@@ -246,10 +246,14 @@ function transformPlayground(
   if (!name) return null
 
   const importName = `${name}Playground`
-  const componentPath = resolveSourcePath(
-    roots,
-    `${name}/${name}.playground.vue`,
+  // A multi-word molecule folder is kebab-case:
+  // `code-editor/CodeEditor.playground.vue`.
+  const kebabName = name.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase()
+  const candidates = [name, kebabName].map((folder) =>
+    resolveSourcePath(roots, `${folder}/${name}.playground.vue`),
   )
+  const componentPath =
+    candidates.find((candidate) => existsSync(candidate)) ?? candidates[0]
   if (!existsSync(componentPath)) {
     console.warn(
       `[componentTransformer] <ComponentPlayground name="${name}"> in ${mdPath} has no playground at ${componentPath} — skipping.`,

@@ -25,6 +25,10 @@ JSON pretty-print, Builder wants a dialog and a dirty dot. So each app writes
 one thin field component on `<CodeEditor>` and reuses it at every call site. See
 [Build your own field](#build-your-own-field).
 
+## Playground
+
+<ComponentPlayground name="CodeEditor" />
+
 ## Basic usage
 
 Pass `[CodeKit]` to `:extensions` and render the content part inside the default
