@@ -24,14 +24,16 @@ export function getCommonSiteConfig() {
 
 export function findBenchPath() {
   let currentDir = path.resolve('.')
-  while (currentDir !== '/') {
+  while (true) {
     if (
       fs.existsSync(path.join(currentDir, 'sites')) &&
       fs.existsSync(path.join(currentDir, 'apps'))
     ) {
       return currentDir
     }
-    currentDir = path.resolve(currentDir, '..')
+    const parent = path.dirname(currentDir)
+    if (parent === currentDir) break
+    currentDir = parent
   }
   return null
 }
@@ -53,11 +55,12 @@ export function findAppName() {
 
   // Walk up from cwd until we find a directory whose parent is the apps folder
   let currentDir = path.resolve('.')
-  while (currentDir !== '/') {
+  while (true) {
     const parent = path.dirname(currentDir)
     if (path.resolve(parent) === path.resolve(appsFolder)) {
       return path.basename(currentDir)
     }
+    if (parent === currentDir) break
     currentDir = parent
   }
 

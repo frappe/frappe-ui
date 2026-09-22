@@ -9,6 +9,12 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### Vite directory lookup terminates on Windows
+
+Bench and app discovery now stop at drive-letter and network-share roots instead
+of hanging when no matching directory exists. Root-level Bench layouts are also
+recognized consistently across platforms.
+
 ### `SidebarItem` attributes land on the link or the button (breaking, silent)
 
 A `SidebarItem` is a row container holding the link or the button, with the
