@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute } from 'vitepress'
+import { ScrollArea } from 'frappe-ui'
 
 interface Heading {
   type: string
@@ -76,28 +77,36 @@ watch(route, () => nextTick(setHeadings))
 </script>
 
 <template>
+  <!-- A sticky column the height of the viewport below the navbar, scrolling
+       on its own when the outline is longer than the screen. The viewport's
+       pt-10 matches the prose column's lg:p-10, so the label sits level with
+       the page's h1. -->
   <aside
-    class="sticky top-20 hidden lg:flex flex-col h-fit mt-10 leading-relaxed w-[200px]"
+    class="sticky top-12 flex h-[calc(100vh-3rem)] flex-col leading-relaxed"
     :class="{ invisible: headings.length == 0 }"
   >
-    <!-- Transparent border keeps the label on the same left edge as the links,
-         which carry the rail's visible border. -->
-    <span
-      class="font-medium whitespace-nowrap pl-4 pb-1 border-l border-transparent"
-      >On this page</span
-    >
+    <ScrollArea class="min-h-0 flex-1" viewport-class="px-5 pt-10 pb-10">
+      <div class="flex flex-col">
+        <!-- Transparent border keeps the label on the same left edge as the
+             links, which carry the rail's visible border. -->
+        <span
+          class="font-medium whitespace-nowrap pl-4 pb-1 border-l border-transparent"
+          >On this page</span
+        >
 
-    <a
-      v-for="x in headings"
-      :href="`#${x.id}`"
-      class="text-ink-gray-6 pl-4 py-1 border-l hover:text-ink-gray-9"
-      @click="activeHeading = x.id"
-      :class="{
-        'pl-7': x.type == 'h3' && h2Exists,
-        'border-outline-gray-7 text-ink-gray-9':
-          activeHeading && x.id == activeHeading,
-      }"
-      >{{ x.name }}</a
-    >
+        <a
+          v-for="x in headings"
+          :href="`#${x.id}`"
+          class="text-ink-gray-6 pl-4 py-1 border-l hover:text-ink-gray-9"
+          @click="activeHeading = x.id"
+          :class="{
+            'pl-7': x.type == 'h3' && h2Exists,
+            'border-outline-gray-7 text-ink-gray-9':
+              activeHeading && x.id == activeHeading,
+          }"
+          >{{ x.name }}</a
+        >
+      </div>
+    </ScrollArea>
   </aside>
 </template>

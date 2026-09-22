@@ -32,6 +32,10 @@
    heading under the 3rem sticky navbar. */
 html {
   scroll-padding-top: 5rem;
+  /* Width of the docs sidebar rail. */
+  --docs-sidebar-width: 220px;
+  /* Width of the "On this page" column pinned to the right edge. */
+  --docs-toc-width: 240px;
 }
 
 body {

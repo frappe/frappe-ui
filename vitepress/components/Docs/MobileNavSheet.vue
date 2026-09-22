@@ -4,6 +4,7 @@ import { useData, useRoute, withBase } from 'vitepress'
 import { Button, TextInput } from 'frappe-ui'
 import { isActiveLink, type SidebarSection } from './sidebarList'
 import { state } from '../../state'
+import Brand from '../Brand.vue'
 
 const route = useRoute()
 const { site, theme } = useData()
@@ -98,6 +99,12 @@ onUnmounted(() => {
     >
       <div class="pt-2 pb-1 flex items-center justify-center shrink-0">
         <div class="h-1.5 w-10 rounded-full bg-surface-gray-3" />
+      </div>
+
+      <!-- The sheet stands in for the Sidebar below lg, so it carries the
+           brand too — the header never does. -->
+      <div class="flex h-12 shrink-0 items-center px-3">
+        <Brand />
       </div>
 
       <div class="px-3 pt-2 pb-1 shrink-0">
