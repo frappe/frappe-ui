@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { extractFinalReview } from "./post-review.ts";
+import { extractFinalReview, parsePostedCommentId } from "./post-review.ts";
 
 describe("extractFinalReview", () => {
   test("returns the final successful result", () => {
@@ -20,7 +20,16 @@ describe("extractFinalReview", () => {
 
   test("rejects missing, empty, and failed results", () => {
     expect(extractFinalReview([])).toBeUndefined();
-    expect(extractFinalReview([{ type: "result", result: "  " }])).toBeUndefined();
+    expect(
+      extractFinalReview([
+        {
+          type: "result",
+          subtype: "success",
+          is_error: false,
+          result: "  ",
+        },
+      ]),
+    ).toBeUndefined();
     expect(
       extractFinalReview([
         {
@@ -31,5 +40,13 @@ describe("extractFinalReview", () => {
         },
       ]),
     ).toBeUndefined();
+  });
+});
+
+describe("parsePostedCommentId", () => {
+  test("accepts only a numeric marker", () => {
+    expect(parsePostedCommentId("12345\n")).toBe("12345");
+    expect(parsePostedCommentId("issuecomment-12345")).toBeUndefined();
+    expect(parsePostedCommentId("  ")).toBeUndefined();
   });
 });
