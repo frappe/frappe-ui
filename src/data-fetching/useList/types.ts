@@ -13,9 +13,17 @@ export type FilterValue =
   | MaybeRefOrGetter<string | number | boolean>
   | [string, MaybeRefOrGetter<string | number | boolean | string[]>]
 
-export interface Filters {
+export interface FilterMap {
   [key: Field]: FilterValue | undefined
 }
+
+export type FilterTuple = [
+  Field,
+  string,
+  MaybeRefOrGetter<string | number | boolean | string[]>,
+]
+
+export type Filters = FilterMap | FilterTuple[]
 
 export type OrderBy =
   | `${Field} ASC`

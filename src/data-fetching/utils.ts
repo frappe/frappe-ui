@@ -1,5 +1,5 @@
 import { MaybeRef, toValue, MaybeRefOrGetter } from 'vue'
-import { Filters } from './useList/types'
+import { FilterMap, FilterTuple, Filters } from './useList/types'
 
 export function makeGetParams(params: Record<string, any>) {
   let url = new URLSearchParams()
@@ -20,25 +20,24 @@ export function parseFilters(
   _filters: MaybeRefOrGetter<Filters>,
 ): Filters | null {
   let filters = typeof _filters == 'function' ? _filters() : toValue(_filters)
-  let parsedFilters: Filters = {}
+  if (Array.isArray(filters)) {
+    let parsedFilters: FilterTuple[] = []
+    for (let [field, operator, value] of filters) {
+      let parsed = parseFilterValue(operator, value)
+      if (parsed) {
+        parsedFilters.push([field, ...parsed])
+      }
+    }
+    return parsedFilters.length ? parsedFilters : null
+  }
+  let parsedFilters: FilterMap = {}
   for (let key in filters) {
     let value = filters[key]
     if (Array.isArray(value)) {
-      let [operator, actualValue] = value
-      operator = toValue(operator)
-      actualValue = toValue(actualValue)
-      if (operator === 'like') {
-        if (typeof actualValue != 'string') {
-          actualValue = String(actualValue)
-        }
-        if (actualValue == null || actualValue == '') {
-          continue
-        }
-        if (!actualValue.includes('%')) {
-          actualValue = `%${actualValue}%`
-        }
+      let parsed = parseFilterValue(...value)
+      if (parsed) {
+        parsedFilters[key] = parsed
       }
-      parsedFilters[key] = [operator, actualValue]
     } else {
       parsedFilters[key] = toValue(value)
     }
@@ -47,6 +46,26 @@ export function parseFilters(
     return null
   }
   return parsedFilters
+}
+
+function parseFilterValue(
+  operator: string,
+  value: FilterTuple[2],
+): [string, string | number | boolean | string[]] | null {
+  operator = toValue(operator)
+  let actualValue = toValue(value)
+  if (operator === 'like') {
+    if (typeof actualValue != 'string') {
+      actualValue = String(actualValue)
+    }
+    if (actualValue == null || actualValue == '') {
+      return null
+    }
+    if (!actualValue.includes('%')) {
+      actualValue = `%${actualValue}%`
+    }
+  }
+  return [operator, actualValue]
 }
 
 export function unrefObject(
