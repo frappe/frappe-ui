@@ -1,17 +1,17 @@
 ---
-allowed-tools: Bash(./.github/barista/scripts/gh.ts:*),Bash(./.github/barista/scripts/add-comment.ts:*),Bash(git log:*),Bash(git show:*),Bash(git blame:*),Bash(git diff:*),Bash(git rev-parse:*),Bash(git merge-base:*),Bash(git ls-files:*),Bash(wc:*),Read,Glob,Grep
-description: Review a frappe-ui pull request and post one concise comment with findings.
+allowed-tools: Bash(./.github/barista/scripts/gh.ts:*),Bash(git log:*),Bash(git show:*),Bash(git blame:*),Bash(git diff:*),Bash(git rev-parse:*),Bash(git merge-base:*),Bash(git ls-files:*),Bash(wc:*),Read,Glob,Grep
+description: Review a frappe-ui pull request and return one concise review with findings.
 ---
 
-## Review and post
+## Review
 
 1. Review `REPO` / `PR_NUMBER` using `.greptile/rules.md`, the shared review
    process and contract references. On `issue_comment`, use
    `$BARISTA_COMMENT_BODY` for the requested focus and acknowledge
    `$BARISTA_COMMENT_AUTHOR` in the response.
 2. Choose the verdict and score from the rubric below.
-3. Post exactly one comment with `./.github/barista/scripts/add-comment.ts --file`.
-   Include a verdict even when there are no findings, then stop.
+3. Return exactly one complete review as your final response. The workflow posts
+   it. Include a verdict even when there are no findings, then stop.
 
 ## Checkout and tools
 
@@ -22,7 +22,7 @@ before drawing conclusions about changed code on those events.
 Use `./.github/barista/scripts/gh.ts` for PR metadata, diffs, checks, comments,
 and issue searches within the wrapper's repository scope.
 Budget about 20 read/search calls, five Git calls, and three issue searches.
-Code and labels are read-only. The single review comment is the only write.
+Code, labels, and comments are read-only.
 
 ## Verdict and format
 

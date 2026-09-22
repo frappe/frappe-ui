@@ -95,8 +95,19 @@ jobs:
           prompt: "/barista-review REPO: ${{ github.repository }} PR_NUMBER: ${{ steps.setup.outputs.number }} EVENT: ${{ github.event_name }}"
           model: ${{ vars.BARISTA_MODEL }}
 
+      - name: Post Barista review
+        id: post-review
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          BARISTA_ISSUE: ${{ steps.setup.outputs.number }}
+          EXECUTION_FILE: ${{ steps.run-barista.outputs.execution-file }}
+        run: ./.github/barista/scripts/post-review.ts
+
       - name: Append run-stats footer
-        if: always() && steps.run-barista.outcome == 'success'
+        if: >-
+          always() &&
+          steps.run-barista.outcome == 'success' &&
+          steps.post-review.outcome == 'success'
         uses: ./.github/actions/barista-append-stats
         with:
           token: ${{ steps.app-token.outputs.token }}
