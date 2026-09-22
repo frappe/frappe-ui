@@ -21,8 +21,8 @@ on:
 
 permissions:
   contents: read
-  pull-requests: write
-  issues: write
+  pull-requests: read
+  issues: read
 
 jobs:
   review:
@@ -86,7 +86,8 @@ jobs:
         uses: ./.github/actions/barista-run
         with:
           oauth-token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          app-token: ${{ steps.app-token.outputs.token }}
+          # Claude only needs read access. The workflow owns comment delivery.
+          app-token: ${{ github.token }}
           repo: ${{ github.repository }}
           issue-number: ${{ steps.setup.outputs.number }}
           event: ${{ github.event_name }}
@@ -95,8 +96,16 @@ jobs:
           prompt: "/barista-review REPO: ${{ github.repository }} PR_NUMBER: ${{ steps.setup.outputs.number }} EVENT: ${{ github.event_name }}"
           model: ${{ vars.BARISTA_MODEL }}
 
+      - name: Post Barista review
+        id: post-review
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          BARISTA_ISSUE: ${{ steps.setup.outputs.number }}
+          EXECUTION_FILE: ${{ steps.run-barista.outputs.execution-file }}
+        run: ./.github/barista/scripts/post-review.ts
+
       - name: Append run-stats footer
-        if: always() && steps.run-barista.outcome == 'success'
+        if: always() && steps.post-review.outcome == 'success'
         uses: ./.github/actions/barista-append-stats
         with:
           token: ${{ steps.app-token.outputs.token }}
