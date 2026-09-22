@@ -9,6 +9,9 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+- ListRows: accept `scrollContainer` so virtual rows can use a ScrollArea
+  viewport directly, including when items are available at mount.
+
 ### `SidebarItem` attributes land on the link or the button (breaking, silent)
 
 A `SidebarItem` is a row container holding the link or the button, with the
