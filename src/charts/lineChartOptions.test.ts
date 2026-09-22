@@ -120,6 +120,17 @@ describe('line chart option series', () => {
     expect(option.series[1].lineStyle.color).toBe('#000033')
   })
 
+  it('draws more than one line in separate hues on a ramp of five pairs', () => {
+    const pairs = ['d1', 'l1', 'd2', 'l2', 'd3', 'l3', 'd4', 'l4', 'd5', 'l5']
+    const option = buildAxisChartOption(config(), {
+      tokens: { ...tokens, categorical: pairs },
+    }) as any
+    expect(option.series.map((s: any) => s.lineStyle.color)).toEqual([
+      'd1',
+      'l2',
+    ])
+  })
+
   it('honours explicit colors and palettes', () => {
     expect(build({ palette: ['a', 'b'] }).series[0].lineStyle.color).toBe('a')
     expect(build({ palette: 'categorical' }).series[1].lineStyle.color).toBe(
