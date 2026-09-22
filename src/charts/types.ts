@@ -85,6 +85,13 @@ export type AxisChartSeriesConfig = {
    * has no second value axis.
    */
   axis?: 'y' | 'y2'
+  /**
+   * Prints this series' values in the tooltip and its data labels, for a series
+   * whose unit differs from the others on its axis. Without one, the tooltip
+   * uses its axis' `format` and a label prints a compact number. A label on a
+   * normalized stack prints the series' share either way.
+   */
+  format?: ChartValueFormatter
   showDataLabels?: boolean
   /**
    * Groups series into separate stacks. Only read when `stacked` is on, and
@@ -722,6 +729,13 @@ export type SeriesStyle = {
    * sits in, so `BarChart` with one `'line'` series is a combo chart.
    */
   type?: ChartMark
+  /**
+   * Prints this series' values in the tooltip and its data labels, for a series
+   * whose unit differs from the others on its axis. Without one, the tooltip
+   * uses its axis' `format` and a label prints a compact number. A label on a
+   * normalized stack prints the series' share either way.
+   */
+  format?: ChartValueFormatter
   /** Prints this series' value beside each of its marks. */
   showDataLabels?: boolean
   /**

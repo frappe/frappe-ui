@@ -479,6 +479,7 @@ function buildBarSeries(entry: PlottedSeries, ctx: SeriesContext) {
       formatter: (params: any) =>
         plottedLabel(
           horizontal ? params.value?.[0] : params.value?.[1],
+          series,
           Boolean(ctx.share),
         ),
     },
@@ -494,6 +495,9 @@ function buildLineSeries(
 ) {
   const { series, mark } = entry
   const { rows, color, tokens, yAxisIndex, banded } = ctx
+  // echarts draws a line's labels on its symbols, so labels alone keep the
+  // symbols but shrink them away. `symbol: 'none'` would drop the labels too.
+  const labelsOnly = Boolean(series.showDataLabels && !series.showDataPoints)
 
   const data = rows.map((row, index) => [
     ctx.xValue(row),
@@ -510,9 +514,9 @@ function buildLineSeries(
     // Nulls read as gaps: bridging them invents data that was never measured.
     connectNulls: Boolean(series.connectNulls),
     smooth: Boolean(series.smooth),
-    showSymbol: Boolean(series.showDataPoints),
+    showSymbol: Boolean(series.showDataPoints || series.showDataLabels),
     symbol: 'circle',
-    symbolSize: SYMBOL_SIZE,
+    symbolSize: labelsOnly ? 0 : SYMBOL_SIZE,
     itemStyle: { color },
     lineStyle: {
       color,
@@ -529,7 +533,7 @@ function buildLineSeries(
       color: tokens.dataLabel,
       fontSize: DATA_LABEL_FONT_SIZE,
       formatter: (params: any) =>
-        plottedLabel(params.value?.[1], Boolean(ctx.share)),
+        plottedLabel(params.value?.[1], series, Boolean(ctx.share)),
     },
     labelLayout: { hideOverlap: true },
   }
@@ -546,9 +550,14 @@ function buildLineSeries(
  * What a data label prints. A normalized series plots a share, so printing it
  * as a number would read as a count of something.
  */
-function plottedLabel(value: any, normalized: boolean) {
+function plottedLabel(
+  value: any,
+  series: AxisChartSeriesConfig,
+  normalized: boolean,
+) {
   if (value === null || value === undefined || isNaN(value)) return ''
-  return normalized ? formatPercent(value) : formatValue(value, 1, true)
+  if (normalized) return formatPercent(value)
+  return series.format ? series.format(value) : formatValue(value, 1, true)
 }
 
 /**

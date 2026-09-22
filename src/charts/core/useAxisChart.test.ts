@@ -5,6 +5,7 @@ import { createApp, defineComponent, h, nextTick, ref, type Ref } from 'vue'
 import { afterEach, describe, expect, it } from 'vitest'
 import { useAxisChart } from './useAxisChart'
 import { buildAxisChartOption } from '../axisChartOptions'
+import type { AxisChartFormatters } from '../seriesData'
 import type { AxisChartConfig, ChartDatapointEvent } from '../types'
 
 /**
@@ -12,7 +13,11 @@ import type { AxisChartConfig, ChartDatapointEvent } from '../types'
  * and what is left is what a reader on the keyboard drives. The pointer path
  * hits the same rows through the option builder.
  */
-function setup(config: AxisChartConfig, hiddenSeries?: Ref<string[]>) {
+function setup(
+  config: AxisChartConfig,
+  hiddenSeries?: Ref<string[]>,
+  format?: AxisChartFormatters,
+) {
   const selected: ChartDatapointEvent[] = []
   let chart!: ReturnType<typeof useAxisChart>
 
@@ -22,6 +27,7 @@ function setup(config: AxisChartConfig, hiddenSeries?: Ref<string[]>) {
         chart = useAxisChart({
           config: () => config,
           buildOption: buildAxisChartOption,
+          format: () => format ?? {},
           hiddenSeries,
           onSelect: (event) => selected.push(event),
         })
@@ -86,6 +92,26 @@ describe('select', () => {
     plot.press('ArrowDown')
     plot.press('Enter')
     expect(plot.selected.map((event) => event.name)).toEqual(['orders'])
+  })
+})
+
+describe('tooltip', () => {
+  it('prints each series in its own format, over its axis format', () => {
+    const plot = setup(
+      config({
+        series: [
+          { name: 'revenue' },
+          { name: 'orders', format: (value) => `${value} orders` },
+        ],
+      }),
+      undefined,
+      { y: (value) => `$${value}` },
+    )
+    plot.focus()
+    const printed = Object.fromEntries(
+      plot.chart.tooltip.items.map((item) => [item.name, item.formattedValue]),
+    )
+    expect(printed).toEqual({ revenue: '$10', orders: '4 orders' })
   })
 })
 

@@ -172,12 +172,14 @@ export function useAxisChart<C extends AxisChartConfig>(
     })),
   )
 
-  // A series reads in the units of the axis it is actually drawn against, so
-  // `y2` series never fall back to the primary formatter — except on a
-  // horizontal chart, which has no second axis to put them on.
+  // Without its own format, a series reads in the units of the axis it is
+  // actually drawn against, so `y2` series never fall back to the primary
+  // formatter — except on a horizontal chart, which has no second axis to put
+  // them on.
   function formatSeriesValue(series: AxisChartSeriesConfig, value: number) {
     const secondary = series.axis === 'y2' && !horizontal.value
-    const formatter = secondary ? format.value.y2 : format.value.y
+    const formatter =
+      series.format ?? (secondary ? format.value.y2 : format.value.y)
     return formatter ? formatter(value) : formatValue(value)
   }
 
