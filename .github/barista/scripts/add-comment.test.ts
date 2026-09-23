@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
   parseCommentArgs,
-  parseCommentId,
+  parseCreatedCommentId,
   resolveMarkerFile,
 } from "./add-comment.ts";
 
@@ -23,20 +23,14 @@ describe("parseCommentArgs", () => {
   });
 });
 
-describe("parseCommentId", () => {
-  test("extracts the id from a gh issue comment URL", () => {
-    expect(parseCommentId("https://github.com/frappe/frappe-ui/issues/751#issuecomment-4603536352"))
-      .toBe("4603536352");
+describe("parseCreatedCommentId", () => {
+  test("extracts the id returned by the GitHub API", () => {
+    expect(parseCreatedCommentId("5791950878\n")).toBe("5791950878");
   });
 
-  test("extracts the id from a PR-thread comment URL", () => {
-    expect(parseCommentId("https://github.com/frappe/frappe-ui/pull/896#issuecomment-5178987334"))
-      .toBe("5178987334");
-  });
-
-  test("returns undefined for output with no comment id", () => {
-    expect(parseCommentId("")).toBeUndefined();
-    expect(parseCommentId("gh: something went wrong")).toBeUndefined();
+  test("rejects a missing or invalid id", () => {
+    expect(parseCreatedCommentId("")).toBeUndefined();
+    expect(parseCreatedCommentId("null")).toBeUndefined();
   });
 });
 

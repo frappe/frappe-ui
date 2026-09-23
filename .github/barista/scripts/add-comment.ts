@@ -30,8 +30,9 @@ export function parseCommentArgs(argv: string[]): CommentArgs {
 }
 
 // Exported for tests — pure parsing, no I/O.
-export function parseCommentId(ghOutputUrl: string): string | undefined {
-  return ghOutputUrl.match(/issuecomment-(\d+)/)?.[1];
+export function parseCreatedCommentId(value: string): string | undefined {
+  const commentId = value.trim();
+  return /^\d+$/.test(commentId) ? commentId : undefined;
 }
 
 export function resolveMarkerFile(env: NodeJS.ProcessEnv = process.env): string {
@@ -60,7 +61,7 @@ async function main() {
     process.exit(1);
   }
 
-  let url: string;
+  let body: string;
   if (input.type === "file") {
     const file = input.file;
     if (!file) { console.error("Error: --file requires a path"); process.exit(1); }
@@ -68,19 +69,19 @@ async function main() {
       console.error(`Error: file not found: ${file}`);
       process.exit(1);
     }
-    url = (await $`gh issue comment ${issue} --body-file ${file}`.text()).trim();
+    body = await Bun.file(file).text();
   } else {
-    const body = input.body;
+    body = input.body ?? "";
     if (!body) { console.error("Error: body required"); process.exit(1); }
-    url = (await $`gh issue comment ${issue} --body ${body}`.text()).trim();
   }
 
-  const commentId = parseCommentId(url);
-  if (commentId) {
-    await Bun.write(resolveMarkerFile(), commentId);
-  } else {
-    console.error(`Warning: couldn't parse comment id from gh output: ${url}`);
+  const createdId = await $`gh api --method POST repos/{owner}/{repo}/issues/${issue}/comments --raw-field body=${body} --jq .id`.text();
+  const commentId = parseCreatedCommentId(createdId);
+  if (!commentId) {
+    console.error(`Error: GitHub returned an invalid comment id: ${createdId.trim()}`);
+    process.exit(1);
   }
+  await Bun.write(resolveMarkerFile(), commentId);
 
   console.log(`Commented on #${issue}`);
 }
