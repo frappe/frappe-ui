@@ -1071,6 +1071,24 @@ describe('Combobox', () => {
       )
     })
 
+    it('treats an empty string model as a real value in button mode', () => {
+      cy.mount(Combobox, {
+        props: {
+          options: [{ label: 'Apple', value: 'apple' }],
+          modelValue: '',
+          trigger: 'button',
+          placeholder: 'Pick a fruit',
+        },
+      })
+
+      cy.get('[data-slot="trigger"]')
+        .should('not.contain.text', 'Pick a fruit')
+        .find('span')
+        .first()
+        .should('have.text', '')
+        .and('not.have.class', 'text-ink-gray-4')
+    })
+
     it('trigger="button" is in the native tab order and opens on Enter', () => {
       cy.mount(Combobox, {
         props: { options: fruits, trigger: 'button', placeholder: 'Pick' },
