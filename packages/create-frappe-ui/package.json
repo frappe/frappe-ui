@@ -1,0 +1,37 @@
+{
+  "name": "create-frappe-ui",
+  "version": "1.0.0-rc.1",
+  "description": "Create a frappe-ui app in one command",
+  "keywords": [
+    "frappe",
+    "frappe-ui",
+    "vue",
+    "vite",
+    "create"
+  ],
+  "homepage": "https://ui.frappe.io",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/frappe/frappe-ui.git",
+    "directory": "packages/create-frappe-ui"
+  },
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "create-frappe-ui": "index.js"
+  },
+  "files": [
+    "index.js",
+    "src",
+    "templates"
+  ],
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "scripts": {
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@clack/prompts": "^1.8.1"
+  }
+}
