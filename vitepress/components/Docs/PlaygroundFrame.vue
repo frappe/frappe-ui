@@ -13,6 +13,17 @@ export type Knob =
     }
   | {
       name: string
+      // Renders `<input type="number">`, so ArrowUp/ArrowDown step the
+      // value. The value is a number, or `null` while the input is empty.
+      type: 'number'
+      default: number | null
+      min?: number
+      max?: number
+      step?: number
+      visibleWhen?: VisibleWhen
+    }
+  | {
+      name: string
       type: 'tabs'
       options: KnobOption[]
       default: string
@@ -42,9 +53,7 @@ const values = reactive<Record<string, any>>(
 
 const rowKnobs = computed(() =>
   props.knobs.filter(
-    (k) =>
-      (k.type === 'text' || k.type === 'tabs') &&
-      (k.visibleWhen?.(values) ?? true),
+    (k) => k.type !== 'switch' && (k.visibleWhen?.(values) ?? true),
   ),
 )
 const switchKnobs = props.knobs.filter((k) => k.type === 'switch') as Extract<
@@ -56,6 +65,11 @@ const switchKnobs = props.knobs.filter((k) => k.type === 'switch') as Extract<
 // characters would overflow it, so those knobs render as a Select.
 const fitsAsTabs = (options: KnobOption[]) =>
   options.reduce((n, o) => n + o.label.length, 0) <= 24
+
+function setNumber(name: string, raw: string) {
+  const n = raw === '' ? null : Number(raw)
+  values[name] = n === null || Number.isFinite(n) ? n : values[name]
+}
 
 const generatedCode = computed(() => props.code(values))
 
@@ -133,6 +147,17 @@ function onCopy() {
               v-model="values[knob.name]"
               :aria-label="knob.name"
               variant="outline"
+            />
+            <TextInput
+              v-else-if="knob.type === 'number'"
+              type="number"
+              :model-value="values[knob.name] ?? ''"
+              :aria-label="knob.name"
+              :min="knob.min"
+              :max="knob.max"
+              :step="knob.step"
+              variant="outline"
+              @update:model-value="setNumber(knob.name, $event)"
             />
             <TabButtons
               v-else-if="knob.type === 'tabs' && fitsAsTabs(knob.options)"

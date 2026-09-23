@@ -7,9 +7,9 @@ const model = ref<number[]>([40])
 
 const knobs: Knob[] = [
   { name: 'label', type: 'text', default: 'Volume' },
-  { name: 'min', type: 'text', default: '0' },
-  { name: 'max', type: 'text', default: '100' },
-  { name: 'step', type: 'text', default: '1' },
+  { name: 'min', type: 'number', default: 0 },
+  { name: 'max', type: 'number', default: 100 },
+  { name: 'step', type: 'number', default: 1, min: 0 },
   {
     name: 'size',
     type: 'tabs',
@@ -26,9 +26,9 @@ const knobs: Knob[] = [
 function buildCode(v: Record<string, any>) {
   const attrs: string[] = []
   if (v.label) attrs.push(`label="${v.label}"`)
-  const min = Number(v.min)
-  const max = Number(v.max)
-  const step = Number(v.step)
+  const min = v.min ?? 0
+  const max = v.max ?? 100
+  const step = v.step || 1
   if (min !== 0) attrs.push(`:min="${min}"`)
   if (max !== 100) attrs.push(`:max="${max}"`)
   if (step !== 1) attrs.push(`:step="${step}"`)
@@ -53,9 +53,9 @@ function valueFor(range: boolean) {
           :model-value="valueFor(values.range)"
           @update:model-value="(v) => (model = v ?? [])"
           :label="values.label || undefined"
-          :min="Number(values.min) || 0"
-          :max="Number(values.max) || 100"
-          :step="Number(values.step) || 1"
+          :min="values.min ?? 0"
+          :max="values.max ?? 100"
+          :step="values.step || 1"
           :size="values.size"
           :disabled="values.disabled"
         />
