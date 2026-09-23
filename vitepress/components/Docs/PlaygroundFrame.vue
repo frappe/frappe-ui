@@ -111,17 +111,17 @@ function onCopy() {
       class="overflow-hidden rounded-7 border border-outline-gray-1 divide-y divide-outline-gray-1"
     >
       <div
-        class="grid divide-y divide-outline-gray-1 lg:grid-cols-[1fr_17rem] lg:divide-x lg:divide-y-0"
+        class="grid divide-y divide-outline-gray-1 lg:grid-cols-[minmax(0,1fr)_17rem] lg:divide-x lg:divide-y-0"
       >
         <div
-          class="flex items-center justify-center bg-surface-base p-8 dot-grid"
+          class="flex min-w-0 items-center justify-center overflow-auto bg-surface-base p-8 dot-grid"
           :style="{ minHeight: previewMinHeight }"
         >
           <slot name="preview" :values="values" />
         </div>
 
         <!-- Knobs stacked in a column beside the preview, label above control. -->
-        <div class="flex flex-col gap-4 bg-surface-gray-1 p-4">
+        <div class="flex flex-col gap-4 bg-surface-base p-4">
           <div
             v-for="knob in rowKnobs"
             :key="knob.name"
@@ -151,17 +151,21 @@ function onCopy() {
             v-if="switchKnobs.length"
             class="flex flex-col gap-2.5 border-t border-outline-gray-1 pt-4"
           >
-            <div
+            <!-- A <label> forwards clicks on the name to the switch inside it. -->
+            <label
               v-for="knob in switchKnobs"
               :key="knob.name"
               class="flex items-center justify-between gap-4"
+              :class="
+                knob.disabledWhen?.(values) ? 'opacity-60' : 'cursor-pointer'
+              "
             >
               <span class="knob-label">{{ knob.name }}</span>
               <Switch
                 v-model="values[knob.name]"
                 :disabled="knob.disabledWhen?.(values) ?? false"
               />
-            </div>
+            </label>
           </div>
         </div>
       </div>
