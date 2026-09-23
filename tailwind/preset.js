@@ -9,7 +9,7 @@ import { spacing } from './tokens.js'
 // apps must list frappe-ui's source globs in their own tailwind.config
 // `content` — declaring them here would be silently ignored. Spread the
 // `content` export from `frappe-ui/tailwind` (see content.js) instead of
-// hand-maintaining the glob list; see docs/content/docs/foundations/tailwind.md.
+// hand-maintaining the glob list; see docs/content/docs/getting-started/tailwind.md.
 
 /** @type {import('tailwindcss').Config} */
 export default {

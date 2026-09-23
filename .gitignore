@@ -42,6 +42,8 @@ docs/css/shiki.css
 
 # Auto-generated proxies for colocated component docs.
 docs/content/docs/components/*.md
+# MobileNav moved onto the MobileShell page; this page sends old links there.
+!docs/content/docs/components/mobilenav.md
 docs/content/docs/experimental/*.md
 docs/content/docs/charts/*.md
 
@@ -62,5 +64,5 @@ cypress/screenshots
 # input to `yarn sync-tokens`, not a record of anything: the committed record
 # is tailwind/tokens/*.js, and build.js holds every place frappe-ui
 # deliberately overrules the export (radius 9, font weights, dropped sizes,
-# the oklch conversion). See docs/content/docs/foundations/tailwind.md.
+# the oklch conversion). See docs/content/docs/getting-started/tailwind.md.
 .figma-export/

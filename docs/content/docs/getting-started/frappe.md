@@ -52,8 +52,8 @@ export default defineConfig({
 
 With no other options, the plugin:
 
-- Forwards `/api`, `/assets`, `/files`, `/app`, `/login` and `/private` to your
-  bench while you develop.
+- Forwards `/api`, `/assets`, `/files`, `/app`, `/desk`, `/login` and
+  `/private` to your bench while you develop.
 - Passes the page's boot data to the app as globals on `window`.
 - Builds into `todo/public/frontend` and copies `index.html` to
   `todo/www/todo.html`.

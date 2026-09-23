@@ -47,11 +47,10 @@ guide shows.
 
 ### Install frappe-ui
 
-Vite sets up Tailwind CSS v4, but frappe-ui needs Tailwind CSS v3. Swap it out,
-then install frappe-ui and Vue Router.
+Install Tailwind CSS v3, frappe-ui and Vue Router. frappe-ui doesn't support
+Tailwind CSS v4 yet.
 
 ```sh
-npm uninstall tailwindcss @tailwindcss/vite
 npm install -D tailwindcss@^3.4 postcss autoprefixer
 npm install frappe-ui vue-router
 ```
@@ -181,15 +180,19 @@ import { Editor, type RichTextKitOptions } from 'frappe-ui/editor'
 Import only from the paths frappe-ui exports. Deeper paths such as
 `frappe-ui/src/...` fail with `Package subpath is not defined`.
 
-| Path                      | What it has                                 |
-| ------------------------- | ------------------------------------------- |
-| `frappe-ui`               | Components, composables and data fetching   |
-| `frappe-ui/list`          | The list components                         |
-| `frappe-ui/editor`        | The rich text editor                        |
-| `frappe-ui/code-editor`   | The code editor                             |
-| `frappe-ui/charts`        | Charts                                      |
-| `frappe-ui/icons`         | Frappe's own icon components                |
-| `frappe-ui/experimental`  | Components whose API may still change       |
-| `frappe-ui/tailwind`      | The Tailwind preset and `content` paths     |
-| `frappe-ui/vite`          | The Vite plugin                             |
-| `frappe-ui/style.css`     | The base stylesheet                         |
+| Path                               | What it has                                                  |
+| ---------------------------------- | ------------------------------------------------------------ |
+| `frappe-ui`                        | Components, composables and data fetching                    |
+| `frappe-ui/list`                   | The list components                                          |
+| `frappe-ui/editor`                 | The rich text editor                                         |
+| `frappe-ui/code-editor`            | The code editor                                              |
+| `frappe-ui/charts`                 | Charts                                                       |
+| `frappe-ui/icons`                  | Frappe's own icon components                                 |
+| `frappe-ui/experimental`           | Components whose API may still change                        |
+| `frappe-ui/tailwind`               | The Tailwind preset and `content` paths                      |
+| `frappe-ui/tailwind/tokens`        | The design tokens as plain data                              |
+| `frappe-ui/vite`                   | The Vite plugin                                              |
+| `frappe-ui/vite/lucideIconsPlugin` | Only the `~icons/lucide/*` resolver from the Vite plugin     |
+| `frappe-ui/style.css`              | The base stylesheet                                          |
+| `frappe-ui/tsconfig.base.json`     | The base TypeScript config                                   |
+| `frappe-ui/vitepress`              | The theme for frappe-ui's own docs. Don't import it in apps. |

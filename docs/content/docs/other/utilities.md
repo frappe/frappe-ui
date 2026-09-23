@@ -127,7 +127,7 @@ import { getConfig, setConfig, toast } from 'frappe-ui'
 // point requests at a remote site during local development
 setConfig('requestBaseUrl', 'https://my-site.frappe.cloud')
 // merged into every request; pass a function for values that change
-setConfig('requestHeaders', () => ({ Authorization: `token ${key}:${secret}` }))
+setConfig('requestHeaders', () => ({ 'Accept-Language': locale.value }))
 // called with the server's _server_messages on a successful response
 setConfig('serverMessagesHandler', (messages) => messages.forEach(toast))
 
@@ -138,8 +138,9 @@ getConfig('requestBaseUrl') // 'https://my-site.frappe.cloud'
 Setting `requestBaseUrl` makes relative requests cross-origin and defaults them
 to `credentials: 'include'`, so the server has to send
 `Access-Control-Allow-Credentials: true` and a non-wildcard origin. If you
-authenticate with a token header instead, pass `credentials: 'omit'` per
-request.
+authenticate with a token header (`Authorization: token <key>:<secret>`)
+instead, pass `credentials: 'omit'` per request. Only do that in code that runs
+on a server: in a browser, anyone can read the key and secret.
 
 ## FrappeResourceError {#frapperequesterror}
 
