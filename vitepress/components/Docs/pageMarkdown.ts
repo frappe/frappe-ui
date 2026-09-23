@@ -23,6 +23,28 @@ function inline(node: Node): string {
   }
 }
 
+// Nested lists keep their own markers, indented under the parent item.
+function list(el: Element, depth = 0): string {
+  const indent = '  '.repeat(depth)
+  return Array.from(el.children)
+    .map((li, i) => {
+      const marker = el.tagName === 'OL' ? `${i + 1}.` : '-'
+      const text = Array.from(li.childNodes)
+        .filter(
+          (n) => !(n instanceof HTMLElement && /^(UL|OL)$/.test(n.tagName)),
+        )
+        .map(inline)
+        .join('')
+        .trim()
+      const children = Array.from(li.children)
+        .filter((c) => /^(UL|OL)$/.test(c.tagName))
+        .map((c) => '\n' + list(c, depth + 1))
+        .join('')
+      return `${indent}${marker} ${text}${children}`
+    })
+    .join('\n')
+}
+
 function block(el: Element): string {
   // Live demos and playground knobs are not content.
   if (el.matches('[data-demo-preview], .dot-grid')) return ''
@@ -30,12 +52,7 @@ function block(el: Element): string {
   if (/^H[1-4]$/.test(tag))
     return '#'.repeat(Number(tag[1])) + ' ' + inline(el).trim()
   if (tag === 'P') return inline(el).trim()
-  if (tag === 'UL' || tag === 'OL')
-    return Array.from(el.children)
-      .map(
-        (li, i) => `${tag === 'OL' ? `${i + 1}.` : '-'} ${inline(li).trim()}`,
-      )
-      .join('\n')
+  if (tag === 'UL' || tag === 'OL') return list(el)
   const isCode =
     tag === 'PRE' || el.matches('[class*="language-"], .component-preview-code')
   if (isCode && el.querySelector('pre, code')) {

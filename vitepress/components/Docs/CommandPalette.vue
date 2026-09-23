@@ -36,9 +36,13 @@ watch(open, (isOpen) => {
 })
 
 const { toggleColorScheme } = useColorScheme()
-function copy(text: string, message: string) {
-  navigator.clipboard?.writeText(text)
-  toast.success(message)
+async function copy(text: string, message: string) {
+  try {
+    await navigator.clipboard.writeText(text)
+    toast.success(message)
+  } catch {
+    toast.error('Could not copy to the clipboard')
+  }
 }
 const actions = [
   {
