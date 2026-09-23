@@ -132,18 +132,4 @@ announced only through the hidden "(required)" text in the label.
 
 In both modes, a number above `max` sets the rating to `max`.
 
-## Migrating from v0
-
-| Before                    | After                                          |
-| ------------------------- | ---------------------------------------------- |
-| `:rating_from`            | `:max`                                         |
-| `:readonly`               | `:disabled`                                    |
-| `size` defaulted to `md`  | `size` defaults to `sm`; pass `size="md"` to keep the old size |
-| attributes on the wrapper | attributes on the row of stars; `class` and `style` on the wrapper |
-
-The old prop names are ignored without a warning: `:rating_from="10"` renders 5
-stars, and a `:readonly` rating can be changed. See the
-[migration guide](../migration#inputs), and
-[the size change](../migration#rating-size).
-
 <!-- @include: ./Rating.api.md -->

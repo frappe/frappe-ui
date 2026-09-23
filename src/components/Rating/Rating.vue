@@ -17,8 +17,8 @@
     <div
       :id="inputId"
       ref="rootRef"
-      class="rating-stars inline-flex shrink-0 gap-0.5 leading-none rounded-1"
-      :class="hasLabeling ? null : (attrs.class as any)"
+      class="rating-stars shrink-0 gap-0.5 leading-none rounded-1"
+      :class="hasLabeling ? 'flex w-fit' : ['inline-flex', attrs.class as any]"
       :style="hasLabeling ? null : (attrs.style as any)"
       :role="isSliderMode ? 'slider' : 'radiogroup'"
       :tabindex="rootTabindex"
@@ -420,9 +420,7 @@ defineExpose<InputExposed>({
     }
     const selected = Math.ceil(savedValue.value)
     const target = selected > 0 ? selected : 1
-    root
-      .querySelector<HTMLElement>(`[data-index="${target}"]`)
-      ?.focus(options)
+    root.querySelector<HTMLElement>(`[data-index="${target}"]`)?.focus(options)
   },
 })
 

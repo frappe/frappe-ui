@@ -15,7 +15,7 @@ const levels = ['Not rated', 'Mild', 'Medium', 'Hot']
       size="md"
       label="Spice level"
     />
-    <span class="text-base leading-none text-ink-gray-7">{{
+    <span class="flex h-5 items-center text-base text-ink-gray-7">{{
       levels[spice]
     }}</span>
   </div>
