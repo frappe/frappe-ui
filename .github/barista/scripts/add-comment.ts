@@ -30,8 +30,9 @@ export function parseCommentArgs(argv: string[]): CommentArgs {
 }
 
 // Exported for tests — pure parsing, no I/O.
-export function parseCommentId(ghOutputUrl: string): string | undefined {
-  return ghOutputUrl.match(/issuecomment-(\d+)/)?.[1];
+export function parseCommentId(value: string): string | undefined {
+  const commentId = value.trim();
+  return /^\d+$/.test(commentId) ? commentId : undefined;
 }
 
 export function resolveMarkerFile(env: NodeJS.ProcessEnv = process.env): string {
@@ -60,7 +61,13 @@ async function main() {
     process.exit(1);
   }
 
-  let url: string;
+  const repo = process.env.GITHUB_REPOSITORY ?? "";
+  if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repo)) {
+    console.error("Error: GITHUB_REPOSITORY must be an owner/repo name");
+    process.exit(1);
+  }
+
+  let createdId: string;
   if (input.type === "file") {
     const file = input.file;
     if (!file) { console.error("Error: --file requires a path"); process.exit(1); }
@@ -68,19 +75,19 @@ async function main() {
       console.error(`Error: file not found: ${file}`);
       process.exit(1);
     }
-    url = (await $`gh issue comment ${issue} --body-file ${file}`.text()).trim();
+    createdId = await $`gh api --method POST repos/${repo}/issues/${issue}/comments --field ${`body=@${file}`} --jq .id`.text();
   } else {
-    const body = input.body;
+    const body = input.body ?? "";
     if (!body) { console.error("Error: body required"); process.exit(1); }
-    url = (await $`gh issue comment ${issue} --body ${body}`.text()).trim();
+    createdId = await $`gh api --method POST repos/${repo}/issues/${issue}/comments --raw-field body=${body} --jq .id`.text();
   }
 
-  const commentId = parseCommentId(url);
-  if (commentId) {
-    await Bun.write(resolveMarkerFile(), commentId);
-  } else {
-    console.error(`Warning: couldn't parse comment id from gh output: ${url}`);
+  const commentId = parseCommentId(createdId);
+  if (!commentId) {
+    console.error(`Error: GitHub returned an invalid comment id: ${createdId.trim()}`);
+    process.exit(1);
   }
+  await Bun.write(resolveMarkerFile(), commentId);
 
   console.log(`Commented on #${issue}`);
 }

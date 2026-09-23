@@ -87,7 +87,7 @@ jobs:
         with:
           oauth-token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           # Claude only needs read access. The workflow owns comment delivery.
-          app-token: ${{ github.token }}
+          github-token: ${{ github.token }}
           repo: ${{ github.repository }}
           issue-number: ${{ steps.setup.outputs.number }}
           event: ${{ github.event_name }}

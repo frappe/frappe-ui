@@ -4,11 +4,15 @@
 
 import { $ } from "bun";
 import { unlink } from "node:fs/promises";
-import { resolveMarkerFile } from "./add-comment.ts";
+import { parseCommentId, resolveMarkerFile } from "./add-comment.ts";
 
-export function parsePostedCommentId(value: string): string | undefined {
-  const commentId = value.trim();
-  return /^\d+$/.test(commentId) ? commentId : undefined;
+export async function readPostedCommentId(markerFile: string): Promise<string | undefined> {
+  const marker = Bun.file(markerFile);
+  if (!(await marker.exists())) return undefined;
+
+  const commentId = parseCommentId(await marker.text());
+  if (!commentId) throw new Error(`Invalid comment id in ${markerFile}`);
+  return commentId;
 }
 
 export function extractFinalReview(data: unknown): string | undefined {
@@ -35,14 +39,9 @@ export function extractFinalReview(data: unknown): string | undefined {
 
 async function main() {
   const markerFile = resolveMarkerFile();
-  const marker = Bun.file(markerFile);
-  if (await marker.exists()) {
-    const commentId = parsePostedCommentId(await marker.text());
-    if (!commentId) {
-      console.error(`Invalid comment id in ${markerFile}`);
-      process.exit(1);
-    }
-    console.log(`Review already posted as comment ${commentId}`);
+  const existingCommentId = await readPostedCommentId(markerFile);
+  if (existingCommentId) {
+    console.log(`Review already posted as comment ${existingCommentId}`);
     return;
   }
 
@@ -69,16 +68,19 @@ async function main() {
     await unlink(reviewFile).catch(() => undefined);
   }
 
-  if (!(await marker.exists())) {
-    console.error(`Review command created no marker at ${markerFile}`);
-    process.exit(1);
-  }
-  const commentId = parsePostedCommentId(await marker.text());
+  const commentId = await readPostedCommentId(markerFile);
   if (!commentId) {
-    console.error(`Invalid comment id in ${markerFile}`);
+    console.error(`Review command created no marker at ${markerFile}`);
     process.exit(1);
   }
   console.log(`Verified review comment ${commentId}`);
 }
 
-if (import.meta.main) await main();
+if (import.meta.main) {
+  try {
+    await main();
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : String(error));
+    process.exit(1);
+  }
+}
