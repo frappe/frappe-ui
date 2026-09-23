@@ -9,6 +9,6 @@ import { KeyboardShortcut } from 'frappe-ui'
   >
     <span class="lucide-search size-4" aria-hidden="true" />
     <span class="flex-1 text-left">Search</span>
-    <KeyboardShortcut combo="Mod+K" />
+    <KeyboardShortcut :show-plus="false" combo="Mod+K" />
   </button>
 </template>

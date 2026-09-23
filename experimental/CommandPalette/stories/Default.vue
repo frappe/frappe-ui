@@ -88,7 +88,7 @@ function select(value: CommandPaletteValue) {
             </template>
             {{ action.title }}
             <template #suffix>
-              <KeyboardShortcut :combo="action.combo" />
+              <KeyboardShortcut :show-plus="false" :combo="action.combo" />
             </template>
           </CommandPaletteItem>
         </CommandPaletteGroup>
@@ -99,8 +99,8 @@ function select(value: CommandPaletteValue) {
       </CommandPaletteEmpty>
 
       <CommandPaletteFooter>
-        <KeyboardShortcut combo="Enter" /> to run
-        <KeyboardShortcut combo="Escape" /> to close
+        <KeyboardShortcut :show-plus="false" combo="Enter" /> to run
+        <KeyboardShortcut :show-plus="false" combo="Escape" /> to close
       </CommandPaletteFooter>
     </CommandPalette>
   </div>

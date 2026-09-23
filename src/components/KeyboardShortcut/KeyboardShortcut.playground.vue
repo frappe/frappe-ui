@@ -11,6 +11,7 @@ const knobs: Knob[] = [
 function buildCode(v: Record<string, any>) {
   const attrs = []
   if (v.combo) attrs.push(`combo="${v.combo}"`)
+  attrs.push(':show-plus="false"')
   if (v.bg) attrs.push('bg')
   if (!v.useIcons) attrs.push(':use-icons="false"')
   return ['<KeyboardShortcut', ...attrs.map((a) => '  ' + a), '/>'].join('\n')
@@ -24,6 +25,7 @@ function buildCode(v: Record<string, any>) {
         :combo="values.combo || undefined"
         :bg="values.bg"
         :use-icons="values.useIcons"
+        :show-plus="false"
       />
     </template>
   </PlaygroundFrame>

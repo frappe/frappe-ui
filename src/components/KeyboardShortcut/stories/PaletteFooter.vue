@@ -17,7 +17,12 @@ const hints = [
       :key="hint.combo"
       class="flex items-center gap-1.5"
     >
-      <KeyboardShortcut :combo="hint.combo" :alt-combos="hint.altCombos" bg />
+      <KeyboardShortcut
+        :show-plus="false"
+        :combo="hint.combo"
+        :alt-combos="hint.altCombos"
+        bg
+      />
       <span>{{ hint.label }}</span>
     </div>
   </div>

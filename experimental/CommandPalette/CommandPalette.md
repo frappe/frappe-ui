@@ -22,7 +22,7 @@ outside it is also what stops them scrolling away.
   </CommandPaletteList>
 
   <CommandPaletteEmpty>No matches</CommandPaletteEmpty>
-  <CommandPaletteFooter><KeyboardShortcut combo="Enter" /> to run</CommandPaletteFooter>
+  <CommandPaletteFooter><KeyboardShortcut :show-plus="false" combo="Enter" /> to run</CommandPaletteFooter>
 </CommandPalette>
 ```
 
@@ -77,7 +77,7 @@ when the default slot draws more than the label.
 ```vue
 <CommandPaletteItem :value="page" :keywords="['mail', 'unread']">
   Inbox
-  <template #suffix><KeyboardShortcut combo="Mod+I" /></template>
+  <template #suffix><KeyboardShortcut :show-plus="false" combo="Mod+I" /></template>
 </CommandPaletteItem>
 ```
 
