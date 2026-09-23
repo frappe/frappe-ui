@@ -153,6 +153,6 @@ While `error` is set, the trigger gets `aria-invalid` and an
 `compareFn` is removed: an option is selected when its `value` is in the
 model. The `displayValue` slot prop is now `summary` on `#summary`, and
 `toggleOpen` is `setOpen(boolean)`. See the
-[migration guide](/docs/migration#multiselect) for the full list.
+[migration guide](../migration#multiselect) for the full list.
 
 <!-- @include: ./MultiSelect.api.md -->

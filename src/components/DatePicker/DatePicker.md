@@ -109,7 +109,7 @@ whether the panel is open.
 `autoClose` is `keepOpen` (inverted), and `#target` is `#trigger`.
 `DateRangePicker` now emits a `[from, to]` array instead of a
 `"from,to"` string. See the
-[migration guide](/docs/migration#datepicker-timepicker-family) for the full
+[migration guide](../migration#datepicker-timepicker-family) for the full
 list.
 
 <!-- @include: ./DatePicker.api.md -->

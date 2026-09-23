@@ -75,6 +75,6 @@ an `aria-errormessage` that points to the error text.
 
 `@change` is now `@update:modelValue`. Attributes used to go to the wrapper.
 Now they go to the switch button. See the
-[migration guide](/docs/migration#inputs) for details.
+[migration guide](../migration#inputs) for details.
 
 <!-- @include: ./Switch.api.md -->

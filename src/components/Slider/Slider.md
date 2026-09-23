@@ -79,7 +79,7 @@ Each handle has `role="slider"` and is in the tab order.
 
 | Keys                                 | Action                          |
 | ------------------------------------ | ------------------------------- |
-| `←` `↓` / `→` `↑`                    | Decrease / increase by `step`   |
+| `ArrowLeft` `ArrowDown` / `ArrowRight` `ArrowUp`                    | Decrease / increase by `step`   |
 | `Shift` + arrow, `PageDown` / `PageUp` | Decrease / increase by 10 steps |
 | `Home` / `End`                       | Set the first handle to `min` / the last handle to `max` |
 

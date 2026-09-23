@@ -128,9 +128,9 @@ siblings and, for a parent, whether it is open.
 
 | Keys              | Action                                        |
 | ----------------- | --------------------------------------------- |
-| `↓` / `↑`         | Move to the next or previous visible row      |
-| `→`               | Open the row, or move to its first child      |
-| `←`               | Close the row, or move to its parent          |
+| `ArrowDown` / `ArrowUp`         | Move to the next or previous visible row      |
+| `ArrowRight`               | Open the row, or move to its first child      |
+| `ArrowLeft`               | Close the row, or move to its parent          |
 | `Home` / `End`    | Move to the first or last row                 |
 | `Enter` / `Space` | Open or close the row                         |
 | Letters           | Move to the next row whose label starts with them |

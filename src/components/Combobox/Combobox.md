@@ -167,6 +167,6 @@ that points to the error text.
 `allowCustomValue` is now a `type: 'custom'` option with a `condition`. The
 `input` emit is `@update:query`, `placement` is `side` and `align`, and
 `reset()` on a template ref is `clear()`. See the
-[migration guide](/docs/migration#combobox) for the full list.
+[migration guide](../migration#combobox) for the full list.
 
 <!-- @include: ./Combobox.api.md -->

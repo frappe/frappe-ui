@@ -81,7 +81,7 @@ whether the list is open.
 `minTime` and `maxTime` are now `min` and `max`, `use12Hour` is
 `format="h:mm A"`, and `scrollMode` is removed. The `open` and `close` events
 are now `update:open`. See the
-[migration guide](/docs/migration#datepicker-timepicker-family) and
-[TimePicker events](/docs/migration#timepicker-emits) for the full list.
+[migration guide](../migration#datepicker-timepicker-family) and
+[TimePicker events](../migration#timepicker-emits) for the full list.
 
 <!-- @include: ./TimePicker.api.md -->

@@ -100,6 +100,6 @@ While `error` is set, the trigger gets `aria-invalid` and an
 The v0 `displayValue` trigger slot prop is now `selectedOption.label`. The
 empty value changed from `undefined` to `null`, which does not fail at build
 time. Option values can no longer be `bigint` or objects. See the
-[migration guide](/docs/migration#select) for the full list.
+[migration guide](../migration#select) for the full list.
 
 <!-- @include: ./Select.api.md -->

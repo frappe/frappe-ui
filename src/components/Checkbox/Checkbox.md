@@ -82,6 +82,6 @@ the description and the error. Every other attribute and listener goes on the
 
 `padding` is now `padded`. Attributes used to go to both the wrapper and the
 `<input>`, so a listener fired twice; now it fires once, from the input. See
-the [migration guide](/docs/migration#inputs-attrs) for details.
+the [migration guide](../migration#inputs-attrs) for details.
 
 <!-- @include: ./Checkbox.api.md -->

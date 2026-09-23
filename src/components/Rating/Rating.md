@@ -112,7 +112,7 @@ is in the tab order.
 
 | Keys              | Action                                               |
 | ----------------- | ---------------------------------------------------- |
-| `←` `↑` / `→` `↓` | Select the previous / next star and move focus to it |
+| `ArrowLeft` `ArrowUp` / `ArrowRight` `ArrowDown` | Select the previous / next star and move focus to it |
 | `Home` / `End`    | Select the first / last star                         |
 | `Space` / `Enter` | Select the focused star                              |
 | `1`–`9`           | Set the rating to that number                        |
@@ -125,7 +125,7 @@ announced only through the hidden "(required)" text in the label.
 
 | Keys                  | Action                              |
 | --------------------- | ----------------------------------- |
-| `←` `↓` / `→` `↑`     | Decrease / increase by half a star  |
+| `ArrowLeft` `ArrowDown` / `ArrowRight` `ArrowUp`     | Decrease / increase by half a star  |
 | `PageDown` / `PageUp` | Decrease / increase by one star     |
 | `Home` / `End`        | Set to `0` / `max`                  |
 | `0`–`9`               | Set the rating to that number       |
