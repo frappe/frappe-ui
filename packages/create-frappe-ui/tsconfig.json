@@ -1,0 +1,15 @@
+{
+  // Type-checks the JSDoc types. There is no build: the package ships its
+  // JavaScript as it is.
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+    "strict": true,
+    "module": "nodenext",
+    "target": "es2023",
+    "types": ["node"],
+    "skipLibCheck": true
+  },
+  "include": ["index.js", "src", "test"]
+}
