@@ -11,11 +11,12 @@ record internal refactors or new tests.
 
 A deprecated API keeps working through v1.x and logs a one-time warning in
 development, unless the entry says otherwise. Deprecated APIs are removed after
-v1. Note that most members deprecated during the betas were removed before
-`1.0.0` instead, under
+v1. This rule does not cover members deprecated during the betas. Under
 [ADR-0008](https://github.com/frappe/frappe-ui/blob/main/spec/adr/0008-no-deprecated-members-in-1-0-0.md)
-(no deprecated member ships in `1.0.0`). Each entry says which, and the
-[Deprecation log](#deprecation-log) lists them.
+(no deprecated member ships in `1.0.0`), each of them was removed before
+`1.0.0`, or moved to `frappe-ui/experimental`, which has no stability promise.
+`ThemeSwitcher` and the v0 `TextEditor` took the second path. Each entry says
+which, and the [Deprecation log](#deprecation-log) lists them.
 
 ## How to read an entry
 
@@ -115,7 +116,9 @@ imports for your type-checker.
   report 136 unresolved modules. It now reports none.
 
 **What to do:** import the preset from `frappe-ui/tailwind`. Run
-`npx -p frappe-ui packaging-v1 ./src` to fix the preset path. The
+`npx -p frappe-ui packaging-v1 .` from your app's root to fix the preset path.
+Point it at the root, not `./src`: the preset is imported in
+`tailwind.config.js`, which sits outside `src`. The
 [packaging migration guide](/docs/migration#packaging-and-tokens) lists the
 manual steps.
 
@@ -293,8 +296,9 @@ The tokens get their own subpath because `frappe-ui/tailwind` imports
 `tailwindcss/plugin` at the top level, and plain Node does not resolve it. So
 the preset entry only works inside a bundler. The token module imports nothing
 but the four data modules next to it, and it loads anywhere. Per ADR-0010,
-build-time entries can only be added until `2.0.0`, so a second entry is
-allowed and neither one may be renamed.
+build-time entries are additive-only until `2.0.0`: a new one can be added, but
+none can be renamed or removed. So a second entry is allowed, and neither one
+may be renamed.
 
 - `semanticColors` is `{ light, dark }` with resolved values, keyed by category
   (`surface`, `surface-alpha`, `ink`, `outline`, `outline-alpha`).
@@ -1676,7 +1680,8 @@ round-trips. `clear()` and the `clear` slot prop both write `null`.
 - **Breaking, silent:** `FormControl type="autocomplete"` is removed.
   `FormControl` falls through to `TextInput` and still forwards the type, so the
   result is `<input type="autocomplete">`: a plain text box, with no build or
-  runtime error. A `console.error` in development names the removal.
+  runtime error. A `console.error` in development names the removal. Use
+  `type="combobox"`, or `Combobox` on its own.
 - **Breaking, silent:** the `v-model` value changes shape. `Autocomplete` held
   the whole option object. Both replacements hold only the value. Listen to
   `@update:selectedOption` where you need the whole option.
@@ -1891,9 +1896,9 @@ color.
 
 **Silent break** for JavaScript call sites: `yellow` is no longer a key in the
 tone maps, so the icon renders with no tint and nothing throws. TypeScript call
-sites get a union error. This also corrects the `warning → yellow` mapping
-given in the
-[`icon.appearance` entry](#dialog-—-deprecated-surface-removed-breaking).
+sites get a union error. The same change corrected the mapping in the
+[`icon.appearance` entry](#dialog-—-deprecated-surface-removed-breaking),
+which used to say `warning → yellow` and now says `warning → amber`.
 
 **What to do:** replace `yellow` with `amber`. See the
 [migration guide](/docs/migration#dialog).
@@ -2128,9 +2133,9 @@ names every call site.
   `Tooltip` and `Button`, with no call sites outside the library.
 - `Tooltip` keeps `#default` as the **trigger**, on purpose. It is the one
   exception in the library to the standard slot names, and `PHILOSOPHY.md`
-records it. Over 200 call sites use
-  the `<Tooltip text="…"><Button /></Tooltip>` shorthand, and renaming the slot
-  would change every one of them for no change in behavior.
+  records it. Over 200 call sites use the `<Tooltip text="…"><Button /></Tooltip>`
+  shorthand, and renaming the slot would change every one of them for no change
+  in behavior.
 
 **What to do:** see the before/after in the
 [migration guide](/docs/migration#tooltip).
@@ -2240,7 +2245,7 @@ enabled one when nothing is selected. Disabled options are skipped, including
 with every option disabled, does nothing. `FocusOptions` is passed through,
 `preventScroll` included. The type is exported as `TabButtonsExposed`.
 
-#### `Rail` renamed to `SidebarRail`, `RailItem` to `SidebarRailItem` (breaking, loud)
+#### `Rail` renamed to `SidebarRail`, `RailItem` to `SidebarRailItem` (breaking) {#rail-renamed-to-sidebarrail-railitem-to-sidebarrailitem-breaking-loud}
 
 The rail joins the Sidebar family by name. Nothing else changes. `SidebarRail`
 is still a bare frame that renders on its own or next to `Sidebar`. `Sidebar`
@@ -2585,8 +2590,11 @@ were a thin wrapper over a `resize` listener that the library itself never
 used. Copy the ~20 lines into your app, or use `@vueuse/core`'s
 `useWindowSize` / `useMediaQuery`.
 
-#### pageMetaPlugin — removed (breaking, silent) {#pagemetaplugin-—-removed}
+#### pageMetaPlugin — removed (breaking) {#pagemetaplugin-—-removed}
 
+- **Breaking, loud:** `pageMetaPlugin` is no longer exported, so
+  `import { pageMetaPlugin } from 'frappe-ui'` fails. Delete
+  `app.use(pageMetaPlugin)`.
 - **Silent break:** `pageMetaPlugin` and the global mixin it installed are
   gone. A leftover `pageMeta()` component option still compiles, but nothing
   reads it, so `document.title` and the favicon quietly stop updating. See the
@@ -2616,8 +2624,9 @@ this list until it was renamed to `SidebarRail`; see
   `"scroll-area-scrollbar"` / `"scroll-area-thumb"`. It had none.
   `viewportElement` on the template ref is now typed through
   `ScrollAreaExposed`. (`SettingsDialog`'s `SettingsBody` exposes the same
-  shape today, but is not wired to this type yet. That is tracked in
-  SettingsDialog's own review.)
+  shape, but it is typed by its own `SettingsBodyExposed`, not by
+  `ScrollAreaExposed`; see
+  [its entry](#settingsdialog-—-settingsbody-s-exposed-type).)
 - `FrappeUIProvider`'s source folder moved from `src/components/Provider` to
   `src/components/FrappeUIProvider`, to match its file name. This is internal
   only: `import { FrappeUIProvider } from 'frappe-ui'` is not affected.
@@ -2986,12 +2995,13 @@ apps shows real, separate demand: `LoadingIndicator` (~60 files) and
 though it is a public export. It now has a docs page and two stories (the
 lucide string form, and the `Component` form).
 
-#### `Pill` unexported, `ThemeSwitcher` stays deprecated {#legacy-components-—-dev-mode-warnings}
+#### `Pill` unexported, `ThemeSwitcher` warns in development {#legacy-components-—-dev-mode-warnings}
 
 `Pill` is no longer exported from the package entry point. It stays an internal
 part of `TabButtons`.
 
 `ThemeSwitcher` moved to `frappe-ui/experimental` and stays deprecated there.
+It logs a one-time deprecation warning in development.
 For new theme switchers, compose `Select` with the `useColorScheme` composable.
 See [the ThemeSwitcher entry](#themeswitcher-—-moved-to-frappe-ui-experimental-breaking-loud).
 
@@ -3125,8 +3135,7 @@ are in
   `data-selected` and `data-interactive` attributes.
 - `ListGroup`'s `#header` slot is renamed to `#label`.
 - `ListHeaderCellSort`'s `#suffix` slot is renamed to `#sort-indicator`. Its
-  edge-aware placement is unchanged: it still follows the edge the cell is
-  aligned to.
+  edge-aware placement is unchanged.
 
 **What to do:** run `npx list-v1 .` for the mechanical selectors and the slots
 with fixed names. See the [migration guide](/docs/migration#list-family) for the
@@ -3147,8 +3156,9 @@ consumer app used it.
 narrower family that you compose, by design. It has no equivalent for
 `ListView`'s config-driven columns: resizable widths, per-column
 `getLabel`/`prefix` functions, cell tooltips, excluding disabled rows, and the
-built-in select banner. So instead of freezing all 12 exports at the root
-without deprecation, the family moves to `frappe-ui/experimental`, which has no
+built-in select banner. So instead of freezing all 13 exports at the root
+without deprecation (12 components: `List` and `ListView` are two names for one
+component), the family moves to `frappe-ui/experimental`, which has no
 stability promise. It stays there until `frappe-ui/list` can do everything it
 does.
 
@@ -3781,7 +3791,7 @@ means the import, build or call fails.
 | `Rating.readonly` prop | `disabled` | **Removed**, silent: prop ignored |
 | `Switch.change` emit | `update:modelValue` / `v-model` | **Removed**, silent: listener never fires |
 | `Switch.labelClasses` prop | `data-*` styling hooks | **Removed**, silent: prop ignored |
-| `Checkbox.padding` prop | `padded` / `data-*` styling hooks | **Removed**, silent: prop ignored |
+| `Checkbox.padding` prop | `padded` | **Removed**, silent: prop ignored |
 | `Dropdown` `{ group, items }` | `{ group, options }` | **Removed**, silent: renders empty, warning in development only |
 | `Dropdown.placement` prop | `align` | **Removed**, silent: falls back to `align="start"` |
 | `Dropdown`/`ContextMenu` `component:` rows | `slots: { item: fn }` | **Removed**, silent: renders a row with only the label, warning in development only |
@@ -3822,7 +3832,7 @@ means the import, build or call fails.
 | `FileUploader.uploadArgs` | flat props (`private`, `folder`, `doctype`, `docname`, `fieldname`, `uploadEndpoint`, `optimize`) | **Removed**, silent: unused attribute |
 | `FileUploader` template-ref `inputRef` | `openFileSelector` slot prop | **Removed**: throws on call |
 | `FileUploader` slot prop `error` | always `string \| null`, was `unknown` | **Changed**, silent: `.message` access renders nothing |
-| `useFileUpload` / `FileUploadHandler` unset privacy | explicit `private` / `is_private` | **Default changed**, silent: now resolves to private |
+| `useFileUpload` / `FileUploadHandler` unset privacy | explicit `private` | **Default changed**, silent: now resolves to private |
 | `fileToBase64`, `formatBytes`, `getMaxFileSize`, `fileSizeLimitMessage` | none (internal only) | **Removed**: import fails |
-| `frappe-ui/charts` `ColorScheme` type | root `ResolvedColorScheme` (re-exported from `frappe-ui/charts`) | **Removed**, loud: type import fails |
+| `frappe-ui/charts` `ColorScheme` type | root `ResolvedColorScheme` (import it from `frappe-ui`) | **Removed**, loud: type import fails |
 | `Badge theme="orange"` | `theme="amber"` | **Removed in 1.0.0** (ADR-0008). Loud in TS (compile error); silent in JS (renders gray, warning in development only) |
