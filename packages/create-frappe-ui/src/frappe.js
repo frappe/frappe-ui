@@ -195,7 +195,9 @@ export function addRouteRule(source, route) {
   }
 
   const rule = `{"from_route": "${fromRoute}", "to_route": "${route.slice(1)}"},`
-  const indent = /^\t/m.test(source) ? '\t' : '    '
+  // Frappe indents Python with tabs. Follow the file only when its code is
+  // indented with spaces.
+  const indent = /^ +\S/m.test(source) && !/^\t/m.test(source) ? '    ' : '\t'
   const manual = { status: /** @type {const} */ ('manual'), snippet: rule }
 
   const assignments = source.match(/^website_route_rules\b/gm) ?? []

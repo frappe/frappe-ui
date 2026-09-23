@@ -169,21 +169,22 @@ test('scaffolds the frontend of a Frappe app and wires up its Python side', () =
 test('adds the route rule to any shape of hooks.py it can edit safely', () => {
   const rule = '{"from_route": "/todo/<path:app_path>", "to_route": "todo"},'
 
-  // No rules yet: a new list goes at the end.
-  const appended = addRouteRule('app_name = "todo"\n', '/todo')
+  // No rules yet: a new list goes at the end, indented with a tab like the
+  // rest of Frappe.
+  const appended = addRouteRule('app_name = "todo"\n# \t"route": "/todo",\n', '/todo')
   assert.deepEqual(appended, {
     status: 'added',
-    source: `app_name = "todo"\n\n# Load the frontend on every path under /todo\nwebsite_route_rules = [\n    ${rule}\n]\n`,
+    source: `app_name = "todo"\n# \t"route": "/todo",\n\n# Load the frontend on every path under /todo\nwebsite_route_rules = [\n\t${rule}\n]\n`,
   })
   assert.deepEqual(
     addRouteRule(/** @type {{ source: string }} */ (appended).source, '/todo'),
     { status: 'present' },
   )
 
-  // An empty list is filled in place.
-  assert.deepEqual(addRouteRule('website_route_rules = []\n', '/todo'), {
+  // An empty list is filled in place. A file indented with spaces gets spaces.
+  assert.deepEqual(addRouteRule('if x:\n    pass\nwebsite_route_rules = []\n', '/todo'), {
     status: 'added',
-    source: `website_route_rules = [\n    ${rule}\n]\n`,
+    source: `if x:\n    pass\nwebsite_route_rules = [\n    ${rule}\n]\n`,
   })
 
   // A "]" inside a string or a comment doesn't end the list.
