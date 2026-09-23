@@ -4,7 +4,11 @@
 // site actions, and the two line up at 48px. Everything sits at the right
 // end, the way an app's PageHeader holds its actions.
 import { provide, useTemplateRef } from 'vue'
-import { Button, PageHeader } from 'frappe-ui'
+import { computed } from 'vue'
+import { useData, useRoute, withBase } from 'vitepress'
+import { Breadcrumbs, Button, PageHeader } from 'frappe-ui'
+import CopyPageMenu from './CopyPageMenu.vue'
+import { isActiveLink, type SidebarSection } from './sidebarList'
 // Internal to the PageHeader family, imported by path on purpose: this theme
 // ships inside the frappe-ui package, and the key is not public API.
 import { pageHeaderTargetKey } from '../../../src/components/PageHeader/target'
@@ -24,16 +28,39 @@ defineSlots<{
 // demos keep their own headers, and this one never leaves the layout.
 const own = useTemplateRef<HTMLElement>('own')
 provide(pageHeaderTargetKey, own)
+
+const { theme, site } = useData()
+const route = useRoute()
+const crumbs = computed(() => {
+  const sections = (theme.value.sidebar ?? []) as SidebarSection[]
+  for (const section of sections) {
+    const item = section.items.find((i) =>
+      isActiveLink(route.path, i.link, site.value.base),
+    )
+    if (item)
+      return [
+        { label: section.text, href: withBase(section.items[0].link) },
+        { label: item.text },
+      ]
+  }
+  return []
+})
 </script>
 
 <template>
   <div ref="own" class="sticky top-0 z-20">
     <PageHeader>
+      <Breadcrumbs
+        v-if="crumbs.length"
+        :items="crumbs"
+        class="hidden sm:flex"
+      />
       <!-- No brand here: the logo belongs to the Sidebar (and to the mobile
            nav sheet below lg), like an app's SidebarHeader. ml-auto pushes
            the single child to the right end. -->
       <nav class="ml-auto flex items-center gap-2 sm:gap-3">
         <slot name="actions" />
+        <CopyPageMenu class="hidden sm:flex" />
         <!-- Below lg the Sidebar (and its search field) is hidden, so the
              command palette gets a trigger here. -->
         <Button

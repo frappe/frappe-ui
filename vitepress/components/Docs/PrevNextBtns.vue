@@ -8,7 +8,6 @@ import {
   type SidebarSection,
 } from './sidebarList'
 
-
 const route = useRoute()
 const { frontmatter, site } = useData()
 

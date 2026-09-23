@@ -56,6 +56,17 @@ const syncActive = () => {
 
 const route = useRoute()
 
+const list = ref<HTMLElement | null>(null)
+const marker = ref<{ top: number; height: number } | null>(null)
+watch([activeHeading, headings], () =>
+  nextTick(() => {
+    const el = list.value?.querySelector<HTMLElement>(
+      `a[href="#${CSS.escape(activeHeading.value ?? '')}"]`,
+    )
+    marker.value = el ? { top: el.offsetTop, height: el.offsetHeight } : null
+  }),
+)
+
 onMounted(() => {
   observer = new IntersectionObserver(
     (entries) => {
@@ -86,7 +97,13 @@ watch(route, () => nextTick(setHeadings))
     :class="{ invisible: headings.length == 0 }"
   >
     <ScrollArea class="min-h-0 flex-1" viewport-class="px-5 pt-10 pb-10">
-      <div class="flex flex-col">
+      <div ref="list" class="relative flex flex-col">
+        <span
+          v-if="marker"
+          class="absolute left-0 w-0.5 -translate-x-[0.5px] rounded-full bg-surface-gray-7 transition-all duration-200 ease-out"
+          :style="{ top: `${marker.top}px`, height: `${marker.height}px` }"
+          aria-hidden="true"
+        />
         <!-- Transparent border keeps the label on the same left edge as the
              links, which carry the rail's visible border. -->
         <span
@@ -101,8 +118,7 @@ watch(route, () => nextTick(setHeadings))
           @click="activeHeading = x.id"
           :class="{
             'pl-7': x.type == 'h3' && h2Exists,
-            'border-outline-gray-7 text-ink-gray-9':
-              activeHeading && x.id == activeHeading,
+            'text-ink-gray-9': activeHeading && x.id == activeHeading,
           }"
           >{{ x.name }}</a
         >

@@ -11,7 +11,8 @@ import {
   ListboxRoot,
 } from 'reka-ui'
 
-import { Dialog } from 'frappe-ui'
+import { Dialog, toast, useColorScheme } from 'frappe-ui'
+import { pageMarkdown } from './pageMarkdown'
 import type { SidebarItem, SidebarSection } from './sidebarList'
 
 const open = defineModel<boolean>('open', { default: true })
@@ -33,6 +34,56 @@ const sectionOrder = sidebarList.map((s) => s.text)
 watch(open, (isOpen) => {
   if (!isOpen) filterText.value = ''
 })
+
+const { toggleColorScheme } = useColorScheme()
+function copy(text: string, message: string) {
+  navigator.clipboard?.writeText(text)
+  toast.success(message)
+}
+const actions = [
+  {
+    id: 'theme',
+    text: 'Toggle dark mode',
+    icon: 'lucide-sun-moon',
+    run: toggleColorScheme,
+  },
+  {
+    id: 'install',
+    text: 'Copy install command',
+    hint: 'npm install frappe-ui',
+    icon: 'lucide-terminal',
+    run: () => copy('npm install frappe-ui', 'Install command copied'),
+  },
+  {
+    id: 'markdown',
+    text: 'Copy this page as Markdown',
+    icon: 'lucide-copy',
+    run: () => copy(pageMarkdown(), 'Page copied as Markdown'),
+  },
+  {
+    id: 'github',
+    text: 'Open frappe-ui on GitHub',
+    icon: 'lucide-external-link',
+    run: () => window.open(theme.value.githubUrl, '_blank', 'noopener'),
+  },
+  {
+    id: 'llms',
+    text: 'Open llms.txt',
+    icon: 'lucide-file-text',
+    run: () => window.open(withBase('/llms.txt'), '_blank', 'noopener'),
+  },
+]
+const matchedActions = computed(() => {
+  const query = filterText.value.trim()
+  if (!query) return actions
+  return fuzzysort
+    .go(query, actions, { key: 'text', threshold: 0.3 })
+    .map((m) => m.obj)
+})
+function runAction(action: (typeof actions)[number]) {
+  open.value = false
+  action.run()
+}
 
 const groupedResults = computed(() => {
   const query = filterText.value.trim()
@@ -56,8 +107,10 @@ const groupedResults = computed(() => {
     .map((name) => ({ text: name, items: bySection.get(name)! }))
 })
 
-const hasResults = computed(() =>
-  groupedResults.value.some((g) => g.items.length > 0),
+const hasResults = computed(
+  () =>
+    matchedActions.value.length > 0 ||
+    groupedResults.value.some((g) => g.items.length > 0),
 )
 
 const highlightedLink = ref<string | null>(null)
@@ -121,6 +174,40 @@ const onFilterKeydown = (e: KeyboardEvent) => {
         <ListboxContent
           class="max-h-96 overflow-auto border-t border-outline-gray-1 dark:border-outline-gray-2"
         >
+          <ListboxGroup
+            v-if="matchedActions.length"
+            class="mb-2 mt-4.5 first:mt-3"
+          >
+            <ListboxGroupLabel
+              class="mb-2.5 block px-4.5 text-base text-ink-gray-5"
+            >
+              Actions
+            </ListboxGroupLabel>
+            <div
+              v-for="action in matchedActions"
+              :key="action.id"
+              class="px-2.5"
+            >
+              <ListboxItem
+                :value="`action:${action.id}`"
+                class="flex w-full min-w-0 cursor-pointer items-center gap-2.5 rounded-4 px-2 py-2 text-base font-medium text-ink-gray-7 outline-none data-[highlighted]:bg-surface-gray-3"
+                @select.prevent="runAction(action)"
+              >
+                <span
+                  :class="action.icon"
+                  class="size-4 text-ink-gray-5"
+                  aria-hidden="true"
+                />
+                {{ action.text }}
+                <code
+                  v-if="action.hint"
+                  class="ml-auto rounded-1 bg-surface-gray-2 px-1.5 text-sm font-normal text-ink-gray-5"
+                  >{{ action.hint }}</code
+                >
+              </ListboxItem>
+            </div>
+          </ListboxGroup>
+
           <ListboxGroup
             v-for="group in groupedResults"
             :key="group.text"
