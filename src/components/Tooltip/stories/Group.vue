@@ -11,11 +11,11 @@ import { Button, Tooltip, TooltipProvider } from 'frappe-ui'
   -->
   <TooltipProvider :hover-delay="500" :skip-delay="300">
     <div class="flex items-center gap-1">
-      <Button icon="bold" :tooltip="'Bold'" />
-      <Button icon="italic" :tooltip="'Italic'" />
-      <Button icon="underline" :tooltip="'Underline'" />
+      <Button icon="lucide-bold" :tooltip="'Bold'" />
+      <Button icon="lucide-italic" :tooltip="'Italic'" />
+      <Button icon="lucide-underline" :tooltip="'Underline'" />
       <Tooltip text="Strikethrough">
-        <Button icon="minus" />
+        <Button icon="lucide-strikethrough" />
       </Tooltip>
     </div>
   </TooltipProvider>
