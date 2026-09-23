@@ -50,7 +50,7 @@ function buildSidebar(): SidebarSection[] {
       text: 'Getting Started',
       items: [
         { text: 'Introduction', link: '/docs/introduction' },
-        { text: 'Getting Started', link: '/docs/getting-started' },
+        { text: 'Installation', link: '/docs/getting-started' },
         {
           text: 'Frappe app',
           link: '/docs/getting-started/frappe',

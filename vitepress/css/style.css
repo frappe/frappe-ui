@@ -219,3 +219,18 @@ code {
 [data-slot='editor-content'] p {
   margin-bottom: 0;
 }
+
+/* Numbered steps for install guides: wrap the steps in <div class="steps">
+   and each h3 inside gets its number in front. */
+.steps {
+  counter-reset: step;
+
+  h3 {
+    counter-increment: step;
+  }
+
+  h3::before {
+    content: counter(step) '.';
+    @apply mr-2 font-normal tabular-nums text-ink-gray-4;
+  }
+}

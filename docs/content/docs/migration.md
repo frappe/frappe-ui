@@ -3298,7 +3298,7 @@ handed either one renders an empty swatch. The new exports carry no sentinel.
 
 `colors`, `focusRing`, `fontFamily`, `fontWeight`, `screens`, `spacing` and
 `tracking` are exported from the same subpath. See
-[Tailwind Setup](/docs/getting-started/tailwind#the-token-exports).
+[Tailwind Setup](/docs/getting-started/tailwind#design-tokens).
 
 ## `frappe-ui/frappe` and `frappe-ui/drive` (removed)
 
@@ -3348,7 +3348,7 @@ so this line in `tailwind.config.js` scans nothing:
 ```
 
 Better: replace the hand-copied list with the
-[`content` export](/docs/getting-started/tailwind#the-content-export), which tracks
+[`content` export](/docs/getting-started/tailwind#content-paths), which tracks
 the library's source directories for you.
 
 ## Autocomplete (removed)

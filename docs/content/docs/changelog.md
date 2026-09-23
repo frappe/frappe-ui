@@ -191,7 +191,7 @@ This is additive, and it is the replacement for the removed
 `tailwind/tokens.js`. The names and shapes differ from that module; the
 [migration guide](/docs/migration#hljs-theme-css-and-tailwind-tokens-js-removed)
 gives the before and after, and
-[Tailwind Setup](/docs/getting-started/tailwind#the-token-exports) documents each
+[Tailwind Setup](/docs/getting-started/tailwind#design-tokens) documents each
 export.
 
 ### Tailwind tokens — one committed source, no vendored Figma export

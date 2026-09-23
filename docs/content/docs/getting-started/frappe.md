@@ -1,15 +1,18 @@
 # Frappe app
 
-The frontend of a Frappe app: a Vite project inside the app, served by the site
-in production. This guide assumes you have finished the
-[shared install](../getting-started).
+Build the frontend of a Frappe app with frappe-ui. The frontend is a Vite
+project inside your app, and the site serves it in production.
 
-> The old `frappe-ui-starter` template targets frappe-ui v0 and Vite 2. Do not
-> clone it for a v1 app. The steps below replace it.
+The examples use an app named `todo`, served at `/todo`.
 
-## Where the frontend lives
+> The old `frappe-ui-starter` template is for frappe-ui v0. Don't use it for a
+> new app. Follow these steps instead.
 
-Create the Vite project inside your Frappe app, next to the Python package:
+<div class="steps">
+
+### Create the frontend
+
+Create the Vite project inside your app, next to the Python package.
 
 ```sh
 cd apps/todo
@@ -17,20 +20,21 @@ npm create vite@latest frontend -- --template vue-ts
 cd frontend
 ```
 
-Then follow the [install](../getting-started#install). The layout the Vite
-plugin expects is:
+Then follow [Installation](../getting-started#install-frappe-ui) from step 2 to
+step 5. Your app now looks like this:
 
 ```
 apps/todo/
   todo/            # the Python package
     www/
     public/
-  frontend/        # this project
+  frontend/        # the Vite project
 ```
 
-## Vite config
+### Add the Vite plugin
 
-In `vite.config.ts`:
+Add the frappe-ui plugin to `vite.config.ts`. Set `frontendRoute` to the path
+the site serves the app on.
 
 ```ts
 import { defineConfig } from 'vite'
@@ -42,50 +46,21 @@ export default defineConfig({
 })
 ```
 
-`frontendRoute` is the path the site serves the app on. Every sub-plugin the
-Frappe setup needs is on by default:
+With no other options, the plugin:
 
-- **`frappeProxy`** forwards `/api`, `/assets`, `/files`, `/app`, `/login` and
-  `/private` from the Vite dev server to the bench. It reads the bench port from
-  `sites/common_site_config.json` and picks the Vite port from it: a bench on
-  `8000` gets Vite on `8080`.
-- **`jinjaBootData`** adds a Jinja block to the built `index.html` that copies
-  every key of the page's `boot` context onto `window`.
-- **`buildConfig`** writes the build to `todo/public/frontend`, sets the asset
-  base to `/assets/todo/frontend/`, and copies the built `index.html` to
+- Forwards `/api`, `/assets`, `/files`, `/app`, `/login` and `/private` to your
+  bench while you develop.
+- Passes the page's boot data to the app as globals on `window`.
+- Builds into `todo/public/frontend` and copies `index.html` to
   `todo/www/todo.html`.
-- **`barrelImports`** speeds up dev when frappe-ui is linked from a working
-  copy. It does nothing for an installed dependency.
 
-`lucideIcons` and `frappeTypes` are off. See the [Vite plugin](../other/vite)
-page for their options.
+The [Vite plugin](../other/vite) page lists every option.
 
-## Dev server
+### Serve the app from the site
 
-The Vite dev server proxies the bench, so open the app through the site's
-hostname on Vite's port. For a site named `todo.test` and a bench on `8000`:
-
-```
-http://todo.test:8080
-```
-
-In development the CSRF token is not on the page. Turn the check off for the
-site, in development only:
-
-```sh
-bench --site todo.test set-config ignore_csrf 1
-```
-
-In production the token arrives through boot data, so the check stays on.
-
-## The page that serves the app
-
-The site needs a page at `frontendRoute`. Two files in the Python package.
-
-`todo/www/todo.py` builds the boot data. `csrf_token` is the one key frappe-ui
-reads itself: `useCall`, `frappeRequest` and the file upload helpers send
-`window.csrf_token` with every request. Add whatever else the app needs on first
-paint.
+Add `todo/www/todo.py`. It sends boot data to the page, and frappe-ui reads
+`csrf_token` from it for every request. Add anything else the app needs on first
+load.
 
 ```python
 import frappe
@@ -100,8 +75,8 @@ def get_context(context):
     }
 ```
 
-`todo/hooks.py` routes every path under the app to that page, so a client-side
-route like `/todo/tasks/42` loads on a hard refresh:
+Then send every path under `/todo` to that page in `todo/hooks.py`, so a
+refresh on `/todo/tasks/42` still loads the app.
 
 ```python
 website_route_rules = [
@@ -109,45 +84,65 @@ website_route_rules = [
 ]
 ```
 
-The router's history base must match `frontendRoute`:
+Don't create `todo/www/todo.html` yourself. The build writes it.
+
+### Set the router base
+
+Give the router the same path as `frontendRoute`.
 
 ```ts
-import { createRouter, createWebHistory } from 'vue-router'
-
-export const router = createRouter({
+const router = createRouter({
   history: createWebHistory('/todo'),
   routes,
 })
 ```
 
-`todo/www/todo.html` is written by the build. Do not create it by hand.
+### Start the dev server
 
-## Build
+Pages in development don't have a CSRF token, so turn the check off for your
+site. Only do this on a development site.
+
+```sh
+bench --site todo.test set-config ignore_csrf 1
+npm run dev
+```
+
+Open the app on the site's name with Vite's port. Vite uses your bench port plus
+80, so a bench on `8000` means:
+
+```
+http://todo.test:8080
+```
+
+### Build
+
+Build the app, then commit `todo/public/frontend` and `todo/www/todo.html`.
 
 ```sh
 npm run build
 ```
 
-`buildConfig` places the output where the site serves it and copies `index.html`
-into `www/`. Commit or deploy both `todo/public/frontend` and
-`todo/www/todo.html`. After `bench build` or a deploy, the app is live at
-`https://todo.test/todo`.
+After a deploy, the app is live at `https://todo.test/todo`.
+
+</div>
 
 ## Talking to the server
 
-The data fetching composables call whitelisted methods and documents over the
-session the browser already has with the site:
+The data fetching composables use the browser's session with the site, so there
+is nothing to set up.
 
-- [`useCall`](../data-fetching/use-call) for a whitelisted method.
+- [`useCall`](../data-fetching/use-call) calls a whitelisted method.
 - [`useList`](../data-fetching/use-list), [`useDoc`](../data-fetching/use-doc),
   [`useDoctype`](../data-fetching/use-doctype) and
-  [`useNewDoc`](../data-fetching/use-new-doc) for documents.
-- [`frappeRequest`](../other/utilities#frapperequest) for anything else.
+  [`useNewDoc`](../data-fetching/use-new-doc) work with documents.
+- [`frappeRequest`](../other/utilities#frapperequest) handles any other request.
 
-`FileUploader` and `useFileUpload` post to `/api/method/upload_file` by default.
+File uploads go to `/api/method/upload_file`.
 
-To generate TypeScript interfaces from your DocTypes, turn on `frappeTypes` with
-the doctypes you use:
+## Types for your DocTypes
+
+The Vite plugin can write TypeScript types for your DocTypes. List the ones you
+use, per app:
 
 ```ts
 frappeui({

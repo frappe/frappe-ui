@@ -18,7 +18,7 @@ Three cross-cutting conventions to know before reading anything else:
 ## Getting started
 
 - [Introduction](https://ui.frappe.io/docs/introduction): what frappe-ui is, motivation, products using it.
-- [Getting started](https://ui.frappe.io/docs/getting-started): the install every setup shares: Tailwind preset wiring, `FrappeUIProvider`, TypeScript config.
+- [Installation](https://ui.frappe.io/docs/getting-started): the install every setup shares: Tailwind preset wiring, `FrappeUIProvider`, TypeScript config.
 - [Frappe app](https://ui.frappe.io/docs/getting-started/frappe): the Vite plugin, dev proxy, CSRF, boot data, the `www` page and the production build.
 - [Standalone app](https://ui.frappe.io/docs/getting-started/standalone): a plain Vite app; which sub-plugins to drop and which APIs assume a Frappe server.
 - [Tailwind setup](https://ui.frappe.io/docs/getting-started/tailwind): wiring the preset into an app, what it replaces, the `content` export.
