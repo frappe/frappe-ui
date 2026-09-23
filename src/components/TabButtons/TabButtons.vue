@@ -318,6 +318,12 @@ function tabElementProps(button: (typeof resolvedButtons.value)[number]) {
 // gives a disabled `route`/`href` option a real disabled `<button>`, which
 // cannot take focus at all. With nothing left to focus the call does nothing.
 defineExpose<TabButtonsExposed>({
+  /**
+   * Moves focus to the selected tab, or to the first enabled tab when nothing
+   * is selected. That is the tab `Tab` reaches, since the group is one tab
+   * stop. Disabled tabs are skipped, so a group with no enabled tab does
+   * nothing.
+   */
   focus: (options?: FocusOptions) => {
     const track = trackRef.value
     if (!track) return

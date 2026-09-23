@@ -453,7 +453,15 @@ if (isButtonMode.value && isQueryBound() && query.value !== '') {
   hasTypedSinceOpen.value = true
 }
 
-defineExpose<SelectionExposed>({ clear, focus })
+defineExpose<SelectionExposed>({
+  clear,
+  /**
+   * Moves focus to the input in `trigger="input"` mode, and to the button in
+   * `trigger="button"` mode. While the popover's search input is showing, it
+   * focuses that instead.
+   */
+  focus,
+})
 defineSlots<ComboboxSlots>()
 </script>
 

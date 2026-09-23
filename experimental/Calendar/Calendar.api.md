@@ -3,6 +3,7 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
+  import ExposedTable from '@/components/Docs/ExposedTable.vue'
 
   const propsData = [
   {
@@ -95,6 +96,74 @@
     type: '[payload: { view: CalendarMode; startDate: string; endDate: string; }]'
   }
 ]
+
+  const exposedData = [
+  {
+    name: 'reloadEvents',
+    description: 'Rebuilds the calendar\'s own copy of `events`. The calendar already does\nthis whenever `events` changes.',
+    type: '() => void'
+  },
+  {
+    name: 'currentMonthYear',
+    description: 'The title of the visible range, e.g. "August 2026".',
+    type: 'string'
+  },
+  {
+    name: 'currentYear',
+    description: 'The year of the visible month.',
+    type: 'number'
+  },
+  {
+    name: 'currentMonth',
+    description: 'The visible month, `0` for January.',
+    type: 'number'
+  },
+  {
+    name: 'currentDay',
+    description: 'The day of the month the view is anchored on.',
+    type: 'number | null'
+  },
+  {
+    name: 'enabledModes',
+    description: 'The views that `config` does not disable. Read once, when the calendar\nmounts.',
+    type: 'CalendarActionOption[]'
+  },
+  {
+    name: 'activeView',
+    description: 'The visible view.',
+    type: 'CalendarMode'
+  },
+  {
+    name: 'decrement',
+    description: 'Moves back one day, week or month, depending on the view.',
+    type: '() => void'
+  },
+  {
+    name: 'increment',
+    description: 'Moves forward one day, week or month, depending on the view.',
+    type: '() => void'
+  },
+  {
+    name: 'updateActiveView',
+    description: 'Switches to this view.',
+    type: '(value: CalendarMode, d?: Date, isPreviousMonth?: boolean, isNextMonth?: boolean) => void'
+  },
+  {
+    name: 'setCalendarDate',
+    description: 'Jumps to this date, or to today when no date is given.',
+    type: '(d?: string | Date) => void'
+  },
+  {
+    name: 'onMonthYearChange',
+    description: 'Jumps to this date and moves the month picker to it.',
+    type: '(val?: string | Date) => void'
+  },
+  {
+    name: 'selectedMonthDate',
+    description: 'The month picker\'s date, as `YYYY-MM-DD`.',
+    type: 'string'
+  }
+]
 </script>
 
 ## API Reference
@@ -104,3 +173,5 @@
 <SlotsTable :data="slotsData"/>
 
 <EmitsTable :data="emitsData"/>
+
+<ExposedTable :data="exposedData"/>

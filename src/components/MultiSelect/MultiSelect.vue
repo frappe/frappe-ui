@@ -345,7 +345,11 @@ watch(open, (isOpen, wasOpen) => {
   hasTypedSinceOpen.value = false
 })
 
-defineExpose<SelectionExposed>({ clear, focus })
+defineExpose<SelectionExposed>({
+  clear,
+  /** Moves focus to the trigger. */
+  focus,
+})
 defineSlots<MultiSelectSlots>()
 </script>
 

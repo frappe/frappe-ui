@@ -3,6 +3,7 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
+  import ExposedTable from '@/components/Docs/ExposedTable.vue'
 
   const propsData = [
   {
@@ -125,6 +126,24 @@
     type: '[]'
   }
 ]
+
+  const exposedData = [
+  {
+    name: 'open',
+    description: 'Opens the popover. Does nothing when it is already open.',
+    type: '() => void'
+  },
+  {
+    name: 'close',
+    description: 'Closes the popover. Does nothing when it is already closed.',
+    type: '() => void'
+  },
+  {
+    name: 'contentEl',
+    description: 'The content element. `null` while the popover is closed.',
+    type: 'HTMLElement | null'
+  }
+]
 </script>
 
 ## API Reference
@@ -134,3 +153,5 @@
 <SlotsTable :data="slotsData"/>
 
 <EmitsTable :data="emitsData"/>
+
+<ExposedTable :data="exposedData"/>

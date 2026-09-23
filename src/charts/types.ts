@@ -15,6 +15,7 @@ export type ChartExposed = {
  * so what a caller reads is `ChartExposed`. Internal.
  */
 export type ChartExposedRefs = {
+  /** The echarts instance, once the plot has a size to initialise into. */
   chart: ComputedRef<ECharts | undefined>
 }
 

@@ -406,6 +406,11 @@ function onKeydown(e: KeyboardEvent) {
 // tabstop, so a ref call and a Tab press land in the same place. In slider mode
 // the root itself is the tabstop.
 defineExpose<InputExposed>({
+  /**
+   * Moves focus to the selected star, or to the first star when nothing is
+   * selected. That is the star `Tab` reaches. In half-star mode the whole
+   * control is one slider, so it focuses the control itself.
+   */
   focus: (options?: FocusOptions) => {
     const root = rootRef.value
     if (!root) return

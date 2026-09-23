@@ -101,6 +101,7 @@ const controlAttrs = computed(() =>
 )
 
 defineExpose<InputExposed>({
+  /** Moves focus to the switch. */
   focus: (options?: FocusOptions) =>
     switchRef.value?.$el?.focus(options),
 })

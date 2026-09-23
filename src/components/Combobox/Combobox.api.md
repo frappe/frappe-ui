@@ -3,6 +3,7 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
+  import ExposedTable from '@/components/Docs/ExposedTable.vue'
 
   const propsData = [
   {
@@ -273,6 +274,19 @@
     type: '[option: ComboboxSelectableOption | ComboboxCustomOption | null]'
   }
 ]
+
+  const exposedData = [
+  {
+    name: 'clear',
+    description: 'Clears the current selection. It leaves the search query alone.',
+    type: '() => void'
+  },
+  {
+    name: 'focus',
+    description: 'Moves focus to the input in `trigger="input"` mode, and to the button in\n`trigger="button"` mode. While the popover\'s search input is showing, it\nfocuses that instead.',
+    type: '(options?: FocusOptions) => void'
+  }
+]
 </script>
 
 ## API Reference
@@ -282,3 +296,5 @@
 <SlotsTable :data="slotsData"/>
 
 <EmitsTable :data="emitsData"/>
+
+<ExposedTable :data="exposedData"/>

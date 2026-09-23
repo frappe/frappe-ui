@@ -3,6 +3,7 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
+  import ExposedTable from '@/components/Docs/ExposedTable.vue'
 
   const datePickerProps = [
   {
@@ -191,6 +192,24 @@
     name: 'update:modelValue',
     description: 'Fired when the model value changes.',
     type: '[value: string]'
+  }
+]
+
+  const datePickerExposed = [
+  {
+    name: 'open',
+    description: 'Opens the panel. A disabled picker stays closed.',
+    type: '() => void'
+  },
+  {
+    name: 'close',
+    description: 'Closes the panel.',
+    type: '() => void'
+  },
+  {
+    name: 'focus',
+    description: 'Moves focus to the input. With a custom `#trigger`, it focuses the first\nfocusable element inside it.',
+    type: '(options?: FocusOptions) => void'
   }
 ]
 
@@ -391,6 +410,24 @@
   }
 ]
 
+  const dateRangePickerExposed = [
+  {
+    name: 'open',
+    description: 'Opens the panel. A disabled picker stays closed.',
+    type: '() => void'
+  },
+  {
+    name: 'close',
+    description: 'Closes the panel.',
+    type: '() => void'
+  },
+  {
+    name: 'focus',
+    description: 'Moves focus to the input. With a custom `#trigger`, it focuses the first\nfocusable element inside it.',
+    type: '(options?: FocusOptions) => void'
+  }
+]
+
   const dateTimePickerProps = [
   {
     name: 'side',
@@ -580,6 +617,24 @@
     type: '[value: string]'
   }
 ]
+
+  const dateTimePickerExposed = [
+  {
+    name: 'open',
+    description: 'Opens the panel. A disabled picker stays closed.',
+    type: '() => void'
+  },
+  {
+    name: 'close',
+    description: 'Closes the panel.',
+    type: '() => void'
+  },
+  {
+    name: 'focus',
+    description: 'Moves focus to the input. With a custom `#trigger`, it focuses the first\nfocusable element inside it.',
+    type: '(options?: FocusOptions) => void'
+  }
+]
 </script>
 
 ## API Reference
@@ -592,6 +647,8 @@
 
 <EmitsTable :data="datePickerEmits"/>
 
+<ExposedTable :data="datePickerExposed"/>
+
 ### DateRangePicker
 
 <PropsTable folder="DatePicker" name="DateRangePicker" :data="dateRangePickerProps"/>
@@ -600,6 +657,8 @@
 
 <EmitsTable :data="dateRangePickerEmits"/>
 
+<ExposedTable :data="dateRangePickerExposed"/>
+
 ### DateTimePicker
 
 <PropsTable folder="DatePicker" name="DateTimePicker" :data="dateTimePickerProps"/>
@@ -607,3 +666,5 @@
 <SlotsTable :data="dateTimePickerSlots"/>
 
 <EmitsTable :data="dateTimePickerEmits"/>
+
+<ExposedTable :data="dateTimePickerExposed"/>

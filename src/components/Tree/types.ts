@@ -139,7 +139,11 @@ export const TreeContextKey: InjectionKey<TreeContext> = Symbol('TreeContext')
  * block them.
  */
 export interface TreeExposed {
-  /** Opens the node with this key. Accepts a key whose children have not loaded yet. */
+  /**
+   * Opens the node with this key. A key whose children have not loaded yet
+   * opens as soon as they arrive. Like every method here, it works while the
+   * tree is `disabled`.
+   */
   expand: (key: TreeKey) => void
   /** Closes the node with this key. */
   collapse: (key: TreeKey) => void
