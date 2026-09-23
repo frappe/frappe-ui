@@ -1,8 +1,8 @@
 #!/usr/bin/env bun
 // Read-only `gh` wrapper. Restricts subcommands and flags so the agent
 // cannot mutate state via this script. Write operations live in
-// sibling scripts (edit-issue-labels.ts, add-comment.ts) with their own
-// allowlists.
+// sibling scripts (add-comment.ts, open-pr.ts, post-review.ts) with their
+// own allowlists.
 //
 // Usage:
 //   ./gh.ts issue view 123
