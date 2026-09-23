@@ -60,8 +60,8 @@ const list = ref<HTMLElement | null>(null)
 const marker = ref<{ top: number; height: number } | null>(null)
 watch([activeHeading, headings], () =>
   nextTick(() => {
-    const el = list.value?.querySelector<HTMLElement>(
-      `a[href="#${CSS.escape(activeHeading.value ?? '')}"]`,
+    const el = [...(list.value?.querySelectorAll<HTMLElement>('a') ?? [])].find(
+      (a) => a.getAttribute('href') === `#${activeHeading.value}`,
     )
     marker.value = el ? { top: el.offsetTop, height: el.offsetHeight } : null
   }),
@@ -104,12 +104,8 @@ watch(route, () => nextTick(setHeadings))
           :style="{ top: `${marker.top}px`, height: `${marker.height}px` }"
           aria-hidden="true"
         />
-        <!-- Transparent border keeps the label on the same left edge as the
-             links, which carry the rail's visible border. -->
-        <span
-          class="font-medium whitespace-nowrap pl-4 pb-1 border-l border-transparent"
-          >On this page</span
-        >
+        <!-- The label starts on the rail's line, left of the indented links. -->
+        <span class="font-medium whitespace-nowrap pb-1">On this page</span>
 
         <a
           v-for="x in headings"

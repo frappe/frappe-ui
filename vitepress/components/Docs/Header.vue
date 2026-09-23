@@ -7,7 +7,6 @@ import { provide, useTemplateRef } from 'vue'
 import { computed } from 'vue'
 import { useData, useRoute, withBase } from 'vitepress'
 import { Breadcrumbs, Button, PageHeader } from 'frappe-ui'
-import CopyPageMenu from './CopyPageMenu.vue'
 import { isActiveLink, type SidebarSection } from './sidebarList'
 // Internal to the PageHeader family, imported by path on purpose: this theme
 // ships inside the frappe-ui package, and the key is not public API.
@@ -60,7 +59,6 @@ const crumbs = computed(() => {
            the single child to the right end. -->
       <nav class="ml-auto flex items-center gap-2 sm:gap-3">
         <slot name="actions" />
-        <CopyPageMenu class="hidden sm:flex" />
         <!-- Below lg the Sidebar (and its search field) is hidden, so the
              command palette gets a trigger here. -->
         <Button
