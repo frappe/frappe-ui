@@ -29,9 +29,14 @@
     "node": ">=20.19.0"
   },
   "scripts": {
-    "test": "node --test"
+    "test": "node --test",
+    "check": "tsc"
   },
   "dependencies": {
     "@clack/prompts": "^1.8.1"
+  },
+  "devDependencies": {
+    "@types/node": "~20.19.0",
+    "typescript": "~5.9.3"
   }
 }

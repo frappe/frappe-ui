@@ -4,17 +4,17 @@ import path from 'node:path'
 import { parseArgs, styleText } from 'node:util'
 import * as p from '@clack/prompts'
 import {
-  applyPythonChanges,
+  applyAppChanges,
   findApp,
   parseRoute,
-  planPythonChanges,
+  planAppChanges,
   readBench,
 } from './frappe.js'
 import { copyTemplate, templateFiles, toPackageName } from './scaffold.js'
 import { detectPackageManager, install, runCommand } from './packageManager.js'
 
 /** @typedef {import('./scaffold.js').Template} Template */
-/** @typedef {import('./frappe.js').PythonChange} PythonChange */
+/** @typedef {import('./frappe.js').AppChange} AppChange */
 
 const { version } = JSON.parse(
   fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8'),
@@ -118,7 +118,7 @@ async function create(argv) {
         ? 'frappe'
         : 'standalone')
 
-  /** @type {{ route: string, changes: PythonChange[] } | null} */
+  /** @type {{ route: string, changes: AppChange[] } | null} */
   let frappe = null
   if (template === 'frappe') {
     if (!app) {
@@ -132,13 +132,16 @@ async function create(argv) {
       )
     }
     const route = await askRoute(args.route, `/${app.name}`, interactive)
-    frappe = { route, changes: planPythonChanges(app, route) }
+    frappe = {
+      route,
+      changes: planAppChanges(app, { route, frontend: path.basename(target), pm }),
+    }
   }
 
   await checkTarget(target, template, cwd, interactive)
 
   if (frappe) {
-    p.note(describeChanges(frappe.changes, cwd), 'Python files')
+    p.note(describeChanges(frappe.changes, cwd), 'Changes to your app')
     const writes = frappe.changes.some((change) => change.content !== undefined)
     if (
       writes &&
@@ -169,12 +172,10 @@ async function create(argv) {
     ROUTE_NAME: frappe?.route.slice(1) ?? '',
   })
   if (frappe) {
-    applyPythonChanges(frappe.changes)
+    applyAppChanges(frappe.changes)
     for (const change of frappe.changes) {
       if (change.action !== 'manual') continue
-      p.log.warn(
-        `Add this rule to website_route_rules in ${path.relative(cwd, change.file)}:\n${change.snippet}`,
-      )
+      p.log.warn(`${path.relative(cwd, change.file)} ${change.summary}\n${change.snippet}`)
     }
   }
 
@@ -250,18 +251,25 @@ function readArgs(argv) {
     )
   }
   const template = values.template
-  if (template !== undefined && template !== 'frappe' && template !== 'standalone') {
+  if (template !== undefined && !isTemplate(template)) {
     throw new CliError(`Unknown template "${template}". Use frappe or standalone.`)
   }
   return {
     dir: positionals[0],
-    /** @type {Template | undefined} */
     template,
     route: values.route,
     install: values.install,
     yes: values.yes ?? false,
     help: values.help ?? false,
   }
+}
+
+/**
+ * @param {string} value
+ * @returns {value is Template}
+ */
+function isTemplate(value) {
+  return value === 'frappe' || value === 'standalone'
 }
 
 /**
@@ -330,25 +338,23 @@ async function checkTarget(target, template, cwd, interactive) {
 }
 
 /**
- * @param {PythonChange[]} changes
+ * @param {AppChange[]} changes
  * @param {string} cwd
  */
 function describeChanges(changes, cwd) {
   return changes
     .map((change) => {
       const file = path.relative(cwd, change.file)
+      const summary = styleText('dim', change.summary)
       switch (change.action) {
         case 'create':
-          return `${styleText('green', '+')} ${file}  ${styleText('dim', 'new page that serves the frontend')}`
+          return `${styleText('green', '+')} ${file}  ${summary}`
         case 'update':
-          return `${styleText('yellow', '~')} ${file}  ${styleText('dim', 'add a route rule')}`
+          return `${styleText('yellow', '~')} ${file}  ${summary}`
         case 'keep':
-          return `${styleText('dim', `= ${file}  already set up, not changed`)}`
+          return styleText('dim', `= ${file}  ${change.summary}`)
         case 'manual':
-          return [
-            `${styleText('red', '!')} ${file}  ${styleText('dim', "can't be edited safely. Add this rule to website_route_rules:")}`,
-            `  ${change.snippet}`,
-          ].join('\n')
+          return `${styleText('red', '!')} ${file}  ${summary}\n${indent(change.snippet ?? '')}`
       }
     })
     .join('\n')
@@ -358,8 +364,8 @@ function describeChanges(changes, cwd) {
  * Exits cleanly when the user cancels a prompt with Ctrl-C or Escape.
  *
  * @template T
- * @param {Promise<T | symbol>} prompt
- * @returns {Promise<T>}
+ * @param {Promise<T>} prompt
+ * @returns {Promise<Exclude<T, symbol>>}
  */
 async function ask(prompt) {
   const value = await prompt
@@ -367,7 +373,12 @@ async function ask(prompt) {
     p.cancel('Cancelled. Nothing was changed.')
     process.exit(0)
   }
-  return /** @type {T} */ (value)
+  return /** @type {Exclude<T, symbol>} */ (value)
+}
+
+/** @param {string} text */
+function indent(text) {
+  return text.replace(/^/gm, '  ')
 }
 
 /** @param {string} text */

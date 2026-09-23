@@ -91,7 +91,7 @@ test('scaffolds a standalone app', () => {
   assert.equal(fs.readFileSync(path.join(cwd, 'my-app', 'src', 'main.ts'), 'utf8'), '// mine')
 })
 
-test('scaffolds the frontend of a Frappe app and wires up its Python side', () => {
+test('scaffolds the frontend of a Frappe app and wires it into the app', () => {
   const bench = tempDir()
   const appRoot = path.join(bench, 'apps', 'todo')
   const pkgDir = path.join(appRoot, 'todo')
@@ -137,6 +137,23 @@ test('scaffolds the frontend of a Frappe app and wires up its Python side', () =
   assert.match(files['src/router.ts'], /createWebHistory\('\/todo'\)/)
   assert.match(files['index.html'], /<title>To Do<\/title>/)
 
+  // bench installs and builds the frontend through the app's package.json.
+  const rootPackagePath = path.join(appRoot, 'package.json')
+  assert.deepEqual(JSON.parse(fs.readFileSync(rootPackagePath, 'utf8')), {
+    private: true,
+    scripts: {
+      postinstall: 'cd frontend && yarn install',
+      dev: 'cd frontend && yarn dev',
+      build: 'cd frontend && yarn build',
+    },
+  })
+
+  const gitignorePath = path.join(appRoot, '.gitignore')
+  assert.equal(
+    fs.readFileSync(gitignorePath, 'utf8'),
+    '# Built by the frontend\ntodo/public/frontend\ntodo/www/todo.html\n',
+  )
+
   const pagePath = path.join(pkgDir, 'www', 'todo.py')
   assert.match(fs.readFileSync(pagePath, 'utf8'), /"csrf_token": frappe\.sessions\.get_csrf_token\(\)/)
   const hooks = fs.readFileSync(hooksPath, 'utf8')
@@ -156,14 +173,22 @@ test('scaffolds the frontend of a Frappe app and wires up its Python side', () =
     ].join('\n'),
   )
 
-  // Running it again after removing the frontend leaves the Python side alone.
+  // Running it again after removing the frontend leaves the rest of the app
+  // alone. A package.json with no build script gets the scripts to paste in.
   fs.writeFileSync(pagePath, '# edited by hand\n')
+  fs.writeFileSync(rootPackagePath, '{ "private": true }\n')
   fs.rmSync(path.join(appRoot, 'frontend'), { recursive: true })
   const again = create(pkgDir, ['--template', 'frappe', '--yes', '--no-install'])
   assert.equal(again.status, 0, again.output)
+  assert.match(again.output, /package\.json has no build script[\s\S]*"build": "cd frontend && yarn build"/)
   assert.ok(fs.existsSync(path.join(appRoot, 'frontend', 'package.json')))
   assert.equal(fs.readFileSync(hooksPath, 'utf8'), hooks)
+  assert.equal(
+    fs.readFileSync(gitignorePath, 'utf8'),
+    '# Built by the frontend\ntodo/public/frontend\ntodo/www/todo.html\n',
+  )
   assert.equal(fs.readFileSync(pagePath, 'utf8'), '# edited by hand\n')
+  assert.equal(fs.readFileSync(rootPackagePath, 'utf8'), '{ "private": true }\n')
 })
 
 test('adds the route rule to any shape of hooks.py it can edit safely', () => {

@@ -1,6 +1,9 @@
 // @ts-check
 import fs from 'node:fs'
 import path from 'node:path'
+import { runCommand } from './packageManager.js'
+
+/** @typedef {import('./packageManager.js').PackageManager} PackageManager */
 
 /**
  * @typedef {object} FrappeApp
@@ -11,11 +14,13 @@ import path from 'node:path'
  */
 
 /**
- * @typedef {object} PythonChange
+ * @typedef {object} AppChange
  * @property {string} file Absolute path.
  * @property {'create' | 'update' | 'keep' | 'manual'} action
  *   `keep` leaves the file as it is. `manual` means the edit is not safe to
  *   make, so `snippet` has the lines to paste in.
+ * @property {string} summary What the change does, or for `manual`, what to
+ *   do with the snippet.
  * @property {string} [content] The new file content, for `create` and `update`.
  * @property {string} [snippet]
  */
@@ -125,40 +130,131 @@ export function readBench(app) {
 }
 
 /**
- * Plans the Python side of the app: the page that serves the frontend, and the
- * route rule that sends every path under the route to that page. Nothing is
- * written until `applyPythonChanges`.
+ * Plans the changes to the app around the frontend: the page that serves it,
+ * the route rule that sends every path under the route to that page, the
+ * scripts that let bench install and build it, and the ignore rules for the
+ * build output. Nothing is written until
+ * `applyAppChanges`.
  *
  * @param {FrappeApp} app
- * @param {string} route
- * @returns {PythonChange[]}
+ * @param {{ route: string, frontend: string, pm: PackageManager }} options
+ *   `frontend` is the folder name, such as `frontend`.
+ * @returns {AppChange[]}
  */
-export function planPythonChanges(app, route) {
+export function planAppChanges(app, { route, frontend, pm }) {
   const pkg = path.join(app.root, app.name)
   const page = path.join(pkg, 'www', `${route.slice(1)}.py`)
   const hooks = path.join(pkg, 'hooks.py')
 
-  /** @type {PythonChange[]} */
+  /** @type {AppChange[]} */
   const changes = []
   changes.push(
     fs.existsSync(page)
-      ? { file: page, action: 'keep' }
-      : { file: page, action: 'create', content: PAGE }
+      ? { file: page, action: 'keep', summary: KEPT }
+      : {
+          file: page,
+          action: 'create',
+          summary: 'new page that serves the frontend',
+          content: PAGE,
+        },
   )
 
-  const result = addRouteRule(fs.readFileSync(hooks, 'utf8'), route)
-  if (result.status === 'present') {
-    changes.push({ file: hooks, action: 'keep' })
-  } else if (result.status === 'added') {
-    changes.push({ file: hooks, action: 'update', content: result.source })
+  const rule = addRouteRule(fs.readFileSync(hooks, 'utf8'), route)
+  if (rule.status === 'present') {
+    changes.push({ file: hooks, action: 'keep', summary: KEPT })
+  } else if (rule.status === 'added') {
+    changes.push({
+      file: hooks,
+      action: 'update',
+      summary: 'add a route rule',
+      content: rule.source,
+    })
   } else {
-    changes.push({ file: hooks, action: 'manual', snippet: result.snippet })
+    changes.push({
+      file: hooks,
+      action: 'manual',
+      summary: "can't be edited safely. Add this rule to website_route_rules:",
+      snippet: rule.snippet,
+    })
   }
+
+  changes.push(planRootPackage(app, frontend, pm), planGitignore(app, route))
   return changes
 }
 
-/** @param {PythonChange[]} changes */
-export function applyPythonChanges(changes) {
+const KEPT = 'already set up, not changed'
+
+/**
+ * bench installs an app's node packages and runs its `build` script from the
+ * `package.json` in the app folder, so a deploy only builds the frontend when
+ * that file points to it.
+ *
+ * @param {FrappeApp} app
+ * @param {string} frontend
+ * @param {PackageManager} pm
+ * @returns {AppChange}
+ */
+function planRootPackage(app, frontend, pm) {
+  const file = path.join(app.root, 'package.json')
+  const scripts = {
+    postinstall: `cd ${frontend} && ${pm} install`,
+    dev: `cd ${frontend} && ${runCommand(pm, 'dev')}`,
+    build: `cd ${frontend} && ${runCommand(pm, 'build')}`,
+  }
+  if (!fs.existsSync(file)) {
+    return {
+      file,
+      action: 'create',
+      summary: 'lets bench install and build the frontend',
+      content: JSON.stringify({ private: true, scripts }, null, 2) + '\n',
+    }
+  }
+
+  // An existing build script is the app's own. Anything else in this file is
+  // not ours to rewrite.
+  let existing
+  try {
+    existing = JSON.parse(fs.readFileSync(file, 'utf8'))
+  } catch {
+    existing = null
+  }
+  if (existing?.scripts?.build) return { file, action: 'keep', summary: KEPT }
+  return {
+    file,
+    action: 'manual',
+    summary: 'has no build script. Add these scripts, so bench builds the frontend:',
+    snippet: JSON.stringify(scripts, null, 2).slice(2, -2).replace(/^ {2}/gm, ''),
+  }
+}
+
+/**
+ * The build writes into the app, so git should skip what it writes.
+ *
+ * @param {FrappeApp} app
+ * @param {string} route
+ * @returns {AppChange}
+ */
+function planGitignore(app, route) {
+  const file = path.join(app.root, '.gitignore')
+  const source = fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : ''
+  const present = new Set(source.split('\n').map((line) => line.trim()))
+  const missing = [
+    `${app.name}/public/frontend`,
+    `${app.name}/www${route}.html`,
+  ].filter((line) => !present.has(line))
+  if (missing.length === 0) return { file, action: 'keep', summary: KEPT }
+
+  const block = ['# Built by the frontend', ...missing].join('\n')
+  return {
+    file,
+    action: source ? 'update' : 'create',
+    summary: 'ignore the build output',
+    content: source.trim() ? `${source.trimEnd()}\n\n${block}\n` : `${block}\n`,
+  }
+}
+
+/** @param {AppChange[]} changes */
+export function applyAppChanges(changes) {
   for (const change of changes) {
     if (change.content === undefined) continue
     fs.mkdirSync(path.dirname(change.file), { recursive: true })
