@@ -14,12 +14,11 @@ const options = [
 ]
 
 const knobs: Knob[] = [
-  { name: 'label', type: 'text', default: 'Status', width: '12rem' },
+  { name: 'label', type: 'text', default: 'Status' },
   {
     name: 'placeholder',
     type: 'text',
     default: 'Pick or search…',
-    width: '16rem',
   },
   {
     name: 'trigger',

@@ -2,8 +2,6 @@
 
 Searchable multi-choice picker. Matches the `Combobox` / `Select` item-slot model and provides built-in Clear All / Select All footer controls.
 
-## Playground
-
 <ComponentPlayground name="MultiSelect" />
 
 ## Default

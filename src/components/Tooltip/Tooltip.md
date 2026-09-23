@@ -4,8 +4,6 @@ A small label that describes its trigger, shown on hover or keyboard focus.
 Built on [reka-ui](https://reka-ui.com/)'s `Tooltip` primitives, so focus,
 dismissal and aria wiring come for free.
 
-## Playground
-
 <ComponentPlayground name="Tooltip" />
 
 ## Default

@@ -6,7 +6,7 @@ import type { Knob } from 'frappe-ui/vitepress'
 const model = ref(3)
 
 const knobs: Knob[] = [
-  { name: 'max', type: 'text', default: '5', width: '4rem' },
+  { name: 'max', type: 'text', default: '5' },
   {
     name: 'step',
     type: 'tabs',

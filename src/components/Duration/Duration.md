@@ -4,8 +4,6 @@ A text input for entering a length of time. The caller works in **seconds** (via
 `v-model`); the user types a human-readable duration in any common notation and
 the component parses it on commit.
 
-## Playground
-
 <ComponentPlayground name="Duration" />
 
 <ComponentPreview name="Duration-Default" layout="stacked" />

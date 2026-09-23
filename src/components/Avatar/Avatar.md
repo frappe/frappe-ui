@@ -2,8 +2,6 @@
 
 A visual representation of a user, typically shown as an image, initials, or an icon.
 
-## Playground
-
 <ComponentPlayground name="Avatar" />
 
 ## Shapes

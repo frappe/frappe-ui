@@ -3,8 +3,6 @@
 Renders a keyboard combo, e.g. `Mod+K`, as styled keys. `Mod` resolves to `⌘` on
 macOS and `Ctrl` elsewhere.
 
-## Playground
-
 <ComponentPlayground name="KeyboardShortcut" />
 
 ## Default

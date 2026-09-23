@@ -9,8 +9,6 @@ Use [TabButtons](./tabbuttons) when the UI picks a value for a filter, a
 setting, or a form field (radiogroup semantics). The two are pixel-identical at
 the same `variant` and `size`.
 
-## Playground
-
 <ComponentPlayground name="Tabs" />
 
 ## Underline

@@ -2,8 +2,6 @@
 
 An inline message that reports status and offers a next step. The layout is content-driven: a title alone renders a single row, a description or a second action switches to a banner.
 
-## Playground
-
 <ComponentPlayground name="Alert" />
 
 ## Dismissible rows

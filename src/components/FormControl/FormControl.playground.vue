@@ -25,8 +25,8 @@ const knobs: Knob[] = [
       { label: 'date', value: 'date' },
     ],
   },
-  { name: 'label', type: 'text', default: 'Status', width: '12rem' },
-  { name: 'description', type: 'text', default: '', width: '20rem' },
+  { name: 'label', type: 'text', default: 'Status' },
+  { name: 'description', type: 'text', default: '' },
   {
     name: 'size',
     type: 'tabs',

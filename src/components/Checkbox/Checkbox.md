@@ -2,8 +2,6 @@
 
 Allows users to select or deselect an option, commonly used in forms and settings where multiple choices are available.
 
-## Playground
-
 <ComponentPlayground name="Checkbox" />
 
 ## Indeterminate

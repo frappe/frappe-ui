@@ -6,10 +6,10 @@ import type { Knob } from 'frappe-ui/vitepress'
 const model = ref<number[]>([40])
 
 const knobs: Knob[] = [
-  { name: 'label', type: 'text', default: 'Volume', width: '12rem' },
-  { name: 'min', type: 'text', default: '0', width: '4rem' },
-  { name: 'max', type: 'text', default: '100', width: '4rem' },
-  { name: 'step', type: 'text', default: '1', width: '4rem' },
+  { name: 'label', type: 'text', default: 'Volume' },
+  { name: 'min', type: 'text', default: '0' },
+  { name: 'max', type: 'text', default: '100' },
+  { name: 'step', type: 'text', default: '1' },
   {
     name: 'size',
     type: 'tabs',

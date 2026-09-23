@@ -2,8 +2,6 @@
 
 A uniform wrapper for form inputs. `FormControl` picks an underlying control from its `type` prop and threads `label`, `description`, `error`, `required`, `size`, and `variant` down to it. Use it when you want one consistent shape for every field in a form.
 
-## Playground
-
 <ComponentPlayground name="FormControl" />
 
 ## Example

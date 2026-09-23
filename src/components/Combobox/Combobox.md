@@ -2,8 +2,6 @@
 
 Lets users pick one option from a searchable list. To accept text that is not in the list, add a `type: 'custom'` row that sets the value — see [Create New](#create-new).
 
-## Playground
-
 <ComponentPlayground name="Combobox" />
 
 ## Simple

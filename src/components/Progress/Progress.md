@@ -3,8 +3,6 @@
 Visually represents progress or completion of a task. Updates dynamically to
 give users clear feedback on status.
 
-## Playground
-
 <ComponentPlayground name="Progress" />
 
 ## Animated

@@ -7,13 +7,11 @@ const knobs: Knob[] = [
     name: 'title',
     type: 'text',
     default: 'Your trial ends soon!',
-    width: '14rem',
   },
   {
     name: 'description',
     type: 'text',
     default: 'Upgrade to keep enjoying features.',
-    width: '20rem',
   },
   {
     name: 'theme',

@@ -14,8 +14,6 @@ value; each `Radio` inside it declares the value it represents.
 handles arrow-key navigation, roving focus and form submission, so options only
 need a `value`.
 
-## Playground
-
 <ComponentPlayground name="Radio" />
 
 ## Required

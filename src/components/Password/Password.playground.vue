@@ -6,9 +6,9 @@ import type { Knob } from 'frappe-ui/vitepress'
 const model = ref('')
 
 const knobs: Knob[] = [
-  { name: 'label', type: 'text', default: 'Password', width: '12rem' },
-  { name: 'description', type: 'text', default: '', width: '20rem' },
-  { name: 'placeholder', type: 'text', default: '••••••••', width: '12rem' },
+  { name: 'label', type: 'text', default: 'Password' },
+  { name: 'description', type: 'text', default: '' },
+  { name: 'placeholder', type: 'text', default: '••••••••' },
   {
     name: 'size',
     type: 'tabs',

@@ -2,8 +2,6 @@
 
 A toggle input for turning options on or off. Clearly indicates state changes and allows quick, intuitive control.
 
-## Playground
-
 <ComponentPlayground name="Switch" />
 
 ## With icon

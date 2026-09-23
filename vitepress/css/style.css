@@ -60,7 +60,10 @@ code {
   @apply !text-xs;
 }
 
-[class*='language'] {
+/* Markdown code blocks, and the playground's generated code, which has the
+   same copy button but no language- class. */
+[class*='language'],
+.component-preview-code {
   position: relative;
 
   .lang {

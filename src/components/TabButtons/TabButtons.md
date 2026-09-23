@@ -7,8 +7,6 @@ Use [Tabs](./tabs) when the UI switches visible panels or routes. The two share
 variants, sizes, and the item vocabulary, and are pixel-identical at the same
 `variant` and `size`. The choice is semantic, not visual.
 
-## Playground
-
 <ComponentPlayground name="TabButtons" />
 
 ## Variants

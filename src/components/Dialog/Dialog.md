@@ -2,8 +2,6 @@
 
 A flexible overlay for showing messages, forms, or actions. Keeps focus on content while allowing clear, user-friendly interactions.
 
-## Playground
-
 <ComponentPlayground name="Dialog" />
 
 ## Share

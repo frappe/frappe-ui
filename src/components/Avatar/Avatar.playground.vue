@@ -3,8 +3,8 @@ import { Avatar } from 'frappe-ui'
 import type { Knob } from 'frappe-ui/vitepress'
 
 const knobs: Knob[] = [
-  { name: 'label', type: 'text', default: 'John Doe', width: '12rem' },
-  { name: 'image', type: 'text', default: '', width: '20rem' },
+  { name: 'label', type: 'text', default: 'John Doe' },
+  { name: 'image', type: 'text', default: '' },
   {
     name: 'size',
     type: 'tabs',

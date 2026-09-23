@@ -2,8 +2,6 @@
 
 A small label used to highlight status, counts, or metadata associated with an element.
 
-## Playground
-
 <ComponentPlayground name="Badge" />
 
 ## Event status

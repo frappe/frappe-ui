@@ -5,8 +5,6 @@ Separates content visually, either horizontally or vertically. It can also host 
 Use `align="start|center|end"` to place an action along the rule. The action
 accepts the shared button fields such as `theme`, `variant`, `size`, and icons.
 
-## Playground
-
 <ComponentPlayground name="Divider" />
 
 ## Examples

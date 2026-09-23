@@ -2,6 +2,8 @@
 
 An interactive element used to trigger actions, submit forms, or navigate between views.
 
+<ComponentPlayground name="Button" />
+
 ## Active state
 
 `Button` holds the pressed look while its own `data-state` is `open` or
@@ -25,10 +27,6 @@ yourself. It is visual only, so pair it with `aria-pressed`:
   :aria-pressed="isBold"
 />
 ```
-
-## Playground
-
-<ComponentPlayground name="Button" />
 
 ## Section controls
 

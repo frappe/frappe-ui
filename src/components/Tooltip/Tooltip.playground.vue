@@ -3,7 +3,7 @@ import { Tooltip, Button } from 'frappe-ui'
 import type { Knob } from 'frappe-ui/vitepress'
 
 const knobs: Knob[] = [
-  { name: 'text', type: 'text', default: 'Save changes', width: '16rem' },
+  { name: 'text', type: 'text', default: 'Save changes' },
   {
     name: 'side',
     type: 'tabs',
@@ -15,7 +15,7 @@ const knobs: Knob[] = [
       { label: 'left', value: 'left' },
     ],
   },
-  { name: 'hoverDelay', type: 'text', default: '500', width: '4rem' },
+  { name: 'hoverDelay', type: 'text', default: '500' },
   { name: 'disabled', type: 'switch', default: false },
 ]
 

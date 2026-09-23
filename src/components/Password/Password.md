@@ -2,8 +2,6 @@
 
 Provides a secure input for entering passwords. Supports visibility toggling and ensures a clear, user-friendly experience.
 
-## Playground
-
 <ComponentPlayground name="Password" />
 
 <ComponentPreview name="Password-Default" layout="stacked" />

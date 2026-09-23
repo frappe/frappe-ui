@@ -6,13 +6,12 @@ import type { Knob } from 'frappe-ui/vitepress'
 const open = ref(false)
 
 const knobs: Knob[] = [
-  { name: 'title', type: 'text', default: 'Delete project', width: '14rem' },
+  { name: 'title', type: 'text', default: 'Delete project' },
   {
     name: 'message',
     type: 'text',
     default:
       'This will permanently remove the project. This action cannot be undone.',
-    width: '22rem',
   },
   {
     name: 'size',

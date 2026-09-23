@@ -3,8 +3,8 @@ import { Progress } from 'frappe-ui'
 import type { Knob } from 'frappe-ui/vitepress'
 
 const knobs: Knob[] = [
-  { name: 'value', type: 'text', default: '60', width: '5rem' },
-  { name: 'label', type: 'text', default: 'Upload', width: '12rem' },
+  { name: 'value', type: 'text', default: '60' },
+  { name: 'label', type: 'text', default: 'Upload' },
   {
     name: 'size',
     type: 'tabs',
@@ -17,7 +17,7 @@ const knobs: Knob[] = [
     ],
   },
   { name: 'hint', type: 'switch', default: true },
-  { name: 'intervals', type: 'text', default: '', width: '4rem' },
+  { name: 'intervals', type: 'text', default: '' },
 ]
 
 function buildCode(v: Record<string, any>) {

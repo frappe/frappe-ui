@@ -3,7 +3,7 @@ import { KeyboardShortcut } from 'frappe-ui'
 import type { Knob } from 'frappe-ui/vitepress'
 
 const knobs: Knob[] = [
-  { name: 'combo', type: 'text', default: 'Mod+K', width: '10rem' },
+  { name: 'combo', type: 'text', default: 'Mod+K' },
   { name: 'bg', type: 'switch', default: false },
   { name: 'useIcons', type: 'switch', default: true },
 ]

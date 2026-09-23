@@ -3,8 +3,6 @@
 A flexible menu component for actions. Handles groups, nested submenus,
 toggle rows, disabled items, custom triggers, and a built-in kebab pattern.
 
-## Playground
-
 <ComponentPlayground name="Dropdown" />
 
 ## Simple

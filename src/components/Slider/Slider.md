@@ -3,8 +3,6 @@
 A slider input for selecting a single value or a range of values within a
 minimum and maximum.
 
-## Playground
-
 <ComponentPlayground name="Slider" />
 
 <ComponentPreview name="Slider-Default" layout="stacked" />
