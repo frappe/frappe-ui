@@ -1,7 +1,7 @@
 # KeyboardShortcutsDialog
 
 A dialog that lists every shortcut registered with
-[`useKeyboardShortcut`](../other/composables.md#usekeyboardshortcut), in groups,
+[`useKeyboardShortcut`](../other/composables#usekeyboardshortcut), in groups,
 with search.
 
 <ComponentPreview name="KeyboardShortcutsDialog-Default" />

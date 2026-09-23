@@ -1,7 +1,8 @@
 # BottomSheet
 
 A panel that slides up from the bottom edge of a mobile screen and blocks the
-page until it is closed. On desktop, use [`Dialog`](./dialog) instead.
+page until it is closed. On desktop, render [`Dialog`](./dialog) instead: the
+two close in different ways, so they are separate components.
 
 <ComponentPreview name="BottomSheet-Title" />
 
@@ -64,12 +65,6 @@ scrolling content or below it, as the layout needs.
 `update:open` fires as soon as the sheet starts to close. `after-leave` fires
 when the close animation has finished. Use it to reset state that would
 visibly change while the sheet is still sliding away.
-
-### Dialog or BottomSheet
-
-`Dialog` and `BottomSheet` are separate components, not one responsive
-component, because they close in different ways and hold content in a
-different layout. Render `Dialog` on desktop and `BottomSheet` on mobile.
 
 ## Accessibility
 

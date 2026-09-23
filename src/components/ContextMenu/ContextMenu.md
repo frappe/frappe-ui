@@ -56,13 +56,13 @@ container.
 
 ## Accessibility
 
-| Key                     | Action                              |
-| ----------------------- | ----------------------------------- |
-| `ArrowDown` / `ArrowUp` | Moves focus between items           |
-| `Enter` / `Space`       | Runs the focused item               |
-| `ArrowRight`            | Opens the focused submenu           |
-| `ArrowLeft`             | Closes the submenu                  |
-| `Escape`                | Closes the menu                     |
+| Keys                    | Action                                    |
+| ----------------------- | ----------------------------------------- |
+| `ArrowDown` / `ArrowUp` | Move focus between items                  |
+| `Enter` / `Space`       | Run the focused item, or open its submenu |
+| `ArrowRight`            | Open the focused submenu                  |
+| `ArrowLeft`             | Close the submenu                         |
+| `Escape`                | Close the menu                            |
 
 The menu opens on right-click, or on a long press on touch screens. Users
 may not know it is there, so also offer important actions somewhere visible,

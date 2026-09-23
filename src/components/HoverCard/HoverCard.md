@@ -2,7 +2,7 @@
 
 A floating panel that opens when the pointer rests on a trigger or the
 keyboard focuses it, for previews of a person or a link. For a panel that
-opens on click, use [`Popover`](./popover). For a short text hint, use
+opens on click, use [`Popover`](./popover), and for a short text hint, use
 [`Tooltip`](./tooltip).
 
 <ComponentPreview name="HoverCard-Example" />

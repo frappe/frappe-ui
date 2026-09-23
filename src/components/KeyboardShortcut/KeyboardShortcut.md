@@ -1,8 +1,8 @@
 # KeyboardShortcut
 
 Shows a key combination, such as `Mod+K`, as keys. It only shows the
-shortcut. To make the shortcut work, use
-[`useKeyboardShortcut`](../other/composables.md#usekeyboardshortcut).
+shortcut: to make the shortcut work, use
+[`useKeyboardShortcut`](../other/composables#usekeyboardshortcut).
 
 <ComponentPlayground name="KeyboardShortcut" />
 
@@ -21,10 +21,10 @@ Hints at the bottom of a command palette. `bg` draws each key as a chip, and
 
 <ComponentPreview name="KeyboardShortcut-PaletteFooter" />
 
-### Menu item
+### Task menu
 
-A menu row with its shortcut at the end. `Delete` is an alternative to
-`Mod+Backspace`.
+Each menu row ends with its shortcut. On the delete row, `alt-combos` adds
+`Delete` as an alternative to `Mod+Backspace`.
 
 <ComponentPreview name="KeyboardShortcut-DeleteRow" />
 

@@ -89,13 +89,14 @@ outer menu item element themselves, so keep them for exceptional cases.
 
 ## Accessibility
 
-| Key                   | Action                                      |
-| --------------------- | ------------------------------------------- |
-| `Enter` / `Space`     | Opens the menu, or runs the focused item    |
-| `ArrowDown` / `ArrowUp` | Moves focus between items                 |
-| `ArrowRight`          | Opens the focused submenu                   |
-| `ArrowLeft`           | Closes the submenu                          |
-| `Escape`              | Closes the menu and returns focus to the trigger |
+| Keys                                           | Action                                         |
+| ---------------------------------------------- | ---------------------------------------------- |
+| `Enter` / `Space` / `ArrowDown` on the trigger | Open the menu                                  |
+| `ArrowDown` / `ArrowUp`                        | Move focus between items                       |
+| `Enter` / `Space`                              | Run the focused item, or open its submenu      |
+| `ArrowRight`                                   | Open the focused submenu                       |
+| `ArrowLeft`                                    | Close the submenu                              |
+| `Escape`                                       | Close the menu and return focus to the trigger |
 
 An icon-only trigger needs a `label` so screen readers can name it.
 

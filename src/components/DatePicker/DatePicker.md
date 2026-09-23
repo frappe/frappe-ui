@@ -70,6 +70,18 @@ The popover closes after a date is picked. Set `keep-open` to keep it open.
 `DateTimePicker` stays open after a date click, because the time is still
 missing, and moves focus to the time input.
 
+### Label, description and error
+
+`label` renders above the field and `description` below it. `error` renders
+below the field and hides `description`. It takes a string, an array of strings
+(one line each), or an `Error`, the same values as
+[ErrorMessage](./errormessage). An empty string or an empty array means no
+error. `required` adds a red asterisk to the label and sets `required` on the
+`<input>`.
+
+The pickers have no `#label` or `#description` slot. A `#trigger` slot
+replaces the input, and the label, description and error go with it.
+
 ### Slots
 
 `#trigger`, `#prefix` and `#suffix` receive

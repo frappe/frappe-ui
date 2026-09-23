@@ -22,7 +22,7 @@ const selected = computed(
 
 <template>
   <div
-    class="h-[480px] w-full overflow-hidden rounded-5 border bg-surface-white"
+    class="h-[480px] w-full overflow-hidden rounded-5 border bg-surface-base"
   >
     <!-- scroll=false: each pane scrolls on its own. -->
     <DesktopShell :scroll="false">

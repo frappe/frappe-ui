@@ -2,7 +2,7 @@
 // Rename and delete from a list without mounting a <Dialog> per row.
 // `dialog.prompt` collects the new name, `dialog.danger` confirms the delete.
 import { ref } from 'vue'
-import { Button, dialog, Dialogs } from 'frappe-ui'
+import { Button, dialog } from 'frappe-ui'
 
 const projects = ref(['Website redesign', 'Mobile app', 'Q4 hiring'])
 
@@ -74,6 +74,4 @@ function remove(index: number) {
       No projects left.
     </p>
   </div>
-  <!-- In real apps <FrappeUIProvider> mounts <Dialogs /> for you. -->
-  <Dialogs />
 </template>

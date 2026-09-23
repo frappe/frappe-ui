@@ -53,11 +53,24 @@ attribute from markup.
 and focus states, for selection lists and menu items. The box stays on the
 leading side.
 
+### Label, description and error
+
+`label` renders beside the box and `description` below it, lined up with the
+label text. `error` renders below the label and hides `description`. It takes a
+string, an array of strings (one line each), or an `Error`, the same values as
+[ErrorMessage](./errormessage). An empty string or an empty array means no
+error. `required` adds a red asterisk to the label and sets `required` on the
+`<input>`.
+
+The `#label` slot replaces the label text and the required marker, and receives
+`{ required }`. A `#description` slot is not hidden by `error`. It renders
+above the error.
+
 ### Attributes
 
-`class` and `style` go to the layout wrapper. Everything else (`name`,
-`aria-*`, `data-*` and listeners) goes once to the interactive element, which
-for `Checkbox` is the `<input type="checkbox">`.
+`class` and `style` go on the outer element, which holds the box, the label,
+the description and the error. Every other attribute and listener goes on the
+`<input type="checkbox">`, including `name`, `aria-*` and `@change`.
 
 ## Accessibility
 

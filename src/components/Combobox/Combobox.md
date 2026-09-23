@@ -1,7 +1,8 @@
 # Combobox
 
 A searchable list that picks one option. For a short list with no search, use
-[Select](./select). To pick several values, use [MultiSelect](./multiselect).
+[Select](./select), and to pick several values, use
+[MultiSelect](./multiselect).
 
 <ComponentPlayground name="Combobox" />
 
@@ -144,11 +145,17 @@ To add a clear button, put it in `#suffix` or `#trigger`. Use `@click.stop`
 so the click does not toggle the popover, and `@pointerdown.stop` so the
 trigger does not take the press.
 
-### Labels
+### Label, description and error
 
-`Combobox` takes `label`, `description`, `error` and `required` directly, so it
-needs no `FormControl` around it. While `error` is set, it shows in place of
-the description.
+`label` renders above the field and `description` below it. `error` renders
+below the field and hides `description`. It takes a string, an array of strings
+(one line each), or an `Error`, the same values as
+[ErrorMessage](./errormessage). An empty string or an empty array means no
+error. `required` adds a red asterisk to the label.
+
+The `#label` slot replaces the label text and the required marker, and receives
+`{ required }`. A `#description` slot is not hidden by `error`. It renders
+above the error.
 
 ## Accessibility
 

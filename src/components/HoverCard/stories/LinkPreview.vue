@@ -7,9 +7,12 @@ import { HoverCard } from 'frappe-ui'
     Before you start, read the
     <HoverCard side="top" arrow>
       <template #trigger>
-        <a href="#" class="text-ink-blue-link underline underline-offset-2">
-          release checklist
-        </a>
+        <a
+          href="#"
+          class="text-ink-blue-link underline underline-offset-2"
+          @click.prevent
+          >release checklist</a
+        >
       </template>
       <template #default>
         <div class="w-72 p-3">

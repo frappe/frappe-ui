@@ -69,17 +69,25 @@ as units.
 While the input has focus, it always shows the short notation (`2h 2m 3s`), so
 the text can be edited and read back the same way whatever the format.
 
-### Label slots
+### Label, description and error
 
-Duration passes `label`, `description`, `error` and `required` to the
-`TextInput` inside it, along with the `#label` and `#description` slots.
+`label` renders above the field and `description` below it. `error` renders
+below the field and hides `description`. It takes a string, an array of strings
+(one line each), or an `Error`, the same values as
+[ErrorMessage](./errormessage). An empty string or an empty array means no
+error. `required` adds a red asterisk to the label and sets `required` on the
+`<input>`.
+
+The `#label` slot replaces the label text and the required marker, and receives
+`{ required }`. A `#description` slot is not hidden by `error`. It renders
+above the error.
 
 ```vue
 <Duration v-model="seconds">
   <template #label="{ required }">
     Time spent <Badge v-if="required" label="Required" />
   </template>
-  <template #description>Type `1h 30m`, or `01:30:00`.</template>
+  <template #description>Type 1h 30m, or 01:30:00.</template>
 </Duration>
 ```
 

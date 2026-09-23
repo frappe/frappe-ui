@@ -278,7 +278,7 @@
   const exposedData = [
   {
     name: 'clear',
-    description: 'Clears the current selection. It leaves the search query alone.',
+    description: 'Clears the current selection (sets the model to `null`). In\n`trigger="button"` mode the typed search query stays. In\n`trigger="input"` mode the input empties, because there it shows the\nselected option\'s label.',
     type: '() => void'
   },
   {

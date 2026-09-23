@@ -454,6 +454,12 @@ if (isButtonMode.value && isQueryBound() && query.value !== '') {
 }
 
 defineExpose<SelectionExposed>({
+  /**
+   * Clears the current selection (sets the model to `null`). In
+   * `trigger="button"` mode the typed search query stays. In
+   * `trigger="input"` mode the input empties, because there it shows the
+   * selected option's label.
+   */
   clear,
   /**
    * Moves focus to the input in `trigger="input"` mode, and to the button in

@@ -29,8 +29,9 @@ your handler.
 
 ### Size
 
-`size` is `xs`, `sm` (default), `md` or `lg`: rows 24, 28, 32 and 40px tall.
-These match the input sizes, so a menu lines up with the trigger above it.
+`size` is `xs`, `sm` (default), `md` or `lg`: rows at least 24, 28, 32 and 40px
+tall. These match the input sizes, so a menu lines up with the trigger above
+it.
 
 ### Element
 
