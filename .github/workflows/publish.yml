@@ -36,6 +36,23 @@ jobs:
       - if: steps.publish_tag.outputs.changed == 'true'
         run: npm publish --tag ${{ steps.publish_tag.outputs.tag }}
 
+      # create-frappe-ui has the same version as frappe-ui, and the Tests
+      # workflow fails when they differ. The docs say `npm create
+      # frappe-ui@latest`, so until a stable create-frappe-ui is out, every
+      # release takes `latest`, even while frappe-ui's own `latest` is 0.x.
+      # After that, both packages use the same tag.
+      - name: Publish create-frappe-ui
+        if: steps.publish_tag.outputs.changed == 'true'
+        working-directory: packages/create-frappe-ui
+        env:
+          TAG: ${{ steps.publish_tag.outputs.tag }}
+        run: |
+          current=$(npm view create-frappe-ui dist-tags.latest 2>/dev/null || true)
+          if [ "$TAG" != latest ] && { [ -z "$current" ] || [[ "$current" == *-* ]]; }; then
+            TAG=latest
+          fi
+          npm publish --tag "$TAG"
+
       # Tag the exact commit that was published (head_sha checked out above).
       # Idempotent: skips if the tag already exists, so workflow re-runs are safe.
       - name: Tag the release

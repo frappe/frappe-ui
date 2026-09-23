@@ -68,17 +68,22 @@ project on frappe-ui 1.2.
 
 ### Releasing
 
-Release both packages together:
+Set the same `version` in `package.json` at the repository root and in
+`packages/create-frappe-ui/package.json`. The tests fail when they differ. When
+the change reaches `main`, the publish workflow publishes frappe-ui and then
+this package.
 
-1. Set the same `version` in `package.json` at the repository root and in
-   `packages/create-frappe-ui/package.json`. A test fails when they differ.
-2. Publish frappe-ui, then publish this package from
-   `packages/create-frappe-ui`. Give it the `latest` tag, even for a prerelease,
-   because the docs tell people to run `npm create frappe-ui@latest`:
+This package gets the `latest` tag until a stable version of it is out, even for
+a prerelease, because the docs tell people to run `npm create frappe-ui@latest`.
+After that, it gets the same tag as frappe-ui.
 
-   ```sh
-   npm publish --tag latest
-   ```
+The workflow publishes with npm trusted publishing, which can only be set up for
+a package that already exists. So publish the first version by hand from this
+folder, then add `publish.yml` as its trusted publisher on npmjs.com:
+
+```sh
+npm publish --tag latest
+```
 
 ## Development
 
