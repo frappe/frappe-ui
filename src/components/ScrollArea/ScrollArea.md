@@ -1,42 +1,50 @@
 # ScrollArea
 
-A styled, cross-browser scroll container: overlay scrollbars that fade in on
-hover or scroll and stay off native scrollbar rendering differences. A general
-primitive, not specific to the app shell — `DesktopShell` uses it for its main
-content region, and `SettingsDialog` uses it for a panel body.
+A scroll container with scrollbars that look the same in every browser. They
+appear on hover or scroll and fade out when idle.
 
 <ComponentPreview name="ScrollArea-Default" />
 
-Pass content as the default slot; `orientation` picks which scrollbars render
-(`vertical` by default). Reach the real scrolling element through the exposed
-`viewportElement` when something outside needs it — driving a virtualization
-library, or registering the region with `shellScrollContainer`.
+## Examples
 
-```ts
-const scrollArea = useTemplateRef('scrollArea')
-scrollArea.value?.viewportElement // HTMLElement | null
-```
+### Wide table
 
-## Orientation
+`orientation="both"` lets a table scroll in both directions, with one
+scrollbar per axis.
 
-`orientation="both"` renders **both** scrollbars, one per axis, not a single
-diagonal one. Use it for a surface that can overflow either way — a wide table,
-a canvas. `vertical` (the default) and `horizontal` render one.
+<ComponentPreview name="ScrollArea-WideTable" />
 
-## Styling
+## Behavior
 
-`data-slot="scroll-area"` / `"scroll-area-viewport"` / `"scroll-area-scrollbar"`
-/ `"scroll-area-thumb"` mark the root, the scrolling viewport, the scrollbar
-track, and the thumb, for app-level CSS.
+### Orientation
 
-`viewportClass` is the one class-name prop the library ships, and the documented
-exception to P10. The scrolling viewport is an element reka-ui owns inside the
-root, so root `class` fallthrough cannot reach it, and layout rules that have to
-sit on the scroller itself (`[&>div]:h-full`, a grid, a min-width) have nowhere
-else to go. Style everything else through the `data-slot` hooks.
+`orientation` picks which scrollbars render. `vertical` (the default) and
+`horizontal` render one. `both` renders two, one per axis, for content that can
+overflow either way, such as a wide table or a canvas.
 
-`ScrollBar` is not exported. `ScrollArea` renders its own scrollbars, and the
-component only works inside reka-ui's `ScrollAreaRoot`, which frappe-ui does not
-export.
+### Hiding the scrollbars
+
+The scrollbars fade out after the content has been idle for `scrollHideDelay`
+milliseconds. The default is 600.
+
+### Viewport classes
+
+The element that scrolls is inside the root, so a `class` on `ScrollArea` does
+not reach it. `viewportClass` adds classes to that element, for layout that has
+to sit on the scrolling element itself: padding, a grid, a minimum width, or
+`h-full` on its child.
+
+### Where it is used
+
+`ScrollArea` is a general component, not only part of the app shell.
+`DesktopShell` uses it for its content area, and `SettingsBody` uses it for a
+settings panel.
+
+## Migrating from v0
+
+`ScrollBar` is no longer exported, and there is no replacement. `ScrollArea`
+draws its own scrollbars, and `ScrollBar` only worked inside reka-ui's
+`ScrollAreaRoot`, which frappe-ui does not export. Use `orientation` instead.
+See the [migration guide](../migration#scrollbar-removed).
 
 <!-- @include: ./ScrollArea.api.md -->

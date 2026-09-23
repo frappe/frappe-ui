@@ -1,24 +1,57 @@
 # MobileNav
 
 The bottom tab bar for a [`MobileShell`](/docs/components/mobileshell).
-`MobileNav` is a grid frame; each `MobileNavItem` becomes one equal-width tab, so
-the bar adapts to any number of items.
 
 <ComponentPreview name="MobileNav-Default" />
 
-## MobileNavItem
+## Anatomy
 
-Each item takes a `label`, an `icon` (or a default slot for custom content like
-an avatar), and a `route` or `href` target (`route` takes precedence). `href`
-renders a native same-tab anchor. A `route` renders a link when navigating
-somewhere new and — when it is already current — a button that scrolls the
-shell's scroll container to the top instead of re-navigating.
+`MobileNav` is a grid. Each `MobileNavItem` in it becomes one equal-width tab,
+so the bar fits any number of items.
 
-`active` controls the highlight and is independent of the current route, so one
-tab can stay lit across a whole section (e.g. Home across every community route)
-while tapping it still navigates home. When `active` is omitted it defaults to
-whether `route` matches the current route. The default slot receives `{ active }`
-so custom content — an avatar, a badge — can react to the highlight:
+```vue
+<MobileShell>
+  <RouterView />
+
+  <template #nav>
+    <MobileNav>
+      <MobileNavItem label="Home" icon="lucide-house" :route="{ name: 'Home' }" />
+      <MobileNavItem label="Search" icon="lucide-search" :route="{ name: 'Search' }" />
+      <MobileNavItem label="You" :route="{ name: 'More' }">
+        <Avatar label="Jane Doe" size="md" />
+      </MobileNavItem>
+    </MobileNav>
+  </template>
+</MobileShell>
+```
+
+## Behavior
+
+### Items
+
+Each item takes a `label` and an `icon`. The default slot replaces the icon
+with custom content, such as an avatar. The label always shows under it.
+
+### Links
+
+`route` renders a router link and `href` a plain same-tab link. `route` wins
+when both are set. An item with neither is a button that emits `click`.
+
+### Tapping the current tab
+
+When an item's `route` is already the current route, the item renders a button
+instead of a link. Tapping it scrolls the shell's scroll container to the top
+instead of navigating again.
+
+### Active tab
+
+`active` controls the highlight, separately from the current route. One tab can
+stay lit across a whole section (for example, Home across every community
+route), and tapping it still navigates home. Left unset, `active` is true when
+`route` matches the current route.
+
+The default slot receives `{ active }`, so custom content can react to the
+highlight:
 
 ```vue
 <MobileNavItem label="You" :route="{ name: 'More' }" :active="isMoreRoute">
@@ -28,8 +61,16 @@ so custom content — an avatar, a badge — can react to the highlight:
 </MobileNavItem>
 ```
 
-Like `SidebarItem`, `MobileNavItem` is router-optional: mounted without
-vue-router it degrades to a plain `<a>`/`<button>` with no warnings, so it works
-in docs, tests, and embedded use.
+### Without a router
+
+Like `SidebarItem`, `MobileNavItem` works without vue-router. It renders a
+plain `<a>` or `<button>` with no warnings, so it works in docs, tests and
+embedded use.
+
+## Accessibility
+
+`MobileNav` renders a `<nav>` element. Each item uses its `label` as its
+accessible name. The item whose `route` is the current route gets
+`aria-current="page"`.
 
 <!-- @include: ./MobileNav.api.md -->

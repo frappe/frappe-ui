@@ -1,43 +1,86 @@
 # SidebarRail
 
-The narrow icon column of an app shell. `SidebarRail` is a bare frame — a
-fixed 50px column with one shared tooltip context and a single slot — and
-`SidebarRailItem` is one tooltip'd cell inside it. Lay the children out with
-plain flex utilities: give the middle section `flex-1` to push the anchors
-above and below it to the edges.
-
-It shares the `Sidebar` name because the two sit side by side in the same app
-frame, not because one contains the other. Compose them independently: a rail
-with a `Sidebar` beside it, a rail on its own, or a sidebar on its own. The
-rail is not a collapsed `Sidebar` — collapsing is `Sidebar`'s own behaviour.
+The narrow icon column of an app shell. For a wide column with labels, use
+[`Sidebar`](/docs/components/sidebar).
 
 <ComponentPreview name="SidebarRail-Default" />
 
-There are no layout slots and no built-in scrolling — position is CSS. Put fixed
-anchors (a logo, a user menu) as direct children, and if the middle list can
-overflow, wrap it in your own `overflow-y-auto` container.
+## Anatomy
 
-## SidebarRailItem
+`SidebarRail` is a fixed 50px column with one slot. `SidebarRailItem` is one
+cell in it, with a tooltip. The rail has no layout slots and does not scroll,
+so lay out the children with flex classes. Give the middle group `flex-1` to
+push the items above and below it to the ends.
 
-`SidebarRailItem` carries the tooltip (its `label`), the active indicator, and
-an optional unread `badge`. Two visual treatments:
+```vue
+<SidebarRail>
+  <SidebarRailItem label="Home" variant="ghost" icon="lucide-house" route="/" />
 
-- `variant="subtle"` (default) — a filled cell with a left indicator bar when
-  active. Use the default slot for an image, avatar, or initials.
-- `variant="ghost"` — transparent until hovered, raised when active. Pass an
-  `icon` for a shortcut like Search or Notifications.
+  <div class="flex w-full flex-1 flex-col items-center gap-3 overflow-y-auto pt-3">
+    <SidebarRailItem label="Design" route="/c/design" :badge="3">
+      <span>DE</span>
+    </SidebarRailItem>
+  </div>
 
-Set `route` to render a router link or `href` for a native same-tab anchor;
-`route` takes precedence when both are set. A string `route` falls back to a
-plain anchor when no router is installed. Omit both to get a button that emits
-`click`. When `active` is omitted, a routed item derives it from the current route.
-The `badge` count shows as a pill (`badgeStyle="count"`) or a dot
-(`badgeStyle="dot"`); either way it folds into the item's accessible label, and
-a dot surfaces the real number in the tooltip. The badge pill teleports to
-`<body>` so an `overflow-hidden` scroll container can't clip it.
+  <SidebarRailItem label="Search" variant="ghost" icon="lucide-search" />
+  <SidebarRailItem label="You" variant="ghost">
+    <Avatar label="Jane Doe" size="md" />
+  </SidebarRailItem>
+</SidebarRail>
+```
 
-Attributes you write on `SidebarRailItem` land on the clickable cell — the
-`<button>` or the link — not on the tooltip wrapper, and a `class` adds to the
-cell's own classes.
+## Behavior
+
+### Rail and sidebar
+
+`SidebarRail` shares the `Sidebar` name because the two sit side by side in the
+same app frame, not because one contains the other. Use a rail with a `Sidebar`
+beside it, a rail on its own, or a sidebar on its own. The rail is not a
+collapsed `Sidebar`. `Sidebar` collapses by itself.
+
+### Layout and scrolling
+
+Put fixed items, such as a logo or a user menu, directly in the rail. If the
+middle list can overflow, wrap it in your own `overflow-y-auto` container.
+
+### Tooltips
+
+Each item shows its `label` in a tooltip to the right. `description` adds a
+second line, such as "12 members". The rail shares one tooltip context across
+its items, so moving between items shows each tooltip with no delay.
+
+### Variants
+
+- `variant="subtle"` (default) is a filled cell with a bar on its left edge when
+  active. Use the default slot for an image, an avatar or initials.
+- `variant="ghost"` is transparent until hovered, and raised when active. Pass
+  an `icon` for a shortcut such as Search or Notifications.
+
+### Links
+
+`route` renders a router link and `href` a plain same-tab link. `route` wins
+when both are set. A string `route` falls back to a plain link when no router
+is installed. An item with neither is a button. All three emit `click`.
+
+When `active` is unset, a routed item is active when its `route` matches the
+current route.
+
+### Unread badge
+
+`badge` takes an unread count. `badgeStyle="count"` (default) shows it as a
+pill, and counts above 99 show as "99+". `badgeStyle="dot"` shows a dot, and
+the tooltip spells out the number unless `description` is set. The pill is
+rendered outside the rail, so an `overflow-hidden` container does not clip it.
+
+### Attributes
+
+Attributes on `SidebarRailItem` go on the clickable cell (the `<button>` or the
+link), not on the tooltip wrapper. A `class` adds to the cell's own classes.
+
+## Accessibility
+
+Each item uses its `label` as its accessible name. When `badge` is above zero,
+the count is added to the name, for example "Notifications, 3 unread". The
+active item gets `aria-current="page"`.
 
 <!-- @include: ./SidebarRail.api.md -->
