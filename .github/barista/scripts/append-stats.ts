@@ -4,14 +4,14 @@
 // add-comment.ts writes when it posts (path from $BARISTA_COMMENT_ID_FILE,
 // default /tmp/barista-comment-id).
 //
-// If no marker file exists, this run didn't post a comment (e.g. triage
-// deciding there's nothing worth saying, or a bug that stopped it before
-// posting) — skip rather than guessing at "the most recent barista
+// If no marker file exists, this run didn't post a comment (e.g. fix mode
+// bailing out before it had anything to say, or a bug that stopped it
+// before posting) — skip rather than guessing at "the most recent barista
 // comment", which could be a stale comment from an earlier run.
 //
 // Expected env:
 //   EXECUTION_FILE  — path to action's JSON output
-//   ISSUE_NUMBER    — issue we're triaging
+//   ISSUE_NUMBER    — issue or PR the run is scoped to
 //   REPO            — owner/repo
 //   GH_TOKEN        — barista app token (must be able to PATCH the bot's own comment)
 //

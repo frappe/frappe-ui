@@ -33,7 +33,7 @@ inputs:
     required: false
     default: ''
   prompt:
-    description: "Slash-command prompt for the agent (e.g. `/barista-triage REPO: …`)"
+    description: "Slash-command prompt for the agent (e.g. `/barista-review REPO: …`)"
     required: true
   model:
     description: "Claude model to use (e.g. `claude-opus-4-7`, `opus`). Empty = action default."
