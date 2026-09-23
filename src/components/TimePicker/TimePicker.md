@@ -57,10 +57,18 @@ goes back to the last valid value.
 `{ open, disabled, setOpen, close }`. Use `setOpen(!open)` for a custom
 chevron. `close()` is the same as `setOpen(false)`.
 
-### Labels
+### Label, description and error
 
-`TimePicker` takes `label`, `description`, `error` and `required`, and the
-`#label` and `#description` slots.
+`label` renders above the field and `description` below it. `error` renders
+below the field and hides `description`. It takes a string, an array of strings
+(one line each), or an `Error`, the same values as
+[ErrorMessage](./errormessage). An empty string or an empty array means no
+error. `required` adds a red asterisk to the label and sets `required` on the
+`<input>`.
+
+The `#label` slot replaces the label text and the required marker, and receives
+`{ required }`. A `#description` slot is not hidden by `error`. It renders
+above the error.
 
 ## Accessibility
 

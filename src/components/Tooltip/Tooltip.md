@@ -1,7 +1,8 @@
 # Tooltip
 
 A small label that describes its trigger, shown on hover or keyboard focus.
-For a panel people can move into and click, use [`HoverCard`](./hovercard).
+For content people interact with, such as links or buttons, use
+[`HoverCard`](./hovercard) or [`Popover`](./popover).
 
 <ComponentPlayground name="Tooltip" />
 
@@ -69,12 +70,6 @@ provider's `hoverDelay` applies, not the tooltip's.
 
 `disabled` turns off the tooltip and still renders the trigger. Use it when the
 label applies only in some states.
-
-### Content
-
-A tooltip labels its trigger. It is not a place for buttons or links. Use
-[`HoverCard`](./hovercard) or [`Popover`](./popover) for content people
-interact with.
 
 ## Accessibility
 

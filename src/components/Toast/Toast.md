@@ -1,8 +1,8 @@
 # Toast
 
 A short message in the bottom-right corner that reports the result of an
-action and closes on its own. Show one with a `toast.*` call from anywhere in
-the app. For a message that stays in the page, use [`Alert`](./alert).
+action and closes on its own. For a message that stays in the page, use
+[`Alert`](./alert).
 
 <ComponentPreview name="Toast-Quickstart" layout="stacked" />
 

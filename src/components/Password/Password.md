@@ -68,12 +68,14 @@ and listener goes on the `<input>`, including `name`, `autocomplete` and
 
 - The eye icon is not a button and cannot be reached with `Tab`. Keyboard
   users toggle with the shortcut above.
-- The `<label>` is linked to the `<input>`, and the description and the error
-  are linked with `aria-describedby`.
+- The `<label>` is linked to the `<input>`, so screen readers announce it as
+  the field's name.
+- The description and the error are linked with `aria-describedby`.
 - With `error`, the `<input>` gets `aria-invalid="true"` and
   `aria-errormessage`.
 - With `required`, the `<input>` gets `aria-required="true"`, and the label
-  includes hidden "(required)" text.
+  includes hidden "(required)" text. The asterisk itself is hidden from screen
+  readers.
 
 ## Migrating from v0
 

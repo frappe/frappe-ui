@@ -31,7 +31,7 @@ change of `v-model`.
 
 ### Value
 
-`v-model` is always an array of numbers: `[25]` for one handle, `[20, 80]` for
+The value is always an array of numbers: `[25]` for one handle, `[20, 80]` for
 a range. Each number draws a handle. An empty or missing value shows one handle
 at `min`, without updating the model.
 

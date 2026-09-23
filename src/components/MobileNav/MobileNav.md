@@ -1,6 +1,6 @@
 # MobileNav
 
-The bottom tab bar for a [`MobileShell`](/docs/components/mobileshell).
+The bottom tab bar for a [`MobileShell`](./mobileshell).
 
 <ComponentPreview name="MobileNav-Default" />
 
@@ -56,7 +56,7 @@ highlight:
 ```vue
 <MobileNavItem label="You" :route="{ name: 'More' }" :active="isMoreRoute">
   <template #default="{ active }">
-    <UserAvatar :user="me" :class="{ 'ring-2 ring-outline-gray-4': active }" />
+    <Avatar label="Jane Doe" size="md" :class="{ 'ring-2 ring-outline-gray-4': active }" />
   </template>
 </MobileNavItem>
 ```

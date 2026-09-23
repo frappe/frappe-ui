@@ -1,7 +1,6 @@
 # PageHeader
 
-The header row at the top of a page in an app shell. A page declares it, and it
-renders into the shell's `PageHeaderTarget`. On mobile, use
+The header row at the top of a page in an app shell. On mobile, use
 `PageHeaderMobile`.
 
 <ComponentPreview name="PageHeader-Default" />
@@ -36,9 +35,8 @@ and `PageHeaderBase` is the plain `<header>` both are built on.
 
 ### Mobile header with a back button
 
-`PageHeaderMobile` puts a back button in `#prefix`, a title in the default
-slot and an options button in `#suffix`. The title stays centered and ends with
-an ellipsis when it is too long.
+`PageHeaderMobile` with a back button in `#prefix`, a long
+`PageHeaderMobileTitle` in the default slot and an options button in `#suffix`.
 
 <ComponentPreview name="PageHeader-Mobile" />
 

@@ -42,8 +42,8 @@ a `value`.
 
 ### Value
 
-A value can be a `string`, `number` or `boolean`. The model is `undefined`
-while nothing is selected, which is where an unbound group starts.
+The value can be a `string`, `number` or `boolean`. When nothing is selected,
+the value is `undefined`, which is where an unbound group starts.
 
 ### Group props
 
@@ -51,6 +51,18 @@ while nothing is selected, which is where an unbound group starts.
 whole choice, not one option. `size` and `padded` are also set on the group
 and apply to every option. `disabled` on the group disables every option, and
 `disabled` on a `Radio` disables that option only.
+
+### Label, description and error
+
+On `RadioGroup`, `label` renders above the options and `description` below
+them. `error` renders below the options and hides `description`. It takes a
+string, an array of strings (one line each), or an `Error`, the same values as
+[ErrorMessage](./errormessage). An empty string or an empty array means no
+error. `required` adds a red asterisk to the group label.
+
+The `#label` slot replaces the label text and the required marker, and receives
+`{ required }`. A `#description` slot is not hidden by `error`. It renders
+above the error.
 
 ### Orientation
 
@@ -80,6 +92,7 @@ label and description.
 | `Tab`                   | Move focus into the group, to the selected option |
 | `ArrowDown` / `ArrowUp` | Select the next or previous option (vertical)    |
 | `ArrowRight` / `ArrowLeft` | Select the next or previous option (horizontal) |
+| `Space`                 | Select the focused option                        |
 
 While `error` is set, the group gets `aria-invalid` and an
 `aria-errormessage` that points to the error text.

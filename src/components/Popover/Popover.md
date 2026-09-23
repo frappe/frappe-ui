@@ -99,9 +99,8 @@ combobox pattern yourself, or use [`Combobox`](./combobox), which has it.
 
 ## Migrating from v0
 
-The v0 API is gone in `1.0.0`. `#target` becomes `#trigger`, `#body` and
-`#body-main` become `#default`, and `placement` splits into `side` + `align`.
-See [Migration from v0 → Popover / HoverCard](../migration#popover-hovercard-tooltip)
-for the full table.
+`#target` is now `#trigger`, `#body` and `#body-main` are now `#default`, and
+`placement` is now `side` and `align`. See the
+[migration guide](../migration#popover-hovercard-tooltip) for the full table.
 
 <!-- @include: ./Popover.api.md -->

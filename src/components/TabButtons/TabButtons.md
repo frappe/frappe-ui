@@ -90,17 +90,16 @@ TabButtons is a `radiogroup`, and each tab is a radio. The group is a single
 tab stop: `Tab` moves focus to the selected option, or to the first enabled
 option when nothing is selected.
 
-| Key                                    | Action                                     |
-| -------------------------------------- | ------------------------------------------ |
-| `Tab`                                  | Moves focus into the group, then out of it |
-| `ArrowRight` (`ArrowDown` when vertical) | Selects the next option                  |
-| `ArrowLeft` (`ArrowUp` when vertical)  | Selects the previous option                |
+| Keys                                     | Action                                    |
+| ---------------------------------------- | ----------------------------------------- |
+| `Tab`                                    | Move focus into the group, then out of it |
+| `ArrowRight` (`ArrowDown` when vertical) | Select the next option                    |
+| `ArrowLeft` (`ArrowUp` when vertical)    | Select the previous option                |
+| `Space`                                  | Select the focused option                 |
 
 The arrow keys skip disabled options.
 
 ## Migrating from v0
-
-See the [migration guide](../migration#tabbuttons) for the full list.
 
 - `type` is renamed to `variant`, matching `TabList`.
 - The deprecated `buttons` prop is removed. Use `options`.
@@ -127,5 +126,7 @@ passed Button props through option entries:
   when `route` is set, or as an `<a href target=_blank>` when `href` is set.
 - The per-tab `tooltip` field is removed. Put help text in your own UI when a
   label alone is not enough.
+
+See the [migration guide](../migration#tabbuttons) for the full list.
 
 <!-- @include: ./TabButtons.api.md -->

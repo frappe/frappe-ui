@@ -1,7 +1,7 @@
 # ScrollArea
 
-A scroll container with scrollbars that look the same in every browser. They
-appear on hover or scroll and fade out when idle.
+A scroll container with scrollbars that look the same in every browser. The
+scrollbars show while the pointer is over the area.
 
 <ComponentPreview name="ScrollArea-Default" />
 
@@ -24,8 +24,8 @@ overflow either way, such as a wide table or a canvas.
 
 ### Hiding the scrollbars
 
-The scrollbars fade out after the content has been idle for `scrollHideDelay`
-milliseconds. The default is 600.
+The scrollbars hide `scrollHideDelay` milliseconds after the pointer leaves
+the area. The default is 600.
 
 ### Viewport classes
 

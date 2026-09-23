@@ -46,6 +46,18 @@ active and focus states, for toolbars and menu items. Without `padded`, only
 the switch and its label respond to clicks, and the row has no hover or focus
 state.
 
+### Label, description and error
+
+`label` renders beside the switch and `description` below it. `error` renders
+below the row and hides `description`. It takes a string, an array of strings
+(one line each), or an `Error`, the same values as
+[ErrorMessage](./errormessage). An empty string or an empty array means no
+error. `required` adds a red asterisk to the label.
+
+The `#label` slot replaces the label text and the required marker, and receives
+`{ required }`. A `#description` slot is not hidden by `error`. It renders
+above the error.
+
 ### Attributes
 
 `class` and `style` go to the layout wrapper. Everything else (`name`,

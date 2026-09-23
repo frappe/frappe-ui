@@ -1,7 +1,7 @@
 # Select
 
 A button that opens a list of options and picks one. For a searchable list, use
-[Combobox](./combobox). To pick several values, use
+[Combobox](./combobox), and to pick several values, use
 [MultiSelect](./multiselect).
 
 <ComponentPlayground name="Select" />
@@ -40,9 +40,8 @@ options are left out. Option values are `string | number`. An option with
 
 ### Empty value
 
-When nothing is selected, the value is `null`, the same as in `Combobox`.
-`Select` emitted `undefined` before 1.0.0. An empty string is a real value, so
-a "None" option with `value: ''` round-trips.
+When nothing is selected, the value is `null`, the same as in `Combobox`. An
+empty string is a real value, so a "None" option with `value: ''` round-trips.
 
 For a "Sort by" menu, add a first option with `value: ''` and
 `disabled: true`. It shows as the label while nothing else is picked, and
@@ -57,8 +56,7 @@ full-width trigger.
 ### Item slots
 
 `#item-prefix`, `#item-label` and `#item-suffix` change parts of the standard
-row. `#item`
-replaces the whole row, including its outer element.
+row. `#item` replaces the whole row, including its outer element.
 
 ### Trigger slots
 
@@ -80,11 +78,17 @@ By default the menu opens over the trigger, lined up with the selected option.
 Pass `side`, `align` or `offset` to place it next to the trigger instead.
 `portalTo` changes where the menu is teleported in both modes.
 
-### Labels
+### Label, description and error
 
-`Select` takes `label`, `description`, `error` and `required` directly, so it
-needs no `FormControl` around it. While `error` is set, it shows in place of
-the description.
+`label` renders above the trigger and `description` below it. `error` renders
+below the trigger and hides `description`. It takes a string, an array of
+strings (one line each), or an `Error`, the same values as
+[ErrorMessage](./errormessage). An empty string or an empty array means no
+error. `required` adds a red asterisk to the label.
+
+The `#label` slot replaces the label text and the required marker, and receives
+`{ required }`. A `#description` slot is not hidden by `error`. It renders
+above the error.
 
 ## Accessibility
 

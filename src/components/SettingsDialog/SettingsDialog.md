@@ -99,11 +99,11 @@ point the label at another element's id.
 The dialog is a tab set: the sidebar has the `tablist` role, each nav item the
 `tab` role, and each panel the `tabpanel` role.
 
-| Key                     | Action                                     |
-| ----------------------- | ------------------------------------------ |
-| `ArrowDown` / `ArrowUp` | Move focus to the next or previous tab     |
-| `Enter` / `Space`       | Select the focused tab                     |
-| `Cmd/Ctrl+Shift+,`      | Open or close the dialog                   |
+| Keys                             | Action                                 |
+| -------------------------------- | -------------------------------------- |
+| `ArrowDown` / `ArrowUp`          | Move focus to the next or previous tab |
+| `Enter` / `Space`                | Select the focused tab                 |
+| `Cmd+Shift+,` / `Ctrl+Shift+,`   | Open or close the dialog               |
 
 Arrow keys move focus without selecting a tab, so a dialog that drives its tab
 from the route does not navigate on every key press.

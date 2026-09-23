@@ -1,7 +1,7 @@
 # TextInput
 
 A single-line field for text, numbers, email addresses and other short values.
-For several lines of text, use [Textarea](./textarea). For a password, use
+For several lines of text, use [Textarea](./textarea), and for a password, use
 [Password](./password).
 
 <ComponentPlayground name="TextInput" />

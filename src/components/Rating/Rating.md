@@ -38,7 +38,7 @@ The `#icon` slot draws a different emoji at each position. The slot's `index`,
 
 ### Value
 
-`v-model` is a number from `0` to `max`, where `0` means no rating. `max`
+The value is a number from `0` to `max`, where `0` means no rating. `max`
 defaults to `5`. A value outside that range shows as the nearest end, and a
 value between steps shows rounded to the nearest `step`.
 
@@ -110,24 +110,27 @@ With whole stars, the row is a `radiogroup` and each star is a `radio` named
 "3 of 5". Only the selected star, or the first star when there is no rating,
 is in the tab order.
 
+| Keys              | Action                                               |
+| ----------------- | ---------------------------------------------------- |
+| `←` `↑` / `→` `↓` | Select the previous / next star and move focus to it |
+| `Home` / `End`    | Select the first / last star                         |
+| `Space` / `Enter` | Select the focused star                              |
+| `1`–`9`           | Set the rating to that number                        |
+| `0`               | Clear the rating                                     |
+
 With `step="0.5"`, the whole row is one `slider`. Screen readers announce its
 value as "3.5 of 5 stars", or "No rating, out of 5 stars" at `0`. The slider
 role does not allow `aria-required`, so a required rating in this mode is
 announced only through the hidden "(required)" text in the label.
 
-| Mode           | Keys                          | Action                                      |
-| -------------- | ----------------------------- | ------------------------------------------- |
-| Whole stars    | `←` `↑` / `→` `↓`             | Select the previous / next star and move focus to it |
-|                | `Home` / `End`                | Select the first / last star                |
-|                | `Space` / `Enter`             | Select the focused star                     |
-|                | `1`–`9`                       | Set the rating to that number               |
-|                | `0`                           | Clear the rating                            |
-| Half stars     | `←` `↓` / `→` `↑`             | Decrease / increase by half a star          |
-|                | `PageDown` / `PageUp`         | Decrease / increase by one star             |
-|                | `Home` / `End`                | Set to `0` / `max`                          |
-|                | `0`–`9`                       | Set the rating to that number               |
+| Keys                  | Action                              |
+| --------------------- | ----------------------------------- |
+| `←` `↓` / `→` `↑`     | Decrease / increase by half a star  |
+| `PageDown` / `PageUp` | Decrease / increase by one star     |
+| `Home` / `End`        | Set to `0` / `max`                  |
+| `0`–`9`               | Set the rating to that number       |
 
-A number above `max` sets the rating to `max`.
+In both modes, a number above `max` sets the rating to `max`.
 
 ## Migrating from v0
 

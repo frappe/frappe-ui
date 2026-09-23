@@ -1,7 +1,7 @@
 # SidebarRail
 
 The narrow icon column of an app shell. For a wide column with labels, use
-[`Sidebar`](/docs/components/sidebar).
+[`Sidebar`](./sidebar).
 
 <ComponentPreview name="SidebarRail-Default" />
 

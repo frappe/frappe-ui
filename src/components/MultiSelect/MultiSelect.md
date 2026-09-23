@@ -74,9 +74,10 @@ When nothing is selected, the value is `[]`.
 
 ### Trigger summary
 
-After more than one selection, the trigger reads "N selected". `#summary`
-renders that text yourself. It receives the default text as `summary`, so you
-can fall back to it, for example when nothing is selected.
+With one option selected, the trigger shows that option's label. With two or
+more, it reads "N selected". `#summary` replaces that text. It receives the
+default text as `summary`, so you can fall back to it, for example when
+nothing is selected.
 
 ### Prefix
 
@@ -130,11 +131,17 @@ row. `#item` replaces the whole row, including its outer element.
 `query`, `selectedOptions`, `clear`, `setOpen` and `close`. `#footer` receives
 the same props and `selectAll`. `close()` is the same as `setOpen(false)`.
 
-### Labels
+### Label, description and error
 
-`MultiSelect` takes `label`, `description`, `error` and `required` directly, so
-it needs no `FormControl` around it. While `error` is set, it shows in place of
-the description.
+`label` renders above the trigger and `description` below it. `error` renders
+below the trigger and hides `description`. It takes a string, an array of
+strings (one line each), or an `Error`, the same values as
+[ErrorMessage](./errormessage). An empty string or an empty array means no
+error. `required` adds a red asterisk to the label.
+
+The `#label` slot replaces the label text and the required marker, and receives
+`{ required }`. A `#description` slot is not hidden by `error`. It renders
+above the error.
 
 ## Accessibility
 
