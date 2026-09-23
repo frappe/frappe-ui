@@ -17,11 +17,15 @@ function mountCodeEditor(
     editable?: boolean
     contentClass?: string
     maxHeight?: string
+    lineNumbers?: boolean
   } = {},
 ) {
   const value = ref(options.content ?? '')
   const onChange = cy.spy().as('change')
   const onOverflow = cy.spy().as('overflow')
+  const kit = options.lineNumbers
+    ? CodeKit.configure({ lineNumbers: {} })
+    : CodeKit
 
   const TestHost = defineComponent({
     setup() {
@@ -34,7 +38,7 @@ function mountCodeEditor(
               'onUpdate:modelValue': (next: string) => {
                 value.value = next
               },
-              extensions: [CodeKit],
+              extensions: [kit],
               editable: options.editable ?? true,
               onChange,
             },
@@ -157,6 +161,21 @@ describe('code editor browser behavior', () => {
     cy.get(CONTENT).should('have.css', 'max-height', '80px')
     cy.get(CONTENT).should('have.attr', 'data-overflowing', 'true')
     cy.get('@overflow').should('have.been.calledWith', true)
+  })
+
+  it('joins the active-line highlight to the line-number gutter', () => {
+    mountCodeEditor({ content: 'SELECT 1\nSELECT 2', lineNumbers: true })
+
+    cy.get('.cm-content').click()
+    cy.get('.cm-activeLine').then(($line) => {
+      const lineLeft = $line[0].getBoundingClientRect().left
+
+      cy.get('.cm-gutters').then(($gutters) => {
+        const gutterRight = $gutters[0].getBoundingClientRect().right
+
+        expect(lineLeft, 'active line left edge').to.eq(gutterRight)
+      })
+    })
   })
 
   it('indents with Tab and dedents with Shift-Tab instead of moving focus', () => {

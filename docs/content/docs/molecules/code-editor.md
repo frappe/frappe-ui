@@ -191,7 +191,8 @@ change in any release.
 | `--code-radius`     | the box corner radius                            | `var(--radius-md)`      |
 | `--code-focus-ring` | the focus ring colour                            | `var(--outline-gray-3)` |
 | `--code-font-size`  | the code font size                               | `13px`                  |
-| `--code-padding`    | the content inset                                | `6px 8px`               |
+| `--code-padding-x`  | the content inline inset                         | `8px`                   |
+| `--code-padding-y`  | the content block inset                          | `6px`                   |
 | `--code-min-height` | the content min-height                           | `auto`                  |
 | `--code-max-height` | the height cap that drives [overflow](#overflow) | `none`                  |
 
@@ -209,7 +210,8 @@ applies:
 }
 .my-code-field[data-size='sm'] {
   --code-font-size: 12px;
-  --code-padding: 6px 8px;
+  --code-padding-x: 8px;
+  --code-padding-y: 6px;
 }
 ```
 

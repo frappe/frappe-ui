@@ -67,14 +67,14 @@
 .frappe-code .cm-content {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   caret-color: var(--ink-gray-8);
-  padding: var(--code-padding, 6px 8px);
+  padding: var(--code-padding-y, 6px) 0;
   min-height: var(--code-min-height, auto);
 }
 
-/* CodeMirror pads every line as well as the content box. Zero it, or the two
- * insets stack and `--code-padding` stops being the only one that matters. */
+/* Keep the inline inset inside each line's painted box. Active-line backgrounds
+ * then meet the gutter instead of starting after the content padding. */
 .frappe-code .cm-line {
-  padding: 0;
+  padding: 0 var(--code-padding-x, 8px);
 }
 
 .frappe-code .cm-cursor,

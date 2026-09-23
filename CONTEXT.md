@@ -284,7 +284,8 @@ stylesheet is scoped under it, so an app that omits the extension gets none of t
 One of three independently removable layers: CodeMirror's base, `codeChrome`,
 `codeHighlight`. Painted through the `--code-*` hooks (ADR-0017): `--code-bg`,
 `--code-border`, `--code-radius`, `--code-focus-ring`, `--code-font-size`,
-`--code-padding`, `--code-min-height`, `--code-max-height`.
+`--code-padding-x`, `--code-padding-y`, `--code-min-height`,
+`--code-max-height`.
 _Avoid_: shipping ambient CSS that every importer must override; a `theme` or `variant`
 prop; reconfiguring anything for dark mode (the hooks resolve `var(--ink-*)` and
 `var(--surface-*)`).
