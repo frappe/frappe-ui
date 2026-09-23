@@ -27,6 +27,17 @@ const knobs: Knob[] = [
     ],
     default: 'sm',
   },
+  {
+    name: 'side',
+    type: 'tabs',
+    options: [
+      { label: 'left', value: 'left' },
+      { label: 'right', value: 'right' },
+    ],
+    default: 'left',
+    // `side` only changes the browser-tab variant, and only when vertical.
+    visibleWhen: (v) => v.variant === 'browser-tab' && v.vertical,
+  },
   { name: 'vertical', type: 'switch', default: false },
   { name: 'icons', type: 'switch', default: true },
 ]
@@ -43,6 +54,7 @@ function buildCode(v: Record<string, any>) {
   if (v.variant !== 'underline') attrs.push(`variant="${v.variant}"`)
   if (v.size !== 'sm') attrs.push(`size="${v.size}"`)
   if (v.vertical) attrs.push('vertical')
+  if (showsSide(v) && v.side !== 'left') attrs.push(`side="${v.side}"`)
   attrs.push(`:tabs="[\n${items}\n  ]"`)
   return [
     '<Tabs',
@@ -50,9 +62,7 @@ function buildCode(v: Record<string, any>) {
     ...attrs.map((a) => '  ' + a),
     '>',
     '  <template #tab-panel="{ tab }">',
-    '    <div class="' +
-      (v.vertical ? 'ms-3 flex-1' : 'mt-3') +
-      ' rounded-6 border border-outline-gray-1 p-4 text-ink-gray-7">',
+    `    <div class="${panelClass(v)} text-ink-gray-7">`,
     '      {{ tab.label }} content',
     '    </div>',
     '  </template>',
@@ -60,10 +70,16 @@ function buildCode(v: Record<string, any>) {
   ].join('\n')
 }
 
+function showsSide(v: Record<string, any>) {
+  return v.variant === 'browser-tab' && v.vertical
+}
+
+function panelClass(v: Record<string, any>) {
+  return v.vertical ? 'ps-3' : 'pt-3'
+}
+
 function tabsFor(icons: boolean) {
-  return icons
-    ? tabs
-    : tabs.map((t) => ({ value: t.value, label: t.label }))
+  return icons ? tabs : tabs.map((t) => ({ value: t.value, label: t.label }))
 }
 </script>
 
@@ -76,11 +92,12 @@ function tabsFor(icons: boolean) {
           :variant="values.variant"
           :size="values.size"
           :vertical="values.vertical"
+          :side="showsSide(values) ? values.side : undefined"
         >
           <template #tab-panel="{ tab }">
             <div
-              class="min-h-[80px] rounded-6 border border-outline-gray-1 p-4 text-base text-ink-gray-7"
-              :class="values.vertical ? 'ms-3 flex-1' : 'mt-3'"
+              class="min-h-[80px] text-base text-ink-gray-7"
+              :class="panelClass(values)"
             >
               {{ tab.label }} content
             </div>

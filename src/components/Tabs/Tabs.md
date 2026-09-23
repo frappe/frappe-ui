@@ -89,20 +89,4 @@ A disabled trigger cannot be selected, and the arrow keys skip it.
 In `tabs` array mode, if the selected tab's `condition` turns false, the first
 visible tab is selected and `update:modelValue` fires.
 
-## Migrating from v0
-
-The v0 `Tabs` was one component driven by a `tabs` array and an index-based
-`v-model`. The v1 API is composed: the model is the trigger `value`, and the app
-owns the `TabList` and `TabPanel` elements. See the
-[migration guide](../migration#tabs) for the full list.
-
-| Before                             | After                                        |
-| ---------------------------------- | -------------------------------------------- |
-| `v-model="index"` (number)         | `v-model="value"` (trigger `value`)          |
-| `:tabs="[{ label: 'Emails' }]"`    | `value` is required; `label` is display-only |
-| `<template #tab-item>`             | `TabTrigger` props and slots                 |
-| `<template #tab-panel="{ tab }">`  | `<TabPanel :value>` children; the shorthand slot keeps the same name |
-| `as="div"`                         | removed — compose the container directly     |
-| `[&_[role='tablist']]:...` classes | style `<TabList class="...">` directly       |
-
 <!-- @include: ./Tabs.api.md -->
