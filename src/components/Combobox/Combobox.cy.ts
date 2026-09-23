@@ -1052,6 +1052,25 @@ describe('Combobox', () => {
       cy.get('[data-slot="trigger"]').should('contain.text', 'Mango')
     })
 
+    it('renders an unmatched model value instead of the placeholder', () => {
+      cy.mount(Combobox, {
+        props: {
+          options: [{ label: 'Apple', value: 'apple' }],
+          modelValue: 'mango',
+          trigger: 'button',
+          placeholder: 'Pick a fruit',
+        },
+      })
+
+      cy.get('[data-slot="trigger"]')
+        .should('contain.text', 'mango')
+        .and('not.contain.text', 'Pick a fruit')
+      cy.contains('[data-slot="trigger"] span', 'mango').should(
+        'not.have.class',
+        'text-ink-gray-4',
+      )
+    })
+
     it('trigger="button" is in the native tab order and opens on Enter', () => {
       cy.mount(Combobox, {
         props: { options: fruits, trigger: 'button', placeholder: 'Pick' },

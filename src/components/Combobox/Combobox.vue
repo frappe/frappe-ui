@@ -588,10 +588,10 @@ defineSlots<ComboboxSlots>()
               <span
                 :class="[
                   'min-w-0 flex-1 truncate text-left font-normal leading-tighter',
-                  !selectedOption && 'text-ink-gray-4',
+                  currentValue === null && 'text-ink-gray-4',
                 ]"
               >
-                {{ selectedOption?.label ?? placeholder }}
+                {{ currentValue === null ? placeholder : displayValue }}
               </span>
 
               <slot name="suffix" v-bind="controlSlotProps">
