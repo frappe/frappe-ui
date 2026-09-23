@@ -214,16 +214,17 @@ function planRootPackage(app, frontend, pm) {
     dev: `${cd}${runCommand(pm, 'dev')}`,
     build: `${cd}${runCommand(pm, 'build')}`,
   }
+  // bench always has npm and yarn, but the servers that build the app may not
+  // have the others.
+  const needs =
+    pm === 'npm' || pm === 'yarn'
+      ? ''
+      : ` Servers that build this app need ${pm} too.`
   if (!fs.existsSync(file)) {
     return {
       file,
       action: 'create',
-      // bench always has npm and yarn, but the servers that build the app may
-      // not have the others.
-      summary:
-        pm === 'npm' || pm === 'yarn'
-          ? 'lets bench install and build the frontend'
-          : `lets bench install and build the frontend, with ${pm}. Servers that build this app need ${pm} too.`,
+      summary: `lets bench install and build the frontend.${needs}`,
       content: JSON.stringify({ private: true, scripts }, null, 2) + '\n',
     }
   }
@@ -243,8 +244,8 @@ function planRootPackage(app, frontend, pm) {
     action: 'manual',
     summary:
       typeof build === 'string'
-        ? `has a build script that doesn't build ${frontend}/. Merge these scripts into it, so bench builds the frontend:`
-        : 'has no build script. Add these scripts, so bench builds the frontend:',
+        ? `has a build script that doesn't build ${frontend}/.${needs} Merge these scripts into it, so bench builds the frontend:`
+        : `has no build script.${needs} Add these scripts, so bench builds the frontend:`,
     snippet: JSON.stringify(scripts, null, 2)
       .slice(2, -2)
       .replace(/^ {2}/gm, ''),
