@@ -1,36 +1,51 @@
 # Rating
 
-Lets users rate items using stars in a simple, interactive way. Provides immediate visual feedback and supports partial or full selections.
+A row of stars for picking a score, such as 4 out of 5.
 
 <ComponentPlayground name="Rating" />
 
-<ComponentPreview name="Rating-Default" layout="stacked" />
+## Examples
 
-## Sizes
+### Product review
 
-`size` defaults to `sm`, matching every other input. An unrecognized value
-renders `sm` too.
+A required rating with a `description` and an `error`. Submit the form without
+a rating to see the error.
 
-<ComponentPreview name="Rating-Sizes" />
+<ComponentPreview name="Rating-ReviewForm" />
 
-## Template ref
+### Score with half stars
 
-`focus()` moves focus to the selected star, or to the first star when nothing
-is selected. That is the same element `Tab` reaches, so a ref call and the
-keyboard agree. In half-star mode the whole control is one slider, so `focus()`
-focuses the control itself.
-
-## Half stars
-
-Set `step="0.5"` to allow half-star ratings. The control switches its ARIA
-role to `slider` so screen readers can announce non-integer values.
+`step="0.5"` lets people pick half a star. Click the left half of a star for
+the half value.
 
 <ComponentPreview name="Rating-HalfStep" />
 
-## Clearing
+### Spice level
 
-Clicking the currently-selected star (or pressing `0`) clears the rating
-to `0`. To opt out, bind manually and drop the `0` update:
+`icon` replaces the star with any class icon, here `lucide-flame`. `max`
+sets the number of icons.
+
+<ComponentPreview name="Rating-CustomIcon" />
+
+### Mood check-in
+
+The `#icon` slot draws a different emoji at each position. The slot's `index`,
+`value` and `previewValue` pick which one stands out.
+
+<ComponentPreview name="Rating-CustomSlot" />
+
+## Behavior
+
+### Value
+
+`v-model` is a number from `0` to `max`, where `0` means no rating. `max`
+defaults to `5`. A value outside that range shows as the nearest end, and a
+value between steps shows rounded to the nearest `step`.
+
+### Clearing
+
+Clicking the selected star, or pressing `0`, sets the rating to `0`. To keep
+people from clearing it, bind the value yourself and ignore the `0` update:
 
 ```vue
 <Rating
@@ -39,57 +54,93 @@ to `0`. To opt out, bind manually and drop the `0` update:
 />
 ```
 
-## Custom icon
+### Hover preview
 
-`icon` accepts a class name (`icon="lucide-zap"`), which renders as a `<span>`
-carrying that class, or a Vue component. The default is an inline filled star:
-the `lucide-star` class icon is a CSS mask of lucide's outline star, so it
-cannot draw a solid one.
+While the pointer is over the stars, they show the value a click would pick.
+Stars that the click would add and stars that it would remove are drawn in
+lighter shades.
 
-The `~icons/lucide/*` component form below needs `lucideIcons: true` on the
-frappe-ui Vite plugin, which is off by default.
+### Icon
 
-<ComponentPreview name="Rating-CustomIcon" />
+`icon` takes a class name (`icon="lucide-zap"`), which renders as a `<span>`
+with that class, or a Vue component. A component gets `fill="currentColor"`,
+so closed shapes render filled.
 
-## Custom icon slot
+The default icon is a filled star. The `lucide-star` class icon draws only the
+outline, so it cannot replace the default.
 
-For per-index content (emojis, mixed icons) or full control over color
-and styling, use the `#icon` slot. It's called once per star and stamped
-into both half-spans so half-step clipping still works.
+### Icon slot
 
-The slot receives `{ index, side, state, leftState, rightState, value, previewValue, max }`.
-Drive your style off `state` (`filled | preview | removing | empty`).
+The `#icon` slot replaces the icon at each position, for content such as emojis
+or icons that change from one position to the next. It renders twice per star,
+once for each half, so half stars still work.
 
-<ComponentPreview name="Rating-CustomSlot" />
+The slot receives `{ index, side, state, leftState, rightState, value,
+previewValue, max }`. `index` starts at `1`. `state` is `filled`, `preview`,
+`removing` or `empty`, and describes the half being drawn. Use it to set the
+icon's color. `previewValue` is the value under the pointer, or `null`, so
+`previewValue ?? value` is the value to highlight.
 
-## Labeling
+### Size
 
-<ComponentPreview name="Rating-Labeling" />
+`size` defaults to `sm`, like every other input. A value it does not know
+renders as `sm`.
 
-## States
+### Label, description and error
 
-<ComponentPreview name="Rating-States" />
+`label` renders above the stars and `description` below them. `error` renders
+below the stars and hides `description`. It takes a string, an array of
+strings (one line each), or an `Error`, the same values as
+[ErrorMessage](./errormessage). An empty string or an empty array means no
+error. `required` adds a red asterisk to the label.
 
-## Keyboard
+The `#label` slot replaces the label text and the required marker, and receives
+`{ required }`. A `#description` slot is not hidden by `error`. It renders
+above the error.
 
-| Mode | Keys | Action |
-| --- | --- | --- |
-| Radiogroup (`step="1"`) | `←` / `↑` / `→` / `↓` | Move focus and select adjacent star |
-| | `Home` / `End` | Select first / last star |
-| | `Space` / `Enter` | Select the focused star |
-| | `1`–`9` | Set the rating to that value |
-| Slider (`step="0.5"`) | `←` / `↓` / `→` / `↑` | Decrement / increment by `step` |
-| | `PageUp` / `PageDown` | Increment / decrement by one full star |
-| | `Home` / `End` | Set to `0` / `max` |
-| | `0`–`9` | Set the rating to that integer |
+### Attributes
 
-## Customization
+`class` and `style` go on the outer element: the wrapper when a label,
+description or error shows, and the row of stars otherwise. Every other
+attribute and listener goes on the row of stars.
 
-Each star exposes data-attribute hooks for styling:
+## Accessibility
 
-- Root: `data-slot="control"`, `data-size`, `data-disabled`, `data-state="valid|invalid"`.
-- Star: `data-slot="star"`, `data-index`, `data-state="filled|preview|removing|empty"`.
-- Half-star fill: each star renders two half-spans with their own
-  `data-state` for half-step granularity.
+With whole stars, the row is a `radiogroup` and each star is a `radio` named
+"3 of 5". Only the selected star, or the first star when there is no rating,
+is in the tab order.
+
+With `step="0.5"`, the whole row is one `slider`. Screen readers announce its
+value as "3.5 of 5 stars", or "No rating, out of 5 stars" at `0`. The slider
+role does not allow `aria-required`, so a required rating in this mode is
+announced only through the hidden "(required)" text in the label.
+
+| Mode           | Keys                          | Action                                      |
+| -------------- | ----------------------------- | ------------------------------------------- |
+| Whole stars    | `←` `↑` / `→` `↓`             | Select the previous / next star and move focus to it |
+|                | `Home` / `End`                | Select the first / last star                |
+|                | `Space` / `Enter`             | Select the focused star                     |
+|                | `1`–`9`                       | Set the rating to that number               |
+|                | `0`                           | Clear the rating                            |
+| Half stars     | `←` `↓` / `→` `↑`             | Decrease / increase by half a star          |
+|                | `PageDown` / `PageUp`         | Decrease / increase by one star             |
+|                | `Home` / `End`                | Set to `0` / `max`                          |
+|                | `0`–`9`                       | Set the rating to that number               |
+
+A number above `max` sets the rating to `max`.
+
+## Migrating from v0
+
+| Before                    | After                                          |
+| ------------------------- | ---------------------------------------------- |
+| `:rating_from`            | `:max`                                         |
+| `:readonly`               | `:disabled`                                    |
+| `size` defaulted to `md`  | `size` defaults to `sm`; pass `size="md"` to keep the old size |
+| attributes on the wrapper | attributes on the row of stars; `class` and `style` on the wrapper |
+
+The old prop names are ignored without a warning: `:rating_from="10"` renders 5
+stars, and a `:readonly` rating can be changed. See the
+[migration guide](../migration#inputs), and
+[the size change](../migration#rating-size).
 
 <!-- @include: ./Rating.api.md -->
