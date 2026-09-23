@@ -54,10 +54,4 @@ The card also opens when the trigger gets keyboard focus. Touch screens and
 screen readers may never show it, so do not put an action or a fact in the card
 that people cannot reach another way.
 
-## Migrating from v0
-
-v0 opened a hover panel with `<Popover trigger="hover">`. Use `HoverCard`
-instead. `hoverDelay` and `leaveDelay` are now in milliseconds: change `0.5` to
-`500`. See the [migration guide](../migration#hover-panels).
-
 <!-- @include: ./HoverCard.api.md -->

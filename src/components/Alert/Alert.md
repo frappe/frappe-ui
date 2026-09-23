@@ -89,14 +89,4 @@ A `red` or `amber` alert has the `alert` role, so screen readers read it out
 at once. Other themes have the `status` role, which screen readers read out
 when they are idle. The × button is labelled "Dismiss".
 
-## Migrating from v0
-
-`Alert` no longer has a `v-model` and never hides itself. Render it with
-`v-if` and hide it on `@dismiss`. `theme="yellow"` is now `amber`, the default
-`theme` is now `gray` instead of `blue`, the
-`variant` and `type` props are gone, the `#icon` slot is now `#prefix`, and the
-`#footer` slot is replaced by `primaryAction`, `secondaryAction` and the
-`#actions` slot. `dismissible` is now `false` by default. None of these changes
-show an error. See the [migration guide](../migration#alert) for the full list.
-
 <!-- @include: ./Alert.api.md -->

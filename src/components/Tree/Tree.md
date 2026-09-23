@@ -138,10 +138,4 @@ siblings and, for a parent, whether it is open.
 Drag and drop announces "Picked up", "Moved" and "Cancelled move" to screen
 readers.
 
-## Migrating from v0
-
-The tree now takes a `nodes` array, keeps expansion in `v-model:expanded`
-instead of on the nodes, and replaces the `options` object with props and CSS
-variables. See the [migration guide](../migration#tree).
-
 <!-- @include: ./Tree.api.md -->

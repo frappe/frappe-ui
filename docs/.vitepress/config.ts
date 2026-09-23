@@ -34,7 +34,6 @@ function buildSidebar(): SidebarSection[] {
       text: name,
       link: `/docs/components/${name.toLowerCase()}`,
     })),
-    { text: 'Legacy components', link: '/docs/components/legacy' },
   ]
 
   const experimentalItems = [

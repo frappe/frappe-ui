@@ -96,14 +96,4 @@ keystroke. Use it when each change starts a request, such as a search.
   includes hidden "(required)" text. The asterisk itself is hidden from screen
   readers.
 
-## Migrating from v0
-
-| Before                 | After                                   |
-| ---------------------- | --------------------------------------- |
-| `<Input>` (removed)    | `TextInput`, or `FormControl`           |
-| `size="xl"`            | `size="lg"`                             |
-| template ref `.el`     | `.focus()`, or `.inputElement`          |
-
-See the [migration guide](../migration#inputs) for details.
-
 <!-- @include: ./TextInput.api.md -->

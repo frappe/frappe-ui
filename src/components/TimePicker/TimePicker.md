@@ -76,12 +76,4 @@ The input has `role="combobox"`, `aria-haspopup="listbox"` and
 `aria-expanded`, so a screen reader announces that the field opens a list and
 whether the list is open.
 
-## Migrating from v0
-
-`minTime` and `maxTime` are now `min` and `max`, `use12Hour` is
-`format="h:mm A"`, and `scrollMode` is removed. The `open` and `close` events
-are now `update:open`. See the
-[migration guide](../migration#datepicker-timepicker-family) and
-[TimePicker events](../migration#timepicker-emits) for the full list.
-
 <!-- @include: ./TimePicker.api.md -->

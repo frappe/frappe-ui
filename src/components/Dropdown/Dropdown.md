@@ -100,10 +100,4 @@ outer menu item element themselves, so keep them for exceptional cases.
 
 An icon-only trigger needs a `label` so screen readers can name it.
 
-## Migrating from v0
-
-`placement` is replaced by `align`, and groups use `{ group, options }`
-instead of `{ group, items }`. See the
-[migration guide](../migration#dropdown-and-contextmenu) for the full list.
-
 <!-- @include: ./Dropdown.api.md -->

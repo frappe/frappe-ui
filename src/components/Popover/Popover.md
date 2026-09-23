@@ -97,10 +97,4 @@ panel, and <kbd>Escape</kbd> closes it. The trigger gets `aria-expanded` and
 `trigger="manual"` removes `aria-expanded` and `aria-controls`. Add the
 combobox pattern yourself, or use [`Combobox`](./combobox), which has it.
 
-## Migrating from v0
-
-`#target` is now `#trigger`, `#body` and `#body-main` are now `#default`, and
-`placement` is now `side` and `align`. See the
-[migration guide](../migration#popover-hovercard-tooltip) for the full table.
-
 <!-- @include: ./Popover.api.md -->

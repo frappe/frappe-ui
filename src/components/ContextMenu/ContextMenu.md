@@ -68,11 +68,4 @@ The menu opens on right-click, or on a long press on touch screens. Users
 may not know it is there, so also offer important actions somewhere visible,
 such as a row actions [Dropdown](./dropdown).
 
-## Migrating from v0
-
-ContextMenu shares its option changes with Dropdown: groups use
-`{ group, options }`, and `component:` rows are replaced by
-`slots: { item: fn }`. See the
-[migration guide](../migration#dropdown-and-contextmenu).
-
 <!-- @include: ./ContextMenu.api.md -->

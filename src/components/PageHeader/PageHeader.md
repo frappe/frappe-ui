@@ -96,11 +96,4 @@ target.
 Each header renders a `<header>` element. `PageHeaderMobile` puts its title in
 an `<h1>`. `PageHeaderBackButton` is named "Back". Set `label` to change it.
 
-## Migrating from v0
-
-`PageHeaderMobile`'s `#left` and `#right` slots are now `#prefix` and
-`#suffix`, and `PageHeaderMobileTitle`'s `#icon` is now `#prefix`. The header no
-longer reads `--mobile-header-height`. See the
-[migration guide](../migration#pageheadermobile-family-slot-names).
-
 <!-- @include: ./PageHeader.api.md -->

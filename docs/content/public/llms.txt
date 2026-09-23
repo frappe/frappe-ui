@@ -22,7 +22,7 @@ Three cross-cutting conventions to know before reading anything else:
 - [Frappe app](https://ui.frappe.io/docs/getting-started/frappe): the Vite plugin, dev proxy, CSRF, boot data, the `www` page and the production build.
 - [Standalone app](https://ui.frappe.io/docs/getting-started/standalone): a plain Vite app; which sub-plugins to drop and which APIs assume a Frappe server.
 - [Tailwind setup](https://ui.frappe.io/docs/getting-started/tailwind): wiring the preset into an app, what it replaces, the `content` export.
-- [Migration from v0](https://ui.frappe.io/docs/migration): moving an app off the v0 API.
+- [Migration from v0](https://ui.frappe.io/docs/migration): moving an app off the v0 API, including every removed component with its replacement and every component parked in `frappe-ui/experimental`.
 
 ## Components
 
@@ -54,8 +54,7 @@ All from the `frappe-ui` root entry.
 - [KeyboardShortcut](https://ui.frappe.io/docs/components/keyboardshortcut): renders a combo such as `Mod+K` as styled keys; `Mod` resolves per platform.
 - [KeyboardShortcutsDialog](https://ui.frappe.io/docs/components/keyboardshortcutsdialog): lists every shortcut registered with `useKeyboardShortcut`. Mount once, bind `v-model:open`; it has no trigger of its own.
 - [LoadingText](https://ui.frappe.io/docs/components/loadingtext): Spinner with a label, for inline "Loading…" states.
-- [MobileNav](https://ui.frappe.io/docs/components/mobilenav): bottom tab bar for MobileShell; each `MobileNavItem` is one equal-width tab.
-- [MobileShell](https://ui.frappe.io/docs/components/mobileshell): the mobile app frame; pinned header with safe-area padding, native-scrolling content, `#nav` slot. A separate family from DesktopShell.
+- [MobileShell](https://ui.frappe.io/docs/components/mobileshell): the mobile app frame; pinned header with safe-area padding, native-scrolling content, `#nav` slot. A separate family from DesktopShell. The same page documents `MobileNav`, the bottom tab bar for `#nav`; each `MobileNavItem` is one equal-width tab.
 - [MultiSelect](https://ui.frappe.io/docs/components/multiselect): multi-value select; value is `(string | number)[]`.
 - [PageHeader](https://ui.frappe.io/docs/components/pageheader): app-shell headers (`PageHeader`, `PageHeaderMobile`, `PageHeaderBase`). A page declares its header and it renders into the layout's `<PageHeaderTarget />`.
 - [Password](https://ui.frappe.io/docs/components/password): masked input with show/hide.
@@ -81,7 +80,6 @@ All from the `frappe-ui` root entry.
 - [Toast](https://ui.frappe.io/docs/components/toast): imperative notifications: `toast.success/error/warning/info`.
 - [Tooltip](https://ui.frappe.io/docs/components/tooltip): hover hint; not for actionable content (use Popover/Dropdown).
 - [Tree](https://ui.frappe.io/docs/components/tree): hierarchical list.
-- [Legacy components](https://ui.frappe.io/docs/components/legacy): what was removed in v1 and the replacement for each, plus which families were parked rather than removed.
 
 ## Charts
 

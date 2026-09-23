@@ -97,9 +97,4 @@ label and description.
 While `error` is set, the group gets `aria-invalid` and an
 `aria-errormessage` that points to the error text.
 
-## Migrating from v0
-
-Attributes used to go to the wrapper. Now they go to the radio group. See the
-[migration guide](../migration#inputs-attrs) for details.
-
 <!-- @include: ./Radio.api.md -->

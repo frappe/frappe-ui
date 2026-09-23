@@ -33,10 +33,4 @@ The asterisk is hidden from screen readers. The label includes hidden
 "(required)" text instead, so the control's name is announced as, for example,
 "Brand color (required)".
 
-## Migrating from v0
-
-The `size` prop was removed. Labels are a fixed 13px. A leftover `size` lands
-on the `<label>` as a plain attribute and does nothing. See the
-[migration guide](../migration#inputs).
-
 <!-- @include: ./FormLabel.api.md -->

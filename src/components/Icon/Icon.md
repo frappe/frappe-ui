@@ -55,10 +55,4 @@ Every icon renders with `aria-hidden="true"`, so screen readers skip it. When
 an icon is the only content of a button or link, give that element an
 `aria-label`.
 
-## Migrating from v0
-
-`FeatherIcon` is removed, and a bare feather name like `"edit"` no longer
-renders. Prefix the name with `lucide-`. See the
-[migration guide](../migration#icons).
-
 <!-- @include: ./Icon.api.md -->

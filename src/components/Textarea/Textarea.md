@@ -66,14 +66,4 @@ keystroke.
   includes hidden "(required)" text. The asterisk itself is hidden from screen
   readers.
 
-## Migrating from v0
-
-| Before                   | After                                   |
-| ------------------------ | --------------------------------------- |
-| `size="xl"`              | `size="lg"`                             |
-| text size follows `size` | text is 13px at every size              |
-| template ref `.el`       | `.focus()`, or `.inputElement`          |
-
-See the [migration guide](../migration#inputs) for details.
-
 <!-- @include: ./Textarea.api.md -->

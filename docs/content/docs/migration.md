@@ -144,6 +144,8 @@ only moved.
   [Composables and directives](#composables-and-directives-renamed) ·
   [Color scheme](#resolved-color-scheme) ·
   [pageMetaPlugin](#pagemetaplugin-removed)
+- **Removed and parked** — [Removed and parked components](#removed-and-parked)
+  lists every removed component with its replacement, and every parked one.
 - **Moved, not removed** — these five families changed an import path and
   nothing else: [ListView](#listview-—-moved-to-frappe-ui-experimental) ·
   [Calendar](#calendar-—-moved-to-frappe-ui-experimental) ·
@@ -1946,7 +1948,8 @@ screen readers announce the control correctly.
 
 **Loud break:** `CircularProgressBar` is deleted, so the import fails. Use
 `Progress` for a linear bar, or draw the arc yourself. v1 has no circular
-variant.
+variant. If you need the circular form, you can copy the v0 component into
+your app.
 
 ### Input sizes
 
@@ -2192,8 +2195,26 @@ also set.
 A checkbox draws no container surface, so it has no `variant`. The forwarded
 value used to land on the `<input>` as a stray `variant="subtle"` attribute.
 
-The `type` routes are unchanged: `date` renders `DatePicker`, `time` renders
-`TimePicker`, and a native date field is `<TextInput type="date" />`.
+### `FormControl` `type="date"` and `type="time"` render the pickers {#formcontrol-date-time}
+
+**Behavior change.** In v0, `type="date"` and `type="time"` fell through to
+`TextInput` and rendered the browser's native date and time inputs. They now
+render `DatePicker` and `TimePicker`. The value format stays the same
+(`YYYY-MM-DD` and `HH:mm`), but the control looks and behaves like the pickers.
+
+To keep a native input, use `TextInput` directly, or `type="datetime-local"`,
+which still renders a native input:
+
+```vue
+<!-- Before: a native date input -->
+<FormControl type="date" label="Due" v-model="due" />
+
+<!-- After: keep the native input -->
+<TextInput type="date" label="Due" v-model="due" />
+```
+
+**Additive:** `FormControl` also takes `type="daterange"` and
+`type="datetime"`, which render `DateRangePicker` and `DateTimePicker`.
 
 ### `data-slot="label"` on `FormLabel`
 
@@ -2660,8 +2681,8 @@ switcher. Its prop and type names now match the Tabs family. See the
 | boolean `value` / `modelValue`                        | `string \| number` only                                                                                    |
 | wrapper divs / raw CSS for equal-width tabs           | `fluid` prop                                                                                               |
 | `iconRight` on an option                              | `<template #suffix>` — silent, nothing throws                                                              |
-| `hideLabel: true` on an option                        | `icon` alone — the option is icon-only and `label` becomes its accessible name                             |
-| `theme` / `variant` / `size` / `loading` on an option | removed — options no longer forward `Button` props. Use `Button` directly for per-tab theming or a spinner |
+| `hideLabel: true` on an option                        | `icon` alone — the option is icon-only and `label` becomes its accessible name. `iconLeft` puts an icon before a visible label |
+| `theme` / `variant` / `size` / `loading` / `prefix` on an option | removed — options no longer forward `Button` props. Use `Button` or `Pill` directly for per-tab theming or a spinner |
 | `tooltip` on an option                                | app-owned help UI                                                                                          |
 | numeric or missing `label`                            | required string `label`                                                                                    |
 
@@ -2673,6 +2694,12 @@ No codemod renames these props. `destinations-v1` does not touch `TabButtons`,
 and `navigation-v1` only renames the `checked` slot prop to `active`. Grep for
 `:buttons`, `type=`, `direction=`, `hideLabel`, `tooltip`, and non-string labels
 in option data.
+
+`TabButtons` no longer wraps `Button`, which is why the `Button` props above
+stop working. Each tab is a native `<button>`, an `<a href>` or a `<RouterLink>`
+that renders a `Pill`. `route` and `href` on an option still work: an option
+with `route` renders a `<RouterLink>`, and an option with `href` renders an
+`<a href target="_blank">`.
 
 For the `class` on an option, see
 [TabButtons: `class` on an option → `data-value`](#tabbuttons-class).
@@ -5517,6 +5544,56 @@ usePageMeta(() => ({ title: pageTitle.value, emoji: '🌈' }))
 
 `usePageMeta` works the same way everywhere. See the
 [composables page](./other/composables#usepagemeta).
+
+## Removed and parked components {#removed-and-parked}
+
+Two different things happened to v0 components. They need different work, so
+check which one applies before you start.
+
+| State       | Import path                          | What to do                                           |
+| ----------- | ------------------------------------ | ---------------------------------------------------- |
+| **Removed** | none — the import fails              | Rewrite the call site against the replacement        |
+| **Parked**  | [`frappe-ui/experimental`](/docs/experimental) | Change the import path, then plan the move off it |
+
+A removed component is gone for good and has a named replacement. A parked
+component still ships and still works. It moved to `frappe-ui/experimental`
+while its future is decided, and it can come back to the root export or be
+deleted in any release. Parked components are exempt from the deprecation
+policy: there is no deprecation period before one is removed. Treat the new
+import path as a stopgap, not a destination.
+
+### Removed in v1 {#removed-in-v1}
+
+**Loud break** for each of these unless the row says otherwise: the import
+fails at build time.
+
+| Removed                               | Use instead                                                                                                                                                                                  |
+| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Input`                               | `TextInput` for text-like types (`text`, `number`, `email`, `password`, `date`), `Textarea`, `Select` or `Checkbox` for the other modes. See [`<Input>` is removed](#input-is-removed).      |
+| `Autocomplete`                        | `Combobox` for single selection, `MultiSelect` for multiple. See [Autocomplete](#autocomplete-removed).                                                                                     |
+| `FormControl type="autocomplete"`     | `type="combobox"`, or a standalone `Combobox`. **Silent break:** the type falls through to a plain text input. See [the section](#formcontrol-type-autocomplete-removed).                  |
+| `MonthPicker`                         | `Select` with month options, or `DatePicker`. See [MonthPicker](#monthpicker).                                                                                                             |
+| `CircularProgressBar`                 | `Progress`, or copy the v0 component into your app if you need the circular form. See [`CircularProgressBar` is removed](#circularprogressbar-is-removed).                                 |
+| `FeatherIcon`                         | a `lucide-*` icon class, or pass a component. See [Icons](#icons).                                                                                                                          |
+| `NestedPopover`                       | `Popover`. It never nested anything. See [Popover](#popover-hovercard-tooltip).                                                                                                            |
+| `Card`, `ListItem`, standalone `<Toast>` | plain markup for `Card` and `ListItem`; the `toast` functions for `<Toast>`. See [the section](#card-listitem-standalone-toast-removed).                                                 |
+| `ListFilter`                          | build the filter UI in your app with `Select` and `Combobox`.                                                                                                                               |
+| `GridLayout`                          | depend on `grid-layout-plus` directly. `GridLayout` passed everything through to it.                                                                                                        |
+| `CommandPalette`, `CommandPaletteItem` at the root | the rebuilt family in `frappe-ui/experimental`. The names carry over but the API does not, so this is a rewrite, not an import-path change. See [CommandPalette](#commandpalette). |
+
+### Parked in `frappe-ui/experimental` {#parked-in-experimental}
+
+**Loud break** for each: the root import fails. Change the import path. The
+[Experimental overview](/docs/experimental) says what each one is waiting on.
+
+| Parked                                                                                                     | Replacement for new code                                                                                                      |
+| ---------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `ListView` and its parts                                                                                   | [`frappe-ui/list`](/docs/molecules/list), which has no equivalent for config-driven columns yet. See [ListView](#listview-—-moved-to-frappe-ui-experimental). |
+| `Calendar`                                                                                                 | none yet. The API is unchanged until a redesigned calendar family replaces it. See [Calendar](#calendar-—-moved-to-frappe-ui-experimental). |
+| `TextEditor`, `TextEditorBubbleMenu`, `TextEditorFixedMenu`, `TextEditorFloatingMenu`, `TextEditorContent`, `createEditorButton` | [`frappe-ui/editor`](/docs/molecules/editor). See [Editor](#editor).                                                          |
+| `AxisChart`, `DonutChart`, `FunnelChart`, `NumberChart`, `ECharts`, `useAxisChartOptions`                  | [`frappe-ui/charts`](/docs/charts/overview). See [Charts (v1)](#charts-v1-—-moved-to-frappe-ui-experimental).               |
+| sprite `Icon`, `IconPicker`, `spritePlugin`                                                                | `lucide-*` classes and the root `Icon` component. The sprite trio will be removed. See [Sprite icons](#sprite-icons-—-moved-to-frappe-ui-experimental). |
+| `ThemeSwitcher`                                                                                            | `Select` plus `useColorScheme`. See [ThemeSwitcher](#themeswitcher).                                                          |
 
 ## ListView — moved to `frappe-ui/experimental`
 

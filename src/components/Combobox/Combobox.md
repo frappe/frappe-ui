@@ -162,11 +162,4 @@ above the error.
 While `error` is set, the input gets `aria-invalid` and an `aria-errormessage`
 that points to the error text.
 
-## Migrating from v0
-
-`allowCustomValue` is now a `type: 'custom'` option with a `condition`. The
-`input` emit is `@update:query`, `placement` is `side` and `align`, and
-`reset()` on a template ref is `clear()`. See the
-[migration guide](../migration#combobox) for the full list.
-
 <!-- @include: ./Combobox.api.md -->

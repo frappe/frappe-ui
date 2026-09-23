@@ -74,10 +74,4 @@ both and receives:
 `file_url` and `file_size`. `failure` fires when validation stops the file or
 the request fails.
 
-## Migrating from v0
-
-Uploads are now private by default, and the `uploadArgs` object is replaced by
-flat props such as `folder`, `doctype` and `private`. See the
-[migration guide](../migration#fileuploader).
-
 <!-- @include: ./FileUploader.api.md -->

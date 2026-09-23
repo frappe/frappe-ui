@@ -52,12 +52,4 @@ dot. Their size follows `size`.
 A `theme`, `variant` or `size` outside the supported values falls back to the
 default (`gray`, `subtle`, `md`) and logs a warning in development.
 
-## Migrating from v0
-
-`theme="orange"` is removed. Use `theme="amber"`, which renders the same
-badge. In JavaScript or with a bound value, a missed `orange` renders a gray
-badge and logs a warning in development only. See the
-[migration guide](../migration#badge) for more cases, such as status-to-theme
-maps and fallback values.
-
 <!-- @include: ./Badge.api.md -->

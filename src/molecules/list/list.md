@@ -278,11 +278,4 @@ The active row has `aria-current`. The select-all checkbox is named "Select
 all" and reports a mixed state when only some rows are selected. A
 `ListGroup` has `role="rowgroup"` and is named by its label.
 
-## Migrating from v0
-
-`ListGroup`'s `#header` slot is now `#label`, `ListHeaderCellSort`'s `#suffix`
-slot is now `#sort-indicator`, and `ListRows.virtual` is now a boolean with a
-separate `overscan` prop. A codemod, `npx list-v1 .`, handles most of it. See
-the [migration guide](../migration#list-family).
-
 <!-- @include: ./list.api.md -->

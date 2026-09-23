@@ -42,8 +42,9 @@ it is likely to move:
 | [Input labeling](#useinputlabeling) | Incubating | Its API settling |
 
 A component that is **removed** rather than parked is a third case: it has no
-import path at all and needs a replacement. Those are on the
-[Legacy components](/docs/components/legacy) page.
+import path at all and needs a replacement. The
+[migration guide](/docs/migration#removed-and-parked) lists each one with its
+replacement.
 
 ## Accordion
 

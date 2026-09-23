@@ -78,10 +78,4 @@ the description and the error. Every other attribute and listener goes on the
 `required` sets `aria-required`. While `error` is set, the input gets
 `aria-invalid` and an `aria-errormessage` that points to the error text.
 
-## Migrating from v0
-
-`padding` is now `padded`. Attributes used to go to both the wrapper and the
-`<input>`, so a listener fired twice; now it fires once, from the input. See
-the [migration guide](../migration#inputs-attrs) for details.
-
 <!-- @include: ./Checkbox.api.md -->

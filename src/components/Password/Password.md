@@ -77,16 +77,4 @@ and listener goes on the `<input>`, including `name`, `autocomplete` and
   includes hidden "(required)" text. The asterisk itself is hidden from screen
   readers.
 
-## Migrating from v0
-
-| Before                    | After                          |
-| ------------------------- | ------------------------------ |
-| `:value` prop (removed)   | `v-model`                      |
-| `size="xl"`               | `size="lg"`                    |
-| template ref exposed none | `.focus()`, or `.inputElement` |
-
-A leftover `:value` now lands on the `<input>` as a plain attribute and no
-longer sets the model. See the [migration guide](../migration#inputs) for
-details.
-
 <!-- @include: ./Password.api.md -->

@@ -117,9 +117,4 @@ both ends.
 also makes the slider `inert`. Without that, the handles would stay in the tab
 order while screen readers could not see them.
 
-## Migrating from v0
-
-`Slider` no longer sets `aria-label="Volume"` on its own. Pass `label` so the
-slider has a correct name. See the [migration guide](../migration#inputs).
-
 <!-- @include: ./Slider.api.md -->

@@ -40,11 +40,4 @@ to sit on the scrolling element itself: padding, a grid, a minimum width, or
 `DesktopShell` uses it for its content area, and `SettingsBody` uses it for a
 settings panel.
 
-## Migrating from v0
-
-`ScrollBar` is no longer exported, and there is no replacement. `ScrollArea`
-draws its own scrollbars, and `ScrollBar` only worked inside reka-ui's
-`ScrollAreaRoot`, which frappe-ui does not export. Use `orientation` instead.
-See the [migration guide](../migration#scrollbar-removed).
-
 <!-- @include: ./ScrollArea.api.md -->

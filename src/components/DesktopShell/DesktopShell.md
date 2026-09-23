@@ -77,10 +77,4 @@ shared name would have to mean "the icon column", "the navigation panel" and
 "the tab bar" at once, and an app that renders both a rail and a sidebar could
 not say which is which.
 
-## Migrating from v0
-
-`useShellScrolled()` now requires a `threshold` in pixels, and a page reads the
-shell it is inside before the shared registry. `:scroll="false"` is new. See
-the [migration guide](../migration#shells).
-
 <!-- @include: ./DesktopShell.api.md -->

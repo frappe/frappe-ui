@@ -85,18 +85,4 @@ each `type`. The value follows the rendered component: `multiselect` emits an
 array, `checkbox` a boolean, `daterange` the value `DateRangePicker` emits, and
 so on.
 
-## Migrating from v0
-
-- `type="date"` and `type="time"` used to render native inputs through
-  `TextInput`. They now render `DatePicker` and `TimePicker`. Use `TextInput`
-  directly, or `type="datetime-local"`, for a native input.
-- `type="autocomplete"` was removed. Use `type="combobox"`. This break is
-  silent: the removed type renders a plain text input instead of failing. In
-  development, a console error names it. See the
-  [migration guide](../migration#formcontrol-type-autocomplete-removed).
-- `size` used to accept only `sm` and `md`. It now takes `xs`, `sm`, `md` and
-  `lg`.
-- A checkbox no longer receives `variant` as a stray attribute on its
-  `<input>`.
-
 <!-- @include: ./FormControl.api.md -->

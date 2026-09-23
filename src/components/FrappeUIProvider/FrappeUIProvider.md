@@ -41,10 +41,4 @@ To get the hosts without the wrapper, mount `<Dialogs />` and
 - `<Dialogs />` can be mounted more than once. Only one of them shows the
   dialogs, and an extra one logs a warning in development.
 
-## Migrating from v0
-
-The `FrappeUIProviderProps` type is removed. It described props the component
-never accepted. See the
-[migration guide](../migration#frappeuiproviderprops-is-deleted).
-
 <!-- @include: ./FrappeUIProvider.api.md -->

@@ -103,13 +103,4 @@ The input has `role="combobox"`, `aria-haspopup="dialog"` and
 `aria-expanded`, so a screen reader announces that the field opens a panel and
 whether the panel is open.
 
-## Migrating from v0
-
-`:value` is now `v-model`, `placement` is `side`, `align` and `offset`,
-`autoClose` is `keepOpen` (inverted), and `#target` is `#trigger`.
-`DateRangePicker` now emits a `[from, to]` array instead of a
-`"from,to"` string. See the
-[migration guide](../migration#datepicker-timepicker-family) for the full
-list.
-
 <!-- @include: ./DatePicker.api.md -->
