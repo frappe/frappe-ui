@@ -220,6 +220,12 @@ code {
   margin-bottom: 0;
 }
 
+/* Typography zeroes the top margin of whatever follows an h2. Component pages
+   open Examples and Behavior with an h3, which then touches its heading. */
+.prose h2 + h3 {
+  margin-top: 1.25em;
+}
+
 /* Numbered steps for install guides: wrap the steps in <div class="steps">
    and each h3 inside gets its number in front. */
 .steps {
