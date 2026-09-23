@@ -1385,6 +1385,15 @@ The default required indicator is not rendered when you use `#label` (the slot
 receives `{ required }`). The labeling wrapper is not rendered at all when there
 is nothing to label.
 
+#### `Rating` — stars line up with text beside a labeled rating (fix)
+
+With a `label`, the stars sat inside a line of text, which added a few pixels
+under them. Text placed next to the rating sat lower than the stars. The stars
+are now their own row, so they line up with the text.
+
+**What to do:** nothing. If you added a class to work around the gap, you can
+remove it.
+
 ### Date and time pickers
 
 #### Pickers — `open` is honored at mount (breaking, silent)
