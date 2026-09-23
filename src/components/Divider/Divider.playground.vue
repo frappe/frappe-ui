@@ -22,7 +22,7 @@ const knobs: Knob[] = [
       { label: 'end', value: 'end' },
     ],
   },
-  { name: 'withAction', type: 'switch', default: false },
+  { name: 'withAction', type: 'switch', default: true },
 ]
 
 function buildCode(v: Record<string, any>) {
