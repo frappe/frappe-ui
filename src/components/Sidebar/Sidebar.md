@@ -100,6 +100,14 @@ it. `action` takes `Button` props and an `onClick({ dismiss })` handler, the
 same shape as `Alert`'s actions. `#prefix`, `#title`, `#description` and
 `#actions` replace each part.
 
+### Attributes
+
+Attributes on `SidebarItem` go to two places. `class`, `style` and event
+listeners go on the row, so a background or a drop target covers the
+`#suffix` area too. Every other attribute (`target`, `rel`, `id`, `title`,
+`data-*`, `aria-*`) goes on the link or button inside. Your `aria-label`
+replaces the one taken from the label.
+
 ## Accessibility
 
 `Sidebar` renders a `<nav>` named "Main". Set `ariaLabel` to rename it, when a
@@ -108,16 +116,5 @@ family, so keep your own wrappers as plain `div`s.
 
 `SidebarSection` marks its items as a group, named by its label. A collapsible
 section's toggle reports whether it is open.
-
-## Styling
-
-Attributes on `SidebarItem` go to two places. `class`, `style` and event
-listeners go on the row, so a background or a drop target covers the
-`#suffix` area too. Every other attribute (`target`, `rel`, `id`, `title`,
-`data-*`, `aria-*`) goes on the link or button inside. Your `aria-label`
-replaces the one taken from the label.
-
-`SidebarCard` carries its color as `data-color` (`gray`, `blue`, `green`,
-`amber` or `red`), the same hook as `Alert`.
 
 <!-- @include: ./Sidebar.api.md -->

@@ -83,10 +83,6 @@ Duration passes `label`, `description`, `error` and `required` to the
 </Duration>
 ```
 
-### Template ref
-
-`focus()` focuses the input.
-
 ## Accessibility
 
 | Keys         | Action                                     |
@@ -94,11 +90,5 @@ Duration passes `label`, `description`, `error` and `required` to the
 | `Enter`      | Save the typed value                       |
 | `Tab` / blur | Save the typed value                       |
 | `Escape`     | Drop the edit and show the saved value     |
-
-## Styling
-
-Duration renders a `TextInput`, so it has the same styling hooks:
-`data-slot="control"`, `data-size`, `data-disabled`, and `data-state="invalid"`
-when there is an error. See [TextInput](./textinput) for the full list.
 
 <!-- @include: ./Duration.api.md -->

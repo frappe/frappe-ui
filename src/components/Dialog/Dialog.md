@@ -90,17 +90,9 @@ right away. They need `<Dialogs />` somewhere in the app, which
   message, or `null` when the value is fine. Its second argument holds every
   field's value, so one field can check another.
 
-## Styling
+### Space above the dialog
 
 `paddingTop` sets the space above the dialog. It takes a number of pixels or a
 CSS length: `:padding-top="80"` or `padding-top="20vh"`.
-
-Style the rest through the `data-slot` hooks:
-
-| Hook                    | Element               |
-| ----------------------- | --------------------- |
-| `[data-slot="content"]` | the dialog card       |
-| `[data-slot="icon"]`    | the header icon badge |
-| `[data-slot="actions"]` | the action row        |
 
 <!-- @include: ./Dialog.api.md -->

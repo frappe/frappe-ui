@@ -1,67 +1,144 @@
 # List
 
-Composition-based list primitives under the `frappe-ui/list` subpath. Every list
-surface is one column grid: a feed row is just the default column template, a
-table is an explicit one. The family owns geometry — columns, dividers, hover
-surfaces, selection and sort chrome — and nothing readable: cell contents
-(typography, avatars, badges, unread emphasis) are entirely app-authored.
-
-Not to be confused with the config-driven `ListView` in `frappe-ui/experimental`
-— that stays untouched; import from `frappe-ui/list` for this family.
-
-## Feed mode
-
-The default template (`auto`, `minmax(0,1fr)`, `auto`) fits leading media,
-content, and a right-aligned trailing cell. Rows with `route` render as
-RouterLinks, rows with `href` as native same-tab anchors, and rows with a click
-listener as buttons — real interactive elements,
-so a row is clickable _or_ carries inline action buttons, never both (nested
-interactive controls are invalid HTML); [row actions](#row-actions) shows how to
-combine them. `selectable` reveals the animated checkbox column and switches row
-click from navigate to toggle; selected values surface through
-`v-model:selection`. When a `ListHeader` is present, a select-all checkbox
-appears in it automatically — checked when every row is selected, mixed when
-only some are, and toggling all rows on or off. It reasons over the full
-`ListRows` items, so it covers virtualized rows too. `ListRows` resolves each
-row's identity once and exposes it as the scoped `value` prop. The identity
-defaults to the item's `name`/`id`; pass `row-key` (a field name or
-`(item, index) => key`) when the row should use a different field.
-
-Dividers default to `inset`: they start at the content column (the text edge) by
-construction, never render above the first row, and hide around a hovered row so
-the rounded hover surface floats free.
+A list or table built from parts, imported from `frappe-ui/list`. It is not
+the config-driven `ListView` in `frappe-ui/experimental`, which is a separate
+component.
 
 <ComponentPreview name="List-Feed" />
 
-## Row actions
+## Anatomy
 
-A row that needs a whole-row click _and_ inline action buttons keeps the row
-static and stacks the two layers itself: a button with `absolute inset-0`
-stretched over the row (rows are `position: relative`) is the whole-row target,
-and every control that handles its own pointer events — action buttons, tooltip
-triggers — gets `relative`, lifting it above the overlay. Which cells they live
-in doesn't matter; DOM order does: the overlay first, the layered controls after
-it. And because those controls are the overlay's siblings, not its children,
-their clicks never reach it — no `stopPropagation`. Give the overlay
-`type="button"` so it doesn't submit a surrounding form, and the row's own
-radius so the focus outline follows the row's corners. A static row brings no
-hover surface or content inset of its own, so add the hover/active classes and
-`list-row-px-3` to keep the interactive look. One gap remains: dividers hide
-around a hovered row only for interactive rows, so here the hover surface keeps
-the rule at its top edge — live with it, or pass `divider="none"`. The Files and
-Tasks recipes show the pattern at scale.
+`List` holds the column template, the selection and the active row.
+`ListHeader` is an optional header row. `ListRows` renders one row per item,
+and each `ListRow` holds one `ListCell` per column. `ListGroup` puts a label
+above a set of rows. The list draws the columns, dividers, hover surfaces,
+checkboxes and sort buttons. You write everything inside the cells: text,
+avatars, badges and unread emphasis.
+
+```vue
+<List v-model:selection="selection" :columns="['minmax(0,1fr)', '8rem']" selectable>
+  <ListHeader>
+    <ListHeaderCellSort :direction="direction" @click="toggleSort">
+      Name
+    </ListHeaderCellSort>
+    <ListHeaderCell>Role</ListHeaderCell>
+  </ListHeader>
+
+  <ListGroup label="Admins">
+    <ListRows :items="admins" v-slot="{ item, value }">
+      <ListRow :value="value">
+        <ListCell>{{ item.name }}</ListCell>
+        <ListCell>{{ item.role }}</ListCell>
+      </ListRow>
+    </ListRows>
+  </ListGroup>
+</List>
+```
+
+## Examples
+
+### Member table
+
+Explicit `columns` and a `ListHeader` turn the list into a table.
+`ListHeaderCellSort` makes a column sortable, and `v-model:active` highlights
+the row that was clicked last.
+
+<ComponentPreview name="List-Columns" />
+
+### Documents with a star button
+
+Each row opens its document on click and has a star button. A row cannot be a
+link or button and also hold buttons, so the rows stay static and a stretched
+button covers each one.
 
 <ComponentPreview name="List-RowActions" />
 
-## Active row
+### Table on a phone
 
-A master–detail list (a mail inbox, a file browser) tracks one open row. Bind
-`v-model:active` to a row `value` and the List owns the rest: it highlights that
-row and hides the dividers hugging it — above and below — so its rounded surface
-floats free, like a hovered row but persistent. Clicking a row sets `active`;
-unlike `selectable`, activation is additive, so the row's own `@click` and `route`
-navigation still run. It's single-select and independent of the multi-select
-checkbox `selection` — and works in feed or column mode.
+`columns` keyed by breakpoint gives the table two columns on a phone and three
+from `md` up. Resize the window to see it switch.
+
+<ComponentPreview name="List-Responsive" />
+
+### A thousand tasks
+
+`virtual` on `ListRows` mounts only the rows near the visible part of the
+scroll area.
+
+<ComponentPreview name="List-Virtual" csr="true" />
+
+## Behavior
+
+### Feed and column layouts
+
+Every list is a grid, and the header and every row read one column template.
+Without `columns`, the list uses the feed template `auto`, `minmax(0,1fr)`,
+`auto`: leading media, the content, and a right-aligned trailing cell.
+
+Pass `columns` for a table. Use fixed track sizes. Each row is its own grid,
+so an `auto` track sizes to that row's content alone, and the columns do not
+line up across rows. Use `minmax(0, 1fr)` for the content column and fixed
+widths or `fr` ratios for the rest.
+
+Cells are flex containers with `items-center`. Align their content with
+justify classes, such as `class="justify-end"` for a number column.
+
+### What a row renders
+
+A row with `route` renders a router link, a row with `href` a plain link that
+opens in the same tab, and a row with a click listener a button. Any other
+row is a plain `div`.
+
+A link or button cannot hold other buttons, so a row is either clickable or
+holds inline buttons, not both.
+
+### Clickable rows with buttons
+
+To have both, keep the row static and put two layers in it. The first is a
+button with `absolute inset-0`, which stretches over the row because rows are
+`position: relative`. It is the whole-row target. Every control after it that
+handles its own clicks, such as action buttons and tooltip triggers, gets the
+`relative` class, which lifts it above the stretched button.
+
+The cells these controls sit in do not matter, but the order does: the
+stretched button first, the other controls after it. The controls are its
+siblings, not its children, so their clicks never reach it and you do not
+need `stopPropagation`. Give the stretched button `type="button"` so it does
+not submit a surrounding form, and the row's corner radius so its focus
+outline follows the row's corners.
+
+A static row has no hover surface or content inset of its own, so add hover
+and active classes as the documents example does. Dividers hide around a
+hovered row only when the row itself is clickable, so here the divider stays
+at the top of the hover surface. Leave it, or pass `divider="none"`.
+
+### Dividers
+
+`divider` is `inset`, `full` or `none`. It defaults to `inset` in the feed
+layout and `full` when `columns` is set. An `inset` divider starts at the
+content column, the text edge. There is no divider above the first row, and
+the dividers around a hovered clickable row hide so its rounded surface
+stands apart.
+
+### Selection
+
+`selectable` shows a checkbox column and makes a row click toggle the row
+instead of opening it. `v-model:selection` holds the selected row values.
+
+With a `ListHeader`, a select-all checkbox appears in the header. It is
+checked when every row is selected and mixed when only some are, and it
+selects or clears all rows. It counts every item passed to `ListRows`, so it
+covers rows that virtual scrolling has not mounted.
+
+### Active row
+
+A list with a detail pane, such as a mail inbox or a file browser, tracks one
+open row. Bind `v-model:active` to a row `value`. The list highlights that row
+and hides the dividers above and below it.
+
+Clicking a row sets `active`, and the row's own `@click` and `route` still
+run. Only one row is active at a time. It is separate from the checkbox
+`selection`, and works in both layouts.
 
 ```vue
 <List v-model:active="openId">
@@ -71,35 +148,35 @@ checkbox `selection` — and works in feed or column mode.
 </List>
 ```
 
-## Column mode
+### Row values
 
-Pass explicit `columns` and a `ListHeader`. The List resolves one template and
-the header and every row read it, so the two grids can never drift.
+Selection and the active row use each row's `value`. `ListRows` works out the
+value once per item and passes it to its slot as `value`. It reads the item's
+`name`, then `id`, then falls back to the index. Pass `row-key` to use another
+field, or a function `(item, index) => key`.
 
-Use deterministic track sizes. Every row is its own grid, so `auto` tracks size
-against that row's content alone and nothing lines up — the intrinsic sizing a
-real `<table>` shares across rows has no equivalent here. `minmax(0, 1fr)` for
-the content column and fixed widths (or `fr` ratios) for the rest is the shape
-that stays aligned.
+The `ListRows` slot receives `{ item, index, value, selected, active }`.
+`selected` and `active` are separate states.
 
-`ListHeaderCell` is a plain label with optional `#prefix` / `#suffix`
-adornments. Sortable columns use `ListHeaderCellSort` instead — a controlled
-sort button: you hand it the active `direction` (`asc` / `desc` / `null`) and
-update your own sort state in its `click` handler. Your code owns the state,
-toggle rules, direction glyphs (via the scoped
-`#sort-indicator="{ direction }"` slot),
-and whether ordering happens client-side or through `useList` orderBy. The cell
-keeps only the behavioral chrome: a real button, `aria-sort`, the tooltip, and
-revealing an inactive column's sort indicator on hover. Both variants render
-the same `data-slot="list-header-cell"` geometry, so mixing them in one header
-is seamless.
+### Sorting
 
-<ComponentPreview name="List-Columns" />
+`ListHeaderCell` is a plain label, with optional `#prefix` and `#suffix`
+slots. A sortable column uses `ListHeaderCellSort` instead. It is controlled:
+pass the current `direction` (`asc`, `desc` or `null`) and update your own
+sort state in its `click` handler. Your code decides the toggle rules and
+whether rows are sorted in the browser or through `useList`'s `orderBy`.
 
-## Responsive columns
+The `#sort-indicator` slot receives `{ direction }` and draws the direction
+icon. The cell renders a real button with a tooltip ("Order by name"), and
+shows an inactive column's indicator on hover. `align="end"` right-aligns the
+cell for a number column and moves the indicator before the label, so the
+label lines up with the values below. Plain and sortable cells can sit in the
+same header.
 
-A table that fits a desktop rarely fits a phone. Pass `columns` as an object
-keyed by breakpoint and the List switches templates with the viewport:
+### Responsive columns
+
+Pass `columns` as an object keyed by breakpoint to change the template with
+the viewport width:
 
 ```vue
 <List
@@ -112,31 +189,29 @@ keyed by breakpoint and the List switches templates with the viewport:
 ```
 
 `base` is required and applies from zero width. Every other key names a
-breakpoint from your own Tailwind `screens` and applies from that width upward,
-until the next supplied breakpoint — `sm` and `xl` are missing above, so `sm`
-keeps the `base` template and `xl` keeps the `lg` one.
+breakpoint from your Tailwind `screens` and applies from that width up, until
+the next key. A breakpoint you leave out keeps the template below it: above,
+`sm` uses `base` and `xl` uses `lg`.
 
-Each breakpoint replaces the **whole** template. Nothing is merged track by
-track, so a breakpoint is free to change the track count as well as the widths.
+Each breakpoint replaces the whole template. Nothing is merged track by track,
+so a breakpoint can change the number of tracks as well as their widths.
 
-The switch happens in CSS, against your app's breakpoint values — a `md` you
-redefined moves the list's tracks and your `md:hidden` utilities together. That
-also means the server-rendered markup is already correct: there is no viewport
-measurement, no resize listener and no first-paint flash.
+The switch happens in CSS, at your app's breakpoint values, so the list's
+columns and your `md:hidden` classes change at the same width. The markup
+rendered on the server is already correct: there is no viewport measurement
+and no flash on first paint.
 
-A key names a screen, so every shape a Tailwind screen can take works, not only
-a plain width: a `{ min, max }` screen gives a tier that ends where the screen
-ends, a `{ max }` screen one that applies below a width, and a `{ raw }` screen
-one that applies wherever its query matches. In each case the tier is live in
-exactly the same places as that screen's own variants. Where two screens match
-at once, the tier that wins is the one whose utilities win.
+A key can be any kind of Tailwind screen. A `{ min, max }` screen gives a
+template that ends where the screen ends, a `{ max }` screen one that applies
+below a width, and a `{ raw }` screen one that applies wherever its media
+query matches. Each template applies in the same places as that screen's own
+classes. Where two screens match at once, the template that wins is the one
+whose classes win.
 
-**A key that is not one of your screens is ignored.**
-`{ base: […], medium: […] }` renders `base` at every width, because `medium`
-names no breakpoint and nothing switches to it. Breakpoint names come from your
-Tailwind config, so the type cannot reject the key — the index signature on
-`ListColumnsByBreakpoint` has to stay open for apps with custom screens. A
-development build warns instead, naming the key and listing the screens it could
+A key that is not one of your screens is ignored. `{ base: […], medium: […] }`
+uses `base` at every width, because `medium` names no breakpoint. The type
+cannot reject the key, because apps can define their own screens. A
+development build warns instead, names the key and lists the screens it could
 have been:
 
 ```
@@ -145,12 +220,12 @@ screens (base, sm, md, lg, xl), so its template is ignored and the list keeps
 the one below it.
 ```
 
-The warning is stripped from production builds. It needs frappe-ui's Tailwind
-preset, which is what tells the List which screens your app defines; without the
-preset every key above `base` is ignored anyway, and the warning says so.
+Production builds leave the warning out. It needs frappe-ui's Tailwind preset,
+which tells the list which screens your app defines. Without the preset every
+key above `base` is ignored, and the warning says so.
 
-Changing the track count never hides a cell. Say that part explicitly, with
-matching classes on the header and the rows:
+Fewer tracks never hide a cell. Hide it yourself, with the same classes on the
+header cell and the row cells:
 
 ```vue
 <List
@@ -165,82 +240,49 @@ matching classes on the header and the rows:
 </List>
 ```
 
-Each `List` owns its own columns. A list nested inside another list keeps its
-own `columns` prop, or the default feed template when it has none — an outer
-template never reaches it.
+### Nested lists
 
-Row height stays a plain prop. A per-breakpoint height would silently desync
-`virtual` windowing, so `rowHeight` is one number at every width; for a
-non-virtual list, set responsive heights with height classes on the rows.
+Each `List` has its own columns. A list inside another list uses its own
+`columns` prop, or the feed template when it has none. It never takes the outer
+list's template.
 
-<ComponentPreview name="List-Responsive" />
+### Row height
 
-## Virtual rows
+`rowHeight` sets a fixed row height in pixels. Without it, rows size to their
+content. It is one number at every width, because virtual scrolling depends on
+it. For a list that is not virtual, set responsive heights with height classes
+on the rows.
 
-`ListRows` iterates items through its scoped slot; with `virtual`, only rows
-near the viewport mount. The scoped slot receives `{ item, index, value, selected, active }`,
-where `selected` and `active` are independent,
-where `value` is the string row identity used by select-all and active-row
-state. The scroll container is the nearest scrollable ancestor — the list
-windows against an app-owned scroll area (a settings body, the page) and keeps
-its scrollbar. `virtual` is a boolean and `overscan` controls the extra rows on each side;
-height always comes from the parent `List`'s `rowHeight`. Virtualization is
-owned by `ListRows`.
+### Virtual rows
 
-<ComponentPreview name="List-Virtual" csr="true" />
+With `virtual`, `ListRows` mounts only the rows near the visible part of the
+scroll area. The row height comes from the parent `List`'s `rowHeight`.
+`overscan` sets how many extra rows mount on each side, and defaults to `6`.
 
-## Styling hooks
+The list scrolls inside the nearest scrollable parent, such as a settings
+panel or the page, and keeps that parent's scrollbar.
 
-`--list-gap` (default `0.5rem`) and `--list-row-padding-x` are the list's public
-CSS hooks. Set them with plain (responsive) classes on the `List` — or on any
-ancestor, to theme every list in a subtree. Their defaults live in `var()`
-fallbacks, so a consumer value always wins.
+### Groups
 
-Column templates are deliberately not a hook. They come from the `columns` prop
-alone, which is what lets every `List` — nested ones included — own its own
-grid.
+`ListGroup` puts a label row above its rows. Pass the text as `label`, or
+replace it with the `#label` slot. `sticky` pins the label to the top of the
+scroll area while its rows scroll under it.
 
-`--list-row-padding-x` is the inline content inset, and its default is
-asymmetric on purpose: interactive rows get `0.75rem` so the rounded hover
-surface clears their content, while static rows, the header and group headers
-sit flush at `0` — a header can't tell whether its sibling rows are interactive.
-Setting the hook gives every row and the header the same value. A column-mode
-list with clickable rows and a header should always set it (`list-row-px-3`) so
-the header labels stay aligned with the cell text below them. The checkbox
-column follows the same rule: in a `selectable` list with a header, the hook is
-also what lines the select-all checkbox up with the row checkboxes.
+## Accessibility
 
-For both hooks the frappe-ui Tailwind preset ships spacing-scale utilities —
-`list-gap-*` and `list-row-px-*` — so the usual authoring form is
-`max-sm:list-gap-3 sm:list-gap-4` rather than raw `[--list-gap:0.75rem]`
-properties. Both forms hit the same CSS vars.
+The roles follow the header. Without a `ListHeader`, the list has
+`role="list"` and each row `listitem`. With one, it has `table`, `row`,
+`columnheader` and `cell`, and a sorted column has `aria-sort`.
 
-The prop/hook split follows one rule: knobs that drive behavior are props
-(`columns` also flips the divider default, `rowHeight` also feeds `virtual`
-windowing), knobs that are pure geometry are CSS hooks. Vars with a `--_list`
-prefix are internal, not API — they can change in any release, and they reset at
-every `List`, so a nested list never inherits an outer list's props. The
-resolved column template is one of them.
+The active row has `aria-current`. The select-all checkbox is named "Select
+all" and reports a mixed state when only some rows are selected. A
+`ListGroup` has `role="rowgroup"` and is named by its label.
 
-Cells (and plain header cells) are flex containers with `items-center` — align
-content with justify utilities (`class="justify-end"` for numeric columns),
-responsively if needed. For sortable numeric headers, use
-`<ListHeaderCellSort align="end">` so the sort glyph moves to the leading side
-and the label stays flush with the column edge.
+## Migrating from v0
 
-Slots for CSS targeting:
-`data-slot="list | list-header | list-header-cell | list-header-checkbox | list-row | list-cell | list-row-checkbox | list-group | list-group-header | list-divider"`.
-Slots not listed here are internal and may change. State:
-`data-state="active|inactive"` (+ `aria-current` on the `v-model:active` row),
-boolean `data-selected` for checkbox selection, and boolean `data-interactive`
-on rows. Active and selected are independent. Header cells use `data-sort` when
-sorted.
-
-`data-slot="list-group-header"` names the structural header element and stays
-unchanged when the ListGroup content slot is renamed to `#label`.
-
-Accessibility follows header presence: `role="list"` / `"listitem"` without a
-`ListHeader`, `table` / `row` / `columnheader` / `cell` (plus `aria-sort`) with
-one.
+`ListGroup`'s `#header` slot is now `#label`, `ListHeaderCellSort`'s `#suffix`
+slot is now `#sort-indicator`, and `ListRows.virtual` is now a boolean with a
+separate `overscan` prop. A codemod, `npx list-v1 .`, handles most of it. See
+the [migration guide](../migration#list-family).
 
 <!-- @include: ./list.api.md -->
