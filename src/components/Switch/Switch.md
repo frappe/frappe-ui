@@ -1,57 +1,68 @@
 # Switch
 
-A toggle input for turning options on or off. Clearly indicates state changes and allows quick, intuitive control.
+A toggle that turns a setting on or off.
 
 <ComponentPlayground name="Switch" />
 
-## With icon
+## Examples
 
-Strings starting with `lucide-` route through the shared Lucide
-Tailwind utility. Component values are rendered with `<component :is>`.
+### Notification settings
+
+`icon` shows an icon before the label.
 
 <ComponentPreview name="Switch-Icons" />
 
-## States
+### Toolbar toggle
 
-<ComponentPreview name="Switch-States" />
-
-## In a toolbar
-
-The `padded` prop gives the switch a clickable surface and hover state that
-matches the buttons beside it, so it sits comfortably in a toolbar. Clicking
-anywhere on the row toggles the switch.
+`padded` gives the switch a clickable surface and a hover state that match the
+buttons beside it. A click anywhere on the row toggles the switch.
 
 <ComponentPreview name="Switch-Toolbar" />
 
-## Settings list
+### Writing settings
 
-When a `description` is present the switch sits on the right of the row. The
-switch control stays interactive on its own — there are no row-level hover or
-focus states.
+A list of rows, each with a `description` below the label and the switch on
+the right.
 
 <ComponentPreview name="Switch-SettingsRows" />
 
-## Template ref
+## Behavior
 
-`focus()` is the one method every input in the library exposes. It moves focus
-to the component's own interactive element, so a generic form can call it
-without knowing which control it holds.
+### Icon
 
-```vue
-<script setup lang="ts">
-import { useTemplateRef } from 'vue'
+`icon` takes a `lucide-` class name, such as `"lucide-bell"`, or a component,
+which is rendered with `<component :is>`.
 
-const field = useTemplateRef('field')
-</script>
+### Control position
 
-<template>
-  <Switch ref="field" v-model="value" />
-</template>
-```
+`controlPosition` is `end` by default, so the switch sits after the label and
+the row fills the available width. `start` puts the switch before the label,
+and the row fits its content. Both follow the text direction.
 
-## Attributes
+### Padded
 
-`class` and `style` go to the layout wrapper. Everything else — `name`,
-`aria-*`, `data-*`, and listeners — goes once to the interactive element.
+`padded` wraps the switch and the label in a clickable surface with hover,
+active and focus states, for toolbars and menu items. Without `padded`, only
+the switch and its label respond to clicks, and the row has no hover or focus
+state.
+
+### Attributes
+
+`class` and `style` go to the layout wrapper. Everything else (`name`,
+`aria-*`, `data-*` and listeners) goes once to the interactive element, which
+for `Switch` is the switch button.
+
+## Accessibility
+
+`Switch` renders a button with `role="switch"`, and `Space` or `Enter` toggles
+it. An icon given as a class name is hidden from screen readers. `required`
+sets `aria-required`. While `error` is set, the switch gets `aria-invalid` and
+an `aria-errormessage` that points to the error text.
+
+## Migrating from v0
+
+`@change` is now `@update:modelValue`. Attributes used to go to the wrapper.
+Now they go to the switch button. See the
+[migration guide](/docs/migration#inputs) for details.
 
 <!-- @include: ./Switch.api.md -->
