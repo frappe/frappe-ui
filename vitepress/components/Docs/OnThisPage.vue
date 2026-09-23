@@ -18,6 +18,14 @@ const h2Exists = ref(false)
 let observer: IntersectionObserver | undefined
 const visible = new Set<string>()
 
+// VitePress appends a `#` anchor whose text is a zero-width space. trim() keeps
+// that character, and it can wrap onto a line of its own in the outline.
+function headingText(el: Element) {
+  const copy = el.cloneNode(true) as Element
+  copy.querySelectorAll('.header-anchor').forEach((a) => a.remove())
+  return copy.textContent?.trim() ?? ''
+}
+
 const setHeadings = () => {
   // Real doc headings carry an id (VitePress adds it for the anchor); headings
   // from components without one, e.g. Accordion triggers, are filtered out already.
@@ -30,7 +38,7 @@ const setHeadings = () => {
 
   headings.value = elements.map((el) => ({
     type: el.tagName.toLowerCase(),
-    name: el.textContent?.trim() ?? '',
+    name: headingText(el),
     id: el.id,
   }))
 
