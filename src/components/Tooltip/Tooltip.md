@@ -77,37 +77,4 @@ The tooltip opens when its trigger gets keyboard focus and closes on
 <kbd>Escape</kbd>. It has the `tooltip` role, and screen readers read it as the
 trigger's description.
 
-## Migrating from v0
-
-`placement` is now `side`, and `arrowClass` is gone. If you used `arrowClass`
-to move the tooltip, use `offset`. `hoverDelay` and `TooltipProvider`'s
-`skipDelay` are now in milliseconds: change `0.5` to `500`. See the
-[migration guide](../migration#tooltip) for the full table.
-
-`#body` is now `#content`, and it renders inside the bubble. Most `#body` uses
-copied the bubble's own classes to get them back, so the move usually means
-deleting that wrapper:
-
-```vue
-<!-- before -->
-<Tooltip>
-  <template #body>
-    <div class="rounded bg-surface-gray-10 px-2 py-1 text-xs text-ink-base shadow-xl">
-      <span>Hide password</span>
-    </div>
-  </template>
-  <Button icon="eye" />
-</Tooltip>
-
-<!-- after -->
-<Tooltip>
-  <template #content>
-    <span>Hide password</span>
-  </template>
-  <Button icon="eye" />
-</Tooltip>
-```
-
-If the content really has its own surface, keep it and add `bare`.
-
 <!-- @include: ./Tooltip.api.md -->

@@ -132,14 +132,3 @@ function notifySaved(options?: ToastOptions): ToastId {
   return toast.success('Saved', options)
 }
 ```
-
-## Migrating from v0
-
-The object form `toast({ title, text })` no longer works and shows no error:
-the toast renders empty. Write `toast.success('Saved', { description: '…' })`
-instead. `toast.create`, `toast.remove` and `toast.removeAll` become
-`toast.message`, `toast.dismiss(id)` and `toast.dismiss()`. The standalone
-`<Toast>` component is removed. `description` now renders limited inline HTML
-instead of plain text. See the migration guide sections on
-[the object form](../migration#toast-legacy-object) and
-[HTML in `description`](../migration#toast-description-html).

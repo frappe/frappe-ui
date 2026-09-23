@@ -99,34 +99,4 @@ option when nothing is selected.
 
 The arrow keys skip disabled options.
 
-## Migrating from v0
-
-- `type` is renamed to `variant`, matching `TabList`.
-- The deprecated `buttons` prop is removed. Use `options`.
-- `value` is required on every option, and boolean values are no longer
-  accepted. The label-as-value fallback and the `active: true` fallback are
-  removed. The model is the only source of the selected value.
-- `fluid` is new. The buttons stretch to fill the container width. It replaces
-  CSS and wrapper `div` workarounds.
-- `class` on an option object is removed. Target one tab through its
-  `data-value` attribute instead. See [Attributes](#attributes) and the
-  [migration guide](../migration#tabbuttons-class).
-
-TabButtons no longer wraps `<Button>`. Each tab is a native `<button>`,
-`<a href>` or `<RouterLink>` that renders a `<Pill>`. This breaks code that
-passed Button props through option entries:
-
-- `theme`, `variant`, `size`, `loading` and `prefix` on individual options are
-  no longer used. Use `Button` or `Pill` directly if you need per-tab theming or
-  a loading spinner.
-- `hideLabel` on options is gone. Use `icon` for an icon-only tab. Its required
-  `label` becomes the accessible name. Use `iconLeft` for an icon before a
-  visible label, and the `#suffix` slot for content after it.
-- `route` and `href` on options still work: a tab renders as a `<RouterLink>`
-  when `route` is set, or as an `<a href target=_blank>` when `href` is set.
-- The per-tab `tooltip` field is removed. Put help text in your own UI when a
-  label alone is not enough.
-
-See the [migration guide](../migration#tabbuttons) for the full list.
-
 <!-- @include: ./TabButtons.api.md -->

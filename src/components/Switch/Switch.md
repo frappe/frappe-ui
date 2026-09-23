@@ -19,13 +19,6 @@ buttons beside it. A click anywhere on the row toggles the switch.
 
 <ComponentPreview name="Switch-Toolbar" />
 
-### Writing settings
-
-A list of rows, each with a `description` below the label and the switch on
-the right.
-
-<ComponentPreview name="Switch-SettingsRows" />
-
 ## Behavior
 
 ### Icon
@@ -70,11 +63,5 @@ for `Switch` is the switch button.
 it. An icon given as a class name is hidden from screen readers. `required`
 sets `aria-required`. While `error` is set, the switch gets `aria-invalid` and
 an `aria-errormessage` that points to the error text.
-
-## Migrating from v0
-
-`@change` is now `@update:modelValue`. Attributes used to go to the wrapper.
-Now they go to the switch button. See the
-[migration guide](../migration#inputs) for details.
 
 <!-- @include: ./Switch.api.md -->
