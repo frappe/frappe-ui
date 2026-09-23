@@ -48,7 +48,7 @@ ambiguous dynamic syntax for manual review instead of guessing.
 | `tokens-v2`       | Tailwind token renames. Flags: `--ink-shift`, `--force`, `--radius-only`. See [Tokens](#tokens).                                                                                                                |
 | `destinations-v1` | Destination prop renames. See [Navigation destinations](#navigation-destinations).                                                                                                                              |
 | `overlays-v1`     | Overlay and picker controls. See [Popover / HoverCard / Tooltip](#popover-hovercard-tooltip), [Selection family](#selection-family-dropdown-select-combobox-multiselect) and [DatePicker / TimePicker](#datepicker-timepicker-family). |
-| `navigation-v1`   | Navigation props and tab state. See [Tabs](#tabs), [TabButtons](#tabbuttons) and [SettingsDialog](#settingsdialog).                                                                                             |
+| `navigation-v1`   | Navigation props and tab state. See [Tabs](#tabs), [TabButtons](#tabbuttons), [SettingsDialog](#settingsdialog) and [Sidebar](#sidebar).                                                                        |
 | `shortcuts-v1`    | Shortcut config. See [The shortcuts codemod](#the-shortcuts-codemod).                                                                                                                                           |
 | `base-props-v1`   | Base component prop normalization. See [Base component props](#base-component-props).                                                                                                                           |
 | `list-v1`         | List row hooks and slot names. See [List family](#list-family).                                                                                                                                                 |
@@ -160,17 +160,16 @@ only moved.
 | Node             | **`>=20.19.0`** (`package.json` `engines`) | New. The 0.1.x line declared no `engines` field at all.            |
 | Vue              | `vue >=3.5.0` (`peerDependencies`)        | Unchanged. An app already on v0 needs no Vue bump.                 |
 | vue-router       | `vue-router ^4.1.6` (`peerDependencies`)  | Unchanged.                                                         |
-| Tailwind CSS     | **v3**                                    | Unchanged. v4 is not supported.                                    |
+| Tailwind CSS     | **v3**, peer `tailwindcss >=3.4.2 <4`     | Unchanged. v4 is not supported.                                    |
 | `@vueuse/core`   | **`^14.1.0`**                             | Up from `^10.4.1` in the 0.1.x line.                               |
 
 **Node.** This is a new minimum, not a raised one. A Node 18 image that built v0
 without problems now fails to install.
 
-**Tailwind.** `frappe-ui/tailwind` is a v3 preset. frappe-ui declares no
-`tailwindcss` peer dependency, so a v4 project installs without errors and then
-fails at build time. See the [Tailwind page](/docs/getting-started/tailwind).
-[Dependencies](#packaging-dependencies) below states the opposite: that
-frappe-ui declares the peer `>=3.4.2 <4`, so a v4 install fails.
+**Tailwind.** `frappe-ui/tailwind` is a v3 preset. frappe-ui declares
+`tailwindcss` as a peer dependency, `>=3.4.2 <4`, so install it yourself; see
+[Dependencies](#packaging-dependencies) below. A v4 project does not work with
+the preset. See the [Tailwind page](/docs/getting-started/tailwind).
 
 **VueUse.** VueUse 14 requires Vue `^3.5.0`, which v1 already requires. If your
 app depends on `@vueuse/core` directly, move it to `^14` as well. Two major
@@ -242,8 +241,9 @@ and `unplugin-vue-components`.
 
 - **Loud break** for an `~icons` import:
   `Failed to resolve import "~icons/lucide/check"`.
-- **Silent break** for an auto-imported tag: `<LucideCheck />` renders as an
-  unknown element, and Vue warns in the console.
+- **Quiet break** for an auto-imported tag: the build passes, `<LucideCheck />`
+  renders as an unknown element, and the only sign is a Vue warning in the
+  console.
 
 **Codemod:** `packaging-v1` adds the option where the app still needs it.
 
@@ -2244,7 +2244,7 @@ props, and gets a security fix to the upload default it shares with
 | `uploadArgs` object prop                        | flat props                                            |
 | `inputRef()` on the template ref                | `openFileSelector` slot prop                          |
 | default slot `error`: `unknown`                 | `string \| null`                                      |
-| `fileToBase64`, size-limit helpers exported     | not exported                                          |
+| `fileToBase64` exported (size-limit helpers: betas only) | not exported                                 |
 
 ### Uploads default to private
 
@@ -2479,8 +2479,9 @@ is no build error, no type error and no warning; the sidebar renders as an empty
 frame. After upgrading, grep for `:header=`, `:sections=`, `:items=`,
 `#sidebar-item` and `isActive` on these five components.
 
-**Codemod:** `SidebarItem.to` → `route` is covered by `destinations-v1`; see
-[Navigation destinations](#navigation-destinations).
+**Codemod:** `destinations-v1` renames `SidebarItem.to` to `route`; see
+[Navigation destinations](#navigation-destinations). `navigation-v1` renames
+`SidebarRailItem variant="tile"` to `variant="subtle"`.
 
 ```vue
 <!-- Before -->
@@ -2668,9 +2669,10 @@ switcher. Its prop and type names now match the Tabs family. See the
 and is spread onto the radiogroup root. A `TabButtons` still on `:buttons`
 renders an empty track with no build error, type error or warning.
 
-The destination codemod (`destinations-v1`) handles statically named component
-props only. Grep for `:buttons`, `type=`, `direction=`, `hideLabel`, `tooltip`,
-and non-string labels in option data.
+No codemod renames these props. `destinations-v1` does not touch `TabButtons`,
+and `navigation-v1` only renames the `checked` slot prop to `active`. Grep for
+`:buttons`, `type=`, `direction=`, `hideLabel`, `tooltip`, and non-string labels
+in option data.
 
 For the `class` on an option, see
 [TabButtons: `class` on an option → `data-value`](#tabbuttons-class).
@@ -3405,7 +3407,9 @@ never set the prop is unchanged.
 `role="note"` on the root becomes `role="img"` when `combo` is set, and no role
 at all without `combo`. A labelled `img` replaces its subtree, so a screen
 reader reads "Shortcut Control + Backspace" once, instead of reading every chip.
-Update any test or stylesheet that selects `[role='note']`.
+
+**Silent break** for a test or stylesheet that selects `[role='note']`: it stops
+matching, with no error. Update it.
 
 ### `matchesShortcut` is no longer exported
 
@@ -3493,12 +3497,12 @@ so the replacement renders the same badge as before.
 
 How the break shows up depends on whether the call site is typed:
 
-- **TypeScript: loud.** `vue-tsc` rejects the value, because the `theme` prop
-  union no longer accepts the string. You get a compile error, not a surprise in
-  production.
-- **JavaScript and bound values: silent.** The badge renders in the default
-  `gray` theme and logs a one-time development-mode warning that names the
-  component, the prop and the value. Production logs nothing.
+- **Loud break in TypeScript.** `vue-tsc` rejects the value, because the
+  `theme` prop union no longer accepts the string. You get a compile error, not
+  a surprise in production.
+- **Silent break in JavaScript and bound values.** The badge renders in the
+  default `gray` theme and logs a one-time development-mode warning that names
+  the component, the prop and the value. Production logs nothing.
 
 ```
 [frappe-ui] Badge.theme="orange" is not a supported value — falling back to
@@ -3550,8 +3554,8 @@ const badgeTheme = tone === 'orange' ? 'amber' : tone
 ## Icons
 
 Pass an icon anywhere in the library as a `lucide-*` string (drawn by the
-Tailwind mask plugin), or as a `Component` when you need one. This is now the
-only supported way. `FeatherIcon` is removed per ADR-0008: it was marked
+Tailwind mask plugin), or as a `Component` when you need one. This is the one
+recommended way. `FeatherIcon` is removed per ADR-0008: it was marked
 `@deprecated` in code, and nothing marked deprecated ships in `1.0.0`.
 
 | Before                                     | After                                               |
@@ -3895,8 +3899,11 @@ toast.success('Saved')
 API is plain `toast()` plus `toast.success()` / `toast.error()` /
 `toast.warning()` / `toast.info()`.
 
-v0's `toast.create()`, `toast.remove()` and `toast.removeAll()` still work, but
-warn once in development. Move them to `toast(...)` and `toast.dismiss(...)`.
+**Loud break:** v0's `toast.create()`, `toast.remove()` and `toast.removeAll()`
+are removed. TypeScript reports each call, and at runtime each one throws a
+`TypeError` (`toast.create is not a function`). Move them to
+`toast.message(...)`, `toast.dismiss(id)` and `toast.dismiss()`; see
+[The three named shims are removed](#the-three-named-shims-are-removed).
 
 ## Toast: the legacy object form is removed {#toast-legacy-object}
 
@@ -3937,8 +3944,9 @@ A grep for `toast(` does not find these reliably. Grep for the keys instead:
 
 ### The three named shims are removed
 
-**Loud break:** the three named shims are removed at the same time, and they
-fail with an error:
+**Loud break:** the three named shims are removed at the same time. They no
+longer work at all: TypeScript reports each call, and at runtime each
+one throws a `TypeError` (`toast.create is not a function`).
 
 ```js
 toast.create({ message: 'Loading…' }) // → toast.message('Loading…')
@@ -4918,9 +4926,9 @@ failed read keeps the last value on screen and reports the failure through
 | a `useDoc` `methods:` member's `submit()`                | resolved with `null` | rejects              |
 | `execute()` / `fetch()` / `reload()` in every composable | resolved             | resolves (no change) |
 
-`useDoctype` and `useList` write methods already rejected; see
-[the section above](#data-fetching-usedoctype-uselist). This change makes the
-rest work the same way.
+`useDoctype` and `useList` write methods follow the same rule. In v0 they also
+resolved with `null` when the request failed; see
+[the section above](#data-fetching-usedoctype-uselist).
 
 **Silent break.** Nothing fails to build. The success path just stops running,
 and an unawaited `submit()` becomes an unhandled rejection.
@@ -5155,9 +5163,9 @@ common case, "POST to a whitelisted method". `request`, `createCall` and
 **Loud break** for the first three rows: they are build failures, and your
 bundler or type-check names them.
 
-**Runtime break** for the last three rows: a dropped `config` is applied
-nowhere, and reading `this.$call` or `this.$resources` throws with the fix in
-the message.
+**Loud break at runtime** for the last three rows, not at build time: a
+dropped `config` is applied nowhere (the plugin warns in development), and
+reading `this.$call` or `this.$resources` throws with the fix in the message.
 
 ### `request` → `frappeRequest`
 
@@ -5707,12 +5715,17 @@ rewrite only when you want to stop using the deprecated component.
 - Where component structure changed, components expose `data-*` hooks
   (`data-slot`, `data-state`, `data-size`, `data-variant`). Check selectors that
   targeted tags or classes.
-- Separately, the token names changed: removed radius aliases and the shifted
-  ink scales emit no CSS at all, with no build or type error. Run the
-  [token codemod](#tokens) before you check anything by hand.
+- Separately, the token names changed, with no build or type error. A removed
+  radius alias emits no CSS at all. A chromatic ink token renders one shade off
+  after the ink shift, and an old `-10` step emits no CSS, because the scales
+  now end at `-9`. Run the [token codemod](#tokens), including its
+  [`--ink-shift` mode](#ink-chromatic-scales-shift-one-level), before you check
+  anything by hand.
 
 **Do I have to run the codemods?**
 
+- Run `packaging-v1` for the Tailwind preset path and the Vite plugin's
+  `lucideIcons` option.
 - Run `tokens-v2` if you use Tailwind utilities from the frappe-ui preset.
 - Run `shortcuts-v1` if you register keyboard shortcuts. It also catches the
   punctuation keys that a hand migration breaks without any error.
@@ -5720,6 +5733,8 @@ rewrite only when you want to stop using the deprecated component.
 - `base-props-v1` handles the Icon, Progress and Divider changes above.
 - Run `destinations-v1` and `navigation-v1` for navigation changes,
   `overlays-v1` for overlays and pickers, and `list-v1` for the List family.
+- Run `data-v1` if you pass an object to the `FrappeUI` plugin's `resources`
+  option.
 
 Review any sites the codemods report before you finish the hand edits named in
 other sections. See [Codemods](#codemods) for the full list.
