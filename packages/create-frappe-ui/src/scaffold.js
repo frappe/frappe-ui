@@ -40,7 +40,9 @@ export function copyTemplate(template, target, values) {
     const content = fs
       .readFileSync(source, 'utf8')
       .replace(/__([A-Z_]+)__/g, (match, /** @type {string} */ key) =>
-        Object.hasOwn(values, key) ? values[/** @type {keyof TemplateValues} */ (key)] : match,
+        Object.hasOwn(values, key)
+          ? values[/** @type {keyof TemplateValues} */ (key)]
+          : match,
       )
     const destination = path.join(target, output)
     fs.mkdirSync(path.dirname(destination), { recursive: true })
@@ -75,7 +77,9 @@ function sourceFiles(template) {
  */
 function outputPath(file) {
   const base = path.basename(file)
-  return base.startsWith('_') ? path.join(path.dirname(file), `.${base.slice(1)}`) : file
+  return base.startsWith('_')
+    ? path.join(path.dirname(file), `.${base.slice(1)}`)
+    : file
 }
 
 /**

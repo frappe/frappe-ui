@@ -20,7 +20,9 @@ export function detectPackageManager(userAgent) {
  * @param {string} script
  */
 export function runCommand(pm, script) {
-  return pm === 'npm' || pm === 'bun' ? `${pm} run ${script}` : `${pm} ${script}`
+  return pm === 'npm' || pm === 'bun'
+    ? `${pm} run ${script}`
+    : `${pm} ${script}`
 }
 
 /**

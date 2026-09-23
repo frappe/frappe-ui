@@ -26,7 +26,15 @@ import { runCommand } from './packageManager.js'
  */
 
 /** Routes that Frappe serves itself, so the app can't take them. */
-const RESERVED_ROUTES = ['api', 'app', 'assets', 'desk', 'files', 'login', 'private']
+const RESERVED_ROUTES = [
+  'api',
+  'app',
+  'assets',
+  'desk',
+  'files',
+  'login',
+  'private',
+]
 
 /**
  * Finds the Frappe app that holds `dir`: either `dir` is the app folder
@@ -122,7 +130,9 @@ export function readBench(app) {
     }
     const siteNames = fs
       .readdirSync(sites)
-      .filter((name) => fs.existsSync(path.join(sites, name, 'site_config.json')))
+      .filter((name) =>
+        fs.existsSync(path.join(sites, name, 'site_config.json')),
+      )
     if (siteNames.length === 1) site = siteNames[0]
   }
   // The frappe-ui Vite plugin runs the dev server on the bench port plus 80.
@@ -222,8 +232,11 @@ function planRootPackage(app, frontend, pm) {
   return {
     file,
     action: 'manual',
-    summary: 'has no build script. Add these scripts, so bench builds the frontend:',
-    snippet: JSON.stringify(scripts, null, 2).slice(2, -2).replace(/^ {2}/gm, ''),
+    summary:
+      'has no build script. Add these scripts, so bench builds the frontend:',
+    snippet: JSON.stringify(scripts, null, 2)
+      .slice(2, -2)
+      .replace(/^ {2}/gm, ''),
   }
 }
 

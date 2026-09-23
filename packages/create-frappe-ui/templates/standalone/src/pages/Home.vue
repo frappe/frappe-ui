@@ -28,7 +28,11 @@ function sayHello() {
         aria-label="Switch light and dark mode"
         @click="toggleColorScheme"
       />
-      <Button icon-left="lucide-book-open" label="Docs" href="https://ui.frappe.io" />
+      <Button
+        icon-left="lucide-book-open"
+        label="Docs"
+        href="https://ui.frappe.io"
+      />
     </div>
   </PageHeader>
 
@@ -37,7 +41,9 @@ function sayHello() {
       <h1 class="text-2xl-semibold text-ink-gray-9">Your app is ready</h1>
       <p class="text-p-base text-ink-gray-7">
         Edit
-        <code class="rounded-1 bg-surface-gray-2 px-1 py-0.5 font-mono text-sm">src/pages/Home.vue</code>
+        <code class="rounded-1 bg-surface-gray-2 px-1 py-0.5 font-mono text-sm"
+          >src/pages/Home.vue</code
+        >
         to start building.
       </p>
     </div>
@@ -46,8 +52,18 @@ function sayHello() {
       class="flex items-end gap-2 rounded-6 border border-outline-gray-1 p-4"
       @submit.prevent="sayHello"
     >
-      <FormControl v-model="name" class="flex-1" label="Your name" placeholder="Ada" />
-      <Button type="submit" variant="solid" icon-left="lucide-hand" label="Say hello" />
+      <FormControl
+        v-model="name"
+        class="flex-1"
+        label="Your name"
+        placeholder="Ada"
+      />
+      <Button
+        type="submit"
+        variant="solid"
+        icon-left="lucide-hand"
+        label="Say hello"
+      />
     </form>
   </div>
 </template>

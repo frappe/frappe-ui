@@ -3,7 +3,9 @@ import { Button } from 'frappe-ui'
 </script>
 
 <template>
-  <div class="flex flex-col items-center justify-center gap-3 py-24 text-center">
+  <div
+    class="flex flex-col items-center justify-center gap-3 py-24 text-center"
+  >
     <div class="rounded-full bg-surface-gray-2 p-3 text-ink-gray-5">
       <span class="lucide-map-pin-off size-6" aria-hidden="true" />
     </div>

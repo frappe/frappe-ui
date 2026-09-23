@@ -72,7 +72,9 @@ async function create(argv) {
   const app = findApp(cwd)
   const pm = detectPackageManager(process.env.npm_config_user_agent)
 
-  p.intro(`${styleText(['bgCyan', 'black'], ' frappe-ui ')} ${styleText('dim', `v${version}`)}`)
+  p.intro(
+    `${styleText(['bgCyan', 'black'], ' frappe-ui ')} ${styleText('dim', `v${version}`)}`,
+  )
 
   // Where
   const frontendDir = app && path.relative(cwd, path.join(app.root, 'frontend'))
@@ -134,7 +136,11 @@ async function create(argv) {
     const route = await askRoute(args.route, `/${app.name}`, interactive)
     frappe = {
       route,
-      changes: planAppChanges(app, { route, frontend: path.basename(target), pm }),
+      changes: planAppChanges(app, {
+        route,
+        frontend: path.basename(target),
+        pm,
+      }),
     }
   }
 
@@ -146,7 +152,9 @@ async function create(argv) {
     if (
       writes &&
       interactive &&
-      !(await ask(p.confirm({ message: 'Make these changes?', initialValue: true })))
+      !(await ask(
+        p.confirm({ message: 'Make these changes?', initialValue: true }),
+      ))
     ) {
       throw new CliError('Nothing was changed.')
     }
@@ -156,7 +164,10 @@ async function create(argv) {
     args.install ??
     (interactive
       ? await ask(
-          p.confirm({ message: `Install dependencies with ${pm}?`, initialValue: true }),
+          p.confirm({
+            message: `Install dependencies with ${pm}?`,
+            initialValue: true,
+          }),
         )
       : true)
 
@@ -164,7 +175,9 @@ async function create(argv) {
   const title = app && template === 'frappe' ? app.title : path.basename(target)
   copyTemplate(template, target, {
     PACKAGE_NAME: toPackageName(
-      app && template === 'frappe' ? `${app.name}-frontend` : path.basename(target),
+      app && template === 'frappe'
+        ? `${app.name}-frontend`
+        : path.basename(target),
     ),
     TITLE: escapeHtml(title),
     FRAPPE_UI_VERSION: version,
@@ -175,7 +188,9 @@ async function create(argv) {
     applyAppChanges(frappe.changes)
     for (const change of frappe.changes) {
       if (change.action !== 'manual') continue
-      p.log.warn(`${path.relative(cwd, change.file)} ${change.summary}\n${change.snippet}`)
+      p.log.warn(
+        `${path.relative(cwd, change.file)} ${change.summary}\n${change.snippet}`,
+      )
     }
   }
 
@@ -252,7 +267,9 @@ function readArgs(argv) {
   }
   const template = values.template
   if (template !== undefined && !isTemplate(template)) {
-    throw new CliError(`Unknown template "${template}". Use frappe or standalone.`)
+    throw new CliError(
+      `Unknown template "${template}". Use frappe or standalone.`,
+    )
   }
   return {
     dir: positionals[0],
@@ -294,7 +311,8 @@ async function askRoute(flag, defaultRoute, interactive) {
         )
       : defaultRoute)
   const result = parseRoute(input)
-  if ('error' in result) throw new CliError(`Invalid route "${input}". ${result.error}`)
+  if ('error' in result)
+    throw new CliError(`Invalid route "${input}". ${result.error}`)
   return result.route
 }
 
@@ -309,7 +327,9 @@ async function askRoute(flag, defaultRoute, interactive) {
 async function checkTarget(target, template, cwd, interactive) {
   if (!fs.existsSync(target)) return
   if (!fs.statSync(target).isDirectory()) {
-    throw new CliError(`${display(cwd, target)} is a file. Choose a folder name.`)
+    throw new CliError(
+      `${display(cwd, target)} is a file. Choose a folder name.`,
+    )
   }
   const existing = fs
     .readdirSync(target)
@@ -394,7 +414,9 @@ function command(text) {
  */
 function display(cwd, file) {
   const relative = path.relative(cwd, file)
-  return relative.startsWith('..') || path.isAbsolute(relative) ? file : `./${relative}`
+  return relative.startsWith('..') || path.isAbsolute(relative)
+    ? file
+    : `./${relative}`
 }
 
 /** @param {string} value */

@@ -40,19 +40,30 @@ const loggedUser = useCall<string>({
       <h1 class="text-2xl-semibold text-ink-gray-9">Your frontend is ready</h1>
       <p class="text-p-base text-ink-gray-7">
         Edit
-        <code class="rounded-1 bg-surface-gray-2 px-1 py-0.5 font-mono text-sm">src/pages/Home.vue</code>
+        <code class="rounded-1 bg-surface-gray-2 px-1 py-0.5 font-mono text-sm"
+          >src/pages/Home.vue</code
+        >
         to start building. The checks below show that the page can talk to your
         site.
       </p>
     </div>
 
-    <div class="divide-y divide-outline-gray-1 rounded-6 border border-outline-gray-1">
+    <div
+      class="divide-y divide-outline-gray-1 rounded-6 border border-outline-gray-1"
+    >
       <div class="flex items-center gap-3 px-4 py-3">
-        <span class="lucide-file-json size-4 shrink-0 text-ink-gray-6" aria-hidden="true" />
+        <span
+          class="lucide-file-json size-4 shrink-0 text-ink-gray-6"
+          aria-hidden="true"
+        />
         <div class="min-w-0 flex-1">
           <p class="text-base-medium text-ink-gray-8">Boot data</p>
           <p class="mt-1.5 truncate text-sm text-ink-gray-5">
-            {{ bootUser ? `Signed in as ${bootUser}` : 'Only a production build has boot data' }}
+            {{
+              bootUser
+                ? `Signed in as ${bootUser}`
+                : 'Only a production build has boot data'
+            }}
           </p>
         </div>
         <Badge
@@ -62,10 +73,17 @@ const loggedUser = useCall<string>({
       </div>
 
       <div class="flex items-center gap-3 px-4 py-3">
-        <span class="lucide-server size-4 shrink-0 text-ink-gray-6" aria-hidden="true" />
+        <span
+          class="lucide-server size-4 shrink-0 text-ink-gray-6"
+          aria-hidden="true"
+        />
         <div class="min-w-0 flex-1">
           <p class="text-base-medium text-ink-gray-8">Server call</p>
-          <ErrorMessage v-if="loggedUser.error" class="mt-1.5" :message="loggedUser.error" />
+          <ErrorMessage
+            v-if="loggedUser.error"
+            class="mt-1.5"
+            :message="loggedUser.error"
+          />
           <p v-else class="mt-1.5 truncate text-sm text-ink-gray-5">
             {{
               loggedUser.data
