@@ -4,7 +4,6 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
   extractFinalReview,
-  parsePostedCommentId,
   readPostedCommentId,
 } from "./post-review.ts";
 
@@ -50,14 +49,6 @@ describe("extractFinalReview", () => {
   });
 });
 
-describe("parsePostedCommentId", () => {
-  test("accepts only a numeric marker", () => {
-    expect(parsePostedCommentId("12345\n")).toBe("12345");
-    expect(parsePostedCommentId("issuecomment-12345")).toBeUndefined();
-    expect(parsePostedCommentId("  ")).toBeUndefined();
-  });
-});
-
 describe("readPostedCommentId", () => {
   test("finds a marker created after an earlier missing check", async () => {
     const directory = await mkdtemp(join(tmpdir(), "barista-marker-"));
@@ -65,7 +56,12 @@ describe("readPostedCommentId", () => {
 
     try {
       expect(await readPostedCommentId(markerFile)).toBeUndefined();
-      await Bun.write(markerFile, "5791950878");
+      const writer = Bun.spawn([
+        process.execPath,
+        "-e",
+        `await Bun.write(${JSON.stringify(markerFile)}, "5791950878")`,
+      ]);
+      expect(await writer.exited).toBe(0);
       expect(await readPostedCommentId(markerFile)).toBe("5791950878");
     } finally {
       await rm(directory, { recursive: true });

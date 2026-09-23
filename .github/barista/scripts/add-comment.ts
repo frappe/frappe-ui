@@ -30,7 +30,7 @@ export function parseCommentArgs(argv: string[]): CommentArgs {
 }
 
 // Exported for tests — pure parsing, no I/O.
-export function parseCreatedCommentId(value: string): string | undefined {
+export function parseCommentId(value: string): string | undefined {
   const commentId = value.trim();
   return /^\d+$/.test(commentId) ? commentId : undefined;
 }
@@ -61,7 +61,13 @@ async function main() {
     process.exit(1);
   }
 
-  let body: string;
+  const repo = process.env.GITHUB_REPOSITORY ?? "";
+  if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repo)) {
+    console.error("Error: GITHUB_REPOSITORY must be an owner/repo name");
+    process.exit(1);
+  }
+
+  let createdId: string;
   if (input.type === "file") {
     const file = input.file;
     if (!file) { console.error("Error: --file requires a path"); process.exit(1); }
@@ -69,14 +75,14 @@ async function main() {
       console.error(`Error: file not found: ${file}`);
       process.exit(1);
     }
-    body = await Bun.file(file).text();
+    createdId = await $`gh api --method POST repos/${repo}/issues/${issue}/comments --field ${`body=@${file}`} --jq .id`.text();
   } else {
-    body = input.body ?? "";
+    const body = input.body ?? "";
     if (!body) { console.error("Error: body required"); process.exit(1); }
+    createdId = await $`gh api --method POST repos/${repo}/issues/${issue}/comments --raw-field body=${body} --jq .id`.text();
   }
 
-  const createdId = await $`gh api --method POST repos/{owner}/{repo}/issues/${issue}/comments --raw-field body=${body} --jq .id`.text();
-  const commentId = parseCreatedCommentId(createdId);
+  const commentId = parseCommentId(createdId);
   if (!commentId) {
     console.error(`Error: GitHub returned an invalid comment id: ${createdId.trim()}`);
     process.exit(1);

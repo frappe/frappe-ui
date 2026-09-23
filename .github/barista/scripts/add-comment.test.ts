@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
   parseCommentArgs,
-  parseCreatedCommentId,
+  parseCommentId,
   resolveMarkerFile,
 } from "./add-comment.ts";
 
@@ -23,14 +23,14 @@ describe("parseCommentArgs", () => {
   });
 });
 
-describe("parseCreatedCommentId", () => {
+describe("parseCommentId", () => {
   test("extracts the id returned by the GitHub API", () => {
-    expect(parseCreatedCommentId("5791950878\n")).toBe("5791950878");
+    expect(parseCommentId("5791950878\n")).toBe("5791950878");
   });
 
   test("rejects a missing or invalid id", () => {
-    expect(parseCreatedCommentId("")).toBeUndefined();
-    expect(parseCreatedCommentId("null")).toBeUndefined();
+    expect(parseCommentId("")).toBeUndefined();
+    expect(parseCommentId("null")).toBeUndefined();
   });
 });
 

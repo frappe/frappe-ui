@@ -4,18 +4,13 @@
 
 import { $ } from "bun";
 import { unlink } from "node:fs/promises";
-import { resolveMarkerFile } from "./add-comment.ts";
-
-export function parsePostedCommentId(value: string): string | undefined {
-  const commentId = value.trim();
-  return /^\d+$/.test(commentId) ? commentId : undefined;
-}
+import { parseCommentId, resolveMarkerFile } from "./add-comment.ts";
 
 export async function readPostedCommentId(markerFile: string): Promise<string | undefined> {
   const marker = Bun.file(markerFile);
   if (!(await marker.exists())) return undefined;
 
-  const commentId = parsePostedCommentId(await marker.text());
+  const commentId = parseCommentId(await marker.text());
   if (!commentId) throw new Error(`Invalid comment id in ${markerFile}`);
   return commentId;
 }
@@ -81,4 +76,11 @@ async function main() {
   console.log(`Verified review comment ${commentId}`);
 }
 
-if (import.meta.main) await main();
+if (import.meta.main) {
+  try {
+    await main();
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : String(error));
+    process.exit(1);
+  }
+}
