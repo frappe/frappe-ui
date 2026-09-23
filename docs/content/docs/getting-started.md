@@ -1,15 +1,40 @@
 # Installation
 
-Set up frappe-ui in a Vite and Vue 3 app. The steps are the same with or without
-a Frappe server behind the app. Only the Vite config differs.
+Set up frappe-ui in a Vite and Vue 3 app. You need Node 20.19 or later.
 
-You need Node 20.19 or later.
+## Quick start
+
+Create a new app with one command:
+
+```sh
+npm create frappe-ui@latest
+```
+
+It asks where to create the project and what it is for, then sets up Vue 3,
+TypeScript, Vite, Tailwind CSS and frappe-ui with a starter page.
+
+- **Frontend of a Frappe app:** run it from your app's folder, such as
+  `apps/todo`. It creates `frontend/` and connects it to the app: the page that
+  serves it, the route rule in `hooks.py`, the build scripts and `.gitignore`.
+  It lists these changes and asks before it writes them.
+- **Standalone app:** run it anywhere else for a plain Vite app with no Frappe
+  server.
+
+When it finishes, it prints the next steps, including the command that starts
+the dev server.
+
+## Set up by hand
+
+Use these steps to add frappe-ui to an existing project, or to see what the
+command above sets up. The steps are the same with or without a Frappe server
+behind the app. Only the Vite config differs.
 
 <div class="steps">
 
 ### Create your project
 
-Start with a Vue and TypeScript project from Vite.
+Start with a Vue and TypeScript project from Vite. Skip this step if you
+already have one.
 
 ```sh
 npm create vite@latest my-app -- --template vue-ts
@@ -104,8 +129,8 @@ createApp(App).use(router).mount('#app')
 
 - [Frappe app](./getting-started/frappe#add-the-vite-plugin): adds the frappe-ui Vite
   plugin, which proxies your bench and builds into the app.
-- [Standalone app](./getting-started/standalone#vite-config): uses the plain Vue
-  plugin.
+- [Standalone app](./getting-started/standalone#vite-config): adds the same
+  plugin with its Frappe server features turned off.
 
 ### Start using frappe-ui
 

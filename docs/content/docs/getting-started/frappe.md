@@ -5,8 +5,12 @@ project inside your app, and the site serves it in production.
 
 The examples use an app named `todo`, served at `/todo`.
 
+The quickest start is to run `npm create frappe-ui@latest` from `apps/todo`.
+It does every step on this page and asks before it changes your app's files.
+The steps below show what it sets up, for an app you set up by hand.
+
 > The old `frappe-ui-starter` template is for frappe-ui v0. Don't use it for a
-> new app. Follow these steps instead.
+> new app.
 
 <div class="steps">
 

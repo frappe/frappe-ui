@@ -6,34 +6,31 @@ icons and the Tailwind preset all work without a server.
 
 ## Vite config
 
-Use the plain Vue plugin in `vite.config.ts`. You don't need the frappe-ui
-plugin.
+Add the frappe-ui Vite plugin in `vite.config.ts`, with the features that talk
+to a Frappe server turned off. `npm create frappe-ui@latest` sets this up for
+you.
 
 ```ts
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
-
-export default defineConfig({
-  plugins: [vue()],
-})
-```
-
-frappe-ui's icons are CSS classes like `lucide-plus`, so they need nothing from
-Vite. See [Icons](../other/icons).
-
-If your own code imports icons from `~icons/lucide/*`, add the frappe-ui plugin
-with only `lucideIcons` on. Its other features are for Frappe apps.
-
-```ts
 import frappeui from 'frappe-ui/vite'
 
-frappeui({
-  lucideIcons: true,
-  frappeProxy: false,
-  jinjaBootData: false,
-  buildConfig: false,
+export default defineConfig({
+  plugins: [
+    frappeui({ frappeProxy: false, jinjaBootData: false, buildConfig: false }),
+    vue(),
+  ],
 })
 ```
+
+The plugin is needed even without a server. Without it, the dev server loads
+two copies of the code behind `toast()`, and `toast()` shows nothing in
+development. The production build works either way, so the problem is easy to
+miss.
+
+frappe-ui's icons are CSS classes like `lucide-plus`, so they need nothing more
+from Vite. See [Icons](../other/icons). If your own code imports icons from
+`~icons/lucide/*`, also pass `lucideIcons: true`.
 
 ## What needs a Frappe server
 
