@@ -71,9 +71,9 @@ component plus parts plus a kit. The prebuilt labeled field moves to `@framework
    extension is the third and carries syntax colours. Dropping one layer never disturbs the other
    two. There is no `variant` prop and no `size` prop. Those become CSS var sets applied by the
    consumer's wrapper. Knob names follow ADR-0017: `--code-bg`, `--code-border`, `--code-radius`,
-   `--code-focus-ring`, `--code-font-size`, `--code-padding`, `--code-min-height`,
-   `--code-max-height`. Dark mode needs no reconfiguration, because the knobs and the highlight
-   style resolve `var(--ink-*)` and `var(--surface-*)`.
+   `--code-focus-ring`, `--code-font-size`, `--code-padding-x`, `--code-padding-y`,
+   `--code-min-height`, `--code-max-height`. Dark mode needs no reconfiguration, because the
+   knobs and the highlight style resolve `var(--ink-*)` and `var(--surface-*)`.
 
 7. **`extensions` is reactive.** It takes `MaybeRefOrGetter<Extension[]>`, and the engine
    re-applies the array with a top-level `StateEffect.reconfigure`. `Compartment` stays out of

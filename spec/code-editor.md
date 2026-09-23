@@ -496,7 +496,8 @@ by the `@framework/ui` field spike, see Open questions.
 | `--code-radius`     | the box corner radius         |
 | `--code-focus-ring` | the focus ring colour         |
 | `--code-font-size`  | the code font size            |
-| `--code-padding`    | the content inset             |
+| `--code-padding-x`  | the content inline inset      |
+| `--code-padding-y`  | the content block inset       |
 | `--code-min-height` | the content min-height        |
 | `--code-max-height` | the height cap that drives §9 |
 
@@ -515,7 +516,8 @@ consumer's wrapper applies:
 }
 .my-code-field[data-size='sm'] {
   --code-font-size: 12px;
-  --code-padding: 6px 8px;
+  --code-padding-x: 8px;
+  --code-padding-y: 6px;
 }
 ```
 
