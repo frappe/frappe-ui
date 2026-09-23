@@ -55,16 +55,20 @@ npm create frappe-ui@latest my-app -- --template standalone --yes
 
 Without a terminal, such as in CI, it also uses the default answers.
 
-It installs with the package manager that ran it: npm, yarn, pnpm or bun. It
-won't write into a folder that has files in it unless you confirm, and `--yes`
-never confirms that for you.
+It installs with the package manager that ran it: npm, yarn, pnpm or bun. In a
+Frappe app, the scripts in the app's `package.json` use it too, so with pnpm or
+bun, the servers that build the app need it installed. bench itself has npm and
+yarn.
+
+It won't write into a folder that has files in it unless you confirm, and
+`--yes` never confirms that for you.
 
 ## Versions
 
 The version of `create-frappe-ui` is always the same as the version of
-`frappe-ui`. The new project depends on that version: `create-frappe-ui@1.0.0`
-writes `"frappe-ui": "^1.0.0"`. So `npm create frappe-ui@1.2.0` sets up a
-project on frappe-ui 1.2.
+`frappe-ui`, and the new project starts from that release:
+`create-frappe-ui@1.2.0` writes `"frappe-ui": "^1.2.0"`, so the project gets
+frappe-ui 1.2.0 or a later 1.x release.
 
 ### Releasing
 

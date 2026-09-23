@@ -13,11 +13,11 @@ const { resolvedColorScheme, toggleColorScheme } = useColorScheme()
 
 const bootUser = window.user
 
-// A POST request needs the CSRF token from the boot data. In development there
-// is no boot data, so the site needs `ignore_csrf`.
+// A GET request, so it works in development too. A POST request sends the CSRF
+// token from the boot data, which only a production build has, so on the dev
+// server the site needs `ignore_csrf`.
 const loggedUser = useCall<string>({
   url: '/api/v2/method/frappe.auth.get_logged_user',
-  method: 'POST',
 })
 </script>
 

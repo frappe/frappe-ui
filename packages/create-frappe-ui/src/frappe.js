@@ -1,7 +1,7 @@
 // @ts-check
 import fs from 'node:fs'
 import path from 'node:path'
-import { runCommand } from './packageManager.js'
+import { quote, runCommand } from './packageManager.js'
 
 /** @typedef {import('./packageManager.js').PackageManager} PackageManager */
 
@@ -101,7 +101,7 @@ export function parseRoute(input) {
     }
   }
   const first = route.split('/')[1]
-  if (RESERVED_ROUTES.includes(first)) {
+  if (RESERVED_ROUTES.includes(first.toLowerCase())) {
     return { error: `Frappe already serves /${first}. Pick another route.` }
   }
   return { route }
@@ -128,6 +128,9 @@ export function readBench(app) {
     } catch {
       // No readable config: the bench uses the default port.
     }
+    // The frappe-ui Vite plugin reads the port from the environment first.
+    const envPort = Number(process.env.FRAPPE_WEB_SERVER_PORT)
+    if (Number.isInteger(envPort) && envPort > 0) webserverPort = envPort
     const siteNames = fs
       .readdirSync(sites)
       .filter((name) =>
@@ -135,7 +138,7 @@ export function readBench(app) {
       )
     if (siteNames.length === 1) site = siteNames[0]
   }
-  // The frappe-ui Vite plugin runs the dev server on the bench port plus 80.
+  // The plugin runs the dev server on the bench port plus 80.
   return { devPort: webserverPort + 80, site }
 }
 
@@ -143,8 +146,7 @@ export function readBench(app) {
  * Plans the changes to the app around the frontend: the page that serves it,
  * the route rule that sends every path under the route to that page, the
  * scripts that let bench install and build it, and the ignore rules for the
- * build output. Nothing is written until
- * `applyAppChanges`.
+ * build output. Nothing is written until `applyAppChanges`.
  *
  * @param {FrappeApp} app
  * @param {{ route: string, frontend: string, pm: PackageManager }} options
@@ -206,38 +208,60 @@ const KEPT = 'already set up, not changed'
  */
 function planRootPackage(app, frontend, pm) {
   const file = path.join(app.root, 'package.json')
+  const cd = `cd ${quote(frontend)} && `
   const scripts = {
-    postinstall: `cd ${frontend} && ${pm} install`,
-    dev: `cd ${frontend} && ${runCommand(pm, 'dev')}`,
-    build: `cd ${frontend} && ${runCommand(pm, 'build')}`,
+    postinstall: `${cd}${pm} install`,
+    dev: `${cd}${runCommand(pm, 'dev')}`,
+    build: `${cd}${runCommand(pm, 'build')}`,
   }
   if (!fs.existsSync(file)) {
     return {
       file,
       action: 'create',
-      summary: 'lets bench install and build the frontend',
+      // bench always has npm and yarn, but the servers that build the app may
+      // not have the others.
+      summary:
+        pm === 'npm' || pm === 'yarn'
+          ? 'lets bench install and build the frontend'
+          : `lets bench install and build the frontend, with ${pm}. Servers that build this app need ${pm} too.`,
       content: JSON.stringify({ private: true, scripts }, null, 2) + '\n',
     }
   }
 
-  // An existing build script is the app's own. Anything else in this file is
-  // not ours to rewrite.
-  let existing
+  // The rest of this file is the app's own, so it is only ever read here.
+  let build
   try {
-    existing = JSON.parse(fs.readFileSync(file, 'utf8'))
+    build = JSON.parse(fs.readFileSync(file, 'utf8')).scripts?.build
   } catch {
-    existing = null
+    build = undefined
   }
-  if (existing?.scripts?.build) return { file, action: 'keep', summary: KEPT }
+  if (typeof build === 'string' && mentionsFolder(build, frontend)) {
+    return { file, action: 'keep', summary: KEPT }
+  }
   return {
     file,
     action: 'manual',
     summary:
-      'has no build script. Add these scripts, so bench builds the frontend:',
+      typeof build === 'string'
+        ? `has a build script that doesn't build ${frontend}/. Merge these scripts into it, so bench builds the frontend:`
+        : 'has no build script. Add these scripts, so bench builds the frontend:',
     snippet: JSON.stringify(scripts, null, 2)
       .slice(2, -2)
       .replace(/^ {2}/gm, ''),
   }
+}
+
+/**
+ * Whether a script runs something in `folder`, such as `cd frontend && yarn
+ * build` or `npm --prefix frontend run build`.
+ *
+ * @param {string} script
+ * @param {string} folder
+ */
+function mentionsFolder(script, folder) {
+  return script
+    .split(/[\s"'=]+/)
+    .some((word) => word.replace(/^\.\/|\/$/g, '') === folder)
 }
 
 /**
@@ -299,7 +323,12 @@ def get_context(context):
  */
 export function addRouteRule(source, route) {
   const fromRoute = `${route}/<path:app_path>`
-  if (source.includes(`"${fromRoute}"`) || source.includes(`'${fromRoute}'`)) {
+  // A rule that is commented out doesn't count.
+  const code = source
+    .split('\n')
+    .filter((line) => !line.trimStart().startsWith('#'))
+    .join('\n')
+  if (code.includes(`"${fromRoute}"`) || code.includes(`'${fromRoute}'`)) {
     return { status: 'present' }
   }
 

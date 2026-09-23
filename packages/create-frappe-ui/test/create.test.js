@@ -6,7 +6,7 @@ import os from 'node:os'
 import path from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
-import { addRouteRule } from '../src/frappe.js'
+import { addRouteRule, parseRoute } from '../src/frappe.js'
 
 const cli = fileURLToPath(new URL('../index.js', import.meta.url))
 const { version } = JSON.parse(
@@ -220,9 +220,9 @@ test('scaffolds the frontend of a Frappe app and wires it into the app', () => {
   )
 
   // Running it again after removing the frontend leaves the rest of the app
-  // alone. A package.json with no build script gets the scripts to paste in.
+  // alone.
   fs.writeFileSync(pagePath, '# edited by hand\n')
-  fs.writeFileSync(rootPackagePath, '{ "private": true }\n')
+  const rootPackage = fs.readFileSync(rootPackagePath, 'utf8')
   fs.rmSync(path.join(appRoot, 'frontend'), { recursive: true })
   const again = create(pkgDir, [
     '--template',
@@ -231,10 +231,6 @@ test('scaffolds the frontend of a Frappe app and wires it into the app', () => {
     '--no-install',
   ])
   assert.equal(again.status, 0, again.output)
-  assert.match(
-    again.output,
-    /package\.json has no build script[\s\S]*"build": "cd frontend && yarn build"/,
-  )
   assert.ok(fs.existsSync(path.join(appRoot, 'frontend', 'package.json')))
   assert.equal(fs.readFileSync(hooksPath, 'utf8'), hooks)
   assert.equal(
@@ -242,10 +238,23 @@ test('scaffolds the frontend of a Frappe app and wires it into the app', () => {
     '# Built by the frontend\ntodo/public/frontend\ntodo/www/todo.html\n',
   )
   assert.equal(fs.readFileSync(pagePath, 'utf8'), '# edited by hand\n')
-  assert.equal(
-    fs.readFileSync(rootPackagePath, 'utf8'),
-    '{ "private": true }\n',
-  )
+  assert.equal(fs.readFileSync(rootPackagePath, 'utf8'), rootPackage)
+
+  // A build script that builds something else doesn't count. The scripts to
+  // merge in quote a folder name with a space.
+  const otherBuild = '{ "scripts": { "build": "vite build" } }\n'
+  fs.writeFileSync(rootPackagePath, otherBuild)
+  const other = create(appRoot, [
+    'my frontend',
+    '--template',
+    'frappe',
+    '--yes',
+    '--no-install',
+  ])
+  assert.equal(other.status, 0, other.output)
+  assert.match(other.output, /doesn't build my frontend/)
+  assert.match(other.output, /"build": "cd \\"my frontend\\" && yarn build"/)
+  assert.equal(fs.readFileSync(rootPackagePath, 'utf8'), otherBuild)
 })
 
 test('adds the route rule to any shape of hooks.py it can edit safely', () => {
@@ -275,6 +284,12 @@ test('adds the route rule to any shape of hooks.py it can edit safely', () => {
     },
   )
 
+  // A rule that is commented out doesn't count.
+  assert.equal(
+    addRouteRule(`website_route_rules = [\n    # ${rule}\n]\n`, '/todo').status,
+    'added',
+  )
+
   // A "]" inside a string or a comment doesn't end the list.
   assert.equal(
     /** @type {{ source: string }} */ (
@@ -298,6 +313,13 @@ test('adds the route rule to any shape of hooks.py it can edit safely', () => {
       { status: 'manual', snippet: rule },
       source,
     )
+  }
+})
+
+test('turns down routes that Frappe serves itself', () => {
+  assert.deepEqual(parseRoute('todo/'), { route: '/todo' })
+  for (const route of ['/api', '/Api', 'app/tasks']) {
+    assert.ok('error' in parseRoute(route), route)
   }
 })
 

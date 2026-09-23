@@ -9,6 +9,15 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### `npm create frappe-ui` sets up a new app
+
+`npm create frappe-ui@latest` creates a frappe-ui project with Vue, TypeScript,
+Vite and Tailwind CSS. Run it from `apps/<app>` for the frontend of a Frappe
+app, or anywhere else for a plain Vite app. In a Frappe app it also adds the
+page that serves the frontend, the route rule in `hooks.py`, the scripts in the
+app's `package.json` that let bench build it, and the build output to
+`.gitignore`. It lists these changes and asks before it writes them.
+
 ### A series can carry its own number `format`
 
 `SeriesStyle.format` prints one series' values in the tooltip and its data

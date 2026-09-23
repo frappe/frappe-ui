@@ -26,6 +26,15 @@ export function runCommand(pm, script) {
 }
 
 /**
+ * A path as it goes into a shell command, in quotes when it needs them.
+ *
+ * @param {string} value
+ */
+export function quote(value) {
+  return /^[\w./-]+$/.test(value) ? value : `"${value}"`
+}
+
+/**
  * Installs dependencies in `cwd`. Resolves with the combined output, so a
  * failure can show why.
  *

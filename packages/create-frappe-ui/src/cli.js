@@ -11,7 +11,12 @@ import {
   readBench,
 } from './frappe.js'
 import { copyTemplate, templateFiles, toPackageName } from './scaffold.js'
-import { detectPackageManager, install, runCommand } from './packageManager.js'
+import {
+  detectPackageManager,
+  install,
+  quote,
+  runCommand,
+} from './packageManager.js'
 
 /** @typedef {import('./scaffold.js').Template} Template */
 /** @typedef {import('./frappe.js').AppChange} AppChange */
@@ -426,9 +431,4 @@ function escapeHtml(value) {
     .replaceAll('<', '&lt;')
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')
-}
-
-/** @param {string} value */
-function quote(value) {
-  return /^[\w./-]+$/.test(value) ? value : `"${value}"`
 }
