@@ -111,10 +111,4 @@ from the route does not navigate on every key press.
 The dialog has a visually hidden title, "Settings", and a hidden description.
 Replace them with the `#title` and `#description` slots.
 
-## Migrating from v0
-
-The open state moves from the unnamed `v-model` to `v-model:open`. This break
-is silent: the dialog never opens. The `shortcut` prop is now
-`keyboardShortcut`. See the [migration guide](../migration#settingsdialog).
-
 <!-- @include: ./SettingsDialog.api.md -->
