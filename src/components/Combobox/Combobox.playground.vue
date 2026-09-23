@@ -16,11 +16,6 @@ const options = [
 const knobs: Knob[] = [
   { name: 'label', type: 'text', default: 'Status' },
   {
-    name: 'placeholder',
-    type: 'text',
-    default: 'Pick or search…',
-  },
-  {
     name: 'trigger',
     type: 'tabs',
     default: 'input',
@@ -57,7 +52,7 @@ const knobs: Knob[] = [
 function buildCode(v: Record<string, any>) {
   const attrs = []
   if (v.label) attrs.push(`label="${v.label}"`)
-  if (v.placeholder) attrs.push(`placeholder="${v.placeholder}"`)
+  attrs.push('placeholder="Pick or search…"')
   if (v.trigger !== 'input') attrs.push(`trigger="${v.trigger}"`)
   if (v.size !== 'sm') attrs.push(`size="${v.size}"`)
   if (v.variant !== 'subtle') attrs.push(`variant="${v.variant}"`)
@@ -76,7 +71,7 @@ function buildCode(v: Record<string, any>) {
         <Combobox
           v-model="model"
           :label="values.label || undefined"
-          :placeholder="values.placeholder || undefined"
+          placeholder="Pick or search…"
           :trigger="values.trigger"
           :size="values.size"
           :variant="values.variant"

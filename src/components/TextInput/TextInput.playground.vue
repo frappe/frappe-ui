@@ -9,11 +9,6 @@ const knobs: Knob[] = [
   { name: 'label', type: 'text', default: 'Email' },
   { name: 'description', type: 'text', default: '' },
   {
-    name: 'placeholder',
-    type: 'text',
-    default: 'jane@example.com',
-  },
-  {
     name: 'type',
     type: 'tabs',
     default: 'text',
@@ -56,7 +51,7 @@ function buildCode(v: Record<string, any>) {
   const attrs = []
   if (v.label) attrs.push(`label="${v.label}"`)
   if (v.description) attrs.push(`description="${v.description}"`)
-  if (v.placeholder) attrs.push(`placeholder="${v.placeholder}"`)
+  attrs.push('placeholder="jane@example.com"')
   if (v.type !== 'text') attrs.push(`type="${v.type}"`)
   if (v.size !== 'sm') attrs.push(`size="${v.size}"`)
   if (v.variant !== 'subtle') attrs.push(`variant="${v.variant}"`)
@@ -95,7 +90,7 @@ function buildCode(v: Record<string, any>) {
           v-model="model"
           :label="values.label || undefined"
           :description="values.description || undefined"
-          :placeholder="values.placeholder || undefined"
+          placeholder="jane@example.com"
           :type="values.type"
           :size="values.size"
           :variant="values.variant"

@@ -8,11 +8,6 @@ const model = ref('')
 const knobs: Knob[] = [
   { name: 'label', type: 'text', default: 'Notes' },
   { name: 'description', type: 'text', default: '' },
-  {
-    name: 'placeholder',
-    type: 'text',
-    default: 'Write something…',
-  },
   { name: 'rows', type: 'text', default: '3' },
   {
     name: 'size',
@@ -43,7 +38,7 @@ function buildCode(v: Record<string, any>) {
   const attrs = []
   if (v.label) attrs.push(`label="${v.label}"`)
   if (v.description) attrs.push(`description="${v.description}"`)
-  if (v.placeholder) attrs.push(`placeholder="${v.placeholder}"`)
+  attrs.push('placeholder="Write something…"')
   const rowsNum = Number(v.rows)
   if (rowsNum && rowsNum !== 3) attrs.push(`:rows="${rowsNum}"`)
   if (v.size !== 'sm') attrs.push(`size="${v.size}"`)
@@ -63,7 +58,7 @@ function buildCode(v: Record<string, any>) {
           v-model="model"
           :label="values.label || undefined"
           :description="values.description || undefined"
-          :placeholder="values.placeholder || undefined"
+          placeholder="Write something…"
           :rows="Number(values.rows) || 3"
           :size="values.size"
           :variant="values.variant"
