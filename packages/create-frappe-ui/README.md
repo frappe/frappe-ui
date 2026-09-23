@@ -74,8 +74,9 @@ frappe-ui 1.2.0 or a later 1.x release.
 
 Set the same `version` in `package.json` at the repository root and in
 `packages/create-frappe-ui/package.json`. The tests fail when they differ. When
-the change reaches `main`, the publish workflow publishes frappe-ui and then
-this package.
+the change reaches `main`, the publish workflow publishes frappe-ui, tags the
+release, and then publishes this package. If this last step fails, publish that
+version by hand from this folder, as described below.
 
 This package gets the `latest` tag until a stable version of it is out, even for
 a prerelease, because the docs tell people to run `npm create frappe-ui@latest`.
