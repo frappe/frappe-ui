@@ -138,6 +138,13 @@ async function create(argv) {
         `The frontend must be a folder directly inside the app, such as ${display(cwd, path.join(app.root, 'frontend'))}.`,
       )
     }
+    // The folder goes into the scripts in the app's package.json, which run in
+    // a shell on every server that builds the app.
+    if (!/^[\w .-]+$/.test(path.basename(target))) {
+      throw new CliError(
+        'Use letters, numbers, spaces, ., - and _ in the frontend folder name.',
+      )
+    }
     const route = await askRoute(args.route, `/${app.name}`, interactive)
     frappe = {
       route,

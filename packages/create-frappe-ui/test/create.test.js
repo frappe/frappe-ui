@@ -160,6 +160,18 @@ test('scaffolds the frontend of a Frappe app and wires it into the app', () => {
   assert.equal(outside.status, 1)
   assert.match(outside.output, /No Frappe app found/)
 
+  // The folder name goes into shell scripts, so it can't need escaping.
+  const unsafe = create(appRoot, [
+    'foo"bar',
+    '--template',
+    'frappe',
+    '--yes',
+    '--no-install',
+  ])
+  assert.equal(unsafe.status, 1)
+  assert.match(unsafe.output, /frontend folder name/)
+  assert.ok(!fs.existsSync(path.join(appRoot, 'foo"bar')))
+
   const run = create(appRoot, ['--template', 'frappe', '--yes', '--no-install'])
   assert.equal(run.status, 0, run.output)
   assert.match(
