@@ -11,7 +11,10 @@
 <a href="./license.md"><img alt="MIT license" src="https://img.shields.io/npm/l/frappe-ui.svg?style=flat" /></a>
 
 <a href="https://ui.frappe.io">
-<img width="1392" alt="The Button page on the Frappe UI documentation site" src="./assets/readme-hero.png" />
+<picture>
+<source media="(prefers-color-scheme: dark)" srcset="./assets/readme-hero-dark.png" />
+<img width="1392" alt="The Button page on the Frappe UI documentation site" src="./assets/readme-hero-light.png" />
+</picture>
 </a>
 
 [Documentation](https://ui.frappe.io) ·
