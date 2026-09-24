@@ -58,10 +58,17 @@ const HUES = [
   'purple',
   'pink',
 ]
-const STEPS = Array.from({ length: 10 }, (_, i) => String(i + 1))
 
 const active = ref<Category>('surface')
 const tab = computed(() => TABS.find((t) => t.value === active.value)!)
+
+// Surface and outline hues have 10 steps, ink hues 9.
+const steps = computed(() => {
+  const last = Math.max(
+    ...names(active.value).map((n) => Number(n.match(/-(\d+)$/)?.[1] ?? 0)),
+  )
+  return Array.from({ length: last }, (_, i) => String(i + 1))
+})
 
 function names(category: string): string[] {
   const table = colors.themedVariables.light as Record<
@@ -82,7 +89,7 @@ function swatch(category: string, name: string, label?: string): Swatch {
 // A hue row, or null when this category has no such hue.
 function hueRow(category: string, hue: string, rowName: string): Row | null {
   const all = new Set(names(category))
-  const swatches = STEPS.map((step) =>
+  const swatches = steps.value.map((step) =>
     all.has(`${hue}-${step}`) ? swatch(category, `${hue}-${step}`) : null,
   )
   if (swatches.every((s) => !s)) return null
@@ -131,7 +138,7 @@ const others = computed<Row[]>(() => {
         Click a swatch to copy its class
       </span>
     </div>
-    <ColorGrid :columns="10" :steps="STEPS" :rows="rows" />
-    <ColorGrid :columns="10" :rows="others" />
+    <ColorGrid :columns="steps.length" :steps="steps" :rows="rows" />
+    <ColorGrid :columns="steps.length" :rows="others" />
   </div>
 </template>
