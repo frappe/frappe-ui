@@ -17,8 +17,8 @@
     <div
       :id="inputId"
       ref="rootRef"
-      class="rating-stars inline-flex shrink-0 gap-0.5 leading-none rounded-1"
-      :class="hasLabeling ? null : (attrs.class as any)"
+      class="rating-stars shrink-0 gap-0.5 leading-none rounded-1"
+      :class="hasLabeling ? 'flex w-fit' : ['inline-flex', attrs.class as any]"
       :style="hasLabeling ? null : (attrs.style as any)"
       :role="isSliderMode ? 'slider' : 'radiogroup'"
       :tabindex="rootTabindex"
@@ -406,6 +406,11 @@ function onKeydown(e: KeyboardEvent) {
 // tabstop, so a ref call and a Tab press land in the same place. In slider mode
 // the root itself is the tabstop.
 defineExpose<InputExposed>({
+  /**
+   * Moves focus to the selected star, or to the first star when nothing is
+   * selected. That is the star `Tab` reaches. In half-star mode the whole
+   * control is one slider, so it focuses the control itself.
+   */
   focus: (options?: FocusOptions) => {
     const root = rootRef.value
     if (!root) return
@@ -415,9 +420,7 @@ defineExpose<InputExposed>({
     }
     const selected = Math.ceil(savedValue.value)
     const target = selected > 0 ? selected : 1
-    root
-      .querySelector<HTMLElement>(`[data-index="${target}"]`)
-      ?.focus(options)
+    root.querySelector<HTMLElement>(`[data-index="${target}"]`)?.focus(options)
   },
 })
 

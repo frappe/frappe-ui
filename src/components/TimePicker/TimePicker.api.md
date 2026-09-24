@@ -3,6 +3,7 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
+  import ExposedTable from '@/components/Docs/ExposedTable.vue'
 
   const propsData = [
   {
@@ -194,6 +195,24 @@
     type: '[value: string]'
   }
 ]
+
+  const exposedData = [
+  {
+    name: 'open',
+    description: 'Opens the panel. A disabled picker stays closed.',
+    type: '() => void'
+  },
+  {
+    name: 'close',
+    description: 'Closes the panel.',
+    type: '() => void'
+  },
+  {
+    name: 'focus',
+    description: 'Moves focus to the input.',
+    type: '(options?: FocusOptions) => void'
+  }
+]
 </script>
 
 ## API Reference
@@ -203,3 +222,5 @@
 <SlotsTable :data="slotsData"/>
 
 <EmitsTable :data="emitsData"/>
+
+<ExposedTable :data="exposedData"/>

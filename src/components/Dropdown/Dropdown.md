@@ -1,48 +1,103 @@
 # Dropdown
 
-A flexible menu component for actions. Handles groups, nested submenus,
-toggle rows, disabled items, custom triggers, and a built-in kebab pattern.
-
-## Playground
+A menu of actions that opens from a button. To open a menu on right-click, use
+[ContextMenu](./contextmenu) instead.
 
 <ComponentPlayground name="Dropdown" />
 
-## Simple
-A plain actions menu with icons. The default trigger is an auto-generated `<Button>` — pass `button: { label }` to override its text.
+## Examples
+
+### More actions button
+
+A plain actions menu with icons. The `button` prop configures the default
+trigger `<Button>`.
 
 <ComponentPreview name="Dropdown-Simple" layout="stacked" />
 
-## With Shortcuts
-Keyboard shortcuts rendered in the row suffix. Use the `#item-suffix` slot and a custom `shortcut` field on each item to keep the label clean and the hint secondary.
+### Row actions
 
-<ComponentPreview name="Dropdown-Shortcuts" layout="stacked" />
-
-## Submenus
-Grouped actions with nested submenus — the "Share" path recurses into "Invite people" which recurses into channel targets. Groups are just `{ group, options }` entries in the options array.
-
-<ComponentPreview name="Dropdown-Submenus" />
-
-## Switches
-Toggle items live inside the menu using `switch: true` + `switchValue`. Clicking a switch row fires `onClick(boolean)` with the new value and keeps the menu open, so consumers can flip multiple settings in one sitting.
-
-<ComponentPreview name="Dropdown-Switches" />
-
-## Kebab Menu
-The classic row-actions pattern — a ghost icon button that opens a grouped menu. `#trigger` swaps in the `LucideMoreHorizontal` button, and the `open` slot prop keeps the button in its `active` state while the menu is open.
-
-The default and `#trigger` slots receive `{ open, disabled, setOpen, close }`.
-`close()` is shorthand for `setOpen(false)`.
+An icon-only `ghost` button on each row of a list opens a grouped menu. The
+`#trigger` slot replaces the default button.
 
 <ComponentPreview name="Dropdown-KebabMenu" />
 
-## User Menu
-A real workspace + profile menu — nested Apps / Theme submenus, account-group footer, and a completely custom trigger showing the workspace icon, product name, and current user.
+### File menu with shortcuts
+
+The `#item-suffix` slot shows a keyboard shortcut at the end of each row. The
+shortcut is a custom `shortcut` field on each item.
+
+<ComponentPreview name="Dropdown-Shortcuts" layout="stacked" />
+
+### Share and move
+
+Groups of actions with nested submenus. "Share" opens a submenu, and "Invite
+people" inside it opens another.
+
+<ComponentPreview name="Dropdown-Submenus" />
+
+### Preference toggles
+
+Items with `switch: true` show a switch. The menu stays open, so the user can
+change several settings at once.
+
+<ComponentPreview name="Dropdown-Switches" />
+
+### Workspace menu
+
+A custom trigger that shows the app, product name and current user, with
+submenus for apps and theme. `selected` marks the current app and theme.
 
 <ComponentPreview name="Dropdown-UserMenu" />
 
-## Notes
+## Behavior
 
-- Prefer `#item-prefix`, `#item-label`, and `#item-suffix` when you want to customize the standard dropdown row.
-- Use the `#item` slot, or `slots: { item: fn }` on a single option, only when you need to replace the entire row. Those escape hatches own the outer menu item element, so they should be reserved for exceptional cases.
+### Options
+
+`options` is an array of items and groups:
+
+- An item has a `label` and an `onClick`. It can also have an `icon`, a
+  `description`, a `theme` (`gray` or `red`), a `route`, `disabled` and
+  `selected`.
+- An item with `submenu` opens a nested menu. The submenu takes the same array
+  shape.
+- A group is `{ group, options }`. `hideLabel` hides the group heading.
+  Items outside a group form groups without a heading.
+- An item with a `condition` shows only while the function returns true. A
+  group with no visible items is left out.
+
+### Switch items
+
+An item with `switch: true` shows a switch set to `switchValue`. Clicking it
+calls `onClick` with the new boolean value and keeps the menu open.
+
+### Trigger
+
+Without a trigger slot, `Dropdown` renders a `<Button>` with the `button`
+props. Its label defaults to "Options". The button stays pressed while the menu
+is open.
+
+The `#trigger` and default slots replace the button. They receive
+`{ open, disabled, setOpen, close }`. `close()` is shorthand for
+`setOpen(false)`.
+
+### Custom rows
+
+Use `#item-prefix`, `#item-label` and `#item-suffix` to change parts of the
+standard row. Use the `#item` slot, or `slots: { item: fn }` on a single
+option, only when you need to replace the whole row. Those slots render the
+outer menu item element themselves, so keep them for exceptional cases.
+
+## Accessibility
+
+| Keys                                           | Action                                         |
+| ---------------------------------------------- | ---------------------------------------------- |
+| `Enter` / `Space` / `ArrowDown` on the trigger | Open the menu                                  |
+| `ArrowDown` / `ArrowUp`                        | Move focus between items                       |
+| `Enter` / `Space`                              | Run the focused item, or open its submenu      |
+| `ArrowRight`                                   | Open the focused submenu                       |
+| `ArrowLeft`                                    | Close the submenu                              |
+| `Escape`                                       | Close the menu and return focus to the trigger |
+
+An icon-only trigger needs a `label` so screen readers can name it.
 
 <!-- @include: ./Dropdown.api.md -->

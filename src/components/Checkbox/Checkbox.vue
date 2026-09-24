@@ -106,6 +106,7 @@ function onChange(e: Event) {
 }
 
 defineExpose<InputExposed>({
+  /** Moves focus to the checkbox. */
   focus: (options?: FocusOptions) => inputRef.value?.focus(options),
 })
 

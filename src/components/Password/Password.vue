@@ -98,6 +98,7 @@ function focus(options?: FocusOptions) {
 // A getter rather than `computed(...)`: see TextInput.vue's defineExpose for
 // why — a ComputedRef doesn't structurally match the type's plain element.
 defineExpose<TextInputExposed>({
+  /** Moves focus to the password input. */
   focus,
   get inputElement() {
     return textInputRef.value?.inputElement ?? null

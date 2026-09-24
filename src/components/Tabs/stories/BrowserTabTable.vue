@@ -41,7 +41,7 @@ const deals = [
 <template>
   <div class="w-full max-w-3xl">
     <Tabs v-model="tab">
-      <TabList variant="browser-tab" class="px-2">
+      <TabList variant="browser-tab">
         <TabTrigger
           v-for="t in tabs"
           :key="t.value"
@@ -54,7 +54,8 @@ const deals = [
         </TabTrigger>
       </TabList>
 
-      <TabPanel value="deals">
+      <!-- A fixed height keeps the page from jumping when the tab changes. -->
+      <TabPanel value="deals" class="h-40">
         <table class="w-full border-collapse text-base">
           <thead>
             <tr class="text-left text-ink-gray-5">
@@ -94,11 +95,13 @@ const deals = [
           </tbody>
         </table>
       </TabPanel>
-      <TabPanel value="contact">
-        <div class="p-4 text-base text-ink-gray-7">Contacts show up here.</div>
+      <TabPanel value="contact" class="h-40">
+        <div class="px-2 py-4 text-base text-ink-gray-7">
+          Contacts show up here.
+        </div>
       </TabPanel>
-      <TabPanel value="organizations">
-        <div class="p-4 text-base text-ink-gray-7">
+      <TabPanel value="organizations" class="h-40">
+        <div class="px-2 py-4 text-base text-ink-gray-7">
           Organizations show up here.
         </div>
       </TabPanel>

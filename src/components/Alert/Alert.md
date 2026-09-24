@@ -1,75 +1,92 @@
 # Alert
 
-An inline message that reports status and offers a next step. The layout is content-driven: a title alone renders a single row, a description or a second action switches to a banner.
-
-## Playground
+A message inside the page that reports a status and offers a next step. For a
+short message that goes away on its own, use [`toast`](./toast) instead.
 
 <ComponentPlayground name="Alert" />
 
-## Dismissible rows
+## Examples
 
-Plain confirmations with only a × button. The parent hides the alert on `@dismiss`.
+### Confirmations
+
+Plain messages with only a × button. `dismissible` shows the button, and the
+parent removes the alert on `@dismiss`.
 
 <ComponentPreview name="Alert-DismissibleRows" />
 
-## Themed rows
+### Status with an action
 
-One-line status rows with a single action. The theme colors the icon and the action label.
+One-line status messages with one `primaryAction` each. `theme` colors the
+icon and the action label.
 
 <ComponentPreview name="Alert-ThemedRows" />
 
-## Banners
+### Warnings that need a decision
 
-A description or a second action switches the alert to the banner layout. A "Dismiss" action calls `context.dismiss()`.
+A `description` or a `secondaryAction` switches the alert to the banner
+layout. The "Dismiss" action calls `dismiss()` from its `onClick` context.
 
 <ComponentPreview name="Alert-Banners" />
 
-## Dismissible banner
+### Trial ending
 
-An info banner with one action and a × button in the corner.
+A banner with one action and a × button in the corner.
 
 <ComponentPreview name="Alert-DismissibleBanner" />
 
-## Slot overrides
+### Import in progress
 
-`#prefix` replaces the status icon and `#description` carries rich content.
+`#prefix` replaces the status icon with a spinner, and `#description` holds
+formatted text.
 
 <ComponentPreview name="Alert-ImportProgress" />
 
-## The icon prop
+## Behavior
 
-`icon` has three states. Unset or `true` renders the theme's own status glyph
-(gray shows the info glyph in black ink). `false` hides it. A `lucide-*` class
-name or a Vue component renders that glyph instead, in the theme's color.
+### Layout
+
+The alert has no layout prop. With only a title, it is a single row. A
+`description`, a `#description` slot or a `secondaryAction` switches it to the
+banner layout, with the description and buttons below the title. The
+container looks the same for every `theme`. Only the icon and the row action
+label take the theme's color.
+
+### Icon
+
+`icon` has three states. Unset or `true` shows the theme's status icon. The
+gray theme shows the info icon in black. `false` hides the icon. A `lucide-*`
+class name or a Vue component shows that icon instead, in the theme's color.
 
 ```vue
+<!-- the theme's icon -->
 <Alert title="Saved" theme="green" />
-<!-- the theme's auto icon -->
+<!-- the same icon, written out -->
 <Alert title="Saved" theme="green" :icon="true" />
-<!-- the same auto icon, stated -->
-<Alert title="Saved" :icon="false" />
 <!-- no icon -->
+<Alert title="Saved" :icon="false" />
+<!-- your own icon -->
 <Alert title="Saved" icon="lucide-rocket" />
-<!-- your own -->
 ```
 
-## Styling
+### Actions
 
-The tone is on the root as `data-color`, and the computed layout as
-`data-layout`:
+`primaryAction` and `secondaryAction` take `Button` props plus an `onClick`
+that receives `{ dismiss }`. While an `onClick` that returns a promise is
+running, its button shows a spinner and ignores more clicks. A `loading` value
+you pass wins over this. A `secondaryAction` without a `primaryAction` logs a
+warning in development.
 
-| Hook                                            | Meaning                                    |
-| ----------------------------------------------- | ------------------------------------------- |
-| `[data-color="gray\|blue\|green\|amber\|red"]` | the `theme` prop                           |
-| `[data-layout="row\|banner"]`                   | one line, or the stacked layout            |
+The `#actions` slot replaces both buttons and receives `{ dismiss }`.
 
-`data-color`, not `data-theme`: `data-theme` is the light/dark attribute the
-app sets on the document, and an alert must not look like a theme root.
+### Dismissing
 
-```css
-:where([data-color='red']) {
-  /* your overrides */
-}
-```
+The alert never hides itself. The × button and `dismiss()` only emit
+`dismiss`. The parent hides the alert, usually with `v-if`.
+
+## Accessibility
+
+A `red` or `amber` alert has the `alert` role, so screen readers read it out
+at once. Other themes have the `status` role, which screen readers read out
+when they are idle. The × button is labelled "Dismiss".
 
 <!-- @include: ./Alert.api.md -->

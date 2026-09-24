@@ -151,6 +151,7 @@ const forwardedAttrs = computed(() => {
 const controlRef = ref<InputExposed | null>(null)
 
 defineExpose<InputExposed>({
+  /** Moves focus to the control that `type` renders. */
   focus: (options?: FocusOptions) => controlRef.value?.focus(options),
 })
 

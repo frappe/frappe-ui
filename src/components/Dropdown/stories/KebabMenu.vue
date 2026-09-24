@@ -66,12 +66,11 @@ function rowActions(task: Task): DropdownOptions {
       </div>
 
       <Dropdown align="end" :options="rowActions(task)">
-        <template #trigger="{ open }">
+        <template #trigger>
           <Button
             variant="ghost"
             icon="lucide-more-horizontal"
-            :active="open"
-            aria-label="Row actions"
+            label="Row actions"
           />
         </template>
       </Dropdown>

@@ -3,6 +3,7 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
+  import ExposedTable from '@/components/Docs/ExposedTable.vue'
 
   const propsData = [
   {
@@ -74,6 +75,14 @@
     type: '[value: TabValue]'
   }
 ]
+
+  const exposedData = [
+  {
+    name: 'focus',
+    description: 'Moves focus to the selected tab, or to the first enabled tab when nothing\nis selected. That is the tab `Tab` reaches, since the group is one tab\nstop. Disabled tabs are skipped, so a group with no enabled tab does\nnothing.',
+    type: '(options?: FocusOptions) => void'
+  }
+]
 </script>
 
 ## API Reference
@@ -83,3 +92,5 @@
 <SlotsTable :data="slotsData"/>
 
 <EmitsTable :data="emitsData"/>
+
+<ExposedTable :data="exposedData"/>

@@ -1,23 +1,23 @@
 # Charts
 
-Nine chart components under the `frappe-ui/charts` subpath, drawn with
+Nine chart components in the `frappe-ui/charts` subpath, drawn with
 [echarts](https://echarts.apache.org). Props are flat and name the columns of
-your data — `x`, `y`, `y2`, `splitBy`, `category`, `value` — so a saved or serialized
-chart is one typed object spread with `v-bind="savedChart"`.
+your data (`x`, `y`, `y2`, `splitBy`, `category`, `value`), so you can save a
+chart as one typed object and render it with `v-bind="savedChart"`.
 
 ```js
 import { BarChart, LineChart } from 'frappe-ui/charts'
 ```
 
-The subpath carries the `--chart-*` color tokens with it. See
-[Chart Colors](/docs/foundations/colors/charts) for the three ramps and how to
-rebrand them. `palette` picks a ramp by name — `categorical`, `sequential` or
-`diverging` — or takes an explicit list of colors.
+Importing the subpath also loads the `--chart-*` color tokens. See
+[Chart colors](/docs/charts/colors) for the three ramps and how to change
+them. The `palette` prop picks a ramp by name (`categorical`, `sequential` or
+`diverging`) or takes a list of colors.
 
-An echarts-backed component registers only the modules it can draw. A donut
-costs a donut; the three axis charts share the bar and line modules, because any
-of them draws any mark. `FunnelChart` and `NumberCard` use no echarts at all —
-both draw their own SVG.
+Each echarts chart registers only the echarts modules it needs, so importing
+`DonutChart` loads only the pie module. The three axis charts share the bar and
+line modules, because each of them can draw bars and lines. `FunnelChart` and
+`NumberCard` do not use echarts. Both draw their own SVG.
 
 ## Data shapes
 
@@ -29,62 +29,66 @@ the rows apart. Pick whichever shape your query already returns.
 ## Marks
 
 `BarChart`, `LineChart` and `AreaChart` are one chart with three defaults.
-`seriesConfig[key].type` sets what a single series draws as — `'bar'`, `'line'`
-or `'area'` — and the rest follow the component you picked. That is what a combo
-chart is, and it is also how one line of a `LineChart` gets a fill.
+`seriesConfig[key].type` sets how one series draws (`'bar'`, `'line'` or
+`'area'`), and the other series use the default of the component you picked.
+Use it for a combo chart, or to fill one line of a `LineChart`.
 
 ## The charts
 
-- [BarChart](/docs/charts/barchart) — grouped, stacked and horizontal bars
-- [LineChart](/docs/charts/linechart) — trends, a second value axis, gaps
-- [AreaChart](/docs/charts/areachart) — the line family with a fill
-- [DonutChart](/docs/charts/donutchart) — share of a total
-- [FunnelChart](/docs/charts/funnelchart) — stage-to-stage drop-off
-- [HeatmapChart](/docs/charts/heatmapchart) — magnitude across two dimensions
-- [ScatterChart](/docs/charts/scatterchart) — two measures against each other
-- [SankeyChart](/docs/charts/sankeychart) — flow from a source to a target
-- [NumberCard](/docs/charts/numbercard) — one reading, with its change
+| Chart | Use it for |
+| --- | --- |
+| [BarChart](/docs/charts/barchart) | Grouped, stacked and horizontal bars |
+| [LineChart](/docs/charts/linechart) | Trends, a second value axis, gaps |
+| [AreaChart](/docs/charts/areachart) | Lines with a fill |
+| [DonutChart](/docs/charts/donutchart) | Share of a total |
+| [FunnelChart](/docs/charts/funnelchart) | Drop-off from stage to stage |
+| [HeatmapChart](/docs/charts/heatmapchart) | Size of a value across two dimensions |
+| [ScatterChart](/docs/charts/scatterchart) | Two measures against each other |
+| [SankeyChart](/docs/charts/sankeychart) | Flow from a source to a target |
+| [NumberCard](/docs/charts/numbercard) | One number and its change |
 
-Every chart shares the same
-[loading, error and empty states](/docs/charts/states), and they compose into a
-[dashboard](/docs/charts/dashboard) without extra chrome.
+Every chart has the same
+[loading, error and empty states](/docs/charts/states). Charts sit together in a
+[dashboard](/docs/charts/dashboard) with no extra wrappers.
 
-## The chrome
+## Card, container, legend and tooltip
 
-The pieces every chart is built from. Compose them yourself for a plot the
-library does not draw — see [Custom charts](#custom-charts).
+Every chart is built from these parts. Use them yourself to draw a chart the
+library does not have. See [Custom charts](#custom-charts).
 
-- [ChartCard](/docs/charts/chartcard) — the card surface
-- [ChartContainer](/docs/charts/chartcontainer) — title block, axis titles, states
-- [ChartLegend](/docs/charts/chartlegend) — the row of series names
-- [ChartTooltip](/docs/charts/charttooltip) — the reading beside the pointer
+| Component | What it draws |
+| --- | --- |
+| [ChartCard](/docs/charts/chartcard) | The card: border, background and padding |
+| [ChartContainer](/docs/charts/chartcontainer) | Title, axis titles and the three states |
+| [ChartLegend](/docs/charts/chartlegend) | The row of series names |
+| [ChartTooltip](/docs/charts/charttooltip) | The values beside the pointer |
 
 ## Custom charts
 
-A chart has two layers. The plot is echarts inside a box. The chrome is
-everything around it: the card surface, the title block, the legend, the
-tooltip, and the three states. The library owns the chrome and exports it, so a
-plot you draw yourself reads like a built-in chart on the same dashboard.
+A chart has two layers. The plot is echarts inside a box. Around it are the
+card, the title, the legend, the tooltip and the three states. The library
+exports these parts, so a plot you draw yourself looks like a built-in chart on
+the same dashboard.
 
 Draw the plot with `useChart`. It creates the echarts instance once the
-container has a size and the fonts settle, follows resizes, and disposes the
-instance on unmount. Call `registerChartModules` with the echarts modules your
-plot needs — nothing is registered for you.
+container has a size and the fonts have loaded, resizes it with the container,
+and disposes it on unmount. Call `registerChartModules` with the echarts modules
+your plot needs. `useChart` registers none for you.
 
 Wrap the plot in [`ChartContainer`](/docs/charts/chartcontainer) for the title,
 the value-axis labels and the states. Put
 [`ChartLegend`](/docs/charts/chartlegend) in its `legend` slot, and
 [`ChartTooltip`](/docs/charts/charttooltip) beside the plot for the same HTML
 tooltip the built-in charts draw. [`ChartCard`](/docs/charts/chartcard) draws
-the card surface.
+the card.
 
-Take the plot-area colors from `useChartTokens`. It takes the element the plot
-draws into and hands back `tokens` that re-resolve when the theme flips, so
-the axes and the series follow a theme switch with the rest of the page.
+Get the plot colors from `useChartTokens`. Pass it the element the plot draws
+into. It returns `tokens`, which update when the theme changes, so the axes and
+series switch theme with the rest of the page.
 
-The three states are slots — `#loading`, `#error` and `#empty` — on the
-container and on every built-in chart alike, so a retry button beside a failed
-query costs a slot rather than a chart of your own. See
+The three states are slots (`#loading`, `#error` and `#empty`) on the container
+and on every built-in chart. To add a retry button to a failed query, fill the
+`#error` slot; you do not need a custom chart. See
 [States](/docs/charts/states).
 
 ```vue
@@ -151,20 +155,19 @@ the option builder over them, and the state of the query that fetched them.
 
 <ComponentPreview name="Charts-CustomRadar" csr="true" self-layout />
 
-`ChartCard` takes `card`, and so does `NumberCard`. Set it to `false` for a
-chart the app has already placed inside a card of its own: the content renders
-with no border, background, radius or padding, and one bordered box stops
-nesting in another.
+`ChartCard` and `NumberCard` both take a `card` prop. Set it to `false` when
+the chart is already inside a card of your own. The content then renders with no
+border, background, radius or padding, so you do not get a box inside a box.
 
-## The option escape hatch
+## Passing raw echarts options
 
-`echartOptions` is deep-merged into the option the props built: objects merge
-key by key, arrays replace. So `series: [...]` at chart level throws away the
-generated series, data and colors included. The per-series `echartOptions` in
-`seriesConfig` is the path to one series key on an axis chart.
+`echartOptions` is deep-merged into the option the props build. Objects merge
+key by key, and arrays replace. So `series: [...]` at chart level replaces all
+generated series, including their data and colors. To change one series on an
+axis chart, use `echartOptions` inside `seriesConfig` for that series.
 
-`animationDuration` set through the hatch applies to the first draw only; every
-later draw is instant.
+An `animationDuration` set here applies to the first draw only. Every later draw
+is instant.
 
 ## The echarts instance
 
@@ -193,27 +196,26 @@ function downloadPng() {
 </template>
 ```
 
-It is the imperative half of the escape hatch `echartOptions` opens for options.
-Reach for it when an app needs an echarts call that no option key expresses: an
-image for a download button, or chart coordinates for an overlay of its own.
+Use it when you need an echarts method that no option can express, such as
+an image for a download button or chart coordinates for your own overlay.
 
-Three limits.
+It has three limits:
 
-- The instance is `undefined` until the plot has a size and the fonts settle.
-  Watch it rather than read it once in `onMounted`.
-- State applied through the instance does not survive. The component rebuilds
-  the whole option and calls `setOption` with `notMerge: true` on every reactive
-  change, so the next prop, data or theme change drops any highlight or
-  selection dispatched from outside, and any hand-written `setOption`. The handle
-  is for one-shot reads and actions. State goes in props.
-- `ECharts` is echarts' type, not this library's. A major echarts bump can change
-  it inside a frappe-ui minor. The promise is that the member exists and carries
-  the live instance, not anything about echarts' own API.
+- The instance is `undefined` until the plot has a size and the fonts have
+  loaded. Watch it instead of reading it once in `onMounted`.
+- Changes made through the instance do not last. On every reactive change the
+  component rebuilds the whole option and calls `setOption` with
+  `notMerge: true`. The next prop, data or theme change drops any highlight or
+  selection you dispatched, and any `setOption` you called. Use the instance for
+  one-time reads and actions, and keep state in props.
+- `ECharts` is the echarts type, not a frappe-ui type. A major echarts upgrade
+  can change it in a frappe-ui minor release. frappe-ui only promises that
+  `chart` exists and holds the live instance.
 
 ## Utilities
 
-The subpath exports three helpers beside the components. A built-in chart calls
-all three for you; a plot you draw yourself calls them itself.
+The subpath also exports three helpers. Built-in charts use them internally.
+Call them yourself when you draw your own plot.
 
 ### `useChartTokens`
 
@@ -223,18 +225,19 @@ function useChartTokens(el: Ref<HTMLElement | undefined>): {
 }
 ```
 
-The plot-area colors, resolved against the element you pass. Read the `--chart-*`
-tokens off that element rather than the document, so a plot inside a dark panel
-on a light page takes the panel's colors. Pass the element the plot draws into.
+Returns the plot colors, read from the `--chart-*` tokens on the element you
+pass. Pass the element the plot draws into. Because the tokens come from that
+element and not the document, a plot inside a dark panel on a light page gets
+the panel's colors.
 
-`tokens` re-resolve when the page theme flips, so a `computed` option built from
-it rebuilds and `setOption` runs again with the new values. It carries the three
-ramps — `categorical`, `sequential` and `diverging` — and the inks the chrome
-draws in: `axisLabel`, `axisTitle`, `axisLine`, `gridline`, `dataLabel`,
+`tokens` updates when the page theme changes, so a `computed` option built from
+it rebuilds and `setOption` runs again with the new colors. It holds the three
+ramps (`categorical`, `sequential` and `diverging`) and the colors for axes,
+grid and labels: `axisLabel`, `axisTitle`, `axisLine`, `gridline`, `dataLabel`,
 `insideLabel` and `backdrop`.
 
-Color a chart's own series through the `palette` prop instead. `useChartTokens`
-is for a plot the library does not draw.
+To color the series of a built-in chart, use the `palette` prop instead.
+`useChartTokens` is for a plot you draw yourself.
 
 ### `paletteColors`
 
@@ -247,20 +250,21 @@ function paletteColors(
 ): string[]
 ```
 
-`count` colors off a palette, the same call a built-in chart picks its series
-colors with. `palette` takes what the `palette` prop takes: a ramp name, an
-explicit list, or nothing, in which case `fallback` names the ramp to read.
+Returns `count` colors from a palette. Built-in charts use it to pick their
+series colors. `palette` takes the same values as the `palette` prop: a ramp
+name, a list of colors, or `undefined`. When it is `undefined`, `fallback` names
+the ramp to use (`'sequential'` by default).
 
-A list is handed out in the order it was written and cycled once it runs out.
-`'categorical'` cycles the ramp too, so eleven series reuse the first hue.
-`'sequential'` and `'diverging'` spread the count over the ramp instead, because
-a stop only means something against the stops beside it — three series take
-three spaced stops, not the first three.
+A list is used in order and repeats from the start when it runs out.
+`'categorical'` also repeats, so an eleventh series reuses the first color.
+`'sequential'` and `'diverging'` spread the colors evenly over the ramp instead,
+because a step on these ramps only has meaning next to the steps around it.
+Three series get three evenly spaced colors, not the first three.
 
 ### `OTHERS_KEY`
 
-The series identity a cap collapses its tail into: `maxSeries` on an axis chart,
-`maxSlices` on a donut. It is reserved, so a group whose name really is "Others"
-cannot collide with it, and stable, so `seriesConfig[OTHERS_KEY]` renames or
-recolors the bucket like any other series. It reads as "Others" until a `label`
-overrides it.
+The key of the series that collects the extra series when you set a limit:
+`maxSeries` on an axis chart, `maxSlices` on a donut. It is a reserved key, so a
+group that is really named "Others" does not clash with it. Use
+`seriesConfig[OTHERS_KEY]` to rename or recolor it like any other series. Its
+label is "Others" unless you set a `label`.

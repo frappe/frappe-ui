@@ -85,8 +85,10 @@ import { Button } from 'frappe-ui'
 </template>
 ```
 
-The full setup, including TypeScript and the Frappe dev-server proxy, is on the
-[Getting Started](https://ui.frappe.io/docs/getting-started) page.
+The full setup, including TypeScript, is on the
+[Installation](https://ui.frappe.io/docs/getting-started) page. The
+[Frappe app](https://ui.frappe.io/docs/getting-started/frappe) guide covers the
+dev-server proxy.
 
 ## Claude Code skill
 

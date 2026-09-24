@@ -37,6 +37,7 @@ const rootRef = ref<{ $el: HTMLElement } | null>(null)
 // The tabbable element is the thumb, not the root, the same reason every
 // caller `aria-*` is re-routed below. A range slider focuses its first thumb.
 defineExpose<InputExposed>({
+  /** Moves focus to the thumb. A range slider focuses its first thumb. */
   focus: (options?: FocusOptions) =>
     rootRef.value?.$el
       ?.querySelector<HTMLElement>('[role="slider"]')

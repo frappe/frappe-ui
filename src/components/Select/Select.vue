@@ -303,7 +303,12 @@ function getOptionKey(option: SelectNormalizedOption, index: number) {
 
 defineSlots<SelectSlots>()
 
-const exposed: SelectionExposed = { clear, focus }
+const exposed: SelectionExposed = {
+  /** Clears the selection and sets the model to `null`. */
+  clear,
+  /** Moves focus to the trigger. */
+  focus,
+}
 defineExpose(exposed)
 </script>
 

@@ -1,82 +1,77 @@
-# What is Frappe UI?
+# Introduction
 
-Frappe UI is a set of components and utilities to build frontend apps based on
-the [Frappe Framework](https://frappeframework.com).
-
-Along with generic components which are required to build a frontend like
-Button, Link, Dialog, etc., frappe-ui also contains utilities for handling
-server-side data fetching, directives and utilities.
-
-**Usage example**
+Frappe UI is a Vue 3 component library for building apps on the
+[Frappe Framework](https://frappeframework.com). It gives you the components,
+design tokens and data fetching that Frappe's own products use.
 
 ```vue
 <script setup>
-import { Button, LoadingText, createResource } from 'frappe-ui'
+import { Button, LoadingText, useList } from 'frappe-ui'
 
-let todos = createResource({
-  type: 'list',
+const todos = useList({
   doctype: 'ToDo',
   fields: ['name', 'description'],
-  cache: 'ToDos',
-  auto: true,
 })
 </script>
 
 <template>
   <LoadingText v-if="todos.loading" />
-  <ul v-else>
+  <ul v-else class="text-base text-ink-gray-8">
     <li v-for="todo in todos.data" :key="todo.name">
       {{ todo.description }}
     </li>
   </ul>
-  <Button>Add ToDo</Button>
+  <Button
+    variant="solid"
+    @click="todos.insert.submit({ description: 'New to-do' })"
+  >
+    Add to-do
+  </Button>
 </template>
 ```
 
-## Dependencies
+## What's included
 
-Frappe UI is built on top of the following amazing projects &ndash;
+- **[Components](./components/button.md):** buttons, inputs, dialogs, menus,
+  tables and more, built on [Reka UI](https://reka-ui.com) for keyboard and
+  screen reader support.
+- **[Foundations](./foundations/colors.md):** the colors, type scale, radius and
+  shadows, as Tailwind classes that switch with dark mode.
+- **[Data fetching](./data-fetching/use-list.md):** `useList`, `useDoc`,
+  `useCall` and friends, which read and write Frappe documents and keep them in
+  sync across the page.
+- **[Charts](./charts/overview.md)** and the
+  **[Editor](./molecules/editor.md):** larger pieces for dashboards and rich
+  text.
 
-- [Vue 3](https://vuejs.org)
-- [TailwindCSS](https://tailwindcss.com)
-- [Reka UI](https://reka-ui.com)
-- [PopperJS](https://popper.js.org/)
-- [TipTap](https://tiptap.dev)
-- [Feather Icons](https://feathericons.com)
+It also works without a Frappe server. The components and styles don't need
+one.
 
-See full list of dependencies:
-[package.json](https://github.com/frappe/frappe-ui/blob/main/package.json)
+## Built on
 
-## Motivation
+[Vue 3](https://vuejs.org), [Tailwind CSS](https://tailwindcss.com),
+[Reka UI](https://reka-ui.com), [TipTap](https://tiptap.dev) and
+[Lucide](https://lucide.dev) icons.
 
-In 2019, I started building [Frappe Books](https://frappebooks.com) based on an
-experimental design system by [Timeless](https://timeless.co). As the product
-got built, a set of small reusable components (like Button, Dialog, Card, etc.)
-were also built.
+## Used in
 
-After the launch of Frappe Books (and me dropping the project) I moved on to
-building the UI for [Frappe Cloud](https://frappecloud.com) in 2020. It also
-needed these components, so I copy-pasted them from Frappe Books to Frappe
-Cloud. These components evolved over time in Frappe Cloud. After working on the
-Frappe Cloud UI for about a year and a half, I moved on to my next project.
+Frappe UI started in 2019 as the components shared between Frappe Books and
+Frappe Cloud. It now powers most Frappe apps, including:
 
-At the start of 2022, I started working on
-[Gameplan](https://github.com/frappe/gameplan). I didn't want to copy-paste yet
-again, so I extracted these components in a separate package called
-[`frappe-ui`](https://npm.im/frappe-ui). This package is being developed in
-parallel along with the Gameplan project. I keep adding generic components and
-utilities useful for frontend development.
-
-## Products
-
-Frappe UI is now being used in a lot of products by Frappe.
-
-- [Frappe Cloud](https://frappecloud.com)
+- [Frappe Cloud](https://frappe.io/cloud)
+- [Frappe CRM](https://github.com/frappe/crm)
+- [Helpdesk](https://github.com/frappe/helpdesk)
+- [Frappe HR](https://github.com/frappe/hrms)
+- [Frappe Learning](https://github.com/frappe/lms)
+- [Insights](https://github.com/frappe/insights)
+- [Builder](https://github.com/frappe/builder)
 - [Gameplan](https://github.com/frappe/gameplan)
-- [Frappe Desk](https://frappedesk.com)
-- [Frappe Insights](https://github.com/frappe/insights)
-- [Frappe Drive](https://github.com/frappe/drive)
+
+## Next steps
+
+[Install frappe-ui](./getting-started.md) in a new or existing app. Moving from
+v0? Read the [migration guide](./migration.md).
 
 ## License
 
-Frappe UI is MIT licensed
+MIT.

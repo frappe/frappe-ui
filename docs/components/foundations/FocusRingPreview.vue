@@ -48,7 +48,7 @@ const RINGS = [
 </script>
 
 <template>
-  <div class="grid gap-10">
+  <div class="not-prose my-8 grid gap-10">
     <div class="flex flex-wrap items-center gap-4">
       <Button label="Button" />
       <TextInput v-model="text" placeholder="Text input" />
@@ -58,13 +58,6 @@ const RINGS = [
     </div>
 
     <div class="grid gap-4">
-      <p class="text-p-sm text-ink-gray-6 m-0">
-        Retheme a ring with
-        <code class="text-ink-gray-8"
-          >focus-visible:focus-ring-&lt;color&gt;</code
-        >
-        like red for errors or green for success.
-      </p>
       <div class="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-7">
         <div v-for="ring in RINGS" :key="ring.label" class="grid gap-3">
           <div

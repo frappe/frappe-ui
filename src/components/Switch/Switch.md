@@ -1,59 +1,67 @@
 # Switch
 
-A toggle input for turning options on or off. Clearly indicates state changes and allows quick, intuitive control.
-
-## Playground
+A toggle that turns a setting on or off.
 
 <ComponentPlayground name="Switch" />
 
-## With icon
+## Examples
 
-Strings starting with `lucide-` route through the shared Lucide
-Tailwind utility. Component values are rendered with `<component :is>`.
+### Notification settings
+
+`icon` shows an icon before the label.
 
 <ComponentPreview name="Switch-Icons" />
 
-## States
+### Toolbar toggle
 
-<ComponentPreview name="Switch-States" />
-
-## In a toolbar
-
-The `padded` prop gives the switch a clickable surface and hover state that
-matches the buttons beside it, so it sits comfortably in a toolbar. Clicking
-anywhere on the row toggles the switch.
+`padded` gives the switch a clickable surface and a hover state that match the
+buttons beside it. A click anywhere on the row toggles the switch.
 
 <ComponentPreview name="Switch-Toolbar" />
 
-## Settings list
+## Behavior
 
-When a `description` is present the switch sits on the right of the row. The
-switch control stays interactive on its own — there are no row-level hover or
-focus states.
+### Icon
 
-<ComponentPreview name="Switch-SettingsRows" />
+`icon` takes a `lucide-` class name, such as `"lucide-bell"`, or a component,
+which is rendered with `<component :is>`.
 
-## Template ref
+### Control position
 
-`focus()` is the one method every input in the library exposes. It moves focus
-to the component's own interactive element, so a generic form can call it
-without knowing which control it holds.
+`controlPosition` is `end` by default, so the switch sits after the label and
+the row fills the available width. `start` puts the switch before the label,
+and the row fits its content. Both follow the text direction.
 
-```vue
-<script setup lang="ts">
-import { useTemplateRef } from 'vue'
+### Padded
 
-const field = useTemplateRef('field')
-</script>
+`padded` wraps the switch and the label in a clickable surface with hover,
+active and focus states, for toolbars and menu items. Without `padded`, only
+the switch and its label respond to clicks, and the row has no hover or focus
+state.
 
-<template>
-  <Switch ref="field" v-model="value" />
-</template>
-```
+### Label, description and error
 
-## Attributes
+`label` renders beside the switch and `description` below it. `error` renders
+below the row and hides `description`. It takes a string, an array of strings
+(one line each), or an `Error`, the same values as
+[ErrorMessage](./errormessage). An empty string or an empty array means no
+error. `required` adds a red asterisk to the label.
 
-`class` and `style` go to the layout wrapper. Everything else — `name`,
-`aria-*`, `data-*`, and listeners — goes once to the interactive element.
+The `#label` slot replaces the label text and the required marker, and receives
+`{ required }`. A `#description` slot is not hidden by `error`. It renders
+above the error.
+
+### Attributes
+
+`class` and `style` go to the layout wrapper. Everything else (`name`,
+`aria-*`, `data-*` and listeners) goes once to the interactive element, which
+for `Switch` is the switch button.
+
+## Accessibility
+
+`Switch` renders a button with `role="switch"`, and `Space` or `Enter` toggles
+it. An icon given as a class name is hidden from screen readers. `required`
+sets `aria-required`. While `error` is set, the switch gets `aria-invalid` and
+an `aria-errormessage` that points to the error text.
 
 <!-- @include: ./Switch.api.md -->

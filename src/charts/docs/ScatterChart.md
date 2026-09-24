@@ -1,82 +1,77 @@
 # ScatterChart
 
-Two measures read against each other, a point per row.
+Plots two measures against each other, with one point for each row.
 
 ## Two measured axes
 
-`x` and `y` name the two value columns. Both axes are measured — a scatter has
-no category axis, and unlike an axis chart it cannot be asked for one — so each
-scale follows the data instead of anchoring to zero, and the cloud fills the
-plot. `label` names the column that titles a point in the tooltip, and
-`select` carries the row behind it.
+`x` and `y` name the two value columns. Both axes are numeric scales. A scatter
+has no category axis and cannot be given one. Each scale follows the data
+instead of starting at zero, so the points fill the plot. `label` names the
+column that titles a point in the tooltip, and `select` reports the data row of
+the point.
 
-The `xAxis` title is drawn on its axis, the `yAxis` title above the plot, the
-same way every cartesian chart in the family places them.
+The `xAxis` title is drawn on its axis and the `yAxis` title above the plot, as
+on the other axis charts.
 
 <ComponentPreview name="Charts-ScatterSpend" csr="true" self-layout />
 
 ## A third measure as size
 
-`size` names a column of magnitudes, and each point is drawn at a diameter that
-maps that magnitude linearly into a readable range. The scale runs over the
-whole plot rather than within a group, so a bubble means the same thing wherever
-it sits. Data with one distinct magnitude draws every bubble at the middle of
-the range: it has no relative size to show, and drawing them all at the floor
-would claim they were the smallest there is.
+`size` names a numeric column. Each point's diameter scales linearly with that
+value, within a readable range. The scale covers the whole plot, not each group,
+so a bubble size means the same thing everywhere. If every row has the same
+value, all bubbles are drawn at the middle size, because there is no difference
+to show and the smallest size would suggest they are the smallest values.
 
-`splitBy` splits the rows into one group per distinct value, colored from the
-palette and named in the legend. Press a legend entry to take a group out of the
-plot, or bind `v-model:hiddenSeries` to own that list yourself.
+`splitBy` splits the rows into one group per distinct value, each with its own
+color and legend entry. Press a legend entry to hide a group, or bind
+`v-model:hiddenSeries` to control that list yourself.
 
 <ComponentPreview name="Charts-ScatterMarkets" csr="true" self-layout />
 
 ## Quadrants and other reference lines
 
-`referenceLines` draws a rule over the plot at a fixed position — a target, a
-threshold, or a median. Each line takes a `value`, an optional `label`, `color`
-and `dashed`. They are annotations, not series: no legend entry, no tooltip
-entry, and no way to switch one off, so a rule stays put while a legend toggle
-takes a group out of the plot.
+`referenceLines` draws a line across the plot at a fixed value, such as a
+target, a threshold or a median. Each line takes a `value` and an optional
+`label`, `color` and `dashed`. Reference lines are not series: they have no
+legend entry or tooltip entry and cannot be hidden, so they stay visible when you
+hide a group.
 
-`labelPlacement` moves the label off whatever it lands on. It is described under
+`labelPlacement` moves the label when it covers something. See
 [BarChart](/docs/charts/barchart#targets-and-thresholds).
 
-`axis` says which scale `value` is read against. Both scales are measured here,
-so `'x'` and `'y'` are the same kind of thing: a number. An axis chart reads
-`'x'` as a category or a date instead, unless `xAxis.type` is `'value'`. `'y'`
-(the default) draws a rule across the
-plot, `'x'` draws one down it. A scatter has no second value axis, so `'y2'`
-reads as `'y'` with a dev-mode warning.
+`axis` sets which scale `value` belongs to. Both scales are numeric here, so
+`'x'` and `'y'` both take a number. On an axis chart, `'x'` takes a category or
+a date instead, unless `xAxis.type` is `'value'`. `'y'` (the default) draws a
+horizontal line and `'x'` a vertical one. A scatter has no second value axis, so
+`'y2'` is treated as `'y'`, with a warning in dev mode.
 
-A scatter is often read in quadrants, with each corner meaning something to the
-business. That is one line per axis. There is no `quadrants` prop and there will
-not be one: a quadrant divider is a reference line, the axis charts already
-spell that `referenceLines`, and one concept gets one spelling.
+To split a scatter into quadrants, add one reference line per axis. There is no
+`quadrants` prop, because a quadrant divider is a reference line, and the axis
+charts already use `referenceLines` for that.
 
 <ComponentPreview name="Charts-ScatterQuadrants" csr="true" self-layout />
 
-A line outside the range the plot covers is not drawn — each scale follows the
-data, not the annotation — so pin `xAxis.min` / `max` or `yAxis.min` / `max` to
-bring a distant one into frame.
+A line outside the plotted range is not drawn, because each scale follows the
+data, not the lines. Set `xAxis.min` / `max` or `yAxis.min` / `max` to bring a
+distant line into view.
 
 ## Naming the points
 
-`showDataLabels` prints each point's own name beside it, as the chart above
-does. That is what a quadrant reading is for: it names the corner every product
-sits in without hovering over one. What it prints is the `label` column, so a
-chart that names none has nothing to show and says so in a dev-mode warning.
-The two measures are already on the axes, and printing one of them beside the
-symbol would say nothing the plot did not.
+`showDataLabels` prints each point's name beside it, as in the chart above, so
+you can see which quadrant each product is in without hovering. It prints the
+`label` column. If no `label` is set, nothing prints and you get a warning in
+dev mode. It does not print the x or y value, because the axes already show
+them.
 
-Points overlap by nature and so would their names. Names that collide with a
-neighbour are dropped, the way a crowded axis drops labels, so a dense cloud
-carries few.
+Points often overlap, and so would their names. A name that overlaps a
+neighbor is hidden, so a dense plot shows only a few names.
 
 ## Formatting
 
-`format` prints every number the chart shows. `xAxis.format` and `yAxis.format`
-override it for their own axis, which is what a chart whose two measures are in
-different units needs. The size measure has no axis of its own, so `format` is
-what prints it in the tooltip.
+`format` formats every number the chart shows. `xAxis.format` and
+`yAxis.format` override it for their own axis, for a chart whose two measures
+are in different units. The size measure has no axis, so `format` formats it in
+the tooltip.
 
 <!-- @include: ./ScatterChart.api.md -->

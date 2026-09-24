@@ -186,8 +186,9 @@ export interface FrappeuiPluginOptions {
  * auto-imports, barrel-import rewriting, TypeScript type generation, boot
  * data injection, and production build configuration.
  *
- * Every sub-plugin except `frappeTypes` is enabled by default — pass `false`
- * to disable one, or an options object to override its defaults.
+ * Every sub-plugin except `frappeTypes` and `lucideIcons` is enabled by
+ * default. Pass `false` to disable one, or an options object to override its
+ * defaults.
  */
 declare function frappeuiPlugin(options?: FrappeuiPluginOptions): PluginOption[]
 export default frappeuiPlugin

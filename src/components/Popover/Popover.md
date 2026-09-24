@@ -1,129 +1,100 @@
 # Popover
 
-Shows content in a floating panel anchored to a trigger, portaled out of the
-page flow so it never disturbs the layout. Built on
-[reka-ui](https://reka-ui.com/)'s `Popover` primitives, so click, keyboard, and
-aria wiring come for free.
+A floating panel that opens from a trigger on click. For a panel that opens on
+hover, such as a profile preview, use [`HoverCard`](./hovercard) instead.
 
-## Basic
+<ComponentPreview name="Popover-FilterPanel" />
 
-`#trigger` is rendered through reka's `PopoverTrigger` as-child — clicking it
-(or pressing <kbd>Enter</kbd> / <kbd>Space</kbd> while focused) toggles the
-panel. `#default` renders inside the standard shell. Both slots receive
-`{ open, setOpen, close }`; `close()` is shorthand for `setOpen(false)`.
+## Examples
 
-<ComponentPreview name="Popover-Click" />
+### Workspace switcher
 
-## Side and alignment
+`match-trigger-width` makes the panel at least as wide as the trigger, so the
+list lines up under the button.
 
-Use `side` (`top` / `right` / `bottom` / `left`) and `align` (`start` / `center`
-/ `end`) to position the panel. The panel flips and shifts automatically to stay
-within the viewport (`collisionPadding` controls the gap kept from the edge).
+<ComponentPreview name="Popover-WorkspaceSwitcher" />
 
-<ComponentPreview name="Popover-SideAlign" />
+### Set a status
 
-## Controlled open state
+`:dismissible="false"` keeps the panel open on an outside click, so a half-typed
+status is not lost. `v-model:open` closes it from the Cancel and Save buttons.
 
-Bind `v-model:open` to drive the panel from outside, or read it to react to open
-/ close. A template ref exposes `open()`, `close()` and `contentEl`, the content
-element (`null` while closed). The component emits `open` / `close` events.
+<ComponentPreview name="Popover-StatusMessage" />
 
-<ComponentPreview name="Popover-Controlled" />
+### Color picker
 
-## Non-dismissible
+`bare` removes the panel's background, border, shadow and rounding, so the
+content draws its own surface.
 
-By default the popover closes on an outside click or on `Escape`. Set
-`:dismissible="false"` to turn off both and keep it open until you close it
-explicitly — useful for panels with their own confirm / cancel actions.
+<ComponentPreview name="Popover-ColorPicker" />
 
-<ComponentPreview name="Popover-Dismissible" />
+### Field help
 
-## Match trigger width
+`side="right"` opens the panel beside the icon, and `arrow` points it back at
+the icon.
 
-Set `match-trigger-width` to make the panel's `min-width` match the trigger.
-Handy for select-style menus where the panel should line up under a wide button.
+<ComponentPreview name="Popover-FieldHelp" />
 
-<ComponentPreview name="Popover-MatchTriggerWidth" />
+### Search suggestions
 
-## Reference element
-
-By default the content is positioned against the trigger element. Pass
-`reference` to position it against another element. This is for a trigger that
-is a labelled field: pass the input row, and the panel sits under the input
-rather than under the description. It works in both trigger modes.
-
-## Bare
-
-Set `bare` to drop the panel shell (background, border, shadow, rounding) so
-`#default` content can bring its own surface — useful for pickers and cards that
-are already styled.
-
-<ComponentPreview name="Popover-Bare" />
-
-## Arrow
-
-Set `arrow` to render a small arrow that points back at the trigger. It's styled
-to match the panel surface.
-
-<ComponentPreview name="Popover-Arrow" />
-
-## Typing-driven panels
-
-Two props stop a panel from fighting the input that drives it.
-`trigger="manual"` turns off toggling: a click on the input only places the
-caret, and `v-model:open` alone opens and closes the panel.
-`:auto-focus="false"` keeps focus in the input when the panel opens.
+`trigger="manual"` and `:auto-focus="false"` let typing in the input open the
+panel while the caret stays in the input.
 
 <ComponentPreview name="Popover-Typeahead" />
 
-`manual` also removes the `aria-expanded` and `aria-controls` wiring. Add the
+## Behavior
+
+### Trigger and content
+
+Put the trigger in `#trigger` and the panel content in `#default`. A click on
+the trigger opens and closes the panel. Both slots receive
+`{ open, setOpen, close }`, where `close()` is the same as `setOpen(false)`.
+
+### Open state
+
+Bind `v-model:open` only when something outside the popover needs to open or
+close it. The popover emits `open` when it opens and `close` when it closes.
+
+### Position
+
+`side` (`top`, `right`, `bottom`, `left`) picks the edge of the trigger the
+panel opens on, and `align` (`start`, `center`, `end`) its position along that
+edge. `offset` sets the gap in pixels. The panel flips and shifts to stay
+inside the screen. `collisionPadding` sets the space it keeps from the screen
+edge.
+
+### Closing
+
+The popover closes on a click outside it and on `Escape`. Set
+`:dismissible="false"` to turn off both, for a panel with its own Save and
+Cancel buttons.
+
+### Reference element
+
+The panel is placed against the trigger. Pass an element as `reference` to
+place it against that element instead. Use it when the trigger is a labelled
+field: pass the input row, and the panel opens under the input instead of
+under the field's description. It works with both `trigger` values.
+
+### Typing in the trigger
+
+Two props stop a panel from getting in the way of the input that opens it.
+`trigger="manual"` turns off the click toggle: a click on the input only places
+the caret, and only `v-model:open` opens and closes the panel.
+`:auto-focus="false"` keeps focus in the input when the panel opens.
+
+### Attributes
+
+`<Popover>` renders no element of its own, so a `class` or `style` on it goes
+nowhere. Put them on the element inside `#trigger`.
+
+## Accessibility
+
+<kbd>Enter</kbd> or <kbd>Space</kbd> on a focused trigger opens and closes the
+panel, and <kbd>Escape</kbd> closes it. The trigger gets `aria-expanded` and
+`aria-controls`.
+
+`trigger="manual"` removes `aria-expanded` and `aria-controls`. Add the
 combobox pattern yourself, or use [`Combobox`](./combobox), which has it.
-
-## Styling
-
-The popover ships with its panel shell baked in
-(`rounded-6 bg-surface-elevation-2 shadow-2xl ring-1 ring-black ring-opacity-5`)
-— there are no class-injection props. Style it through the stable `data-slot`
-hooks instead:
-
-| Hook                         | Element                                      |
-| ---------------------------- | -------------------------------------------- |
-| `[data-slot="trigger"]`      | the trigger wrapper                          |
-| `[data-slot="content"]`      | the portaled content (reka `PopoverContent`) |
-| `[data-slot="content-body"]` | the panel shell that owns the visuals        |
-
-Open / closed and motion rhythm are reflected as `data-state="open" \| "closed"`
-and `data-motion="instant"` for state-driven styling.
-
-```css
-:where([data-slot='content-body']) {
-  /* your overrides */
-}
-```
-
-## Motion
-
-The panel appears instantly. An 80ms fade smooths the paint on open, and there
-is no exit animation — a panel that appears at a fixed spot has nothing to scale
-from, so an entrance would only add latency. Same for pointer and keyboard
-opens, and `prefers-reduced-motion` is respected. No configuration is required.
-
-## Notes
-
-- Use `#trigger` + `#default` for the standard click popover. Both slots get
-  `{ open, setOpen, close }`.
-- Reach for `v-model:open` only when an external control needs to drive the
-  panel. Clicking the trigger already toggles it, unless `trigger="manual"`.
-- For a panel that opens on hover (profile previews, link previews), use the
-  dedicated [`HoverCard`](./hovercard) component instead of a popover.
-- Attributes on `<Popover>` are not inherited — the component renders no element
-  of its own. Put classes and styles on the element inside `#trigger`.
-
-## Migrating from v0
-
-The v0 API is gone in `1.0.0`. `#target` becomes `#trigger`, `#body` and
-`#body-main` become `#default`, and `placement` splits into `side` + `align`.
-See [Migration from v0 → Popover / HoverCard](../migration#popover-hovercard-tooltip)
-for the full table.
 
 <!-- @include: ./Popover.api.md -->

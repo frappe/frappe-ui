@@ -15,7 +15,7 @@ const options = [
 ]
 
 const knobs: Knob[] = [
-  { name: 'label', type: 'text', default: 'Actions', width: '12rem' },
+  { name: 'label', type: 'text', default: 'Actions' },
   {
     name: 'align',
     type: 'tabs',

@@ -170,9 +170,16 @@ provide(
 )
 
 defineExpose({
+  /** The keys (`rowKey` values) of the selected rows. */
   selections,
+  /** Whether every enabled row is selected. */
   allRowsSelected,
+  /** Selects the row with this key, or deselects it if it is selected. */
   toggleRow,
+  /**
+   * Selects every enabled row. Clears the selection instead when `select` is
+   * false or every row is already selected.
+   */
   toggleAllRows,
 })
 </script>
