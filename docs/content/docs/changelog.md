@@ -285,6 +285,14 @@ when nothing is selected. Disabled options are skipped, including `route` and
 option disabled does nothing. `FocusOptions` is forwarded, `preventScroll`
 included. The type is exported as `TabButtonsExposed`.
 
+### Tabs, TabButtons — `side` is now `edge`, with `start` and `end`
+
+On a vertical `browser-tab` list, the prop that picks which edge of the list
+the tabs attach to is now `edge="start" | "end"` instead of
+`side="left" | "right"`. `start` and `end` follow text direction: `start` is the
+left edge in left-to-right text and the right edge in right-to-left text. The
+type `TabsSide` is now `TabsEdge`.
+
 ### Tree — expansion moves to a keyed `v-model:expanded` (breaking, silent)
 
 `expanded` was a boolean that expanded everything, and the open/closed state of

@@ -39,11 +39,11 @@
     default: 'false'
   },
   {
-    name: 'side',
-    description: 'Edge the active browser tab attaches to. Only used when `variant=\'browser-tab\'` and `vertical`.',
+    name: 'edge',
+    description: 'browser-tab + vertical only: the edge of the list the tabs attach to.\n`start` is the left edge in left-to-right text.',
     required: false,
-    type: 'TabsSide',
-    default: '"left"'
+    type: 'TabsEdge',
+    default: '"start"'
   },
   {
     name: 'fluid',

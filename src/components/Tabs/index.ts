@@ -7,7 +7,7 @@ export type {
   TabItem,
   TabListProps,
   TabPanelProps,
-  TabsSide,
+  TabsEdge,
   TabsEmits,
   TabsProps,
   TabsSize,

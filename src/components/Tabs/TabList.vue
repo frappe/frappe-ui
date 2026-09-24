@@ -16,7 +16,7 @@ import type { TabListProps } from './types'
 const props = withDefaults(defineProps<TabListProps>(), {
   variant: 'underline',
   size: 'sm',
-  side: 'left',
+  edge: 'start',
 })
 
 const root = inject(tabsRootKey, null)
@@ -26,7 +26,7 @@ const orientation = computed(() => root?.orientation.value ?? 'horizontal')
 provide(tabListKey, {
   variant: computed(() => props.variant),
   size: computed(() => props.size),
-  side: computed(() => props.side),
+  edge: computed(() => props.edge),
 })
 
 const pillTrack = computed(
@@ -53,7 +53,7 @@ const listClasses = computed(() => {
       variant: props.variant,
       size: props.size,
       orientation: orientation.value,
-      side: props.side,
+      edge: props.edge,
     }),
   ]
 })
@@ -92,7 +92,7 @@ const pillIndicatorClasses = computed(() => [
 // open edge in the rail moves continuously mid-flight.
 const browserIndicatorClasses = computed(() => {
   const vertical = orientation.value === 'vertical'
-  const base = vertical ? props.side : 'default'
+  const base = vertical ? props.edge : 'default'
   return [
     tabRadiusClasses('browser-tab', props.size, base),
     browserTabCardClasses(base),

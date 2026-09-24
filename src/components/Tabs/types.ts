@@ -4,7 +4,7 @@ import type { RouteDestination } from '../shared/route'
 export type TabValue = string | number
 export type TabsVariant = 'underline' | 'subtle' | 'ghost' | 'browser-tab'
 export type TabsSize = 'sm' | 'md'
-export type TabsSide = 'left' | 'right'
+export type TabsEdge = 'start' | 'end'
 
 /** A `lucide-*` class string or a Vue component. */
 export type TabIcon = string | Component
@@ -29,7 +29,7 @@ export interface TabsProps {
   size?: TabsSize
 
   /** Shorthand mode only; forwarded to the generated TabList. */
-  side?: TabsSide
+  edge?: TabsEdge
 }
 
 export interface TabsEmits {
@@ -44,8 +44,11 @@ export interface TabListProps {
   /** Size of the triggers. */
   size?: TabsSize
 
-  /** browser-tab + vertical only: which edge the tabs attach to. */
-  side?: TabsSide
+  /**
+   * browser-tab + vertical only: the edge of the list the tabs attach to.
+   * `start` is the left edge in left-to-right text.
+   */
+  edge?: TabsEdge
 }
 
 export interface TabTriggerProps {
