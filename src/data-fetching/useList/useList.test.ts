@@ -3,7 +3,9 @@
  */
 
 import { ref } from 'vue'
-import { baseUrl, waitUntilValueChanges } from '../../mocks/utils'
+import { http, HttpResponse } from 'msw'
+import { baseUrl, url, waitUntilValueChanges } from '../../mocks/utils'
+import { server } from '../../mocks/node'
 import { useList } from '../index'
 
 describe('useList', () => {
@@ -270,6 +272,54 @@ describe('useList', () => {
       { name: 'User1', email: 'user1@example.com' },
       { name: 'User2', email: 'user2@example.com' },
     ])
+  })
+
+  it('caches rows as the server sent them and transforms them once on read', async () => {
+    // Each row carries a JSON string that `transform` parses. Parsing it a
+    // second time throws, so the cache must never hand `transform` a row it
+    // has already transformed.
+    server.use(
+      http.get(url('/api/v2/document/Activity'), ({ request }) => {
+        let start = Number(new URL(request.url).searchParams.get('start'))
+        return HttpResponse.json({
+          data: [start + 1, start + 2].map((n) => ({
+            name: `A${n}`,
+            data: JSON.stringify({ n }),
+          })),
+        })
+      }),
+    )
+
+    interface Activity {
+      name: string
+      data: string | { n: number }
+    }
+    const options = {
+      baseUrl,
+      doctype: 'Activity',
+      cacheKey: 'parsed-activities',
+      limit: 2,
+      immediate: false,
+      transform: (rows: Activity[]) =>
+        rows.map((row) => ({ ...row, data: JSON.parse(row.data as string) })),
+    }
+    const expected = [1, 2, 3, 4].map((n) => ({ name: `A${n}`, data: { n } }))
+
+    const activities = useList<Activity>(options)
+    await activities.fetch()
+
+    // A reload shows the cached rows while it is in flight.
+    const reloading = activities.reload()
+    expect(activities.data).toStrictEqual(expected.slice(0, 2))
+    await reloading
+
+    activities.next()
+    await waitUntilValueChanges(() => activities.data)
+    expect(activities.data).toStrictEqual(expected)
+
+    // A second list with the same key starts from the cache, both pages.
+    const reopened = useList<Activity>(options)
+    await vi.waitFor(() => expect(reopened.data).toStrictEqual(expected))
   })
 })
 

@@ -77,6 +77,7 @@ export function useList<T extends { name: string }>(
   const hasPreviousPage = computed(() => _start.value > 0)
 
   let normalizedCacheKey = normalizeCacheKey(cacheKey, 'useList')
+  // Rows ready to show, already transformed. IndexedDB holds them untransformed.
   let cachedResponse = ref<UseListResponse<T> | null>(
     null,
   ) as Ref<UseListResponse<T> | null>
@@ -114,12 +115,6 @@ export function useList<T extends { name: string }>(
       canUseCachedFallback(error.value, staleOnError) &&
       (out.loading || !out.isFinished || !allData.value || error.value)
     ) {
-      if (transform) {
-        let returnValue = transform(cachedData as T[])
-        if (returnValue !== undefined) {
-          return returnValue
-        }
-      }
       return cachedData
     }
     return allData.value
@@ -128,7 +123,9 @@ export function useList<T extends { name: string }>(
   if (normalizedCacheKey) {
     idbStore.get(normalizedCacheKey).then((data) => {
       if (data) {
-        cachedResponse.value = data as UseListResponse<T>
+        // Stored rows are as the server sent them. Transform them once, here,
+        // the same as a fresh response.
+        cachedResponse.value = applyTransform(data as T[], transform)
       }
     })
   }
@@ -298,6 +295,11 @@ function handleAfterFetch<T extends { name: string }>({
   hasNextPage: Ref<boolean>
   cachedResponse: Ref<UseListResponse<T> | null>
 }) {
+  // Every page loaded so far, as the server sent it. This is what goes to
+  // IndexedDB: transformed rows may not survive JSON, and `transform` runs
+  // again when the cache is read.
+  let rawData: T[] = []
+
   return function (
     ctx: AfterFetchContext<{
       data: UseListResponse<T>
@@ -316,12 +318,14 @@ function handleAfterFetch<T extends { name: string }>({
       } else {
         hasNextPage.value = resultData.length < _limit.value ? false : true
       }
-      if (transform) {
-        const returnValue = transform(resultData)
-        if (Array.isArray(returnValue)) {
-          resultData = returnValue
-        }
+
+      let normalizedCacheKey = normalizeCacheKey(cacheKey, 'useList')
+      if (normalizedCacheKey) {
+        // Copied before `transform` runs, which may change the rows in place.
+        let rawPage = transform ? structuredClone(resultData) : resultData
+        rawData = _start.value === 0 ? rawPage : [...rawData, ...rawPage]
       }
+      resultData = applyTransform(resultData, transform)
 
       if (_start.value === 0) {
         allData.value = resultData
@@ -330,9 +334,8 @@ function handleAfterFetch<T extends { name: string }>({
       }
       ctx.data.data = allData.value
 
-      let normalizedCacheKey = normalizeCacheKey(cacheKey, 'useList')
       if (normalizedCacheKey) {
-        idbStore.set(normalizedCacheKey, ctx.data.data)
+        idbStore.set(normalizedCacheKey, rawData)
         cachedResponse.value = ctx.data.data
       }
       if (onSuccess) {
@@ -346,6 +349,12 @@ function handleAfterFetch<T extends { name: string }>({
 
     return ctx
   } as UseFetchOptions['afterFetch']
+}
+
+function applyTransform<T>(rows: T[], transform?: (data: T[]) => T[]) {
+  if (!transform) return rows
+  const returnValue = transform(rows)
+  return Array.isArray(returnValue) ? returnValue : rows
 }
 
 function handleFetchError<T>({ onError }: UseListOptions<T>) {

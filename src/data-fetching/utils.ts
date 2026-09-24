@@ -59,6 +59,13 @@ export function unrefObject(
   return newObj
 }
 
+// Part of every prefixed cache key. Bump it when what the cache stores
+// changes meaning, so entries an older frappe-ui wrote are ignored instead of
+// misread. v2: the cache holds responses as the server sent them, before
+// `transform`. A v1 entry holds transformed data, and transforming it again
+// on read breaks any transform that is not idempotent.
+const CACHE_VERSION = 'v2'
+
 export function normalizeCacheKey(
   cacheKey: string | Array<string | number | boolean | object> | undefined,
   prefix?: string,
@@ -70,7 +77,7 @@ export function normalizeCacheKey(
     cacheKey = [cacheKey]
   }
   if (prefix) {
-    cacheKey = [prefix, ...cacheKey]
+    cacheKey = [`${prefix}:${CACHE_VERSION}`, ...cacheKey]
   }
   return JSON.stringify(cacheKey)
 }
