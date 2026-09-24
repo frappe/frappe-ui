@@ -64,7 +64,6 @@ Frappe Cloud. It now powers most Frappe apps, including:
 - [Frappe HR](https://github.com/frappe/hrms)
 - [Frappe Learning](https://github.com/frappe/lms)
 - [Insights](https://github.com/frappe/insights)
-- [Frappe Drive](https://github.com/frappe/drive)
 - [Builder](https://github.com/frappe/builder)
 - [Gameplan](https://github.com/frappe/gameplan)
 
