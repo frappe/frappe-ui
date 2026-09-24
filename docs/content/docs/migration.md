@@ -5082,21 +5082,19 @@ npx --package frappe-ui@rc base-props-v1 src
 Progress labels and hints now render independently. A `#hint` slot no longer
 needs a `label` or `hint` prop to make its row appear.
 
-### `LoadingIndicator` is deprecated; use `Spinner` {#loadingindicator-deprecated}
+### `LoadingIndicator` no longer takes `scale` {#loadingindicator-is-spinner}
 
-`LoadingIndicator` is now `Spinner` under a second name. It still works, warns
-once in development, and is removed after v1. Rename the import and the tags:
+`LoadingIndicator` is now the same component as `Spinner`, so it takes
+`Spinner`'s props. `scale` no longer changes the size. Size it with `size` or a
+class instead:
 
 ```vue
 <!-- Before -->
-<LoadingIndicator class="size-4" />
+<LoadingIndicator scale="70" />
 
 <!-- After -->
-<Spinner class="size-4" />
+<LoadingIndicator size="sm" />
 ```
-
-`scale` no longer changes the size. Size the spinner with a class or `size`
-instead. If you register `LoadingIndicator` globally, register `Spinner`.
 
 ## FAQ
 

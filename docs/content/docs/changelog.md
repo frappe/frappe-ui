@@ -18,13 +18,12 @@ as text meet, as in "Ctrl+K". A key drawn as an icon, like ⌘, ⇧, ⌥, an arr
 everywhere. `show-plus` still draws every plus, and `:show-plus="false"` none.
 `bg` chips never drew it.
 
-### `LoadingIndicator` is deprecated; use `Spinner`
+### `LoadingIndicator` is now `Spinner` under its older name
 
-`LoadingIndicator` was a `Spinner` scaled by a percentage. It is now `Spinner`
-under a second name: it takes `Spinner`'s props, so `scale` no longer changes
-its size. It warns once in development and is removed after v1. Rename the
-imports and tags to `Spinner`; see the
-[migration guide](/docs/migration#loadingindicator-deprecated).
+`LoadingIndicator` was a `Spinner` scaled by a percentage. It is now the same
+component as `Spinner`, so it takes `Spinner`'s props and `scale` no longer
+changes its size. Use `size` or a class instead; see the
+[migration guide](/docs/migration#loadingindicator-is-spinner).
 
 ### `npm create frappe-ui` sets up a new app
 
