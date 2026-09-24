@@ -6,11 +6,22 @@
 
   const propsData = [
   {
-    name: 'scale',
-    description: 'Scales the underlying Spinner, as a percentage.',
+    name: 'size',
+    description: 'Diameter — xs=12px, sm=14px, md=16px, lg=20px. Omit to size with classes (default 16px).',
     required: false,
-    type: 'number',
-    default: '100'
+    type: 'SpinnerSize'
+  },
+  {
+    name: 'theme',
+    description: 'Spinner color. Omit to inherit the text color.',
+    required: false,
+    type: 'SpinnerTheme'
+  },
+  {
+    name: 'track',
+    description: 'Show a faint track behind the arc',
+    required: false,
+    type: 'boolean'
   }
 ]
 </script>

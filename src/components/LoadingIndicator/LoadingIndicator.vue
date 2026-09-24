@@ -1,19 +1,16 @@
 <template>
-  <Spinner :style="scaleStyle" />
+  <Spinner v-bind="props" />
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { Spinner } from '../Spinner'
-import type { LoadingIndicatorProps } from './types'
+import { Spinner, type SpinnerProps } from '../Spinner'
+import { warnDeprecated } from '../../utils/warnDeprecated'
 
-// Thin wrapper around Spinner that scales by percentage instead of a fixed
-// size step — useful when callers need an arbitrary in-between size.
-const props = withDefaults(defineProps<LoadingIndicatorProps>(), {
-  scale: 100,
-})
+const props = defineProps<SpinnerProps>()
 
-const scaleStyle = computed(() =>
-  props.scale === 100 ? undefined : { scale: `${props.scale}%` },
+warnDeprecated(
+  'LoadingIndicator',
+  'Spinner',
+  'https://ui.frappe.io/docs/migration#loadingindicator-deprecated',
 )
 </script>

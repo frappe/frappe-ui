@@ -50,8 +50,7 @@ All from the `frappe-ui` root entry.
 - [ItemListRow](https://ui.frappe.io/docs/components/itemlistrow): single-row list item primitive.
 - [KeyboardShortcut](https://ui.frappe.io/docs/components/keyboardshortcut): renders a combo such as `Mod+K` as styled keys; `Mod` resolves per platform.
 - [KeyboardShortcutsDialog](https://ui.frappe.io/docs/components/keyboardshortcutsdialog): lists every shortcut registered with `useKeyboardShortcut`. Mount once, bind `v-model:open`; it has no trigger of its own.
-- [LoadingIndicator](https://ui.frappe.io/docs/components/loadingindicator): Spinner scaled by percentage instead of a fixed size step.
-- [LoadingText](https://ui.frappe.io/docs/components/loadingtext): LoadingIndicator with a label, for inline "Loading…" states.
+- [LoadingText](https://ui.frappe.io/docs/components/loadingtext): Spinner with a label, for inline "Loading…" states.
 - [MobileNav](https://ui.frappe.io/docs/components/mobilenav): bottom tab bar for MobileShell; each `MobileNavItem` is one equal-width tab.
 - [MobileShell](https://ui.frappe.io/docs/components/mobileshell): the mobile app frame; pinned header with safe-area padding, native-scrolling content, `#nav` slot. A separate family from DesktopShell.
 - [MultiSelect](https://ui.frappe.io/docs/components/multiselect): multi-value select; value is `(string | number)[]`.
