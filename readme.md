@@ -38,6 +38,13 @@
 - **Vite plugins** for the Frappe dev-server proxy, Lucide icon auto-imports,
   DocType type generation and production builds.
 - **TypeScript first.** Every core component ships typed props, slots and emits.
+- **Recipes.** Eight full app screens built with frappe-ui, such as mail,
+  tickets, deals and accounting, each with a desktop and a mobile layout. See
+  them on the [home page](https://ui.frappe.io).
+- **Agent skills.** An [agent skill](./skills/frappe-ui/) and
+  [llms.txt](https://ui.frappe.io/llms.txt) teach Claude Code, Cursor, Codex
+  and similar tools how to use the library. See
+  [For AI coding agents](#for-ai-coding-agents).
 
 ## Quick start
 
