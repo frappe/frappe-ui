@@ -565,7 +565,8 @@ was true for `useDoc` methods with `cacheKey`.
 - `initialData` is now in the shape the server sends, and goes through
   `transform` the same as a response. `updateRow` and `removeRow` change its
   rows before the first response arrives. Before, they did nothing on these
-  rows. `initialData` rows are not saved to the cache.
+  rows. `useList` works on its own copy, so the array you pass never changes.
+  `initialData` rows are not saved to the cache.
 
 No API change: the types stay the same, and the behaviour changes are the
 ones listed above.

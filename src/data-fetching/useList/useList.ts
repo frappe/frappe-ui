@@ -68,11 +68,8 @@ export function useList<T extends { name: string }>(
 
   // Every row loaded so far, as the server sent it. This is the one copy that
   // changes: pages and row updates land here, and IndexedDB stores it.
-  // `initialData` has the same shape, so the rows start from it. It may be
-  // reactive, and `structuredClone` in `transformRows` cannot copy a proxy.
-  let rawRows: T[] | null = initialData
-    ? toRaw(initialData).map((row) => toRaw(row))
-    : null
+  // `initialData` has the same shape, so the rows start from a copy of it.
+  let rawRows: T[] | null = initialData ? unwrapDeep(initialData) : null
   // Rows are saved only after the first response, so `initialData` rows,
   // changed or not, never replace rows that a real response cached.
   let hasResponse = false
@@ -320,6 +317,24 @@ export function useList<T extends { name: string }>(
   listStore.addList(doctype, out)
 
   return out
+}
+
+// A copy of `value` with no Vue proxy at any depth. `initialData` may hold
+// proxies, even inside a row, and `structuredClone` in `transformRows` cannot
+// copy them. Only arrays and plain objects are copied; other values are
+// unwrapped where they are.
+function unwrapDeep<V>(value: V): V {
+  let raw = toRaw(value)
+  if (Array.isArray(raw)) {
+    return raw.map((item) => unwrapDeep(item)) as V
+  }
+  if (raw && Object.getPrototypeOf(raw) === Object.prototype) {
+    let entries = Object.entries(raw as Record<string, unknown>)
+    return Object.fromEntries(
+      entries.map(([key, item]) => [key, unwrapDeep(item)]),
+    ) as V
+  }
+  return raw
 }
 
 function canUseCachedFallback(error: unknown, staleOnError: boolean) {

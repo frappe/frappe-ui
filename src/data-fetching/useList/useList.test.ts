@@ -121,6 +121,27 @@ describe('useList', () => {
     ])
   })
 
+  it('transforms initialData with reactive values inside a row', () => {
+    const row = reactive({
+      name: 'User1',
+      email: 'user1@example.com',
+      roles: ['Admin'],
+    })
+    const users = useList({
+      baseUrl,
+      doctype: 'User',
+      // A spread reads `roles` through the proxy, so it stays reactive.
+      initialData: [{ ...row }],
+      transform: (rows) =>
+        rows.map((row) => ({ ...row, email: row.email.toUpperCase() })),
+      immediate: false,
+    })
+
+    expect(users.data).toStrictEqual([
+      { name: 'User1', email: 'USER1@EXAMPLE.COM', roles: ['Admin'] },
+    ])
+  })
+
   it('does not save changed initialData rows over the cache', async () => {
     interface User {
       name: string
