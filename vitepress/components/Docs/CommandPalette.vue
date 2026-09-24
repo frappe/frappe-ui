@@ -48,32 +48,27 @@ const actions = [
   {
     id: 'theme',
     text: 'Toggle dark mode',
-    icon: 'lucide-sun-moon',
     run: toggleColorScheme,
   },
   {
     id: 'install',
     text: 'Copy install command',
     hint: 'npm install frappe-ui',
-    icon: 'lucide-terminal',
     run: () => copy('npm install frappe-ui', 'Install command copied'),
   },
   {
     id: 'markdown',
     text: 'Copy this page as Markdown',
-    icon: 'lucide-copy',
     run: () => copy(pageMarkdown(), 'Page copied as Markdown'),
   },
   {
     id: 'github',
     text: 'Open frappe-ui on GitHub',
-    icon: 'lucide-external-link',
     run: () => window.open(theme.value.githubUrl, '_blank', 'noopener'),
   },
   {
     id: 'llms',
     text: 'Open llms.txt',
-    icon: 'lucide-file-text',
     run: () => window.open(withBase('/llms.txt'), '_blank', 'noopener'),
   },
 ]
@@ -200,11 +195,6 @@ const onFilterKeydown = (e: KeyboardEvent) => {
                 class="flex w-full min-w-0 cursor-pointer items-center gap-2.5 rounded-4 px-2 py-2 text-base font-medium text-ink-gray-7 outline-none data-[highlighted]:bg-surface-gray-3"
                 @select.prevent="runAction(action)"
               >
-                <span
-                  :class="action.icon"
-                  class="size-4 text-ink-gray-5"
-                  aria-hidden="true"
-                />
                 {{ action.text }}
                 <code
                   v-if="action.hint"
