@@ -329,6 +329,98 @@ describe('useList', () => {
   })
 })
 
+describe('useList transform', () => {
+  interface Activity {
+    name: string
+    title: string
+    data: string | { n: number }
+  }
+
+  // Two rows per page. Each carries a JSON string for `transform` to parse.
+  beforeEach(() => {
+    server.use(
+      http.get(url('/api/v2/document/Activity'), ({ request }) => {
+        let start = Number(new URL(request.url).searchParams.get('start'))
+        return HttpResponse.json({
+          data: [start + 1, start + 2].map((n) => ({
+            name: `A${n}`,
+            title: `Activity ${n}`,
+            data: JSON.stringify({ n }),
+          })),
+        })
+      }),
+    )
+  })
+
+  const activities = (
+    cacheKey: string,
+    transform: (rows: Activity[]) => Activity[],
+  ) =>
+    useList<Activity>({
+      baseUrl,
+      doctype: 'Activity',
+      cacheKey,
+      limit: 2,
+      immediate: false,
+      transform,
+    })
+
+  const parseData = (rows: Activity[]) =>
+    rows.map((row) => ({ ...row, data: JSON.parse(row.data as string) }))
+
+  const names = (rows: Activity[] | null) => rows?.map((row) => row.name)
+
+  it('runs on the whole list, the same fresh and cached', async () => {
+    const reverse = (rows: Activity[]) => [...rows].reverse()
+
+    const list = activities('reversed-activities', reverse)
+    await list.fetch()
+    list.next()
+    await waitUntilValueChanges(() => list.data)
+    expect(names(list.data)).toStrictEqual(['A4', 'A3', 'A2', 'A1'])
+
+    const reopened = activities('reversed-activities', reverse)
+    await vi.waitFor(() =>
+      expect(names(reopened.data)).toStrictEqual(['A4', 'A3', 'A2', 'A1']),
+    )
+  })
+
+  it('keeps row changes when a later page writes the cache', async () => {
+    const list = activities('changed-activities', parseData)
+    await list.fetch()
+    list.removeRow('A1')
+    list.updateRow({ name: 'A2', title: 'Renamed' })
+
+    list.next()
+    await vi.waitFor(() =>
+      expect(names(list.data)).toStrictEqual(['A2', 'A3', 'A4']),
+    )
+
+    const reopened = activities('changed-activities', parseData)
+    await vi.waitFor(() =>
+      expect(reopened.data).toStrictEqual([
+        { name: 'A2', title: 'Renamed', data: { n: 2 } },
+        { name: 'A3', title: 'Activity 3', data: { n: 3 } },
+        { name: 'A4', title: 'Activity 4', data: { n: 4 } },
+      ]),
+    )
+  })
+
+  it('runs again on a row that updateRow changed', async () => {
+    const list = activities('updated-activities', parseData)
+    await list.fetch()
+
+    // The update comes in the shape the server sends, a JSON string.
+    list.updateRow({ name: 'A1', data: JSON.stringify({ n: 10 }) })
+
+    expect(list.data?.[0]).toStrictEqual({
+      name: 'A1',
+      title: 'Activity 1',
+      data: { n: 10 },
+    })
+  })
+})
+
 describe('useList per user', () => {
   afterEach(() => {
     vi.unstubAllGlobals()

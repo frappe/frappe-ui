@@ -65,10 +65,13 @@ export function useList<T extends { name: string }>(
     return `${baseUrl}/api/v2/document/${doctype}?${params}`
   })
 
+  // Every row loaded so far, as the server sent it. This is the one copy that
+  // changes: pages and row updates land here, and IndexedDB stores it.
+  let rawRows: T[] | null = null
   // `data` is exposed via the `result` computed below, which reads from
-  // `allData` (populated in `afterFetch`) — not from the underlying fetch's
-  // own `data` ref. Seed `allData` itself, or `initialData` would never
-  // surface until the first response lands.
+  // `allData` (set by `setRows`) — not from the underlying fetch's own `data`
+  // ref. Seed `allData` itself, or `initialData` would never surface until
+  // the first response lands.
   const allData: Ref<T[] | null> = ref(null)
   if (initialData) {
     allData.value = initialData
@@ -82,17 +85,34 @@ export function useList<T extends { name: string }>(
     null,
   ) as Ref<UseListResponse<T> | null>
 
+  // Replaces the raw rows and shows them. `transform` runs on all of them at
+  // once, so a list read back from the cache shows the same result as a fresh
+  // one, even for a transform that sorts or groups the whole list.
+  function setRows(rows: T[]) {
+    rawRows = rows
+    // `transform` may change the rows in place, so it gets a copy. With no
+    // `transform`, `data` holds the raw rows themselves.
+    allData.value = transform
+      ? applyTransform(structuredClone(rows), transform)
+      : rows
+    if (normalizedCacheKey) {
+      // Shown while the list reloads, so it keeps up with row changes too.
+      cachedResponse.value = allData.value
+    }
+    return allData.value
+  }
+
   const fetchOptions: UseFetchOptions = {
     immediate,
     refetch,
     initialData: initialData || null,
     afterFetch: handleAfterFetch<T>({
       ...options,
-      allData,
+      getRawRows: () => rawRows,
+      setRows,
       _start,
       _limit,
       hasNextPage,
-      cachedResponse,
     }),
     onFetchError: handleFetchError<T>(options),
   }
@@ -140,16 +160,22 @@ export function useList<T extends { name: string }>(
     if (!refetch) execute()
   }
 
+  // Row changes apply to the raw rows, which have the shape `doc` has, and
+  // `transform` runs again on the result. Rows shown from `initialData` or the
+  // cache before the first response are not changed.
   const updateRow = (
     doc: Partial<{ name: string }> & Record<string, unknown>,
   ) => {
-    if (allData.value == null) return
+    if (rawRows == null) return
     let changed = false
-    for (let row of allData.value) {
+    for (let row of rawRows) {
       if (doc.name && doc.name === row.name) {
+        // Through `reactive`, so that with no `transform` a component that
+        // shows this row object sees the change.
+        let reactiveRow = reactive(row) as Record<string, unknown>
         for (let key in doc) {
           if (key in row && doc[key] !== undefined) {
-            ;(row as Record<string, unknown>)[key] = doc[key]
+            reactiveRow[key] = doc[key]
             changed = true
           }
         }
@@ -157,16 +183,15 @@ export function useList<T extends { name: string }>(
       }
     }
     if (changed) {
-      allData.value = [...allData.value]
+      setRows([...rawRows])
     }
   }
 
   const removeRow = (name: string) => {
-    if (allData.value == null) return
-    const index = allData.value.findIndex((row) => row.name === name)
+    if (rawRows == null) return
+    const index = rawRows.findIndex((row) => row.name === name)
     if (index > -1) {
-      allData.value.splice(index, 1)
-      allData.value = [...allData.value]
+      setRows(rawRows.filter((_, i) => i !== index))
     }
   }
 
@@ -280,26 +305,20 @@ function canUseCachedFallback(error: unknown, staleOnError: boolean) {
 }
 
 function handleAfterFetch<T extends { name: string }>({
-  transform,
   onSuccess,
   cacheKey,
-  allData,
+  getRawRows,
+  setRows,
   _start,
   _limit,
   hasNextPage,
-  cachedResponse,
 }: UseListOptions<T> & {
-  allData: Ref<T[] | null>
+  getRawRows: () => T[] | null
+  setRows: (rows: T[]) => T[]
   _start: Ref<number>
   _limit: Ref<number>
   hasNextPage: Ref<boolean>
-  cachedResponse: Ref<UseListResponse<T> | null>
 }) {
-  // Every page loaded so far, as the server sent it. This is what goes to
-  // IndexedDB: transformed rows may not survive JSON, and `transform` runs
-  // again when the cache is read.
-  let rawData: T[] = []
-
   return function (
     ctx: AfterFetchContext<{
       data: UseListResponse<T>
@@ -319,28 +338,22 @@ function handleAfterFetch<T extends { name: string }>({
         hasNextPage.value = resultData.length < _limit.value ? false : true
       }
 
+      let rawRows =
+        _start.value === 0
+          ? resultData
+          : [...(getRawRows() || []), ...resultData]
+      let rows = setRows(rawRows)
+      ctx.data.data = rows
+
+      // Transformed rows may not survive JSON, and `transform` runs again
+      // when the cache is read, so the cache holds the raw rows.
       let normalizedCacheKey = normalizeCacheKey(cacheKey, 'useList')
       if (normalizedCacheKey) {
-        // Copied before `transform` runs, which may change the rows in place.
-        let rawPage = transform ? structuredClone(resultData) : resultData
-        rawData = _start.value === 0 ? rawPage : [...rawData, ...rawPage]
-      }
-      resultData = applyTransform(resultData, transform)
-
-      if (_start.value === 0) {
-        allData.value = resultData
-      } else {
-        allData.value = [...(allData.value || []), ...resultData]
-      }
-      ctx.data.data = allData.value
-
-      if (normalizedCacheKey) {
-        idbStore.set(normalizedCacheKey, rawData)
-        cachedResponse.value = ctx.data.data
+        idbStore.set(normalizedCacheKey, rawRows)
       }
       if (onSuccess) {
         try {
-          onSuccess(allData.value)
+          onSuccess(rows)
         } catch (e) {
           console.error('Error in onSuccess hook:', e)
         }
