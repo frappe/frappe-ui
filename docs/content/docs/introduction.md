@@ -56,11 +56,17 @@ one.
 ## Used in
 
 Frappe UI started in 2019 as the components shared between Frappe Books and
-Frappe Cloud. It now powers [Frappe Cloud](https://frappe.io/cloud),
-[Gameplan](https://github.com/frappe/gameplan),
-[Helpdesk](https://github.com/frappe/helpdesk),
-[CRM](https://github.com/frappe/crm),
-[Insights](https://github.com/frappe/insights) and many other Frappe apps.
+Frappe Cloud. It now powers most Frappe apps, including:
+
+- [Frappe Cloud](https://frappe.io/cloud)
+- [Frappe CRM](https://github.com/frappe/crm)
+- [Helpdesk](https://github.com/frappe/helpdesk)
+- [Frappe HR](https://github.com/frappe/hrms)
+- [Frappe Learning](https://github.com/frappe/lms)
+- [Insights](https://github.com/frappe/insights)
+- [Frappe Drive](https://github.com/frappe/drive)
+- [Builder](https://github.com/frappe/builder)
+- [Gameplan](https://github.com/frappe/gameplan)
 
 ## Next steps
 
