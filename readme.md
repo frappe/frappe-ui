@@ -118,18 +118,17 @@ dev-server proxy.
 
 ## Package entries
 
-| Import                   | Contents                                                                            |
-| ------------------------ | ----------------------------------------------------------------------------------- |
-| `frappe-ui`              | Core components, data composables, `dialog` and `toast`, directives                 |
-| `frappe-ui/editor`       | TipTap-based rich text editor, kits and extensions                                  |
-| `frappe-ui/code-editor`  | CodeMirror-based code editor and `CodeKit`                                          |
-| `frappe-ui/list`         | Composable `List` family: rows, cells, headers, groups, sorting                     |
-| `frappe-ui/charts`       | ECharts-based area, bar, line, donut, funnel, heatmap, sankey, scatter              |
-| `frappe-ui/icons`        | Frappe's own icons, such as `StepsIcon` and `LightningIcon`                         |
-| `frappe-ui/experimental` | Components without a stability promise: Calendar, ListView, CommandPalette and more |
-| `frappe-ui/vite`         | Vite plugins                                                                        |
-| `frappe-ui/tailwind`     | Tailwind preset and content globs                                                   |
-| `frappe-ui/style.css`    | Base stylesheet, fonts and token variables                                          |
+| Import                  | Contents                                                               |
+| ----------------------- | ---------------------------------------------------------------------- |
+| `frappe-ui`             | Core components, data composables, `dialog` and `toast`, directives    |
+| `frappe-ui/editor`      | TipTap-based rich text editor, kits and extensions                     |
+| `frappe-ui/code-editor` | CodeMirror-based code editor and `CodeKit`                             |
+| `frappe-ui/list`        | Composable `List` family: rows, cells, headers, groups, sorting        |
+| `frappe-ui/charts`      | ECharts-based area, bar, line, donut, funnel, heatmap, sankey, scatter |
+| `frappe-ui/icons`       | Frappe's own icons, such as `StepsIcon` and `LightningIcon`            |
+| `frappe-ui/vite`        | Vite plugins                                                           |
+| `frappe-ui/tailwind`    | Tailwind preset and content globs                                      |
+| `frappe-ui/style.css`   | Base stylesheet, fonts and token variables                             |
 
 ## Using with AI agents
 
