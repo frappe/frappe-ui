@@ -32,7 +32,9 @@ const showOlder = ref(false)
 
 const olderAction = computed(() => ({
   label: `Show ${older.length} older comments`,
-  onClick: () => (showOlder.value = true),
+  onClick: () => {
+    showOlder.value = true
+  },
 }))
 </script>
 

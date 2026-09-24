@@ -68,7 +68,8 @@ const list = ref<HTMLElement | null>(null)
 const marker = ref<{ top: number; height: number } | null>(null)
 watch([activeHeading, headings], () =>
   nextTick(() => {
-    const el = [...(list.value?.querySelectorAll<HTMLElement>('a') ?? [])].find(
+    const links = list.value?.querySelectorAll<HTMLElement>('a')
+    const el = Array.from(links ?? []).find(
       (a) => a.getAttribute('href') === `#${activeHeading.value}`,
     )
     marker.value = el ? { top: el.offsetTop, height: el.offsetHeight } : null
