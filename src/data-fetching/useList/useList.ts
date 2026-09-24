@@ -5,6 +5,7 @@ import {
   readonly,
   Ref,
   ref,
+  toRaw,
   toValue,
 } from 'vue'
 import {
@@ -67,8 +68,11 @@ export function useList<T extends { name: string }>(
 
   // Every row loaded so far, as the server sent it. This is the one copy that
   // changes: pages and row updates land here, and IndexedDB stores it.
-  // `initialData` has the same shape, so the rows start from it.
-  let rawRows: T[] | null = initialData || null
+  // `initialData` has the same shape, so the rows start from it. It may be
+  // reactive, and `structuredClone` in `transformRows` cannot copy a proxy.
+  let rawRows: T[] | null = initialData
+    ? toRaw(initialData).map((row) => toRaw(row))
+    : null
   // Rows are saved only after the first response, so `initialData` rows,
   // changed or not, never replace rows that a real response cached.
   let hasResponse = false

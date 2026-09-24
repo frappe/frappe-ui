@@ -2,7 +2,7 @@
  * @vitest-environment node
  */
 
-import { ref } from 'vue'
+import { reactive, ref } from 'vue'
 import { http, HttpResponse } from 'msw'
 import {
   baseUrl,
@@ -94,6 +94,23 @@ describe('useList', () => {
       baseUrl,
       doctype: 'User',
       initialData: [{ name: 'User1', email: 'user1@example.com' }],
+      transform: (rows) =>
+        rows.map((row) => ({ ...row, email: row.email.toUpperCase() })),
+      immediate: false,
+    })
+
+    expect(users.data).toStrictEqual([
+      { name: 'User1', email: 'USER1@EXAMPLE.COM' },
+    ])
+  })
+
+  it('transforms reactive initialData', () => {
+    const users = useList({
+      baseUrl,
+      doctype: 'User',
+      initialData: reactive([
+        reactive({ name: 'User1', email: 'user1@example.com' }),
+      ]),
       transform: (rows) =>
         rows.map((row) => ({ ...row, email: row.email.toUpperCase() })),
       immediate: false,
