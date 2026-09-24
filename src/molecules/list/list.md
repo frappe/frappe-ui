@@ -120,6 +120,33 @@ content column, the text edge. There is no divider above the first row, and
 the dividers around a hovered clickable row hide so its rounded surface
 stands apart.
 
+### Row padding and gap
+
+Two CSS variables set the list's spacing:
+
+- `--list-gap`: the space between columns. The default is `0.5rem`.
+- `--list-row-padding-x`: the space between a row's edge and its content.
+
+The frappe-ui Tailwind preset has a utility for each: `list-gap-*` and
+`list-row-px-*`, on the spacing scale. Put them on the `List`, or on any
+parent to set every list inside it. Responsive prefixes work, as in
+`max-sm:list-gap-3 sm:list-gap-4`.
+
+By default, clickable rows get `0.75rem` of padding so their rounded hover
+surface clears the content. Static rows, the header and group headers get
+none, because a header cannot tell whether the rows below it are clickable.
+Setting `--list-row-padding-x` gives every row and the header the same value.
+So a table with clickable rows and a header needs `list-row-px-3`, or the
+header labels sit to the left of the cell text. In a `selectable` list, it
+also lines up the select-all checkbox with the row checkboxes.
+
+To let the hover surface reach into the page gutter while the text stays
+lined up with the content above, pair `-mx-3` with `list-row-px-3`.
+
+Column widths are not a CSS variable. They come from the `columns` prop, so
+each list, nested ones included, has its own columns. Variables that start
+with `--_list` are internal and can change in any release.
+
 ### Selection
 
 `selectable` shows a checkbox column and makes a row click toggle the row

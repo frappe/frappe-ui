@@ -108,8 +108,8 @@ imports for your type-checker.
   file, and the file is unchanged.
 - **The tarball ships no tests.** `*.test.*`, `*.spec.ts`, `*.cy.ts`,
   `*.story.vue`, `*.playground.vue`, `stories/` and `src/mocks` are excluded.
-  The tarball went from 1449 files to 934, and the 520 test, story,
-  playground, mock and helper files it carried went to none.
+  The tarball no longer ships the 520 test, story, playground, mock and
+  helper files it used to carry.
 - **Fix: the internal `#` imports resolve for your app.** The package ships
   TypeScript source, so your compiler resolves these imports through the
   `imports` map. A type-check of an app that imports `frappe-ui/editor` used to

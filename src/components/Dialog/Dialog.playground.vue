@@ -44,7 +44,7 @@ function buildCode(v: Record<string, any>) {
   const attrs: string[] = [`title="${v.title}"`, `message="${v.message}"`]
   if (v.size !== 'lg') attrs.push(`size="${v.size}"`)
   if (v.position !== 'center') attrs.push(`position="${v.position}"`)
-  if (v.icon) attrs.push(`:icon="{ name: 'lucide-trash-2', theme: 'red' }"`)
+  if (v.icon) attrs.push('icon="lucide-trash-2"', 'theme="red"')
   if (v.actions) {
     attrs.push(`:actions="[
     { label: 'Cancel' },
@@ -76,9 +76,8 @@ function actionsFor(enabled: boolean) {
         :message="values.message"
         :size="values.size"
         :position="values.position"
-        :icon="
-          values.icon ? { name: 'lucide-trash-2', theme: 'red' } : undefined
-        "
+        :icon="values.icon ? 'lucide-trash-2' : undefined"
+        :theme="values.icon ? 'red' : undefined"
         :actions="actionsFor(values.actions)"
         :dismissible="values.dismissible"
         :show-close-button="values.showCloseButton"
