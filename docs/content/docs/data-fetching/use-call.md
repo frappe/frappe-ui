@@ -199,6 +199,11 @@ Guests, and requests with no session, share one cache that is not tied to a
 user. A signed-in user never reads from it, so nothing a user saved reaches a
 guest.
 
+Reload the page after a user signs in or out. The data already loaded, and any
+request still waiting for its response, belong to the user who was signed in
+before. Without a reload, they can be shown to the new user and saved under
+the new user's key. Frappe's own login and logout pages reload the page.
+
 Other users' values stay in IndexedDB until the browser clears them. The v1
 resources (`createResource`, `createDocumentResource`) do not keep a cache per
 user.

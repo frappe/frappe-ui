@@ -580,7 +580,9 @@ user on the same browser could see the first user's saved data.
 - The keys now include the signed-in user, read from the `user_id` cookie
   that Frappe sets at login. A user reads only their own saved data. The
   cookie is read each time data is saved, so a user who signs in without a
-  page reload has their data saved under their own key.
+  page reload has their data saved under their own key. Still, reload the
+  page when the user changes: data loaded for the previous user stays in
+  memory and can be saved under the new user's key.
 - Guests and requests with no session share one cache that is not tied to a
   user. A signed-in user never reads from it.
 - Documents saved by older versions are ignored, like lists and calls. The
