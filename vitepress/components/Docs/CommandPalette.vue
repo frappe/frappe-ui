@@ -118,9 +118,12 @@ const hasResults = computed(
 )
 
 const highlightedLink = ref<string | null>(null)
+// Actions share the list with links, as `action:<id>` values. Only links can
+// open in a new tab.
 const onHighlight = (payload: { value: unknown } | undefined) => {
+  const value = payload?.value
   highlightedLink.value =
-    typeof payload?.value === 'string' ? payload.value : null
+    typeof value === 'string' && !value.startsWith('action:') ? value : null
 }
 
 const navigateTo = (item: SidebarItem) => {

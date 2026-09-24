@@ -45,9 +45,24 @@ function list(el: Element, depth = 0): string {
     .join('\n')
 }
 
+// A table cell must stay on one line, and its own `|` must not start a new
+// column. A cell can hold several parts, such as a prop's type and its
+// description, so keep them apart.
+function cell(el: Element): string {
+  const parts = el.children.length
+    ? Array.from(el.children).map((c) => inline(c).trim())
+    : [inline(el).trim()]
+  return parts
+    .filter(Boolean)
+    .join(' — ')
+    .replace(/\s*\n\s*/g, ' ')
+    .replace(/\|/g, '\\|')
+}
+
 function block(el: Element): string {
-  // Live demos and playground knobs are not content.
-  if (el.matches('[data-demo-preview], .dot-grid')) return ''
+  // Live demos and playground knobs are not content. The API tables also
+  // render a phone-only copy of each row, which would repeat every description.
+  if (el.matches('[data-demo-preview], .dot-grid, .sm\\:hidden')) return ''
   const tag = el.tagName
   if (/^H[1-4]$/.test(tag))
     return '#'.repeat(Number(tag[1])) + ' ' + inline(el).trim()
@@ -64,9 +79,7 @@ function block(el: Element): string {
     const rows = Array.from(el.querySelectorAll('tr')).map(
       (tr) =>
         '| ' +
-        Array.from(tr.children)
-          .map((c) => inline(c).trim())
-          .join(' | ') +
+        Array.from(tr.children).map(cell).join(' | ') +
         ' |',
     )
     if (rows.length > 1) rows.splice(1, 0, rows[0].replace(/[^|]+/g, ' --- '))
