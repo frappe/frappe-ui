@@ -593,6 +593,27 @@ describe('useList per user', () => {
     expect(noSession.data).toBe(null)
   })
 
+  it('saves rows under the user who signs in after the list is created', async () => {
+    signInAs(null)
+    const users = useList({
+      baseUrl,
+      doctype: 'User',
+      fields: ['name', 'email'],
+      cacheKey: 'late-sign-in',
+      limit: 2,
+      immediate: false,
+    })
+
+    signInAs('alice@example.com')
+    users.fetch()
+    await waitUntilValueChanges(() => users.data)
+
+    expect(
+      await idbStore.get('ns:alice%40example.com:["useList:v2","late-sign-in"]'),
+    ).toStrictEqual(users.data)
+    expect(await idbStore.get('["useList:v2","late-sign-in"]')).toBe(null)
+  })
+
   it.each([
     ['no session', null],
     ['a guest', 'Guest'],

@@ -578,7 +578,9 @@ saves every document there. The keys did not include the user, so a second
 user on the same browser could see the first user's saved data.
 
 - The keys now include the signed-in user, read from the `user_id` cookie
-  that Frappe sets at login. A user reads only their own saved data.
+  that Frappe sets at login. A user reads only their own saved data. The
+  cookie is read each time data is saved, so a user who signs in without a
+  page reload has their data saved under their own key.
 - Guests and requests with no session share one cache that is not tied to a
   user. A signed-in user never reads from it.
 - Documents saved by older versions are ignored, like lists and calls. The

@@ -95,12 +95,15 @@ export function useList<T extends { name: string }>(
   function setRows(rows: T[]) {
     rawRows = rows
     allData.value = transformRows(rows)
-    if (normalizedCacheKey && hasResponse) {
+    // Built again, not taken from setup: the key names the signed-in user, and
+    // someone may have signed in since this list was created.
+    let key = normalizeCacheKey(cacheKey, 'useList')
+    if (key && hasResponse) {
       // Shown while the list reloads, so it keeps up with row changes too.
       cachedResponse.value = allData.value
       // Transformed rows may not survive JSON, and `transform` runs again
       // when the cache is read, so the cache holds the raw rows.
-      idbStore.set(normalizedCacheKey, rows)
+      idbStore.set(key, rows)
     }
     return allData.value
   }
