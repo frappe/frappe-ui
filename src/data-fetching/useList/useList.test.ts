@@ -406,6 +406,20 @@ describe('useList transform', () => {
     )
   })
 
+  it('saves row changes to the cache without a later page', async () => {
+    const list = activities('saved-activities', parseData)
+    await list.fetch()
+    list.updateRow({ name: 'A1', title: 'Renamed' })
+    list.removeRow('A2')
+
+    const reopened = activities('saved-activities', parseData)
+    await vi.waitFor(() =>
+      expect(reopened.data).toStrictEqual([
+        { name: 'A1', title: 'Renamed', data: { n: 1 } },
+      ]),
+    )
+  })
+
   it('runs again on a row that updateRow changed', async () => {
     const list = activities('updated-activities', parseData)
     await list.fetch()

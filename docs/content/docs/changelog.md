@@ -558,10 +558,10 @@ was true for `useDoc` methods with `cacheKey`.
   `removeRow`. A `transform` that sorts, groups or removes duplicates now
   gives the same result on a fresh list and on a cached one. `transform` gets
   a copy of the rows, so it may change them in place.
-- `updateRow` and `removeRow` change the rows as the server sent them, so the
-  cache keeps these changes. `updateRow` takes values in the shape the server
-  sends. With a `transform` that parses a JSON field, an updated row now shows
-  the parsed value, not the raw string.
+- `updateRow` and `removeRow` change the rows as the server sent them, and
+  save the changed rows to the cache at once. `updateRow` takes values in the
+  shape the server sends. With a `transform` that parses a JSON field, an
+  updated row now shows the parsed value, not the raw string.
 
 No API change: the types stay the same, and the behaviour changes are the
 ones listed above.

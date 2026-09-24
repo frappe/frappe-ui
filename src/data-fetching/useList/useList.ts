@@ -85,9 +85,9 @@ export function useList<T extends { name: string }>(
     null,
   ) as Ref<UseListResponse<T> | null>
 
-  // Replaces the raw rows and shows them. `transform` runs on all of them at
-  // once, so a list read back from the cache shows the same result as a fresh
-  // one, even for a transform that sorts or groups the whole list.
+  // Replaces the raw rows, shows them and saves them. `transform` runs on all
+  // of them at once, so a list read back from the cache shows the same result
+  // as a fresh one, even for a transform that sorts or groups the whole list.
   function setRows(rows: T[]) {
     rawRows = rows
     // `transform` may change the rows in place, so it gets a copy. With no
@@ -98,6 +98,9 @@ export function useList<T extends { name: string }>(
     if (normalizedCacheKey) {
       // Shown while the list reloads, so it keeps up with row changes too.
       cachedResponse.value = allData.value
+      // Transformed rows may not survive JSON, and `transform` runs again
+      // when the cache is read, so the cache holds the raw rows.
+      idbStore.set(normalizedCacheKey, rows)
     }
     return allData.value
   }
@@ -306,7 +309,6 @@ function canUseCachedFallback(error: unknown, staleOnError: boolean) {
 
 function handleAfterFetch<T extends { name: string }>({
   onSuccess,
-  cacheKey,
   getRawRows,
   setRows,
   _start,
@@ -344,13 +346,6 @@ function handleAfterFetch<T extends { name: string }>({
           : [...(getRawRows() || []), ...resultData]
       let rows = setRows(rawRows)
       ctx.data.data = rows
-
-      // Transformed rows may not survive JSON, and `transform` runs again
-      // when the cache is read, so the cache holds the raw rows.
-      let normalizedCacheKey = normalizeCacheKey(cacheKey, 'useList')
-      if (normalizedCacheKey) {
-        idbStore.set(normalizedCacheKey, rawRows)
-      }
       if (onSuccess) {
         try {
           onSuccess(rows)
