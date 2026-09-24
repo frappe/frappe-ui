@@ -125,7 +125,6 @@ function buildSidebar(): SidebarSection[] {
         },
       ],
     },
-    { text: 'Experimental', items: experimentalItems },
     {
       text: 'Other',
       items: [
@@ -137,6 +136,7 @@ function buildSidebar(): SidebarSection[] {
         { text: 'VitePress theme', link: '/docs/other/vitepress-theme' },
       ],
     },
+    { text: 'Experimental', items: experimentalItems },
   ]
 }
 
