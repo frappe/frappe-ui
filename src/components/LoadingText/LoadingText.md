@@ -1,7 +1,7 @@
 # LoadingText
 
-A [LoadingIndicator](./loadingindicator) with a label next to it, for inline
-loading states like "Loading..." or "Saving...".
+A [Spinner](./spinner) with a label next to it, for inline loading states like
+"Loading..." or "Saving...".
 
 ## Default
 

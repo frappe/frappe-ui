@@ -15,7 +15,7 @@ import {
 } from 'reka-ui'
 import Avatar from '../../src/components/Avatar/Avatar.vue'
 import ItemListRow from '../../src/components/ItemListRow/ItemListRow.vue'
-import { LoadingIndicator } from '../../src/components/LoadingIndicator'
+import { Spinner } from '../../src/components/Spinner'
 import {
   InputDescription,
   InputError,
@@ -377,7 +377,7 @@ defineSlots<MultiEmailInputSlots>()
               data-slot="loading"
               class="flex items-center gap-2 px-2 py-1.5 text-base text-ink-gray-5"
             >
-              <LoadingIndicator class="size-4" />
+              <Spinner class="size-4" />
               <span>{{ loadingText }}</span>
             </div>
 

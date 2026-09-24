@@ -9,7 +9,7 @@ import {
   FocusScope,
 } from 'reka-ui'
 import Button from '../Button/Button.vue'
-import { LoadingIndicator } from '../LoadingIndicator'
+import { Spinner } from '../Spinner'
 import MultiSelectResults from './MultiSelectResults.vue'
 import { useInputLabeling } from '../../composables/useInputLabeling'
 import { useReactiveSlots } from '../../composables/useReactiveSlots'
@@ -526,7 +526,7 @@ defineSlots<MultiSelectSlots>()
                   class="min-w-0 flex-1 border-0 bg-transparent px-0 py-2 text-base text-ink-gray-8 outline-none placeholder:text-ink-gray-4 focus:ring-0"
                   @input="handleInputChange"
                 />
-                <LoadingIndicator
+                <Spinner
                   v-if="loading"
                   class="size-4 shrink-0 text-ink-gray-5"
                 />

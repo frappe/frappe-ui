@@ -9,6 +9,22 @@ one-time dev-mode warning (unless noted). Removal is post-v1.
 
 ## Unreleased
 
+### `KeyboardShortcut` draws `+` only between two text keys
+
+A plain `KeyboardShortcut` drew a `+` between every pair of keys. `showPlus`
+now takes `'auto'`, the new default, which draws one only where two keys drawn
+as text meet, as in "Ctrl+K". A key drawn as an icon, like ⌘, ⇧, ⌥, an arrow or
+↵, needs none, so `Mod+K` renders "⌘K" on macOS and `Shift+F2` renders "⇧F2"
+everywhere. `show-plus` still draws every plus, and `:show-plus="false"` none.
+`bg` chips never drew it.
+
+### `LoadingIndicator` is now `Spinner` under its older name
+
+`LoadingIndicator` was a `Spinner` scaled by a percentage. It is now the same
+component as `Spinner`, so it takes `Spinner`'s props. Its `scale` prop is
+removed: use `size` or a class instead; see the
+[migration guide](/docs/migration#loadingindicator-is-spinner).
+
 ### `npm create frappe-ui` sets up a new app
 
 `npm create frappe-ui@latest` creates a frappe-ui project with Vue, TypeScript,

@@ -417,7 +417,7 @@ Size: **M**. The change touches 10 to 30 token, test, preview, spec, and documen
 - **DAT-Q7** — Add object overloads to `useDoctype` and `useNewDoc` after v1.
 - **DAT-Q8, partial** — Decide whether to export `dayjsSystem` after v1.
 - **DAT-Q9, partial** — Export missing data types, fix v1 upload-handler options, apply app config to v2 composables, and tighten loose composable types.
-- **NAV-Q2, partial** — Add shortcut `showPlus`, dialog title and padding behavior, and array-overload documentation.
+- **NAV-Q2, partial** — Add dialog title and padding behavior, and array-overload documentation. (`showPlus` left this list on 2026-09-24: before RC it defaults to `'auto'`, which draws `+` only between two text keys, and the prop is not documented.)
 - **NAV-Q10** — Add navigation label customization and keep English defaults for v1.
 - **SHELL-Q13** — Add portal-target composable documentation.
 - **ED-Q11** — Add EditorDropZone context and hook support and export the missing editor types.
