@@ -17,8 +17,7 @@
 [Documentation](https://ui.frappe.io) ·
 [Getting started](https://ui.frappe.io/docs/getting-started) ·
 [Migration guide](https://ui.frappe.io/docs/migration) ·
-[Changelog](https://ui.frappe.io/docs/changelog) ·
-[Discussions](https://github.com/frappe/frappe-ui/discussions)
+[Changelog](https://ui.frappe.io/docs/changelog)
 
 </div>
 
