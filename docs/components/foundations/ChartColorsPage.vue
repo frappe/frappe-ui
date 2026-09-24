@@ -61,25 +61,34 @@ function valueOf(token: string) {
         <p class="text-p-sm text-ink-gray-5">{{ ramp.description }}</p>
       </div>
 
-      <div class="flex" :class="ramp.discrete ? 'gap-1.5' : 'gap-0'">
+      <!-- A continuous ramp is one bar, so it gets one outline. -->
+      <div
+        class="flex"
+        :class="
+          ramp.discrete
+            ? 'gap-1.5'
+            : 'overflow-hidden rounded-3 outline outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10'
+        "
+      >
         <Tooltip
           v-for="(token, index) in tokens(ramp)"
           :key="token"
           :hover-delay="0"
-          class="flex-1"
         >
-          <div
-            class="flex h-14 w-full items-end justify-center border border-outline-gray-1 pb-1"
-            :class="
-              ramp.discrete
-                ? 'rounded-md'
-                : 'border-x-0 first:border-l last:border-r'
-            "
-            :style="{ background: `var(${token})` }"
-          >
+          <!-- The slot number sits under the swatch: no one text color reads
+               on both the dark and the light swatches. -->
+          <div class="grid min-w-0 flex-1 gap-1">
+            <div
+              class="h-14 w-full"
+              :class="
+                ramp.discrete &&
+                'rounded-3 outline outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10'
+              "
+              :style="{ background: `var(${token})` }"
+            />
             <span
               v-if="ramp.discrete"
-              class="text-xs font-medium text-ink-gray-7"
+              class="text-center text-xs font-medium text-ink-gray-5"
             >
               {{ index + 1 }}
             </span>

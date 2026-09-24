@@ -37,6 +37,8 @@ const TABS: {
       style: {
         background: 'var(--surface-base)',
         boxShadow: `inset 0 0 0 2px var(${v})`,
+        // The 2px border is the swatch's edge; the hairline would cover it.
+        outline: 'none',
       },
     }),
   },

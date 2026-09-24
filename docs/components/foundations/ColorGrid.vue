@@ -56,29 +56,33 @@ async function copy(value: string) {
     <template v-for="row in rows" :key="row.name">
       <span
         class="self-center text-sm font-medium text-ink-gray-8 sm:truncate"
-        :class="{ 'self-start sm:pt-2': row.swatches.some((s) => s?.label) }"
+        :class="{ 'sm:mb-5': row.swatches.some((s) => s?.label) }"
       >
         {{ row.name }}
       </span>
+      <!-- Names under swatches sit outside the swatch's box, and both columns
+           get the same margin to make room, so the row name centers on the
+           swatches. -->
       <div
         class="grid gap-1.5"
+        :class="{ 'mb-5': row.swatches.some((s) => s?.label) }"
         :style="{
           gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
         }"
       >
         <template v-for="(swatch, i) in row.swatches" :key="i">
           <div v-if="!swatch" />
-          <div v-else class="grid min-w-0 content-start gap-1">
+          <div v-else class="relative min-w-0">
             <button
               type="button"
-              class="aspect-square w-full rounded-md"
+              class="block aspect-square w-full rounded-3"
               :class="row.checker && 'checker'"
               :title="swatch.copy"
               :aria-label="`Copy ${swatch.copy}`"
               @click="copy(swatch.copy)"
             >
               <span
-                class="flex size-full items-center justify-center rounded-md text-lg font-medium shadow-[inset_0_0_0_1px_var(--outline-gray-1)]"
+                class="flex size-full items-center justify-center rounded-3 text-lg font-medium outline outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10"
                 :style="swatch.style"
               >
                 {{ swatch.text }}
@@ -86,7 +90,7 @@ async function copy(value: string) {
             </button>
             <span
               v-if="swatch.label"
-              class="truncate text-center text-2xs text-ink-gray-5"
+              class="absolute inset-x-0 top-full mt-1 truncate text-center text-2xs text-ink-gray-5"
               :title="swatch.label"
             >
               {{ swatch.label }}
