@@ -46,6 +46,8 @@ docs/content/docs/components/*.md
 !docs/content/docs/components/mobilenav.md
 docs/content/docs/experimental/*.md
 docs/content/docs/charts/*.md
+# Chart colors is written here, not generated from src/charts/docs.
+!docs/content/docs/charts/colors.md
 
 coverage
 .nyc_output

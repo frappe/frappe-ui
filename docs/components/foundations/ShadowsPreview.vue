@@ -1,44 +1,20 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { TabButtons, useColorScheme } from 'frappe-ui'
 import effects from '../../../tailwind/tokens/effects.js'
 
 // The six shadow steps, all sat on one elevated surface so the scale reads as
 // shadow-only. In light mode `surface-elevation-2` is white, so depth comes
-// from the shadow; in dark mode it steps lighter than the page and carries the
-// lift the (faded) shadow can't. Real per-component pairings live in the
-// Surface pairing table.
+// from the shadow; in dark mode it is lighter than the page, which shows the
+// depth the shadow can't. The page's table lists the pairs components use.
 const STEPS = ['sm', 'base', 'md', 'lg', 'xl', '2xl'] as const
 
 const rows = STEPS.map((step) => ({
   name: step,
   value: effects.elevation.light[step],
 }))
-
-// The switcher drives the global theme, so the page and these cards swap
-// together, with no detached preview, and `bg-surface-*` resolves straight from
-// the document's `data-theme`.
-// No "system" option here: the toggle is explicit light/dark, so an initial
-// `system` scheme just reads as light — passing `system` through would leave
-// both tabs unselected.
-const { colorScheme, setColorScheme } = useColorScheme()
-const previewTheme = computed<'light' | 'dark'>({
-  get: () => (colorScheme.value === 'dark' ? 'dark' : 'light'),
-  set: (next) => setColorScheme(next),
-})
-
-const modeButtons = [
-  { label: 'Light', value: 'light' },
-  { label: 'Dark', value: 'dark' },
-]
 </script>
 
 <template>
-  <div>
-    <div class="flex justify-end mb-3">
-      <TabButtons :options="modeButtons" v-model="previewTheme" class="w-fit" />
-    </div>
-
+  <div class="not-prose my-8">
     <div class="grid divide-y divide-outline-gray-1">
       <div
         v-for="row in rows"

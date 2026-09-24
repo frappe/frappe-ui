@@ -10,7 +10,7 @@ import { BarChart, LineChart } from 'frappe-ui/charts'
 ```
 
 The subpath carries the `--chart-*` color tokens with it. See
-[Chart Colors](/docs/foundations/colors/charts) for the three ramps and how to
+[Chart colors](/docs/charts/colors) for the three ramps and how to
 rebrand them. `palette` picks a ramp by name — `categorical`, `sequential` or
 `diverging` — or takes an explicit list of colors.
 

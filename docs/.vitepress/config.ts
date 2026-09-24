@@ -66,13 +66,11 @@ function buildSidebar(): SidebarSection[] {
     {
       text: 'Foundations',
       items: [
-        { text: 'Base Colors', link: '/docs/foundations/colors/base' },
-        { text: 'Semantic Colors', link: '/docs/foundations/colors/semantic' },
-        { text: 'Chart Colors', link: '/docs/foundations/colors/charts' },
+        { text: 'Colors', link: '/docs/foundations/colors' },
         { text: 'Typography', link: '/docs/foundations/typography' },
         { text: 'Radius', link: '/docs/foundations/radius' },
-        { text: 'Elevation', link: '/docs/foundations/elevation' },
-        { text: 'Focus Ring', link: '/docs/foundations/focus-ring' },
+        { text: 'Shadows', link: '/docs/foundations/shadows' },
+        { text: 'Focus ring', link: '/docs/foundations/focus-ring' },
       ],
     },
     { text: 'Components', items: componentItems },
@@ -80,6 +78,7 @@ function buildSidebar(): SidebarSection[] {
       text: 'Charts',
       items: [
         { text: 'Overview', link: '/docs/charts/overview' },
+        { text: 'Colors', link: '/docs/charts/colors' },
         { text: 'BarChart', link: '/docs/charts/barchart' },
         { text: 'LineChart', link: '/docs/charts/linechart' },
         { text: 'AreaChart', link: '/docs/charts/areachart' },

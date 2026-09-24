@@ -86,6 +86,7 @@ All from the `frappe-ui` root entry.
 Nine chart components on the `frappe-ui/charts` subpath, drawn with echarts. Props are flat and name the columns of your rows; the column names differ per family. Every chart draws its own header, tooltip and states, and fills the box you give it, so size it from the wrapper: there is no `height` prop.
 
 - [Overview](https://ui.frappe.io/docs/charts/overview): the shared prop model and how a chart reads its data.
+- [Colors](https://ui.frappe.io/docs/charts/colors): the three `--chart-*` color ramps, `palette`, and the plot-area variables.
 - [BarChart](https://ui.frappe.io/docs/charts/barchart): bars for comparing categories, or a measure over time; `x`, `y`, optional `y2`, `splitBy` and `horizontal`.
 - [LineChart](https://ui.frappe.io/docs/charts/linechart): lines for a measure over time; `x`, `y`, optional `y2` and `splitBy`.
 - [AreaChart](https://ui.frappe.io/docs/charts/areachart): the line family with a fill; same props as LineChart.
@@ -110,12 +111,10 @@ Nine chart components on the `frappe-ui/charts` subpath, drawn with echarts. Pro
 
 ## Foundations
 
-- [Base colors](https://ui.frappe.io/docs/foundations/colors/base): the raw color scales.
-- [Semantic colors](https://ui.frappe.io/docs/foundations/colors/semantic): `bg-surface-*`, `text-ink-*`, `border-outline-*` tokens.
-- [Chart colors](https://ui.frappe.io/docs/foundations/colors/charts): the categorical chart palette.
+- [Colors](https://ui.frappe.io/docs/foundations/colors): the `bg-surface-*`, `text-ink-*` and `border-outline-*` tokens, and the fixed palette.
 - [Typography](https://ui.frappe.io/docs/foundations/typography): the type scale.
 - [Radius](https://ui.frappe.io/docs/foundations/radius): radius scale.
-- [Elevation](https://ui.frappe.io/docs/foundations/elevation): shadow scale.
+- [Shadows](https://ui.frappe.io/docs/foundations/shadows): shadow scale and the surfaces to pair them with.
 - [Focus ring](https://ui.frappe.io/docs/foundations/focus-ring): the shared focus treatment.
 
 ## Data fetching
