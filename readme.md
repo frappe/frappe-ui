@@ -44,7 +44,7 @@
 - **Agent skills.** An [agent skill](./skills/frappe-ui/) and
   [llms.txt](https://ui.frappe.io/llms.txt) teach Claude Code, Cursor, Codex
   and similar tools how to use the library. See
-  [For AI coding agents](#for-ai-coding-agents).
+  [Using with AI agents](#using-with-ai-agents).
 
 ## Quick start
 
@@ -131,20 +131,16 @@ dev-server proxy.
 | `frappe-ui/tailwind`     | Tailwind preset and content globs                                                   |
 | `frappe-ui/style.css`    | Base stylesheet, fonts and token variables                                          |
 
-## For AI coding agents
+## Using with AI agents
 
-Frappe UI ships an [agent skill](./skills/frappe-ui/) that teaches Claude Code,
-Cursor, Codex and similar tools the library's conventions: semantic tokens, the
-`variant` and `theme` color axes, the data composables, common recipes and
-anti-patterns.
+Install the frappe-ui skill in your coding agent:
 
 ```sh
 npx skills add https://github.com/frappe/frappe-ui/tree/main/skills/frappe-ui
 ```
 
-The docs are also available as plain text for agents at
-[ui.frappe.io/llms.txt](https://ui.frappe.io/llms.txt). It lists every page
-with a short description and a link.
+Or point it to [ui.frappe.io/llms.txt](https://ui.frappe.io/llms.txt), a list
+of every docs page.
 
 ## Contributing
 
