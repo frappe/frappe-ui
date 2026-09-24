@@ -1,22 +1,22 @@
 # FunnelChart
 
-Stage-to-stage drop-off, drawn as plain SVG.
+Shows drop-off from one stage to the next. Drawn as plain SVG.
 
 ## Stages
 
-One row per stage, drawn in row order. Each stage prints its count and its share
-of the first stage, which is what a funnel is read for. The first stage prints no
-share: it has nothing to convert from. `format` runs on the counts.
+One row per stage, drawn in row order. Each stage shows its count and its share
+of the first stage. The first stage shows no share, because there is no stage
+before it. `format` formats the counts.
 
-The tooltip adds the share of the preceding stage wherever that is a different
-number, so the drop-off at one step reads without arithmetic. Both rates reach
-the `tooltip` slot as `'context'` items, named `ofFirst` and `ofPrevious`.
+When the share of the previous stage is a different number, the tooltip shows it
+too, so you can see the drop-off at each step without doing the math. Both rates
+reach the `tooltip` slot as `'context'` items, named `ofFirst` and `ofPrevious`.
 
 <ComponentPreview name="Charts-FunnelStages" csr="true" self-layout />
 
 ## Clicks
 
-`select` reports the stage, its value and its row. `name` is the category value; `label` is what the column printed.
+`select` reports the stage, its value and its row. `name` is the category value and `label` is the printed text.
 
 <ComponentPreview name="Charts-FunnelDeals" csr="true" self-layout />
 

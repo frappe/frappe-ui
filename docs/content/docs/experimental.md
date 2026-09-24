@@ -1,28 +1,19 @@
 # Experimental
 
-The `frappe-ui/experimental` subpath exposes internal building blocks —
-composables, class helpers, components and headless logic — that are not part of
-the public API.
+`frappe-ui/experimental` holds components and helpers that are not part of the
+public API yet, or are on their way out of it.
 
-Think of it as a staging area: exports live here while their API settles. Over
-time, some of them get promoted to the public API and others get removed.
-
-> **Unstable API** — everything exported from `frappe-ui/experimental` is exempt
-> from the usual deprecation policy and can change shape or disappear in _any_
-> release, including minor and patch releases, with no deprecation window. Do
-> **not** import this subpath from product apps or third-party code — pin to a
-> public entry point instead.
+> **Unstable API.** Don't import this subpath in product apps. Anything in it
+> can change or disappear in any release, including minor and patch releases.
 
 ## Parked or incubating
 
-An export lands here for one of two reasons, and the reason tells you which way
-it is likely to move:
+Each export is here for one of two reasons:
 
-- **Parked** — it was public in v0, left the root export in `1.0.0`, and sits
-  here as an interim import path. It still works. It leaves by being deleted
-  once apps migrate, not by being promoted.
-- **Incubating** — this API was never public, even if the name was. It leaves
-  by being promoted to the root export, or by being dropped.
+- **Parked:** it was public in v0 and left the root export in `1.0.0`. It still
+  works here while apps migrate, and then it is deleted.
+- **Incubating:** it is new, and will be promoted to the root export or dropped
+  once its API settles.
 
 | Export | State | Waiting on |
 | --- | --- | --- |
@@ -41,58 +32,50 @@ it is likely to move:
 | [TextEditor (v0)](#texteditor-v0) | Parked | Apps moving to [`frappe-ui/editor`](/docs/molecules/editor) |
 | [Input labeling](#useinputlabeling) | Incubating | Its API settling |
 
-A component that is **removed** rather than parked is a third case: it has no
-import path at all and needs a replacement. The
+Components that were **removed** have no import path at all. The
 [migration guide](/docs/migration#removed-and-parked) lists each one with its
 replacement.
 
 ## Accordion
 
-Stacks sections of content behind labelled headers that expand and collapse.
-Built on reka-ui's `Accordion`, so the WAI-ARIA keyboard grammar and the
-single/multiple open models come for free.
+Sections of content behind headers that expand and collapse. Incubating.
 
 ```ts
 import { Accordion } from 'frappe-ui/experimental'
 ```
 
-See the [Accordion page](/docs/experimental/accordion) for examples and the full
-API reference.
+See the [Accordion page](/docs/experimental/accordion) for examples and the API.
 
 ## Calendar
 
-A date and event view with Month, Week, and Day modes: event CRUD, drag and
-resize, keyboard shortcuts, and a replaceable header and event popover. Moved
-here from root in `1.0.0` with its public API unchanged; it stays, unstable,
-until a redesigned calendar family replaces it.
+A date and event view with Month, Week and Day modes. Parked: moved here from
+the root in `1.0.0` with the same API, until a redesigned calendar family
+replaces it. There is no replacement yet.
 
 ```ts
 import { Calendar } from 'frappe-ui/experimental'
 ```
 
-See the [Calendar page](/docs/experimental/calendar) for examples and the
-full API reference.
+See the [Calendar page](/docs/experimental/calendar) for examples and the API.
 
 ## Charts (v1)
 
-The first chart family — `AxisChart`, `DonutChart`, `FunnelChart`,
-`NumberChart`, the raw `ECharts` wrapper, and `useAxisChartOptions`. Each one
-takes a single `config` object. Removed from root in `1.0.0`;
-[`frappe-ui/charts`](/docs/charts/overview) is the replacement and draws
-everything these did. Unstable — it will be removed once consumers migrate.
+The first chart family: `AxisChart`, `DonutChart`, `FunnelChart`,
+`NumberChart`, the `ECharts` wrapper, and `useAxisChartOptions`. Parked, and
+will be removed. Use [`frappe-ui/charts`](/docs/charts/overview) instead.
 
 ```ts
 import { AxisChart } from 'frappe-ui/experimental'
 ```
 
-See the [migration guide](/docs/migration) for the before/after.
+See the [migration guide](/docs/migration#charts-v1-—-moved-to-frappe-ui-experimental)
+for the before and after.
 
 ## CommandPalette
 
-A searchable list of commands in a dialog. The root `CommandPalette` was
-removed in `1.0.0` and rebuilt here as seven composable parts, so an app writes
-the rows it needs instead of feeding one `groups` shape. `filterable` (default
-`true`) turns the client filter off for server search.
+A searchable list of commands in a dialog, built from seven parts so an app
+writes the rows it needs. Incubating. It replaces the root `CommandPalette`,
+which was removed in `1.0.0`.
 
 ```ts
 import {
@@ -107,38 +90,40 @@ import {
 ```
 
 See the [CommandPalette page](/docs/experimental/commandpalette) for filtering,
-server search, link items and the styling hooks.
+server search, link items and styling.
 
 ## Date calendars
 
-The calendars inside the date pickers, as standalone components. `DateCalendar` holds one date as `v-model`. `DateRangeCalendar` holds a `[from, to]` pair, previews the pending range under the cursor, and shows two months with `dualPane`. Both accept `min`, `max` and `isDateUnavailable`, and expose `focus()`.
+The calendars inside the date pickers, as standalone components. Incubating.
+`DateCalendar` holds one date as `v-model`. `DateRangeCalendar` holds a
+`[from, to]` pair and shows two months with `dualPane`. Both accept `min`, `max`
+and `isDateUnavailable`, and expose `focus()`.
 
 ```ts
 import { DateCalendar, DateRangeCalendar } from 'frappe-ui/experimental'
 ```
 
-Both emit `select` on every click and `today` from the Today button, even when the value does not change. `update:modelValue` alone does not fire for an unchanged value, so listen to these when every click matters, for example to close a popover.
+Both emit `select` on every click and `today` from the Today button, even when
+the value does not change. Listen to these when every click matters, for
+example to close a popover. Setting the value from outside moves the view to
+that month.
 
 <ComponentPreview name="DatePicker-DateCalendar" />
-
-Setting the value from outside moves the view to that month. Clicking inside the calendar does not move the view.
 
 <ComponentPreview name="DatePicker-DateRangeCalendar" />
 
 ## FloatingWindow
 
-A panel that docks, floats, or collapses to a bottom-right tray, for
-composer-style windows. `v-model:mode` holds the state (`docked` | `floating` |
-`minimized`); `storageKey` persists the mode and geometry across sessions, and
-`minimizable: false` drops the tray state. The `#header`, `#actions`, and
-`#footer` slots replace or extend the title bar and pin a region below the
-scrollable body. `useFloatingWindow` is the headless half — pass it the panel
-and drag-handle refs to build your own chrome.
+A panel that docks, floats, or collapses to a tray at the bottom right, for
+windows like an email composer. Incubating. `v-model:mode` holds the state
+(`docked`, `floating` or `minimized`), and `storageKey` saves the mode and
+position between sessions, and `minimizable: false` removes the tray state. The
+`#header`, `#actions` and `#footer` slots change the title bar and add a footer
+below the scrolling body. `useFloatingWindow` gives the same behavior without
+the markup.
 
-A detached window sits at `z-index: 40`, above page chrome and below every
-dialog. It was `50` before, which tied with `Dialog`. If your app has chrome in
-that band, scope a rule to the `has-floating-window` class, set on `<body>`
-while a window is detached.
+A detached window sits at `z-index: 40`, below every dialog. While one is
+detached, `<body>` has the `has-floating-window` class.
 
 ```ts
 import { FloatingWindow, useFloatingWindow } from 'frappe-ui/experimental'
@@ -146,107 +131,29 @@ import { FloatingWindow, useFloatingWindow } from 'frappe-ui/experimental'
 
 ## ListView
 
-A config-driven data table: resizable columns, per-column `getLabel`/`prefix`
-functions, cell tooltips, grouped rows, disabled-row exclusion, and a select
-banner. `frappe-ui/list` is the composition-based replacement for new code,
-but it has no equivalent for ListView's config-driven columns yet — ListView
-stays here, unstable, until it does.
+A data table configured with column objects. Parked until
+[`frappe-ui/list`](/docs/molecules/list) supports config-driven columns. Use
+`frappe-ui/list` for new code.
 
 ```ts
 import { ListView } from 'frappe-ui/experimental'
 ```
 
-See the [ListView page](/docs/experimental/listview) for examples and the
-full API reference.
-
-## TextEditor (v0)
-
-The deprecated v0 editor family, parked here while apps migrate to
-[`frappe-ui/editor`](/docs/molecules/editor). Removed from root in `1.0.0`;
-this subpath is the interim import path. Unstable — it will be removed once
-consumers migrate.
-
-```ts
-import { TextEditor, TextEditorFixedMenu } from 'frappe-ui/experimental'
-```
-
-See the [Editor migration section](/docs/migration#editor) for the
-before/after.
-
-## ThemeSwitcher
-
-`ThemeSwitcher`, moved out of the root export in `1.0.0`. It stays deprecated
-here: `Select` bound to the [`useColorScheme`](/docs/other/composables#usecolorscheme)
-composable is the replacement, and `useColorScheme` remains the stable
-primitive at the root. Parked only while apps migrate, and it will be removed.
-
-```ts
-import { ThemeSwitcher } from 'frappe-ui/experimental'
-```
-
-The replacement is behavioral, not visual. `ThemeSwitcher` renders a group of
-theme preview cards, so an app that wants the cards keeps its own markup. See
-the [migration guide](/docs/migration#themeswitcher) for the `Select` version.
-
-## Sprite icons
-
-The sprite-based `Icon`, `IconPicker`, and `spritePlugin`, moved out of
-`frappe-ui/icons` in `1.0.0`. They draw from a 468 KB SVG sprite that
-`spritePlugin` injects into `<body>`. `lucide-*` classes — and the root
-[`Icon`](/docs/components/icon) component, which wraps one — are the canonical
-way to render icons, so this trio is parked only while apps migrate, and it
-will be removed. Nothing about the components changed; only the subpath did.
-
-```ts
-// Root `frappe-ui` exports a different `Icon` — alias one if you import both.
-import { Icon as SpriteIcon, IconPicker, spritePlugin } from 'frappe-ui/experimental'
-```
-
-The named SFC icons (`CircleCheckIcon`, `HelpIcon`, …) stay on
-`frappe-ui/icons`.
+See the [ListView page](/docs/experimental/listview) for examples and the API.
 
 ## MultiEmailInput
 
-A multi-value email field: selected addresses render as removable chips, and a
-typeahead dropdown suggests existing people as you type. Built on reka-ui's
-`TagsInput` + `Combobox`, so chip keyboard navigation (Delete / Backspace /
-Arrow / Home / End) and the popover come for free. `v-model` is the array of
-addresses.
+An email field that holds several addresses as removable chips and suggests
+people as you type. Incubating. `v-model` is the array of addresses.
 
-As you type, the component emits `update:query` (debounce it in the host) so you
-can fetch matching `options`. Picked suggestions are added as-is; a typed
-address is validated first (a practical email check by default — override with
-`validate`) and surfaced through `invalid` if it fails. Already-selected
-addresses are filtered out of the suggestions automatically.
+It is a separate component, not a `Combobox` mode: a `Combobox` picks one value
+from its options, while this field builds a list from free text, with options
+only as suggestions.
 
-### Why it isn't a `Combobox` mode
-
-A `multiple` flag on `Combobox` looks like the obvious home for this, but the
-two controls disagree about what the text input fundamentally _is_.
-
-In a `Combobox` the input **is the value**: you type to narrow toward a single
-choice, and the field then displays that choice. Typing edits the selection,
-Backspace edits the search, and Enter commits _and closes_ — you are done
-choosing. The model is one value, and the options are authoritative: they define
-what is selectable, with free text as a deliberate exception.
-
-`MultiEmailInput` inverts all of it. The input is a **throwaway staging area**
-for the next address; committed values live beside it as independent,
-individually-removable chips. Typing builds a token instead of a selection,
-Backspace deletes a chip instead of a query, and Enter commits _and keeps going_
-— you are assembling a set, not picking one member of it. Its options are merely
-advisory: an email address space is open by nature, so the free-text token is
-the centre of gravity and suggestions are assistance layered on top — the
-reverse of a picker, where the list is the truth.
-
-Those are two different interaction grammars — single-choice _resolution_ versus
-set _composition_ — over two different data shapes (`string | null` versus
-`string[]`). Collapsing them into one component would force `Combobox` to carry
-both selection models, both keyboard grammars, and both commit semantics,
-leaving every prop quietly ambiguous about which mode it governs. reka-ui
-already draws this line: `Combobox` and `TagsInput` are separate primitives, and
-`MultiEmailInput` is their _composition_, not a fork of either. Keeping it
-distinct is what lets each one stay a single, legible idea.
+The component emits `update:query` as you type, so you can fetch matching
+`options` (debounce it). A typed address is checked with `validate` (a basic
+email check by default) and emits `invalid` if it fails. Addresses already
+selected are left out of the suggestions.
 
 ```vue
 <script setup lang="ts">
@@ -279,20 +186,16 @@ const search = debounce(async (query: string) => {
 </template>
 ```
 
-It plugs into [`useInputLabeling`](#useinputlabeling), so `label`,
-`description`, `error`, and `required` behave (and look) like every other
-frappe-ui form field.
+`label`, `description`, `error` and `required` work like on every other form
+field.
 
 <ComponentPreview name="MultiEmailInput-AsyncSuggestions" csr="true" />
 
 ### Suggestions with avatars
 
-Every suggestion row and chip always renders an `Avatar` — the option's `avatar`
-image when present, otherwise initials from its `label`. (The field is named
-`avatar`, not the house `icon`, because this control is person-centric: the
-leading visual is always a face or initials.) Override the row with the
-`#item-prefix` / `#item-label` / `#item-suffix` slots, or replace a chip
-entirely with `#tag`:
+Every suggestion and chip shows an `Avatar`: the option's `avatar` image, or
+initials from its `label`. Change a row with the `#item-prefix`, `#item-label`
+and `#item-suffix` slots, or replace a chip with `#tag`:
 
 ```vue
 <MultiEmailInput v-model="emails" :options="options">
@@ -318,14 +221,16 @@ entirely with `#tag`:
 
 ### Label, description, error
 
-`label`, `description`, `error`, and `required` render exactly like the other
-form fields (this example shows a required error until a recipient is added).
+This example shows a required error until a recipient is added.
 
 <ComponentPreview name="MultiEmailInput-Labeling" csr="true" />
 
 ## PickerShell
 
-The input half of the date pickers: a `TextInput`, a `Popover` that the input opens rather than toggles, and the focus wiring between them. Use it to build a picker instead of copying `DatePicker`. Put the panel in `#default` and bind the text with `v-model:input-value`.
+The input half of the date pickers: a `TextInput` that opens a `Popover`, with
+focus handled between them. Incubating. Use it to build your own picker instead
+of copying `DatePicker`. Put the panel in `#default` and bind the text with
+`v-model:input-value`.
 
 ```vue
 <script setup lang="ts">
@@ -352,14 +257,53 @@ const text = ref('')
 </template>
 ```
 
-Style it through the `data-slot` hooks that `TextInput` and [`Popover`](/docs/components/popover) render. There are no class props. The panel is as wide as its content.
+Style it with the `data-slot` attributes that `TextInput` and
+[`Popover`](/docs/components/popover) render. It has no class props.
+
+## Sprite icons
+
+The sprite-based `Icon`, `IconPicker` and `spritePlugin`, moved here from
+`frappe-ui/icons` in `1.0.0` with no other change. Parked, and will be removed.
+Use `lucide-*` classes or the root [`Icon`](/docs/components/icon) component
+instead.
+
+```ts
+// Root `frappe-ui` exports a different `Icon`. Alias one if you import both.
+import { Icon as SpriteIcon, IconPicker, spritePlugin } from 'frappe-ui/experimental'
+```
+
+The named icon components (`CircleCheckIcon`, `HelpIcon`, …) stay in
+`frappe-ui/icons`.
+
+## ThemeSwitcher
+
+A group of theme preview cards, moved out of the root export in `1.0.0`.
+Parked, and will be removed. Use a `Select` bound to
+[`useColorScheme`](/docs/other/composables#usecolorscheme) instead; the
+[migration guide](/docs/migration#themeswitcher) shows how. An app that wants
+the cards keeps its own markup.
+
+```ts
+import { ThemeSwitcher } from 'frappe-ui/experimental'
+```
+
+## TextEditor (v0)
+
+The v0 editor family, removed from the root in `1.0.0`. Parked, and will be
+removed. Use [`frappe-ui/editor`](/docs/molecules/editor) instead.
+
+```ts
+import { TextEditor, TextEditorFixedMenu } from 'frappe-ui/experimental'
+```
+
+See the [Editor migration section](/docs/migration#editor) for the before and
+after.
 
 ## useInputLabeling
 
-Shared headless logic for input components: it wires up the label, description,
-and error region of a form control, and computes the matching ARIA and `data-*`
-attributes. All frappe-ui input components use it internally, so a custom
-control built with it gets the same behavior and styling hooks for free.
+The logic frappe-ui inputs use for their label, description and error: ids,
+ARIA attributes and `data-*` attributes. Incubating. Use it in a custom input to
+get the same behavior and styling hooks.
 
 ```ts
 import { useInputLabeling } from 'frappe-ui/experimental'
@@ -370,10 +314,8 @@ const { inputId, labelledBy, describedBy, hasError, errorLines, dataAttrs } =
 
 ## Input labeling components
 
-The presentational counterparts of `useInputLabeling`: small components that
-render the label, description, and error region of a form control. frappe-ui
-input components compose them internally; a custom control can use them with the
-ids returned by `useInputLabeling` to get matching markup and styling.
+The components that render the label, description and error of a form field.
+Incubating. Pass them the ids from `useInputLabeling`.
 
 ```vue
 <script setup lang="ts">
@@ -396,50 +338,35 @@ const {
 </script>
 
 <template>
-  <div v-if="hasLabeling" class="space-y-1.5">
-    <InputLabel
-      v-if="props.label"
-      :id="labelId"
-      :for-id="inputId"
-      :label="props.label"
-      :required="props.required"
-    />
-    <slot />
-    <InputDescription
-      v-if="showDescription"
-      :id="descriptionId"
-      :description="props.description"
-    />
-    <InputError v-if="hasError" :id="errorMessageId" :lines="errorLines" />
-  </div>
-  <slot v-else />
+  <InputLabel
+    v-if="props.label"
+    :id="labelId"
+    :for-id="inputId"
+    :label="props.label"
+    :required="props.required"
+  />
+  <slot />
+  <InputDescription
+    v-if="showDescription"
+    :id="descriptionId"
+    :description="props.description"
+  />
+  <InputError v-if="hasError" :id="errorMessageId" :lines="errorLines" />
 </template>
 ```
 
-### InputLabel
+| Component          | Renders                                                                                           |
+| ------------------ | ------------------------------------------------------------------------------------------------- |
+| `InputLabel`       | A `<label>` for `forId`. With `required`, adds a red `*` and "(required)" for screen readers.     |
+| `InputDescription` | The help text below the input (`data-slot="description"`).                                        |
+| `InputError`       | Each message in `lines` on its own line, in a `role="alert"` region (`data-slot="error"`).        |
 
-Renders a `<label>` linked to the input via `forId`, with a required marker (a
-red `*` plus screen-reader-only "(required)" text) when `required` is set.
-Renders nothing when there is no label text or slot content. The default slot
-replaces the label text and receives `required` as a slot prop.
-
-### InputDescription
-
-Renders the help text below an input as a muted paragraph
-(`data-slot="description"`). Renders nothing without a `description` prop or
-slot content.
-
-### InputError
-
-Renders validation messages (`lines`) as a `role="alert"` region
-(`data-slot="error"`), one message per line. Renders nothing when `lines` is
-empty.
+Each one renders nothing when it has no text or slot content.
 
 ## inputFontSizeClasses
 
-Returns the Tailwind font-size class frappe-ui input components use for a given
-size token (`'xs' | 'sm' | 'md' | 'lg'`), so custom controls render text at the
-same scale as built-in ones.
+Returns the font-size class frappe-ui inputs use for a size (`'xs'`, `'sm'`,
+`'md'` or `'lg'`), so a custom input matches the built-in ones.
 
 ```ts
 import { inputFontSizeClasses } from 'frappe-ui/experimental'

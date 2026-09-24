@@ -1,61 +1,46 @@
 # List Resource
 
-List Resource is a wrapper on top of [Resource](./resource.md) for working
-with lists. This feature only works with a Frappe Framework backend as of now.
+`createListResource` fetches a page of records of a DocType from a Frappe
+backend and gives you methods to page through, insert, update and delete them.
+It is the older data-fetching API and stays supported through `1.x`.
 
-## Usage
+For new code, use [`useList`](./use-list).
 
-A list resource knows how to fetch records of a DocType from a Frappe Framework
-backend so there is no need to specify the url. Instead you only define
-`doctype`, `fields`, `filters`, etc. You also get methods like `next()`,
-`setValue()`, etc.
+## Composition API
+
+You set `doctype`, `fields`, `filters` and the other list options instead of a
+URL.
 
 ```vue
 <template>
-  <div class="space-y-4">
-    <div
-      class="flex items-center justify-between"
-      v-for="todo in todos.data"
-      :key="todo.name"
-    >
-      <div>
-        {{ todo.description }}
-      </div>
-      <Badge>{{ todo.status }}</Badge>
-    </div>
+  <div v-for="todo in todos.data" :key="todo.name" class="flex justify-between">
+    {{ todo.description }}
+    <Badge :label="todo.status" />
   </div>
-  <Button @click="todos.next()"> Next Page </Button>
+  <Button v-if="todos.hasNextPage" @click="todos.next()">Load more</Button>
 </template>
+
 <script setup>
 import { createListResource } from 'frappe-ui'
-let todos = createListResource({
+
+const todos = createListResource({
   doctype: 'ToDo',
   fields: ['name', 'description', 'status'],
   orderBy: 'creation desc',
-  start: 0,
   pageLength: 5,
+  auto: true,
 })
-todos.fetch()
 </script>
 ```
 
+The resource sends dotted method names like `frappe.client.get_list`, so the
+app must use [`frappeRequest`](./resource#frappe-backend) as its fetcher.
+
 ## Options API
 
-You can also define resources if you are using Options API. You need to register
-the `resourcesPlugin` first.
-
-**main.js**
-
-```js
-import { resourcesPlugin } from 'frappe-ui'
-app.use(resourcesPlugin)
-```
-
-In your .vue file, you can declare all your resources under the resources key as
-functions. The resource object will be available on `this.$resources.[name]`. In
-the following example, `this.$resources.todos` is the resource object.
-
-**Component.vue**
+With `app.use(FrappeUI, { resources: true })` in `main.js` (see
+[Resource](./resource#options-api)), declare the resource with `type: 'list'`.
+It is available on `this.$resources.todos`.
 
 ```vue
 <script>
@@ -67,7 +52,6 @@ export default {
         doctype: 'ToDo',
         fields: ['name', 'description', 'status'],
         orderBy: 'creation desc',
-        start: 0,
         pageLength: 5,
         auto: true,
       }
@@ -77,158 +61,63 @@ export default {
 </script>
 ```
 
-## List of Options and API
-
-Here is the list of all options and APIs that are available on a list resource.
+## API Reference
 
 ### Options
 
-```js
-let todos = createListResource({
-    // name of the doctype
-    doctype: 'ToDo',
+| Option | Default | Description |
+| --- | --- | --- |
+| `doctype` | | The DocType to fetch. Required. |
+| `fields` | | Fields to fetch, like `['name', 'status']`. |
+| `filters` | | Filters as an object, like `{ status: 'Open' }`. |
+| `orFilters` | | Filters where any one must match. |
+| `orderBy` | | Sort order, like `'creation desc'`. |
+| `groupBy` | | Field to group the results by. |
+| `start` | `0` | Index of the first record to fetch. |
+| `pageLength` | `20` | Number of records in one page. |
+| `parent` | | Parent DocType, when you fetch records of a child DocType. |
+| `debug` | `0` | Set to `1` to print the list query on the server. |
+| `url` | `frappe.client.get_list` | A custom API method that returns the list. |
+| `cache` | | String or array key. Keeps the list in memory and in IndexedDB. |
+| `auto` | `false` | Fetch once when the resource is created. |
+| `realtime` | `false` | Fetch a row again when the server reports that its document changed. Needs a socket on `this.$socket`, so it works only in the Options API. |
+| `onSuccess(data)` | | Runs after the list loads. |
+| `onError(error)` | | Runs when the list request fails. |
+| `onData(data)` | | Runs when cached data loads from IndexedDB. |
+| `transform(data)` | | Changes the rows before they are set on `data`. |
+| `fetchOne`, `insert`, `delete`, `setValue`, `runDocMethod` | | Objects with `onSuccess` and `onError` for the resource of the same name. |
 
-    // list of fields
-    fields: ['name', 'description', 'status', ...],
+### Properties
 
-    // object of filters to apply
-    filters: {
-        status: 'Open'
-    },
+| Property | Description |
+| --- | --- |
+| `data` | The rows, after `transform`. |
+| `originalData` | The rows before `transform`. |
+| `hasNextPage` | `true` when the last page was full, so there may be more rows. |
+| `hasPreviousPage` | `true` when `start` is greater than `0`. |
+| `list` | The [resource](./resource#properties) that fetches the list. Read `list.loading`, `list.error` and `list.promise` here. |
 
-    // the order in which records must be sorted
-    orderBy: 'creation desc',
+### Methods
 
-    // index from which records should be fetched
-    // default value is 0
-    start: 0,
+| Method | Description |
+| --- | --- |
+| `fetch()` | Fetch the list. |
+| `reload()` | Fetch all loaded pages again. Returns a promise. |
+| `next()` | Fetch the next page and add it to `data`. |
+| `previous()` | Move `start` back by one page and fetch. |
+| `update(options)` | Change list options, like `{ filters: { status: 'Closed' } }`. Call `reload()` after it. |
+| `setData(data)` | Replace the rows. Pass a function to compute them from the current rows. |
+| `getRow(name)` | Return the loaded row with this `name`. |
 
-    // number of records to fetch in a single request
-    // default value is 20
-    pageLength: 20,
+### Write resources
 
-    // parent doctype when you are fetching records of a child doctype
-    parent: null,
+Each of these is a [resource](./resource#methods) with its own `loading` and
+`error`. Call `submit()` to run it. On success, the list updates.
 
-    // set to 1 to enable debugging of list query
-    debug: 0,
-
-    // cache key to cache the resource
-    // can be a string
-    cache: 'todos',
-    // or an array that can be serialized
-    cache: ['todos', 'faris@example.com'],
-
-    // default value for url is "frappe.client.get_list"
-    // specify url if you want to use a custom API method
-    url: 'todo_app.api.get_todos',
-
-    // make the first request automatically
-    auto: true,
-
-    // events
-    // error can occur from failed request
-    onError(error) {
-
-    },
-    // on successful response
-    onSuccess(data) {
-
-    },
-    // transform data before setting it
-    transform(data) {
-      for (let d of data) {
-        d.open = false
-      }
-      return data
-    },
-    // other events
-    fetchOne: {
-        onSuccess() {},
-        onError() {}
-    },
-    insert: {
-        onSuccess() {},
-        onError() {}
-    },
-    delete: {
-        onSuccess() {},
-        onError() {}
-    },
-    setValue: {
-        onSuccess() {},
-        onError() {}
-    },
-    runDocMethod: {
-        onSuccess() {},
-        onError() {}
-    },
-})
-```
-
-### API
-
-A list resource is made up of multiple individual resources. In our running
-example, the resource object that fetches the list is at `todos.list`. So all
-the [properties of a resource](./resource.md) are available on this
-object. Similarly, there are resources for `fetchOne`, `setValue`, `insert`,
-`delete`, and `runDocMethod`.
-
-```js
-let todos = createListResource({...})
-
-todos.data // data returned from request
-todos.originalData // response data before being transformed
-todos.reload() // reload the existing list
-todos.next() // fetch the next page
-todos.hasNextPage // whether there is next page to fetch
-
-// update list options
-todos.update({
-  fields: ['*'],
-  filters: {
-    status: 'Closed'
-  }
-})
-
-todos.list // list resource
-todos.list.loading // true when data is being fetched
-todos.list.error // error that occurred from making the request
-todos.list.promise // promise object of the request, can be awaited
-
-// resource to fetch and update a single record in the list
-todos.fetchOne
-// pass the name of the record to fetch that record and update the list
-todos.fetchOne.submit(name)
-
-// resource to set value(s) for a single record in the list
-todos.setValue
-todos.setValue.submit({
-    // id of the record
-    name: '',
-    // field value pairs to set
-    status: 'Closed',
-    description: 'Updated description'
-})
-
-// resource to insert a new record in the list
-todos.insert
-todos.insert.submit({
-    description: 'New todo'
-})
-
-// resource to delete a single record
-todos.delete
-todos.delete.submit(name)
-
-// resource to run a doc method
-todos.runDocMethod
-todos.runDocMethod.submit({
-    // name of the doc method
-    method: 'send_email',
-    // name of the record
-    name: '',
-    // params to pass to the method
-    email: 'test@example.com'
-})
-```
+| Resource | `submit()` argument | Description |
+| --- | --- | --- |
+| `fetchOne` | `name` | Fetch one record and update its row in the list. |
+| `insert` | `{ description: 'New todo' }` | Insert a record with these values, then reload the list. |
+| `setValue` | `{ name, status: 'Closed' }` | Set field values on the record `name` and update its row. |
+| `delete` | `name` | Delete the record, then reload the list. |
+| `runDocMethod` | `{ method: 'send_email', name, ...args }` | Run a method on the record's controller. Other keys are passed as arguments. |

@@ -1,77 +1,76 @@
 # ChartContainer
 
-Everything around the plot: the title block, the value-axis titles, the three
-states and the legend row. Every built-in chart is a plot inside this container,
-so a plot you draw yourself reads the same way on the same dashboard.
+Lays out everything around the plot: the title, the value-axis titles, the
+three states and the legend row. Every built-in chart uses it, so wrap a plot
+you draw yourself in it to match the built-in charts.
 
 ```js
 import { ChartContainer } from 'frappe-ui/charts'
 ```
 
-The default slot is the plot. The container gives it the space the chrome does
-not take, and lays the rest out around it.
+The default slot is the plot. It gets the space left after the title, axis
+titles and legend.
 
 <ComponentPreview name="Charts-CustomRadar" csr="true" self-layout />
 
-## The title block
+## Title and actions
 
 `title` names the chart and `subtitle` captions it. The row is only drawn when
 one of them is set, or when something fills `#actions`.
 
-`#actions` sits at the end of that row, opposite the title — for a period
-picker, a menu, or a link to the records behind the chart. It keeps its width
-and the title truncates, because a control that shrinks stops being pressable
-while a name that shortens still reads.
+`#actions` sits at the end of that row, opposite the title. Use it for a
+period picker, a menu, or a link to the records behind the chart. It keeps its
+width and the title truncates, because a truncated title is still readable but a
+shrunk control is hard to press.
 
-The header row is one title line tall. An action taller than that is centred on
+The header row is one title line tall. An action taller than that is centered on
 the title instead of making the row taller.
 
-`#title-suffix` goes at the other end, right after the title text — for a mark
-that belongs to the name rather than to the card, like a lock on a chart whose
-rows are filtered per reader. The title truncates around it and it keeps its
-width. It renders in the title's font size, so a mark sized in `em` follows the
-title wherever the title is smaller, as it is on a `NumberCard`.
+`#title-suffix` goes right after the title text. Use it for an icon that
+belongs to the title, such as a lock on a chart whose rows are filtered per
+user. It keeps its width and the title truncates before it. It uses the title's
+font size, so an icon sized in `em` scales with the title, which is smaller on a
+`NumberCard`.
 
 ## Value-axis titles
 
 `yAxisTitle` titles the primary value axis and `y2AxisTitle` the second one.
-They are drawn as a row over the plot rather than as echarts axis names: an axis
-name inside the plot has to be rotated to fit, and a rotated name is read last.
+They are drawn as a row above the plot, not as echarts axis names, because an
+axis name inside the plot has to be rotated to fit, which makes it hard to read.
 
-Each title sits over the edge its axis is drawn on, so the row mirrors with the
-plot in RTL. `axisTitlePlacement` moves the row: `'top'` by default, `'bottom'`
-for a chart whose value axis runs along the bottom. A horizontal `BarChart` sets
-`'bottom'` for that reason, and pins the titles to the far end — the near end of
-a row chart is the category-label column, where a title would read as a heading
-for it.
+Each title sits above the side its axis is on, so the row mirrors in RTL.
+`axisTitlePlacement` moves the row: `'top'` by default, or `'bottom'` for a chart
+whose value axis runs along the bottom. A horizontal `BarChart` uses `'bottom'`
+and puts the titles at the far end, because the near end is above the category
+labels, where a title would look like their heading.
 
-The titles are hidden in every state but `ready`. A title heading a plot that is
-not drawn names nothing.
+The titles show only in the `ready` state, because there is no plot to title in
+the other states.
 
 ## States
 
-`loading`, `error` and `empty` switch the container between four states, in that
-order of precedence: a non-empty `error` wins over `loading`, and `loading` wins
-over `empty`.
+`loading`, `error` and `empty` switch the container between four states
+(`ready` is the fourth). A non-empty `error` wins over `loading`, and `loading`
+wins over `empty`.
 
-The plot stays mounted through all four. Unmounting it would dispose the echarts
-instance and pay to build it again on the way back, so it is hidden instead.
+The plot stays mounted in all four states. Unmounting it would dispose the
+echarts instance and it would have to be built again, so it is hidden instead.
 
-Each state has a slot that replaces what it draws — `#loading`, `#error` and
-`#empty`. `#error` carries the message as a slot prop, so a retry button can sit
-beside it. The loading placeholder gets the whole plot box rather than a row in
-the middle of it: a dashboard fills in a card at a time, and a block holding the
-grid's shape reads as one card arriving. See [States](/docs/charts/states).
+Each state has a slot that replaces its content: `#loading`, `#error` and
+`#empty`. `#error` gets the message as a slot prop, so you can show a retry
+button next to it. The loading placeholder fills the whole plot box, not a row
+in the middle, so while a dashboard loads, each card keeps its shape in the
+grid. See [States](/docs/charts/states).
 
 ## The legend
 
 `#legend` is a row under the plot. Put [`ChartLegend`](/docs/charts/chartlegend)
-in it. When nothing fills it, the plot keeps the space the row would have taken,
-so a one-series chart sits in its card the way a multi-series one does.
+in it. When the slot is empty, the container adds padding in place of the row, so a
+chart with one series lines up with a chart that has several.
 
 ## Direction
 
-`dir` forces the layout direction to `'ltr'` or `'rtl'`. It defaults to
+`dir` sets the layout direction to `'ltr'` or `'rtl'`. It defaults to
 `document.documentElement.dir`.
 
 <!-- @include: ./ChartContainer.api.md -->

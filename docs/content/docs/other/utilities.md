@@ -1,12 +1,13 @@
 # Utilities
 
-Some common utilities that are useful in building frontend apps.
+Plain functions and classes for common app tasks: dates, server requests,
+errors and file uploads. Import them from `frappe-ui`.
 
 ## debounce
 
-Creates a function that will run only once in the specified number of wait time
-(milliseconds). In the following example, if you run `debouncedInput` function
-every time the user presses a key, it will run only once in every `500ms`.
+Returns a function that waits until `wait` milliseconds pass with no new call,
+then runs once with the last arguments. In this example, `debouncedInput` runs
+500ms after the user stops typing.
 
 ```vue
 <script setup>
@@ -20,13 +21,17 @@ const debouncedInput = debounce(onInput, 500)
 </script>
 ```
 
+Pass `true` as the third argument to run on the first call instead of the last.
+Call `debouncedInput.cancel()` to drop a pending call, for example when the
+component unmounts before a debounced request fires.
+
 ## dayjs / dayjsLocal
 
-`dayjs` is a re-export of [Day.js](https://day.js.org/), pre-loaded with the
-plugins the library and most apps need: `relativeTime`, `localizedFormat`,
-`isToday`, `duration`, `utc`, `timezone`, `advancedFormat`, `customParseFormat`.
-Import it instead of adding your own `dayjs` dependency, so every date in the
-app shares one set of plugins.
+`dayjs` is [Day.js](https://day.js.org/) with the plugins the library and most
+apps need already loaded: `relativeTime`, `localizedFormat`, `isToday`,
+`duration`, `utc`, `timezone`, `advancedFormat`, `customParseFormat`. Import it
+instead of adding your own `dayjs` dependency, so every date in the app uses
+the same plugins.
 
 ```vue
 <script setup>
@@ -37,10 +42,10 @@ const label = dayjs('2024-01-15').format('MMMM D, YYYY') // "January 15, 2024"
 ```
 
 `dayjsLocal` converts a datetime string stored in the server's timezone
-(`setConfig('systemTimezone', …)`) into the browser's local timezone
-(`setConfig('localTimezone', …)`, falling back to the browser's own). Called
-with no argument, it returns "now" in the local timezone. Without a
-`systemTimezone` configured, it behaves exactly like `dayjs`.
+(`setConfig('systemTimezone', …)`) into the local timezone
+(`setConfig('localTimezone', …)`, or the browser's own). With no argument, it
+returns "now" in the local timezone. Without a `systemTimezone`, it behaves
+like `dayjs`.
 
 ```vue
 <script setup>
@@ -52,13 +57,12 @@ const local = dayjsLocal('2024-01-15 10:00:00') // 10:00 UTC, shown in the brows
 </script>
 ```
 
-`dayjs` and `dayjsLocal` are the two public helpers. The opposite conversion,
-`dayjsSystem`, is internal to the library and is not exported.
+The reverse conversion, `dayjsSystem`, is internal and not exported.
 
 ## call
 
-Calls a whitelisted method on the server and resolves to its `message`. The
-method is a dotted path; an argument object becomes the JSON request body.
+Calls a whitelisted server method and resolves to its `message`. The method is
+a dotted path, and the argument object becomes the JSON request body.
 
 ```vue
 <script setup>
@@ -68,12 +72,15 @@ const count = await call('frappe.client.get_count', { doctype: 'ToDo' })
 </script>
 ```
 
-Pass a path starting with `/` to hit it directly instead of `/api/method/…`.
+A path that starts with `/` is used as the URL, instead of
+`/api/method/<method>`.
 
-A third argument takes `headers` (merged over the defaults, winning over
-anything from [`setConfig('requestHeaders')`](#configuration)) and `onError`,
-which receives `{ response, status, error }` for a failed HTTP response. The
-promise rejects either way — `onError` is for reporting, not for recovery.
+The third argument takes two options:
+
+| Option    | Type                                     | Description                                                                                                  |
+| --------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `headers` | `Record<string, string>`                 | Merged over the default headers and over [`setConfig('requestHeaders')`](#configuration).                    |
+| `onError` | `({ response, status, error }) => void`  | Called when the server returns an error response. The promise still rejects, so use it to report, not recover. |
 
 ```vue
 <script setup>
@@ -87,14 +94,12 @@ await call(
 </script>
 ```
 
-The rejection is a `FrappeResourceError`: a plain `Error` carrying `exc_type`,
-`exc`, `status`, `response`, and `messages` (the server's `_server_messages`,
-already parsed).
+The promise rejects with a [`FrappeResourceError`](#frapperequesterror).
 
 ## frappeRequest
 
-The transport `call` is built on, for requests `call` doesn't shape — a `GET`, a
-non-method URL, a request you need to abort.
+The request function that `call` is built on. Use it for requests `call` does
+not cover: a `GET`, a URL that is not a method, or a request you need to abort.
 
 ```vue
 <script setup>
@@ -107,18 +112,26 @@ const doc = await frappeRequest({
 </script>
 ```
 
-Options: `url` (required), `method` (defaults to `POST`), `params` (query string
-on `GET`, JSON body otherwise), `headers`, `signal`, `credentials`,
-`responseType` (`'json'` or `'response'`), and the `onError` /
-`onServerMessages` callbacks. It sets the `Accept`, `Content-Type`,
-`X-Frappe-Site-Name` and CSRF headers, unwraps `message` from the response, and
-throws a `FrappeResourceError` on failure.
+| Option             | Type                       | Description                                                  |
+| ------------------ | -------------------------- | ------------------------------------------------------------ |
+| `url`              | `string`                   | Required. A dotted method name or a path.                    |
+| `method`           | `string`                   | HTTP method. Defaults to `POST`.                             |
+| `params`           | `object`                   | Query string on `GET`, JSON body otherwise.                  |
+| `headers`          | `HeadersInit`              | Extra request headers.                                       |
+| `signal`           | `AbortSignal`              | Cancels the request.                                         |
+| `credentials`      | `RequestCredentials`       | Passed to `fetch`.                                           |
+| `responseType`     | `'json' \| 'response'`     | `'response'` returns the raw `Response`. Defaults to `json`. |
+| `onError`          | `(error) => void`          | Called once with the `FrappeResourceError`.                  |
+| `onServerMessages` | `(messages) => void`       | Called with the server's `_server_messages`.                 |
+
+It sets the `Accept`, `Content-Type`, `X-Frappe-Site-Name` and CSRF headers,
+returns the `message` from the response, and throws a `FrappeResourceError` on
+failure.
 
 ### Configuration
 
-Both `call` and `frappeRequest` read these through `setConfig`. `getConfig`
-reads a value back — useful when one part of the app sets a value another part
-depends on.
+`call` and `frappeRequest` read these settings from `setConfig`. `getConfig`
+reads a value back, for code that depends on a value set elsewhere in the app.
 
 ```vue
 <script setup>
@@ -135,41 +148,41 @@ getConfig('requestBaseUrl') // 'https://my-site.frappe.cloud'
 </script>
 ```
 
-Setting `requestBaseUrl` makes relative requests cross-origin and defaults them
-to `credentials: 'include'`, so the server has to send
-`Access-Control-Allow-Credentials: true` and a non-wildcard origin. If you
+With `requestBaseUrl` set, relative requests go to another origin and default
+to `credentials: 'include'`. The server must then send
+`Access-Control-Allow-Credentials: true` and a specific (not `*`) origin. If you
 authenticate with a token header (`Authorization: token <key>:<secret>`)
 instead, pass `credentials: 'omit'` per request. Only do that in code that runs
 on a server: in a browser, anyone can read the key and secret.
 
 ## FrappeResourceError {#frapperequesterror}
 
-The error [`call`](#call), [`frappeRequest`](#frapperequest) and the v1
-[resources](../data-fetching/resource.md) raise. A plain `Error` carrying the
-transport fields of the failed request: `messages` (the server messages array),
-`exc_type`, `exc`, `status` and the raw `response`. The name says the layer that
-raises it: both errors are server responses, so request versus response named
-nothing. The [migration guide](../migration.md#errors-renamed) has the rename.
+The error that [`call`](#call), [`frappeRequest`](#frapperequest) and the v1
+[resources](../data-fetching/resource.md) raise. It is a plain `Error` with the
+fields of the failed request: `messages` (the server messages, parsed),
+`exc_type`, `exc`, `status` and the raw `response`. It was renamed from
+`FrappeRequestError`; the [migration guide](../migration.md#errors-renamed) has
+the details.
 
-It is a TypeScript `interface`, not a class: the resource layer throws
-`new Error(...)` and assigns those fields. So it types a caught error
-(`catch (error) { const e = error as FrappeResourceError }` — a catch clause
-variable cannot carry a type annotation) but
-`error instanceof FrappeResourceError` does not compile, and `error.name` is
-`"Error"`. Test a field instead, for example `e.exc_type === 'PermissionError'`.
+It is a TypeScript `interface`, not a class. The resource layer throws
+`new Error(...)` and sets those fields on it. So use it to type a caught error
+(`const e = error as FrappeResourceError`, since a catch variable cannot have a
+type annotation), but `error instanceof FrappeResourceError` does not compile,
+and `error.name` is `"Error"`. Check a field instead, for example
+`e.exc_type === 'PermissionError'`.
 
-It stays separate from `FrappeResponseError` below, which the v2 composables
-raise and which is a real class.
-[The error table](../data-fetching/use-call.md#which-error-class) says which API
-raises which.
+The v2 composables raise [`FrappeResponseError`](#frapperesponseerror) instead,
+which is a real class.
+[The error table](../data-fetching/use-call.md#which-error-class) shows which
+API raises which.
 
 ## FrappeResponseError
 
-The error [`useCall`](../data-fetching/use-call.md),
+The error that [`useCall`](../data-fetching/use-call.md),
 [`useDoc`](../data-fetching/use-doc.md) and
-[`useList`](../data-fetching/use-list.md) raise on a Frappe error response — set
-on `.error` and the reason `submit()`/`execute()` rejects with. An `Error` with
-`title`, `type`, `exception` and `indicator` from the server's response.
+[`useList`](../data-fetching/use-list.md) raise on a Frappe error response. It is
+set on `.error`, and `submit()` and `execute()` reject with it. It is an `Error`
+with `title`, `type`, `exception` and `indicator` from the server's response.
 
 ```vue
 <script setup>
@@ -190,10 +203,9 @@ const rename = useCall({
 
 ## FrappeUI plugin
 
-An optional Vue plugin with one boolean option. It installs the v1 resources
-Options API mixin — the `resources: { … }` component option, `this.$resources`,
-and the `$getResource` / `$getDoc` / `$getListResource` / `$refetchResource`
-helpers.
+An optional Vue plugin that installs the v1 resources Options API: the
+`resources: { … }` component option, `this.$resources`, and the `$getResource`,
+`$getDoc`, `$getListResource` and `$refetchResource` helpers.
 
 ```js
 // main.js
@@ -204,31 +216,36 @@ const app = createApp(App)
 app.use(FrappeUI, { resources: true })
 ```
 
-`resources` is a boolean: `true` installs the mixin, `false` or no options
-leaves it out. Earlier versions typed it as an object and never read what was
-in it. The object form is a type error now. It still installs the mixin at
+| Option      | Type      | Default | Description                               |
+| ----------- | --------- | ------- | ----------------------------------------- |
+| `resources` | `boolean` | `false` | Install the v1 resources Options API mixin. |
+
+Earlier versions typed `resources` as an object and never read its contents.
+The object form is now a type error, but it still installs the mixin at
 runtime, so an app that misses the change keeps working.
 `npx -p frappe-ui data-v1 ./src` rewrites it.
 
-You do not need it otherwise. Components, the imperative `dialog` and `toast`
-APIs, and every Composition API data helper work without installing anything —
-wrap your app in [`FrappeUIProvider`](../getting-started) instead. Passing an
-option the plugin doesn't accept logs a warning in development.
+You don't need the plugin for anything else. Components, the `dialog` and
+`toast` functions, and every Composition API data helper work without it. Wrap
+your app in [`FrappeUIProvider`](../getting-started) instead. Passing an option
+the plugin doesn't accept logs a warning in development.
 
 ## useFileUpload / FileUploadHandler
 
-Two lower-level primitives for posting a file to Frappe's upload endpoint
-without the [`FileUploader`](../components/fileuploader) component — reach
-for them for a custom trigger, multi-file upload, or a fully headless flow.
-`FileUploader` is the ready-made UI built on top of `FileUploadHandler`.
+Upload a file to Frappe's upload endpoint without the
+[`FileUploader`](../components/fileuploader) component. Use them for a custom
+trigger, several files at once, or an upload with no UI. `FileUploader` is
+built on `FileUploadHandler`.
 
-Uploads default to **private** — an upload with no stated `private` resolves to
-`is_private=1` on the server. Pass `private: false` only for intentionally
-public files.
+Uploads are **private** by default: an upload with no `private` option is saved
+with `is_private=1`. Pass `private: false` only for files meant to be public.
+
+For a single upload with no reactive state, call `upload(file, options)`. It
+takes the same options and resolves to the uploaded file's record.
 
 ### useFileUpload
 
-A composable with reactive upload state.
+A composable that uploads a file and tracks its progress in reactive state.
 
 ```vue
 <script setup>
@@ -244,34 +261,34 @@ async function onFile(file) {
 </script>
 ```
 
-`upload(file, options)` resets state, uploads the file, and resolves to the
-uploaded file's record (or rejects with an [`UploadError`](#uploaderror)).
-`state` — and the `isUploading` / `progress` / `error` / `result` computed refs
-read from it — update as the request runs. `error` is an `UploadError` or
-`null`. `reset()` clears `state` back to its initial values without uploading
-anything.
+| Member                                     | Description                                                                                               |
+| ------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
+| `upload(file, options)`                    | Resets state, uploads the file, and resolves to its record. Rejects with an [`UploadError`](#uploaderror). |
+| `state`                                    | Reactive upload state, updated while the request runs.                                                    |
+| `isUploading`, `progress`, `error`, `result` | Computed refs read from `state`. `error` is an `UploadError` or `null`.                                 |
+| `reset()`                                  | Clears `state` without uploading anything.                                                                |
 
 `options` (`UploadOptions`):
 
-| Option                       | Type                                       | Notes                                                |
-| ----------------------------- | ------------------------------------------- | ------------------------------------------------------ |
-| `private`                     | `boolean`                                    | Defaults to `true`. Pass `false` for public files.     |
-| `folder`                      | `string`                                     | Defaults to `Home`.                                    |
-| `doctype` / `docname` / `fieldname` | `string`                               | Attaches the upload to a document field.               |
-| `file_url`                    | `string`                                     | Replaces the file at an existing URL.                  |
-| `method`                      | `string`                                     | A whitelisted method to call instead of the default upload handler. |
-| `type`                        | `string`                                     | Passed through to the upload endpoint as-is.           |
-| `upload_endpoint`             | `string`                                     | Defaults to `/api/method/upload_file`.                 |
-| `optimize`                    | `boolean`                                    | Resize the image server-side.                          |
-| `max_width` / `max_height`    | `number`                                     | Applied when `optimize` is set.                        |
-| `params`                      | `object`                                     | Extra form fields, appended as-is.                      |
-| `signal`                      | `AbortSignal`                                 | Cancels the upload.                                     |
-| `onProgress`                  | `(p: { loaded, total, percent }) => void`     | Called on every progress tick.                          |
+| Option                              | Type                                    | Description                                                    |
+| ----------------------------------- | --------------------------------------- | -------------------------------------------------------------- |
+| `private`                           | `boolean`                               | Defaults to `true`. Pass `false` for public files.             |
+| `folder`                            | `string`                                | Defaults to `Home`.                                            |
+| `doctype` / `docname` / `fieldname` | `string`                                | Attaches the upload to a document field.                       |
+| `file_url`                          | `string`                                | Replaces the file at an existing URL.                          |
+| `method`                            | `string`                                | A whitelisted method to call instead of the default handler.   |
+| `type`                              | `string`                                | Sent to the upload endpoint unchanged.                         |
+| `upload_endpoint`                   | `string`                                | Defaults to `/api/method/upload_file`.                         |
+| `optimize`                          | `boolean`                               | Resize the image on the server.                                |
+| `max_width` / `max_height`          | `number`                                | Used when `optimize` is set.                                   |
+| `params`                            | `object`                                | Extra form fields, sent unchanged.                             |
+| `signal`                            | `AbortSignal`                           | Cancels the upload.                                            |
+| `onProgress`                        | `(p: { loaded, total, percent }) => void` | Called on every progress update.                             |
 
 ### FileUploadHandler
 
-An event-emitter class, for callers that want `.on(…)` instead of reactive
-state — this is what `FileUploader` itself uses internally.
+A class that uploads a file and reports progress through events. Use it when you
+want `.on(…)` listeners instead of reactive state. `FileUploader` uses it.
 
 ```ts
 import { FileUploadHandler } from 'frappe-ui'
@@ -285,28 +302,32 @@ handler.on('finish', () => {})
 const result = await handler.upload(file, { doctype: 'ToDo' })
 ```
 
-`upload(file, options)` takes the same `UploadOptions` as `useFileUpload` and
-resolves to the uploaded file's record, rejecting with an
-[`UploadError`](#uploaderror) on failure. The events fire alongside the promise,
-for callers that want to hook progress without awaiting: `start` (request
-began), `progress` (`{ uploaded, total }`), `error` (the server's error text, if
-any), `finish` (upload succeeded).
+`upload(file, options)` takes the same `UploadOptions` as `useFileUpload`,
+resolves to the uploaded file's record, and rejects with an
+[`UploadError`](#uploaderror). The events fire while the promise runs:
+
+| Event      | Payload                | Fires when                  |
+| ---------- | ---------------------- | --------------------------- |
+| `start`    | none                   | The request starts.         |
+| `progress` | `{ uploaded, total }`  | Upload progress changes.    |
+| `error`    | The server's error text, if any | The upload fails. |
+| `finish`   | none                   | The upload succeeds.        |
 
 ## UploadError
 
-Every upload failure rejects with this class: `upload`, `useFileUpload` and
+The error every upload failure rejects with. `upload`, `useFileUpload` and
 `FileUploadHandler` all raise it, and `useFileUpload`'s `state.error` holds it.
 
-| Field      | Type                                              | Notes                                                        |
+| Field      | Type                                              | Description                                                  |
 | ---------- | ------------------------------------------------- | ------------------------------------------------------------ |
-| `kind`     | `'file-size' \| 'network' \| 'server' \| 'abort'` | What failed. Branch on this instead of matching the message. |
+| `kind`     | `'file-size' \| 'network' \| 'server' \| 'abort'` | What failed. Check this instead of matching the message.     |
 | `status`   | `number \| undefined`                             | The HTTP status, for `kind: 'server'`.                       |
 | `messages` | `string[]`                                        | The server messages, parsed. Empty for the other kinds.      |
 | `response` | `unknown`                                         | The parsed response body, for `kind: 'server'`.              |
 
 ```vue
 <script setup>
-import { upload, UploadError } from 'frappe-ui'
+import { toast, upload, UploadError } from 'frappe-ui'
 
 async function send(file) {
   try {

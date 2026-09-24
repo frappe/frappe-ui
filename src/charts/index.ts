@@ -12,8 +12,8 @@ export { default as NumberCard } from './NumberCard.vue'
 export { default as SankeyChart } from './SankeyChart.vue'
 export { default as ScatterChart } from './ScatterChart.vue'
 
-// The chrome, so a plot an app draws itself reads as one of the family: the
-// card surface, the title block and states, the legend and the tooltip.
+// The parts around a plot: card, title and states, legend and tooltip. An app
+// that draws its own plot uses these so it matches the other charts.
 export { default as ChartCard } from './components/ChartCard.vue'
 export { default as ChartContainer } from './components/ChartContainer.vue'
 export { default as ChartLegend } from './components/ChartLegend.vue'
