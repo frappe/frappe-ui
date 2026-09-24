@@ -3951,7 +3951,7 @@ are removed. TypeScript reports each call, and at runtime each one throws a
 | Before                                        | After                                          |
 | --------------------------------------------- | ---------------------------------------------- |
 | `toast({ title, text, type })`                | `toast.success(title, { description: text })`  |
-| `toast({ position })` per toast               | `position` on `<ToastProvider>`                |
+| `toast({ position })` per toast               | removed; toasts always appear bottom-right     |
 | `toast.create({ message })`                   | `toast.message(message)`                       |
 | `toast.remove(id)`                            | `toast.dismiss(id)`                            |
 | `toast.removeAll()`                           | `toast.dismiss()`                              |
@@ -3970,13 +3970,15 @@ toast({ title: 'Saved', text: 'Your changes are live.', type: 'success' })
 toast.success('Saved', { description: 'Your changes are live.' })
 ```
 
-`position` was already ignored per toast. Set it once on `<ToastProvider>`.
+`position` was already ignored per toast, and nothing replaces it. Toasts
+always appear at the bottom right, the same in every app. `ToastProvider` takes
+no props.
 
 ```js
 // Before
 toast({ title: 'Copied', position: 'bottom-right' })
 
-// After — position is global
+// After: toasts always appear at the bottom right
 toast('Copied')
 ```
 
