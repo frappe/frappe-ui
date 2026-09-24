@@ -395,3 +395,11 @@ Types: `CodeEditorOptions`, `CodeEditorExposed`, `CodeKitOptions`,
 
 Moving from the v0 `CodeEditor` in `frappe-ui/experimental`? See
 [Migration: Code editor](/docs/migration#code-editor).
+
+<style scoped>
+/* One width for every table's first column, so the columns line up down the page. */
+th:first-child,
+td:first-child {
+  width: 11rem;
+}
+</style>
