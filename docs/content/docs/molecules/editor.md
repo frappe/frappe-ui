@@ -345,3 +345,11 @@ Ready-made `MenuItem[]` lists.
 `TagSuggestionItem`, `SuggestionExtensionOptions`, `SuggestionRange`,
 `StarterKitOptions`, `CommandItem`, `SlashCommandsOptions`,
 `MarkdownExtensionOptions`, and the kit option types above.
+
+<style scoped>
+/* One width for every table's first column, so the columns line up down the page. */
+th:first-child,
+td:first-child {
+  width: 11rem;
+}
+</style>
