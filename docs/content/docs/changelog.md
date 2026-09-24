@@ -556,6 +556,23 @@ was true for `useDoc` methods with `cacheKey`.
 
 No API change.
 
+#### Data fetching (v2) — each user has their own cache (fix)
+
+`useCall` and `useList` save a `cacheKey` response in IndexedDB, and `useDoc`
+saves every document there. The keys did not include the user, so a second
+user on the same browser could see the first user's saved data.
+
+- The keys now include the signed-in user, read from the `user_id` cookie
+  that Frappe sets at login. A user reads only their own saved data.
+- Guests and requests with no session share one cache that is not tied to a
+  user. A signed-in user never reads from it.
+- Documents saved by older versions are ignored, like lists and calls. The
+  first load after the update fetches from the server.
+
+See [One cache per user](/docs/data-fetching/use-call#cache-namespace).
+
+No API change.
+
 #### Data fetching (v2) — stale responses no longer write the shared stores (fix)
 
 Two writes to one document at the same time could leave `docStore` and

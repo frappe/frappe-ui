@@ -185,3 +185,20 @@ const todo = useCall({
   cacheKey: ['todo', 'todo-1'],
 })
 ```
+
+### One cache per user {#cache-namespace}
+
+Each signed-in user has their own cache. You do not have to set anything up.
+Every `cacheKey` of `useCall` and `useList`, and every document that
+[`useDoc`](./use-doc.md#shared-cache) saves, is stored under the user who is
+signed in. frappe-ui reads the user from the `user_id` cookie that Frappe sets
+at login. If another user signs in on the same browser, they do not see the
+first user's saved values.
+
+Guests, and requests with no session, share one cache that is not tied to a
+user. A signed-in user never reads from it, so nothing a user saved reaches a
+guest.
+
+Other users' values stay in IndexedDB until the browser clears them. The v1
+resources (`createResource`, `createDocumentResource`) do not keep a cache per
+user.

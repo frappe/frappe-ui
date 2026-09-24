@@ -135,4 +135,5 @@ created with [`useNewDoc`](./use-new-doc.md) is in the store as soon as its
 `submit()` resolves.
 
 Documents are also saved in IndexedDB. On the next page load, `useDoc` shows
-the saved copy while it fetches the current one.
+the saved copy while it fetches the current one. Each user has their own saved
+copies: see [One cache per user](./use-call.md#cache-namespace).

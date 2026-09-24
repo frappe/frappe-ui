@@ -4,9 +4,15 @@
 
 import { ref } from 'vue'
 import { http, HttpResponse } from 'msw'
-import { baseUrl, url, waitUntilValueChanges } from '../../mocks/utils'
+import {
+  baseUrl,
+  signInAs,
+  url,
+  waitUntilValueChanges,
+} from '../../mocks/utils'
 import { server } from '../../mocks/node'
 import { useList } from '../index'
+import { idbStore } from '../idbStore'
 
 describe('useList', () => {
   it('it returns expected object', async () => {
@@ -320,6 +326,68 @@ describe('useList', () => {
     // A second list with the same key starts from the cache, both pages.
     const reopened = useList<Activity>(options)
     await vi.waitFor(() => expect(reopened.data).toStrictEqual(expected))
+  })
+})
+
+describe('useList per user', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  const cachedList = (cacheKey: string) =>
+    useList<{ name: string; email: string }>({
+      baseUrl,
+      doctype: 'User',
+      fields: ['name', 'email'],
+      cacheKey,
+      limit: 2,
+      immediate: false,
+    })
+
+  it('rows one user cached are not read by another user or a guest', async () => {
+    signInAs('alice@example.com')
+    const alices = useList({
+      baseUrl,
+      doctype: 'User',
+      fields: ['name', 'email'],
+      cacheKey: 'per-user-users',
+      limit: 2,
+    })
+    await waitUntilValueChanges(() => alices.data)
+    expect(alices.data).toHaveLength(2)
+
+    signInAs('bob@example.com')
+    const bobs = cachedList('per-user-users')
+    signInAs('Guest')
+    const guests = cachedList('per-user-users')
+    signInAs(null)
+    const noSession = cachedList('per-user-users')
+    signInAs('alice@example.com')
+    const alicesAgain = cachedList('per-user-users')
+
+    await waitUntilValueChanges(() => alicesAgain.data)
+    expect(alicesAgain.data).toStrictEqual(alices.data)
+    expect(bobs.data).toBe(null)
+    expect(guests.data).toBe(null)
+    expect(noSession.data).toBe(null)
+  })
+
+  it.each([
+    ['no session', null],
+    ['a guest', 'Guest'],
+  ])('with %s, rows keep the un-namespaced key', async (_, user) => {
+    signInAs(user)
+    const users = useList({
+      baseUrl,
+      doctype: 'User',
+      fields: ['name', 'email'],
+      cacheKey: ['plain-users', String(user)],
+      limit: 2,
+    })
+    await waitUntilValueChanges(() => users.data)
+    expect(
+      await idbStore.get(`["useList:v2","plain-users","${user}"]`),
+    ).toStrictEqual(users.data)
   })
 })
 

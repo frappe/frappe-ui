@@ -99,7 +99,7 @@ time.
 | `immediate`    | `boolean`                                  | `true`                        | Fetches the first page when `useList` runs.                                                                  |
 | `refetch`      | `boolean`                                  | `true`                        | Fetches again when `filters` or `orderBy` change, and after each successful write.                          |
 | `initialData`  | `T[]`                                      |                               | The value of `data` before the first response.                                                               |
-| `cacheKey`     | `CacheKey`                                 |                               | A string or an array. Saves the rows in IndexedDB and shows them at once on the next `useList` with this key. |
+| `cacheKey`     | `CacheKey`                                 |                               | A string or an array. Saves the rows in IndexedDB and shows them at once on the next `useList` with this key. Each user has their own saved rows: see [One cache per user](./use-call.md#cache-namespace). |
 | `staleOnError` | `boolean`                                  | `false`                       | With `cacheKey`, a failed fetch keeps showing the cached rows. A Frappe error response still clears them.    |
 | `transform`    | `(rows: T[]) => T[]`                       |                               | Changes the fetched rows before they go into `data`.                                                         |
 | `onSuccess`    | `(rows: T[]) => void`                      |                               | Called with all loaded rows after each successful fetch.                                                     |
