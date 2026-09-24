@@ -21,8 +21,8 @@ everywhere. `show-plus` still draws every plus, and `:show-plus="false"` none.
 ### `LoadingIndicator` is now `Spinner` under its older name
 
 `LoadingIndicator` was a `Spinner` scaled by a percentage. It is now the same
-component as `Spinner`, so it takes `Spinner`'s props and `scale` no longer
-changes its size. Use `size` or a class instead; see the
+component as `Spinner`, so it takes `Spinner`'s props. Its `scale` prop is
+removed: use `size` or a class instead; see the
 [migration guide](/docs/migration#loadingindicator-is-spinner).
 
 ### `npm create frappe-ui` sets up a new app
