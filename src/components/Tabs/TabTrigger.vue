@@ -35,7 +35,7 @@ const list = inject(tabListKey, null)
 
 const variant = computed(() => list?.variant.value ?? 'underline')
 const size = computed(() => list?.size.value ?? 'sm')
-const side = computed(() => list?.side.value ?? 'left')
+const edge = computed(() => list?.edge.value ?? 'start')
 const orientation = computed(() => root?.orientation.value ?? 'horizontal')
 
 watchEffect(() => {
@@ -89,7 +89,7 @@ const isIconOnly = computed(() => Boolean(props.icon) && !slots.default)
 const browserTabBase = computed<BrowserTabBase>(() => {
   if (variant.value !== 'browser-tab') return 'none'
   if (orientation.value !== 'vertical') return 'default'
-  return selected.value ? side.value : 'default'
+  return selected.value ? edge.value : 'default'
 })
 
 const elementIs = computed(() =>

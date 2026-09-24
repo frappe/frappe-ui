@@ -47,7 +47,7 @@ const iconButtons = [
         :options="navButtons"
         variant="browser-tab"
         vertical
-        side="left"
+        edge="start"
       />
     </div>
 

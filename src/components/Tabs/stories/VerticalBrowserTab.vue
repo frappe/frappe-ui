@@ -2,8 +2,8 @@
 import { ref } from 'vue'
 import { Tabs, TabList, TabTrigger, TabPanel } from 'frappe-ui'
 
-const left = ref('inbox')
-const right = ref('inbox')
+const start = ref('inbox')
+const end = ref('inbox')
 
 const tabs = [
   { value: 'inbox', label: 'Inbox' },
@@ -15,9 +15,9 @@ const tabs = [
 <template>
   <div class="flex items-start gap-10 p-2">
     <div class="flex flex-col gap-3">
-      <div class="text-sm text-ink-gray-6">Attached left</div>
-      <Tabs v-model="left" vertical class="flex">
-        <TabList variant="browser-tab" side="left">
+      <div class="text-sm text-ink-gray-6">Attached at start</div>
+      <Tabs v-model="start" vertical class="flex">
+        <TabList variant="browser-tab" edge="start">
           <TabTrigger
             v-for="t in tabs"
             :key="t.value"
@@ -32,12 +32,12 @@ const tabs = [
     </div>
 
     <div class="flex flex-col gap-3">
-      <div class="text-sm text-ink-gray-6">Attached right</div>
-      <Tabs v-model="right" vertical class="flex">
+      <div class="text-sm text-ink-gray-6">Attached at end</div>
+      <Tabs v-model="end" vertical class="flex">
         <TabPanel v-for="t in tabs" :key="t.value" :value="t.value">
           <div class="w-32 p-4 text-base text-ink-gray-7">{{ t.label }} panel</div>
         </TabPanel>
-        <TabList variant="browser-tab" side="right">
+        <TabList variant="browser-tab" edge="end">
           <TabTrigger
             v-for="t in tabs"
             :key="t.value"

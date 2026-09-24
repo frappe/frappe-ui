@@ -1910,8 +1910,8 @@ and aligns its vocabulary with the Tabs family. See the
 | Before                                                | After                                                                                                      |
 | ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | `type="ghost"`                                        | `variant="ghost"`                                                                                          |
-| `direction="right"`                                   | `side="right"` — the same prop name on `TabList`                                                           |
-| `TabButtonsType` / `TabButtonsDirection` types        | `TabsVariant` / `TabsSide`, shared with the Tabs family                                                    |
+| `direction="right"`                                   | `edge="end"` — the same prop name on `TabList`                                                           |
+| `TabButtonsType` / `TabButtonsDirection` types        | `TabsVariant` / `TabsEdge`, shared with the Tabs family                                                    |
 | `:buttons="items"` (deprecated)                       | `:options="items"`                                                                                         |
 | `{ label: 'Day' }` (label as value)                   | `value` is required on every option                                                                        |
 | `{ active: true }` fallback                           | the `v-model` is the single source of truth                                                                |

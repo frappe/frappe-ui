@@ -57,8 +57,10 @@ A disabled trigger cannot be selected. Keyboard navigation skips it.
 
 ## Vertical browser tabs
 
-With `variant="browser-tab"` and a vertical root, `side` sets the edge the
-tabs attach to.
+With `variant="browser-tab"` and a vertical root, `edge` sets the edge of the
+list the tabs attach to. The line sits on that edge, and the selected tab opens
+onto it. `start` is the left edge in left-to-right text and the right edge in
+right-to-left text.
 
 <ComponentPreview name="Tabs-VerticalBrowserTab" />
 

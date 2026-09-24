@@ -41,7 +41,7 @@ const props = withDefaults(defineProps<TabButtonsProps>(), {
   variant: 'subtle',
   size: 'sm',
   vertical: false,
-  side: 'left',
+  edge: 'start',
   fluid: false,
 })
 
@@ -112,7 +112,7 @@ const rootClasses = computed(() => [
     variant: props.variant,
     size: props.size,
     orientation: props.vertical ? 'vertical' : 'horizontal',
-    side: props.side,
+    edge: props.edge,
   }),
 ])
 
@@ -245,7 +245,7 @@ watch(
 )
 
 const browserCardBase = computed<BrowserTabBase>(() =>
-  props.vertical ? props.side : 'default',
+  props.vertical ? props.edge : 'default',
 )
 
 // Layer that clips the pill indicator's shadow to the track's rounded box.
@@ -281,7 +281,7 @@ const indicatorStyle = computed(() => {
 function browserTabBase(checked: boolean): BrowserTabBase {
   if (props.variant !== 'browser-tab') return 'none'
   if (!props.vertical) return 'default'
-  return checked ? props.side : 'default'
+  return checked ? props.edge : 'default'
 }
 
 function hasLabel(label: TabButton['label']) {

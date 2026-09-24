@@ -1508,15 +1508,15 @@ describe('Tabs', () => {
     cy.wrap(tab).its('value').should('equal', 'sent')
   })
 
-  it('forwards side to the generated TabList in shorthand mode', () => {
-    // `variant` and `size` were forwarded and `side` was not, so a shorthand
-    // vertical browser-tab list could only ever attach left.
+  it('forwards edge to the generated TabList in shorthand mode', () => {
+    // `variant` and `size` were forwarded and `edge` was not, so a shorthand
+    // vertical browser-tab list could only ever attach at the start.
     cy.mount(Tabs, {
       props: {
         tabs: items,
         variant: 'browser-tab',
         vertical: true,
-        side: 'right',
+        edge: 'end',
       },
     })
 
@@ -1525,6 +1525,32 @@ describe('Tabs', () => {
         getComputedStyle($list[0]).borderRightWidth,
         'right rail',
       ).to.not.equal('0px')
+    })
+  })
+
+  it('puts the start edge on the right in right-to-left text', () => {
+    cy.mount(Tabs, {
+      props: {
+        tabs: items,
+        variant: 'browser-tab',
+        vertical: true,
+        edge: 'start',
+        dir: 'rtl',
+      },
+    })
+
+    cy.get('[data-slot="tab-list"]').should(($list) => {
+      const style = getComputedStyle($list[0])
+      expect(style.borderRightWidth, 'right rail').to.not.equal('0px')
+      expect(style.borderLeftWidth, 'no left rail').to.equal('0px')
+    })
+    // The selected card leaves its right edge open onto the rail.
+    cy.get('[data-slot="tab-indicator"]').should(($card) => {
+      const style = getComputedStyle($card[0])
+      expect(style.borderRightColor, 'open edge').to.equal('rgba(0, 0, 0, 0)')
+      expect(style.borderLeftColor, 'closed edge').to.not.equal(
+        'rgba(0, 0, 0, 0)',
+      )
     })
   })
 })

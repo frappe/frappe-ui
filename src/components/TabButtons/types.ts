@@ -2,7 +2,7 @@ import type { InputExposed } from '../../composables/inputTypes'
 import type { RouteDestination } from '../shared/route'
 import type {
   TabIcon,
-  TabsSide,
+  TabsEdge,
   TabsSize,
   TabsVariant,
   TabValue,
@@ -38,8 +38,11 @@ export interface TabButtonsProps {
 
   vertical?: boolean
 
-  /** Edge the active browser tab attaches to. Only used when `variant='browser-tab'` and `vertical`. */
-  side?: TabsSide
+  /**
+   * browser-tab + vertical only: the edge of the list the tabs attach to.
+   * `start` is the left edge in left-to-right text.
+   */
+  edge?: TabsEdge
 
   /** Buttons stretch to fill the container width. */
   fluid?: boolean

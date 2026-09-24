@@ -45,10 +45,10 @@
     default: '"sm"'
   },
   {
-    name: 'side',
+    name: 'edge',
     description: 'Shorthand mode only; forwarded to the generated TabList.',
     required: false,
-    type: 'TabsSide'
+    type: 'TabsEdge'
   }
 ]
 
@@ -104,11 +104,11 @@
     default: '"sm"'
   },
   {
-    name: 'side',
-    description: 'browser-tab + vertical only: which edge the tabs attach to.',
+    name: 'edge',
+    description: 'browser-tab + vertical only: the edge of the list the tabs attach to.\n`start` is the left edge in left-to-right text.',
     required: false,
-    type: 'TabsSide',
-    default: '"left"'
+    type: 'TabsEdge',
+    default: '"start"'
   }
 ]
 
