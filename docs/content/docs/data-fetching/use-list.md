@@ -98,10 +98,10 @@ time.
 | `debug`        | `boolean`                                  | `false`                       | Asks the server for debug output and logs it to the console.                                                 |
 | `immediate`    | `boolean`                                  | `true`                        | Fetches the first page when `useList` runs.                                                                  |
 | `refetch`      | `boolean`                                  | `true`                        | Fetches again when `filters` or `orderBy` change, and after each successful write.                          |
-| `initialData`  | `T[]`                                      |                               | The value of `data` before the first response.                                                               |
-| `cacheKey`     | `CacheKey`                                 |                               | A string or an array. Saves the rows in IndexedDB and shows them at once on the next `useList` with this key. |
+| `initialData`  | `T[]`                                      |                               | The rows to show before the first response, in the shape the server sends. They go through `transform`, the same as a response. |
+| `cacheKey`     | `CacheKey`                                 |                               | A string or an array. Saves the rows in IndexedDB and shows them at once on the next `useList` with this key. Each user has their own saved rows: see [One cache per user](./use-call.md#cache-namespace). |
 | `staleOnError` | `boolean`                                  | `false`                       | With `cacheKey`, a failed fetch keeps showing the cached rows. A Frappe error response still clears them.    |
-| `transform`    | `(rows: T[]) => T[]`                       |                               | Changes the fetched rows before they go into `data`.                                                         |
+| `transform`    | `(rows: T[]) => T[]`                       |                               | Changes the rows before they go into `data`. It gets every row loaded so far, from all pages, and runs again after each new page or row change. It gets a copy, so it may change the rows in place. |
 | `onSuccess`    | `(rows: T[]) => void`                      |                               | Called with all loaded rows after each successful fetch.                                                     |
 | `onError`      | `(error: Error) => void`                   |                               | Called with the error after each failed fetch.                                                               |
 | `url`          | `string`                                   | `/api/v2/document/<doctype>`  | Replaces the URL of the fetch. The list params are still added.                                              |
@@ -126,7 +126,7 @@ time.
 | `abort()`                       | `() => void`              | Aborts the fetch in flight.                                                                         |
 | `next()`                        | `() => void`              | Moves `start` forward one page and fetches it.                                                      |
 | `previous()`                    | `() => void`              | Moves `start` back one page and fetches it.                                                         |
-| `updateRow(doc)`                | `(doc) => void`           | Changes the row with the same `name` in `data`, without a request. Only fields the row has change.  |
+| `updateRow(doc)`                | `(doc) => void`           | Changes the row with the same `name` in `data`, without a request. Only fields the row has change. Pass values as the server sends them: `transform` runs again on the row. |
 | `removeRow(name)`               | `(name: string) => void`  | Removes the row with this `name` from `data`, without a request.                                    |
 | `insert`                        | write member              | `insert.submit(values)` creates a document. `insert.isLoading()` takes no argument.                 |
 | `setValue`                      | write member              | `setValue.submit({ name, ...values })` saves fields of one document. `setValue.isLoading(name)` checks one row. |

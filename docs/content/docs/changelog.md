@@ -538,6 +538,60 @@ deleting it changes nothing for apps.
 
 ### Data fetching, HTTP and the `FrappeUI` plugin
 
+#### Data fetching (v2) — `transform` ran twice on cached data (fix)
+
+With `cacheKey` and `transform` both set, `useList` and `useCall` saved the
+rows after `transform` had changed them. When they showed the saved rows
+again, they ran `transform` on them a second time. A `transform` that gives a
+different result the second time broke: one that parses a JSON field threw
+`"[object Object]" is not valid JSON` the next time the list opened. The same
+was true for `useDoc` methods with `cacheKey`.
+
+- The cache now holds the response as the server sent it. `transform` runs on
+  it once, each time it is read, the same as on a fresh response. Values that
+  do not survive JSON, such as `Date` objects, now come back correctly.
+- The cache key format changed, so entries saved by older versions are
+  ignored. The first load after the update fetches from the server, the same
+  as with no cache. The old entries stay in IndexedDB until the app clears it.
+- `useList` runs `transform` on every loaded row at once, not one page at a
+  time. It runs again after each new page and after each `updateRow` or
+  `removeRow`. A `transform` that sorts, groups or removes duplicates now
+  gives the same result on a fresh list and on a cached one. `transform` gets
+  a copy of the rows, so it may change them in place.
+- `updateRow` and `removeRow` change the rows as the server sent them, and
+  save the changed rows to the cache at once. `updateRow` takes values in the
+  shape the server sends. With a `transform` that parses a JSON field, an
+  updated row now shows the parsed value, not the raw string.
+- `initialData` is now in the shape the server sends, and goes through
+  `transform` the same as a response. `updateRow` and `removeRow` change its
+  rows before the first response arrives. Before, they did nothing on these
+  rows. `useList` works on its own copy, so the array you pass never changes.
+  `initialData` rows are not saved to the cache.
+
+No API change: the types stay the same, and the behaviour changes are the
+ones listed above.
+
+#### Data fetching (v2) — each user has their own cache (fix)
+
+`useCall` and `useList` save a `cacheKey` response in IndexedDB, and `useDoc`
+saves every document there. The keys did not include the user, so a second
+user on the same browser could see the first user's saved data.
+
+- The keys now include the signed-in user, read from the `user_id` cookie
+  that Frappe sets at login. A user reads only their own saved data. The
+  cookie is read each time data is saved, so a user who signs in without a
+  page reload has their data saved under their own key. Still, reload the
+  page when the user changes: data loaded for the previous user stays in
+  memory and can be saved under the new user's key.
+- Guests and requests with no session share one cache that is not tied to a
+  user. A signed-in user never reads from it.
+- Documents saved by older versions are ignored, like lists and calls. The
+  first load after the update fetches from the server.
+
+See [One cache per user](/docs/data-fetching/use-call#cache-namespace).
+
+No API change.
+
 #### Data fetching (v2) — stale responses no longer write the shared stores (fix)
 
 Two writes to one document at the same time could leave `docStore` and

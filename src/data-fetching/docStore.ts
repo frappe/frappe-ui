@@ -1,5 +1,6 @@
 import { Ref, ref, MaybeRefOrGetter, toValue } from 'vue'
 import { idbStore } from './idbStore'
+import { CACHE_VERSION, withCacheNamespace } from './utils'
 import { docKey, writeGate, type DocKey, type WriteStamp } from './writeGate'
 
 type Doc = {
@@ -24,7 +25,7 @@ class DocStore {
   // later slot starts from, which is how a deleted doc comes back to life.
   private revisionCounter = 0
   private cacheTimeout: number = 5 * 60 * 1000 // 5 minutes
-  private storePrefix = 'doc:'
+  private storePrefix = `doc:${CACHE_VERSION}:`
 
   constructor() {
     this.docs = new Map<DocKey, Ref<Doc | null>>()
@@ -81,7 +82,7 @@ class DocStore {
     // round trip, and widen the window a cached read can land in.
     this.publish(key, doc)
     try {
-      await idbStore.set(this.storePrefix + key, doc)
+      await idbStore.set(this.storageKey(key), doc)
     } catch (error) {
       console.error('Failed to set doc in IDB:', error)
       throw error
@@ -163,11 +164,11 @@ class DocStore {
       if (!options.staleOnError) {
         // Keep the IDB copy only when callers explicitly opt into stale
         // read-only fallback, such as offline-capable routes.
-        await idbStore.delete(this.storePrefix + key)
+        await idbStore.delete(this.storageKey(key))
       }
     }
 
-    const idbDoc = (await idbStore.get(this.storePrefix + key)) as Doc | null
+    const idbDoc = (await idbStore.get(this.storageKey(key))) as Doc | null
     if (!idbDoc) return
     // A read only ever writes into a slot that still exists. The read was issued
     // before any delete that has since happened, so it still answers with the
@@ -189,7 +190,7 @@ class DocStore {
       // doc next to one that a later-dispatched request already wrote.
       if (!writeGate.admit(key, stamp)) continue
       this.publish(key, doc)
-      docMap[this.storePrefix + key] = doc
+      docMap[this.storageKey(key)] = doc
     }
     await idbStore.setMany(docMap)
   }
@@ -218,6 +219,11 @@ class DocStore {
     return this.invalidateDoc(doctype, name)
   }
 
+  /** The IndexedDB key for a doc, under the signed-in user. */
+  private storageKey(key: DocKey): string {
+    return withCacheNamespace(this.storePrefix + key)
+  }
+
   private getKey(doctype: string, name: string): DocKey {
     return docKey(doctype, name)
   }
@@ -239,15 +245,16 @@ class DocStore {
     // The gate is not sealed here: cleanup serves invalidation too, and an
     // invalidated doc still exists on the server — an in-flight write must
     // stay admitted. Sealing for a real delete lives in `removeDoc`.
-    await idbStore.delete(this.storePrefix + key)
+    await idbStore.delete(this.storageKey(key))
   }
 
   async clearAll() {
     try {
+      // Only the signed-in user's copies, the same keys every other read
+      // and write here uses.
+      const prefix = withCacheNamespace(this.storePrefix)
       const allKeys = await idbStore.keys()
-      const docKeys = allKeys.filter((key: string) =>
-        key.startsWith(this.storePrefix),
-      )
+      const docKeys = allKeys.filter((key: string) => key.startsWith(prefix))
       await Promise.all(docKeys.map((key: string) => idbStore.delete(key)))
       this.docs.clear()
       this.lastFetched.clear()

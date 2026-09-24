@@ -2,9 +2,17 @@
  * @vitest-environment node
  */
 
-import { ref } from 'vue'
-import { baseUrl, waitUntilValueChanges } from '../../mocks/utils'
+import { reactive, ref } from 'vue'
+import { http, HttpResponse } from 'msw'
+import {
+  baseUrl,
+  signInAs,
+  url,
+  waitUntilValueChanges,
+} from '../../mocks/utils'
+import { server } from '../../mocks/node'
 import { useList } from '../index'
+import { idbStore } from '../idbStore'
 
 describe('useList', () => {
   it('it returns expected object', async () => {
@@ -60,6 +68,110 @@ describe('useList', () => {
       { name: 'placeholder', email: 'placeholder@example.com' },
     ])
     expect(users.loading).toBe(false)
+  })
+
+  it('changes initialData rows before the first response arrives', () => {
+    const users = useList({
+      baseUrl,
+      doctype: 'User',
+      initialData: [
+        { name: 'User1', email: 'user1@example.com' },
+        { name: 'User2', email: 'user2@example.com' },
+      ],
+      immediate: false,
+    })
+
+    users.updateRow({ name: 'User1', email: 'changed@example.com' })
+    users.removeRow('User2')
+
+    expect(users.data).toStrictEqual([
+      { name: 'User1', email: 'changed@example.com' },
+    ])
+  })
+
+  it('transforms initialData like a response', () => {
+    const users = useList({
+      baseUrl,
+      doctype: 'User',
+      initialData: [{ name: 'User1', email: 'user1@example.com' }],
+      transform: (rows) =>
+        rows.map((row) => ({ ...row, email: row.email.toUpperCase() })),
+      immediate: false,
+    })
+
+    expect(users.data).toStrictEqual([
+      { name: 'User1', email: 'USER1@EXAMPLE.COM' },
+    ])
+  })
+
+  it('transforms reactive initialData', () => {
+    const users = useList({
+      baseUrl,
+      doctype: 'User',
+      initialData: reactive([
+        reactive({ name: 'User1', email: 'user1@example.com' }),
+      ]),
+      transform: (rows) =>
+        rows.map((row) => ({ ...row, email: row.email.toUpperCase() })),
+      immediate: false,
+    })
+
+    expect(users.data).toStrictEqual([
+      { name: 'User1', email: 'USER1@EXAMPLE.COM' },
+    ])
+  })
+
+  it('transforms initialData with reactive values inside a row', () => {
+    const row = reactive({
+      name: 'User1',
+      email: 'user1@example.com',
+      roles: ['Admin'],
+    })
+    const users = useList({
+      baseUrl,
+      doctype: 'User',
+      // A spread reads `roles` through the proxy, so it stays reactive.
+      initialData: [{ ...row }],
+      transform: (rows) =>
+        rows.map((row) => ({ ...row, email: row.email.toUpperCase() })),
+      immediate: false,
+    })
+
+    expect(users.data).toStrictEqual([
+      { name: 'User1', email: 'USER1@EXAMPLE.COM', roles: ['Admin'] },
+    ])
+  })
+
+  it('does not save changed initialData rows over the cache', async () => {
+    interface User {
+      name: string
+      email: string
+    }
+    const users = (initialData?: User[]) =>
+      useList<User>({
+        baseUrl,
+        doctype: 'User',
+        fields: ['name', 'email'],
+        cacheKey: 'initial-users',
+        limit: 2,
+        immediate: false,
+        initialData,
+      })
+
+    await users().fetch()
+
+    const withInitialData = users([
+      { name: 'User1', email: 'placeholder@example.com' },
+    ])
+    withInitialData.updateRow({ name: 'User1', email: 'changed@example.com' })
+
+    const reopened = users()
+    await vi.waitFor(() =>
+      expect(reopened.data).toStrictEqual([
+        { name: 'User1', email: 'user1@example.com' },
+        { name: 'User2', email: 'user2@example.com' },
+      ]),
+    )
   })
 
   it('handles pagination correctly', async () => {
@@ -270,6 +382,254 @@ describe('useList', () => {
       { name: 'User1', email: 'user1@example.com' },
       { name: 'User2', email: 'user2@example.com' },
     ])
+  })
+
+  it('caches rows as the server sent them and transforms them once on read', async () => {
+    // Each row carries a JSON string that `transform` parses. Parsing it a
+    // second time throws, so the cache must never hand `transform` a row it
+    // has already transformed.
+    server.use(
+      http.get(url('/api/v2/document/Activity'), ({ request }) => {
+        let start = Number(new URL(request.url).searchParams.get('start'))
+        return HttpResponse.json({
+          data: [start + 1, start + 2].map((n) => ({
+            name: `A${n}`,
+            data: JSON.stringify({ n }),
+          })),
+        })
+      }),
+    )
+
+    interface Activity {
+      name: string
+      data: string | { n: number }
+    }
+    const options = {
+      baseUrl,
+      doctype: 'Activity',
+      cacheKey: 'parsed-activities',
+      limit: 2,
+      immediate: false,
+      transform: (rows: Activity[]) =>
+        rows.map((row) => ({ ...row, data: JSON.parse(row.data as string) })),
+    }
+    const expected = [1, 2, 3, 4].map((n) => ({ name: `A${n}`, data: { n } }))
+
+    const activities = useList<Activity>(options)
+    await activities.fetch()
+
+    // A reload shows the cached rows while it is in flight.
+    const reloading = activities.reload()
+    expect(activities.data).toStrictEqual(expected.slice(0, 2))
+    await reloading
+
+    activities.next()
+    await waitUntilValueChanges(() => activities.data)
+    expect(activities.data).toStrictEqual(expected)
+
+    // A second list with the same key starts from the cache, both pages.
+    const reopened = useList<Activity>(options)
+    await vi.waitFor(() => expect(reopened.data).toStrictEqual(expected))
+  })
+})
+
+describe('useList transform', () => {
+  interface Activity {
+    name: string
+    title: string
+    data: string | { n: number }
+  }
+
+  // Two rows per page. Each carries a JSON string for `transform` to parse.
+  beforeEach(() => {
+    server.use(
+      http.get(url('/api/v2/document/Activity'), ({ request }) => {
+        let start = Number(new URL(request.url).searchParams.get('start'))
+        return HttpResponse.json({
+          data: [start + 1, start + 2].map((n) => ({
+            name: `A${n}`,
+            title: `Activity ${n}`,
+            data: JSON.stringify({ n }),
+          })),
+        })
+      }),
+    )
+  })
+
+  const activities = (
+    cacheKey: string,
+    transform: (rows: Activity[]) => Activity[],
+  ) =>
+    useList<Activity>({
+      baseUrl,
+      doctype: 'Activity',
+      cacheKey,
+      limit: 2,
+      immediate: false,
+      transform,
+    })
+
+  const parseData = (rows: Activity[]) =>
+    rows.map((row) => ({ ...row, data: JSON.parse(row.data as string) }))
+
+  const names = (rows: Activity[] | null) => rows?.map((row) => row.name)
+
+  it('runs on the whole list, the same fresh and cached', async () => {
+    const reverse = (rows: Activity[]) => [...rows].reverse()
+
+    const list = activities('reversed-activities', reverse)
+    await list.fetch()
+    list.next()
+    await waitUntilValueChanges(() => list.data)
+    expect(names(list.data)).toStrictEqual(['A4', 'A3', 'A2', 'A1'])
+
+    const reopened = activities('reversed-activities', reverse)
+    await vi.waitFor(() =>
+      expect(names(reopened.data)).toStrictEqual(['A4', 'A3', 'A2', 'A1']),
+    )
+  })
+
+  it('keeps row changes when a later page writes the cache', async () => {
+    const list = activities('changed-activities', parseData)
+    await list.fetch()
+    list.removeRow('A1')
+    list.updateRow({ name: 'A2', title: 'Renamed' })
+
+    list.next()
+    await vi.waitFor(() =>
+      expect(names(list.data)).toStrictEqual(['A2', 'A3', 'A4']),
+    )
+
+    const reopened = activities('changed-activities', parseData)
+    await vi.waitFor(() =>
+      expect(reopened.data).toStrictEqual([
+        { name: 'A2', title: 'Renamed', data: { n: 2 } },
+        { name: 'A3', title: 'Activity 3', data: { n: 3 } },
+        { name: 'A4', title: 'Activity 4', data: { n: 4 } },
+      ]),
+    )
+  })
+
+  it('saves row changes to the cache without a later page', async () => {
+    const list = activities('saved-activities', parseData)
+    await list.fetch()
+    list.updateRow({ name: 'A1', title: 'Renamed' })
+    list.removeRow('A2')
+
+    const reopened = activities('saved-activities', parseData)
+    await vi.waitFor(() =>
+      expect(reopened.data).toStrictEqual([
+        { name: 'A1', title: 'Renamed', data: { n: 1 } },
+      ]),
+    )
+  })
+
+  it('runs again on a row that updateRow changed', async () => {
+    const list = activities('updated-activities', parseData)
+    await list.fetch()
+
+    // The update comes in the shape the server sends, a JSON string.
+    list.updateRow({ name: 'A1', data: JSON.stringify({ n: 10 }) })
+
+    expect(list.data?.[0]).toStrictEqual({
+      name: 'A1',
+      title: 'Activity 1',
+      data: { n: 10 },
+    })
+  })
+
+  it('does not run again for an update that changes nothing', async () => {
+    const transform = vi.fn(parseData)
+    const list = activities('unchanged-activities', transform)
+    await list.fetch()
+    transform.mockClear()
+
+    list.updateRow({ name: 'A1', title: 'Activity 1' })
+
+    expect(transform).not.toHaveBeenCalled()
+  })
+})
+
+describe('useList per user', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  const cachedList = (cacheKey: string) =>
+    useList<{ name: string; email: string }>({
+      baseUrl,
+      doctype: 'User',
+      fields: ['name', 'email'],
+      cacheKey,
+      limit: 2,
+      immediate: false,
+    })
+
+  it('rows one user cached are not read by another user or a guest', async () => {
+    signInAs('alice@example.com')
+    const alices = useList({
+      baseUrl,
+      doctype: 'User',
+      fields: ['name', 'email'],
+      cacheKey: 'per-user-users',
+      limit: 2,
+    })
+    await waitUntilValueChanges(() => alices.data)
+    expect(alices.data).toHaveLength(2)
+
+    signInAs('bob@example.com')
+    const bobs = cachedList('per-user-users')
+    signInAs('Guest')
+    const guests = cachedList('per-user-users')
+    signInAs(null)
+    const noSession = cachedList('per-user-users')
+    signInAs('alice@example.com')
+    const alicesAgain = cachedList('per-user-users')
+
+    await waitUntilValueChanges(() => alicesAgain.data)
+    expect(alicesAgain.data).toStrictEqual(alices.data)
+    expect(bobs.data).toBe(null)
+    expect(guests.data).toBe(null)
+    expect(noSession.data).toBe(null)
+  })
+
+  it('saves rows under the user who signs in after the list is created', async () => {
+    signInAs(null)
+    const users = useList({
+      baseUrl,
+      doctype: 'User',
+      fields: ['name', 'email'],
+      cacheKey: 'late-sign-in',
+      limit: 2,
+      immediate: false,
+    })
+
+    signInAs('alice@example.com')
+    users.fetch()
+    await waitUntilValueChanges(() => users.data)
+
+    expect(
+      await idbStore.get('ns:alice%40example.com:["useList:v2","late-sign-in"]'),
+    ).toStrictEqual(users.data)
+    expect(await idbStore.get('["useList:v2","late-sign-in"]')).toBe(null)
+  })
+
+  it.each([
+    ['no session', null],
+    ['a guest', 'Guest'],
+  ])('with %s, rows keep the un-namespaced key', async (_, user) => {
+    signInAs(user)
+    const users = useList({
+      baseUrl,
+      doctype: 'User',
+      fields: ['name', 'email'],
+      cacheKey: ['plain-users', String(user)],
+      limit: 2,
+    })
+    await waitUntilValueChanges(() => users.data)
+    expect(
+      await idbStore.get(`["useList:v2","plain-users","${user}"]`),
+    ).toStrictEqual(users.data)
   })
 })
 
