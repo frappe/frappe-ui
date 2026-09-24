@@ -11,7 +11,7 @@
 <a href="./license.md"><img alt="MIT license" src="https://img.shields.io/npm/l/frappe-ui.svg?style=flat" /></a>
 
 <a href="https://ui.frappe.io">
-<img width="1292" alt="Frappe UI documentation site" src="https://github.com/user-attachments/assets/56800b45-2859-4dc5-92b8-e40959ce4902" />
+<img width="1392" alt="The Button page on the Frappe UI documentation site" src="./assets/readme-hero.png" />
 </a>
 
 [Documentation](https://ui.frappe.io) ·
@@ -39,7 +39,6 @@
 - **Vite plugins** for the Frappe dev-server proxy, Lucide icon auto-imports,
   DocType type generation and production builds.
 - **TypeScript first.** Every core component ships typed props, slots and emits.
-- **Codemods** for every breaking change on the road to 1.0.
 
 ## Quick start
 
@@ -137,19 +136,9 @@ anti-patterns.
 npx skills add https://github.com/frappe/frappe-ui/tree/main/skills/frappe-ui
 ```
 
-## Upgrading to 1.0
-
-Every breaking change ships with a codemod. Run them from your frontend
-directory:
-
-```sh
-npx -p frappe-ui tokens-v2 .     # semantic color tokens
-npx -p frappe-ui overlays-v1 .   # Dialog, Popover, Dropdown, Tooltip
-npx -p frappe-ui data-v1 .       # data composables
-```
-
-The [migration guide](https://ui.frappe.io/docs/migration) lists all ten
-codemods and the changes behind them.
+The docs are also available as plain text for agents at
+[ui.frappe.io/llms.txt](https://ui.frappe.io/llms.txt). It lists every page
+with a short description and a link.
 
 ## Contributing
 
