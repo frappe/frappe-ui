@@ -29,7 +29,7 @@
   [Tailwind CSS](https://tailwindcss.com) and [Reka UI](https://reka-ui.com)
   primitives.
 - **Design tokens with dark mode built in.** Semantic `surface`, `ink` and
-  `outline` colour tokens, plus radius, typography and elevation scales. Tokens
+  `outline` color tokens, plus radius, typography and elevation scales. Tokens
   flip under `[data-theme="dark"]`, so a `dark:` variant is never needed.
 - **Data composables for Frappe.** `useCall`, `useList`, `useDoc`, `useDoctype`
   and `useNewDoc` handle fetching, caching, pagination and writes against a
@@ -117,8 +117,10 @@ dev-server proxy.
 | ------------------------ | ----------------------------------------------------------------------------------- |
 | `frappe-ui`              | Core components, data composables, `dialog` and `toast`, directives                 |
 | `frappe-ui/editor`       | TipTap-based rich text editor, kits and extensions                                  |
+| `frappe-ui/code-editor`  | CodeMirror-based code editor and `CodeKit`                                          |
 | `frappe-ui/list`         | Composable `List` family: rows, cells, headers, groups, sorting                     |
 | `frappe-ui/charts`       | ECharts-based area, bar, line, donut, funnel, heatmap, sankey, scatter              |
+| `frappe-ui/icons`        | Frappe's own icons, such as `StepsIcon` and `LightningIcon`                         |
 | `frappe-ui/experimental` | Components without a stability promise: Calendar, ListView, CommandPalette and more |
 | `frappe-ui/vite`         | Vite plugins                                                                        |
 | `frappe-ui/tailwind`     | Tailwind preset and content globs                                                   |
@@ -128,7 +130,7 @@ dev-server proxy.
 
 Frappe UI ships an [agent skill](./skills/frappe-ui/) that teaches Claude Code,
 Cursor, Codex and similar tools the library's conventions: semantic tokens, the
-`variant` and `theme` colour axes, the data composables, common recipes and
+`variant` and `theme` color axes, the data composables, common recipes and
 anti-patterns.
 
 ```sh
@@ -141,7 +143,7 @@ Every breaking change ships with a codemod. Run them from your frontend
 directory:
 
 ```sh
-npx -p frappe-ui tokens-v2 .     # semantic colour tokens
+npx -p frappe-ui tokens-v2 .     # semantic color tokens
 npx -p frappe-ui overlays-v1 .   # Dialog, Popover, Dropdown, Tooltip
 npx -p frappe-ui data-v1 .       # data composables
 ```
@@ -165,11 +167,14 @@ design rules, [`CONTEXT.md`](./CONTEXT.md) for the shared vocabulary and
 
 ## Used by
 
-- [Frappe Cloud](https://frappecloud.com)
-- [Gameplan](https://github.com/frappe/gameplan)
+- [Frappe Cloud](https://frappe.io/cloud)
+- [Frappe CRM](https://github.com/frappe/crm)
 - [Helpdesk](https://github.com/frappe/helpdesk)
-- [Frappe Insights](https://github.com/frappe/insights)
-- [Frappe Builder](https://github.com/frappe/builder)
+- [Frappe HR](https://github.com/frappe/hrms)
+- [Frappe Learning](https://github.com/frappe/lms)
+- [Insights](https://github.com/frappe/insights)
+- [Builder](https://github.com/frappe/builder)
+- [Gameplan](https://github.com/frappe/gameplan)
 
 ## License
 
