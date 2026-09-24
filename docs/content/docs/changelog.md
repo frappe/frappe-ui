@@ -562,6 +562,10 @@ was true for `useDoc` methods with `cacheKey`.
   save the changed rows to the cache at once. `updateRow` takes values in the
   shape the server sends. With a `transform` that parses a JSON field, an
   updated row now shows the parsed value, not the raw string.
+- `initialData` is now in the shape the server sends, and goes through
+  `transform` the same as a response. `updateRow` and `removeRow` change its
+  rows before the first response arrives. Before, they did nothing on these
+  rows. `initialData` rows are not saved to the cache.
 
 No API change: the types stay the same, and the behaviour changes are the
 ones listed above.

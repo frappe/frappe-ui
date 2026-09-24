@@ -67,14 +67,17 @@ export function useList<T extends { name: string }>(
 
   // Every row loaded so far, as the server sent it. This is the one copy that
   // changes: pages and row updates land here, and IndexedDB stores it.
-  let rawRows: T[] | null = null
-  // `data` is exposed via the `result` computed below, which reads from
-  // `allData` (set by `setRows`) — not from the underlying fetch's own `data`
-  // ref. Seed `allData` itself, or `initialData` would never surface until
-  // the first response lands.
+  // `initialData` has the same shape, so the rows start from it.
+  let rawRows: T[] | null = initialData || null
+  // Rows are saved only after the first response, so `initialData` rows,
+  // changed or not, never replace rows that a real response cached.
+  let hasResponse = false
+  // The rows `data` shows: `rawRows` after `transform`. `data` is exposed via
+  // the `result` computed below, which reads from `allData`, not from the
+  // underlying fetch's own `data` ref.
   const allData: Ref<T[] | null> = ref(null)
-  if (initialData) {
-    allData.value = initialData
+  if (rawRows) {
+    allData.value = transformRows(rawRows)
   }
   const hasNextPage = ref(true)
   const hasPreviousPage = computed(() => _start.value > 0)
@@ -90,12 +93,8 @@ export function useList<T extends { name: string }>(
   // as a fresh one, even for a transform that sorts or groups the whole list.
   function setRows(rows: T[]) {
     rawRows = rows
-    // `transform` may change the rows in place, so it gets a copy. With no
-    // `transform`, `data` holds the raw rows themselves.
-    allData.value = transform
-      ? applyTransform(structuredClone(rows), transform)
-      : rows
-    if (normalizedCacheKey) {
+    allData.value = transformRows(rows)
+    if (normalizedCacheKey && hasResponse) {
       // Shown while the list reloads, so it keeps up with row changes too.
       cachedResponse.value = allData.value
       // Transformed rows may not survive JSON, and `transform` runs again
@@ -105,6 +104,12 @@ export function useList<T extends { name: string }>(
     return allData.value
   }
 
+  // `transform` may change the rows in place, so it gets a copy. With no
+  // `transform`, `data` holds the raw rows themselves.
+  function transformRows(rows: T[]) {
+    return transform ? applyTransform(structuredClone(rows), transform) : rows
+  }
+
   const fetchOptions: UseFetchOptions = {
     immediate,
     refetch,
@@ -112,7 +117,10 @@ export function useList<T extends { name: string }>(
     afterFetch: handleAfterFetch<T>({
       ...options,
       getRawRows: () => rawRows,
-      setRows,
+      setRows(rows) {
+        hasResponse = true
+        return setRows(rows)
+      },
       _start,
       _limit,
       hasNextPage,
@@ -164,8 +172,8 @@ export function useList<T extends { name: string }>(
   }
 
   // Row changes apply to the raw rows, which have the shape `doc` has, and
-  // `transform` runs again on the result. Rows shown from `initialData` or the
-  // cache before the first response are not changed.
+  // `transform` runs again on the result. Rows from `initialData` change too.
+  // Rows shown from the cache before the first response do not.
   const updateRow = (
     doc: Partial<{ name: string }> & Record<string, unknown>,
   ) => {

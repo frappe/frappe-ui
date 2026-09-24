@@ -70,6 +70,72 @@ describe('useList', () => {
     expect(users.loading).toBe(false)
   })
 
+  it('changes initialData rows before the first response arrives', () => {
+    const users = useList({
+      baseUrl,
+      doctype: 'User',
+      initialData: [
+        { name: 'User1', email: 'user1@example.com' },
+        { name: 'User2', email: 'user2@example.com' },
+      ],
+      immediate: false,
+    })
+
+    users.updateRow({ name: 'User1', email: 'changed@example.com' })
+    users.removeRow('User2')
+
+    expect(users.data).toStrictEqual([
+      { name: 'User1', email: 'changed@example.com' },
+    ])
+  })
+
+  it('transforms initialData like a response', () => {
+    const users = useList({
+      baseUrl,
+      doctype: 'User',
+      initialData: [{ name: 'User1', email: 'user1@example.com' }],
+      transform: (rows) =>
+        rows.map((row) => ({ ...row, email: row.email.toUpperCase() })),
+      immediate: false,
+    })
+
+    expect(users.data).toStrictEqual([
+      { name: 'User1', email: 'USER1@EXAMPLE.COM' },
+    ])
+  })
+
+  it('does not save changed initialData rows over the cache', async () => {
+    interface User {
+      name: string
+      email: string
+    }
+    const users = (initialData?: User[]) =>
+      useList<User>({
+        baseUrl,
+        doctype: 'User',
+        fields: ['name', 'email'],
+        cacheKey: 'initial-users',
+        limit: 2,
+        immediate: false,
+        initialData,
+      })
+
+    await users().fetch()
+
+    const withInitialData = users([
+      { name: 'User1', email: 'placeholder@example.com' },
+    ])
+    withInitialData.updateRow({ name: 'User1', email: 'changed@example.com' })
+
+    const reopened = users()
+    await vi.waitFor(() =>
+      expect(reopened.data).toStrictEqual([
+        { name: 'User1', email: 'user1@example.com' },
+        { name: 'User2', email: 'user2@example.com' },
+      ]),
+    )
+  })
+
   it('handles pagination correctly', async () => {
     const users = useList({
       baseUrl,
