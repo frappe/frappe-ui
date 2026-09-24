@@ -39,7 +39,7 @@ All from the `frappe-ui` root entry.
 - [ContextMenu](https://ui.frappe.io/docs/components/contextmenu): right-click menu for surfaces, rows and canvas elements; opens at the cursor.
 - [DatePicker](https://ui.frappe.io/docs/components/datepicker): date input; also DateRangePicker (range is `string[]`).
 - [DesktopShell](https://ui.frappe.io/docs/components/desktopshell): the desktop app frame; arranges `SidebarRail` and `Sidebar` beside the content, and owns the pinned `PageHeaderTarget` and scroll region.
-- [Dialog](https://ui.frappe.io/docs/components/dialog): modal overlay; `v-model:open`, `title`/`message`/`icon`/`actions`/`size`/`position`/`dismissible`/`bare`. There is no `theme` prop: tone lives on the icon object, `:icon="{ name: 'lucide-trash-2', theme: 'red' }"`. Imperative API: `dialog.confirm`, `dialog.prompt`, `dialog.danger`. There is no `dialog.alert`.
+- [Dialog](https://ui.frappe.io/docs/components/dialog): modal overlay; `v-model:open`, `title`/`message`/`icon`/`theme`/`actions`/`size`/`position`/`dismissible`/`bare`. `icon` takes a `lucide-*` class name or a component, and `theme` colors its badge: `icon="lucide-trash-2" theme="red"`. The old `{ name, theme }` icon object renders an empty badge. Imperative API: `dialog.confirm`, `dialog.prompt`, `dialog.danger`. There is no `dialog.alert`.
 - [Divider](https://ui.frappe.io/docs/components/divider): horizontal/vertical rule.
 - [Dropdown](https://ui.frappe.io/docs/components/dropdown): action menu anchored to a trigger; takes `options` (flat or grouped).
 - [Duration](https://ui.frappe.io/docs/components/duration): text input for a length of time; `v-model` is **seconds**, the user types any common duration notation.
@@ -53,8 +53,7 @@ All from the `frappe-ui` root entry.
 - [ItemListRow](https://ui.frappe.io/docs/components/itemlistrow): single-row list item primitive.
 - [KeyboardShortcut](https://ui.frappe.io/docs/components/keyboardshortcut): renders a combo such as `Mod+K` as styled keys; `Mod` resolves per platform.
 - [KeyboardShortcutsDialog](https://ui.frappe.io/docs/components/keyboardshortcutsdialog): lists every shortcut registered with `useKeyboardShortcut`. Mount once, bind `v-model:open`; it has no trigger of its own.
-- [LoadingIndicator](https://ui.frappe.io/docs/components/loadingindicator): Spinner scaled by percentage instead of a fixed size step.
-- [LoadingText](https://ui.frappe.io/docs/components/loadingtext): LoadingIndicator with a label, for inline "Loading…" states.
+- [LoadingText](https://ui.frappe.io/docs/components/loadingtext): Spinner with a label, for inline "Loading…" states.
 - [MobileShell](https://ui.frappe.io/docs/components/mobileshell): the mobile app frame; pinned header with safe-area padding, native-scrolling content, `#nav` slot. A separate family from DesktopShell. The same page documents `MobileNav`, the bottom tab bar for `#nav`; each `MobileNavItem` is one equal-width tab.
 - [MultiSelect](https://ui.frappe.io/docs/components/multiselect): multi-value select; value is `(string | number)[]`.
 - [PageHeader](https://ui.frappe.io/docs/components/pageheader): app-shell headers (`PageHeader`, `PageHeaderMobile`, `PageHeaderBase`). A page declares its header and it renders into the layout's `<PageHeaderTarget />`.
