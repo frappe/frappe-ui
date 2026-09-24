@@ -184,8 +184,15 @@ export function useList<T extends { name: string }>(
         // Through `reactive`, so that with no `transform` a component that
         // shows this row object sees the change.
         let reactiveRow = reactive(row) as Record<string, unknown>
+        let values = row as Record<string, unknown>
         for (let key in doc) {
-          if (key in row && doc[key] !== undefined) {
+          // A key that already has this value is not a change, so an update
+          // that changes nothing does not run `transform` again.
+          if (
+            key in row &&
+            doc[key] !== undefined &&
+            values[key] !== doc[key]
+          ) {
             reactiveRow[key] = doc[key]
             changed = true
           }

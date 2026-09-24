@@ -499,6 +499,17 @@ describe('useList transform', () => {
       data: { n: 10 },
     })
   })
+
+  it('does not run again for an update that changes nothing', async () => {
+    const transform = vi.fn(parseData)
+    const list = activities('unchanged-activities', transform)
+    await list.fetch()
+    transform.mockClear()
+
+    list.updateRow({ name: 'A1', title: 'Activity 1' })
+
+    expect(transform).not.toHaveBeenCalled()
+  })
 })
 
 describe('useList per user', () => {
