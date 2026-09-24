@@ -2275,13 +2275,17 @@ There is no alias export. The import fails, so the build names every call site.
 **What to do:** find and replace the old names, as with every other component
 rename in v1. Update CSS selectors on the `data-slot` values.
 
-#### Tabs, TabButtons — `side` is now `edge`, with `start` and `end`
+#### Tabs, TabButtons — `side` is now `edge`, with `start` and `end` (breaking; loud in TS, silent in JS)
 
 On a vertical `browser-tab` list, the prop that picks which edge of the list
 the tabs attach to is now `edge="start" | "end"` instead of
 `side="left" | "right"`. `start` and `end` follow text direction: `start` is the
 left edge in left-to-right text and the right edge in right-to-left text. The
 type `TabsSide` is now `TabsEdge`.
+
+**What to do:** replace `side="left"` with `edge="start"` and `side="right"`
+with `edge="end"`. In JS, the old prop is ignored and the tabs attach to the
+start edge.
 
 #### TabButtons: `class` on an option is replaced by `data-value` (breaking, silent in JS)
 
@@ -3719,7 +3723,7 @@ It first shipped in `1.0.0-beta.41`. If you used it in a beta, read the
 `frappe-ui/charts` and freeze there. frappe-ui owns the composable's shape and
 lifecycle. echarts owns the option and instance types it carries. The four
 `--chart-*` properties that are not ramps are documented on the
-[chart colors](/docs/foundations/colors/charts) page, and the echarts template
+[chart colors](/docs/charts/colors) page, and the echarts template
 ref on the [charts overview](/docs/charts/overview).
 
 #### Charts (v1) family — moved to `frappe-ui/experimental` (breaking)

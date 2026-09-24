@@ -83,6 +83,7 @@ everything else, use the tokens above.
 
 <PaletteColors />
 
-`dark-*` shades hold the values the dark theme uses, with an extra `450` step.
+`dark-*` shades hold the values the dark theme uses. `dark-gray-*` and
+`dark-gray-alpha-*` have an extra `450` step.
 An opacity modifier such as `/50` works on solid shades, but not on the alpha
 and overlay shades, which already have their own transparency.

@@ -26,7 +26,7 @@ does not. The regular weight is 420, a little heavier than Tailwind's 400.
 ### Paragraphs
 
 For text that runs over several lines, use `text-p-*`, as in `text-p-base`.
-It has a taller line height: 1.5, or 1.6 at `text-p-xs`.
+It has a taller line height, about 1.5.
 
 ### Line height
 
