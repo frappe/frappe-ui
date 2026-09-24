@@ -9,7 +9,7 @@
       >
         {{ title }}
       </component>
-      <div v-if="description" class="mt-1 text-base leading-5 text-ink-gray-6">
+      <div v-if="description" class="mt-1 text-p-base text-ink-gray-6">
         {{ description }}
       </div>
     </div>
