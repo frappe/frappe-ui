@@ -11,7 +11,7 @@ import {
   ListboxRoot,
 } from 'reka-ui'
 
-import { Dialog, toast, useColorScheme } from 'frappe-ui'
+import { Dialog, KeyboardShortcut, toast, useColorScheme } from 'frappe-ui'
 import { pageMarkdown } from './pageMarkdown'
 import type { SidebarItem, SidebarSection } from './sidebarList'
 
@@ -72,6 +72,13 @@ const actions = [
     run: () => window.open(withBase('/llms.txt'), '_blank', 'noopener'),
   },
 ]
+const footerHints = [
+  { combo: 'ArrowDown', altCombos: ['ArrowUp'], label: 'to navigate' },
+  { combo: 'Enter', label: 'to select' },
+  { combo: 'Mod+Enter', label: 'new tab' },
+  { combo: 'Escape', label: 'to close' },
+]
+
 const matchedActions = computed(() => {
   const query = filterText.value.trim()
   if (!query) return actions
@@ -242,56 +249,25 @@ const onFilterKeydown = (e: KeyboardEvent) => {
 
         <!-- footer -->
         <div
-          class="mt-2 flex items-center justify-between border-t border-outline-gray-1 px-2.5 py-2 text-xs text-ink-gray-6 dark:border-outline-gray-2"
+          class="mt-2 flex items-center justify-between border-t border-outline-gray-1 px-2.5 py-2 text-xs text-ink-gray-5 dark:border-outline-gray-2"
         >
-          <div class="flex items-center gap-4">
-            <div class="flex items-center gap-1">
-              <kbd
-                class="inline-flex items-center gap-0.5 whitespace-nowrap rounded-1 bg-surface-gray-2 p-0.5 font-[inherit] text-[11px] font-medium leading-normal tracking-[0.02em] text-ink-gray-5"
-              >
-                <span class="lucide-arrow-down size-4" />
-              </kbd>
-              <kbd
-                class="inline-flex items-center gap-0.5 whitespace-nowrap rounded-1 bg-surface-gray-2 p-0.5 font-[inherit] text-[11px] font-medium leading-normal tracking-[0.02em] text-ink-gray-5"
-              >
-                <span class="lucide-arrow-up size-4" />
-              </kbd>
-              <span class="ml-1">to navigate</span>
-            </div>
-            <div class="flex items-center gap-1">
-              <kbd
-                class="inline-flex items-center gap-0.5 whitespace-nowrap rounded-1 bg-surface-gray-2 p-0.5 font-[inherit] text-[11px] font-medium leading-normal tracking-[0.02em] text-ink-gray-5"
-              >
-                <span class="lucide-corner-down-left size-4" />
-              </kbd>
-              <span class="ml-1">to select</span>
-            </div>
-            <div class="flex items-center gap-1">
-              <kbd
-                class="inline-flex items-center gap-0.5 whitespace-nowrap rounded-1 bg-surface-gray-2 p-0.5 font-[inherit] text-[11px] font-medium leading-normal tracking-[0.02em] text-ink-gray-5"
-              >
-                <span class="lucide-command w-3 h-3" />
-                <span class="lucide-corner-down-left size-4" />
-              </kbd>
-              <span class="ml-1">new tab</span>
-            </div>
-            <div class="flex items-center gap-1">
-              <kbd
-                class="inline-flex items-center gap-0.5 whitespace-nowrap rounded-1 bg-surface-gray-2 p-0.5 px-1 font-[inherit] font-medium leading-normal tracking-[0.02em] text-sm text-ink-gray-5"
-              >
-                esc
-              </kbd>
-              <span class="ml-1">to close</span>
+          <div class="flex items-center gap-3">
+            <div
+              v-for="hint in footerHints"
+              :key="hint.label"
+              class="flex items-center gap-1.5"
+            >
+              <KeyboardShortcut
+                :combo="hint.combo"
+                :alt-combos="hint.altCombos"
+                bg
+              />
+              <span class="whitespace-nowrap">{{ hint.label }}</span>
             </div>
           </div>
-          <div class="flex items-center gap-1">
-            <kbd
-              class="inline-flex items-center gap-0.5 whitespace-nowrap rounded-1 bg-surface-gray-2 p-0.5 font-[inherit] text-[11px] font-medium leading-normal tracking-[0.02em] text-ink-gray-5"
-            >
-              <span class="lucide-command w-3 h-3" />
-              <span class="text-sm">K</span>
-            </kbd>
-            <span class="ml-1">to open</span>
+          <div class="flex items-center gap-1.5">
+            <KeyboardShortcut combo="Mod+K" bg />
+            <span class="whitespace-nowrap">to open</span>
           </div>
         </div>
       </ListboxRoot>
