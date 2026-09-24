@@ -127,7 +127,6 @@ function onEnter() {
           <span class="flex-1 truncate">{{ cmd.label }}</span>
           <span class="text-p-xs text-ink-gray-5">{{ cmd.hint }}</span>
           <KeyboardShortcut
-            :show-plus="false"
             v-if="cmd.combo"
             :combo="cmd.combo"
             bg
@@ -139,16 +138,16 @@ function onEnter() {
         class="flex items-center gap-4 border-t border-outline-elevation-2 px-4 py-2 text-p-xs text-ink-gray-5"
       >
         <span class="flex items-center gap-1.5">
-          <KeyboardShortcut :show-plus="false" combo="ArrowUp" bg />
-          <KeyboardShortcut :show-plus="false" combo="ArrowDown" bg />
+          <KeyboardShortcut combo="ArrowUp" bg />
+          <KeyboardShortcut combo="ArrowDown" bg />
           Navigate
         </span>
         <span class="flex items-center gap-1.5">
-          <KeyboardShortcut :show-plus="false" combo="Enter" bg />
+          <KeyboardShortcut combo="Enter" bg />
           Select
         </span>
         <span class="ml-auto flex items-center gap-1.5">
-          <KeyboardShortcut :show-plus="false" combo="Escape" bg />
+          <KeyboardShortcut combo="Escape" bg />
           Close
         </span>
       </div>

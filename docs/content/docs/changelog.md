@@ -2275,6 +2275,14 @@ There is no alias export. The import fails, so the build names every call site.
 **What to do:** find and replace the old names, as with every other component
 rename in v1. Update CSS selectors on the `data-slot` values.
 
+#### Tabs, TabButtons — `side` is now `edge`, with `start` and `end`
+
+On a vertical `browser-tab` list, the prop that picks which edge of the list
+the tabs attach to is now `edge="start" | "end"` instead of
+`side="left" | "right"`. `start` and `end` follow text direction: `start` is the
+left edge in left-to-right text and the right edge in right-to-left text. The
+type `TabsSide` is now `TabsEdge`.
+
 #### TabButtons: `class` on an option is replaced by `data-value` (breaking, silent in JS)
 
 The library customizes through slots and `data-*` attributes, never through
@@ -2769,6 +2777,15 @@ unit tests before). `useShortcut` gained a short entry on the
 release, to `KeyboardShortcutsDialog` and `useKeyboardShortcut`. Read the
 entries at the top of this section for the API that ships.
 
+#### KeyboardShortcut — `+` only between two text keys
+
+A plain `KeyboardShortcut` drew a `+` between every pair of keys. `showPlus`
+now takes `'auto'`, the new default, which draws one only where two keys drawn
+as text meet, as in "Ctrl+K". A key drawn as an icon, like ⌘, ⇧, ⌥, an arrow or
+↵, needs none, so `Mod+K` renders "⌘K" on macOS and `Shift+F2` renders "⇧F2"
+everywhere. `show-plus` still draws every plus, and `:show-plus="false"` none.
+`bg` chips never drew it.
+
 ### Other components
 
 #### Tree — expansion moves to a keyed `v-model:expanded` (breaking, silent)
@@ -2997,6 +3014,14 @@ tests. The import path
 They stay separate from `Spinner` and `Skeleton`. Usage across the surveyed
 apps shows real, separate demand: `LoadingIndicator` (~60 files) and
 `LoadingText` (~11 files) are both in active use, not duplicates.
+
+#### `LoadingIndicator` is now `Spinner` under its older name (breaking; loud in TS, silent in JS) {#loadingindicator-is-now-spinner-under-its-older-name}
+
+This replaces the entry above. `LoadingIndicator` was a `Spinner` scaled by a
+percentage. It is now the same component as `Spinner`, so it takes `Spinner`'s
+props, and it has no docs page of its own. Its `scale` prop is removed: use
+`size` or a class instead. See the
+[migration guide](/docs/migration#loadingindicator-is-spinner).
 
 #### Icon — docs page and stories added
 

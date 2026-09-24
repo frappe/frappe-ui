@@ -20,7 +20,7 @@ const rows = [
         <span :class="row.icon" class="size-4" aria-hidden="true" />
         {{ row.label }}
       </span>
-      <KeyboardShortcut :show-plus="false" :combo="row.combo" />
+      <KeyboardShortcut :combo="row.combo" />
     </div>
     <div
       class="flex items-center justify-between rounded-4 px-2 py-1.5 text-ink-red-7 hover:bg-surface-red-1"
@@ -30,7 +30,6 @@ const rows = [
         Delete task
       </span>
       <KeyboardShortcut
-        :show-plus="false"
         combo="Mod+Backspace"
         :alt-combos="['Delete']"
       />

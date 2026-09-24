@@ -18,7 +18,6 @@ const hints = [
       class="flex items-center gap-1.5"
     >
       <KeyboardShortcut
-        :show-plus="false"
         :combo="hint.combo"
         :alt-combos="hint.altCombos"
         bg

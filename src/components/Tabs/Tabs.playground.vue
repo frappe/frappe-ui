@@ -28,14 +28,14 @@ const knobs: Knob[] = [
     default: 'sm',
   },
   {
-    name: 'side',
+    name: 'edge',
     type: 'tabs',
     options: [
-      { label: 'left', value: 'left' },
-      { label: 'right', value: 'right' },
+      { label: 'start', value: 'start' },
+      { label: 'end', value: 'end' },
     ],
-    default: 'left',
-    // `side` only changes the browser-tab variant, and only when vertical.
+    default: 'start',
+    // `edge` only changes the browser-tab variant, and only when vertical.
     visibleWhen: (v) => v.variant === 'browser-tab' && v.vertical,
   },
   { name: 'vertical', type: 'switch', default: false },
@@ -54,7 +54,7 @@ function buildCode(v: Record<string, any>) {
   if (v.variant !== 'underline') attrs.push(`variant="${v.variant}"`)
   if (v.size !== 'sm') attrs.push(`size="${v.size}"`)
   if (v.vertical) attrs.push('vertical')
-  if (showsSide(v) && v.side !== 'left') attrs.push(`side="${v.side}"`)
+  if (showsEdge(v) && v.edge !== 'start') attrs.push(`edge="${v.edge}"`)
   attrs.push(`:tabs="[\n${items}\n  ]"`)
   return [
     '<Tabs',
@@ -70,7 +70,7 @@ function buildCode(v: Record<string, any>) {
   ].join('\n')
 }
 
-function showsSide(v: Record<string, any>) {
+function showsEdge(v: Record<string, any>) {
   return v.variant === 'browser-tab' && v.vertical
 }
 
@@ -92,7 +92,7 @@ function tabsFor(icons: boolean) {
           :variant="values.variant"
           :size="values.size"
           :vertical="values.vertical"
-          :side="showsSide(values) ? values.side : undefined"
+          :edge="showsEdge(values) ? values.edge : undefined"
         >
           <template #tab-panel="{ tab }">
             <div

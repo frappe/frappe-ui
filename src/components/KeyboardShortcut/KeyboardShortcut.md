@@ -50,6 +50,10 @@ the value is known.
 both `bg` and plain mode. ⌘ is always an icon. Plain mode draws Shift and Alt
 as icons, and `bg` mode draws them as text.
 
+In plain mode, a `+` appears only between two keys drawn as text, as in
+"Ctrl+K". A key drawn as an icon needs none, so `Mod+K` shows "⌘K" on macOS.
+`bg` mode draws no `+`.
+
 ### Alternative combos
 
 `altCombos` lists other combos after a `/`. A combo that shows the same keys as

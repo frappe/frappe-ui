@@ -76,7 +76,8 @@ emits `update:modelValue`.
 ### Vertical
 
 `vertical` stacks the buttons in a column. With `variant="browser-tab"`,
-`side="left"` or `side="right"` sets the edge the selected tab attaches to.
+`edge="start"` or `edge="end"` sets the edge of the list the selected tab
+attaches to. `start` is the left edge in left-to-right text.
 
 ### Attributes
 

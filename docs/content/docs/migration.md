@@ -2673,8 +2673,8 @@ switcher. Its prop and type names now match the Tabs family. See the
 | Before                                                | After                                                                                                      |
 | ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | `type="ghost"`                                        | `variant="ghost"`                                                                                          |
-| `direction="right"`                                   | `side="right"` — the same prop name on `TabList`                                                           |
-| `TabButtonsType` / `TabButtonsDirection` types        | `TabsVariant` / `TabsSide`, shared with the Tabs family                                                    |
+| `direction="right"`                                   | `edge="end"` — the same prop name on `TabList`                                                             |
+| `TabButtonsType` / `TabButtonsDirection` types        | `TabsVariant` / `TabsEdge`, shared with the Tabs family                                                    |
 | `:buttons="items"` (deprecated)                       | `:options="items"`                                                                                         |
 | `{ label: 'Day' }` (label as value)                   | `value` is required on every option                                                                        |
 | `{ active: true }` fallback                           | the `v-model` is the single source of truth                                                                |
@@ -3576,6 +3576,20 @@ defined, convert it where you pass it to `Badge`:
 
 ```ts
 const badgeTheme = tone === 'orange' ? 'amber' : tone
+```
+
+## LoadingIndicator {#loadingindicator-is-spinner}
+
+`LoadingIndicator` is now the same component as `Spinner`, so it takes
+`Spinner`'s props. `scale` no longer changes the size. Size it with `size` or a
+class instead:
+
+```vue
+<!-- Before -->
+<LoadingIndicator scale="70" />
+
+<!-- After -->
+<LoadingIndicator size="sm" />
 ```
 
 ## Icons

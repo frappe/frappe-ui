@@ -77,8 +77,9 @@ the item as `tab`. Put your own fields in the item's `data` and read them as
 
 `vertical` on `Tabs` changes the orientation and the arrow keys, not the
 layout. Add `class="flex"` to put the list beside the panel. With
-`variant="browser-tab"`, `side="left"` or `side="right"` on `TabList` sets the
-edge the tabs attach to. The `tabs` array mode lays itself out.
+`variant="browser-tab"`, `edge="start"` or `edge="end"` on `TabList` sets the
+edge of the list the tabs attach to. `start` is the left edge in left-to-right
+text. The `tabs` array mode lays itself out.
 
 ### Disabled tabs
 

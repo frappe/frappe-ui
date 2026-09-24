@@ -49,7 +49,6 @@ useKeyboardShortcut([
             {{ shortcut.description }}
           </span>
           <KeyboardShortcut
-            :show-plus="false"
             :combo="shortcut.combo"
             :alt-combos="shortcut.altCombos"
             bg
