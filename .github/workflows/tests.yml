@@ -110,6 +110,7 @@ jobs:
         with:
           component: true
           install: false
+          browser: chrome
         env:
           COVERAGE: 'true'
           SPLIT: ${{ strategy.job-total }}
