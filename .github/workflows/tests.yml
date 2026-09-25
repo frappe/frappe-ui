@@ -25,6 +25,9 @@ jobs:
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
+        env:
+          # This job never runs Cypress, so skip its binary download.
+          CYPRESS_INSTALL_BINARY: 0
 
       # Each check after this one runs even when an earlier one fails, so one
       # failure does not hide the others.
