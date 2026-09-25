@@ -11,8 +11,9 @@ permissions:
   pull-requests: write
 
 jobs:
-  test:
+  checks:
     runs-on: ubuntu-latest
+    name: Checks
     steps:
       - uses: actions/checkout@v4
 
@@ -25,6 +26,8 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
+      # Each check after this one runs even when an earlier one fails, so one
+      # failure does not hide the others.
       - name: Run vitest with coverage
         run: yarn test:coverage
 
@@ -36,21 +39,6 @@ jobs:
           path: coverage/vitest
           if-no-files-found: ignore
 
-  type-check:
-    runs-on: ubuntu-latest
-    name: Type Check
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: 'yarn'
-
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
-
       # Gates on zero errors, not on drift against the merge base. Scope is the
       # shipped library: src, experimental, stories, mocks and the vitepress
       # entry (tsconfig.app.json), plus the build and test configs
@@ -58,53 +46,38 @@ jobs:
       # `cy.mount()`'s component generics produce ~200 errors that are a
       # cleanup of their own.
       - name: Type-check the library
+        if: ${{ !cancelled() }}
         run: yarn type-check
-
-  create-frappe-ui:
-    runs-on: ubuntu-latest
-    name: create-frappe-ui
-    defaults:
-      run:
-        working-directory: packages/create-frappe-ui
-    steps:
-      - uses: actions/checkout@v4
-
-      # The oldest Node the package supports
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20.19'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Check types
-        run: npm run check
-
-      - name: Run tests
-        run: npm test
-
-  docs-tables:
-    runs-on: ubuntu-latest
-    name: API Tables
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: 'yarn'
-
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
 
       # Compares the committed tables against a fresh run row by row, keyed by
       # name. Row order is not compared: vue-component-meta returns props, emits
       # and union members in checker-resolution order, which shifts with how
       # much of the program is loaded.
       - name: Check the API tables match the source
+        if: ${{ !cancelled() }}
         run: yarn docs:check
+
+      # The oldest Node the package supports
+      - name: Setup Node.js for create-frappe-ui
+        if: ${{ !cancelled() }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.19'
+
+      - name: Install create-frappe-ui dependencies
+        if: ${{ !cancelled() }}
+        working-directory: packages/create-frappe-ui
+        run: npm ci
+
+      - name: Check create-frappe-ui types
+        if: ${{ !cancelled() }}
+        working-directory: packages/create-frappe-ui
+        run: npm run check
+
+      - name: Run create-frappe-ui tests
+        if: ${{ !cancelled() }}
+        working-directory: packages/create-frappe-ui
+        run: npm test
 
   component-test:
     runs-on: ubuntu-latest
@@ -160,8 +133,8 @@ jobs:
           if-no-files-found: ignore
 
   coverage-report:
-    needs: [test, component-test]
-    if: always() && (needs.test.result == 'success' || needs.component-test.result == 'success')
+    needs: [checks, component-test]
+    if: always() && (needs.checks.result == 'success' || needs.component-test.result == 'success')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
