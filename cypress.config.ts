@@ -11,6 +11,7 @@ const coverageDir: string = JSON.parse(readFileSync('.nycrc.json', 'utf8'))[
 
 export default defineConfig({
   component: {
+    experimentalSingleTabRunMode: true,
     devServer: {
       framework: 'vue',
       bundler: 'vite',
