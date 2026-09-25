@@ -143,10 +143,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'yarn'
 
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
+      # The merge scripts need only tsx and nyc, not the full dependency tree.
+      # Versions match yarn.lock.
+      - name: Install coverage tools
+        run: npm install -g tsx@4.21.0 nyc@17.1.0
 
       - name: Download Vitest coverage
         uses: actions/download-artifact@v4
@@ -163,10 +164,10 @@ jobs:
         continue-on-error: true
 
       - name: Merge Cypress shards
-        run: yarn tsx .github/scripts/merge-cypress-shards.ts
+        run: tsx .github/scripts/merge-cypress-shards.ts
 
       - name: Merge Vitest + Cypress
-        run: yarn coverage:merge
+        run: tsx .github/scripts/merge-coverage.ts
 
       - name: Upload merged coverage report
         uses: actions/upload-artifact@v4
