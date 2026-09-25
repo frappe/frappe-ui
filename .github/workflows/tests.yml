@@ -115,6 +115,12 @@ jobs:
           SPLIT: ${{ strategy.job-total }}
           SPLIT_INDEX: ${{ strategy.job-index }}
 
+      # The specs save raw coverage to .nyc_output/cypress. The merge job needs
+      # only coverage-final.json, so skip the HTML report.
+      - name: Write Cypress coverage report
+        if: ${{ !cancelled() }}
+        run: npx nyc report --reporter=json
+
       - name: Upload Cypress screenshots if tests fail
         if: failure()
         uses: actions/upload-artifact@v4
