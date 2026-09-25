@@ -19,7 +19,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
         with:
-          fetch-depth: 0
           persist-credentials: false
 
       - name: Setup Node
