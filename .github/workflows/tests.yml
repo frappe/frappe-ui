@@ -11,8 +11,9 @@ permissions:
   pull-requests: write
 
 jobs:
-  test:
+  checks:
     runs-on: ubuntu-latest
+    name: Checks
     steps:
       - uses: actions/checkout@v4
 
@@ -24,7 +25,12 @@ jobs:
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
+        env:
+          # This job never runs Cypress, so skip its binary download.
+          CYPRESS_INSTALL_BINARY: 0
 
+      # Each check after this one runs even when an earlier one fails, so one
+      # failure does not hide the others.
       - name: Run vitest with coverage
         run: yarn test:coverage
 
@@ -36,21 +42,6 @@ jobs:
           path: coverage/vitest
           if-no-files-found: ignore
 
-  type-check:
-    runs-on: ubuntu-latest
-    name: Type Check
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: 'yarn'
-
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
-
       # Gates on zero errors, not on drift against the merge base. Scope is the
       # shipped library: src, experimental, stories, mocks and the vitepress
       # entry (tsconfig.app.json), plus the build and test configs
@@ -58,53 +49,38 @@ jobs:
       # `cy.mount()`'s component generics produce ~200 errors that are a
       # cleanup of their own.
       - name: Type-check the library
+        if: ${{ !cancelled() }}
         run: yarn type-check
-
-  create-frappe-ui:
-    runs-on: ubuntu-latest
-    name: create-frappe-ui
-    defaults:
-      run:
-        working-directory: packages/create-frappe-ui
-    steps:
-      - uses: actions/checkout@v4
-
-      # The oldest Node the package supports
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20.19'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Check types
-        run: npm run check
-
-      - name: Run tests
-        run: npm test
-
-  docs-tables:
-    runs-on: ubuntu-latest
-    name: API Tables
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: 'yarn'
-
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
 
       # Compares the committed tables against a fresh run row by row, keyed by
       # name. Row order is not compared: vue-component-meta returns props, emits
       # and union members in checker-resolution order, which shifts with how
       # much of the program is loaded.
       - name: Check the API tables match the source
+        if: ${{ !cancelled() }}
         run: yarn docs:check
+
+      # The oldest Node the package supports
+      - name: Setup Node.js for create-frappe-ui
+        if: ${{ !cancelled() }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.19'
+
+      - name: Install create-frappe-ui dependencies
+        if: ${{ !cancelled() }}
+        working-directory: packages/create-frappe-ui
+        run: npm ci
+
+      - name: Check create-frappe-ui types
+        if: ${{ !cancelled() }}
+        working-directory: packages/create-frappe-ui
+        run: npm run check
+
+      - name: Run create-frappe-ui tests
+        if: ${{ !cancelled() }}
+        working-directory: packages/create-frappe-ui
+        run: npm test
 
   component-test:
     runs-on: ubuntu-latest
@@ -123,26 +99,33 @@ jobs:
           node-version: 20
           cache: 'yarn'
 
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
-
+      # Restore the binary first, so the install finds it and skips the
+      # download.
       - name: Cache Cypress binary
         uses: actions/cache@v4
         with:
           path: ~/.cache/Cypress
           key: cypress-${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
 
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
       - name: Run Component Tests
         uses: cypress-io/github-action@v6
         with:
           component: true
-          build: 'yarn build'
-          start: 'yarn dev'
           install: false
+          browser: chrome
         env:
           COVERAGE: 'true'
           SPLIT: ${{ strategy.job-total }}
           SPLIT_INDEX: ${{ strategy.job-index }}
+
+      # The specs save raw coverage to .nyc_output/cypress. The merge job needs
+      # only coverage-final.json, so skip the HTML report.
+      - name: Write Cypress coverage report
+        if: ${{ !cancelled() }}
+        run: npx nyc report --reporter=json
 
       - name: Upload Cypress screenshots if tests fail
         if: failure()
@@ -160,8 +143,8 @@ jobs:
           if-no-files-found: ignore
 
   coverage-report:
-    needs: [test, component-test]
-    if: always() && (needs.test.result == 'success' || needs.component-test.result == 'success')
+    needs: [checks, component-test]
+    if: always() && (needs.checks.result == 'success' || needs.component-test.result == 'success')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -170,10 +153,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'yarn'
 
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
+      # The merge scripts need only tsx and nyc, not the full dependency tree.
+      # Versions match yarn.lock.
+      - name: Install coverage tools
+        run: npm install -g tsx@4.21.0 nyc@17.1.0
 
       - name: Download Vitest coverage
         uses: actions/download-artifact@v4
@@ -190,10 +174,10 @@ jobs:
         continue-on-error: true
 
       - name: Merge Cypress shards
-        run: yarn tsx .github/scripts/merge-cypress-shards.ts
+        run: tsx .github/scripts/merge-cypress-shards.ts
 
       - name: Merge Vitest + Cypress
-        run: yarn coverage:merge
+        run: tsx .github/scripts/merge-coverage.ts
 
       - name: Upload merged coverage report
         uses: actions/upload-artifact@v4
