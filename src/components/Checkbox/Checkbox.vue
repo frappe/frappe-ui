@@ -219,15 +219,36 @@ const inputClasses = computed(() => {
     'cursor-pointer transition focus:ring-0 focus:ring-offset-0',
     // Unchecked — surface-base fill, outline scale: default 4 / hover 5 / active 6.
     'bg-surface-base border-outline-gray-4',
-    // Checked fill (via currentColor): default 10 / hover 9 / active 8.
+    // Checked fill (via currentColor): resting is gray-10. The hover / active
+    // tokens (9 / 8) are set in the scoped <style> below — this preset does not
+    // emit the stacked-variant arbitrary-colour utilities
+    // (`checked:hover:text-[color:var(--…)]`), so the fill was stuck at gray-10.
     'text-[color:var(--surface-gray-10)]',
     // Non-padded shows the global espresso ring on keyboard focus. forms sets a
     // transparent `:focus` outline that outranks the global `:focus-visible` rule,
     // so re-assert it with the themed `focus-ring` utility. (Padded shows the ring
     // on the row instead, via `[&:has(:focus-visible)]` on the container.)
     padded
-      ? 'group-hover:border-outline-gray-5 checked:group-hover:text-[color:var(--surface-gray-9)]'
-      : 'hover:border-outline-gray-5 hover:shadow-sm active:border-outline-gray-6 focus-visible:focus-ring checked:hover:text-[color:var(--surface-gray-9)] checked:active:text-[color:var(--surface-gray-8)]',
+      ? 'group-hover:border-outline-gray-5'
+      : 'hover:border-outline-gray-5 active:border-outline-gray-6 focus-visible:focus-ring',
   ]
 })
 </script>
+
+<style scoped>
+/* The checked / indeterminate fill is painted via `currentColor` (see
+   inputClasses). Resting gray-10 comes from a utility, but the hover / active
+   fill tokens are set here because this preset drops the stacked-variant
+   arbitrary-colour utilities, which left the fill stuck at gray-10 on hover. */
+[data-slot='control']:not(:disabled):not([data-state='unchecked']):hover {
+  color: var(--surface-gray-9);
+}
+[data-slot='control']:not(:disabled):not([data-state='unchecked']):active {
+  color: var(--surface-gray-8);
+}
+/* Padded rows drive hover from the surrounding `.group`, matching the
+   `group-hover:` border utility above. */
+.group:hover [data-slot='control']:not(:disabled):not([data-state='unchecked']) {
+  color: var(--surface-gray-9);
+}
+</style>
