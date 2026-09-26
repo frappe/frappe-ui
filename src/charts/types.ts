@@ -239,6 +239,62 @@ export type DonutSliceEvent = {
   rows: Record<string, any>[]
 }
 
+export type ProportionBarConfig = {
+  data: Record<string, any>[]
+  /** Row key holding the segment name. */
+  categoryColumn: string
+  /** Row key holding the segment size. */
+  valueColumn: string
+  title?: string
+  subtitle?: string
+  /**
+   * How many segments the bar holds, "Others" included: past that it keeps the
+   * largest `maxSegments - 1` and sums the tail into "Others". A track a few
+   * hundred pixels wide runs out of room well before the palette does, so it
+   * defaults to 6.
+   */
+  maxSegments?: number
+  /**
+   * Ramp segment colors are drawn from. Defaults to `'categorical'`: the parts
+   * of a breakdown are unrelated categories, not steps of one magnitude.
+   */
+  palette?: ChartPalette
+  /** Forces layout direction; defaults to document.documentElement.dir */
+  dir?: ChartDir
+}
+
+/** One block of the bar, after "Others" grouping and color assignment. */
+export type ProportionSegment = {
+  /** Identity used by the legend and the tooltip. Unique within the bar. */
+  name: string
+  /** The category value as it should read; not unique. */
+  label: string
+  value: number
+  /** Share of the *visible* total, so hiding a segment re-percentages the rest. */
+  percent: number
+  /**
+   * What the segment is drawn at, as a percentage of the track. Equal to
+   * `percent` until a share is too small to see, at which point the bar widens
+   * it at the expense of the segments above the floor. Read `percent` for the
+   * number a reader is told; this one is geometry.
+   */
+  width: number
+  color: string
+  hidden: boolean
+  /** The row behind this segment, or every grouped row for "Others". */
+  rows: Record<string, any>[]
+  isOthers: boolean
+}
+
+export type ProportionSegmentEvent = {
+  /** The segment as it reads, i.e. the category value or "Others". */
+  name: string
+  value: number
+  percent: number
+  /** One row, or every grouped row when the "Others" segment was clicked. */
+  rows: Record<string, any>[]
+}
+
 export type FunnelChartConfig = {
   /** One row per stage, in process order. Rows are drawn as they arrive. */
   data: Record<string, any>[]
@@ -789,6 +845,43 @@ export type DonutChartProps = ChartBaseProps & {
   echartOptions?: EchartOptionsOverride
 }
 
+export type ProportionBarProps = ChartBaseProps & {
+  /** The rows to draw. One row is one segment, before the "Others" grouping. */
+  data: Record<string, any>[]
+  /** Row key holding the segment name. */
+  category: string
+  /** Row key holding the segment size. */
+  value: string
+  /**
+   * How many segments the bar holds, "Others" included. Past that it keeps the
+   * largest `maxSegments - 1` and sums the tail into a single "Others" segment,
+   * named `OTHERS_KEY`. Defaults to 6 — the track runs out of readable width
+   * long before the palette runs out of hues.
+   */
+  maxSegments?: number
+  /**
+   * How thick the track is drawn: `'sm'` 8px, the default, for a strip under
+   * the number it breaks down; `'md'` 12px where the breakdown is itself what
+   * the card is about. The corner follows the thickness — the thinner track
+   * cannot carry the deeper one without rounding into capsules.
+   */
+  size?: 'sm' | 'md'
+  /**
+   * Segments the legend has switched off, by name. Bind it with
+   * `v-model:hiddenSegments` to drive the legend from the app, or to keep what
+   * a reader hid across a reload. Left unbound, the legend owns it.
+   *
+   * `hiddenSegments`, not the axis charts' `hiddenSeries`: a segment comes out
+   * of a `category` / `value` row rather than a column, so it is not a series
+   * under another name. `spec/charts.md` records the ruling.
+   */
+  hiddenSegments?: string[]
+  /** Prints every value the bar shows: the tooltip, and each segment's name. */
+  format?: ChartValueFormatter
+  /** Defaults to `'categorical'`: the parts are unrelated, not steps of a ramp. */
+  palette?: ChartPalette
+}
+
 export type FunnelChartProps = ChartBaseProps & {
   /** One row per stage, in process order. Rows are drawn as they arrive. */
   data: Record<string, any>[]
@@ -1071,6 +1164,21 @@ export type DonutChartSlots = ChartActionsSlot &
       percent?: string
     }) => unknown
     /** Replaces the tooltip body. `items` holds the hovered slice alone. */
+    tooltip?: (props: { items: ChartTooltipItem[] }) => unknown
+  }
+
+export type ProportionBarEmits = {
+  /**
+   * A segment was selected, by click or by Enter on the keyboard. The "Others"
+   * segment carries every row it grouped, so a caller can drill into the tail
+   * as well as into a named part.
+   */
+  select: [event: ProportionSegmentEvent]
+}
+
+export type ProportionBarSlots = ChartActionsSlot &
+  ChartStateSlots & {
+    /** Replaces the tooltip body. `items` holds the hovered segment alone. */
     tooltip?: (props: { items: ChartTooltipItem[] }) => unknown
   }
 
