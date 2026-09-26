@@ -2846,6 +2846,14 @@ everywhere. `show-plus` still draws every plus, and `:show-plus="false"` none.
 
 ### Other components
 
+#### Tag — new component (additive) {#tag-—-new-component}
+
+`Tag` is an interactive label for applied filters, selected values and labels
+on a record. It takes Badge's `variant`, `theme` and `size` axes, and adds
+hover, pressed, focus and `disabled` states. `dismissible` shows a × that emits
+`dismiss`, as do Delete and Backspace while the tag has focus. See
+[Tag](/docs/components/tag).
+
 #### Tree — expansion moves to a keyed `v-model:expanded` (breaking, silent)
 
 `expanded` was a boolean that expanded everything, and each node's open or

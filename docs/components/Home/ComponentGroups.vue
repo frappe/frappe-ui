@@ -12,7 +12,7 @@ import { withBase } from 'vitepress'
 const componentGroups = {
   "Data Display": {
     component: DataDisplay,
-    list: ["Avatar", "Badge"],
+    list: ["Avatar", "Badge", "Tag"],
   },
 
   "Navigation": {
