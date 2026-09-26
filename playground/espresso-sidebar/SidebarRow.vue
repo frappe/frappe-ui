@@ -66,7 +66,7 @@
       :class="[
         collapsed ? 'justify-start p-1.5' : 'flex-1 gap-2 px-2 py-1.5',
         row.active
-          ? 'bg-surface-elevation-3 text-ink-gray-8 shadow-sm'
+          ? 'bg-surface-elevation-2 text-ink-gray-8 shadow-sm'
           : row.white
             ? 'bg-surface-elevation-1 text-ink-gray-6'
             : row.hovered

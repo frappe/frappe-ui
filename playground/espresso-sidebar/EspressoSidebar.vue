@@ -242,49 +242,7 @@
             </div>
 
             <!-- Menu -->
-            <div
-              class="flex flex-col"
-              :style="{ gap: `${scenario.menuGap}px` }"
-            >
-              <template
-                v-for="(segment, i) in menuSegments"
-                :key="`${scenario.id}-${i}`"
-              >
-                <SidebarRow v-if="segment.kind === 'row'" :row="segment.row" />
-                <!-- A disclosure section and the rows it folds. The rows sit
-                     in a grid track that eases between its content height and
-                     zero; the menu's gap moves inside it as top padding, so
-                     nothing is left behind when folded. -->
-                <div v-else class="flex flex-col">
-                  <SidebarRow :row="segment.header" />
-                  <div
-                    class="grid transition-[grid-template-rows] duration-200 ease-in-out"
-                    :class="
-                      segment.header.expanded === false
-                        ? 'grid-rows-[0fr]'
-                        : 'grid-rows-[1fr]'
-                    "
-                    :inert="segment.header.expanded === false || undefined"
-                  >
-                    <div class="min-h-0 overflow-hidden">
-                      <div
-                        class="flex flex-col"
-                        :style="{
-                          gap: `${scenario.menuGap}px`,
-                          paddingTop: `${scenario.menuGap}px`,
-                        }"
-                      >
-                        <SidebarRow
-                          v-for="(row, j) in segment.rows"
-                          :key="j"
-                          :row="row"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </template>
-            </div>
+            <SidebarMenu :scenario="scenario" />
           </div>
 
           <!-- Footer: Default -->
@@ -564,10 +522,11 @@
 import { computed, defineComponent, h, ref } from 'vue'
 import { Button, Dropdown, Progress, Sidebar, SidebarCard } from '../../src'
 import EIcon from './EIcon.vue'
+import SidebarMenu from './SidebarMenu.vue'
 import SidebarRow from './SidebarRow.vue'
 import railAvatar from './avatars/avatar-lg-status.png'
 import { scenarios, type ScenarioId } from './scenarios'
-import type { ItemRow, Row, SectionRow } from './types'
+import type { ItemRow, Row } from './types'
 
 const props = defineProps<{
   appNavigation?: boolean
@@ -604,45 +563,6 @@ const railButtonClass =
 const indicatorTop = computed(() => {
   const app = scenarioId.value === 'default' ? 'helpdesk' : scenarioId.value
   return 63 + railApps.findIndex((a) => a.scenario === app) * 40
-})
-
-// Disclosure sections (a chevron header: Public Views, My Calendars,
-// Delegated Calendar) own the rows beneath them, up to the next divider or
-// section. Each folds on its own; the open state lives for the session.
-const foldedSections = ref(new Set<string>())
-
-type MenuSegment =
-  | { kind: 'row'; row: Row }
-  | { kind: 'section'; header: SectionRow; rows: Row[] }
-
-const menuSegments = computed<MenuSegment[]>(() => {
-  const segments: MenuSegment[] = []
-  let open: Extract<MenuSegment, { kind: 'section' }> | null = null
-  for (const row of scenario.value.rows) {
-    if (row.type === 'divider' || row.type === 'section') open = null
-    if (row.type === 'section' && row.chevron) {
-      const key = `${scenario.value.id}:${row.label}`
-      open = {
-        kind: 'section',
-        header: {
-          ...row,
-          expanded: !foldedSections.value.has(key),
-          onToggle: () => {
-            const next = new Set(foldedSections.value)
-            next.has(key) ? next.delete(key) : next.add(key)
-            foldedSections.value = next
-          },
-        },
-        rows: [],
-      }
-      segments.push(open)
-    } else if (open) {
-      open.rows.push(row)
-    } else {
-      segments.push({ kind: 'row', row })
-    }
-  }
-  return segments
 })
 
 const collapsedRows = computed<Row[]>(() => {

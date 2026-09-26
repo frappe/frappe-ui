@@ -1,22 +1,23 @@
 <script setup lang="ts">
-// The Toast page: a controller in the middle of the panel, and the toasts
-// it fires stacking up from the panel's bottom-right corner (Figma
-// 29790:191548 — see EspressoToast for the card itself).
-// Each type fires on tap; the switches decide whether that toast carries a
-// description and an action. They dismiss themselves after 5s, or on the ×.
+// The Toast page: a controller in the middle of the panel, and the toasts it
+// fires stacking up from the bottom-right corner.
+//
+// The toasts are frappe-ui's own — `toast()` from the library, rendered by
+// `ToastProvider` (vue-sonner underneath), so what shows here is exactly what
+// an app gets: the 360px surface-gray-9 card, its icon, the blue action and
+// the close button. Each type fires on tap; the switches decide whether that
+// toast carries a description and an action.
 import { ref } from 'vue'
-import { Button, Switch } from '../../../src'
-import EspressoToast, { type ToastType } from './EspressoToast.vue'
+import { Button, Switch, toast, ToastProvider } from '../../../src'
 
-interface Shown {
-  id: number
-  type: ToastType
+type ToastType = 'success' | 'error' | 'warning' | 'info' | 'plain'
+
+const TYPES: {
+  value: ToastType
+  label: string
   title: string
-  description?: string
-  action?: string
-}
-
-const TYPES: { value: ToastType; label: string; title: string; blurb: string }[] = [
+  blurb: string
+}[] = [
   {
     value: 'success',
     label: 'Success',
@@ -52,37 +53,16 @@ const TYPES: { value: ToastType; label: string; title: string; blurb: string }[]
 const withDescription = ref(true)
 const withAction = ref(true)
 
-const toasts = ref<Shown[]>([])
-let next = 1
-
-// the newest sits at the bottom, nearest the corner it came from
-const LIMIT = 4
-
 function show(t: (typeof TYPES)[number]) {
-  const id = next++
-  toasts.value = [
-    ...toasts.value.slice(-(LIMIT - 1)),
-    {
-      id,
-      type: t.value,
-      title: t.title,
-      description: withDescription.value ? t.blurb : undefined,
-      action: withAction.value ? 'Undo' : undefined,
-    },
-  ]
-  setTimeout(() => dismiss(id), 5000)
-}
-
-function dismiss(id: number) {
-  toasts.value = toasts.value.filter((t) => t.id !== id)
-}
-
-// A leaving toast keeps its slot while it falls, so it does not jump to the
-// corner first; the slot closes underneath it on the same beat, which lets
-// the rest of the stack settle toward the corner rather than snap.
-function onLeave(el: Element) {
-  const toast = el as HTMLElement
-  toast.style.marginBottom = `-${toast.offsetHeight + 10}px`
+  const options = {
+    description: withDescription.value ? t.blurb : undefined,
+    action: withAction.value
+      ? { label: 'Undo', onClick: () => undefined }
+      : undefined,
+  }
+  // `plain` is the type without an icon — the library's bare `toast()`.
+  if (t.value === 'plain') toast(t.title, options)
+  else toast[t.value](t.title, options)
 }
 </script>
 
@@ -129,61 +109,16 @@ function onLeave(el: Element) {
       </div>
     </div>
 
-    <!-- the stack: newest nearest the corner -->
-    <TransitionGroup
-      tag="div"
-      name="v2-toast"
-      class="pointer-events-none absolute bottom-5 right-5 z-20 flex flex-col items-end gap-2.5"
-      @leave="onLeave"
-    >
-      <EspressoToast
-        v-for="t in toasts"
-        :key="t.id"
-        class="pointer-events-auto"
-        :type="t.type"
-        :title="t.title"
-        :description="t.description"
-        :action="t.action"
-        @action="dismiss(t.id)"
-        @dismiss="dismiss(t.id)"
-      />
-    </TransitionGroup>
+    <!-- frappe-ui's toaster: one per page, fixed to the viewport's corner -->
+    <ToastProvider />
   </div>
 </template>
 
 <style>
-/* Each toast rises from below the corner and settles, then drops back the
-   same way to leave: a long, decelerating curve in, a shorter accelerating
-   one out. The panel clips its bottom edge, so a toast appears to come up
-   from off-stage and to fall back off it. */
-.v2-toast-enter-active {
-  transition:
-    opacity 260ms ease-out,
-    transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
-  will-change: transform, opacity;
-}
-.v2-toast-leave-active {
-  transition:
-    opacity 260ms ease-in 60ms,
-    transform 320ms cubic-bezier(0.4, 0, 0.9, 0.6),
-    margin-bottom 320ms cubic-bezier(0.22, 1, 0.36, 1);
-  will-change: transform, opacity;
-}
-/* the others close the gap on the same curve as the one coming in */
-.v2-toast-move {
-  transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-.v2-toast-enter-from,
-.v2-toast-leave-to {
-  opacity: 0;
-  /* its own height plus the stack's gap: fully below its slot */
-  transform: translateY(calc(100% + 10px)) scale(0.98);
-}
-@media (prefers-reduced-motion: reduce) {
-  .v2-toast-enter-active,
-  .v2-toast-leave-active,
-  .v2-toast-move {
-    transition: none;
-  }
+/* The shell's theme / sidebar / fullscreen group sits 20px from the same
+   corner and is 48px tall, so the stack starts above it. The toaster writes
+   its offsets inline, hence `!important`. */
+[data-sonner-toaster][data-y-position='bottom'] {
+  --offset-bottom: 84px !important;
 }
 </style>

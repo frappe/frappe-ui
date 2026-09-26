@@ -10,14 +10,24 @@ import {
   watch,
   type Component,
 } from 'vue'
-import { Breadcrumbs, Button, useColorScheme } from '../../src'
-import EspressoLayout from '../EspressoLayout.vue'
+import {
+  Breadcrumbs,
+  Button,
+  Dropdown,
+  Popover,
+  useColorScheme,
+} from '../../src'
+import ControlSelect from '../controls/ControlSelect.vue'
+import ControlToggle from '../controls/ControlToggle.vue'
+import { headerTypes, subheaderTypes } from '../espresso-header/variants'
 import ListPage from './list/ListPage.vue'
 import PopoverPage from './popover/PopoverPage.vue'
 import CardsPage from './cards/CardsPage.vue'
 import ToastPage from './toast/ToastPage.vue'
-import frappeLogo from './assets/frappe-logo.svg'
+// Figma 35185:59381 — the app's own mark, in place of the Frappe logo
+import appLogo from './assets/app-logo.svg'
 import EIcon from '../espresso-sidebar/EIcon.vue'
+import SidebarMenu from '../espresso-sidebar/SidebarMenu.vue'
 import SidebarRow from '../espresso-sidebar/SidebarRow.vue'
 import { scenarios, type ScenarioId } from '../espresso-sidebar/scenarios'
 import trayAvatar from '../espresso-sidebar/avatars/avatar-lg-status.png'
@@ -160,7 +170,10 @@ const TRAY_APPS: { logo: string; label: string; scenario: ScenarioId }[] = [
 // playground's components.
 type TrayPick = ScenarioId | 'components'
 const app = ref<TrayPick>('components')
-const appMenu = computed(() =>
+// the workspace the cell names: this playground, or the app in front
+const appTitle = computed(() => appScenario.value?.title ?? 'Frappe UI')
+
+const appScenario = computed(() =>
   app.value === 'components'
     ? undefined
     : scenarios.find((s) => s.id === app.value),
@@ -186,14 +199,31 @@ setColorScheme(params.get('theme') === 'dark' ? 'dark' : 'light')
 
 // Crossfade the whole page between themes where the browser supports view
 // transitions; elsewhere (and under reduced motion) it switches instantly.
+const darkMode = computed({
+  get: () => resolvedColorScheme.value === 'dark',
+  set: () => toggleTheme(),
+})
+
 function toggleTheme() {
   const next = resolvedColorScheme.value === 'dark' ? 'light' : 'dark'
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
   const doc = document as Document & {
-    startViewTransition?: (update: () => void) => unknown
+    startViewTransition?: (update: () => void) => {
+      finished: Promise<void>
+      skipTransition: () => void
+    }
   }
-  if (doc.startViewTransition && !reduce) {
-    doc.startViewTransition(() => setColorScheme(next))
+  // A crossfade holds a snapshot of the old theme over the page while it
+  // runs. If that snapshot is left behind — the tab goes to the background
+  // mid-flight, a long task eats the frame — the old colours stay painted
+  // over the new ones, so the transition is skipped unless the page is
+  // visible, and dropped if it has not finished in time.
+  if (doc.startViewTransition && !reduce && !document.hidden) {
+    const transition = doc.startViewTransition(() => setColorScheme(next))
+    const bail = window.setTimeout(() => transition.skipTransition(), 600)
+    transition.finished
+      .catch(() => setColorScheme(next))
+      .finally(() => clearTimeout(bail))
   } else {
     setColorScheme(next)
   }
@@ -236,8 +266,72 @@ onMounted(() => {
     fullscreen.value = !!document.fullscreenElement
   })
 })
-// Sidebar & Header: the v1 preview-control card, opened from the corner group.
-const layoutControls = ref(false)
+// ---- the sidebar pattern.
+// The Sidebar & Header page has no sidebar of its own: the shell's own
+// sidebar is the pattern, and the preview control in its header cell drives
+// it — which app's menu it shows, whether it is collapsed to the 44px rail,
+// whether the app tray is beside it — while the page draws the header bars
+// underneath the breadcrumb.
+const patternCollapsed = ref(false)
+const patternTray = ref(true)
+const showHeader = ref(true)
+const headerType = ref(headerTypes[0].value)
+const showSubheader = ref(true)
+const subheaderType = ref(subheaderTypes[0].value)
+
+const headerComponent = computed(
+  () => headerTypes.find((v) => v.value === headerType.value)!.component,
+)
+const subheaderComponent = computed(
+  () => subheaderTypes.find((v) => v.value === subheaderType.value)!.component,
+)
+
+// Settings has neither a collapsed variant nor the app tray, and its page
+// carries no header bars — the same rule the v1 layout follows.
+const inSettings = computed(() => app.value === 'settings')
+watch(inSettings, (settings) => {
+  if (!settings) return
+  patternCollapsed.value = false
+  patternTray.value = false
+  showHeader.value = false
+  showSubheader.value = false
+})
+
+// The App row picks what the sidebar is: this playground's components, or
+// one of the apps — the same pick the tray makes.
+const appOptions = [
+  { label: 'Frappe UI', value: 'components' },
+  ...scenarios.map((s) => ({ label: s.label, value: s.id })),
+]
+const appPick = computed({
+  get: () => app.value as string,
+  set: (value: string) => (app.value = value as TrayPick),
+})
+
+// 48px tray · 220px menu, or 44px once collapsed (35164:58913)
+const sidebarWidth = computed(
+  () => (patternTray.value ? 48 : 0) + (patternCollapsed.value ? 44 : 220),
+)
+
+// the rows an app shows on the rail; the components list falls back to its
+// own icons
+const collapsedRows = computed(
+  () => appScenario.value?.collapsedRows ?? appScenario.value?.rows ?? [],
+)
+
+const headerOptions = headerTypes.map(({ value, label }) => ({ value, label }))
+const subheaderOptions = subheaderTypes.map(({ value, label }) => ({
+  value,
+  label,
+}))
+
+// the header cell, full width or as the 28px logo on the rail
+const cellClass = computed(() => [
+  'flex h-8 shrink-0 items-center rounded-4 transition-colors hover:bg-surface-gray-2 data-[state=open]:bg-surface-gray-2',
+  patternCollapsed.value
+    ? 'w-7 justify-center self-center'
+    : 'w-full gap-2 py-0.5 pl-2 pr-1',
+])
 
 const current = computed(() => pages.find((p) => p.id === page.value)!)
 
@@ -330,6 +424,76 @@ onMounted(() => nextTick(scanSections))
 watch(page, () => setTimeout(scanSections, 260))
 onUnmounted(() => observer?.disconnect())
 
+// The header cell's menu, as Frappe apps have it: switch app, docs, about,
+// cloud, settings — and the controls this playground needs, so the cell is
+// where everything is driven from.
+const appLogoIcon = (logo: string) => () =>
+  h(EIcon, { name: `logo-${logo}`, class: 'size-4' })
+
+const currentMark = {
+  suffix: () =>
+    h('span', {
+      class: 'lucide-check size-4 text-ink-gray-7',
+      'aria-label': 'Current app',
+    }),
+}
+
+const appMenu = computed(() => [
+  {
+    group: 'App',
+    hideLabel: true,
+    options: [
+      {
+        label: 'Apps',
+        icon: 'lucide-layout-grid',
+        submenu: [
+          {
+            label: 'Frappe UI',
+            icon: () => h('img', { src: appLogo, class: 'size-4' }),
+            slots: app.value === 'components' ? currentMark : undefined,
+            onClick: () => (app.value = 'components'),
+          },
+          ...TRAY_APPS.map((a) => ({
+            label: a.label,
+            icon: appLogoIcon(a.logo),
+            slots: app.value === a.scenario ? currentMark : undefined,
+            onClick: () => (app.value = a.scenario),
+          })),
+        ],
+      },
+      { label: 'Frappe Docs', icon: 'lucide-book-open' },
+      { label: 'About', icon: 'lucide-info' },
+      { label: 'Login to Frappe Cloud', icon: 'lucide-cloud' },
+      { label: 'Settings', icon: 'lucide-settings' },
+    ],
+  },
+  {
+    group: 'Preview',
+    hideLabel: true,
+    options: [
+      {
+        label: 'Sidebar',
+        icon: 'lucide-panel-left',
+        switch: true,
+        switchValue: sidebarOpen.value,
+        onClick: (on: boolean) => (sidebarOpen.value = on),
+      },
+      {
+        label: 'Dark mode',
+        icon: 'lucide-moon',
+        switch: true,
+        switchValue: darkMode.value,
+        onClick: () => toggleTheme(),
+      },
+    ],
+  },
+  {
+    group: 'Account',
+    hideLabel: true,
+    options: [{ label: 'Log out', icon: 'lucide-log-out' }],
+  },
+])
+
 // what the outline is a list of, per page
 const OUTLINE_TITLES: Record<string, string> = {
   modal: 'Modal sizes',
@@ -349,8 +513,10 @@ const crumbs = computed(() => [
 
 <template>
   <!-- Figma: espresso-2.0 (34984:226091). The app frame: a 220px sidebar on
-       surface-gray-1 behind a hairline (p 8, its header cell 41 tall, items
-       28 tall and 2px apart), a 48px header ruled underneath (pl 12 · pr 20)
+       surface-sidebar behind a hairline — #F8F8F8 in light, and in dark the
+       file's fill is transparent (29752:48048), so the page shows through
+       (p 8, its header cell 41 tall, items 28 tall and 2px apart), a 48px
+       header ruled underneath (pl 12 · pr 20)
        carrying the breadcrumb, the page itself, and the content outline down
        the right — 150px rows, 30px in from the edge. The theme / expand
        group sits 20px from the bottom-right corner. -->
@@ -359,158 +525,312 @@ const crumbs = computed(() => [
          app tray (p 10, 28px logos 12px apart, its own hairline) and the
          220px nav beside it (p 8 · pb 10) -->
     <div
-      class="flex h-full shrink-0 overflow-hidden border-r border-outline-gray-1 bg-surface-gray-1 transition-[width,opacity] duration-300 ease-out dark:border-outline-gray-2"
-      :class="
-        sidebarOpen ? 'w-[268px] opacity-100' : 'w-0 border-r-0 opacity-0'
-      "
+      class="flex h-full shrink-0 overflow-hidden border-r border-outline-gray-1 bg-surface-sidebar transition-[width,opacity] duration-300 ease-out"
+      :class="sidebarOpen ? 'opacity-100' : 'border-r-0 opacity-0'"
+      :style="{ width: sidebarOpen ? `${sidebarWidth}px` : '0px' }"
       :inert="!sidebarOpen || undefined"
     >
-      <nav
-        class="flex h-full w-12 shrink-0 flex-col justify-between border-r border-outline-gray-1 p-2.5 dark:border-outline-gray-2"
-        aria-label="Apps"
+      <!-- the tray slides its own width away when app navigation is off -->
+      <div
+        class="h-full shrink-0 overflow-hidden transition-[width] duration-300 ease-out"
+        :style="{ width: patternTray ? '48px' : '0px' }"
       >
-        <span class="flex flex-col items-center gap-3">
-          <!-- the app in front carries the 3.5px indicator -->
-          <span class="relative">
-            <span
-              v-if="app === 'default'"
-              aria-hidden="true"
-              class="absolute -left-2.5 top-0 h-7 w-[3.5px] rounded-r-[3px] bg-surface-gray-6"
-            />
-            <button
-              type="button"
-              class="tray-app"
-              aria-label="Frappe"
-              title="Frappe"
-              :aria-current="app === 'default' ? 'page' : undefined"
-              @click="app = 'default'"
-            >
-              <img
-                :src="frappeLogo"
-                alt=""
-                class="size-7 rounded-5 dark:invert"
+        <nav
+          class="flex h-full w-12 shrink-0 flex-col justify-between border-r border-outline-gray-1 p-2.5"
+          aria-label="Apps"
+        >
+          <span class="flex flex-col items-center gap-3">
+            <!-- the app in front carries the 3.5px indicator -->
+            <span class="relative">
+              <span
+                v-if="app === 'default'"
+                aria-hidden="true"
+                class="absolute -left-2.5 top-0 h-7 w-[3.5px] rounded-r-[3px] bg-surface-gray-6"
               />
-            </button>
-          </span>
-          <span class="w-7 border-t border-outline-gray-1" />
-          <span v-for="a in TRAY_APPS" :key="a.logo" class="relative">
-            <span
-              v-if="app === a.scenario"
-              aria-hidden="true"
-              class="absolute -left-2.5 top-0 h-7 w-[3.5px] rounded-r-[3px] bg-surface-gray-6"
-            />
-            <button
-              type="button"
-              class="tray-app"
-              :aria-label="a.label"
-              :title="a.label"
-              :aria-current="app === a.scenario ? 'page' : undefined"
-              @click="app = a.scenario"
-            >
-              <EIcon :name="`logo-${a.logo}`" class="size-7" />
-            </button>
-          </span>
-          <!-- under the apps: this playground's own components -->
-          <span class="relative">
-            <span
-              v-if="app === 'components'"
-              aria-hidden="true"
-              class="absolute -left-2.5 top-0 h-7 w-[3.5px] rounded-r-[3px] bg-surface-gray-6"
-            />
-            <button
-              type="button"
-              class="tray-app"
-              aria-label="Frappe UI"
-              title="Frappe UI"
-              :aria-current="app === 'components' ? 'page' : undefined"
-              @click="app = 'components'"
-            >
-              <img
-                :src="frappeLogo"
-                alt=""
-                class="size-7 rounded-5 dark:invert"
+              <button
+                type="button"
+                class="tray-app"
+                aria-label="Frappe"
+                title="Frappe"
+                :aria-current="app === 'default' ? 'page' : undefined"
+                @click="app = 'default'"
+              >
+                <img :src="appLogo" alt="" class="size-7" />
+              </button>
+            </span>
+            <span class="w-7 border-t border-outline-gray-1" />
+            <span v-for="a in TRAY_APPS" :key="a.logo" class="relative">
+              <span
+                v-if="app === a.scenario"
+                aria-hidden="true"
+                class="absolute -left-2.5 top-0 h-7 w-[3.5px] rounded-r-[3px] bg-surface-gray-6"
               />
-            </button>
+              <button
+                type="button"
+                class="tray-app"
+                :aria-label="a.label"
+                :title="a.label"
+                :aria-current="app === a.scenario ? 'page' : undefined"
+                @click="app = a.scenario"
+              >
+                <EIcon :name="`logo-${a.logo}`" class="size-7" />
+              </button>
+            </span>
+            <!-- under the apps: this playground's own components -->
+            <span class="relative">
+              <span
+                v-if="app === 'components'"
+                aria-hidden="true"
+                class="absolute -left-2.5 top-0 h-7 w-[3.5px] rounded-r-[3px] bg-surface-gray-6"
+              />
+              <button
+                type="button"
+                class="tray-app"
+                aria-label="Frappe UI"
+                title="Frappe UI"
+                :aria-current="app === 'components' ? 'page' : undefined"
+                @click="app = 'components'"
+              >
+                <img :src="appLogo" alt="" class="size-7" />
+              </button>
+            </span>
           </span>
-        </span>
 
-        <!-- settings and the account, at the foot of the tray -->
-        <span class="flex flex-col items-center gap-3">
-          <button
-            type="button"
-            class="flex size-7 items-center justify-center rounded-4 text-ink-gray-6 transition-colors hover:bg-surface-gray-2 hover:text-ink-gray-8"
-            aria-label="Settings"
-            title="Settings"
-          >
-            <span class="nav-icon size-4" v-html="sbSettings" />
-          </button>
-          <img
-            :src="trayAvatar"
-            alt="Sally Potter"
-            class="size-[30px] max-w-none"
-          />
-        </span>
-      </nav>
+          <!-- settings and the account, at the foot of the tray -->
+          <span class="flex flex-col items-center gap-3">
+            <button
+              type="button"
+              class="flex size-7 items-center justify-center rounded-4 text-ink-gray-6 transition-colors hover:bg-surface-gray-2 hover:text-ink-gray-8"
+              aria-label="Settings"
+              title="Settings"
+            >
+              <span class="nav-icon size-4" v-html="sbSettings" />
+            </button>
+            <img
+              :src="trayAvatar"
+              alt="Sally Potter"
+              class="size-[30px] max-w-none"
+            />
+          </span>
+        </nav>
+      </div>
 
       <div
-        class="v2-scroll flex h-full w-[220px] flex-col gap-2 overflow-y-auto p-2 pb-2.5"
+        class="v2-scroll flex h-full shrink-0 flex-col gap-2 overflow-y-auto p-2 pb-2.5 transition-[width] duration-300 ease-out"
+        :style="{ width: patternCollapsed ? '44px' : '220px' }"
       >
-        <!-- header cell (204 × 32, pl 8 · py 2): the workspace and a chevron -->
-        <div class="flex h-8 shrink-0 items-center gap-2 rounded-4 py-0.5 pl-2">
-          <span
-            class="min-w-0 flex-1 truncate text-base-medium text-ink-gray-9"
+        <!-- header cell (204 × 32, pl 8 · py 2): the workspace, and what
+             everything is driven from. On the Sidebar & Header page it opens
+             the preview control, which drives this sidebar; on every other
+             page it opens the app menu. Collapsed, the cell is the 28px
+             logo (Figma's collapsed header slot). -->
+        <Popover
+          v-if="page === 'sidebar-header'"
+          side="bottom"
+          align="start"
+          :offset="6"
+          bare
+        >
+          <template #trigger>
+            <button
+              type="button"
+              :class="cellClass"
+              :aria-label="patternCollapsed ? 'Preview control' : undefined"
+            >
+              <img
+                v-if="patternCollapsed"
+                :src="appLogo"
+                alt=""
+                class="size-7 shrink-0"
+              />
+              <template v-else>
+                <span
+                  class="min-w-0 flex-1 truncate text-start text-base-medium text-ink-gray-9"
+                >
+                  {{ appTitle }}
+                </span>
+                <span
+                  class="flex size-6 shrink-0 items-center justify-center text-ink-gray-7"
+                  aria-hidden="true"
+                >
+                  <span class="size-3.5" v-html="navChevron" />
+                </span>
+              </template>
+            </button>
+          </template>
+          <!-- the layout's own controls, in the shape the floating card
+               used: one row per setting, the pickers lining up -->
+          <div
+            class="v2-scroll flex max-h-[calc(100vh-72px)] w-[340px] flex-col gap-2 overflow-y-auto rounded-[20px] border border-outline-gray-1 bg-surface-elevation-2 p-3 shadow-lg"
           >
-            {{ appMenu?.title ?? 'Frappe UI' }}
-          </span>
-          <span
-            class="flex size-6 shrink-0 items-center justify-center rounded-4 text-ink-gray-7"
-            aria-hidden="true"
-          >
-            <span class="size-3.5" v-html="navChevron" />
-          </span>
-        </div>
+            <p class="px-2 pb-1 pt-1 text-xl-semibold text-ink-gray-9">
+              Preview control
+            </p>
+            <ControlSelect
+              v-model="appPick"
+              label="App"
+              :options="appOptions"
+            />
+            <ControlToggle
+              v-model="patternCollapsed"
+              label="Collapsed"
+              :disabled="inSettings"
+            />
+            <ControlToggle
+              v-model="patternTray"
+              label="App navigation"
+              :disabled="inSettings"
+            />
+            <ControlToggle
+              v-model="showHeader"
+              label="Header"
+              :disabled="inSettings"
+            />
+            <ControlSelect
+              v-if="showHeader"
+              v-model="headerType"
+              label="Header type"
+              :options="headerOptions"
+            />
+            <ControlToggle
+              v-model="showSubheader"
+              label="Subheader"
+              :disabled="inSettings"
+            />
+            <ControlSelect
+              v-if="showSubheader"
+              v-model="subheaderType"
+              label="Subheader type"
+              :options="subheaderOptions"
+            />
+            <ControlToggle v-model="darkMode" label="Dark mode" />
+          </div>
+        </Popover>
+        <Dropdown v-else :options="appMenu" match-trigger-width :offset="6">
+          <button type="button" :class="cellClass">
+            <img
+              v-if="patternCollapsed"
+              :src="appLogo"
+              alt=""
+              class="size-7 shrink-0"
+            />
+            <template v-else>
+              <span
+                class="min-w-0 flex-1 truncate text-start text-base-medium text-ink-gray-9"
+              >
+                {{ appTitle }}
+              </span>
+              <span
+                class="flex size-6 shrink-0 items-center justify-center text-ink-gray-7"
+                aria-hidden="true"
+              >
+                <span class="size-3.5" v-html="navChevron" />
+              </span>
+            </template>
+          </button>
+        </Dropdown>
 
         <!-- an app's own menu, drawn from the same rows the Espresso
              sidebar demo uses -->
+        <!-- collapsed, the rail is the app's own icon rows; expanded, it is
+             the shared menu, so a disclosure section (CRM's Public Views,
+             Calendar's My Calendars) folds here exactly as it does in the
+             Espresso sidebar -->
         <div
-          v-if="appMenu"
-          class="flex flex-col"
-          :style="{ gap: `${appMenu.menuGap}px` }"
+          v-if="appScenario && patternCollapsed"
+          class="flex flex-col items-center gap-0.5"
         >
-          <SidebarRow v-for="(row, i) in appMenu.rows" :key="i" :row="row" />
+          <SidebarRow
+            v-for="(row, i) in collapsedRows"
+            :key="i"
+            :row="row"
+            collapsed
+          />
         </div>
+        <SidebarMenu v-else-if="appScenario" :scenario="appScenario" />
 
-        <div v-else class="flex flex-col gap-0.5">
+        <div
+          v-else
+          class="flex flex-col gap-0.5"
+          :class="patternCollapsed && 'items-center'"
+        >
           <!-- 28px rows 2px apart, px 8: a 16px icon · 8px · the 14 label.
-               The pick sits on a raised white row (sm elevation), as the
-               file draws it; the rest darken on hover. -->
+               The states are the sidebar-item component's own (29766:167193),
+               so both themes come from the same tokens: the pick sits on a
+               raised elevation-2 row with the sm shadow (white in light,
+               #242424 in dark, where that shadow carries the file's inner
+               highlight), the rest take a gray-2 fill on hover. -->
           <button
             v-for="p in pages"
             :key="p.id"
             type="button"
-            class="flex h-7 shrink-0 items-center gap-2 rounded-4 px-2 text-start transition-colors"
-            :class="
+            class="flex h-7 shrink-0 items-center rounded-4 transition-colors"
+            :class="[
+              patternCollapsed ? 'w-7 justify-center' : 'gap-2 px-2 text-start',
               p.id === page
                 ? 'bg-surface-elevation-2 text-ink-gray-8 shadow-sm'
-                : 'text-ink-gray-6 hover:text-ink-gray-8'
-            "
+                : 'text-ink-gray-6 hover:bg-surface-gray-2 hover:text-ink-gray-8',
+            ]"
             :aria-current="p.id === page ? 'page' : undefined"
+            :aria-label="patternCollapsed ? p.label : undefined"
+            :title="patternCollapsed ? p.label : undefined"
             @click="page = p.id"
           >
             <span class="nav-icon size-4 shrink-0" v-html="NAV_ICONS[p.id]" />
-            <span class="min-w-0 flex-1 truncate text-base">{{ p.label }}</span>
+            <span
+              v-if="!patternCollapsed"
+              class="min-w-0 flex-1 truncate text-base"
+              >{{ p.label }}</span
+            >
           </button>
         </div>
 
-        <!-- an app's foot is a single Collapse row (35167:69809) -->
-        <div v-if="appMenu" class="mt-auto pt-4">
+        <!-- an app's foot is a single Collapse row (35167:69809), which on
+             the rail is the button that opens it again -->
+        <div
+          v-if="appScenario"
+          class="mt-auto pt-4"
+          :class="patternCollapsed && 'flex justify-center'"
+        >
           <button
             type="button"
-            class="flex h-7 w-full items-center gap-2 rounded-4 px-2 text-start text-ink-gray-7 transition-colors hover:bg-surface-gray-2"
-            @click="sidebarOpen = false"
+            class="flex h-7 items-center rounded-4 text-ink-gray-7 transition-colors hover:bg-surface-gray-2"
+            :class="
+              patternCollapsed
+                ? 'w-7 justify-center'
+                : 'w-full gap-2 px-2 text-start'
+            "
+            :aria-label="patternCollapsed ? 'Expand sidebar' : undefined"
+            @click="patternCollapsed = !patternCollapsed"
           >
             <span class="nav-icon size-4 shrink-0" v-html="sbSidebarToggle" />
-            <span class="min-w-0 flex-1 truncate text-base">Collapse</span>
+            <span
+              v-if="!patternCollapsed"
+              class="min-w-0 flex-1 truncate text-base"
+              >Collapse</span
+            >
+          </button>
+        </div>
+
+        <!-- collapsed, this playground's foot is the same actions stacked on
+             the rail; the trial card and the storage bar need the width -->
+        <div
+          v-else-if="patternCollapsed"
+          class="mt-auto flex flex-col items-center gap-1 pt-4"
+        >
+          <button type="button" class="sb-action" aria-label="What's new">
+            <span class="nav-icon size-4" v-html="sbZap" />
+          </button>
+          <button type="button" class="sb-action" aria-label="Help">
+            <span class="nav-icon size-4" v-html="sbHelp" />
+          </button>
+          <button
+            type="button"
+            class="sb-action"
+            aria-label="Expand sidebar"
+            @click="patternCollapsed = false"
+          >
+            <span class="nav-icon size-4" v-html="sbSidebarToggle" />
           </button>
         </div>
 
@@ -518,7 +838,7 @@ const crumbs = computed(() => [
              and the quick actions — 11px apart, pinned to the bottom -->
         <div v-else class="mt-auto flex flex-col gap-[11px] pt-4">
           <div
-            class="flex flex-col gap-3.5 rounded-6 bg-surface-elevation-2 p-3 shadow-sm"
+            class="flex flex-col gap-3.5 rounded-6 border border-outline-elevation-1 bg-surface-elevation-1 p-3 shadow-sm"
           >
             <p class="flex items-start gap-1.5">
               <span
@@ -566,11 +886,14 @@ const crumbs = computed(() => [
                 <span class="nav-icon size-4" v-html="sbHelp" />
               </button>
             </span>
+            <!-- the file's sidebar-collapse glyph, so it collapses to the
+                 rail rather than hiding the sidebar outright; the rail's own
+                 button brings it back -->
             <button
               type="button"
               class="sb-action"
-              aria-label="Hide sidebar"
-              @click="sidebarOpen = false"
+              aria-label="Collapse sidebar"
+              @click="patternCollapsed = true"
             >
               <span class="nav-icon size-4" v-html="sbSidebarToggle" />
             </button>
@@ -582,7 +905,7 @@ const crumbs = computed(() => [
     <main class="relative flex min-w-0 flex-1 flex-col">
       <!-- header: the breadcrumb on the left, 48 tall and ruled beneath -->
       <header
-        class="flex h-12 shrink-0 items-center border-b border-outline-gray-1 py-2.5 pl-3 pr-5 dark:border-outline-gray-2"
+        class="flex h-12 shrink-0 items-center border-b border-outline-gray-1 py-2.5 pl-3 pr-5"
       >
         <Breadcrumbs :items="crumbs" />
       </header>
@@ -622,16 +945,25 @@ const crumbs = computed(() => [
                 </section>
               </div>
 
-              <!-- the v1 app layout, as-is; its control card floats above the
-                 corner group -->
-              <!-- the shell already has a sidebar, so this page opens the
-                   layout with just its header bars -->
-              <EspressoLayout
+              <!-- The sidebar pattern is the shell's own sidebar, so this
+                   page is just the header bars it sits beside; the preview
+                   control in the sidebar's header cell drives both. -->
+              <div
                 v-else-if="page === 'sidebar-header'"
-                :with-sidebar="false"
-                :show-controls="layoutControls"
-                controls-class="absolute bottom-[64px] right-2.5 z-20 max-h-[calc(100%-74px)]"
-              />
+                class="flex h-full flex-col"
+              >
+                <component
+                  :is="headerComponent"
+                  v-if="showHeader"
+                  :key="headerType"
+                />
+                <component
+                  :is="subheaderComponent"
+                  v-if="showSubheader"
+                  :key="subheaderType"
+                />
+                <div class="min-h-0 flex-1" />
+              </div>
 
               <ListPage v-else-if="page === 'list'" />
               <PopoverPage v-else-if="page === 'popover'" />
@@ -719,22 +1051,6 @@ const crumbs = computed(() => [
           </template>
         </Button>
         <Button
-          v-if="page === 'sidebar-header'"
-          size="md"
-          :label="
-            layoutControls ? 'Hide preview controls' : 'Show preview controls'
-          "
-          :aria-pressed="layoutControls"
-          :class="{ '!bg-surface-gray-3': layoutControls }"
-          @click="layoutControls = !layoutControls"
-        >
-          <template #icon>
-            <span
-              class="lucide-sliders-horizontal size-[18px] text-ink-gray-7"
-            />
-          </template>
-        </Button>
-        <Button
           size="md"
           :label="sidebarOpen ? 'Hide sidebar' : 'Show sidebar'"
           :aria-pressed="!sidebarOpen"
@@ -816,12 +1132,10 @@ const crumbs = computed(() => [
   @apply flex size-7 items-center justify-center rounded-4 text-ink-gray-6 transition-colors hover:bg-surface-gray-2 hover:text-ink-gray-8;
 }
 
-/* an app in the tray: the logo, dimmed until it is pointed at */
+/* an app in the tray: every logo at full strength, the app in front marked
+   by the indicator rather than by the others fading */
 .tray-app {
-  @apply flex size-7 items-center justify-center rounded-5 transition-opacity;
-}
-.tray-app:not([aria-current]) {
-  @apply opacity-80 hover:opacity-100;
+  @apply flex size-7 items-center justify-center rounded-5;
 }
 
 /* the row icons take the row's own ink */
