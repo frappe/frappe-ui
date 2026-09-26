@@ -4,6 +4,7 @@ import AppShell from './playground/AppShell.vue'
 import SettingsModalPatterns from './playground/v2/SettingsModalPatterns.vue'
 import TablePatterns from './playground/components/TablePatterns.vue'
 import ActivityPatterns from './playground/activity/ActivityPatterns.vue'
+import CalendarPatterns from './playground/calendar/CalendarPatterns.vue'
 import V1 from './playground/v1/SettingsModalPatterns.vue'
 
 // The whole playground lives under one address, so nothing of ours sits at the
@@ -34,6 +35,12 @@ const pages = [
     label: 'Activity',
     icon: 'lucide-activity',
     component: ActivityPatterns,
+  },
+  {
+    path: '/calendar',
+    label: 'Calendar',
+    icon: 'lucide-calendar',
+    component: CalendarPatterns,
   },
 ]
 

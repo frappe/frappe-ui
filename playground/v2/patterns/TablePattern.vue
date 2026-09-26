@@ -3,12 +3,26 @@ import { ref } from 'vue'
 import { Avatar, Badge, Dropdown, Select } from '../../../src'
 import { faceFor } from '../../components/patterns/designAssets'
 import {
-  List,
-  ListCell,
   ListHeader,
-  ListHeaderCell,
-  ListRow,
-} from '../../../src/molecules/list'
+  ListHeaderItem,
+  ListRows,
+  ListView,
+} from '../../../experimental/ListView'
+import {
+  settingsListView,
+  settingsListViewOptions,
+} from '../settingsListViewClasses'
+import * as shellPending from '../../pendingFrappeUIChanges'
+
+// Widths as the List version set them: the name column takes what's left of
+// 700 after the 98px role, the 40px menu and the two 8px gaps.
+const columns = [
+  { label: 'Name', key: 'name', width: 'minmax(0,1fr)' },
+  // The ghost Select insets its value by its own `px-2`, so the label takes
+  // the same 8px to line up with the roles beneath it.
+  { label: 'Role', key: 'role', width: '98px', headerClass: 'pl-2' },
+  { label: '', key: 'actions', width: '40px' },
+]
 
 const roleOptions = [
   { label: 'Admin', value: 'Admin' },
@@ -72,80 +86,99 @@ function rowActions(name: string) {
 
 <template>
   <!--
-    frappe-ui's List family in table mode. Each row holds two controls (the
-    role select and the actions menu), so rows stay static — only the controls
-    are interactive. `list-row-px-0`: no inset, so the avatar and the "Name"
-    label sit flush with the pattern's left edge.
-  -->
-  <List
-    class="w-[700px] max-w-full list-row-px-0 [&_[data-slot=list-header]]:!h-10"
-    :columns="['minmax(0,1fr)', '98px', '40px']"
-  >
-    <ListHeader>
-      <ListHeaderCell>Name</ListHeaderCell>
-      <!--
-        The ghost Select insets its value by its own `px-2`, so the header
-        takes the same 8px to line up with the roles beneath it.
-      -->
-      <ListHeaderCell class="pl-2">Role</ListHeaderCell>
-      <ListHeaderCell><span class="sr-only">Actions</span></ListHeaderCell>
-    </ListHeader>
+    The experimental ListView, drawn as the List family drew this table.
+    Rows hold two controls (the role select and the actions menu), so nothing
+    about a row is a click target: `settingsListViewOptions` turns selection
+    off and returns no route, which is also what keeps ListRow from wrapping
+    the cells in a button.
 
-    <!-- 13px above and below the 39px name/email block: the design's 65px row. -->
-    <ListRow v-for="member in members" :key="member.id" class="py-3">
-      <ListCell class="gap-2">
+    Header and rows are composed by hand rather than left to ListView's
+    default, because the role label needs its own 8px inset.
+  -->
+  <ListView
+    :class="`w-[700px] max-w-full ${settingsListView}`"
+    :columns="columns"
+    :rows="members"
+    row-key="id"
+    :options="settingsListViewOptions"
+  >
+    <template #default>
+      <ListHeader>
+        <!--
+          The label goes in the slot rather than through `:class`:
+          ListHeaderItem applies `$attrs.class` to its inner div, and Vue has
+          already merged the same class onto its root, so any inset passed
+          that way lands twice and the label drifts right of its column.
+        -->
+        <ListHeaderItem
+          v-for="column in columns"
+          :key="column.key"
+          :item="column"
+        >
+          <span v-if="!column.label" class="sr-only">Actions</span>
+          <div v-else class="truncate" :class="column.headerClass">
+            {{ column.label }}
+          </div>
+        </ListHeaderItem>
+      </ListHeader>
+      <ListRows />
+    </template>
+
+    <template #cell="{ row, column }">
+      <!-- 13px above and below the 39px name/email block: the design's 65px row. -->
+      <div v-if="column.key === 'name'" class="flex min-w-0 items-center gap-2">
         <!--
           A photo for everyone who has actually joined; the inactive row keeps
           its initial, which is what an account with no one behind it shows.
         -->
         <Avatar
           size="xl"
-          :label="member.name"
-          :image="member.inactive ? undefined : faceFor(member.name)"
+          :label="row.name"
+          :image="row.inactive ? undefined : faceFor(row.name)"
           class="shrink-0"
-          :class="{ 'opacity-50': member.inactive }"
+          :class="{ 'opacity-50': row.inactive }"
         />
         <div class="min-w-0">
           <div class="flex items-center gap-1.5">
             <span class="truncate text-base-medium text-ink-gray-7">
-              {{ member.name }}
+              {{ row.name }}
             </span>
             <!-- `sm` (16px): an `md` badge is 20 and made this one row 4px
                  taller than the rest. -->
-            <Badge v-if="member.inactive" label="Inactive" size="sm" />
+            <Badge v-if="row.inactive" label="Inactive" size="sm" />
           </div>
           <p class="mt-0.5 truncate text-p-base text-ink-gray-5">
-            {{ member.email }}
+            {{ row.email }}
           </p>
         </div>
-      </ListCell>
+      </div>
 
-      <ListCell>
-        <!--
-          `w-full` pins every select to the column's width, so the role labels
-          start on one line and the chevrons finish on another.
-        -->
-        <Select
-          v-model="member.role"
-          class="w-full"
-          variant="ghost"
-          size="sm"
-          :options="roleOptions"
-          placeholder="Select role"
-          :aria-label="`Role for ${member.name}`"
-        />
-      </ListCell>
+      <!--
+        `w-full` pins every select to the column's width, so the role labels
+        start on one line and the chevrons finish on another.
+      -->
+      <Select
+        v-else-if="column.key === 'role'"
+        v-model="row.role"
+        class="w-full"
+        :class="shellPending.ghostSelectFocus"
+        variant="ghost"
+        size="sm"
+        :options="roleOptions"
+        placeholder="Select role"
+        :aria-label="`Role for ${row.name}`"
+      />
 
-      <ListCell class="justify-end">
+      <div v-else class="flex justify-end">
         <Dropdown
-          :options="rowActions(member.name)"
+          :options="rowActions(row.name)"
           :button="{
             variant: 'ghost',
             icon: 'lucide-ellipsis',
-            'aria-label': `Actions for ${member.name}`,
+            'aria-label': `Actions for ${row.name}`,
           }"
         />
-      </ListCell>
-    </ListRow>
-  </List>
+      </div>
+    </template>
+  </ListView>
 </template>

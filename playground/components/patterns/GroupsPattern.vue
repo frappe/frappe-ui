@@ -5,6 +5,7 @@ import { ListView } from '../../../experimental/ListView'
 import { faceFor, logos } from './designAssets'
 import { espressoListView, espressoListViewGroups } from './listViewClasses'
 import StageRing from '../icons/StageRing.vue'
+import CallIcon from '../icons/CallIcon.vue'
 
 type Stage = 'Qualification' | 'Demo' | 'Proposal' | 'Negotiation'
 
@@ -145,8 +146,14 @@ const opened = ref<string | null>(null)
         value.
       -->
       <template #group-header="{ group }">
+        <!--
+          `text-p-base-medium`, not `text-base-medium`: the file sets this
+          line at 14/21, which is the paragraph line height. The heading line
+          is the same 14px either way, but on the 18.9px line it sits cramped
+          in a 32px row.
+        -->
         <span
-          class="flex items-center gap-2 text-base-medium text-ink-gray-9"
+          class="flex items-center gap-2 text-p-base-medium text-ink-gray-9"
         >
           Status -
           <span class="flex items-center gap-1">
@@ -173,9 +180,11 @@ const opened = ref<string | null>(null)
             :image="faceFor((row as Deal).assignee)"
             :label="(row as Deal).assignee"
           />
-          <span
+          <!-- Espresso's own handset (component 23447:5069), in the same
+               ink as the number beside it. -->
+          <CallIcon
             v-else-if="column.key === 'mobile'"
-            class="lucide-phone size-4 shrink-0 text-ink-gray-5"
+            class="text-ink-gray-6"
             aria-hidden="true"
           />
           <StageRing

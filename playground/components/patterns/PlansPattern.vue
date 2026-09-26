@@ -2,7 +2,10 @@
 import { ref } from 'vue'
 import { Button } from '../../../src'
 import { ListView } from '../../../experimental/ListView'
-import { espressoListViewStatic } from './listViewClasses'
+import {
+  espressoListViewStatic,
+  espressoStaticOptions,
+} from './listViewClasses'
 
 type Plan = {
   id: number
@@ -57,7 +60,7 @@ const current = ref(1)
       :columns="columns"
       :rows="rows"
       row-key="id"
-      :options="{ selectable: false, showTooltip: false, rowHeight: 40 }"
+      :options="{ ...espressoStaticOptions, rowHeight: 40 }"
     >
       <!--
         `align: 'right'` on a column does nothing: ListView puts `justify-end`

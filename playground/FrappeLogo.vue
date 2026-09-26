@@ -1,29 +1,32 @@
 <script setup lang="ts">
-// The Frappe mark, straight from `docs/content/public/frappe-logo.svg` —
-// inlined rather than linked so it takes a class and needs no asset pipeline.
+// The Frappe mark, from the Frappe Logos file (node 4372:16) — inlined rather
+// than linked so it takes a class and needs no asset pipeline.
 //
-// It is a brand mark, so nothing here is retokenised: black square, white F.
-// `dark:invert` is the standard mono inversion — the artwork is pure black and
-// white, so inverting gives the white-on-black form the dark theme needs
-// without drawing a second version of the logo.
+// It is a brand mark, so nothing here is retokenised and nothing flips in the
+// dark theme: the purple tile carries its own contrast on either page.
+//
+// `rx` is 9, not the 4.5 Figma's SVG export writes. The tile is 16x16 with a
+// 4.5px corner in the file — 28.125% — and the exporter scales the paths to
+// the 2x canvas but leaves the radius at its source value, which halves the
+// roundness. 28.125% of 32 is 9.
+//
+// That draws at 7.875px in the header's 28px box, which the box's own 6px
+// clip doesn't touch: a rounder corner cuts away more, so the mark's shape
+// sits inside the crop's rather than against it.
 </script>
 
 <template>
   <svg
-    viewBox="0 0 44 44"
+    viewBox="0 0 32 32"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
-    class="dark:invert"
     aria-hidden="true"
   >
-    <path
-      d="M12.5714 44L31.4286 44C38.3716 44 44 38.3716 44 31.4286L44 12.5714C44 5.62842 38.3716 0 31.4286 0L12.5714 0C5.62842 0 0 5.62842 0 12.5714L0 31.4286C0 38.3716 5.62842 44 12.5714 44Z"
-      fill="black"
-    />
-    <path d="M27.9084 12.9957H16.1069V16.1385H27.9084V12.9957Z" fill="white" />
-    <path
-      d="M16.1069 31.0042V20.7742H27.1069V23.917H19.2498V31.0042H16.1069Z"
-      fill="white"
-    />
+    <rect width="32" height="32" rx="9" fill="#B352FF" />
+    <path d="M12.3 15.5449H9.80002V25.2499H12.3V15.5449Z" fill="white" />
+    <path d="M12.3 6.75082H9.80002V11.4508H12.3V6.75082Z" fill="white" />
+    <path d="M25.5001 9.54413H7.00012V12.0441H25.5001V9.54413Z" fill="white" />
+    <path d="M25.5001 19.9477H7.00012V22.4477H25.5001V19.9477Z" fill="white" />
+    <path d="M22.7051 6.75082H20.2051V25.2508H22.7051V6.75082Z" fill="white" />
   </svg>
 </template>

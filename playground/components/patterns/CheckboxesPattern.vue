@@ -2,7 +2,10 @@
 import { reactive } from 'vue'
 import { Checkbox } from '../../../src'
 import { ListView } from '../../../experimental/ListView'
-import { espressoListViewStatic } from './listViewClasses'
+import {
+  espressoListViewStatic,
+  espressoStaticOptions,
+} from './listViewClasses'
 
 type Notification = {
   id: number
@@ -98,7 +101,7 @@ const channels = reactive(
       :columns="columns"
       :rows="rows"
       row-key="id"
-      :options="{ selectable: false, showTooltip: false, rowHeight: 62 }"
+      :options="{ ...espressoStaticOptions, rowHeight: 62 }"
     >
       <template #cell="{ row, column }">
         <span class="flex min-w-0 items-center">

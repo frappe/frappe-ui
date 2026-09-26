@@ -7,6 +7,8 @@ import {
   ListRows,
   ListView,
 } from '../../../experimental/ListView'
+import SettingsIcon from '../icons/SettingsIcon.vue'
+import EditIcon from '../icons/EditIcon.vue'
 
 type Entry = {
   id: number
@@ -88,6 +90,12 @@ const gridClasses = [
   '[&_.transition-all.flex-col]:!rounded-none',
   // ListView draws its own rule between rows; the cell borders replace it.
   '[&_.h-px.border-t]:hidden',
+  // A focus ring is drawn 3px outside its control, and ListView nests boxes
+  // that clip it: the cells, the rows container and this wrapper. This grid
+  // has its own class list rather than the shared one, so it repeats them.
+  '[&_.overflow-x-hidden]:!overflow-visible',
+  '[&_.h-full.overflow-y-auto]:!overflow-visible',
+  '!overflow-visible',
 ].join(' ')
 </script>
 
@@ -119,10 +127,14 @@ const gridClasses = [
               aria-label="Select all rows"
               @click="toggleAll"
             />
-            <!-- A label, not a control: same ink as every other header label. -->
-            <span
+            <!--
+              A label, not a control: same ink as every other header label.
+              Espresso's own cog (node 34900:31849), not lucide's — eight
+              teeth against six, and a narrower bore.
+            -->
+            <SettingsIcon
               v-else-if="column.key === 'action'"
-              class="lucide-settings size-4 text-ink-gray-5"
+              class="text-ink-gray-5"
               role="img"
               aria-label="Column settings"
             />
@@ -139,15 +151,22 @@ const gridClasses = [
           :aria-label="`Select row ${(row as Entry).id}`"
           @click.stop="toggle((row as Entry).id)"
         />
-        <!-- The design's per-row action: an edit button, ghost and icon-only. -->
+        <!--
+          The design's per-row action: an edit button, ghost and icon-only,
+          carrying Espresso's own mark (node 34900:31853). The file fills it
+          ink-gray-9, which is heavier than an action in a row wants to read
+          — ink-gray-6 here. The `#icon` slot is what keeps the button
+          icon-only — the `icon` prop only takes a lucide name.
+        -->
         <Button
           v-else-if="column.key === 'action'"
           variant="ghost"
           size="sm"
-          icon="lucide-square-pen"
           :aria-label="`Edit row ${(row as Entry).id}`"
           @click.stop
-        />
+        >
+          <template #icon><EditIcon class="text-ink-gray-6" /></template>
+        </Button>
         <!-- Nothing in a grid row is the row's name, so no cell is picked out
              in ink-gray-8 medium the way the other tables do it. -->
         <span v-else class="truncate text-base text-ink-gray-6">

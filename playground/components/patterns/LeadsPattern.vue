@@ -5,6 +5,7 @@ import { ListView } from '../../../experimental/ListView'
 import { faceFor, logos } from './designAssets'
 import { espressoListView } from './listViewClasses'
 import StatusDot from '../icons/StatusDot.vue'
+import CallIcon from '../icons/CallIcon.vue'
 
 type Status =
   | 'Open'
@@ -266,9 +267,11 @@ const opened = ref<string | null>(null)
             :image="faceFor((row as Lead).assignee)"
             :label="(row as Lead).assignee"
           />
-          <span
+          <!-- Espresso's own handset (component 23447:5069), in the same
+               ink as the number beside it. -->
+          <CallIcon
             v-else-if="column.key === 'mobile'"
-            class="lucide-phone size-4 shrink-0 text-ink-gray-5"
+            class="text-ink-gray-6"
             aria-hidden="true"
           />
           <!-- Espresso's own dot glyph, exported from the design file. -->

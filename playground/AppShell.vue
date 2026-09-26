@@ -6,6 +6,7 @@ import {
   SidebarItem,
 } from '../src'
 import FrappeLogo from './FrappeLogo.vue'
+import * as pending from './pendingFrappeUIChanges'
 import ThemeSwitcher from './ThemeSwitcher.vue'
 
 defineProps<{
@@ -43,7 +44,10 @@ function choose(event: MouseEvent, path: string) {
       it already knows about.
     -->
     <div class="sticky top-0 h-screen shrink-0">
-      <Sidebar class="h-full border-r border-outline-gray-1">
+      <Sidebar
+        class="h-full border-r border-outline-gray-1"
+        :class="[pending.sidebarTopPadding, pending.headerTextGap]"
+      >
         <SidebarHeader title="Patterns" subtitle="Frappe UI">
           <!-- The real mark, in the 28px box the header keeps for it. -->
           <template #prefix><FrappeLogo class="h-full w-full" /></template>
@@ -52,11 +56,20 @@ function choose(event: MouseEvent, path: string) {
         <!--
           14px between the header and the first item, as the design sets it.
           SidebarHeader is a 48px region with its 40px row centred in it, so 4
-          of those 14 are already there and the nav adds the other 10.
+          of those 14 are already there and the nav adds the other 10 — 6 of
+          margin and 4 of padding.
+
+          The split matters: `overflow-y-auto` makes this a clipping box, and
+          the active item's `shadow-sm` reaches ~2px past its own top edge, so
+          against a padding of zero the shadow was cut off square whenever the
+          first item was the active one. The 4px of padding gives it room, and
+          the margin drops by the same 4 so the gap itself doesn't move.
 
           Icons as the design marks them: a cog, a table, a pulse.
         -->
-        <nav class="mt-2.5 flex flex-1 flex-col gap-0.5 overflow-y-auto px-2">
+        <nav
+          class="mt-1.5 flex flex-1 flex-col gap-0.5 overflow-y-auto px-2 py-1"
+        >
           <SidebarItem
             v-for="page in pages"
             :key="page.path"

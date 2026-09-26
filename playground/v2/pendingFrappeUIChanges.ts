@@ -98,3 +98,32 @@ export const cellText = 'tracking-[0.21px]'
  */
 export const multiSelectMenu =
   '[&_[data-slot=item-prefix]>span>div:first-child]:hidden'
+
+/**
+ * Password: the reveal toggle doesn't scale with the field.
+ *
+ * `Password.vue` hard-codes its suffix as a `size-5` button around a
+ * `size-3.5` glyph whatever the `size` prop says, so the same 20/14 toggle
+ * sits in a 28px `sm` field and a 32px `md` one. Espresso scales it: on the
+ * 28px field (node 35220:54178) the button is 24 and the glyph 14 — the
+ * button is the field height less 4, and the glyph half the field. On our
+ * 32px `md` field that is a 28px button around a 16px glyph.
+ *
+ * The `md` variant wasn't reachable over REST, so those two numbers are read
+ * off the `sm` one's ratios rather than measured directly.
+ */
+export const passwordToggle = [
+  '[&_button]:!size-7',
+  '[&_button>span]:!size-4',
+
+  // The field's own padding, from the same node: 8 on the lead, 2 on the
+  // tail, and 14 between the text and the toggle.
+  //
+  // `TextInput` insets the suffix by its size step instead (`pe-2.5`, 10px on
+  // md), which leaves the toggle floating well short of the edge. 2px puts it
+  // where Espresso draws it. The input's own tail padding then has to clear
+  // the button by that 14: 2 + 28 + 14 = 44.
+  '[&_.absolute.end-0]:!pe-0.5',
+  '[&_input]:!ps-2',
+  '[&_input]:!pe-11',
+].join(' ')

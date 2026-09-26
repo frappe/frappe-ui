@@ -1,12 +1,24 @@
 <script setup lang="ts">
 import { Badge, Dropdown } from '../../../src'
 import {
-  List,
-  ListCell,
   ListHeader,
-  ListHeaderCell,
-  ListRow,
-} from '../../../src/molecules/list'
+  ListHeaderItem,
+  ListRows,
+  ListView,
+} from '../../../experimental/ListView'
+import {
+  settingsListView,
+  settingsListViewOptions,
+} from '../settingsListViewClasses'
+
+// Widths as the List version set them. `pl-10` on the status label and its
+// badge together keeps them on one left edge while evening out the gaps
+// either side of the column (~48px each) instead of 8 before and ~88 after.
+const columns = [
+  { label: 'Name', key: 'name', width: 'minmax(0,1fr)' },
+  { label: 'Status', key: 'status', width: '136px', headerClass: 'pl-10' },
+  { label: '', key: 'actions', width: '40px' },
+]
 
 type Status = 'completed' | 'in-progress' | 'cancelled'
 
@@ -76,58 +88,70 @@ function rowActions(name: string) {
 
 <template>
   <!--
-    frappe-ui's List family in table mode. Each row carries an actions menu,
-    so rows stay static; `list-row-px-0` keeps the text flush with the
-    pattern's left edge. Column labels sit on the same left edge as their
-    items, and the gaps between columns are even (see `pl-` below).
+    The experimental ListView, drawn as the List family drew this table. Each
+    row carries an actions menu, so nothing about the row itself is a click
+    target — `settingsListViewOptions` is what turns selection, routing and
+    the hover off, and what keeps ListRow from wrapping the cells in a button.
   -->
-  <List
-    class="w-[700px] max-w-full list-row-px-0 [&_[data-slot=list-header]]:!h-10"
-    :columns="['minmax(0,1fr)', '136px', '40px']"
+  <ListView
+    :class="`w-[700px] max-w-full ${settingsListView}`"
+    :columns="columns"
+    :rows="imports"
+    row-key="id"
+    :options="settingsListViewOptions"
   >
-    <ListHeader>
-      <ListHeaderCell>Name</ListHeaderCell>
-      <!--
-        `pl-10` on the label and the badge together: it keeps them on one left
-        edge while evening out the gaps either side of the badge column
-        (~48px each) instead of 8px before and ~88px after.
-      -->
-      <ListHeaderCell class="pl-10">Status</ListHeaderCell>
-      <ListHeaderCell><span class="sr-only">Actions</span></ListHeaderCell>
-    </ListHeader>
-
-    <!-- 13px above and below the 39px name/time block: the design's 65px row. -->
-    <ListRow v-for="item in imports" :key="item.id" class="py-3">
-      <ListCell>
-        <div class="min-w-0">
-          <div class="truncate text-base-medium text-ink-gray-7">
-            {{ item.name }}
+    <template #default>
+      <ListHeader>
+        <!--
+          The label goes in the slot rather than through `:class`:
+          ListHeaderItem applies `$attrs.class` to its inner div, and Vue has
+          already merged the same class onto its root, so any inset passed
+          that way lands twice and the label drifts right of its column.
+        -->
+        <ListHeaderItem
+          v-for="column in columns"
+          :key="column.key"
+          :item="column"
+        >
+          <span v-if="!column.label" class="sr-only">Actions</span>
+          <div v-else class="truncate" :class="column.headerClass">
+            {{ column.label }}
           </div>
-          <p class="mt-0.5 truncate text-p-base text-ink-gray-5">
-            {{ item.uploaded }}
-          </p>
-        </div>
-      </ListCell>
+        </ListHeaderItem>
+      </ListHeader>
+      <ListRows />
+    </template>
 
-      <ListCell class="pl-10">
+    <template #cell="{ row, column }">
+      <!-- 13px above and below the 39px name/time block: the design's 65px row. -->
+      <div v-if="column.key === 'name'" class="min-w-0">
+        <div class="truncate text-base-medium text-ink-gray-7">
+          {{ row.name }}
+        </div>
+        <p class="mt-0.5 truncate text-p-base text-ink-gray-5">
+          {{ row.uploaded }}
+        </p>
+      </div>
+
+      <div v-else-if="column.key === 'status'" class="pl-10">
         <Badge
-          :label="statusBadge[item.status].label"
-          :theme="statusBadge[item.status].theme"
+          :label="statusBadge[row.status].label"
+          :theme="statusBadge[row.status].theme"
           variant="subtle"
           size="md"
         />
-      </ListCell>
+      </div>
 
-      <ListCell class="justify-end">
+      <div v-else class="flex justify-end">
         <Dropdown
-          :options="rowActions(item.name)"
+          :options="rowActions(row.name)"
           :button="{
             variant: 'ghost',
             icon: 'lucide-ellipsis',
-            'aria-label': `Actions for ${item.name}`,
+            'aria-label': `Actions for ${row.name}`,
           }"
         />
-      </ListCell>
-    </ListRow>
-  </List>
+      </div>
+    </template>
+  </ListView>
 </template>

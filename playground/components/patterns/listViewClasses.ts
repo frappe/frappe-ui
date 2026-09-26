@@ -40,6 +40,32 @@ const base = [
   // The rules between rows arrive inset 8px; Espresso runs them full width.
   '[&_.h-px.border-t]:!mx-0',
 
+  // A focus ring is an `outline` drawn 3px outside the control, and ListView
+  // nests three boxes that clip it: each cell is `overflow-x-hidden` (which
+  // makes the y axis `auto` too), the rows container is `overflow-y-auto`
+  // (same effect on x), and the width wrapper is `overflow-y-hidden`. Any
+  // control that fills its cell — a select, a switch, a menu button — has its
+  // ring cut on every side. None of the three is holding anything in: the
+  // cells' own content truncates itself.
+  '[&_.overflow-x-hidden]:!overflow-visible',
+  // A control in the first or last column sits flush with the table's own
+  // edge, which is also the edge of the scroll container — and a scroller has
+  // to clip, so a ring drawn outside it is cut on that side. Those two
+  // columns draw their ring inside instead. Nothing moves: only the focus
+  // state differs, and only where it would otherwise be sliced.
+  '[&_.grid>*:first-child_button:focus-visible]:!outline-offset-[-3px]',
+  '[&_.grid>*:last-child_button:focus-visible]:!outline-offset-[-3px]',
+  '[&_.grid>*:first-child_input:focus-visible]:!outline-offset-[-3px]',
+  '[&_.grid>*:last-child_input:focus-visible]:!outline-offset-[-3px]',
+  '[&_.grid>*:first-child:focus-visible]:!outline-offset-[-3px]',
+  '[&_.grid>*:last-child:focus-visible]:!outline-offset-[-3px]',
+
+  '[&_.h-full.overflow-y-auto]:!overflow-visible',
+  // The width wrapper is the element ListView puts this very class list
+  // on, so it frees itself rather than a descendant.
+  '!overflow-visible',
+
+
   // A selected row is treated the same way as a hovered one: it lifts out of
   // the list, so the rules that would cut it off disappear — the one it draws
   // under itself, and the one belonging to the row above it. A run of selected
@@ -76,9 +102,11 @@ const base = [
   '[&_.shadow-2xl_input]:!cursor-default',
 
   // The label row's rule belongs to the first row the way every other rule
-  // belongs to the row above it: when that row is hovered or selected, it
-  // goes too, so the block is never cut off at the top.
-  '[&_.grid.rounded-4.bg-surface-gray-2:has(+*>.transition-all:first-child:hover)]:after:opacity-0',
+  // belongs to the row above it: when that row is selected, it goes too, so
+  // the block is never cut off at the top. The hover half of this lives in
+  // `espressoListView` — a table with no row hover must not lose its label
+  // rule to one, which reads as the border flickering out under the cursor
+  // with nothing else happening.
   '[&_.grid.rounded-4.bg-surface-gray-2:has(+*>.transition-all:first-child.bg-surface-gray-2)]:after:opacity-0',
 ]
 
@@ -98,6 +126,11 @@ const base = [
  * hover, and their corners are already set by the block they sit in.
  */
 export const espressoListView = [
+  // A clickable row's wrapper button is the full width of the table, which is
+  // also the width of the scroll container — so a ring drawn outside it is cut
+  // at both ends. On a full-bleed row the ring belongs inside anyway.
+  '[&_.transition-all.flex-col>button:focus-visible]:!outline-offset-[-3px]',
+  '[&_.grid.rounded-4.bg-surface-gray-2:has(+*>.transition-all:first-child:hover)]:after:opacity-0',
   '[&_.transition-all.flex-col:not(.bg-surface-gray-2):hover]:!bg-surface-gray-1',
   '[&_.transition-all.flex-col:not(.bg-surface-gray-2):hover]:!rounded-4',
   '[&_.transition-all.flex-col:hover_.h-px]:opacity-0',
@@ -105,8 +138,28 @@ export const espressoListView = [
   ...base,
 ].join(' ')
 
-/** For a table whose rows carry their own controls, so nothing is hoverable. */
-export const espressoListViewStatic = base.join(' ')
+/**
+ * For a table whose rows carry their own controls, so nothing is hoverable.
+ * Nothing in here responds to `:hover` at all — not the row, and not the
+ * label row's rule above it.
+ */
+export const espressoListViewStatic = [
+  // `options.getRowRoute: () => null` (see `espressoStaticOptions`) turns the
+  // row wrapper from a <button> into a div, so a row with its own controls is
+  // neither a tab stop nor a button nested in a button — and there is no
+  // full-width focus ring left to be clipped. Passing a route getter does make
+  // ListView think the row is hoverable, so the fill and the pointer go here.
+  '[&_.transition-all.flex-col]:!cursor-default',
+  '[&_.transition-all.flex-col:hover]:!bg-transparent',
+  ...base,
+].join(' ')
+
+/** Pair with `espressoListViewStatic`: no selection, no route, no tooltips. */
+export const espressoStaticOptions = {
+  selectable: false,
+  showTooltip: false,
+  getRowRoute: () => null,
+}
 
 /**
  * The Espresso treatment for ListView's *grouped* rows, on top of
@@ -120,6 +173,11 @@ export const espressoListViewStatic = base.join(' ')
  * - **The header row is 32px**, the same as the label row, with its rule as
  *   the last pixel inside it rather than a 33rd underneath. ListView leaves
  *   the row to be as tall as its 24px chevron button and hangs the rule below.
+ *   The `#group-header` slot does *not* replace ListGroupHeader's own
+ *   `w-full py-1.5 pe-2` wrapper — `ListGroups` renders that slot through
+ *   `list.slots`, inside the wrapper, not in place of it — so the 6px above
+ *   and below still apply and push the content to 33, half a pixel out of the
+ *   row at each end. Its padding goes, and the row centres the line itself.
  *
  * - **The chevron sits where the checkbox sits** — 8px in — with the label 8
  *   after it. ListView's `ms-[3px] me-[11px]` puts the glyph at 7 and leaves
@@ -146,6 +204,7 @@ export const espressoListViewStatic = base.join(' ')
  */
 export const espressoListViewGroups = [
   '[&_.overflow-y-auto>div>.flex.items-center]:!h-8',
+  '[&_.overflow-y-auto>div>.flex.items-center>.w-full]:!py-0',
   '[&_.border-outline-elevation-2]:!-mt-px',
   '[&_.border-outline-elevation-2]:!border-outline-gray-1',
 

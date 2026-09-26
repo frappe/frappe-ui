@@ -24,8 +24,18 @@ withDefaults(
     :class="open ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'"
     :style="{ marginTop: open ? undefined : `-${feedGap}px` }"
   >
-    <!-- `data-clip` tells the feed how much of a mark is actually showing. -->
-    <div data-clip class="overflow-hidden">
+    <!--
+      `data-clip` tells the feed how much of a mark is actually showing.
+
+      The 3px of padding grows the clipping box, and the negative margin on
+      the same element takes those 3px back out of the layout — so the run
+      ends where it always did, but whatever closes it sits 3px clear of the
+      edge. Without that, `overflow-hidden` slices the focus ring off the
+      bottom of the last thing in the run. The margin has to sit on the
+      clipping box itself: on the child it only shrinks what the child
+      occupies, and the content still ends flush.
+    -->
+    <div data-clip class="-mb-[3px] overflow-hidden pb-[3px]">
       <div class="flex flex-col" :style="{ gap: `${gap}px` }">
         <slot />
       </div>

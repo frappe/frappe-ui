@@ -2,12 +2,15 @@
 import { ref } from 'vue'
 import { Badge, TabList, Tabs, TabTrigger } from '../../../src'
 import {
-  List,
-  ListCell,
   ListHeader,
-  ListHeaderCell,
-  ListRow,
-} from '../../../src/molecules/list'
+  ListHeaderItem,
+  ListRows,
+  ListView,
+} from '../../../experimental/ListView'
+import {
+  dataGridListView,
+  settingsListViewOptions,
+} from '../settingsListViewClasses'
 
 const activeTab = ref('deals')
 const tabs = [
@@ -230,31 +233,7 @@ const rows: Row[] = [
  * Horizontal scrolling is the wrapper's `overflow-x-auto`: the columns total
  * ~2100px inside the pattern's 700.
  */
-const gridClasses = [
-  // `w-max`: the grid box grows to its columns (~2100px) instead of staying at
-  // the wrapper's 700 — without it the rows are 700 wide, their cells overflow,
-  // and the frozen column can't stay put past that point.
-  'w-max list-gap-0 list-row-px-0',
-  // Height lives on the cells, not the List's `rowHeight`: a row-height track
-  // leaves the cells at text height, so the vertical rules would stop short.
-  '[&_[data-slot=list-cell]]:h-10',
-  // The header is 28px in the design; frappe-ui's is 32 (`h-8`), and its cells
-  // size to their text, which would leave the vertical rules short.
-  '[&_[data-slot=list-header]]:!h-7 [&_[data-slot=list-header-cell]]:h-7',
-  '[&_[data-slot=list-cell]]:border-b [&_[data-slot=list-cell]]:border-r [&_[data-slot=list-cell]]:border-outline-gray-1 [&_[data-slot=list-cell]]:px-2',
-  '[&_[data-slot=list-header-cell]]:border-b [&_[data-slot=list-header-cell]]:border-r [&_[data-slot=list-header-cell]]:border-outline-gray-1 [&_[data-slot=list-header-cell]]:px-2',
-  // The header already draws its own full-width rule; the cell borders replace it.
-  '[&_[data-slot=list-header-border]]:hidden',
-  // No double rule where the last row meets the wrapper's border.
-  '[&_[data-slot=list-row]:last-child_[data-slot=list-cell]]:border-b-0',
-  // Same on the right edge: scrolled to the end, the last column's own rule
-  // sat beside the wrapper's border and read as a double line.
-  '[&_[data-slot=list-cell]:last-child]:border-r-0',
-  '[&_[data-slot=list-header-cell]:last-child]:border-r-0',
-  // Frozen first column.
-  '[&_[data-slot=list-cell]:first-child]:sticky [&_[data-slot=list-cell]:first-child]:left-0 [&_[data-slot=list-cell]:first-child]:z-10 [&_[data-slot=list-cell]:first-child]:bg-surface-base',
-  '[&_[data-slot=list-header-cell]:first-child]:sticky [&_[data-slot=list-header-cell]:first-child]:left-0 [&_[data-slot=list-header-cell]:first-child]:z-20 [&_[data-slot=list-header-cell]:first-child]:bg-surface-base',
-].join(' ')
+// The grid's whole treatment lives in `dataGridListView`.
 </script>
 
 <template>
@@ -296,49 +275,42 @@ const gridClasses = [
       class="overflow-x-auto rounded-4 border border-outline-gray-1"
       :class="{ 'rounded-tl-none': activeTab === tabs[0].value }"
     >
-      <List
-        :class="gridClasses"
-        :columns="columns.map((column) => column.width)"
-        divider="none"
+      <ListView
+        :class="dataGridListView"
+        :columns="columns"
+        :rows="rows"
+        row-key="id"
+        :options="{ ...settingsListViewOptions, rowHeight: 40 }"
       >
-        <ListHeader>
-          <!-- The serial number sits centred in its column, label and all. -->
-          <ListHeaderCell
-            v-for="(column, index) in columns"
-            :key="column.key"
-            :class="[
-              column.key === 'no' ? 'justify-center' : '',
-              // `:last-child` misses this cell — the header renders its rule
-              // after the cells, so the last cell is not the last child.
-              index === columns.length - 1 ? '!border-r-0' : '',
-            ]"
-          >
-            {{ column.label }}
-          </ListHeaderCell>
-        </ListHeader>
-
-        <ListRow v-for="row in rows" :key="row.id">
-          <ListCell class="justify-center">
-            <span class="text-base text-ink-gray-7">{{ row.id }}</span>
-          </ListCell>
-          <ListCell
-            v-for="column in columns.slice(1)"
-            :key="column.key"
-            class="min-w-0"
-          >
-            <Badge
-              v-if="column.key === 'status'"
-              :label="row.status.label"
-              :theme="row.status.theme"
-              variant="subtle"
-              size="md"
+        <template #default>
+          <ListHeader>
+            <ListHeaderItem
+              v-for="column in columns"
+              :key="column.key"
+              :item="column"
+              :class="column.key === 'no' ? 'justify-center' : ''"
             />
-            <span v-else class="truncate text-base text-ink-gray-6">
-              {{ row[column.key as keyof Row] }}
-            </span>
-          </ListCell>
-        </ListRow>
-      </List>
+          </ListHeader>
+          <ListRows />
+        </template>
+
+        <template #cell="{ row, column }">
+          <!-- The serial number sits centred in its column, label and all. -->
+          <span v-if="column.key === 'no'" class="text-base text-ink-gray-7">
+            {{ row.id }}
+          </span>
+          <Badge
+            v-else-if="column.key === 'status'"
+            :label="row.status.label"
+            :theme="row.status.theme"
+            variant="subtle"
+            size="md"
+          />
+          <span v-else class="truncate text-base text-ink-gray-6">
+            {{ row[column.key] }}
+          </span>
+        </template>
+      </ListView>
     </div>
   </div>
 </template>

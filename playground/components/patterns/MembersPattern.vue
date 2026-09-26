@@ -3,7 +3,11 @@ import { reactive } from 'vue'
 import { Avatar, Select } from '../../../src'
 import { ListView } from '../../../experimental/ListView'
 import { faceFor } from './designAssets'
-import { espressoListViewStatic } from './listViewClasses'
+import {
+  espressoListViewStatic,
+  espressoStaticOptions,
+} from './listViewClasses'
+import * as pending from '../../pendingFrappeUIChanges'
 
 type Member = {
   id: number
@@ -64,7 +68,7 @@ const choice = reactive(
       :columns="columns"
       :rows="rows"
       row-key="id"
-      :options="{ selectable: false, showTooltip: false, rowHeight: 62 }"
+      :options="{ ...espressoStaticOptions, rowHeight: 62 }"
     >
       <template #cell="{ row, column }">
         <span class="flex min-w-0 items-center gap-2">
@@ -97,6 +101,7 @@ const choice = reactive(
             v-else
             v-model="choice[(row as Member).id][column.key as 'teams' | 'role']"
             class="w-full"
+            :class="pending.ghostSelectFocus"
             variant="ghost"
             size="sm"
             :options="column.key === 'teams' ? teamOptions : roleOptions"
