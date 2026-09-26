@@ -82,6 +82,7 @@ function buildSidebar(): SidebarSection[] {
         { text: 'ScatterChart', link: '/docs/charts/scatterchart' },
         { text: 'SankeyChart', link: '/docs/charts/sankeychart' },
         { text: 'NumberCard', link: '/docs/charts/numbercard' },
+        { text: 'ProportionBar', link: '/docs/charts/proportionbar' },
         { text: 'ChartCard', link: '/docs/charts/chartcard' },
         { text: 'ChartContainer', link: '/docs/charts/chartcontainer' },
         { text: 'ChartLegend', link: '/docs/charts/chartlegend' },

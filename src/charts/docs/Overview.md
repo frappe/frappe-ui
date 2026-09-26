@@ -16,8 +16,9 @@ rebrand them. `palette` picks a ramp by name — `categorical`, `sequential` or
 
 An echarts-backed component registers only the modules it can draw. A donut
 costs a donut; the three axis charts share the bar and line modules, because any
-of them draws any mark. `FunnelChart` and `NumberCard` use no echarts at all —
-both draw their own SVG — so they add nothing to the bundle.
+of them draws any mark. `FunnelChart`, `NumberCard` and
+`ProportionBar` use no echarts at all — the first two draw their own SVG and
+the third is a row of divs — so they add nothing to the bundle.
 
 ## Data shapes
 
@@ -44,6 +45,7 @@ chart is, and it is also how one line of a `LineChart` gets a fill.
 - [ScatterChart](/docs/charts/scatterchart) — two measures against each other
 - [SankeyChart](/docs/charts/sankeychart) — flow from a source to a target
 - [NumberCard](/docs/charts/numbercard) — one reading, with its change
+- [ProportionBar](/docs/charts/proportionbar) — a breakdown as one bar
 
 Every chart shares the same
 [loading, error and empty states](/docs/charts/states), and they compose into a
