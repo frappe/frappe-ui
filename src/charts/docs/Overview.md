@@ -1,6 +1,6 @@
 # Charts
 
-Nine chart components in the `frappe-ui/charts` subpath, drawn with
+Ten chart components in the `frappe-ui/charts` subpath, most of them drawn with
 [echarts](https://echarts.apache.org). Props are flat and name the columns of
 your data (`x`, `y`, `y2`, `splitBy`, `category`, `value`), so you can save a
 chart as one typed object and render it with `v-bind="savedChart"`.
@@ -10,14 +10,15 @@ import { BarChart, LineChart } from 'frappe-ui/charts'
 ```
 
 Importing the subpath also loads the `--chart-*` color tokens. See
-[Chart colors](/docs/charts/colors) for the three ramps and how to change
-them. The `palette` prop picks a ramp by name (`categorical`, `sequential` or
+[Chart colors](/docs/charts/colors) for the three ramps and how to change them.
+The `palette` prop picks a ramp by name (`categorical`, `sequential` or
 `diverging`) or takes a list of colors.
 
 Each echarts chart registers only the echarts modules it needs, so importing
 `DonutChart` loads only the pie module. The three axis charts share the bar and
-line modules, because each of them can draw bars and lines. `FunnelChart` and
-`NumberCard` do not use echarts. Both draw their own SVG.
+line modules, because each of them can draw bars and lines. `FunnelChart`,
+`NumberCard` and `PercentageBarChart` do not use echarts. The first two draw their
+own SVG; the bar is a row of divs.
 
 ## Data shapes
 
@@ -30,38 +31,39 @@ the rows apart. Pick whichever shape your query already returns.
 
 `BarChart`, `LineChart` and `AreaChart` are one chart with three defaults.
 `seriesConfig[key].type` sets how one series draws (`'bar'`, `'line'` or
-`'area'`), and the other series use the default of the component you picked.
-Use it for a combo chart, or to fill one line of a `LineChart`.
+`'area'`), and the other series use the default of the component you picked. Use
+it for a combo chart, or to fill one line of a `LineChart`.
 
 ## The charts
 
-| Chart | Use it for |
-| --- | --- |
-| [BarChart](/docs/charts/barchart) | Grouped, stacked and horizontal bars |
-| [LineChart](/docs/charts/linechart) | Trends, a second value axis, gaps |
-| [AreaChart](/docs/charts/areachart) | Lines with a fill |
-| [DonutChart](/docs/charts/donutchart) | Share of a total |
-| [FunnelChart](/docs/charts/funnelchart) | Drop-off from stage to stage |
-| [HeatmapChart](/docs/charts/heatmapchart) | Size of a value across two dimensions |
-| [ScatterChart](/docs/charts/scatterchart) | Two measures against each other |
-| [SankeyChart](/docs/charts/sankeychart) | Flow from a source to a target |
-| [NumberCard](/docs/charts/numbercard) | One number and its change |
+| Chart                                       | Use it for                            |
+| ------------------------------------------- | ------------------------------------- |
+| [BarChart](/docs/charts/barchart)           | Grouped, stacked and horizontal bars  |
+| [LineChart](/docs/charts/linechart)         | Trends, a second value axis, gaps     |
+| [AreaChart](/docs/charts/areachart)         | Lines with a fill                     |
+| [DonutChart](/docs/charts/donutchart)       | Share of a total                      |
+| [FunnelChart](/docs/charts/funnelchart)     | Drop-off from stage to stage          |
+| [HeatmapChart](/docs/charts/heatmapchart)   | Size of a value across two dimensions |
+| [ScatterChart](/docs/charts/scatterchart)   | Two measures against each other       |
+| [SankeyChart](/docs/charts/sankeychart)     | Flow from a source to a target        |
+| [NumberCard](/docs/charts/numbercard)       | One number and its change             |
+| [PercentageBarChart](/docs/charts/percentagebarchart) | A breakdown as one bar                |
 
-Every chart has the same
-[loading, error and empty states](/docs/charts/states). Charts sit together in a
-[dashboard](/docs/charts/dashboard) with no extra wrappers.
+Every chart has the same [loading, error and empty states](/docs/charts/states).
+Charts sit together in a [dashboard](/docs/charts/dashboard) with no extra
+wrappers.
 
 ## Card, container, legend and tooltip
 
 Every chart is built from these parts. Use them yourself to draw a chart the
 library does not have. See [Custom charts](#custom-charts).
 
-| Component | What it draws |
-| --- | --- |
-| [ChartCard](/docs/charts/chartcard) | The card: border, background and padding |
-| [ChartContainer](/docs/charts/chartcontainer) | Title, axis titles and the three states |
-| [ChartLegend](/docs/charts/chartlegend) | The row of series names |
-| [ChartTooltip](/docs/charts/charttooltip) | The values beside the pointer |
+| Component                                     | What it draws                            |
+| --------------------------------------------- | ---------------------------------------- |
+| [ChartCard](/docs/charts/chartcard)           | The card: border, background and padding |
+| [ChartContainer](/docs/charts/chartcontainer) | Title, axis titles and the three states  |
+| [ChartLegend](/docs/charts/chartlegend)       | The row of series names                  |
+| [ChartTooltip](/docs/charts/charttooltip)     | The values beside the pointer            |
 
 ## Custom charts
 
@@ -155,8 +157,8 @@ the option builder over them, and the state of the query that fetched them.
 
 <ComponentPreview name="Charts-CustomRadar" csr="true" self-layout />
 
-`ChartCard` and `NumberCard` both take a `card` prop. Set it to `false` when
-the chart is already inside a card of your own. The content then renders with no
+`ChartCard` and `NumberCard` both take a `card` prop. Set it to `false` when the
+chart is already inside a card of your own. The content then renders with no
 border, background, radius or padding, so you do not get a box inside a box.
 
 ## Passing raw echarts options
@@ -172,7 +174,8 @@ is instant.
 ## The echarts instance
 
 Every echarts-backed chart hands back its instance as `chart` on a template ref.
-`FunnelChart` and `NumberCard` draw no echarts plot and hand back nothing.
+`FunnelChart`, `NumberCard` and `PercentageBarChart` draw no echarts plot and hand
+back nothing.
 
 ```vue
 <script setup lang="ts">
@@ -196,8 +199,8 @@ function downloadPng() {
 </template>
 ```
 
-Use it when you need an echarts method that no option can express, such as
-an image for a download button or chart coordinates for your own overlay.
+Use it when you need an echarts method that no option can express, such as an
+image for a download button or chart coordinates for your own overlay.
 
 It has three limits:
 

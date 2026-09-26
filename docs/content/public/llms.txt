@@ -83,7 +83,7 @@ All from the `frappe-ui` root entry.
 
 ## Charts
 
-Nine chart components on the `frappe-ui/charts` subpath, drawn with echarts. Props are flat and name the columns of your rows; the column names differ per family. Every chart draws its own header, tooltip and states, and fills the box you give it, so size it from the wrapper: there is no `height` prop.
+Ten chart components on the `frappe-ui/charts` subpath, most of them drawn with echarts. Props are flat and name the columns of your rows; the column names differ per family. Every chart draws its own header, tooltip and states, and fills the box you give it, so size it from the wrapper: there is no `height` prop.
 
 - [Overview](https://ui.frappe.io/docs/charts/overview): the shared prop model and how a chart reads its data.
 - [Colors](https://ui.frappe.io/docs/charts/colors): the three `--chart-*` color ramps, `palette`, and the plot-area variables.
@@ -96,9 +96,10 @@ Nine chart components on the `frappe-ui/charts` subpath, drawn with echarts. Pro
 - [ScatterChart](https://ui.frappe.io/docs/charts/scatterchart): two measures against each other; `x`, `y`, optional `size` and `splitBy`.
 - [SankeyChart](https://ui.frappe.io/docs/charts/sankeychart): flow between two sets of nodes; `source`, `target`, `value`.
 - [NumberCard](https://ui.frappe.io/docs/charts/numbercard): the KPI tile: one reading plus the change against a comparison period. Required `title` and `value`.
+- [PercentageBarChart](https://ui.frappe.io/docs/charts/percentagebarchart): one bar split into the parts of a total, i.e. a 100% stacked bar; `category`, `value`. For a breakdown that sits under a number rather than filling a card.
 - [ChartCard](https://ui.frappe.io/docs/charts/chartcard): the card surface a chart sits on, for a plot you draw yourself.
 - [ChartContainer](https://ui.frappe.io/docs/charts/chartcontainer): everything around the plot: title block, axis titles, states, legend row.
-- [ChartLegend](https://ui.frappe.io/docs/charts/chartlegend): the series row under a plot. Bar, Line, Area, Donut and Scatter draw it themselves; Funnel, Heatmap and Sankey draw none.
+- [ChartLegend](https://ui.frappe.io/docs/charts/chartlegend): the series row under a plot. Bar, Line, Area, Donut, Scatter and PercentageBarChart draw it themselves; Funnel, Heatmap and Sankey draw none.
 - [ChartTooltip](https://ui.frappe.io/docs/charts/charttooltip): the reading beside the pointer, as HTML rather than a canvas overlay.
 - [States](https://ui.frappe.io/docs/charts/states): the shared loading, error and empty states; set `loading`, set `error` to a message, pass no rows for empty.
 - [Dashboard](https://ui.frappe.io/docs/charts/dashboard): composing charts into a page. The page owns the grid, the charts own everything inside.

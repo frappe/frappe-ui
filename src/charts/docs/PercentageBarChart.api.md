@@ -37,31 +37,50 @@
   },
   {
     name: 'data',
-    description: 'One row per stage, in process order. Rows are drawn as they arrive.',
+    description: 'The rows to draw. One row is one slice, before the "Others" grouping.',
     required: true,
     type: 'Record<string, any>[]'
   },
   {
     name: 'category',
-    description: 'Row key holding the stage name.',
+    description: 'Row key holding the slice name.',
     required: true,
     type: 'string'
   },
   {
     name: 'value',
-    description: 'Row key holding how many reached the stage.',
+    description: 'Row key holding the slice size.',
     required: true,
     type: 'string'
   },
   {
+    name: 'maxSlices',
+    description: 'How many slices the bar holds, "Others" included. Past that it keeps the\nlargest `maxSlices - 1` and sums the tail into a single "Others" slice,\nnamed `OTHERS_KEY`. Same word and same behavior as `DonutChart`, so a\nbreakdown carries it across when it moves from the ring to the bar.\nDefaults to 6 — a track runs out of readable width sooner than a ring,\nwhich defaults to 9.',
+    required: false,
+    type: 'number'
+  },
+  {
+    name: 'size',
+    description: 'How thick the track is drawn: `\'sm\'` 8px, the default, for a strip under\nthe number it breaks down; `\'md\'` 12px where the breakdown is itself what\nthe card is about. The corner follows the thickness — the thinner track\ncannot carry the deeper one without rounding into capsules.',
+    required: false,
+    type: '"sm" | "md"'
+  },
+  {
+    name: 'hiddenSlices',
+    description: 'Slices the legend has switched off, by name. Bind it with\n`v-model:hiddenSlices` to drive the legend from the app, or to keep what\na reader hid across a reload. Left unbound, the legend owns it.\n\n`DonutChart`\'s word, because it is `DonutChart`\'s mark: the two read the\nsame rows into the same parts and differ only in the shape they lay them\nout in. `spec/charts.md` records the ruling.',
+    required: false,
+    type: 'string[]',
+    default: '[]'
+  },
+  {
     name: 'format',
-    description: 'Prints every number the funnel shows: the stage values and the tooltip.',
+    description: 'Prints every value the bar shows: the tooltip, and each slice\'s name.',
     required: false,
     type: 'ChartValueFormatter'
   },
   {
     name: 'palette',
-    description: 'Defaults to `\'sequential\'` reversed, so color darkens as the funnel narrows.',
+    description: 'Defaults to `\'categorical\'`: the parts are unrelated, not steps of a ramp.',
     required: false,
     type: 'ChartPalette'
   }
@@ -95,7 +114,7 @@
   },
   {
     name: 'tooltip',
-    description: 'Replaces the tooltip body. `items` holds the stage\'s value and its two\nconversion rates, which are `\'context\'` items; `rows` holds the row\nbehind the stage.',
+    description: 'Replaces the tooltip body. `items` holds the hovered slice alone. A\nnamed slice carries one row, and "Others" every row it collapsed.',
     type: 'ChartTooltipSlotProps'
   }
 ]
@@ -103,15 +122,20 @@
   const emitsData = [
   {
     name: 'select',
-    description: 'A stage was selected, by click or by Enter on the keyboard cursor. Carries\nits label, its value and the row behind it; the whole column is the hit\narea, not just the shape it draws.',
-    type: '[event: FunnelStageEvent]'
+    description: 'A slice was selected, by click or by Enter on the keyboard. The "Others"\nslice carries every row it grouped, so a caller can drill into the tail\nas well as into a named part.',
+    type: '[event: PercentageBarSliceEvent]'
+  },
+  {
+    name: 'update:hiddenSlices',
+    description: 'Fired when the hidden slices changes.',
+    type: '[value: string[]]'
   }
 ]
 </script>
 
 ## API Reference
 
-<PropsTable folder="charts" name="FunnelChart" :data="propsData"/>
+<PropsTable folder="charts" name="PercentageBarChart" :data="propsData"/>
 
 <SlotsTable :data="slotsData"/>
 
