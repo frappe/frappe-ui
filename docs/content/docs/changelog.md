@@ -328,6 +328,16 @@ Landed so far:
 - `stacked: 'normalized'` for shares, and `maxSeries` to cap a long grouping
   column. `maxSeries` has no default.
 - `ScatterChart` and `SankeyChart`.
+- `ProportionBar`, a single 100% stacked bar for a breakdown that is a
+  footnote to a reading rather than a card of its own — the ring unrolled,
+  for the strip under a total. Same `category` / `value` rows as
+  `DonutChart`, with `maxSegments` capping the tail into "Others" and
+  `v-model:hiddenSegments` driving the legend. A share too small to see is
+  widened to a readable floor at the expense of the segments above it;
+  `percent` still reports the true share. `size` is `sm` 8px, the default, or
+  `md` 12px where the breakdown is the card's subject, with the corner
+  following the thickness, and pointing at a segment grows it and steps the
+  others back — the ring's emphasis, unrolled.
 - Category labels fit themselves — the library measures, tilts and truncates
   instead of taking an angle prop.
 - `xAxis.type: 'value'` reads the x column as a quantity: a point sits at its
