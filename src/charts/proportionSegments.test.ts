@@ -93,6 +93,22 @@ describe('buildProportionSegments', () => {
     expect(segments[0].label).toBe('(Blank)')
   })
 
+  it('keeps a generated name clear of a later row that spells it out', () => {
+    // `A`, `A`, `A (2)`: the second row generates `A (2)`, which the third row
+    // already carries. Every name has to stay distinct, or two segments share
+    // a Vue key and one legend press toggles both.
+    const segments = build({
+      data: [
+        { part: 'A', amount: 10 },
+        { part: 'A', amount: 20 },
+        { part: 'A (2)', amount: 30 },
+      ],
+    })
+
+    expect(segments.map((s) => s.label)).toEqual(['A', 'A', 'A (2)'])
+    expect(new Set(segments.map((s) => s.name)).size).toBe(3)
+  })
+
   it('keeps two rows of the same category apart by name, not by label', () => {
     const segments = build({
       data: [
@@ -169,6 +185,50 @@ describe('buildProportionSegments — the "Others" tail', () => {
     expect(segments.map((s) => s.isOthers)).toEqual([false, false, false])
   })
 
+  it('holds the cap when values tie across it', () => {
+    // Seven equal rows under a cap of six. A cutoff *value* cannot split them,
+    // so every row clears it and the bar draws seven segments.
+    const segments = buildProportionSegments(
+      config({
+        data: Array.from({ length: 7 }, (_, i) => ({
+          part: `Part ${i + 1}`,
+          amount: 10,
+        })),
+        maxSegments: 6,
+      }),
+      { tokens },
+    )
+
+    expect(segments).toHaveLength(6)
+    expect(segments[5].name).toBe(OTHERS_KEY)
+    // The five kept are the earliest written of the tied rows.
+    expect(segments.slice(0, 5).map((s) => s.label)).toEqual([
+      'Part 1',
+      'Part 2',
+      'Part 3',
+      'Part 4',
+      'Part 5',
+    ])
+    expect(segments[5].rows).toHaveLength(2)
+  })
+
+  it('never draws more segments than the cap, whatever the values', () => {
+    for (const values of [
+      [5, 5, 5, 5, 5, 5, 5, 5],
+      [9, 1, 1, 1, 1, 1, 1],
+      [3, 3, 3, 2, 2, 2, 1, 1, 1],
+    ]) {
+      const segments = buildProportionSegments(
+        config({
+          data: values.map((amount, i) => ({ part: `Part ${i}`, amount })),
+          maxSegments: 4,
+        }),
+        { tokens },
+      )
+      expect(segments.length).toBeLessThanOrEqual(4)
+    }
+  })
+
   it('refuses a cap below two — there is nothing left to group into', () => {
     const segments = buildProportionSegments(
       config({ data: many, maxSegments: 1 }),
@@ -207,6 +267,30 @@ describe('segmentWidths', () => {
 
   it('leaves a segment worth nothing out of the bar', () => {
     expect(segmentWidths([70, 30, 0])).toEqual([70, 30, 0])
+  })
+
+  it('falls back to true shares when the floor cannot be paid for', () => {
+    // 70 hairlines and one wide segment. Lifting all 70 onto the floor costs
+    // more than the wide one can give up, and taking it anyway would draw it
+    // at a negative width.
+    const percents = [...Array(70).fill(0.5), 65]
+    const widths = segmentWidths(percents)
+
+    expect(Math.min(...widths)).toBeGreaterThan(0)
+    expect(widths).toEqual(percents)
+    expect(total(widths)).toBe(100)
+  })
+
+  it('never draws a segment at a negative width', () => {
+    for (const count of [2, 5, 20, 60, 70, 100]) {
+      const share = 100 / count
+      const widths = segmentWidths([
+        ...Array(count - 1).fill(share / 10),
+        100 - ((count - 1) * share) / 10,
+      ])
+      expect(Math.min(...widths)).toBeGreaterThanOrEqual(0)
+      expect(total(widths)).toBe(100)
+    }
   })
 
   it('shares the track evenly when every segment is under the floor', () => {

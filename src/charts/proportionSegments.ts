@@ -92,13 +92,18 @@ export function segmentWidths(
   const debt = total - 100
   if (debt <= 0) return lifted
 
+  // What the segments above the floor can give up between them, i.e. how far
+  // they can fall before they are on the floor themselves.
   const slack = lifted.reduce(
     (sum, percent) => sum + Math.max(0, percent - min),
     0,
   )
-  // Every segment is already at the floor — there are more parts than the track
-  // has room for at a readable width, so they share it evenly instead.
-  if (slack <= 0) return lifted.map((percent) => (percent / total) * 100)
+  // The debt is larger than they can pay: there are more parts than the track
+  // holds at a readable width, so no floor can be honoured. Taking the debt
+  // anyway would drive the widest segment past zero and draw the bar
+  // backwards. Every segment falls back to its true share instead — the floor
+  // is what gets dropped, never the accuracy.
+  if (debt >= slack) return percents
 
   return lifted.map((percent) => {
     const above = Math.max(0, percent - min)
@@ -132,16 +137,16 @@ function groupRows(config: ProportionBarConfig): UnsizedSegment[] {
     config.maxSegments ?? DEFAULT_MAX_SEGMENTS,
   )
   const keep = entries.length > max ? max - 1 : entries.length
-  const cutoff = smallestKept(entries, keep)
+  const kept = keptIndices(entries, keep)
 
   const seen = new Set<string>()
   const segments: UnsizedSegment[] = []
   const overflow: { row: Record<string, any>; value: number }[] = []
 
-  for (const entry of entries) {
-    if (cutoff !== null && entry.value < cutoff) {
+  entries.forEach((entry, index) => {
+    if (!kept.has(index)) {
       overflow.push(entry)
-      continue
+      return
     }
     const label = categoryLabel(entry.row[config.categoryColumn])
     segments.push({
@@ -151,7 +156,7 @@ function groupRows(config: ProportionBarConfig): UnsizedSegment[] {
       rows: [entry.row],
       isOthers: false,
     })
-  }
+  })
 
   if (!overflow.length) return segments
 
@@ -168,16 +173,20 @@ function groupRows(config: ProportionBarConfig): UnsizedSegment[] {
 }
 
 /**
- * The value a row has to reach to keep its own segment, or `null` when every
- * row keeps one. Read off a sorted copy so the bar itself stays in row order.
+ * Which entries keep a segment of their own: the `keep` largest, and the
+ * earliest written of them where values tie. Read off a sorted copy of the
+ * positions, so the bar itself stays in row order.
+ *
+ * Positions rather than a cutoff value, because a cutoff cannot separate rows
+ * that tie on it — every one of them clears it, and seven equal rows would
+ * draw seven segments under a cap of six.
  */
-function smallestKept(
-  entries: { value: number }[],
-  keep: number,
-): number | null {
-  if (keep >= entries.length) return null
-  const descending = entries.map((entry) => entry.value).sort((a, b) => b - a)
-  return descending[keep - 1] ?? null
+function keptIndices(entries: { value: number }[], keep: number): Set<number> {
+  if (keep >= entries.length) return new Set(entries.map((_, index) => index))
+
+  const byValue = entries.map((entry, index) => ({ value: entry.value, index }))
+  byValue.sort((a, b) => b.value - a.value || a.index - b.index)
+  return new Set(byValue.slice(0, keep).map((entry) => entry.index))
 }
 
 function categoryLabel(value: any) {

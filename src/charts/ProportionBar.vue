@@ -99,7 +99,7 @@
 import { computed, reactive, ref, useSlots, watch } from 'vue'
 import { BLUR_OPACITY } from './axisChartCommon'
 import { formatPercent, formatValue } from './format'
-import { pruneHiddenSeries, toggleHiddenSeries } from './hiddenSeries'
+import { pruneHiddenSeries } from './hiddenSeries'
 import { buildProportionSegments } from './proportionSegments'
 import { useChartTokens } from './tokens'
 import { documentDir } from './utils'
@@ -303,11 +303,17 @@ const legendItems = computed<ChartLegendItem[]>(() =>
 )
 
 function toggleSegment(name: string) {
-  hiddenSegments.value = toggleHiddenSeries(
-    hiddenSegments.value,
-    name,
-    segments.value.length,
-  )
+  const hidden = hiddenSegments.value
+  if (hidden.includes(name)) {
+    hiddenSegments.value = hidden.filter((n) => n !== name)
+    return
+  }
+  // Refuse to hide the last segment the bar is drawing — an empty bar reads as
+  // a failure to load. Counted against what is drawn rather than against what
+  // is unhidden: a segment worth nothing has a legend entry but no block, so
+  // it is not the one still holding the bar up.
+  if (visibleSegments.value.length <= 1) return
+  hiddenSegments.value = [...hidden, name]
 }
 
 // Segments that disappear while hidden shouldn't stay in the hidden list

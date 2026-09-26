@@ -143,6 +143,26 @@ describe('ProportionBar', () => {
     segments().should('have.length', 1)
   })
 
+  it('will not hide the last drawn segment past a zero-valued one', () => {
+    // The zero-valued part has a legend entry but no block. Hiding the part
+    // that is drawn would leave nothing on the track and show the empty state.
+    mountBar({
+      data: [
+        { part: 'Used', amount: 10 },
+        { part: 'Free', amount: 0 },
+      ],
+    })
+
+    segments().should('have.length', 1)
+    cy.get('[aria-label="Hide Used"]').click()
+    segments().should('have.length', 1)
+    cy.get('[data-slot="chart-container"]').should(
+      'not.have.attr',
+      'data-state',
+      'empty',
+    )
+  })
+
   it('drives the legend from a bound hiddenSegments', () => {
     const hidden = ref(['Storage'])
     cy.mount(
