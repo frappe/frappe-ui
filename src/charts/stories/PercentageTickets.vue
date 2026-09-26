@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ProportionBar } from 'frappe-ui/charts'
+import { PercentageBarChart } from 'frappe-ui/charts'
 
 // Not sorted: a queue is read in the order a ticket moves through it, and the
 // largest state is the last one.
@@ -15,7 +15,7 @@ const count = (value: number) => `${value.toLocaleString('en-US')} tickets`
 <template>
   <div class="flex h-full min-h-52 w-full items-center justify-center">
     <div class="w-full max-w-md">
-      <ProportionBar
+      <PercentageBarChart
         :data="ticketsByState"
         category="state"
         value="tickets"

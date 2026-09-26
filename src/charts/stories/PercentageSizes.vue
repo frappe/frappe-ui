@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ProportionBar } from 'frappe-ui/charts'
-import type { ProportionBarProps } from 'frappe-ui/charts'
+import { PercentageBarChart } from 'frappe-ui/charts'
+import type { PercentageBarChartProps } from 'frappe-ui/charts'
 
 const traffic = [
   { source: 'Organic', sessions: 4820 },
@@ -8,7 +8,7 @@ const traffic = [
   { source: 'Paid', sessions: 980 },
 ]
 
-const sizes: ProportionBarProps['size'][] = ['sm', 'md']
+const sizes: PercentageBarChartProps['size'][] = ['sm', 'md']
 </script>
 
 <template>
@@ -16,7 +16,7 @@ const sizes: ProportionBarProps['size'][] = ['sm', 'md']
     <div class="flex w-full max-w-md flex-col gap-8">
       <div v-for="size in sizes" :key="size" class="flex flex-col gap-2">
         <span class="text-p-xs text-ink-gray-5">size="{{ size }}"</span>
-        <ProportionBar
+        <PercentageBarChart
           :data="traffic"
           category="source"
           value="sessions"

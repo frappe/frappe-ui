@@ -37,25 +37,25 @@
   },
   {
     name: 'data',
-    description: 'The rows to draw. One row is one segment, before the "Others" grouping.',
+    description: 'The rows to draw. One row is one slice, before the "Others" grouping.',
     required: true,
     type: 'Record<string, any>[]'
   },
   {
     name: 'category',
-    description: 'Row key holding the segment name.',
+    description: 'Row key holding the slice name.',
     required: true,
     type: 'string'
   },
   {
     name: 'value',
-    description: 'Row key holding the segment size.',
+    description: 'Row key holding the slice size.',
     required: true,
     type: 'string'
   },
   {
-    name: 'maxSegments',
-    description: 'How many segments the bar holds, "Others" included. Past that it keeps the\nlargest `maxSegments - 1` and sums the tail into a single "Others" segment,\nnamed `OTHERS_KEY`. Defaults to 6 — the track runs out of readable width\nlong before the palette runs out of hues.',
+    name: 'maxSlices',
+    description: 'How many slices the bar holds, "Others" included. Past that it keeps the\nlargest `maxSlices - 1` and sums the tail into a single "Others" slice,\nnamed `OTHERS_KEY`. Same word and same behavior as `DonutChart`, so a\nbreakdown carries it across when it moves from the ring to the bar.\nDefaults to 6 — a track runs out of readable width sooner than a ring,\nwhich defaults to 9.',
     required: false,
     type: 'number'
   },
@@ -66,15 +66,15 @@
     type: '"sm" | "md"'
   },
   {
-    name: 'hiddenSegments',
-    description: 'Segments the legend has switched off, by name. Bind it with\n`v-model:hiddenSegments` to drive the legend from the app, or to keep what\na reader hid across a reload. Left unbound, the legend owns it.\n\n`hiddenSegments`, not the axis charts\' `hiddenSeries`: a segment comes out\nof a `category` / `value` row rather than a column, so it is not a series\nunder another name. `spec/charts.md` records the ruling.',
+    name: 'hiddenSlices',
+    description: 'Slices the legend has switched off, by name. Bind it with\n`v-model:hiddenSlices` to drive the legend from the app, or to keep what\na reader hid across a reload. Left unbound, the legend owns it.\n\n`DonutChart`\'s word, because it is `DonutChart`\'s mark: the two read the\nsame rows into the same parts and differ only in the shape they lay them\nout in. `spec/charts.md` records the ruling.',
     required: false,
     type: 'string[]',
     default: '[]'
   },
   {
     name: 'format',
-    description: 'Prints every value the bar shows: the tooltip, and each segment\'s name.',
+    description: 'Prints every value the bar shows: the tooltip, and each slice\'s name.',
     required: false,
     type: 'ChartValueFormatter'
   },
@@ -114,7 +114,7 @@
   },
   {
     name: 'tooltip',
-    description: 'Replaces the tooltip body. `items` holds the hovered segment alone. A\nnamed segment carries one row, and "Others" every row it collapsed.',
+    description: 'Replaces the tooltip body. `items` holds the hovered slice alone. A\nnamed slice carries one row, and "Others" every row it collapsed.',
     type: 'ChartTooltipSlotProps'
   }
 ]
@@ -122,12 +122,12 @@
   const emitsData = [
   {
     name: 'select',
-    description: 'A segment was selected, by click or by Enter on the keyboard. The "Others"\nsegment carries every row it grouped, so a caller can drill into the tail\nas well as into a named part.',
-    type: '[event: ProportionSegmentEvent]'
+    description: 'A slice was selected, by click or by Enter on the keyboard. The "Others"\nslice carries every row it grouped, so a caller can drill into the tail\nas well as into a named part.',
+    type: '[event: PercentageBarSliceEvent]'
   },
   {
-    name: 'update:hiddenSegments',
-    description: 'Fired when the hidden segments changes.',
+    name: 'update:hiddenSlices',
+    description: 'Fired when the hidden slices changes.',
     type: '[value: string[]]'
   }
 ]
@@ -135,7 +135,7 @@
 
 ## API Reference
 
-<PropsTable folder="charts" name="ProportionBar" :data="propsData"/>
+<PropsTable folder="charts" name="PercentageBarChart" :data="propsData"/>
 
 <SlotsTable :data="slotsData"/>
 

@@ -139,7 +139,7 @@ axis is additive and can land in a 1.x minor.
 ## The template ref
 
 Every echarts-backed chart hands back one member, the echarts instance, as
-`chart`. `FunnelChart`, `NumberCard` and `ProportionBar` draw no echarts plot
+`chart`. `FunnelChart`, `NumberCard` and `PercentageBarChart` draw no echarts plot
 and hand back nothing.
 
 It is the imperative half of the escape hatch `echartOptions` opens for options.
@@ -181,15 +181,21 @@ because only one component has the part:
 `change` when an entry flips a series' visibility, `highlight` when the
 highlighted series changes (`null` clears it) — not `toggle` or `hover`.
 
-The list of marks a legend has switched off is named for the mark the component
-draws, not for one word across the family: `hiddenSeries` on the axis charts and
-`ScatterChart`, `hiddenSegments` on `ProportionBar`. It reads as a second
-spelling of one idea, and convention 4 would refuse it — but the two are not one
-idea. A series is a column, or a value of the `series` column, and a caller
-names it in `y` or `seriesConfig`. A `ProportionBar` has neither: its parts come
-out of `category` / `value` rows, one row per part, exactly as a ring's slices
-do. Calling those series would be the borrowed word, and the component says
-*segment* everywhere else — `maxSegments`, `ProportionSegment`,
-`ProportionSegmentEvent`. A chart that draws a third kind of mark names its own,
-and `DonutChart` keeps its slices' visibility internal, so nothing is settled
-for it here.
+Every chart names the mark it draws, and the name runs through its whole API:
+`DonutSlice`, `FunnelStage`, `HeatmapCell`, `SankeyLink`, `ScatterPoint`,
+`ChartDatapoint`. The cap on how many marks are drawn, and the list the legend
+has switched off, take that word too — `maxSeries` and `hiddenSeries` on the
+axis charts, `maxSlices` and `hiddenSlices` on the ones cut into slices.
+
+**Two charts that draw the same mark share the word.** `DonutChart` and
+`PercentageBarChart` read the same rows — `category` and `value`, one row per
+part — and cut them into the same parts; only the shape they are laid out in
+differs. So a slice is a slice in both, and a caller moving a breakdown from
+the ring to the bar carries `maxSlices` across with the data rather than
+learning a second word for one idea. That is convention 4 read at the level of
+vocabulary.
+
+Sharing the *props* is not on its own the reason. `FunnelChart` takes
+`category` and `value` as well and still draws stages, because a stage is a
+step in a process rather than a part of a total. The question is what the mark
+is, not what the props are called.

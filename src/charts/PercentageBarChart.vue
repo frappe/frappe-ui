@@ -42,31 +42,31 @@
           :data-size="size"
           class="flex w-full items-center"
           :class="thickness.track"
-          :style="{ gap: `${SEGMENT_GAP}px` }"
+          :style="{ gap: `${SLICE_GAP}px` }"
         >
           <button
-            v-for="segment in visibleSegments"
-            :key="segment.name"
+            v-for="slice in visibleSlices"
+            :key="slice.name"
             type="button"
-            data-slot="chart-segment"
-            :data-state="hovered === segment.name ? 'active' : undefined"
+            data-slot="chart-slice"
+            :data-state="hovered === slice.name ? 'active' : undefined"
             class="transition-[height,width,opacity] duration-150 focus-visible:focus-ring motion-reduce:transition-none"
             :class="
-              hovered === segment.name ? thickness.hovered : thickness.track
+              hovered === slice.name ? thickness.hovered : thickness.track
             "
             :style="{
-              width: `${segment.width}%`,
-              backgroundColor: segment.color,
+              width: `${slice.width}%`,
+              backgroundColor: slice.color,
               borderRadius: `${thickness.radius}px`,
-              opacity: blurred(segment) ? BLUR_OPACITY : undefined,
+              opacity: blurred(slice) ? BLUR_OPACITY : undefined,
             }"
-            :aria-label="segmentLabel(segment)"
-            @mouseenter="hover(segment, $event)"
+            :aria-label="sliceLabel(slice)"
+            @mouseenter="hover(slice, $event)"
             @mousemove="track($event)"
             @mouseleave="clearHover"
-            @focus="focusSegment(segment, $event)"
+            @focus="focusSegment(slice, $event)"
             @blur="clearHover"
-            @click="select(segment)"
+            @click="select(slice)"
           />
         </div>
       </div>
@@ -88,7 +88,7 @@
     <template v-if="legendItems.length > 1" #legend>
       <ChartLegend
         :items="legendItems"
-        @change="toggleSegment"
+        @change="toggleSlice"
         @highlight="hovered = $event"
       />
     </template>
@@ -101,7 +101,7 @@ import { BLUR_OPACITY } from './axisChartCommon'
 import { formatPercent, formatValue } from './format'
 import { useReactiveSlots } from '../composables/useReactiveSlots'
 import { pruneHiddenSeries } from './hiddenSeries'
-import { buildProportionSegments } from './proportionSegments'
+import { buildPercentageBarSlices } from './percentageBarSlices'
 import { useChartTokens } from './tokens'
 import { documentDir } from './utils'
 import ChartContainer from './components/ChartContainer.vue'
@@ -110,42 +110,42 @@ import ChartTooltip from './components/ChartTooltip.vue'
 import type {
   ChartLegendItem,
   ChartTooltipItem,
-  ProportionBarConfig,
-  ProportionBarEmits,
-  ProportionBarProps,
-  ProportionBarSlots,
-  ProportionSegment,
+  PercentageBarChartConfig,
+  PercentageBarChartEmits,
+  PercentageBarChartProps,
+  PercentageBarChartSlots,
+  PercentageBarSlice,
 } from './types'
 
 // A single 100% stacked bar: one track, one block per part, read as shares of
 // the whole. No echarts — the marks are divs, which is what lets each one be a
 // real button with its own focus ring rather than a region of a canvas.
 
-const props = defineProps<ProportionBarProps>()
+const props = defineProps<PercentageBarChartProps>()
 
-const hiddenSegments = defineModel<string[]>('hiddenSegments', {
+const hiddenSlices = defineModel<string[]>('hiddenSlices', {
   default: () => [],
 })
 
-const emit = defineEmits<ProportionBarEmits>()
+const emit = defineEmits<PercentageBarChartEmits>()
 
-defineSlots<ProportionBarSlots>()
+defineSlots<PercentageBarChartSlots>()
 
 const root = ref<HTMLElement>()
 const dir = computed(() => props.dir ?? documentDir())
 
 /**
- * How thick the track is, how thick the hovered segment grows to, and how far
+ * How thick the track is, how thick the hovered slice grows to, and how far
  * its corners cut. Two sizes, because the bar is read two ways and there is no
  * third: `'sm'` under a number it breaks down, `'md'` where the breakdown is
  * itself the thing on the card.
  *
  * `'md'` carries the donut's `SLICE_RADIUS`; `'sm'` steps the corner back with
- * the thickness, since a corner at half the height rounds a segment into a
+ * the thickness, since a corner at half the height rounds a slice into a
  * capsule and a row of capsules reads as separate objects rather than as one
  * track cut into parts.
  *
- * The hovered segment gains 2px at either size rather than a proportion of the
+ * The hovered slice gains 2px at either size rather than a proportion of the
  * track: the cue is "this one, not its neighbours", and 2px reads as that at
  * 8px as well as at 12px. It is the ring's emphasis, unrolled.
  */
@@ -155,13 +155,13 @@ const THICKNESS = {
 } as const
 
 /**
- * Between one segment and the next. The ring's gap is `padAngle`, an angle, so
+ * Between one slice and the next. The ring's gap is `padAngle`, an angle, so
  * it is not one distance — it runs about 2px to 3.3px across the ring sizes a
  * card gives it, widest at the outer edge. 3px reads as the same separation on
  * a straight track, and holds at every `size`: the gap separates the blocks,
  * so it should not thin out as the blocks do.
  */
-const SEGMENT_GAP = 3
+const SLICE_GAP = 3
 
 const size = computed(() => props.size ?? 'sm')
 const thickness = computed(() => THICKNESS[size.value])
@@ -175,49 +175,49 @@ const hasHeader = computed(() =>
   Boolean(props.title || props.subtitle || slots.actions),
 )
 
-const config = computed<ProportionBarConfig>(() => ({
+const config = computed<PercentageBarChartConfig>(() => ({
   data: props.data,
   categoryColumn: props.category,
   valueColumn: props.value,
-  maxSegments: props.maxSegments,
+  maxSlices: props.maxSlices,
   palette: props.palette,
   dir: dir.value,
 }))
 
 const { tokens } = useChartTokens(root)
 
-const segments = computed(() =>
-  buildProportionSegments(config.value, {
+const slices = computed(() =>
+  buildPercentageBarSlices(config.value, {
     tokens: tokens.value,
-    hiddenSegments: hiddenSegments.value,
+    hiddenSlices: hiddenSlices.value,
   }),
 )
-// A hidden segment keeps its legend entry and leaves the track. So does one
+// A hidden slice keeps its legend entry and leaves the track. So does one
 // worth nothing: a block with no width is a seam between its neighbours.
-const visibleSegments = computed(() =>
-  segments.value.filter((segment) => !segment.hidden && segment.width > 0),
+const visibleSlices = computed(() =>
+  slices.value.filter((slice) => !slice.hidden && slice.width > 0),
 )
-const isEmpty = computed(() => !visibleSegments.value.length)
+const isEmpty = computed(() => !visibleSlices.value.length)
 
-/** Segment under the pointer, under the keyboard focus, or under the legend. */
+/** Slice under the pointer, under the keyboard focus, or under the legend. */
 const hovered = ref<string | null>(null)
 
 /**
- * Everything but the segment being pointed at steps back, the way the ring's
+ * Everything but the slice being pointed at steps back, the way the ring's
  * other slices do — `focus: 'self'` plus `blur.itemStyle.opacity` on the donut,
  * the same `BLUR_OPACITY` here. Growing one block on its own is a weak cue on a
  * track this thin; the pair is what makes the hover read.
  *
- * Nothing blurs while the legend highlights a segment the bar is not drawing —
- * a hidden one — because there is no segment for the reader to be looking at.
+ * Nothing blurs while the legend highlights a slice the bar is not drawing —
+ * a hidden one — because there is no slice for the reader to be looking at.
  */
 const highlighted = computed(() =>
-  visibleSegments.value.some((segment) => segment.name === hovered.value)
+  visibleSlices.value.some((slice) => slice.name === hovered.value)
     ? hovered.value
     : null,
 )
-const blurred = (segment: ProportionSegment) =>
-  highlighted.value !== null && highlighted.value !== segment.name
+const blurred = (slice: PercentageBarSlice) =>
+  highlighted.value !== null && highlighted.value !== slice.name
 
 const tooltip = reactive({
   open: false,
@@ -227,37 +227,37 @@ const tooltip = reactive({
   rows: [] as Record<string, any>[],
 })
 
-function hover(segment: ProportionSegment, event: MouseEvent) {
-  read(segment)
+function hover(slice: PercentageBarSlice, event: MouseEvent) {
+  read(slice)
   track(event)
   tooltip.open = true
 }
 
 // A keyboard reader has no pointer to anchor the tooltip to, so it hangs off
-// the bottom of the segment's own block.
-function focusSegment(segment: ProportionSegment, event: FocusEvent) {
-  read(segment)
+// the bottom of the slice's own block.
+function focusSegment(slice: PercentageBarSlice, event: FocusEvent) {
+  read(slice)
   const rect = (event.currentTarget as HTMLElement).getBoundingClientRect()
   tooltip.x = rect.left + rect.width / 2
   tooltip.y = rect.bottom
   tooltip.open = true
 }
 
-function read(segment: ProportionSegment) {
-  hovered.value = segment.name
+function read(slice: PercentageBarSlice) {
+  hovered.value = slice.name
   tooltip.items = [
     {
-      name: segment.name,
-      label: segment.label,
-      color: segment.color,
-      value: segment.value,
-      formattedValue: formatMeasure(segment.value),
-      percent: segment.percent,
+      name: slice.name,
+      label: slice.label,
+      color: slice.color,
+      value: slice.value,
+      formattedValue: formatMeasure(slice.value),
+      percent: slice.percent,
       kind: 'series',
     },
   ]
-  // A named segment carries one row; "Others" carries every row it collapsed.
-  tooltip.rows = segment.rows
+  // A named slice carries one row; "Others" carries every row it collapsed.
+  tooltip.rows = slice.rows
 }
 
 function track(event: MouseEvent) {
@@ -271,12 +271,12 @@ function clearHover() {
   tooltip.open = false
 }
 
-function select(segment: ProportionSegment) {
+function select(slice: PercentageBarSlice) {
   emit('select', {
-    name: segment.label,
-    value: segment.value,
-    percent: segment.percent,
-    rows: segment.rows,
+    name: slice.label,
+    value: slice.value,
+    percent: slice.percent,
+    rows: slice.rows,
   })
 }
 
@@ -285,9 +285,9 @@ function select(segment: ProportionSegment) {
  * width is the whole point of the bar, and a reader who cannot see it is
  * otherwise told a number with nothing to read it against.
  */
-function segmentLabel(segment: ProportionSegment) {
-  return `${segment.label}, ${formatMeasure(segment.value)}, ${formatPercent(
-    segment.percent,
+function sliceLabel(slice: PercentageBarSlice) {
+  return `${slice.label}, ${formatMeasure(slice.value)}, ${formatPercent(
+    slice.percent,
   )}`
 }
 
@@ -296,39 +296,39 @@ function formatMeasure(value: number) {
 }
 
 const legendItems = computed<ChartLegendItem[]>(() =>
-  segments.value.map((segment) => ({
-    name: segment.name,
-    label: segment.label,
-    color: segment.color,
-    hidden: segment.hidden,
-    // A hidden segment has no share of the visible total, so it shows none.
-    hint: segment.hidden ? undefined : formatPercent(segment.percent),
+  slices.value.map((slice) => ({
+    name: slice.name,
+    label: slice.label,
+    color: slice.color,
+    hidden: slice.hidden,
+    // A hidden slice has no share of the visible total, so it shows none.
+    hint: slice.hidden ? undefined : formatPercent(slice.percent),
   })),
 )
 
-function toggleSegment(name: string) {
-  const hidden = hiddenSegments.value
+function toggleSlice(name: string) {
+  const hidden = hiddenSlices.value
   if (hidden.includes(name)) {
-    hiddenSegments.value = hidden.filter((n) => n !== name)
+    hiddenSlices.value = hidden.filter((n) => n !== name)
     return
   }
-  // Refuse to hide the last segment the bar is drawing — an empty bar reads as
+  // Refuse to hide the last slice the bar is drawing — an empty bar reads as
   // a failure to load. Counted against what is drawn rather than against what
-  // is unhidden: a segment worth nothing has a legend entry but no block, so
+  // is unhidden: a slice worth nothing has a legend entry but no block, so
   // it is neither the one holding the bar up nor able to empty it, and its own
   // entry stays pressable however little is left on the track.
-  const drawn = visibleSegments.value.some((segment) => segment.name === name)
-  if (drawn && visibleSegments.value.length <= 1) return
-  hiddenSegments.value = [...hidden, name]
+  const drawn = visibleSlices.value.some((slice) => slice.name === name)
+  if (drawn && visibleSlices.value.length <= 1) return
+  hiddenSlices.value = [...hidden, name]
 }
 
-// Segments that disappear while hidden shouldn't stay in the hidden list
+// Slices that disappear while hidden shouldn't stay in the hidden list
 // forever. `pruneHiddenSeries` returns the list unchanged when there is nothing
-// to drop, so a controlled `hiddenSegments` doesn't emit on every redraw.
+// to drop, so a controlled `hiddenSlices` doesn't emit on every redraw.
 watch(
-  () => segments.value.map((segment) => segment.name),
+  () => slices.value.map((slice) => slice.name),
   (names) => {
-    hiddenSegments.value = pruneHiddenSeries(hiddenSegments.value, names)
+    hiddenSlices.value = pruneHiddenSeries(hiddenSlices.value, names)
   },
 )
 </script>

@@ -3,69 +3,69 @@ import { paletteColors, type ChartTokens } from './tokens'
 import { OTHERS_KEY, OTHERS_LABEL } from './utils'
 import type {
   ChartPaletteName,
-  ProportionBarConfig,
-  ProportionSegment,
+  PercentageBarChartConfig,
+  PercentageBarSlice,
 } from './types'
 
-// Bar, legend and tooltip all read the same `ProportionSegment[]`, so the three
-// cannot disagree about what a segment is worth. No echarts: a single stacked
+// Bar, legend and tooltip all read the same `PercentageBarSlice[]`, so the three
+// cannot disagree about what a slice is worth. No echarts: a single stacked
 // bar is a row of divs, and a plot library would only take the rounded ends and
 // the pixel-exact gaps away again.
 
-export type ProportionSegmentContext = {
+export type PercentageBarSliceContext = {
   tokens: ChartTokens
-  /** Segment names the legend has switched off. Dropped from the bar. */
-  hiddenSegments?: string[]
+  /** Slice names the legend has switched off. Dropped from the bar. */
+  hiddenSlices?: string[]
 }
 
-export const DEFAULT_MAX_SEGMENTS = 6
+export const DEFAULT_MAX_SLICES = 6
 /** Below two there is nothing left to group into. */
-const MIN_MAX_SEGMENTS = 2
+const MIN_MAX_SLICES = 2
 
-const PROPORTION_PALETTE: ChartPaletteName = 'categorical'
+const PERCENTAGE_BAR_PALETTE: ChartPaletteName = 'categorical'
 
 /**
- * Narrowest a segment is drawn, as a percentage of the track. A share under
+ * Narrowest a slice is drawn, as a percentage of the track. A share under
  * this reads as a hairline or as nothing at all, and a part that is in the
  * legend but not in the bar reads as a bug — so the bar carries the floor and
  * `percent` keeps the true share. Convention 3: the caller is not asked to
  * round its own data up.
  */
-export const MIN_SEGMENT_WIDTH = 1.5
+export const MIN_SLICE_WIDTH = 1.5
 
 /**
- * The segments of the bar, in drawing order. Hidden segments stay in the list —
+ * The slices of the bar, in drawing order. Hidden slices stay in the list —
  * the legend still needs them, and dropping them would shift every color after.
  */
-export function buildProportionSegments(
-  config: ProportionBarConfig,
-  { tokens, hiddenSegments = [] }: ProportionSegmentContext,
-): ProportionSegment[] {
+export function buildPercentageBarSlices(
+  config: PercentageBarChartConfig,
+  { tokens, hiddenSlices = [] }: PercentageBarSliceContext,
+): PercentageBarSlice[] {
   const grouped = groupRows(config)
   const colors = paletteColors(
     config.palette,
     tokens,
     grouped.length,
-    PROPORTION_PALETTE,
+    PERCENTAGE_BAR_PALETTE,
   )
 
   const visibleTotal = grouped.reduce(
-    (sum, segment) =>
-      hiddenSegments.includes(segment.name) ? sum : sum + segment.value,
+    (sum, slice) =>
+      hiddenSlices.includes(slice.name) ? sum : sum + slice.value,
     0,
   )
 
-  const percents = grouped.map((segment) =>
-    hiddenSegments.includes(segment.name) || !visibleTotal
+  const percents = grouped.map((slice) =>
+    hiddenSlices.includes(slice.name) || !visibleTotal
       ? 0
-      : (segment.value / visibleTotal) * 100,
+      : (slice.value / visibleTotal) * 100,
   )
-  const widths = segmentWidths(percents)
+  const widths = sliceWidths(percents)
 
-  return grouped.map((segment, index) => ({
-    ...segment,
+  return grouped.map((slice, index) => ({
+    ...slice,
     color: colors[index],
-    hidden: hiddenSegments.includes(segment.name),
+    hidden: hiddenSlices.includes(slice.name),
     percent: percents[index],
     width: widths[index],
   }))
@@ -73,16 +73,16 @@ export function buildProportionSegments(
 
 /**
  * True shares, widened so the small ones stay visible. Anything under the floor
- * is lifted onto it and the difference is taken off the segments above it, in
+ * is lifted onto it and the difference is taken off the slices above it, in
  * proportion to how far above they sit — so the widest gives up the most and
  * the order of the bar never changes.
  *
- * Zeroes stay at zero: a hidden segment and a segment worth nothing are both
+ * Zeroes stay at zero: a hidden slice and a slice worth nothing are both
  * absent from the bar rather than drawn as a stub of the floor.
  */
-export function segmentWidths(
+export function sliceWidths(
   percents: number[],
-  min: number = MIN_SEGMENT_WIDTH,
+  min: number = MIN_SLICE_WIDTH,
 ): number[] {
   const lifted = percents.map((percent) =>
     percent > 0 && percent < min ? min : percent,
@@ -92,7 +92,7 @@ export function segmentWidths(
   const debt = total - 100
   if (debt <= 0) return lifted
 
-  // What the segments above the floor can give up between them, i.e. how far
+  // What the slices above the floor can give up between them, i.e. how far
   // they can fall before they are on the floor themselves.
   const slack = lifted.reduce(
     (sum, percent) => sum + Math.max(0, percent - min),
@@ -100,8 +100,8 @@ export function segmentWidths(
   )
   // The debt is larger than they can pay: there are more parts than the track
   // holds at a readable width, so no floor can be honoured. Taking the debt
-  // anyway would drive the widest segment past zero and draw the bar
-  // backwards. Every segment falls back to its true share instead — the floor
+  // anyway would drive the widest slice past zero and draw the bar
+  // backwards. Every slice falls back to its true share instead — the floor
   // is what gets dropped, never the accuracy.
   if (debt >= slack) return percents
 
@@ -111,12 +111,12 @@ export function segmentWidths(
   })
 }
 
-type UnsizedSegment = Omit<
-  ProportionSegment,
+type UnsizedSlice = Omit<
+  PercentageBarSlice,
   'color' | 'hidden' | 'percent' | 'width'
 >
 
-function groupRows(config: ProportionBarConfig): UnsizedSegment[] {
+function groupRows(config: PercentageBarChartConfig): UnsizedSlice[] {
   const rows = config.data ?? []
 
   const entries = rows
@@ -132,15 +132,12 @@ function groupRows(config: ProportionBarConfig): UnsizedSegment[] {
   // read — spent then forecast then tax, free then used — and re-ordering it by
   // size would break a sequence the caller built on purpose. The tail that gets
   // grouped is still the smallest values, wherever they sit.
-  const max = Math.max(
-    MIN_MAX_SEGMENTS,
-    config.maxSegments ?? DEFAULT_MAX_SEGMENTS,
-  )
+  const max = Math.max(MIN_MAX_SLICES, config.maxSlices ?? DEFAULT_MAX_SLICES)
   const keep = entries.length > max ? max - 1 : entries.length
   const kept = keptIndices(entries, keep)
 
   const seen = new Set<string>()
-  const segments: UnsizedSegment[] = []
+  const slices: UnsizedSlice[] = []
   const overflow: { row: Record<string, any>; value: number }[] = []
 
   entries.forEach((entry, index) => {
@@ -149,7 +146,7 @@ function groupRows(config: ProportionBarConfig): UnsizedSegment[] {
       return
     }
     const label = categoryLabel(entry.row[config.categoryColumn])
-    segments.push({
+    slices.push({
       name: uniqueName(label, seen),
       label,
       value: entry.value,
@@ -158,10 +155,10 @@ function groupRows(config: ProportionBarConfig): UnsizedSegment[] {
     })
   })
 
-  if (!overflow.length) return segments
+  if (!overflow.length) return slices
 
   return [
-    ...segments,
+    ...slices,
     {
       name: OTHERS_KEY,
       label: OTHERS_LABEL,
@@ -173,13 +170,13 @@ function groupRows(config: ProportionBarConfig): UnsizedSegment[] {
 }
 
 /**
- * Which entries keep a segment of their own: the `keep` largest, and the
+ * Which entries keep a slice of their own: the `keep` largest, and the
  * earliest written of them where values tie. Read off a sorted copy of the
  * positions, so the bar itself stays in row order.
  *
  * Positions rather than a cutoff value, because a cutoff cannot separate rows
  * that tie on it — every one of them clears it, and seven equal rows would
- * draw seven segments under a cap of six.
+ * draw seven slices under a cap of six.
  */
 function keptIndices(entries: { value: number }[], keep: number): Set<number> {
   if (keep >= entries.length) return new Set(entries.map((_, index) => index))

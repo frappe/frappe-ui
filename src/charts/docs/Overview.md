@@ -17,7 +17,7 @@ The `palette` prop picks a ramp by name (`categorical`, `sequential` or
 Each echarts chart registers only the echarts modules it needs, so importing
 `DonutChart` loads only the pie module. The three axis charts share the bar and
 line modules, because each of them can draw bars and lines. `FunnelChart`,
-`NumberCard` and `ProportionBar` do not use echarts. The first two draw their
+`NumberCard` and `PercentageBarChart` do not use echarts. The first two draw their
 own SVG; the bar is a row of divs.
 
 ## Data shapes
@@ -47,7 +47,7 @@ it for a combo chart, or to fill one line of a `LineChart`.
 | [ScatterChart](/docs/charts/scatterchart)   | Two measures against each other       |
 | [SankeyChart](/docs/charts/sankeychart)     | Flow from a source to a target        |
 | [NumberCard](/docs/charts/numbercard)       | One number and its change             |
-| [ProportionBar](/docs/charts/proportionbar) | A breakdown as one bar                |
+| [PercentageBarChart](/docs/charts/percentagebarchart) | A breakdown as one bar                |
 
 Every chart has the same [loading, error and empty states](/docs/charts/states).
 Charts sit together in a [dashboard](/docs/charts/dashboard) with no extra
@@ -174,7 +174,7 @@ is instant.
 ## The echarts instance
 
 Every echarts-backed chart hands back its instance as `chart` on a template ref.
-`FunnelChart`, `NumberCard` and `ProportionBar` draw no echarts plot and hand
+`FunnelChart`, `NumberCard` and `PercentageBarChart` draw no echarts plot and hand
 back nothing.
 
 ```vue

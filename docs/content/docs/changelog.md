@@ -3563,21 +3563,21 @@ captions.
 
 ### Charts
 
-#### `ProportionBar` draws a breakdown as one bar
+#### `PercentageBarChart` draws a breakdown as one bar
 
 A single 100% stacked bar, for a breakdown that sits under the number it
 splits up rather than filling a card of its own. It takes the same
 `category` / `value` rows as `DonutChart`, so a breakdown can move between
 the ring and the bar without you reshaping the data.
 
-`maxSegments` (default 6) keeps the largest parts and sums the rest into
+`maxSlices` (default 6) keeps the largest parts and sums the rest into
 "Others", named `OTHERS_KEY`. `size` is `sm` (8px, the default) or `md`
-(12px). `select` reports the segment and every row behind it, and
-`v-model:hiddenSegments` drives the legend from your app.
+(12px). `select` reports the slice and every row behind it, and
+`v-model:hiddenSlices` drives the legend from your app.
 
 Rows draw in the order you pass them, not sorted by size: a breakdown is
 usually written in the order it is read. A share too small to see is widened
-to a readable width, and the difference comes off the wider segments, so a
+to a readable width, and the difference comes off the wider slices, so a
 part is never in the legend and missing from the bar. The `percent` you read
 is still the true share.
 

@@ -1,5 +1,5 @@
 import { defineComponent, h, ref } from 'vue'
-import ProportionBar from './ProportionBar.vue'
+import PercentageBarChart from './PercentageBarChart.vue'
 import './style.css'
 
 const data = [
@@ -18,7 +18,7 @@ function mountBar(
         return () =>
           h('div', { style: 'width: 480px; padding: 24px' }, [
             h(
-              ProportionBar,
+              PercentageBarChart,
               {
                 data,
                 category: 'part',
@@ -33,11 +33,11 @@ function mountBar(
   )
 }
 
-const segments = () => cy.get('[data-slot="chart-segment"]')
+const slices = () => cy.get('[data-slot="chart-slice"]')
 const legendEntries = () => cy.get('[data-slot="chart-legend"] button')
 const tooltip = () => cy.get('[data-slot="chart-tooltip"]')
 
-/** The declared width of a segment, as the percentage the style carries. */
+/** The declared width of a slice, as the percentage the style carries. */
 function widthOf(label: string) {
   return cy
     .get(`[aria-label^="${label},"]`)
@@ -45,20 +45,17 @@ function widthOf(label: string) {
     .then((style) => Number(/width:\s*([\d.]+)%/.exec(style ?? '')?.[1]))
 }
 
-describe('ProportionBar', () => {
-  it('draws one segment per row, in row order', () => {
+describe('PercentageBarChart', () => {
+  it('draws one slice per row, in row order', () => {
     mountBar()
-    segments().should('have.length', 3)
-    segments()
-      .first()
-      .should('have.attr', 'aria-label')
-      .and('contain', 'Compute')
+    slices().should('have.length', 3)
+    slices().first().should('have.attr', 'aria-label').and('contain', 'Compute')
   })
 
-  it('colors the segments from the categorical ramp', () => {
+  it('colors the slices from the categorical ramp', () => {
     mountBar()
     const seen: string[] = []
-    segments().each(($el) => {
+    slices().each(($el) => {
       const color = $el.css('background-color')
       expect(color).to.match(/^rgba?\(/)
       expect(color).not.to.equal('rgba(0, 0, 0, 0)')
@@ -67,14 +64,14 @@ describe('ProportionBar', () => {
     cy.then(() => expect(new Set(seen).size).to.equal(3))
   })
 
-  it('sizes each segment by its share of the total', () => {
+  it('sizes each slice by its share of the total', () => {
     mountBar()
     widthOf('Compute').should('be.closeTo', 60, 0.01)
     widthOf('Storage').should('be.closeTo', 30, 0.01)
     widthOf('Bandwidth').should('be.closeTo', 10, 0.01)
   })
 
-  it('names each segment with its value and its share', () => {
+  it('names each slice with its value and its share', () => {
     mountBar()
     cy.get('[aria-label="Compute, 60, 60%"]').should('exist')
   })
@@ -96,37 +93,37 @@ describe('ProportionBar', () => {
     widthOf('Used').should('be.greaterThan', 90)
   })
 
-  it('reads the hovered segment out in a tooltip', () => {
+  it('reads the hovered slice out in a tooltip', () => {
     mountBar()
-    segments().first().trigger('mouseenter')
+    slices().first().trigger('mouseenter')
     tooltip().should('contain.text', 'Compute').and('contain.text', '60%')
-    segments().first().trigger('mouseleave')
+    slices().first().trigger('mouseleave')
     tooltip().should('not.exist')
   })
 
   it('opens the tooltip on keyboard focus too', () => {
     mountBar()
-    segments().eq(1).focus()
+    slices().eq(1).focus()
     tooltip().should('contain.text', 'Storage')
   })
 
-  // at-bar item 3.4 — P12. The segments are the plot's only controls, so the
+  // at-bar item 3.4 — P12. The slices are the plot's only controls, so the
   // tab order, the focus ring and Enter/Space are the component's keyboard
   // contract.
-  it('puts every drawn segment in the tab order, in reading order', () => {
+  it('puts every drawn slice in the tab order, in reading order', () => {
     mountBar()
-    segments().each(($el) => {
+    slices().each(($el) => {
       expect($el.prop('tagName')).to.equal('BUTTON')
       expect($el.attr('tabindex')).to.not.equal('-1')
     })
 
     cy.get('body').tab?.()
-    segments().first().focus().should('be.focused')
+    slices().first().focus().should('be.focused')
   })
 
   it('shows a focus ring on keyboard focus', () => {
     mountBar()
-    segments()
+    slices()
       .first()
       .focus()
       .should(($el) => {
@@ -136,25 +133,25 @@ describe('ProportionBar', () => {
       })
   })
 
-  it('answers Enter and Space on the focused segment with select', () => {
+  it('answers Enter and Space on the focused slice with select', () => {
     const onSelect = cy.spy().as('keySelect')
     mountBar({ onSelect })
 
-    segments().eq(1).focus().type('{enter}')
+    slices().eq(1).focus().type('{enter}')
     cy.get('@keySelect').should('have.been.calledWithMatch', {
       name: 'Storage',
     })
 
-    segments().eq(2).focus().type(' ')
+    slices().eq(2).focus().type(' ')
     cy.get('@keySelect').should('have.been.calledWithMatch', {
       name: 'Bandwidth',
     })
   })
 
-  it('emits select with the row behind the segment', () => {
+  it('emits select with the row behind the slice', () => {
     const onSelect = cy.spy().as('select')
     mountBar({ onSelect })
-    segments().eq(2).click()
+    slices().eq(2).click()
     cy.get('@select').should('have.been.calledWithMatch', {
       name: 'Bandwidth',
       value: 10,
@@ -162,29 +159,29 @@ describe('ProportionBar', () => {
     })
   })
 
-  it("prints each segment's share in the legend", () => {
+  it("prints each slice's share in the legend", () => {
     mountBar()
     legendEntries().should('have.length', 3)
     cy.get('[data-slot="chart-legend"]').should('contain.text', '30%')
   })
 
-  it('takes a segment off the bar and re-percentages the rest', () => {
+  it('takes a slice off the bar and re-percentages the rest', () => {
     mountBar()
     cy.get('[aria-label="Hide Bandwidth"]').click()
-    segments().should('have.length', 2)
+    slices().should('have.length', 2)
     widthOf('Compute').should('be.closeTo', 66.67, 0.01)
     cy.get('[aria-label="Show Bandwidth"]').should('exist')
   })
 
-  it('refuses to hide the last visible segment', () => {
+  it('refuses to hide the last visible slice', () => {
     mountBar()
     cy.get('[aria-label="Hide Bandwidth"]').click()
     cy.get('[aria-label="Hide Storage"]').click()
     cy.get('[aria-label="Hide Compute"]').click()
-    segments().should('have.length', 1)
+    slices().should('have.length', 1)
   })
 
-  it('will not hide the last drawn segment past a zero-valued one', () => {
+  it('will not hide the last drawn slice past a zero-valued one', () => {
     // The zero-valued part has a legend entry but no block. Hiding the part
     // that is drawn would leave nothing on the track and show the empty state.
     mountBar({
@@ -194,9 +191,9 @@ describe('ProportionBar', () => {
       ],
     })
 
-    segments().should('have.length', 1)
+    slices().should('have.length', 1)
     cy.get('[aria-label="Hide Used"]').click()
-    segments().should('have.length', 1)
+    slices().should('have.length', 1)
     cy.get('[data-slot="chart-container"]').should(
       'not.have.attr',
       'data-state',
@@ -204,9 +201,9 @@ describe('ProportionBar', () => {
     )
   })
 
-  it('still lets a zero-valued entry toggle when one segment is drawn', () => {
+  it('still lets a zero-valued entry toggle when one slice is drawn', () => {
     // Hiding a part with no block cannot empty the bar, so the guard that
-    // protects the last drawn segment must not block it.
+    // protects the last drawn slice must not block it.
     mountBar({
       data: [
         { part: 'Used', amount: 10 },
@@ -214,10 +211,10 @@ describe('ProportionBar', () => {
       ],
     })
 
-    segments().should('have.length', 1)
+    slices().should('have.length', 1)
     cy.get('[aria-label="Hide Free"]').click()
     cy.get('[aria-label="Show Free"]').should('exist')
-    segments().should('have.length', 1)
+    slices().should('have.length', 1)
   })
 
   it('follows the header spacing when a parent adds the actions slot', () => {
@@ -228,7 +225,7 @@ describe('ProportionBar', () => {
           return () =>
             h('div', { style: 'width: 480px; padding: 24px' }, [
               h(
-                ProportionBar,
+                PercentageBarChart,
                 { data, category: 'part', value: 'amount' },
                 withActions.value
                   ? { actions: () => h('button', 'Export') }
@@ -247,19 +244,19 @@ describe('ProportionBar', () => {
     pad().should('have.css', 'padding-top', '0px')
   })
 
-  it('drives the legend from a bound hiddenSegments', () => {
+  it('drives the legend from a bound hiddenSlices', () => {
     const hidden = ref(['Storage'])
     cy.mount(
       defineComponent({
         setup() {
           return () =>
             h('div', { style: 'width: 480px; padding: 24px' }, [
-              h(ProportionBar, {
+              h(PercentageBarChart, {
                 data,
                 category: 'part',
                 value: 'amount',
-                hiddenSegments: hidden.value,
-                'onUpdate:hiddenSegments': (next: string[]) => {
+                hiddenSlices: hidden.value,
+                'onUpdate:hiddenSlices': (next: string[]) => {
                   hidden.value = next
                 },
               }),
@@ -268,7 +265,7 @@ describe('ProportionBar', () => {
       }),
     )
 
-    segments().should('have.length', 2)
+    slices().should('have.length', 2)
     cy.get('[aria-label="Show Storage"]')
       .click()
       .then(() => {
@@ -281,16 +278,16 @@ describe('ProportionBar', () => {
     cy.get('[data-slot="chart-legend"]').should('not.exist')
   })
 
-  it('groups the tail past maxSegments into one segment', () => {
+  it('groups the tail past maxSlices into one slice', () => {
     mountBar({
       data: Array.from({ length: 8 }, (_, i) => ({
         part: `Part ${i + 1}`,
         amount: 10 - i,
       })),
-      maxSegments: 3,
+      maxSlices: 3,
     })
 
-    segments().should('have.length', 3)
+    slices().should('have.length', 3)
     cy.get('[aria-label^="Others,"]').should('exist')
   })
 
@@ -299,7 +296,7 @@ describe('ProportionBar', () => {
     cy.get('[data-slot="chart-track"]')
       .should('have.attr', 'data-size', 'sm')
       .and('have.css', 'height', '8px')
-    segments().first().should('have.css', 'height', '8px')
+    slices().first().should('have.css', 'height', '8px')
   })
 
   it('takes its thickness from size', () => {
@@ -307,29 +304,29 @@ describe('ProportionBar', () => {
     for (const [size, height] of Object.entries(heights)) {
       mountBar({ size })
       cy.get('[data-slot="chart-track"]').should('have.css', 'height', height)
-      segments().first().should('have.css', 'height', height)
+      slices().first().should('have.css', 'height', height)
     }
   })
 
-  it('grows the hovered segment by 2px, whatever the size', () => {
+  it('grows the hovered slice by 2px, whatever the size', () => {
     mountBar({ size: 'sm' })
-    segments().first().trigger('mouseenter')
-    segments().first().should('have.css', 'height', '10px')
+    slices().first().trigger('mouseenter')
+    slices().first().should('have.css', 'height', '10px')
 
     mountBar({ size: 'md' })
-    segments().first().trigger('mouseenter')
-    segments().first().should('have.css', 'height', '14px')
+    slices().first().trigger('mouseenter')
+    slices().first().should('have.css', 'height', '14px')
   })
 
   it("cuts the corner deeper as the track thickens, up to the donut's", () => {
     const radii = { sm: '3px', md: '4px' }
     for (const [size, radius] of Object.entries(radii)) {
       mountBar({ size })
-      segments().first().should('have.css', 'border-radius', radius)
+      slices().first().should('have.css', 'border-radius', radius)
     }
   })
 
-  it("separates the segments by the ring's own gap", () => {
+  it("separates the slices by the ring's own gap", () => {
     mountBar()
     cy.get('[data-slot="chart-track"]').should('have.css', 'column-gap', '3px')
   })
@@ -363,27 +360,27 @@ describe('ProportionBar', () => {
     )
   })
 
-  it('steps the other segments back while one is hovered', () => {
+  it('steps the other slices back while one is hovered', () => {
     mountBar()
-    segments().first().trigger('mouseenter')
-    segments().first().should('have.css', 'opacity', '1')
-    segments().eq(1).should('have.css', 'opacity', '0.75')
-    segments().first().trigger('mouseleave')
-    segments().eq(1).should('have.css', 'opacity', '1')
+    slices().first().trigger('mouseenter')
+    slices().first().should('have.css', 'opacity', '1')
+    slices().eq(1).should('have.css', 'opacity', '0.75')
+    slices().first().trigger('mouseleave')
+    slices().eq(1).should('have.css', 'opacity', '1')
   })
 
   it('steps them back from the legend too', () => {
     mountBar()
     cy.get('[aria-label="Hide Compute"]').trigger('mouseenter')
-    segments().first().should('have.css', 'opacity', '1')
-    segments().eq(2).should('have.css', 'opacity', '0.75')
+    slices().first().should('have.css', 'opacity', '1')
+    slices().eq(2).should('have.css', 'opacity', '0.75')
   })
 
-  it('blurs nothing while the legend points at a hidden segment', () => {
+  it('blurs nothing while the legend points at a hidden slice', () => {
     mountBar()
     cy.get('[aria-label="Hide Bandwidth"]').click()
     cy.get('[aria-label="Show Bandwidth"]').trigger('mouseenter')
-    segments().each(($el) => {
+    slices().each(($el) => {
       expect($el).to.have.css('opacity', '1')
     })
   })
@@ -439,7 +436,7 @@ describe('ProportionBar', () => {
       {},
       { tooltip: ({ items }: any) => h('div', `own: ${items[0].label}`) },
     )
-    segments().first().trigger('mouseenter')
+    slices().first().trigger('mouseenter')
     tooltip().should('contain.text', 'own: Compute')
   })
 })

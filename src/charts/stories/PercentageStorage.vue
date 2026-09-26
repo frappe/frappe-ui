@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { ProportionBar } from 'frappe-ui/charts'
-import type { ProportionSegmentEvent } from 'frappe-ui/charts'
+import { PercentageBarChart } from 'frappe-ui/charts'
+import type { PercentageBarSliceEvent } from 'frappe-ui/charts'
 
 const diskBySite = [
   { site: 'shop.example.com', gb: 214 },
@@ -15,17 +15,17 @@ const diskBySite = [
 
 const gigabytes = (value: number) => `${value} GB`
 
-const selected = ref<ProportionSegmentEvent | null>(null)
+const selected = ref<PercentageBarSliceEvent | null>(null)
 </script>
 
 <template>
   <div class="flex h-full min-h-52 w-full items-center justify-center">
     <div class="flex w-full max-w-lg flex-col gap-3">
-      <ProportionBar
+      <PercentageBarChart
         :data="diskBySite"
         category="site"
         value="gb"
-        :max-segments="4"
+        :max-slices="4"
         :format="gigabytes"
         title="Disk used"
         subtitle="374 GB of 500 GB"
@@ -37,7 +37,7 @@ const selected = ref<ProportionSegmentEvent | null>(null)
           {{ selected.rows.length }} site(s) behind it
         </template>
         <template v-else>
-          Select a segment — Others carries every site it groups.
+          Select a slice — Others carries every site it groups.
         </template>
       </p>
     </div>

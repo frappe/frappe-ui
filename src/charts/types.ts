@@ -276,23 +276,23 @@ export type DonutSliceEvent = {
   rows: Record<string, any>[]
 }
 
-export type ProportionBarConfig = {
+export type PercentageBarChartConfig = {
   data: Record<string, any>[]
-  /** Row key holding the segment name. */
+  /** Row key holding the slice name. */
   categoryColumn: string
-  /** Row key holding the segment size. */
+  /** Row key holding the slice size. */
   valueColumn: string
   title?: string
   subtitle?: string
   /**
-   * How many segments the bar holds, "Others" included: past that it keeps the
-   * largest `maxSegments - 1` and sums the tail into "Others". A track a few
+   * How many slices the bar holds, "Others" included: past that it keeps the
+   * largest `maxSlices - 1` and sums the tail into "Others". A track a few
    * hundred pixels wide runs out of room well before the palette does, so it
    * defaults to 6.
    */
-  maxSegments?: number
+  maxSlices?: number
   /**
-   * Ramp segment colors are drawn from. Defaults to `'categorical'`: the parts
+   * Ramp slice colors are drawn from. Defaults to `'categorical'`: the parts
    * of a breakdown are unrelated categories, not steps of one magnitude.
    */
   palette?: ChartPalette
@@ -301,34 +301,34 @@ export type ProportionBarConfig = {
 }
 
 /** One block of the bar, after "Others" grouping and color assignment. */
-export type ProportionSegment = {
+export type PercentageBarSlice = {
   /** Identity used by the legend and the tooltip. Unique within the bar. */
   name: string
   /** The category value as it should read; not unique. */
   label: string
   value: number
-  /** Share of the *visible* total, so hiding a segment re-percentages the rest. */
+  /** Share of the *visible* total, so hiding a slice re-percentages the rest. */
   percent: number
   /**
-   * What the segment is drawn at, as a percentage of the track. Equal to
+   * What the slice is drawn at, as a percentage of the track. Equal to
    * `percent` until a share is too small to see, at which point the bar widens
-   * it at the expense of the segments above the floor. Read `percent` for the
+   * it at the expense of the slices above the floor. Read `percent` for the
    * number a reader is told; this one is geometry.
    */
   width: number
   color: string
   hidden: boolean
-  /** The row behind this segment, or every grouped row for "Others". */
+  /** The row behind this slice, or every grouped row for "Others". */
   rows: Record<string, any>[]
   isOthers: boolean
 }
 
-export type ProportionSegmentEvent = {
-  /** The segment as it reads, i.e. the category value or "Others". */
+export type PercentageBarSliceEvent = {
+  /** The slice as it reads, i.e. the category value or "Others". */
   name: string
   value: number
   percent: number
-  /** One row, or every grouped row when the "Others" segment was clicked. */
+  /** One row, or every grouped row when the "Others" slice was clicked. */
   rows: Record<string, any>[]
 }
 
@@ -985,20 +985,22 @@ export type DonutChartProps = ChartBaseProps & {
   echartOptions?: EchartOptionsOverride
 }
 
-export type ProportionBarProps = ChartBaseProps & {
-  /** The rows to draw. One row is one segment, before the "Others" grouping. */
+export type PercentageBarChartProps = ChartBaseProps & {
+  /** The rows to draw. One row is one slice, before the "Others" grouping. */
   data: Record<string, any>[]
-  /** Row key holding the segment name. */
+  /** Row key holding the slice name. */
   category: string
-  /** Row key holding the segment size. */
+  /** Row key holding the slice size. */
   value: string
   /**
-   * How many segments the bar holds, "Others" included. Past that it keeps the
-   * largest `maxSegments - 1` and sums the tail into a single "Others" segment,
-   * named `OTHERS_KEY`. Defaults to 6 — the track runs out of readable width
-   * long before the palette runs out of hues.
+   * How many slices the bar holds, "Others" included. Past that it keeps the
+   * largest `maxSlices - 1` and sums the tail into a single "Others" slice,
+   * named `OTHERS_KEY`. Same word and same behavior as `DonutChart`, so a
+   * breakdown carries it across when it moves from the ring to the bar.
+   * Defaults to 6 — a track runs out of readable width sooner than a ring,
+   * which defaults to 9.
    */
-  maxSegments?: number
+  maxSlices?: number
   /**
    * How thick the track is drawn: `'sm'` 8px, the default, for a strip under
    * the number it breaks down; `'md'` 12px where the breakdown is itself what
@@ -1007,16 +1009,16 @@ export type ProportionBarProps = ChartBaseProps & {
    */
   size?: 'sm' | 'md'
   /**
-   * Segments the legend has switched off, by name. Bind it with
-   * `v-model:hiddenSegments` to drive the legend from the app, or to keep what
+   * Slices the legend has switched off, by name. Bind it with
+   * `v-model:hiddenSlices` to drive the legend from the app, or to keep what
    * a reader hid across a reload. Left unbound, the legend owns it.
    *
-   * `hiddenSegments`, not the axis charts' `hiddenSeries`: a segment comes out
-   * of a `category` / `value` row rather than a column, so it is not a series
-   * under another name. `spec/charts.md` records the ruling.
+   * `DonutChart`'s word, because it is `DonutChart`'s mark: the two read the
+   * same rows into the same parts and differ only in the shape they lay them
+   * out in. `spec/charts.md` records the ruling.
    */
-  hiddenSegments?: string[]
-  /** Prints every value the bar shows: the tooltip, and each segment's name. */
+  hiddenSlices?: string[]
+  /** Prints every value the bar shows: the tooltip, and each slice's name. */
   format?: ChartValueFormatter
   /** Defaults to `'categorical'`: the parts are unrelated, not steps of a ramp. */
   palette?: ChartPalette
@@ -1339,21 +1341,21 @@ export type DonutChartSlots = ChartActionsSlot &
     tooltip?: (props: ChartTooltipSlotProps) => unknown
   }
 
-export type ProportionBarEmits = {
+export type PercentageBarChartEmits = {
   /**
-   * A segment was selected, by click or by Enter on the keyboard. The "Others"
-   * segment carries every row it grouped, so a caller can drill into the tail
+   * A slice was selected, by click or by Enter on the keyboard. The "Others"
+   * slice carries every row it grouped, so a caller can drill into the tail
    * as well as into a named part.
    */
-  select: [event: ProportionSegmentEvent]
+  select: [event: PercentageBarSliceEvent]
 }
 
-export type ProportionBarSlots = ChartActionsSlot &
+export type PercentageBarChartSlots = ChartActionsSlot &
   ChartTitleSuffixSlot &
   ChartStateSlots & {
     /**
-     * Replaces the tooltip body. `items` holds the hovered segment alone. A
-     * named segment carries one row, and "Others" every row it collapsed.
+     * Replaces the tooltip body. `items` holds the hovered slice alone. A
+     * named slice carries one row, and "Others" every row it collapsed.
      */
     tooltip?: (props: ChartTooltipSlotProps) => unknown
   }
