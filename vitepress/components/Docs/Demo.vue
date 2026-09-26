@@ -24,8 +24,14 @@ const isEditorDemo = computed(() => props.name?.startsWith('Editor'))
     <div
       class="rounded-7 overflow-hidden border border-outline-gray-1 divide-y divide-outline-gray-1"
     >
+      <!-- `vp-raw` stops VitePress from taking over link clicks in a demo.
+           Without it, a `<router-link>` (Tabs route mode, Breadcrumbs) would
+           send the docs site to the demo's URL instead of the in-memory
+           router the theme installs for demos. -->
       <div
+        data-demo-preview
         :class="[
+          'vp-raw',
           isEditorDemo ? '' : 'not-prose',
           'bg-surface-base overflow-x-auto scrollbar min-h-[200px]',
           selfLayout

@@ -7,10 +7,27 @@ export type ChartDir = 'ltr' | 'rtl'
 /** What an echarts-backed chart hands back through a template ref. */
 export type ChartExposed = {
   /** The echarts instance, once the plot has a size to initialise into. */
+  chart: ECharts | undefined
+}
+
+/**
+ * What a chart hands `defineExpose`. Vue unwraps the computed on the way out,
+ * so what a caller reads is `ChartExposed`. Internal.
+ */
+export type ChartExposedRefs = {
+  /** The echarts instance, once the plot has a size to initialise into. */
   chart: ComputedRef<ECharts | undefined>
 }
 
-/** Deep-merged into the generated echarts option as a last-resort escape hatch. */
+/**
+ * Deep-merged into the generated echarts option as a last-resort escape hatch.
+ * Objects merge key by key; arrays replace. So `series: [...]` at chart level
+ * throws away the generated series, data and colors included. To reach one
+ * series key, use the per-series `echartOptions` on an axis chart.
+ *
+ * `animationDuration` set here applies to the first draw only; every later
+ * draw is instant.
+ */
 export type EchartOptionsOverride = Record<string, any>
 
 export type ChartPaletteName = 'sequential' | 'categorical' | 'diverging'
@@ -64,21 +81,26 @@ export type AxisChartSeriesConfig = {
   /** Mark this series draws as. Defaults to the chart's own mark. */
   type?: ChartMark
   /**
-   * Which value axis this series is measured against. `'y2'` gives a series in
-   * a different unit or magnitude its own scale, opposite the primary. Ignored
-   * on a horizontal bar chart, which has no second value axis.
+   * Which value axis this series is measured against, i.e. which of `y` and
+   * `y2` named its column. `'y2'` is ignored on a horizontal bar chart, which
+   * has no second value axis.
    */
   axis?: 'y' | 'y2'
+  /**
+   * Prints this series' values in the tooltip and its data labels, for a series
+   * whose unit differs from the others on its axis. Without one, the tooltip
+   * uses its axis' `format` and a label prints a compact number. A label on a
+   * normalized stack prints the series' share either way.
+   */
+  format?: ChartValueFormatter
   showDataLabels?: boolean
   /**
    * Groups series into separate stacks. Only read when `stacked` is on, and
    * only by the marks that stack — a line never does.
    */
   stackName?: string
-  /** Dash pattern of the line itself. Defaults to a solid stroke. */
-  lineType?: 'solid' | 'dashed' | 'dotted'
-  /** Stroke width in px. Defaults to 2. */
-  lineWidth?: number
+  /** Breaks the line into a dash. Defaults to a solid stroke. */
+  dashed?: boolean
   /**
    * Marks every datapoint with a dot. Off by default — a clean line reads
    * better, and the dot for the hovered point appears anyway.
@@ -86,8 +108,11 @@ export type AxisChartSeriesConfig = {
   showDataPoints?: boolean
   /** Rounds the corners of the line instead of drawing straight segments. */
   smooth?: boolean
-  /** Overrides the chart-level `fillOpacity`. Read by an area series. */
-  fillOpacity?: number
+  /**
+   * Bridges gaps left by null or non-numeric values. Off by default: a break in
+   * the line is how missing data should read. Line and area series only.
+   */
+  connectNulls?: boolean
   echartOptions?: EchartOptionsOverride
 }
 
@@ -96,6 +121,13 @@ export type AxisChartSeriesConfig = {
  * budget, or the date something changed. An annotation rather than a series —
  * it has no legend entry, cannot be switched off, and is never in the tooltip.
  */
+/** An end of a reference line, and a side of it. See `ReferenceLine.labelPlacement`. */
+export type ReferenceLineLabelPlacement =
+  | 'start-top'
+  | 'start-bottom'
+  | 'end-top'
+  | 'end-bottom'
+
 export type ReferenceLine = {
   /**
    * Where the line sits: a number on a value axis, or whatever the category
@@ -115,9 +147,17 @@ export type ReferenceLine = {
    * with `xAxis.type: 'value'` reads `'x'` the same way: a number on the scale.
    */
   axis?: 'y' | 'y2' | 'x'
-  /** Printed at the far end of the line. Left out, the rule carries no text. */
+  /** Printed on the line. Left out, the rule carries no text. */
   label?: string
-  /** Defaults to the ink data labels are printed in, so it reads as an annotation. */
+  /**
+   * Where the label sits, as an end of the rule and a side of it. Defaults to
+   * `'end-top'`. Move it when the default lands on a mark or on another rule's
+   * label. The ends are read in the direction of the axis the rule runs along,
+   * so an RTL chart swaps them. A rule drawn down the plot carries its label
+   * rotated, so its sides are the left and the right of it.
+   */
+  labelPlacement?: ReferenceLineLabelPlacement
+  /** Defaults to the ink the axis labels are printed in, so it reads as furniture. */
   color?: string
   /** Breaks the rule up, for a line that should not read as a hard boundary. */
   dashed?: boolean
@@ -130,7 +170,7 @@ export type AxisChartBaseConfig = {
   yAxis?: ChartYAxisConfig
   /**
    * The second value axis, drawn opposite the primary. Only read when a series
-   * sets `axis: 'y2'`, and never on a horizontal bar chart — two value axes
+   * carries `axis: 'y2'`, and never on a horizontal bar chart — two value axes
    * along the top and bottom of the plot are unreadable.
    */
   y2Axis?: ChartYAxisConfig
@@ -142,6 +182,10 @@ export type AxisChartBaseConfig = {
   /**
    * Ramp series colors are drawn from. Defaults to `'sequential'`: one series
    * gets a single mid-blue, more get evenly spaced stops running dark to light.
+   * A chart of mixed marks spends those stops by mark rather than by series
+   * order: see `resolveSeriesColors`. A chart of two or more lines and no other
+   * mark defaults to the categorical ramp instead, its light partners shifted
+   * one hue along so no two neighbouring lines share a hue.
    */
   palette?: ChartPalette
   /** Forces layout direction; defaults to document.documentElement.dir */
@@ -166,16 +210,6 @@ export type AxisChartConfig = AxisChartBaseConfig & {
   stacked?: boolean | 'normalized'
   /** Bars run left-to-right; the category axis moves to Y. Bars only. */
   horizontal?: boolean
-  /**
-   * Bridges gaps left by null or non-numeric values. Off by default: a break in
-   * the line is how missing data should read. Line and area series only.
-   */
-  connectNulls?: boolean
-  /**
-   * Alpha of the fill under an area series. Defaults to a faint wash that fades
-   * out towards the axis; areas that stack into a band default to solid.
-   */
-  fillOpacity?: number
 }
 
 export type DonutChartConfig = {
@@ -202,7 +236,7 @@ export type DonutChartConfig = {
    * Prints each slice's name and share next to the ring. Off by default: the
    * legend carries the same information without the leader lines.
    */
-  showInlineLabels?: boolean
+  showDataLabels?: boolean
   /** Caption under the total in the middle. Defaults to the value column name. */
   centerLabel?: string
   /** `'half'` draws the ring as a semicircle; only the geometry changes. */
@@ -231,9 +265,12 @@ export type DonutSlice = {
 }
 
 export type DonutSliceEvent = {
-  /** The slice as it reads, i.e. the category value or "Others". */
+  /** Identity of the slice: the category value, or `OTHERS_KEY` for the tail. */
   name: string
+  /** The slice as it reads, i.e. the category value or "Others". */
+  label: string
   value: number
+  /** Share of the *visible* total, so a hidden slice changes what this reads. */
   percent: number
   /** One row, or every grouped row when the "Others" slice was clicked. */
   rows: Record<string, any>[]
@@ -310,11 +347,6 @@ export type FunnelChartConfig = {
    * as the population narrows.
    */
   palette?: ChartPalette
-  /**
-   * Prints each stage's share of the first stage under its value. On by
-   * default: the conversion rate is what a funnel is read for.
-   */
-  showPercentages?: boolean
   /** Forces layout direction; defaults to document.documentElement.dir */
   dir?: ChartDir
 }
@@ -322,6 +354,9 @@ export type FunnelChartConfig = {
 /** One stage of the funnel, after coercion and percentage arithmetic. */
 export type FunnelStage = {
   index: number
+  /** Identity of the stage: the category value as a string. */
+  name: string
+  /** The stage as it should read; `(Blank)` where the category is empty. */
   label: string
   value: number
   /** Share of the first stage, i.e. the conversion rate to here. 0-100. */
@@ -332,9 +367,11 @@ export type FunnelStage = {
 }
 
 export type FunnelStageEvent = {
+  /** Identity of the stage: the category value as a string. */
+  name: string
+  /** The stage as it printed, i.e. `(Blank)` where the category is empty. */
   label: string
   value: number
-  index: number
   row: Record<string, any>
 }
 
@@ -381,7 +418,7 @@ export type HeatmapChartConfig = {
    * Prints each cell's value inside it. Labels that would collide with a
    * neighbour are dropped, so a grid too fine to carry numbers shows none.
    */
-  showValues?: boolean
+  showDataLabels?: boolean
   /** Forces layout direction; defaults to document.documentElement.dir */
   dir?: ChartDir
   echartOptions?: EchartOptionsOverride
@@ -432,18 +469,22 @@ export type NumberCardConfig = {
   value: number | null
   prefix?: string
   suffix?: string
+  /** What the reading is measured against, printed as a muted ` / target` in the value's own formatting. */
+  target?: number | string
   /** Change against the comparison period. Sign drives the arrow. */
   delta?: number | null
+  /** Unit printed before the delta, e.g. `'$'`. */
+  deltaPrefix?: string
   /** Unit printed after the delta, e.g. `'%'`. */
   deltaSuffix?: string
   /** What the delta is measured against, e.g. `'vs last month'`. */
   deltaCaption?: string
   /** Flips the delta colors, for metrics like churn or cost. */
   negativeIsBetter?: boolean
-  /** Decimal places. Defaults to as many as the value carries, up to 2. */
-  precision?: number
-  /** Shortens the value, `12300` -> `12.3K`. */
-  compact?: boolean
+  /** Prints the reading and the target: they are one measure, read against each other. */
+  format?: ChartValueFormatter
+  /** Prints the delta. It takes the absolute value: the arrow beside it carries the sign. */
+  deltaFormat?: ChartValueFormatter
   /** Forces layout direction; defaults to document.documentElement.dir */
   dir?: ChartDir
   /** A trend across the bottom of the card: shape only, no axes to read against. */
@@ -454,18 +495,14 @@ export type NumberCardSparkline = {
   /** Oldest reading first. Gaps are skipped, not drawn as zero. */
   data: (number | null | undefined)[]
   /**
-   * `line` for a continuous reading, `bar` for one the reader counts in
-   * periods. Defaults to `line`.
+   * The mark, from the set every other chart's `type` takes. `'area'` draws a
+   * line over a filled curve, `'line'` the stroke alone, and `'bar'` one bar
+   * per reading. Defaults to `'area'`.
    */
-  type?: NumberCardSparklineType
+  type?: ChartMark
   /** Overrides the sequential-palette blue the sparkline is drawn in. */
   color?: string
 }
-
-export type NumberCardSparklineType = 'line' | 'bar'
-
-/** Which way the flow runs: columns of nodes left to right, or rows top to bottom. */
-export type SankeyOrient = 'horizontal' | 'vertical'
 
 /**
  * Where a node sits along the flow. `'justify'` pushes a node with no outgoing
@@ -485,7 +522,7 @@ export type SankeyChartConfig = {
   valueColumn: string
   title?: string
   subtitle?: string
-  orient?: SankeyOrient
+  vertical?: boolean
   nodeAlign?: SankeyNodeAlign
   /**
    * Ramp node colors are drawn from. Defaults to `'categorical'`: the nodes of
@@ -540,8 +577,8 @@ export type ScatterChartConfig = {
   yColumn: string
   /** Row key holding the magnitude each point is sized by. */
   sizeColumn?: string
-  /** Grouping column: one series per distinct value. */
-  seriesColumn?: string
+  /** Splits the points into one series per distinct value. */
+  splitByColumn?: string
   /** Row key holding the point's own name, which heads its tooltip. */
   labelColumn?: string
   /** Prints the point's own name beside it. Needs `labelColumn` to have one. */
@@ -579,7 +616,7 @@ export type ScatterPoint = {
   row: Record<string, any>
 }
 
-/** One group of points, i.e. one value of the grouping column. */
+/** One group of points, i.e. one value of `splitBy`. */
 export type ScatterSeries = {
   /** The grouping value as it reads, or the y column when nothing groups. Unique. */
   name: string
@@ -589,7 +626,8 @@ export type ScatterSeries = {
 }
 
 export type ScatterPointEvent = {
-  seriesName: string
+  /** Identity of the group the point belongs to, i.e. the grouping value. */
+  name: string
   x: number
   y: number
   /** Null when the chart has no size column. */
@@ -602,7 +640,7 @@ export type ScatterPointEvent = {
  * Which edge of the plot the value-axis title heads, i.e. the edge that axis is
  * drawn on: the top for a column chart, the bottom for a row chart.
  */
-export type PlotLabelPlacement = 'top' | 'bottom'
+export type AxisTitlePlacement = 'top' | 'bottom'
 
 export type ChartLegendItem = {
   /** Series name, i.e. the identity used by echarts actions. */
@@ -617,16 +655,40 @@ export type ChartLegendItem = {
 export type ChartTooltipItem = {
   name: string
   label: string
-  color: string
-  value: number
+  /** Left out by a `'context'` item: a swatch would claim a mark on the plot. */
+  color?: string
+  value: number | string
   formattedValue: string
   /** Share of the total, printed after the value. Only part-to-whole charts set it. */
   percent?: number
+  /**
+   * `'series'` is a value the plot draws. `'context'` is a reading it does not:
+   * a `tooltipColumns` entry, or a funnel stage's conversion rate.
+   */
+  kind: 'series' | 'context'
+}
+
+/**
+ * What every tooltip body reads: the `#tooltip` slot on every chart, and
+ * `ChartTooltip`'s own default slot.
+ */
+export type ChartTooltipSlotProps = {
+  /** Heads the readings, e.g. the category the pointer is over. */
+  label?: string
+  /** One entry per reading, in the order they should be read. */
+  items: ChartTooltipItem[]
+  /**
+   * The rows behind the reading, so a body can read a column the plot never
+   * drew. One row for a point, cell, band or stage; every grouped row for the
+   * donut's "Others" slice; none for a sankey node, which stands for every row
+   * through it rather than one.
+   */
+  rows: Record<string, any>[]
 }
 
 export type ChartDatapointEvent = {
-  seriesName: string
-  dataIndex: number
+  /** Identity of the series the mark belongs to, i.e. the column it plots. */
+  name: string
   value: number
   row: Record<string, any>
 }
@@ -646,6 +708,9 @@ export type ChartValueFormatter = (value: number) => string
 /** A category axis carries whatever the column holds, so its formatter takes any. */
 export type ChartCategoryFormatter = (value: any) => string
 
+/** A tooltip column may hold text, so its formatter takes either. */
+export type ChartTooltipFormatter = (value: number | string) => string
+
 export type ChartBaseProps = {
   /** Heads the card. Left out, the chart draws no header row at all. */
   title?: string
@@ -656,8 +721,8 @@ export type ChartBaseProps = {
   /** Draws the placeholder in place of the plot, for data still on its way. */
   loading?: boolean
   /**
-   * Puts the chart in its error state and prints this message under it. A
-   * chart that fails to draw sets its own; this is for a failed request.
+   * Puts the chart in its error state and prints this message under it. Data
+   * the chart cannot draw shows the empty state, not this one.
    */
   error?: string | null
 }
@@ -685,8 +750,8 @@ export type ChartXAxisOptions = {
 
 export type ChartValueAxisOptions = {
   /**
-   * Names what the axis measures. Drawn above the plot rather than turned
-   * sideways along it, so it reads with the chart title.
+   * Names what the axis measures. Reads as running text, never set on its
+   * side.
    */
   title?: string
   /** Bottom of the scale. Defaults to a round number under the data. */
@@ -695,7 +760,11 @@ export type ChartValueAxisOptions = {
   max?: number
   /** Prints each tick label, and every value this axis carries elsewhere. */
   format?: ChartValueFormatter
-  /** Escape hatch: deep-merged into this axis' echarts option. */
+  /**
+   * Escape hatch: deep-merged into this axis' echarts option. On a
+   * `stacked: 'normalized'` chart the percent formatter wins over an
+   * `axisLabel.formatter` set here.
+   */
   echartOptions?: EchartOptionsOverride
 }
 
@@ -704,6 +773,10 @@ export type ChartValueAxisOptions = {
  * defaults. One style covers every mark, so a series keeps its label and color
  * when `type` changes, and the keys the mark it draws as does not read are
  * ignored rather than dropped.
+ *
+ * `showDataLabels`, `smooth`, `showDataPoints`, `dashed` and `connectNulls` are
+ * chart-level props as well. The chart-level value is every series' default,
+ * and an entry here overrides it for one series, on or off.
  */
 export type SeriesStyle = {
   /** Display name. The `seriesConfig` key stays the identity. */
@@ -716,16 +789,12 @@ export type SeriesStyle = {
    */
   type?: ChartMark
   /**
-   * Which value axis this series is measured against. `'y2'` gives a series in
-   * another unit or magnitude its own scale, drawn opposite the primary.
-   * Defaults to `'y'`. Ignored on a horizontal bar chart, which has no second
-   * value axis, and on a chart where no series asks for `'y2'` the second axis
-   * is not drawn at all.
-   *
-   * Moving a series here never moves it in the chart: the series are drawn in
-   * `y` order whatever axis each one sits on, so a series keeps its color.
+   * Prints this series' values in the tooltip and its data labels, for a series
+   * whose unit differs from the others on its axis. Without one, the tooltip
+   * uses its axis' `format` and a label prints a compact number. A label on a
+   * normalized stack prints the series' share either way.
    */
-  axis?: 'y' | 'y2'
+  format?: ChartValueFormatter
   /** Prints this series' value beside each of its marks. */
   showDataLabels?: boolean
   /**
@@ -733,18 +802,31 @@ export type SeriesStyle = {
    * only by the marks that stack: bars stack with bars, areas with areas.
    */
   stackName?: string
-  /** Line and area series. */
-  lineType?: 'solid' | 'dashed' | 'dotted'
-  /** Line and area series. */
-  lineWidth?: number
+  /**
+   * Breaks this series' line, for a projection or a comparison that should not
+   * read as measured as the rest. Line and area series.
+   */
+  dashed?: boolean
   /** Line and area series. */
   showDataPoints?: boolean
   /** Line and area series. */
   smooth?: boolean
-  /** Overrides the chart-level `fillOpacity`. Area series only. */
-  fillOpacity?: number
+  /** Bridges gaps left by nulls in this series. Line and area series. */
+  connectNulls?: boolean
   /** Escape hatch: deep-merged into this series' echarts option. */
   echartOptions?: EchartOptionsOverride
+}
+
+/** One `tooltipColumns` entry. */
+export type ChartTooltipColumn = {
+  /** Row key. Also the label when none is given. */
+  name: string
+  label?: string
+  /**
+   * A column sits on no axis, so it takes no formatter from one. Left out, a
+   * number prints with the default grouping and text prints as it stands.
+   */
+  format?: ChartTooltipFormatter
 }
 
 export type AxisChartProps = ChartBaseProps & {
@@ -753,35 +835,91 @@ export type AxisChartProps = ChartBaseProps & {
   /** Column holding the category or time each point sits at. */
   x: string
   /**
-   * Value column(s). A list reads wide data: one series per column, drawn and
-   * colored in the order given. `seriesConfig[key].axis` moves one of them to
-   * the second value axis without moving it in the list.
+   * Value column(s) measured against the primary value axis. A list reads wide
+   * data: one series per column, drawn and colored in the order given.
    */
   y: string | string[]
-  /** Grouping column, i.e. long data. Use with a single `y`. */
-  series?: string
   /**
-   * Caps how many series the `series` column produces. The rest are summed
+   * Value column(s) measured against the second value axis, for a measure in
+   * another unit or magnitude. The axis is only drawn when this names a column,
+   * and it is ignored on a horizontal bar chart, which has no second value
+   * axis.
+   *
+   * These series draw and take their palette slots after every `y` column, and
+   * they draw as the chart component's own mark unless `seriesConfig[key].type`
+   * says otherwise.
+   *
+   * With `splitBy` the column is not split: it reads per category, so it must
+   * hold one value per `x` and the first row at each `x` is the one read. Rows
+   * that disagree there warn in development.
+   */
+  y2?: string | string[]
+  /**
+   * Splits `y` into one series per distinct value, i.e. long data. Use with a
+   * single `y`. A `y2` column is not split: it draws as one series of its own.
+   */
+  splitBy?: string
+  /**
+   * Caps how many series `splitBy` produces. The rest are summed
    * into a single "Others" series, keyed `OTHERS_KEY` so `seriesConfig` can
    * style it. Uncapped by default, and ignored when `y` names the columns:
    * those the caller chose one by one.
    */
   maxSeries?: number
-  /** Keyed by series identity: a `y` column, or a value of the `series` column. */
+  /** Keyed by series identity: a `y` or `y2` column, or a value of `splitBy`. */
   seriesConfig?: Record<string, SeriesStyle>
+  /**
+   * Prints every series' value beside its marks. A `seriesConfig` entry
+   * overrides it for one series, on or off.
+   */
+  showDataLabels?: boolean
+  /**
+   * Rounds the corners of every line instead of drawing straight segments. Line
+   * and area series. A `seriesConfig` entry overrides it for one series.
+   */
+  smooth?: boolean
+  /**
+   * Marks every datapoint with a dot, on every series. Line and area series. A
+   * `seriesConfig` entry overrides it for one series.
+   */
+  showDataPoints?: boolean
+  /**
+   * Breaks every series' line into a dash. Line and area series. A
+   * `seriesConfig` entry overrides it for one series.
+   */
+  dashed?: boolean
+  /**
+   * Bridges gaps left by nulls, on every series. Line and area series. A
+   * `seriesConfig` entry overrides it for one series.
+   */
+  connectNulls?: boolean
   /**
    * Series the legend has switched off, by name. Bind it with
    * `v-model:hiddenSeries` to drive the legend from the app, or to keep what a
    * reader hid across a reload. Left unbound, the legend owns it.
    */
   hiddenSeries?: string[]
+  /**
+   * Columns that reach the tooltip and nothing else: no mark, no legend entry,
+   * no palette slot, and no effect on the value axis. For context in another
+   * unit, such as the count behind a rate. They print after the series rows,
+   * in the order given: a value in another unit cannot be ranked among them.
+   *
+   * With `splitBy` a column reads per category, so it must hold one value per
+   * `x` and the first row at each `x` is the one read. Rows that disagree there
+   * warn in development.
+   */
+  tooltipColumns?: ChartTooltipColumn[]
   /** The category axis: its title, how the `x` column reads, and label format. */
   xAxis?: ChartXAxisOptions
   /** The primary value axis: its title, its range, and how a value prints. */
   yAxis?: ChartValueAxisOptions
-  /** The second value axis. Only drawn when a series sits on `axis: 'y2'`. */
+  /** The second value axis. Only drawn when `y2` names a column. */
   y2Axis?: ChartValueAxisOptions
-  /** Ramp series colors are drawn from. Defaults to `'sequential'`. */
+  /**
+   * Ramp series colors are drawn from. Defaults to `'sequential'`, or to the
+   * categorical ramp for a chart of two or more lines and no other mark.
+   */
   palette?: ChartPalette
   /**
    * Series sum on top of each other. Bar and area series; a line never stacks.
@@ -789,10 +927,6 @@ export type AxisChartProps = ChartBaseProps & {
    * instead of its own magnitude, and pins that value axis to 0-100.
    */
   stacked?: boolean | 'normalized'
-  /** Bridges gaps left by nulls. Line and area series. */
-  connectNulls?: boolean
-  /** Chart-level fill alpha; `seriesConfig` overrides it per series. Area series. */
-  fillOpacity?: number
   /**
    * Targets, thresholds and other fixed marks drawn over the plot. They are
    * annotations, not series: no legend entry, and no way to switch one off.
@@ -828,16 +962,22 @@ export type DonutChartProps = ChartBaseProps & {
    */
   maxSlices?: number
   /**
-   * Prints each slice's name and share beside the ring, and drops the readout
-   * in the middle. Off by default: the legend says the same without the
-   * leader lines.
+   * Slices the legend has switched off, by name. Bind it with
+   * `v-model:hiddenSlices` to drive the legend from the app. Left unbound, the
+   * legend owns it.
    */
-  showInlineLabels?: boolean
+  hiddenSlices?: string[]
+  /**
+   * Prints each slice's name and share beside the ring, and drops the readout
+   * in the middle. Off by default. The legend already names every slice and its
+   * share, without the lines that tie a label back to its arc.
+   */
+  showDataLabels?: boolean
   /** Caption under the total in the middle. Defaults to the `value` key. */
   centerLabel?: string
   /** `'half'` draws the ring as a semicircle; only the geometry changes. */
   variant?: DonutVariant
-  /** Prints every number the ring shows: the readout, the tooltip, the labels. */
+  /** Prints the readout and the tooltip. The slice labels print shares. */
   format?: ChartValueFormatter
   /** Defaults to `'categorical'`: slices are unrelated categories, not steps. */
   palette?: ChartPalette
@@ -889,8 +1029,6 @@ export type FunnelChartProps = ChartBaseProps & {
   category: string
   /** Row key holding how many reached the stage. */
   value: string
-  /** Prints each stage's share of the first stage. On by default. */
-  showPercentages?: boolean
   /** Prints every number the funnel shows: the stage values and the tooltip. */
   format?: ChartValueFormatter
   /** Defaults to `'sequential'` reversed, so color darkens as the funnel narrows. */
@@ -918,7 +1056,7 @@ export type HeatmapChartProps = ChartBaseProps & {
    * Prints each cell's value inside it. A label that would collide with its
    * neighbour is dropped, so a grid too fine to carry numbers shows none.
    */
-  showValues?: boolean
+  showDataLabels?: boolean
   /** Prints every number the grid shows: the cells, the scale ends, the tooltip. */
   format?: ChartValueFormatter
   /**
@@ -939,8 +1077,8 @@ export type SankeyChartProps = ChartBaseProps & {
   target: string
   /** Row key holding how much flows along the link. */
   value: string
-  /** Defaults to `'horizontal'`: the flow runs left to right. */
-  orient?: SankeyOrient
+  /** Flow runs top to bottom, in rows of nodes. Defaults to left to right. */
+  vertical?: boolean
   /** Where a node sits along the flow. Defaults to `'justify'`. */
   nodeAlign?: SankeyNodeAlign
   /** Prints every number the flow shows, i.e. what a band or node carries. */
@@ -960,8 +1098,8 @@ export type ScatterChartProps = ChartBaseProps & {
   y: string
   /** Row key holding the magnitude each point is sized by. */
   size?: string
-  /** Grouping column: one series per distinct value. */
-  series?: string
+  /** Splits the points into one series per distinct value. */
+  splitBy?: string
   /**
    * Groups the legend has switched off, by name. Bind it with
    * `v-model:hiddenSeries` to drive the legend from the app. Left unbound, the
@@ -971,10 +1109,10 @@ export type ScatterChartProps = ChartBaseProps & {
   /** Row key holding the point's own name, which heads its tooltip. */
   label?: string
   /**
-   * Prints the point's own name beside it, the way an axis series prints its
-   * value. `label` is what it prints, so a chart that names no label column has
-   * nothing to show and says so in a dev-mode warning. Names that would collide
-   * with a neighbour are dropped, so a dense cloud carries few.
+   * Prints each point's own name beside it, the way an axis series prints its
+   * value. The `label` prop names the column those come from; without it there
+   * is nothing to print, and a development build warns. A name that would
+   * collide with its neighbour is dropped, so a dense cloud carries few.
    */
   showDataLabels?: boolean
   /** The horizontal scale. Both axes are value axes: a scatter has no categories. */
@@ -1018,18 +1156,22 @@ export type NumberCardProps = Omit<ChartBaseProps, 'subtitle'> &
     prefix?: string
     /** Printed after the number, e.g. a unit. */
     suffix?: string
+    /** What the reading is measured against, printed as a muted ` / target` in the value's own formatting. */
+    target?: number | string
     /** Change against the comparison period. Sign drives the arrow. */
     delta?: number | null
+    /** Unit printed before the delta, e.g. `'$'`. */
+    deltaPrefix?: string
     /** Unit printed after the delta, e.g. `'%'`. */
     deltaSuffix?: string
     /** What the delta is measured against, e.g. `'vs last month'`. */
     deltaCaption?: string
     /** Flips the delta colors, for metrics like churn or cost. */
     negativeIsBetter?: boolean
-    /** Decimal places. Defaults to as many as the value carries, up to 2. */
-    precision?: number
-    /** Shortens the value, `12300` -> `12.3K`. */
-    compact?: boolean
+    /** Prints the reading and the target: they are one measure, read against each other. */
+    format?: ChartValueFormatter
+    /** Prints the delta. It takes the absolute value: the arrow beside it carries the sign. */
+    deltaFormat?: ChartValueFormatter
     /** A trend across the bottom of the card: shape only, no axes to read against. */
     sparkline?: NumberCardSparkline
   }
@@ -1053,12 +1195,15 @@ export type ChartContainerProps = {
   title?: string
   /** A second line under the title, e.g. the period the numbers cover. */
   subtitle?: string
-  /** Value-axis title, drawn above the plot instead of inside it. */
-  plotLabel?: string
+  /**
+   * Title of the primary value axis. The container draws it above the plot
+   * rather than along the axis, where it would have to be turned sideways.
+   */
+  yAxisTitle?: string
   /** Title of the second value axis, drawn over the edge that axis sits on. */
-  plotLabelSecondary?: string
+  y2AxisTitle?: string
   /** Edge of the plot the value-axis titles head. Defaults to the top. */
-  plotLabelPlacement?: PlotLabelPlacement
+  axisTitlePlacement?: AxisTitlePlacement
   /** Draws the placeholder in place of the plot, for data still on its way. */
   loading?: boolean
   /** Non-empty switches the container into its error state. */
@@ -1088,6 +1233,12 @@ export type ChartTooltipProps = {
   label?: string
   /** One row per reading, in the order they should be read. */
   items: ChartTooltipItem[]
+  /**
+   * The rows behind the reading, handed to the slot so a body can read a column
+   * the plot never drew. Empty when the pointer is over an aggregate that
+   * stands for no single row.
+   */
+  rows: Record<string, any>[]
   /** Forces layout direction; defaults to document.documentElement.dir */
   dir?: ChartDir
 }
@@ -1117,22 +1268,35 @@ export type ChartActionsSlot = {
   actions?: () => unknown
 }
 
+/** A mark on the title itself, e.g. a lock on a chart filtered per reader. */
+export type ChartTitleSuffixSlot = {
+  /**
+   * A mark right after the title, on the same line. The title truncates
+   * around it and it keeps its width. It renders in the title's font size, so
+   * content sized in `em` is smaller on a NumberCard than on a chart.
+   */
+  'title-suffix'?: () => unknown
+}
+
 export type AxisChartEmits = {
+  /** The legend switched a series off or back on. Carries the new list. */
+  'update:hiddenSeries': [value: string[]]
   /**
    * A mark was selected, by click or by Enter on the keyboard cursor. Carries
-   * the series it belongs to, its position along the category axis, and the
-   * row behind it.
+   * the series it belongs to, its value, and the row behind it.
    */
   select: [event: ChartDatapointEvent]
 }
 
 export type AxisChartSlots = ChartActionsSlot &
+  ChartTitleSuffixSlot &
   ChartStateSlots & {
     /**
      * Replaces the tooltip body. `items` holds one entry per visible series at
-     * the hovered category, biggest first.
+     * the hovered category, biggest first. `rows` holds the data row behind
+     * them, so a replacement body can read a column the chart never plotted.
      */
-    tooltip?: (props: { label?: string; items: ChartTooltipItem[] }) => unknown
+    tooltip?: (props: ChartTooltipSlotProps) => unknown
   }
 
 export type BarChartEmits = AxisChartEmits
@@ -1143,28 +1307,36 @@ export type AreaChartEmits = AxisChartEmits
 export type AreaChartSlots = AxisChartSlots
 
 export type DonutChartEmits = {
+  /** The legend switched a slice off or back on. Carries the new list. */
+  'update:hiddenSlices': [value: string[]]
   /**
-   * A slice was selected, by click or by Enter on the keyboard cursor. The
-   * "Others" slice carries every row it grouped, so a caller can drill into
-   * the tail as well as into a named slice.
+   * A slice was selected, by click or by Enter on the keyboard cursor. `name`
+   * identifies the slice and `label` is what it printed. The collapsed tail is
+   * named `OTHERS_KEY` and carries every row it grouped, so a caller can drill
+   * into it as well as into a named slice.
    */
   select: [event: DonutSliceEvent]
 }
 
 export type DonutChartSlots = ChartActionsSlot &
+  ChartTitleSuffixSlot &
   ChartStateSlots & {
     /**
      * Replaces the readout in the middle of the ring. Reads the total, or the
      * hovered slice while one is hovered.
      */
     center?: (props: {
-      value: string
       label: string
+      value: number
+      formattedValue: string
       /** Only set while a slice is hovered. */
-      percent?: string
+      percent?: number
     }) => unknown
-    /** Replaces the tooltip body. `items` holds the hovered slice alone. */
-    tooltip?: (props: { items: ChartTooltipItem[] }) => unknown
+    /**
+     * Replaces the tooltip body. `items` holds the hovered slice alone. A named
+     * slice carries one row, and the "Others" slice every row it collapsed.
+     */
+    tooltip?: (props: ChartTooltipSlotProps) => unknown
   }
 
 export type ProportionBarEmits = {
@@ -1177,31 +1349,33 @@ export type ProportionBarEmits = {
 }
 
 export type ProportionBarSlots = ChartActionsSlot &
+  ChartTitleSuffixSlot &
   ChartStateSlots & {
-    /** Replaces the tooltip body. `items` holds the hovered segment alone. */
-    tooltip?: (props: { items: ChartTooltipItem[] }) => unknown
+    /**
+     * Replaces the tooltip body. `items` holds the hovered segment alone. A
+     * named segment carries one row, and "Others" every row it collapsed.
+     */
+    tooltip?: (props: ChartTooltipSlotProps) => unknown
   }
 
 export type FunnelChartEmits = {
   /**
    * A stage was selected, by click or by Enter on the keyboard cursor. Carries
-   * its position in the funnel and the row behind it; the whole column is the
-   * hit area, not just the shape it draws.
+   * its label, its value and the row behind it; the whole column is the hit
+   * area, not just the shape it draws.
    */
   select: [event: FunnelStageEvent]
 }
 
 export type FunnelChartSlots = ChartActionsSlot &
+  ChartTitleSuffixSlot &
   ChartStateSlots & {
     /**
-     * Replaces the tooltip body. `stage` carries the two conversion rates the
-     * default body prints under the value.
+     * Replaces the tooltip body. `items` holds the stage's value and its two
+     * conversion rates, which are `'context'` items; `rows` holds the row
+     * behind the stage.
      */
-    tooltip?: (props: {
-      label?: string
-      items: ChartTooltipItem[]
-      stage?: FunnelStage
-    }) => unknown
+    tooltip?: (props: ChartTooltipSlotProps) => unknown
   }
 
 export type HeatmapChartEmits = {
@@ -1213,9 +1387,13 @@ export type HeatmapChartEmits = {
 }
 
 export type HeatmapChartSlots = ChartActionsSlot &
+  ChartTitleSuffixSlot &
   ChartStateSlots & {
-    /** Replaces the tooltip body. `items` holds the hovered cell alone. */
-    tooltip?: (props: { label?: string; items: ChartTooltipItem[] }) => unknown
+    /**
+     * Replaces the tooltip body. `items` holds the hovered cell alone, and
+     * `rows` the row behind it, so a body can read a column the grid never drew.
+     */
+    tooltip?: (props: ChartTooltipSlotProps) => unknown
   }
 
 export type SankeyChartEmits = {
@@ -1228,12 +1406,18 @@ export type SankeyChartEmits = {
 }
 
 export type SankeyChartSlots = ChartActionsSlot &
+  ChartTitleSuffixSlot &
   ChartStateSlots & {
-    /** Replaces the tooltip body. `items` holds the hovered band or node alone. */
-    tooltip?: (props: { label?: string; items: ChartTooltipItem[] }) => unknown
+    /**
+     * Replaces the tooltip body. `items` holds the hovered band or node alone.
+     * A node's `rows` is empty: it stands for every row through it, not one.
+     */
+    tooltip?: (props: ChartTooltipSlotProps) => unknown
   }
 
 export type ScatterChartEmits = {
+  /** The legend switched a group off or back on. Carries the new list. */
+  'update:hiddenSeries': [value: string[]]
   /**
    * A point was selected, by click or by Enter on the keyboard cursor. Carries
    * both measures and the row behind it.
@@ -1242,16 +1426,19 @@ export type ScatterChartEmits = {
 }
 
 export type ScatterChartSlots = ChartActionsSlot &
+  ChartTitleSuffixSlot &
   ChartStateSlots & {
     /**
      * Replaces the tooltip body. `items` holds the point's two measures, and
-     * its size when the chart draws one.
+     * its size when the chart draws one. `rows` holds the row behind the point,
+     * so a body can read a column the plot never drew.
      */
-    tooltip?: (props: { label?: string; items: ChartTooltipItem[] }) => unknown
+    tooltip?: (props: ChartTooltipSlotProps) => unknown
   }
 
 /** No tooltip slot: a card with no plot has nothing to hover. */
 export type NumberCardSlots = ChartActionsSlot &
+  ChartTitleSuffixSlot &
   ChartStateSlots & {
     /** Replaces `deltaCaption`, e.g. with a Dropdown that changes the period. */
     caption?: (props: { caption?: string }) => unknown
@@ -1263,6 +1450,7 @@ export type ChartCardSlots = {
 }
 
 export type ChartContainerSlots = ChartActionsSlot &
+  ChartTitleSuffixSlot &
   ChartStateSlots & {
     /** The plot itself, drawn into a box the container sizes and states. */
     default: () => unknown
@@ -1279,5 +1467,5 @@ export type ChartLegendEmits = {
 
 export type ChartTooltipSlots = {
   /** Replaces the whole tooltip body, headline row included. */
-  default: (props: { label?: string; items: ChartTooltipItem[] }) => unknown
+  default: (props: ChartTooltipSlotProps) => unknown
 }

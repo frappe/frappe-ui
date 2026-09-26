@@ -122,16 +122,21 @@ export function useFloatingWindow(
     persist()
   }
 
-  function anchorBottomRight() {
-    x.value = clamp(viewportWidth.value - width.value - EDGE_MARGIN, 0, viewportWidth.value - width.value)
-    y.value = clamp(viewportHeight.value - height.value - EDGE_MARGIN, 0, viewportHeight.value - height.value)
+  /**
+   * Pull the panel back inside the viewport. The window may have been resized
+   * while this one was docked or trayed, so a remembered position can now be
+   * off-screen. Only what falls outside moves.
+   */
+  function clampIntoViewport() {
+    x.value = clamp(x.value, 0, Math.max(0, viewportWidth.value - width.value))
+    y.value = clamp(y.value, 0, Math.max(0, viewportHeight.value - height.value))
   }
 
   const dock = () => setMode('docked')
   const minimize = () => setMode('minimized')
 
   function float() {
-    anchorBottomRight()
+    clampIntoViewport()
     setMode('floating')
   }
   const expandFromTray = float

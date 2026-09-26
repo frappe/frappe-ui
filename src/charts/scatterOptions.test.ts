@@ -12,10 +12,10 @@ const tokens: ChartTokens = {
   axisLabel: 'ink-5',
   axisTitle: 'ink-7',
   axisLine: 'outline-2',
-  splitLine: 'outline-1',
+  gridline: 'outline-1',
   dataLabel: 'ink-6',
   insideLabel: 'ink-8',
-  cellGap: '#ffffff',
+  backdrop: '#ffffff',
 }
 
 /** Diameters the size measure is mapped onto. */
@@ -93,7 +93,7 @@ describe('buildScatterSeries', () => {
   })
 
   it('splits into one series per grouping value, first mention first', () => {
-    const built = series({ seriesColumn: 'region' })
+    const built = series({ splitByColumn: 'region' })
 
     expect(built.map((entry) => entry.name)).toEqual(['EU', 'US'])
     expect(built.map((entry) => entry.points.length)).toEqual([2, 2])
@@ -102,7 +102,7 @@ describe('buildScatterSeries', () => {
 
   it('reads a blank grouping value as (Blank)', () => {
     const built = series({
-      seriesColumn: 'region',
+      splitByColumn: 'region',
       data: [{ spend: 1, revenue: 2, region: null }],
     })
 
@@ -175,7 +175,7 @@ describe('buildScatterSeries', () => {
   })
 
   it('reads the size scale across every group, not within one', () => {
-    const built = series({ sizeColumn: 'seats', seriesColumn: 'region' })
+    const built = series({ sizeColumn: 'seats', splitByColumn: 'region' })
     const sized = built.flatMap((entry) =>
       entry.points.map((point) => [point.size, point.symbolSize]),
     )
@@ -227,7 +227,7 @@ describe('buildScatterSeries', () => {
   })
 
   it('colors the groups from the categorical palette by default', () => {
-    const built = series({ seriesColumn: 'region' })
+    const built = series({ splitByColumn: 'region' })
 
     expect(built.map((entry) => entry.color)).toEqual(
       paletteColors('categorical', tokens, 2),
@@ -235,7 +235,7 @@ describe('buildScatterSeries', () => {
   })
 
   it('reads a named palette off the config', () => {
-    const built = series({ seriesColumn: 'region', palette: 'sequential' })
+    const built = series({ splitByColumn: 'region', palette: 'sequential' })
 
     expect(built.map((entry) => entry.color)).toEqual(
       paletteColors('sequential', tokens, 2),
@@ -244,7 +244,7 @@ describe('buildScatterSeries', () => {
 
   it('cycles an explicit palette in the order it was written', () => {
     const built = series({
-      seriesColumn: 'account',
+      splitByColumn: 'account',
       palette: ['#aaaaaa', '#bbbbbb'],
     })
 
@@ -259,7 +259,7 @@ describe('buildScatterSeries', () => {
 
 describe('buildScatterOption', () => {
   it('draws one scatter series per group, points as coordinate pairs', () => {
-    const option = build({ seriesColumn: 'region' })
+    const option = build({ splitByColumn: 'region' })
 
     expect(option.series.map((entry: any) => entry.name)).toEqual(['EU', 'US'])
     expect(option.series[0].type).toBe('scatter')
@@ -281,7 +281,7 @@ describe('buildScatterOption', () => {
   })
 
   it('paints a group in its palette color, translucent enough to overlap', () => {
-    const option = build({ seriesColumn: 'region' })
+    const option = build({ splitByColumn: 'region' })
     const [eu] = paletteColors('categorical', tokens, 2)
 
     expect(option.series[0].itemStyle).toMatchObject({
@@ -299,7 +299,7 @@ describe('buildScatterOption', () => {
   })
 
   it('leaves a hidden group out of the option', () => {
-    const option = buildScatterOption(config({ seriesColumn: 'region' }), {
+    const option = buildScatterOption(config({ splitByColumn: 'region' }), {
       tokens,
       hiddenSeries: ['EU'],
     }) as any
@@ -424,7 +424,7 @@ describe('point labels on a scatter', () => {
   })
 
   it('labels every group, not just the first', () => {
-    const option = labelled({ seriesColumn: 'region' })
+    const option = labelled({ splitByColumn: 'region' })
 
     expect(option.series).toHaveLength(2)
     expect(option.series.every((entry: any) => entry.label.show)).toBe(true)
@@ -477,7 +477,11 @@ describe('reference lines on a scatter', () => {
     const option = build({ referenceLines: [{ value: 1500 }] })
 
     expect(entriesOf(option)).toEqual([
-      { yAxis: 1500, lineStyle: { width: 1.5, color: 'ink-6' } },
+      {
+        yAxis: 1500,
+        lineStyle: { width: 1, color: 'ink-5' },
+        label: { show: false },
+      },
     ])
   })
 
@@ -487,7 +491,11 @@ describe('reference lines on a scatter', () => {
     const option = build({ referenceLines: [{ value: 500, axis: 'x' }] })
 
     expect(entriesOf(option)).toEqual([
-      { xAxis: 500, lineStyle: { width: 1.5, color: 'ink-6' } },
+      {
+        xAxis: 500,
+        lineStyle: { width: 1, color: 'ink-5' },
+        label: { show: false },
+      },
     ])
   })
 
@@ -504,8 +512,16 @@ describe('reference lines on a scatter', () => {
     })
 
     expect(entriesOf(option)).toEqual([
-      { xAxis: 500, lineStyle: { width: 1.5, color: 'ink-6' } },
-      { yAxis: 1500, lineStyle: { width: 1.5, color: 'ink-6' } },
+      {
+        xAxis: 500,
+        lineStyle: { width: 1, color: 'ink-5' },
+        label: { show: false },
+      },
+      {
+        yAxis: 1500,
+        lineStyle: { width: 1, color: 'ink-5' },
+        label: { show: false },
+      },
     ])
   })
 
@@ -562,8 +578,8 @@ describe('reference lines on a scatter', () => {
     })
     const [dashed, solid] = entriesOf(option)
 
-    expect(dashed.lineStyle.color).toBe(tokens.dataLabel)
-    expect(dashed.lineStyle.type).toEqual(DOTTED_LINE.type)
+    expect(dashed.lineStyle.color).toBe(tokens.axisLabel)
+    expect(dashed.lineStyle.type).not.toEqual(DOTTED_LINE.type)
     expect(solid.lineStyle.type).toBeUndefined()
   })
 
@@ -608,7 +624,7 @@ describe('reference lines against the rest of the scatter', () => {
 
   it('keeps its host out of the legend and out of hiddenSeries', () => {
     const overrides = {
-      seriesColumn: 'region',
+      splitByColumn: 'region',
       referenceLines: [{ value: 1500 }],
     }
     const option = build(overrides)
@@ -625,7 +641,7 @@ describe('reference lines against the rest of the scatter', () => {
 
   it('draws its lines while every group is hidden', () => {
     const option = buildScatterOption(
-      config({ seriesColumn: 'region', referenceLines: [{ value: 1500 }] }),
+      config({ splitByColumn: 'region', referenceLines: [{ value: 1500 }] }),
       { tokens, hiddenSeries: ['EU', 'US'] },
     ) as any
 
@@ -646,9 +662,9 @@ describe('reference lines against the rest of the scatter', () => {
   })
 
   it('leaves the points and the scales exactly as they were', () => {
-    const bare = build({ seriesColumn: 'region' })
+    const bare = build({ splitByColumn: 'region' })
     const annotated = build({
-      seriesColumn: 'region',
+      splitByColumn: 'region',
       // A target far outside the data does not stretch the scale: it would
       // flatten the cloud it is meant to be read against.
       referenceLines: [{ value: 100000 }],

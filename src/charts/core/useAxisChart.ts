@@ -2,29 +2,36 @@ import { computed, reactive, ref, watch, type Ref } from 'vue'
 import type { EChartsCoreOption } from 'echarts/core'
 import { useChart } from './useChart'
 import { usePlotKeyboard } from './usePlotKeyboard'
+import { useTooltipDismiss } from './useTooltipDismiss'
 import type { AxisChartOptionContext } from '../axisChartCommon'
 import {
   hasSecondaryValueAxis,
   plotRows,
   resolveSeriesColors,
   resolveXAxis,
+  toNumber,
 } from '../axisChartCommon'
 import { applyAxisFormatters } from '../axisFormat'
 import { pruneHiddenSeries, toggleHiddenSeries } from '../hiddenSeries'
-import type { AxisChartFormatters } from '../seriesData'
+import { buildTooltipItems } from '../tooltipItems'
+import {
+  seriesLabel,
+  type AxisChartFormatters,
+  type ResolvedTooltipColumn,
+} from '../seriesData'
 import { formatAxisValue, formatLabel, formatValue } from '../format'
 import { useChartTokens } from '../tokens'
 import { documentDir, markName, plotReading } from '../utils'
 import type {
-  AxisChartBaseConfig,
+  AxisChartConfig,
   AxisChartSeriesConfig,
   ChartDatapointEvent,
   ChartLegendItem,
   ChartTooltipItem,
-  PlotLabelPlacement,
+  AxisTitlePlacement,
 } from '../types'
 
-export type UseAxisChartArgs<C extends AxisChartBaseConfig> = {
+export type UseAxisChartArgs<C extends AxisChartConfig> = {
   config: () => C
   buildOption: (config: C, context: AxisChartOptionContext) => EChartsCoreOption
   /** Axis label and tooltip formatters, kept beside the config by `normalizeAxisChartProps`. */
@@ -42,6 +49,12 @@ export type UseAxisChartArgs<C extends AxisChartBaseConfig> = {
    * beside it, so the reader gets both.
    */
   stackShares?: () => Map<string, (number | null)[]>
+  /**
+   * Columns that reach the tooltip and nothing else. They are handed in beside
+   * the config, not inside it, so the option builder never sees them: an extra
+   * has no mark, no legend entry, no palette slot and no axis.
+   */
+  tooltipColumns?: () => ResolvedTooltipColumn[]
   onSelect?: (event: ChartDatapointEvent) => void
 }
 
@@ -50,7 +63,7 @@ export type UseAxisChartArgs<C extends AxisChartBaseConfig> = {
  * legend state and the hit-testing behind the HTML tooltip. Bar, line and area
  * differ only in the builder they hand in, so their interactions stay identical.
  */
-export function useAxisChart<C extends AxisChartBaseConfig>(
+export function useAxisChart<C extends AxisChartConfig>(
   args: UseAxisChartArgs<C>,
 ) {
   const plotEl = ref<HTMLElement>()
@@ -60,6 +73,7 @@ export function useAxisChart<C extends AxisChartBaseConfig>(
   const format = computed<AxisChartFormatters>(() => args.format?.() ?? {})
   const horizontal = computed(() => Boolean(args.horizontal?.()))
   const stackShares = computed(() => args.stackShares?.())
+  const tooltipColumns = computed(() => args.tooltipColumns?.() ?? [])
   const dir = computed(() => config.value.dir ?? documentDir())
   // Same resolution the option builder runs, so the hit-testing and the tooltip
   // read the axis the way it is actually drawn — and the same row list, so a
@@ -67,22 +81,36 @@ export function useAxisChart<C extends AxisChartBaseConfig>(
   const xAxis = computed(() => resolveXAxis(config.value, horizontal.value))
   const xAxisType = computed(() => xAxis.value.type)
   const rows = computed(() => plotRows(config.value, xAxisType.value, true))
+  const visibleSeries = computed(() =>
+    config.value.series.filter(
+      (series) => !hiddenSeries.value.includes(series.name),
+    ),
+  )
+  // Empty is what the plot draws, not what the data holds: a chart whose every
+  // visible series reads as nothing at every row has no mark on it, whether
+  // that is a column key no row carries or a legend switched all the way off.
   const isEmpty = computed(
-    () => !rows.value.length || !config.value.series.length,
+    () =>
+      !visibleSeries.value.length ||
+      !rows.value.some((row) =>
+        visibleSeries.value.some(
+          (series) => toNumber(row[series.name]) !== null,
+        ),
+      ),
   )
 
   // Value-axis titles are chrome, not echarts axis names. The title heads the
   // edge its axis is drawn on: on a row chart the top-left belongs to the
   // category labels, so a title there would name the wrong axis.
-  const plotLabelPlacement = computed<PlotLabelPlacement>(() =>
+  const axisTitlePlacement = computed<AxisTitlePlacement>(() =>
     horizontal.value ? 'bottom' : 'top',
   )
-  const plotLabel = computed(() =>
+  const yAxisTitle = computed(() =>
     config.value.yAxis?.title
       ? formatLabel(config.value.yAxis.title)
       : undefined,
   )
-  const plotLabelSecondary = computed(() =>
+  const y2AxisTitle = computed(() =>
     config.value.y2Axis?.title &&
     hasSecondaryValueAxis(config.value, horizontal.value)
       ? formatLabel(config.value.y2Axis.title)
@@ -119,23 +147,12 @@ export function useAxisChart<C extends AxisChartBaseConfig>(
 
   const renderError = computed(() => built.value.error)
 
-  const {
-    chart,
-    dispatch,
-    width: plotWidth,
-  } = useChart({
+  const { chart, width: plotWidth } = useChart({
     container: plotEl,
     option: () => built.value.option,
     events: {
       click: (params: any) => {
-        const row = rows.value[params.dataIndex]
-        if (!row) return
-        args.onSelect?.({
-          seriesName: params.seriesName,
-          dataIndex: params.dataIndex,
-          value: Number(row[params.seriesName]),
-          row,
-        })
+        select(params.seriesName, rows.value[params.dataIndex])
       },
     },
     onZrEvents: {
@@ -155,16 +172,14 @@ export function useAxisChart<C extends AxisChartBaseConfig>(
     })),
   )
 
-  function seriesLabel(series: AxisChartSeriesConfig) {
-    return series.label ?? formatLabel(series.name)
-  }
-
-  // A series reads in the units of the axis it is actually drawn against, so
-  // `y2` series never fall back to the primary formatter — except on a
-  // horizontal chart, which has no second axis to put them on.
+  // Without its own format, a series reads in the units of the axis it is
+  // actually drawn against, so `y2` series never fall back to the primary
+  // formatter — except on a horizontal chart, which has no second axis to put
+  // them on.
   function formatSeriesValue(series: AxisChartSeriesConfig, value: number) {
     const secondary = series.axis === 'y2' && !horizontal.value
-    const formatter = secondary ? format.value.y2 : format.value.y
+    const formatter =
+      series.format ?? (secondary ? format.value.y2 : format.value.y)
     return formatter ? formatter(value) : formatValue(value)
   }
 
@@ -176,27 +191,23 @@ export function useAxisChart<C extends AxisChartBaseConfig>(
     )
   }
 
-  // Legend hover is the only thing that emphasises a series. Pointing at the
-  // plot deliberately does not — the axis pointer and tooltip already read out
-  // the category, and dimming on every mouse move costs more than it says.
-  const hoveredSeries = ref<string | null>(null)
-  function hoverSeries(name: string | null) {
-    hoveredSeries.value = name
-  }
-
-  watch(hoveredSeries, (name, previous) => {
-    if (previous) dispatch({ type: 'downplay', seriesName: previous })
-    if (name && !hiddenSeries.value.includes(name)) {
-      dispatch({ type: 'highlight', seriesName: name })
-    }
-  })
-
   const tooltip = reactive({
     open: false,
     x: 0,
     y: 0,
     label: undefined as string | undefined,
     items: [] as ChartTooltipItem[],
+    // Handed to the `#tooltip` slot so a replacement body can read a column the
+    // chart never plotted.
+    rows: [] as Record<string, any>[],
+  })
+
+  useTooltipDismiss({
+    plot: plotEl,
+    data: () => rows.value,
+    close: () => {
+      tooltip.open = false
+    },
   })
 
   /**
@@ -269,24 +280,20 @@ export function useAxisChart<C extends AxisChartBaseConfig>(
 
   function showIndex(index: number, clientX?: number, clientY?: number) {
     const row = rows.value[index]
-    const items = config.value.series
-      .filter((series) => !hiddenSeries.value.includes(series.name))
-      .map((series) => ({
-        name: series.name,
-        label: seriesLabel(series),
-        color: seriesColors.value[series.name],
-        value: Number(row[series.name]),
-        formattedValue: formatSeriesValue(series, Number(row[series.name])),
-        // A normalized plot draws the share, so the tooltip is the only place
-        // the measured number survives — it carries both.
-        percent: stackShares.value?.get(series.name)?.[index] ?? undefined,
-      }))
-      // A series that silently drops out of the tooltip reads as a bug, so a
-      // zero stays. Only a blank cell is dropped. Biggest contributor first.
-      .filter((item) => !isNaN(item.value))
-      .sort((a, b) => b.value - a.value)
+    const items = buildTooltipItems({
+      row,
+      index,
+      series: config.value.series,
+      hiddenSeries: hiddenSeries.value,
+      colors: seriesColors.value,
+      formatSeries: formatSeriesValue,
+      shares: stackShares.value,
+      tooltipColumns: tooltipColumns.value,
+    })
 
-    if (!items.length) {
+    // The tooltip still stands on the series: extras alone would open one over
+    // a chart whose whole legend is switched off.
+    if (!items.some((item) => item.kind === 'series')) {
       tooltip.open = false
       return
     }
@@ -296,6 +303,7 @@ export function useAxisChart<C extends AxisChartBaseConfig>(
       ? format.value.x(category)
       : formatAxisValue(category, xAxis.value.type, xAxis.value.timeGrain)
     tooltip.items = items
+    tooltip.rows = [row]
     tooltip.x = clientX ?? tooltip.x
     tooltip.y = clientY ?? tooltip.y
     tooltip.open = true
@@ -307,11 +315,6 @@ export function useAxisChart<C extends AxisChartBaseConfig>(
   // the tooltip lists every series at once, so without that a multi-series
   // chart would have no way to say which one Enter means.
 
-  const visibleSeries = computed(() =>
-    config.value.series.filter(
-      (series) => !hiddenSeries.value.includes(series.name),
-    ),
-  )
   const cursorSeries = ref(0)
 
   /**
@@ -378,6 +381,36 @@ export function useAxisChart<C extends AxisChartBaseConfig>(
     )
   }
 
+  /**
+   * A cell that does not read as a number has no mark on the plot, so the
+   * pointer cannot reach it and Enter does not fire for it either.
+   */
+  function select(
+    name: string | undefined,
+    row: Record<string, any> | undefined,
+  ) {
+    if (!name || !row) return
+    const value = toNumber(row[name])
+    if (value === null) return
+    args.onSelect?.({ name, value, row })
+  }
+
+  /**
+   * The next visible series in `delta`'s direction that has a value at this
+   * row, so the cursor walks the marks the pointer can hit. Undefined when
+   * there is none, which holds the cursor where it is.
+   */
+  function seriesStep(delta: number, row: Record<string, any> | undefined) {
+    for (
+      let i = cursorSeries.value + delta;
+      i >= 0 && i < visibleSeries.value.length;
+      i += delta
+    ) {
+      if (!row || toNumber(row[visibleSeries.value[i].name]) !== null) return i
+    }
+    return undefined
+  }
+
   const keyboard = usePlotKeyboard({
     marks: () => rows.value,
     // The category is what the mark is called on the axis, so the cursor holds
@@ -391,23 +424,17 @@ export function useAxisChart<C extends AxisChartBaseConfig>(
       readCursor(index)
     },
     cross: (delta) => {
-      const last = visibleSeries.value.length - 1
-      cursorSeries.value = Math.min(
-        last,
-        Math.max(0, cursorSeries.value + delta),
+      const index = keyboard.index.value
+      const next = seriesStep(
+        delta,
+        index === null ? undefined : rows.value[index],
       )
-      if (keyboard.index.value !== null) readCursor(keyboard.index.value)
+      if (next === undefined) return
+      cursorSeries.value = next
+      if (index !== null) readCursor(index)
     },
     activate: (index) => {
-      const row = rows.value[index]
-      const series = visibleSeries.value[cursorSeries.value]
-      if (!row || !series) return
-      args.onSelect?.({
-        seriesName: series.name,
-        dataIndex: index,
-        value: Number(row[series.name]),
-        row,
-      })
+      select(visibleSeries.value[cursorSeries.value]?.name, rows.value[index])
     },
     clear: () => {
       tooltip.open = false
@@ -433,14 +460,13 @@ export function useAxisChart<C extends AxisChartBaseConfig>(
     chart,
     dir,
     isEmpty,
-    plotLabel,
-    plotLabelSecondary,
-    plotLabelPlacement,
+    yAxisTitle,
+    y2AxisTitle,
+    axisTitlePlacement,
     renderError,
     tooltip,
     legendItems,
     toggleSeries,
-    hoverSeries,
     /** `v-bind` onto the plot element: the tab stop and its arrow keys. */
     plotAttrs: keyboard.attrs,
     /** What the live region announces while the cursor walks the plot. */

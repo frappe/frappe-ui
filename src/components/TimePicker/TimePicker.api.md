@@ -3,6 +3,7 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
+  import ExposedTable from '@/components/Docs/ExposedTable.vue'
 
   const propsData = [
   {
@@ -23,7 +24,7 @@
     name: 'options',
     description: 'Caller-provided option values; bypasses the generated grid.',
     required: false,
-    type: '{ value: string; label?: string; }[] | undefined',
+    type: '{ value: string; label?: string; }[]',
     default: '[]'
   },
   {
@@ -55,7 +56,7 @@
     name: 'variant',
     description: 'Visual style variant.',
     required: false,
-    type: 'Variant',
+    type: 'InputVariant',
     default: '"subtle" as Variant'
   },
   {
@@ -136,9 +137,9 @@
   },
   {
     name: 'error',
-    description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. May be either a string\nor an `Error` object whose `messages?: string[]` is rendered as stacked\nlines (with `Error.message` as the fallback).',
+    description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. Takes a string, an\narray of strings, or an `Error` whose `messages` are rendered as stacked\nlines (with `Error.message` as the fallback). This is the same value\n`ErrorMessage.message` takes. An empty array and an empty string both\nmean no error.',
     required: false,
-    type: 'string | FrappeUIError'
+    type: 'ErrorMessageValue'
   },
   {
     name: 'required',
@@ -173,16 +174,11 @@
   {
     name: 'suffix',
     description: 'Rendered inside the trigger input, after the typed value. Defaults to a\nchevron-down that toggles the popover.',
-    type: '{ toggle: (flag?: boolean | Event | undefined) => void; open: boolean; }'
+    type: '{ open: boolean; disabled: boolean; setOpen: (value: boolean) => void; close: () => void; }'
   }
 ]
 
   const emitsData = [
-  {
-    name: 'open',
-    description: 'Fired when the component opens.',
-    type: '[]'
-  },
   {
     name: 'update:open',
     description: 'Fired when the open state changes.',
@@ -194,24 +190,27 @@
     type: '[value: string]'
   },
   {
-    name: 'close',
-    description: 'Fired when the component closes.',
-    type: '[]'
-  },
-  {
     name: 'update:modelValue',
     description: 'Fired when the model value changes.',
     type: '[value: string]'
+  }
+]
+
+  const exposedData = [
+  {
+    name: 'open',
+    description: 'Opens the panel. A disabled picker stays closed.',
+    type: '() => void'
   },
   {
-    name: 'input-invalid',
-    description: '',
-    type: '[input: string]'
+    name: 'close',
+    description: 'Closes the panel.',
+    type: '() => void'
   },
   {
-    name: 'invalid-change',
-    description: '',
-    type: '[invalid: boolean]'
+    name: 'focus',
+    description: 'Moves focus to the input.',
+    type: '(options?: FocusOptions) => void'
   }
 ]
 </script>
@@ -223,3 +222,5 @@
 <SlotsTable :data="slotsData"/>
 
 <EmitsTable :data="emitsData"/>
+
+<ExposedTable :data="exposedData"/>

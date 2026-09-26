@@ -51,7 +51,7 @@
           <button
             v-if="isEditable && selected"
             type="button"
-            class="absolute top-1 right-1 z-10 rounded-4 bg-black/65 p-1 transition-opacity opacity-100 sm:opacity-0 sm:group-hover:opacity-100 focus:opacity-100"
+            class="absolute top-1 right-1 z-10 rounded-4 bg-black/65 p-1 transition-opacity opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100 focus:opacity-100"
             aria-label="Remove image"
             @click.stop="removeImage(idx)"
           >
@@ -75,7 +75,7 @@
 
           <div
             v-if="img.attrs.alt"
-            class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent rounded-b-4 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100"
+            class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent rounded-b-4 opacity-0 transition-opacity group-hover:opacity-100 [@media(hover:none)]:opacity-100"
           >
             <div class="p-2">
               <div class="text-white text-xs truncate" :title="img.attrs.alt">

@@ -1,7 +1,7 @@
 import type { Component } from 'vue'
 import type { TabsSize, TabsVariant } from '../../Tabs/types'
 
-export type BrowserTabBase = 'none' | 'default' | 'left' | 'right'
+export type BrowserTabBase = 'none' | 'default' | 'start' | 'end'
 export type PillIcon = string | Component
 export type PillOrientation = 'horizontal' | 'vertical'
 

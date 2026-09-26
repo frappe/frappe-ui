@@ -30,6 +30,7 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.unstubAllGlobals()
+  Reflect.deleteProperty(document, 'fullscreenEnabled')
 })
 
 /** Run one animation frame, the way the browser would. */
@@ -39,15 +40,33 @@ async function paint() {
   await nextTick()
 }
 
-function mount(videoEl: HTMLVideoElement) {
+function mount(
+  videoEl: HTMLVideoElement,
+  options: {
+    fullscreen?: boolean
+    standardFullscreen?: boolean
+    onUpdateFullscreen?: (fullscreen: boolean) => void
+  } = {},
+) {
   const root = document.createElement('div')
   document.body.appendChild(root)
-  const app = createApp({ render: () => h(VideoControls, { videoEl }) })
+  const app = createApp({
+    render: () =>
+      h(VideoControls, {
+        videoEl,
+        fullscreen: options.fullscreen,
+        standardFullscreen: options.standardFullscreen,
+        'onUpdate:fullscreen': options.onUpdateFullscreen,
+      }),
+  })
   app.mount(root)
   return {
     root,
     fill: () => root.querySelector<HTMLElement>('[aria-label="Seek"] div div'),
     slider: () => root.querySelector<HTMLElement>('[aria-label="Seek"]'),
+    controls: () => root.firstElementChild as HTMLElement,
+    fullscreenButton: () =>
+      root.querySelector<HTMLButtonElement>('[aria-label="Fullscreen"]'),
     unmount: () => {
       app.unmount()
       root.remove()
@@ -115,5 +134,102 @@ describe('VideoControls playhead', () => {
     expect(ctx.slider()?.getAttribute('aria-valuenow')).toBe('50')
 
     ctx.unmount()
+  })
+})
+
+describe('VideoControls fullscreen', () => {
+  it('fullscreens the media wrapper with the standard API', () => {
+    const video = fakeVideo()
+    const wrapper = document.createElement('div')
+    wrapper.dataset.videoFullscreenRoot = ''
+    wrapper.appendChild(video)
+    const requestFullscreen = vi.fn(() => Promise.resolve())
+    Object.defineProperty(wrapper, 'requestFullscreen', {
+      value: requestFullscreen,
+    })
+    const ctx = mount(video)
+
+    ctx.fullscreenButton()?.click()
+
+    expect(requestFullscreen).toHaveBeenCalledOnce()
+    ctx.unmount()
+    wrapper.remove()
+  })
+
+  it('uses native video fullscreen when the standard API is disabled', () => {
+    const video = fakeVideo() as HTMLVideoElement & {
+      webkitSupportsFullscreen: boolean
+      webkitEnterFullscreen: () => void
+    }
+    const wrapper = document.createElement('div')
+    wrapper.dataset.videoFullscreenRoot = ''
+    wrapper.appendChild(video)
+    const requestFullscreen = vi.fn(() => Promise.resolve())
+    Object.defineProperty(wrapper, 'requestFullscreen', {
+      value: requestFullscreen,
+    })
+    Object.defineProperty(document, 'fullscreenEnabled', {
+      configurable: true,
+      value: false,
+    })
+    video.webkitSupportsFullscreen = true
+    video.webkitEnterFullscreen = vi.fn()
+    const ctx = mount(video)
+
+    ctx.fullscreenButton()?.click()
+
+    expect(requestFullscreen).not.toHaveBeenCalled()
+    expect(video.webkitEnterFullscreen).toHaveBeenCalledOnce()
+    ctx.unmount()
+    wrapper.remove()
+  })
+
+  it('handles a rejected standard fullscreen request', async () => {
+    const video = fakeVideo()
+    const requestFullscreen = vi.fn(() =>
+      Promise.reject(new DOMException('Fullscreen denied', 'NotAllowedError')),
+    )
+    Object.defineProperty(video, 'requestFullscreen', {
+      value: requestFullscreen,
+    })
+    const ctx = mount(video)
+
+    ctx.fullscreenButton()?.click()
+    await Promise.resolve()
+
+    expect(requestFullscreen).toHaveBeenCalledOnce()
+    ctx.unmount()
+  })
+
+  it('reports native WebKit fullscreen transitions', () => {
+    const video = fakeVideo()
+    const onUpdateFullscreen = vi.fn()
+    const ctx = mount(video, { onUpdateFullscreen })
+
+    video.dispatchEvent(new Event('webkitbeginfullscreen'))
+    video.dispatchEvent(new Event('webkitendfullscreen'))
+
+    expect(onUpdateFullscreen).toHaveBeenNthCalledWith(1, true)
+    expect(onUpdateFullscreen).toHaveBeenNthCalledWith(2, false)
+    ctx.unmount()
+  })
+
+  it('keeps inline spacing for native fullscreen', () => {
+    const native = mount(fakeVideo(), { fullscreen: true })
+
+    expect(native.controls().classList).toContain('rounded-b-4')
+    expect(native.controls().classList).not.toContain('px-6')
+    expect(
+      native.root.querySelector('[aria-label="Exit fullscreen"]'),
+    ).not.toBeNull()
+    native.unmount()
+
+    const standard = mount(fakeVideo(), {
+      fullscreen: true,
+      standardFullscreen: true,
+    })
+    expect(standard.controls().classList).toContain('px-6')
+    expect(standard.controls().classList).not.toContain('rounded-b-4')
+    standard.unmount()
   })
 })

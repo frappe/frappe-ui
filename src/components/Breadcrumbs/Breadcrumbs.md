@@ -1,26 +1,40 @@
 # Breadcrumbs
 
-A navigation aid that shows the user’s current location within a hierarchy and allows quick navigation to parent pages.
-
-## Playground
+A row of links that shows where the current page sits in a hierarchy, and lets
+the user go back to a parent page.
 
 <ComponentPlayground name="Breadcrumbs" />
 
-## Example
+## Examples
 
-<ComponentPreview name="Breadcrumbs-Example" />
+### Page header
 
-## Prefix slot
+Breadcrumbs on the left of a page header, with page actions on the right. The
+last item is the current page. The items here navigate with `onClick`.
 
-<ComponentPreview name="Breadcrumbs-Slots" />
+<ComponentPreview name="Breadcrumbs-PageHeader" />
 
-## Item shape
+### Path to a person
+
+The `#prefix` slot shows an icon or an avatar before each label. The slot reads
+`icon` and `user`, which are extra fields on the items.
+
+<ComponentPreview name="Breadcrumbs-PersonPath" />
+
+## Behavior
+
+### Item shape
 
 Each item needs a `label`. How the item navigates depends on the other fields:
 
 - `route` renders a `<router-link>`.
 - `href` renders an `<a>`.
 - Neither renders a `<button>`, so use `onClick` to navigate.
+
+The last item is the current page. Its label truncates when space runs out,
+and the full label shows on hover.
+
+### Links that navigate in the app
 
 Set `href` and `onClick` together when the app navigates by itself but the crumb
 must still be a real link. A plain left click runs `onClick` only. A click with
@@ -37,5 +51,35 @@ const items = [
   { label: 'Sales' },
 ]
 ```
+
+### Extra fields
+
+An item also carries any extra field you put on it. `BreadcrumbItem` has an
+open index signature, so a crumb can hold the record it came from and the
+`#prefix` and `#suffix` slots can read it back:
+
+```vue
+<Breadcrumbs :items="items">
+  <template #prefix="{ item }">
+    <Avatar v-if="item.user" :image="item.user.avatar" size="sm" />
+  </template>
+</Breadcrumbs>
+```
+
+`#prefix` renders before the crumb's label and `#suffix` after it. Each
+receives `{ item }`, and they render for every crumb.
+
+### Long paths
+
+When the items do not fit their container and there are more than two, all
+items except the last two move into a menu behind a "…" button. The menu opens
+each item with its `onClick` or `route`. An item with only `href` does nothing
+in that menu, so give it an `onClick` too.
+
+## Accessibility
+
+- Breadcrumbs does not add a landmark. Wrap it in
+  `<nav aria-label="Breadcrumb">` when it is the page's main breadcrumb trail.
+- The `/` separators are hidden from screen readers.
 
 <!-- @include: ./Breadcrumbs.api.md -->

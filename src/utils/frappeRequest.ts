@@ -13,11 +13,20 @@ export interface FrappeRequestOptions<TResponse = unknown> extends Omit<
   RequestOptions<TResponse>,
   'transformRequest' | 'transformResponse' | 'transformError'
 > {
-  onError?: (error: FrappeRequestError) => void
+  onError?: (error: FrappeResourceError) => void
   onServerMessages?: ServerMessagesHandler
 }
 
-export interface FrappeRequestError extends Error {
+/**
+ * What the resource layer rejects with: `call`, `frappeRequest`,
+ * `createResource` and the other v1 resources. Named for that layer, because
+ * the v2 composables raise `FrappeResponseError` and both are server
+ * responses — request versus response named nothing.
+ *
+ * It is a type over a plain `Error` with these fields assigned, not a class,
+ * so narrow it by field (`error.exc_type`), never with `instanceof`.
+ */
+export interface FrappeResourceError extends Error {
   exc_type?: string
   exc?: string
   response?: Response
@@ -38,7 +47,7 @@ const reported = Symbol('frappe-ui.onErrorReported')
 
 function reportOnce(
   error: unknown,
-  onError: ((error: FrappeRequestError) => void) | undefined,
+  onError: ((error: FrappeResourceError) => void) | undefined,
 ) {
   if (!onError) return
   if (error && typeof error === 'object') {
@@ -46,7 +55,7 @@ function reportOnce(
     if (tagged[reported]) return
     tagged[reported] = true
   }
-  onError(error as FrappeRequestError)
+  onError(error as FrappeResourceError)
 }
 
 /**
@@ -187,7 +196,7 @@ export function frappeRequest<TResponse = unknown>(
             // eslint-disable-next-line no-empty
           } catch (e) {}
         }
-        let e = new Error(errorParts.join('\n')) as FrappeRequestError
+        let e = new Error(errorParts.join('\n')) as FrappeResourceError
         e.exc_type = error.exc_type
         e.exc = exception
         e.response = response

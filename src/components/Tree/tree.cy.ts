@@ -1,9 +1,10 @@
 import Tree from './Tree.vue'
-import { h, ref } from 'vue'
-import type { DropInfo, TreeNode } from './types'
+import { defineComponent, h, ref } from 'vue'
+import type { DropInfo, TreeExposed, TreeNode } from './types'
+import { _resetWarnDeprecated } from '../../utils/warnDeprecated'
 
-// Fresh data per test — the tree mutates `node.expanded`, so a shared const
-// would leak expansion state between tests.
+// Fresh data per test. The tree never writes to these objects; a few tests
+// assert exactly that.
 function makeNodes(): TreeNode[] {
   return [
     {
@@ -22,34 +23,45 @@ function makeNodes(): TreeNode[] {
 }
 
 describe('Tree', () => {
-  it('renders nodes expanded by default', () => {
-    cy.mount(Tree, { props: { nodes: makeNodes(), nodeKey: 'id' } })
-    cy.contains('Node A').should('exist')
-    cy.contains('Node A-1').should('exist')
+  // `warned` in warnDeprecated.ts is module-level, so a warning tripped by one
+  // test would silence the next.
+  beforeEach(() => {
+    _resetWarnDeprecated()
   })
 
-  it('starts a node collapsed when flagged expanded: false', () => {
-    const nodes = makeNodes()
-    nodes[0].expanded = false
-    cy.mount(Tree, { props: { nodes, nodeKey: 'id' } })
+  it('renders only the roots when no key is expanded', () => {
+    cy.mount(Tree, { props: { nodes: makeNodes(), nodeKey: 'id' } })
     cy.contains('Root').should('exist')
     cy.contains('Node A').should('not.exist')
   })
 
-  it('expands all via the v-model:expanded switch', () => {
-    const nodes = makeNodes()
-    nodes[0].expanded = false // start collapsed; the switch should override it
-    cy.mount(Tree, { props: { nodes, nodeKey: 'id', expanded: true } })
+  it('opens exactly the nodes named in v-model:expanded', () => {
+    cy.mount(Tree, {
+      props: { nodes: makeNodes(), nodeKey: 'id', expanded: ['root'] },
+    })
     cy.contains('Node A').should('exist')
-    cy.contains('Node A-1').should('exist')
     cy.contains('Node B').should('exist')
+    cy.contains('Node A-1').should('not.exist')
   })
 
-  it('expands late-arriving nodes while the switch is on', () => {
+  it('follows the model when the caller changes the keys', () => {
+    const keys = ref<string[]>([])
+    cy.mount({
+      render: () =>
+        h(Tree, { nodes: makeNodes(), nodeKey: 'id', expanded: keys.value }),
+    })
+    cy.contains('Node A').should('not.exist')
+    cy.then(() => {
+      keys.value = ['root', 'a']
+    })
+    cy.contains('Node A-1').should('exist')
+  })
+
+  it('opens a key whose children arrive later', () => {
     const data = ref<TreeNode[]>([])
     cy.mount({
       render: () =>
-        h(Tree, { nodes: data.value, nodeKey: 'id', expanded: true }),
+        h(Tree, { nodes: data.value, nodeKey: 'id', expanded: ['root', 'a'] }),
     })
     cy.contains('Node A').should('not.exist')
     cy.then(() => {
@@ -59,23 +71,38 @@ describe('Tree', () => {
     cy.contains('Node A-1').should('exist')
   })
 
-  it('reflects the switch back to the model when a row toggles', () => {
+  it('emits a fresh array on toggle and leaves the nodes untouched', () => {
+    const nodes = makeNodes()
+    const keys = ['root']
     const onUpdate = cy.stub().as('update')
     cy.mount(Tree, {
       props: {
-        nodes: makeNodes(),
+        nodes,
         nodeKey: 'id',
-        expanded: true,
+        expanded: keys,
         'onUpdate:expanded': onUpdate,
       },
     })
-    // Collapsing one node means "not all expanded" → switch flips to false.
     cy.contains('[data-slot="row"]', 'Node A').click()
-    cy.get('@update').should('have.been.calledWith', false)
+    cy.get('@update').should('have.been.calledWith', ['root', 'a'])
+    cy.get('@update').then((stub: any) => {
+      // A new array, so a shallow watcher on the caller's state fires.
+      expect(stub.firstCall.args[0]).to.not.equal(keys)
+      expect(keys).to.deep.eq(['root'])
+      // And nothing was written onto the caller's node objects.
+      expect(Object.keys(nodes[0])).to.deep.eq(['id', 'label', 'children'])
+      expect(Object.keys((nodes[0].children as TreeNode[])[0])).to.deep.eq([
+        'id',
+        'label',
+        'children',
+      ])
+    })
   })
 
   it('toggles via the chevron', () => {
-    cy.mount(Tree, { props: { nodes: makeNodes(), nodeKey: 'id' } })
+    cy.mount(Tree, {
+      props: { nodes: makeNodes(), nodeKey: 'id', expanded: ['root'] },
+    })
     cy.contains('Node A').should('exist')
     cy.get('[data-slot="toggle"]').first().click()
     cy.contains('Node A').should('not.exist')
@@ -84,7 +111,9 @@ describe('Tree', () => {
   })
 
   it('toggles expansion by clicking the row', () => {
-    cy.mount(Tree, { props: { nodes: makeNodes(), nodeKey: 'id' } })
+    cy.mount(Tree, {
+      props: { nodes: makeNodes(), nodeKey: 'id', expanded: ['root'] },
+    })
     cy.contains('Node A').should('exist')
     cy.contains('[data-slot="row"]', 'Root').click()
     cy.contains('Node A').should('not.exist')
@@ -92,9 +121,184 @@ describe('Tree', () => {
     cy.contains('Node A').should('exist')
   })
 
+  it('keeps every key when calls stack up under a bound v-model', () => {
+    // A bound model round-trips through the parent, so the prop lags a render.
+    // Consecutive calls must still accumulate rather than overwrite.
+    const keys = ref<string[]>([])
+    const tree = ref<TreeExposed | null>(null)
+    const Parent = defineComponent({
+      setup: () => () =>
+        h(Tree, {
+          ref: tree,
+          nodes: makeNodes(),
+          nodeKey: 'id',
+          expanded: keys.value,
+          'onUpdate:expanded': (value: string[]) => (keys.value = value),
+        }),
+    })
+    cy.mount(Parent)
+    cy.then(() => {
+      tree.value!.expand('root')
+      tree.value!.expand('a')
+    })
+    cy.then(() => expect(keys.value).to.deep.eq(['root', 'a']))
+    cy.contains('Node A-1').should('exist')
+  })
+
+  it('expandAll keeps keys whose children have not loaded', () => {
+    const tree = ref<TreeExposed | null>(null)
+    const keys = ref<string[]>(['lazy'])
+    const data = ref<TreeNode[]>([{ id: 'lazy', label: 'Lazy' }])
+    cy.mount({
+      render: () =>
+        h(Tree, {
+          ref: tree,
+          nodes: data.value,
+          nodeKey: 'id',
+          expanded: keys.value,
+          'onUpdate:expanded': (value: string[]) => (keys.value = value),
+        }),
+    })
+    cy.then(() => tree.value!.expandAll())
+    // `lazy` has no children yet, so expandAll cannot see it — it must survive.
+    cy.then(() => expect(keys.value).to.include('lazy'))
+    cy.then(() => {
+      data.value = [
+        {
+          id: 'lazy',
+          label: 'Lazy',
+          children: [{ id: 'late', label: 'Late' }],
+        },
+      ]
+    })
+    cy.contains('Late').should('exist')
+  })
+
+  it('warns instead of throwing on the removed boolean model', () => {
+    cy.window().then((win) => cy.spy(win.console, 'warn').as('warn'))
+    cy.mount(Tree, {
+      props: { nodes: makeNodes(), nodeKey: 'id', expanded: true as any },
+    })
+    cy.contains('Root').should('exist')
+    cy.contains('Node A').should('not.exist')
+    cy.get('@warn').should(
+      'have.been.calledWithMatch',
+      /boolean `v-model:expanded`/,
+    )
+  })
+
+  it('warns on the removed per-node expanded field', () => {
+    cy.window().then((win) => cy.spy(win.console, 'warn').as('warn'))
+    const nodes = makeNodes()
+    nodes[0].expanded = true
+    cy.mount(Tree, { props: { nodes, nodeKey: 'id', expanded: ['root'] } })
+    cy.contains('Node A').should('exist')
+    cy.get('@warn').should(
+      'have.been.calledWithMatch',
+      /carries an `expanded` field/,
+    )
+  })
+
+  it('warns when a late-arriving child carries the removed field', () => {
+    cy.window().then((win) => cy.spy(win.console, 'warn').as('warn'))
+    const data = ref<TreeNode[]>([{ id: 'root', label: 'Root' }])
+    cy.mount({
+      render: () =>
+        h(Tree, { nodes: data.value, nodeKey: 'id', expanded: ['root'] }),
+    })
+    cy.get('@warn').should('not.have.been.called')
+    cy.then(() => {
+      // Assigned in place, so `roots` keeps its identity — only a deep watch
+      // sees it. This is the lazy-load path.
+      data.value[0].children = [{ id: 'late', label: 'Late', expanded: true }]
+    })
+    cy.contains('Late').should('exist')
+    cy.get('@warn').should(
+      'have.been.calledWithMatch',
+      /carries an `expanded` field/,
+    )
+  })
+
+  it('warns about the removed field on a node that never renders', () => {
+    cy.window().then((win) => cy.spy(win.console, 'warn').as('warn'))
+    const nodes = makeNodes()
+    ;(nodes[0].children as TreeNode[])[0].expanded = false
+    // Nothing is expanded, so only Root renders — the mount walk has to reach
+    // the rest anyway. This is the shut tree a beta caller actually sees.
+    cy.mount(Tree, { props: { nodes, nodeKey: 'id' } })
+    cy.contains('Node A').should('not.exist')
+    cy.get('@warn').should(
+      'have.been.calledWithMatch',
+      /carries an `expanded` field/,
+    )
+  })
+
+  it('warns when the tree loads its nodes after mount', () => {
+    cy.window().then((win) => cy.spy(win.console, 'warn').as('warn'))
+    const data = ref<TreeNode[]>([])
+    cy.mount({
+      render: () => h(Tree, { nodes: data.value, nodeKey: 'id' }),
+    })
+    cy.get('@warn').should('not.have.been.called')
+    cy.then(() => {
+      const nodes = makeNodes()
+      ;(nodes[0].children as TreeNode[])[0].expanded = true
+      data.value = nodes
+    })
+    // Nothing is expanded, so the node carrying the field never renders.
+    cy.contains('Root').should('exist')
+    cy.contains('Node A').should('not.exist')
+    cy.get('@warn').should(
+      'have.been.calledWithMatch',
+      /carries an `expanded` field/,
+    )
+  })
+
+  it('stays quiet when expandAll or collapseAll change nothing', () => {
+    const tree = ref<TreeExposed | null>(null)
+    const keys = ref<string[]>(['root', 'a'])
+    const onUpdate = cy.stub().as('update')
+    cy.mount({
+      render: () =>
+        h(Tree, {
+          ref: tree,
+          nodes: makeNodes(),
+          nodeKey: 'id',
+          expanded: keys.value,
+          'onUpdate:expanded': (value: string[]) => {
+            keys.value = value
+            onUpdate(value)
+          },
+        }),
+    })
+    // `root` and `a` are the only collapsible nodes, so both are already open.
+    cy.then(() => tree.value!.expandAll())
+    cy.then(() => tree.value!.collapseAll())
+    cy.then(() => tree.value!.collapseAll())
+    cy.get('@update').should('have.been.calledOnce')
+    cy.get('@update').should('have.been.calledWith', [])
+  })
+
+  it('expands and collapses everything through the exposed methods', () => {
+    const tree = ref<TreeExposed | null>(null)
+    cy.mount({
+      render: () => h(Tree, { ref: tree, nodes: makeNodes(), nodeKey: 'id' }),
+    })
+    cy.contains('Node A').should('not.exist')
+    cy.then(() => tree.value!.expandAll())
+    cy.contains('Node A-1').should('exist')
+    cy.then(() => tree.value!.collapseAll())
+    cy.contains('Node A').should('not.exist')
+    cy.then(() => tree.value!.expand('root'))
+    cy.contains('Node A').should('exist')
+    cy.contains('Node A-1').should('not.exist')
+    cy.then(() => tree.value!.toggle('root'))
+    cy.contains('Node A').should('not.exist')
+  })
+
   it('exposes ARIA tree semantics', () => {
     cy.mount(Tree, {
-      props: { nodes: makeNodes(), nodeKey: 'id', expanded: true },
+      props: { nodes: makeNodes(), nodeKey: 'id', expanded: ['root', 'a'] },
     })
     cy.get('[role="tree"]').should('exist')
     cy.get('[role="treeitem"]').should('have.length', 4)
@@ -109,11 +313,13 @@ describe('Tree', () => {
   })
 
   it('navigates with the keyboard', () => {
-    cy.mount(Tree, { props: { nodes: makeNodes(), nodeKey: 'id' } })
+    cy.mount(Tree, {
+      props: { nodes: makeNodes(), nodeKey: 'id', expanded: ['root', 'a'] },
+    })
     // Root is the only tabbable item initially.
     cy.get('[role="treeitem"]').first().focus()
     cy.focused().should('contain', 'Root')
-    // Tree starts expanded; Down steps into the first child.
+    // Root and Node A are open; Down steps into the first child.
     cy.focused().trigger('keydown', { key: 'ArrowDown' })
     cy.focused().should('contain', 'Node A')
     // Left collapses the expanded node, Left again steps to the parent.
@@ -123,7 +329,9 @@ describe('Tree', () => {
   })
 
   it('toggles expansion with Enter/Space', () => {
-    cy.mount(Tree, { props: { nodes: makeNodes(), nodeKey: 'id' } })
+    cy.mount(Tree, {
+      props: { nodes: makeNodes(), nodeKey: 'id', expanded: ['root'] },
+    })
     cy.get('[role="treeitem"]').first().focus()
     cy.focused().should('contain', 'Root')
     cy.focused().trigger('keydown', { key: 'Enter' })
@@ -150,7 +358,7 @@ describe('Tree', () => {
 
   it('renders custom item-label and item-prefix/item-suffix slots', () => {
     cy.mount(Tree, {
-      props: { nodes: makeNodes(), nodeKey: 'id', expanded: true },
+      props: { nodes: makeNodes(), nodeKey: 'id', expanded: ['root', 'a'] },
       slots: {
         'item-label': ({ node }: any) =>
           h('span', { 'data-cy': `label-${node.id}` }, `label-${node.label}`),
@@ -181,7 +389,7 @@ describe('Tree', () => {
 
   it('indents nested groups', () => {
     cy.mount(Tree, {
-      props: { nodes: makeNodes(), nodeKey: 'id', expanded: true },
+      props: { nodes: makeNodes(), nodeKey: 'id', expanded: ['root', 'a'] },
     })
     cy.get('[role="group"]')
       .first()
@@ -191,17 +399,26 @@ describe('Tree', () => {
   })
 
   it('freezes expand/collapse and drag when disabled', () => {
-    cy.mount(Tree, {
-      props: {
-        nodes: makeNodes(),
-        nodeKey: 'id',
-        disabled: true,
-        draggable: true,
-      },
+    const tree = ref<TreeExposed | null>(null)
+    cy.mount({
+      render: () =>
+        h(Tree, {
+          ref: tree,
+          nodes: makeNodes(),
+          nodeKey: 'id',
+          expanded: ['root'],
+          disabled: true,
+          draggable: true,
+        }),
     })
     cy.contains('Node A').should('exist')
     cy.get('[data-slot="toggle"]').first().click()
     cy.contains('Node A').should('exist') // click had no effect
+    // `disabled` freezes interaction, not the imperative API.
+    cy.then(() => tree.value!.expand('a'))
+    cy.contains('Node A-1').should('exist')
+    cy.then(() => tree.value!.collapseAll())
+    cy.contains('Node A').should('not.exist')
     cy.contains('[role="treeitem"]', 'Root').should(
       'have.attr',
       'data-disabled',
@@ -216,7 +433,7 @@ describe('Tree', () => {
       props: {
         nodes: makeNodes(),
         nodeKey: 'id',
-        expanded: true,
+        expanded: ['root', 'a'],
         guides: 'connectors',
       },
     })
@@ -229,7 +446,7 @@ describe('Tree', () => {
       return {
         nodes: makeNodes(),
         nodeKey: 'id',
-        expanded: true,
+        expanded: ['root', 'a'],
         draggable: true,
         onDragEnd,
         ...extra,

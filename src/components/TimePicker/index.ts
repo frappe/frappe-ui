@@ -1,2 +1,2 @@
 export { default as TimePicker } from './TimePicker.vue'
-export type { TimePickerProps } from './types'
+export type { TimePickerEmits, TimePickerProps } from './types'

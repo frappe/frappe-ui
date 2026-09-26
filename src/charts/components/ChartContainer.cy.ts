@@ -55,6 +55,106 @@ describe('ChartContainer', () => {
       cy.get('[data-slot="chart-header"] #period').should('exist')
     })
 
+    it('keeps the row the height of the title line, with a tall action', () => {
+      mountContainer({ title: 'Revenue' })
+      cy.get('.text-ink-gray-8').invoke('outerHeight').as('titleHeight')
+
+      mountContainer({ title: 'Revenue' }, {
+        default: () => h('div', 'Plot'),
+        actions: () =>
+          h('button', { id: 'period', style: 'height: 28px' }, 'Last 30 days'),
+      } as any)
+
+      cy.get('[data-slot="chart-header"]')
+        .invoke('outerHeight')
+        .then((rowHeight) => {
+          cy.get('@titleHeight').should('be.closeTo', rowHeight as number, 0.5)
+        })
+    })
+
+    it('centres a tall action on the title line', () => {
+      mountContainer({ title: 'Revenue' }, {
+        default: () => h('div', 'Plot'),
+        actions: () =>
+          h('button', { id: 'period', style: 'height: 28px' }, 'Last 30 days'),
+      } as any)
+
+      cy.get('.text-ink-gray-8')
+        .then(($title) => $title[0].getBoundingClientRect())
+        .as('title')
+
+      cy.get('#period')
+        .then(($action) => $action[0].getBoundingClientRect())
+        .then((action) => {
+          cy.get<DOMRect>('@title').should((title) => {
+            expect(action.top + action.height / 2).to.be.closeTo(
+              title.top + title.height / 2,
+              0.5,
+            )
+          })
+        })
+    })
+
+    it('sets the title suffix against the end of the title text', () => {
+      mountContainer({ title: 'Revenue' }, {
+        default: () => h('div', 'Plot'),
+        'title-suffix': () => h('span', { id: 'lock' }, '*'),
+      } as any)
+
+      cy.get('#lock')
+        .then(($mark) => $mark[0].getBoundingClientRect())
+        .as('mark')
+
+      // Against the text, not against the far edge `#actions` holds.
+      cy.contains('[data-slot="chart-header"] span', 'Revenue')
+        .then(($title) => $title[0].getBoundingClientRect())
+        .then((title) => {
+          cy.get<DOMRect>('@mark').should((mark) => {
+            expect(mark.left).to.be.closeTo(title.right, 6)
+            expect(mark.top + mark.height / 2).to.be.closeTo(
+              title.top + title.height / 2,
+              0.5,
+            )
+          })
+        })
+    })
+
+    // The mark reads the title's font size, so an app sizing it in `em` gets
+    // one that matches whichever title it sits on.
+    it('renders the title suffix in the title’s font size', () => {
+      mountContainer({ title: 'Revenue' }, {
+        default: () => h('div', 'Plot'),
+        'title-suffix': () =>
+          h('span', { id: 'lock', style: 'display: block; width: 1em' }),
+      } as any)
+
+      cy.get('#lock').should(($mark) => {
+        expect($mark[0].getBoundingClientRect().width).to.be.closeTo(14, 0.5)
+      })
+    })
+
+    it('keeps the title truncating with a suffix beside it', () => {
+      mountContainer(
+        {
+          title:
+            'Revenue by region, quarter over quarter, across every account we bill',
+        },
+        {
+          default: () => h('div', 'Plot'),
+          'title-suffix': () => h('span', { id: 'lock' }, '*'),
+          actions: () => h('button', { id: 'period' }, 'Last 30 days'),
+        } as any,
+      )
+
+      cy.contains('[data-slot="chart-header"] span', 'Revenue by').should(
+        ($title) => {
+          expect($title[0].scrollWidth).to.be.greaterThan($title[0].clientWidth)
+        },
+      )
+      cy.get('#lock').should('be.visible')
+      cy.get('#period').should('be.visible')
+    })
+
     // A card with only controls still needs the row to hang them on.
     it('draws the header for actions alone', () => {
       mountContainer({}, {
@@ -182,9 +282,9 @@ describe('ChartContainer', () => {
     })
   })
 
-  describe('plot labels', () => {
+  describe('axis titles', () => {
     it('heads the plot with the axis titles', () => {
-      mountContainer({ plotLabel: 'Revenue', plotLabelSecondary: 'Orders' })
+      mountContainer({ yAxisTitle: 'Revenue', y2AxisTitle: 'Orders' })
       container()
         .should('contain.text', 'Revenue')
         .and('contain.text', 'Orders')
@@ -198,7 +298,7 @@ describe('ChartContainer', () => {
     })
 
     it('puts them under the plot when asked to', () => {
-      mountContainer({ plotLabel: 'Revenue', plotLabelPlacement: 'bottom' })
+      mountContainer({ yAxisTitle: 'Revenue', axisTitlePlacement: 'bottom' })
       cy.contains('Revenue').then(($label) => {
         cy.get('[data-slot="chart-plot"]').then(($plot) => {
           expect($label[0].getBoundingClientRect().top).to.be.greaterThan(
@@ -215,7 +315,7 @@ describe('ChartContainer', () => {
       ['empty', { empty: true }],
     ] as const) {
       it(`leaves the titles off while ${name}`, () => {
-        mountContainer({ plotLabel: 'Revenue', ...props })
+        mountContainer({ yAxisTitle: 'Revenue', ...props })
         container().should('not.contain.text', 'Revenue')
       })
     }

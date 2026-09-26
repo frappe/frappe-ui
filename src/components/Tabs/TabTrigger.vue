@@ -13,13 +13,14 @@ import Pill from '../shared/tabs/Pill.vue'
 import { NativeButton } from '../shared/nativeElements'
 import { tabRadiusClasses, tabShellClasses } from '../shared/tabs/styles'
 import { warnUnsupportedIconString } from '../../utils/iconString'
+import { useReactiveSlots } from '../../composables/useReactiveSlots'
 import { tabListKey, tabsRootKey } from './context'
 import type { BrowserTabBase } from '../shared/tabs/pillTypes'
 import type { TabTriggerProps, TabTriggerSlotProps } from './types'
 
 const props = defineProps<TabTriggerProps>()
 
-const slots = defineSlots<{
+const declaredSlots = defineSlots<{
   /** Leading content, after `iconLeft`. */
   prefix?: (props: TabTriggerSlotProps) => any
   /** Replaces the label region. */
@@ -27,13 +28,14 @@ const slots = defineSlots<{
   /** Trailing content (badges, counts). */
   suffix?: (props: TabTriggerSlotProps) => any
 }>()
+const slots = useReactiveSlots<typeof declaredSlots>()
 
 const root = inject(tabsRootKey, null)
 const list = inject(tabListKey, null)
 
 const variant = computed(() => list?.variant.value ?? 'underline')
 const size = computed(() => list?.size.value ?? 'sm')
-const side = computed(() => list?.side.value ?? 'left')
+const edge = computed(() => list?.edge.value ?? 'start')
 const orientation = computed(() => root?.orientation.value ?? 'horizontal')
 
 watchEffect(() => {
@@ -43,9 +45,7 @@ watchEffect(() => {
 
 // Route mode. `route` is assumed present-or-absent for the trigger's
 // lifetime — useLink can only be called during setup.
-const link = props.route
-  ? useLink({ to: computed(() => props.route!) })
-  : null
+const link = props.route ? useLink({ to: computed(() => props.route!) }) : null
 
 if (import.meta.env.DEV) {
   let warned = false
@@ -80,7 +80,7 @@ onUnmounted(() => unregister?.())
 const selected = computed(() => root?.selected.value === props.value)
 
 const slotProps = computed<TabTriggerSlotProps>(() => ({
-  selected: selected.value,
+  active: selected.value,
   disabled: !!props.disabled,
 }))
 
@@ -89,7 +89,7 @@ const isIconOnly = computed(() => Boolean(props.icon) && !slots.default)
 const browserTabBase = computed<BrowserTabBase>(() => {
   if (variant.value !== 'browser-tab') return 'none'
   if (orientation.value !== 'vertical') return 'default'
-  return selected.value ? side.value : 'default'
+  return selected.value ? edge.value : 'default'
 })
 
 const elementIs = computed(() =>

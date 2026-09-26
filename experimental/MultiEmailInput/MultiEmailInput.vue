@@ -1,13 +1,5 @@
 <script setup lang="ts">
-import {
-  computed,
-  nextTick,
-  reactive,
-  ref,
-  useAttrs,
-  useSlots,
-  watch,
-} from 'vue'
+import { computed, nextTick, reactive, ref, useAttrs, watch } from 'vue'
 import {
   ComboboxAnchor,
   ComboboxContent,
@@ -23,7 +15,7 @@ import {
 } from 'reka-ui'
 import Avatar from '../../src/components/Avatar/Avatar.vue'
 import ItemListRow from '../../src/components/ItemListRow/ItemListRow.vue'
-import { LoadingIndicator } from '../../src/components/LoadingIndicator'
+import { Spinner } from '../../src/components/Spinner'
 import {
   InputDescription,
   InputError,
@@ -31,6 +23,7 @@ import {
   LabelingWrapper,
 } from '../../src/components/InputLabeling'
 import { useInputLabeling } from '../../src/composables/useInputLabeling'
+import { useReactiveSlots } from '../../src/composables/useReactiveSlots'
 import { usePortalTarget } from '../../src/composables/usePortalTarget'
 import {
   inputFontSizeClasses,
@@ -65,7 +58,7 @@ const props = withDefaults(defineProps<MultiEmailInputProps>(), {
 })
 
 const emit = defineEmits<MultiEmailInputEmits>()
-const slots = useSlots()
+const slots = useReactiveSlots<MultiEmailInputSlots>()
 const attrs = useAttrs()
 
 // `portalTo` stays undefaulted on purpose: a `'body'` default outranks the
@@ -173,7 +166,15 @@ const showEmpty = computed(
   () => !props.loading && !suggestions.value.length && !showCreateOption.value,
 )
 
-const rowAvatarSize = computed(() => (props.size === 'sm' ? 'sm' : 'md'))
+// Avatar has its own scale (`xs` 16px, `sm` 20px, `md` 24px), and the option
+// row is `min-h-6`/`min-h-7`/`min-h-8`/`min-h-10` plus `ItemListRow`'s own
+// padding. Step the avatar down with the row for the two small sizes rather
+// than forwarding a size the row cannot draw — a `md` avatar is 24px, the
+// whole height of an `xs` row before its `py-1`. `md` and `lg` rows both fit
+// `md`; a 28px `lg` avatar would leave no room in a 32px `md` row.
+const rowAvatarSize = computed(() =>
+  props.size === 'xs' ? 'xs' : props.size === 'sm' ? 'sm' : 'md',
+)
 
 const boxClasses = computed(() => [
   'flex flex-wrap items-center gap-1.5 rounded-4 bg-surface-gray-2 px-1.5 py-1 transition-colors focus-within:ring-2 focus-within:ring-outline-gray-3',
@@ -376,7 +377,7 @@ defineSlots<MultiEmailInputSlots>()
               data-slot="loading"
               class="flex items-center gap-2 px-2 py-1.5 text-base text-ink-gray-5"
             >
-              <LoadingIndicator class="size-4" />
+              <Spinner class="size-4" />
               <span>{{ loadingText }}</span>
             </div>
 

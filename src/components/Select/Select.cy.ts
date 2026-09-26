@@ -27,10 +27,10 @@ describe('Select', () => {
 
   it('sizes', () => {
     const classes = {
+      xs: 'min-h-6',
       sm: 'min-h-7',
       md: 'min-h-8',
       lg: 'min-h-10',
-      xl: 'min-h-10',
     }
 
     for (const size in classes) {
@@ -38,6 +38,24 @@ describe('Select', () => {
       cy.get('button').click()
       cy.get('[role=option]').should('have.class', classes[size])
     }
+  })
+
+  it('renders the trigger at the accepted single-line heights', () => {
+    const heights = { xs: 24, sm: 28, md: 32, lg: 40 }
+
+    for (const [size, height] of Object.entries(heights)) {
+      cy.mount(Select, { props: { options, size } })
+      cy.get('[role=combobox]').should(($el) => {
+        expect($el[0].getBoundingClientRect().height).to.equal(height)
+      })
+    }
+  })
+
+  it('falls back to sm geometry for a size outside the union', () => {
+    cy.mount(Select, { props: { options, size: 'xl' as never } })
+    cy.get('[role=combobox]').should(($el) => {
+      expect($el[0].getBoundingClientRect().height).to.equal(28)
+    })
   })
 
   it('v-model', () => {
@@ -173,15 +191,11 @@ describe('Select', () => {
     cy.mount(Select, {
       props: { options, modelValue: 'def' },
       slots: {
-        footer: ({ selectedOption, clear, setOpen }: any) =>
+        footer: ({ selectedOption, clear, close }: any) =>
           h('div', [
             h('span', { 'data-cy': 'footer-label' }, selectedOption?.label),
             h('button', { 'data-cy': 'footer-clear', onClick: clear }, 'Clear'),
-            h(
-              'button',
-              { 'data-cy': 'footer-close', onClick: () => setOpen(false) },
-              'Close',
-            ),
+            h('button', { 'data-cy': 'footer-close', onClick: close }, 'Close'),
           ]),
       },
     })
@@ -592,6 +606,93 @@ describe('Select', () => {
       cy.mount(Select, { props: { options } })
       cy.get('[data-slot="trigger"]').should('exist')
       cy.get('label').should('not.exist')
+    })
+  })
+
+  // INP-Q2: one empty value for the single-value half of the family.
+  describe('the empty value is null', () => {
+    it('clear() emits null, not undefined', () => {
+      const onUpdate = cy.spy().as('onUpdate')
+      cy.mount(Select, {
+        props: { options, modelValue: 'def', 'onUpdate:modelValue': onUpdate },
+      }).then((mounted: any) => {
+        const vm = mounted.component ?? mounted.wrapper?.vm ?? mounted
+        vm?.clear?.()
+      })
+
+      cy.get('@onUpdate').should('have.been.calledOnce')
+      cy.get('@onUpdate').should('have.been.calledWith', null)
+      cy.get('@onUpdate').then((spy: any) => {
+        expect(spy.firstCall.args[0]).to.be.null
+      })
+    })
+
+    it('the #trigger slot clear() emits null too', () => {
+      const onUpdate = cy.spy().as('onUpdate')
+      cy.mount(Select, {
+        props: { options, modelValue: 'def', 'onUpdate:modelValue': onUpdate },
+        slots: {
+          trigger: ({ clear }: any) =>
+            h('button', { 'data-cy': 'slot-clear', onClick: clear }, 'Clear'),
+        },
+      })
+
+      cy.get('[data-cy="slot-clear"]').click()
+      cy.get('@onUpdate').then((spy: any) => {
+        expect(spy.firstCall.args[0]).to.be.null
+      })
+    })
+
+    it('leaves an untouched model alone', () => {
+      // A `defineModel` default is local to the child, so writing one here
+      // would leave a parent `v-model` on `undefined` while this component
+      // read `null`, and a caller watching for `null` would never fire.
+      const onUpdate = cy.spy().as('onUpdate')
+      cy.mount(Select, {
+        props: { options, modelValue: undefined, 'onUpdate:modelValue': onUpdate },
+      })
+
+      cy.get('[role=combobox]').should('have.text', 'Select option')
+      cy.get('@onUpdate').should('not.have.been.called')
+    })
+
+    it('emits null from clear even when the model started undefined', () => {
+      const onUpdate = cy.spy().as('onUpdate')
+      cy.mount(Select, {
+        props: { options, modelValue: undefined, 'onUpdate:modelValue': onUpdate },
+      }).then((mounted: any) => {
+        const vm = mounted.component ?? mounted.wrapper?.vm ?? mounted
+        vm?.clear?.()
+      })
+
+      cy.get('@onUpdate').should('have.been.calledOnce')
+      cy.get('@onUpdate').then((spy: any) => {
+        expect(spy.firstCall.args[0]).to.be.null
+      })
+    })
+
+    it('renders the placeholder for null and for undefined alike', () => {
+      cy.mount(Select, { props: { options, modelValue: null } })
+      cy.get('[role=combobox]').should('have.text', 'Select option')
+
+      cy.mount(Select, { props: { options, modelValue: undefined } })
+      cy.get('[role=combobox]').should('have.text', 'Select option')
+    })
+
+    it('still round-trips an empty string as a real value', () => {
+      const withNone = [{ label: 'None', value: '' }, ...options]
+      const onUpdate = cy.spy().as('onUpdate')
+      cy.mount(Select, {
+        props: {
+          options: withNone,
+          modelValue: 'def',
+          'onUpdate:modelValue': onUpdate,
+        },
+      })
+
+      cy.get('[role=combobox]').click()
+      cy.get('[role=option]').contains('None').click()
+      cy.get('@onUpdate').should('have.been.calledWith', '')
     })
   })
 })

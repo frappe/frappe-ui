@@ -3,6 +3,7 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
+  import ExposedTable from '@/components/Docs/ExposedTable.vue'
 
   const propsData = [
   {
@@ -47,10 +48,10 @@
   },
   {
     name: 'expanded',
-    description: 'Expand/collapse-all switch. Toggling it writes that value into every node\'s\n`expanded` field. Two-way: it also reflects whether all collapsible nodes are\ncurrently open, so a bound button stays in sync. Per-node state lives on the\nnodes themselves (`node.expanded`).',
+    description: 'Keys of the expanded nodes. Two-way via `v-model:expanded` — the tree\nreplaces the array as rows toggle and never writes to your nodes. A key\nthat is absent means that node is collapsed, so the default renders only\nthe roots.',
     required: false,
-    type: 'boolean',
-    default: 'false'
+    type: 'TreeKey[]',
+    default: '[]'
   }
 ]
 
@@ -86,7 +87,7 @@
   {
     name: 'update:expanded',
     description: 'Fired when the expanded changes.',
-    type: '[value: boolean]'
+    type: '[value: TreeKey[]]'
   },
   {
     name: 'drag-start',
@@ -99,6 +100,34 @@
     type: '[info: DropInfo | null]'
   }
 ]
+
+  const exposedData = [
+  {
+    name: 'expand',
+    description: 'Opens the node with this key. A key whose children have not loaded yet\nopens as soon as they arrive. Like every method here, it works while the\ntree is `disabled`.',
+    type: '(key: TreeKey) => void'
+  },
+  {
+    name: 'collapse',
+    description: 'Closes the node with this key.',
+    type: '(key: TreeKey) => void'
+  },
+  {
+    name: 'toggle',
+    description: 'Flips the node with this key.',
+    type: '(key: TreeKey) => void'
+  },
+  {
+    name: 'expandAll',
+    description: 'Opens every node that has children, keeping any keys already open.',
+    type: '() => void'
+  },
+  {
+    name: 'collapseAll',
+    description: 'Closes every node.',
+    type: '() => void'
+  }
+]
 </script>
 
 ## API Reference
@@ -108,3 +137,5 @@
 <SlotsTable :data="slotsData"/>
 
 <EmitsTable :data="emitsData"/>
+
+<ExposedTable :data="exposedData"/>

@@ -1,4 +1,8 @@
-import type { InputSize, InputVariant } from '../../composables/inputTypes'
+import type {
+  InputExposed,
+  InputSize,
+  InputVariant,
+} from '../../composables/inputTypes'
 import type { InputLabelingProps } from '../../composables/useInputLabeling'
 
 /**
@@ -46,7 +50,4 @@ export interface DurationEmits {
   'update:modelValue': [value: number | null]
 }
 
-export interface DurationExposed {
-  /** Moves focus to the underlying text input. */
-  focus: (options?: FocusOptions) => void
-}
+export interface DurationExposed extends InputExposed {}

@@ -32,7 +32,8 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, useSlots } from 'vue'
+import { computed, inject } from 'vue'
+import { useReactiveSlots } from '../../composables/useReactiveSlots'
 // See RadioGroup.vue — AcceptableValue omits `boolean` at the type level only.
 import { RadioGroupItem, type AcceptableValue } from 'reka-ui'
 import { useId } from '../../utils/useId'
@@ -43,9 +44,9 @@ const props = withDefaults(defineProps<RadioProps>(), {
   disabled: false,
 })
 
-const slots = useSlots()
+const slots = useReactiveSlots<typeof declaredSlots>()
 
-defineSlots<{
+const declaredSlots = defineSlots<{
   /** Overrides the rendered label content. */
   label?: () => any
   /** Overrides the rendered description content. */

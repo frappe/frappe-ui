@@ -1,22 +1,15 @@
-import {
-  computed,
-  ref,
-  toValue,
-  watchEffect,
-  type MaybeRefOrGetter,
-  type Ref,
-} from 'vue'
-import { useEventListener, useVirtualList } from '@vueuse/core'
+import { computed, ref, toValue, watchEffect, type MaybeRefOrGetter } from 'vue'
+import { useElementSize, useEventListener } from '@vueuse/core'
 
 export interface UseVirtualRowsOptions {
   /** Enables DOM scroll-container lookup and scroll listener registration. */
   enabled?: MaybeRefOrGetter<boolean>
 
   /** Row height in px. */
-  itemHeight: MaybeRefOrGetter<number>
+  rowHeight: MaybeRefOrGetter<number>
 
   /** Rows rendered beyond the visible window on each side. */
-  overscan?: number
+  overscan?: MaybeRefOrGetter<number>
 
   /** Explicit scroll container. Defaults to the nearest scrollable ancestor of `anchor`. */
   scrollContainer?: MaybeRefOrGetter<HTMLElement | null | undefined>
@@ -25,9 +18,7 @@ export interface UseVirtualRowsOptions {
 /**
  * Windowing for list rows whose scroll container is an ancestor the app owns
  * (a settings body, the page itself) rather than an element the virtualizer
- * renders. Wraps vueuse's useVirtualList: points its container ref at the
- * discovered ancestor and forwards that element's scroll events, so the
- * app keeps its own scroll container and styled scrollbar.
+ * renders. The app keeps its own scroll container and styled scrollbar.
  *
  * Bind `anchor` to the element wrapping the windowed rows (`wrapperProps`
  * carries the height/offset styles vueuse computes for it).
@@ -37,30 +28,58 @@ export function useVirtualRows<T>(
   options: UseVirtualRowsOptions,
 ) {
   const source = computed(() => toValue(items))
-  const { list, containerProps, wrapperProps } = useVirtualList(
-    source as Ref<T[]>,
-    {
-      itemHeight: () => toValue(options.itemHeight),
-      overscan: options.overscan ?? 6,
-    },
-  )
-
   const anchor = ref<HTMLElement | null>(null)
+  const container = ref<HTMLElement | null>(null)
+  const scrollTop = ref(0)
+  const { height: viewportHeight } = useElementSize(container)
+
   watchEffect(() => {
     if (!toValue(options.enabled ?? true)) {
-      containerProps.ref.value = null
+      container.value = null
+      scrollTop.value = 0
       return
     }
     const explicit = toValue(options.scrollContainer)
-    containerProps.ref.value = explicit ?? findScrollContainer(anchor.value)
+    container.value = explicit ?? findScrollContainer(anchor.value)
+    scrollTop.value = container.value?.scrollTop ?? 0
   })
   useEventListener(
-    () => (toValue(options.enabled ?? true) ? containerProps.ref.value : null),
+    () => (toValue(options.enabled ?? true) ? container.value : null),
     'scroll',
-    () => containerProps.onScroll(),
+    () => (scrollTop.value = container.value?.scrollTop ?? 0),
   )
 
-  return { rows: list, wrapperProps, anchor }
+  const range = computed(() => {
+    const rowHeight = Math.max(1, toValue(options.rowHeight))
+    const overscan = Math.max(0, Math.floor(toValue(options.overscan ?? 6)))
+    const visibleStart = Math.floor(scrollTop.value / rowHeight)
+    const visibleEnd = Math.ceil(
+      (scrollTop.value + viewportHeight.value) / rowHeight,
+    )
+    const start = Math.max(0, visibleStart - overscan)
+    const end = Math.min(source.value.length, visibleEnd + overscan)
+    return { start, end, rowHeight }
+  })
+
+  const rows = computed(() =>
+    source.value
+      .slice(range.value.start, range.value.end)
+      .map((data, index) => ({ data, index: index + range.value.start })),
+  )
+
+  const wrapperProps = computed(() => {
+    const offset = range.value.start * range.value.rowHeight
+    const total = source.value.length * range.value.rowHeight
+    return {
+      style: {
+        width: '100%',
+        height: `${total - offset}px`,
+        marginTop: `${offset}px`,
+      },
+    }
+  })
+
+  return { rows, wrapperProps, anchor }
 }
 
 function findScrollContainer(el: HTMLElement | null): HTMLElement | null {

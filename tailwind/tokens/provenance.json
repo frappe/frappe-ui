@@ -1,0 +1,11 @@
+{
+  "figmaFile": "kMYnZ9ougpSSQBdjZCgtdX",
+  "inputs": {
+    "Colour primitives.Light.tokens.json": "sha256:5197b4b84bcec1d0e27b72b3e234297156a1cc8cca1b0282dcd2954580b17519",
+    "Styles.Dark.tokens.json": "sha256:f5cc376a2768cebc96abb23f5181fb02784c6740d18200936b418a4d266b24fc",
+    "Styles.Light.tokens.json": "sha256:fd4a71df3f349d43add809a0d6acde749b12b66c02c9670f723d1ad122f7a2e9",
+    "Tokens.Mode 1.tokens.json": "sha256:bb1969b9e8e096111bfe947fed1a6e85a7d8fb80f14d082a8787aa40d07c12b1",
+    "effect.styles.tokens.json": "sha256:d750bb31bb2b06e9fbcc81110f63c1f752927657ecbd984b59f8c9a035d02073",
+    "text.styles.tokens.json": "sha256:538e1d2e3c316b0f133aeeb929c57890b0405b0376ef9cb4d29298e3da2f4a02"
+  }
+}

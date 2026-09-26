@@ -6,14 +6,8 @@ import type { Knob } from 'frappe-ui/vitepress'
 const model = ref('')
 
 const knobs: Knob[] = [
-  { name: 'label', type: 'text', default: 'Email', width: '12rem' },
-  { name: 'description', type: 'text', default: '', width: '20rem' },
-  {
-    name: 'placeholder',
-    type: 'text',
-    default: 'jane@example.com',
-    width: '14rem',
-  },
+  { name: 'label', type: 'text', default: 'Email' },
+  { name: 'description', type: 'text', default: '' },
   {
     name: 'type',
     type: 'tabs',
@@ -31,10 +25,10 @@ const knobs: Knob[] = [
     type: 'tabs',
     default: 'sm',
     options: [
+      { label: 'xs', value: 'xs' },
       { label: 'sm', value: 'sm' },
       { label: 'md', value: 'md' },
       { label: 'lg', value: 'lg' },
-      { label: 'xl', value: 'xl' },
     ],
   },
   {
@@ -57,7 +51,7 @@ function buildCode(v: Record<string, any>) {
   const attrs = []
   if (v.label) attrs.push(`label="${v.label}"`)
   if (v.description) attrs.push(`description="${v.description}"`)
-  if (v.placeholder) attrs.push(`placeholder="${v.placeholder}"`)
+  attrs.push('placeholder="jane@example.com"')
   if (v.type !== 'text') attrs.push(`type="${v.type}"`)
   if (v.size !== 'sm') attrs.push(`size="${v.size}"`)
   if (v.variant !== 'subtle') attrs.push(`variant="${v.variant}"`)
@@ -96,7 +90,7 @@ function buildCode(v: Record<string, any>) {
           v-model="model"
           :label="values.label || undefined"
           :description="values.description || undefined"
-          :placeholder="values.placeholder || undefined"
+          placeholder="jane@example.com"
           :type="values.type"
           :size="values.size"
           :variant="values.variant"

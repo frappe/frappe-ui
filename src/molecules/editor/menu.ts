@@ -1,4 +1,5 @@
 import type { Component } from 'vue'
+import type { PopoverAlign, PopoverSide } from '#components/Popover/types'
 import type { Editor } from './useEditor'
 import {
   commandMeta,
@@ -7,6 +8,8 @@ import {
   type EditorCommandMeta,
 } from './commands'
 import { CellSelection } from '@tiptap/pm/tables'
+import type { EditorState } from '@tiptap/pm/state'
+import type { EditorView } from '@tiptap/pm/view'
 import { openFontColorPicker } from './components/font-color/fontColorController'
 import { openTableCellColorPicker } from './components/table-color/tableCellColorController'
 import { openTableSizePicker } from './components/table-size-picker/tableSizePickerController'
@@ -53,6 +56,58 @@ export type MenuGroupItem = {
 }
 
 export type MenuItem = CommandMenuItem | MenuGroupItem | { type: 'separator' }
+
+/** What `shouldShow` is given on every position update. */
+export type EditorMenuShouldShowContext = {
+  editor: Editor
+  /** The menu's own element. `EditorBubbleMenu` only. */
+  element?: HTMLElement
+  view: EditorView
+  state: EditorState
+  oldState?: EditorState
+  /** Start of the current selection. */
+  from: number
+  /** End of the current selection. */
+  to: number
+}
+
+/**
+ * Positioning options shared by `EditorBubbleMenu` and `EditorFloatingMenu`.
+ *
+ * A narrow owned type, not TipTap's Floating UI bag. The keys below are the
+ * whole supported contract, so a key that is not listed is a compile error.
+ *
+ * This is a break, not a tidy-up. The prop used to take TipTap's own bag, so
+ * `arrow`, `size`, `autoPlacement`, `onShow`, `onHide`, `onUpdate`,
+ * `onDestroy` and the middleware object forms of `offset`, `flip`, `shift`,
+ * `hide` and `inline` type-checked and reached Floating UI. They are removed
+ * from the v1 contract.
+ */
+export type EditorMenuOptions = {
+  /**
+   * Side of the selection to render the menu on. Same vocabulary as every
+   * other overlay in the library. Unset keeps TipTap's own default, `top` for
+   * the bubble menu and `right` for the floating menu.
+   */
+  side?: PopoverSide
+  /** Alignment along the chosen side. Default `center`. */
+  align?: PopoverAlign
+  strategy?: 'absolute' | 'fixed'
+  /** Gap in pixels between the menu and its anchor. `0` disables the gap. */
+  offset?: number
+  /** Flip to the opposite side when there is no room. Default on. */
+  flip?: boolean
+  /** Slide along the anchor to stay in view. Default on. */
+  shift?: boolean
+  /** Hide the menu when its anchor is scrolled out of view. */
+  hide?: boolean
+  /** Position against a wrapped inline selection rather than its bounding box. */
+  inline?: boolean
+  /** The scrollable element to follow. Defaults to the window. */
+  scrollTarget?: HTMLElement | Window
+  /** Decide whether the menu shows for the current selection. */
+  shouldShow?: (context: EditorMenuShouldShowContext) => boolean
+}
 
 function canRun(editor: Editor, command: CommandMenuItem['action']) {
   const canEditor = editor.can?.()

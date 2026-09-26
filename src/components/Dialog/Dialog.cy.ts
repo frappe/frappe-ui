@@ -2,6 +2,7 @@ import { ref, h, defineComponent } from 'vue'
 import Dialog from './Dialog.vue'
 import Button from '../Button/Button.vue'
 import Dropdown from '../Dropdown/Dropdown.vue'
+import { _resetWarnUnsupportedIconObject } from '../../utils/iconString'
 
 describe('Dialog', () => {
   // ---- Canonical v1 surface --------------------------------------------------
@@ -15,6 +16,24 @@ describe('Dialog', () => {
     cy.get('[data-position=center]').should('exist')
     cy.get('[role=dialog] h3').should('not.exist')
     cy.get('[role=dialog] [aria-label=Close]').should('exist')
+  })
+
+  it('takes paddingTop as pixels or as a CSS length', () => {
+    cy.mount(Dialog, { props: { open: true, paddingTop: 80 } })
+
+    cy.get('[data-position=center]').should(
+      'have.css',
+      'padding-top',
+      '80px',
+    )
+
+    cy.mount(Dialog, { props: { open: true, paddingTop: '120px' } })
+
+    cy.get('[data-position=center]').should(
+      'have.css',
+      'padding-top',
+      '120px',
+    )
   })
 
   it('renders title, message and action; ctx.close() closes the dialog', () => {
@@ -358,16 +377,101 @@ describe('Dialog', () => {
 
   // ---- Icon theming ----------------------------------------------------------
 
-  it('renders an icon by theme color', () => {
+  it('renders a lucide icon string, toned by theme', () => {
     cy.mount(Dialog, {
       props: {
         open: true,
         title: 'Heads up',
-        icon: { name: 'lucide-alert-triangle', theme: 'red' },
+        icon: 'lucide-alert-triangle',
+        theme: 'red',
       },
     })
 
     cy.get('[role=dialog] .lucide-alert-triangle').should('exist')
+    cy.get('[role=dialog] [data-slot=icon]').should(
+      'have.class',
+      'bg-surface-red-2',
+    )
+  })
+
+  it('renders a component icon', () => {
+    const Glyph = defineComponent({
+      render() {
+        return h('svg', { 'data-cy': 'component-icon' })
+      },
+    })
+
+    cy.mount(Dialog, {
+      props: { open: true, title: 'Heads up', icon: Glyph },
+    })
+
+    cy.get('[role=dialog] [data-cy=component-icon]').should('exist')
+  })
+
+  it('renders an empty badge for a legacy DialogIcon object', () => {
+    // The removed `{ name, theme }` shape is not a string, so it lands in the
+    // component branch and renders nothing inside the badge. The badge itself
+    // still paints. This is what the migration guide documents.
+    cy.mount(Dialog, {
+      props: {
+        open: true,
+        title: 'Heads up',
+        icon: { name: 'lucide-trash', theme: 'red' } as any,
+      },
+    })
+
+    cy.get('[role=dialog] [data-slot=icon]')
+      .should('exist')
+      .and('have.class', 'bg-surface-gray-2')
+      .and('be.empty')
+    cy.get('[role=dialog] .lucide-trash').should('not.exist')
+  })
+
+  it('warns once for a legacy DialogIcon object and not for a component', () => {
+    _resetWarnUnsupportedIconObject()
+    cy.window().then((win) => {
+      cy.spy(win.console, 'warn').as('warn')
+    })
+
+    cy.mount(Dialog, {
+      props: {
+        open: true,
+        title: 'Heads up',
+        icon: { name: 'lucide-trash', theme: 'red' } as any,
+      },
+    })
+
+    cy.get('@warn').should((spy: any) => {
+      const messages = spy.getCalls().map((call: any) => String(call.args[0]))
+      expect(messages.some((m: string) => m.includes('Dialog.icon'))).to.eq(
+        true,
+      )
+    })
+
+    _resetWarnUnsupportedIconObject()
+    const Glyph = defineComponent({ render: () => h('svg') })
+    cy.mount(Dialog, {
+      props: { open: true, title: 'Heads up', icon: Glyph },
+    }).then(() => {
+      cy.get('@warn').should((spy: any) => {
+        const messages = spy
+          .getCalls()
+          .map((call: any) => String(call.args[0]))
+          .filter((m: string) => m.includes('Dialog.icon'))
+        expect(messages).to.have.length(1)
+      })
+    })
+  })
+
+  it('keeps the neutral badge when no theme is set', () => {
+    cy.mount(Dialog, {
+      props: { open: true, title: 'Heads up', icon: 'lucide-info' },
+    })
+
+    cy.get('[role=dialog] [data-slot=icon]').should(
+      'have.class',
+      'bg-surface-gray-2',
+    )
   })
 
   // ---- Escape ------------------------------------------------------------

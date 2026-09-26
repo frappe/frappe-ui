@@ -1,7 +1,8 @@
 import type { Component, ComputedRef, InjectionKey } from 'vue'
-import { RouteLocationRaw } from 'vue-router'
+import type { RouteDestination } from '../shared/route'
 import type { AlertAction } from '../Alert'
 import type { StatusTheme } from '../shared/statusIcon'
+import type { MenuOptions } from '../Menu/types'
 
 /**
  * Read-only collapsed state, provided by `Sidebar` and consumed by
@@ -19,14 +20,21 @@ export const sidebarToggleKey: InjectionKey<() => void> =
   Symbol('sidebarToggle')
 
 export type SidebarProps = {
-  /** Disables collapsing entirely (fixed width, no built-in toggle). */
-  disableCollapse?: boolean
+  /** Allows the sidebar to collapse. Default: `true`. */
+  collapsible?: boolean
 
   /** Expanded width as a CSS length. Applied inline so apps can override it. */
   width?: string
 
   /** Collapsed width as a CSS length. */
   collapsedWidth?: string
+
+  /**
+   * Accessible name of the `<nav>` landmark. Default: `'Main'`. Give a second
+   * sidebar on the same page its own name, and translate it in a localised
+   * app — the library ships no translation layer.
+   */
+  ariaLabel?: string
 }
 
 export interface SidebarItemProps {
@@ -37,8 +45,9 @@ export interface SidebarItemProps {
   accessKey?: string
 
   /**
-   * Leading icon: a CSS class (e.g. `lucide-box`), plain text, or a component.
-   * Ignored when the `#prefix` slot is used.
+   * Leading icon: a `lucide-*` class, an emoji, or a component. Any other
+   * string renders nothing and warns in dev — put initials in the `#prefix`
+   * slot instead. Ignored when the `#prefix` slot is used.
    */
   icon?: string | Component
 
@@ -49,11 +58,14 @@ export interface SidebarItemProps {
    * Navigation target. When set the row's main area renders as a router link;
    * otherwise it renders as a button. A click still invokes `onClick`.
    */
-  to?: RouteLocationRaw
+  route?: RouteDestination
+
+  /** External URL. Used when `route` is absent; renders a native same-tab anchor. */
+  href?: string
 
   /**
    * Marks the row active (`data-state="active"`). When omitted, active state is
-   * inferred by matching `to` against the current route.
+   * inferred by matching `route` against the current route.
    */
   active?: boolean
 
@@ -85,11 +97,7 @@ export type SidebarHeaderProps = {
    */
   showLogo?: boolean
   /** Options rendered in the trigger's dropdown — the same shape `Dropdown` itself takes. */
-  menuItems?: {
-    label: string
-    icon?: string | Component
-    onClick?: () => void
-  }[]
+  menuItems?: MenuOptions
 }
 
 /**

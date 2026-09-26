@@ -2,6 +2,8 @@
   position: relative;
 }
 
+/* The hours hang 45px left of the day column — which is 45px in from the
+   gutter's right edge, the two being the same line. */
 .calendar-column ::before {
   content: attr(data-time-attr);
   position: absolute;
@@ -10,35 +12,108 @@
   font-size: 12px;
   font-weight: 400;
 }
+/* "All day" is one more label in that column and reads as one: the same type,
+   spelled here beside the hours rather than in the template, so the two cannot
+   be changed apart. It was a size up and a weight heavier — near enough to the
+   hours to look like a mistake, far enough to stop the column reading as a
+   column. Where it sits is the template's business: centred in the gutter,
+   with even air either side of it. */
+.calendar-all-day-label {
+  font-size: 12px;
+  font-weight: 400;
+}
 
+/* An event wherever it is drawn: a pill in the grids, and a row in the Agenda,
+   which is a pill lying down and takes every rule here. */
 .event {
   background-color: var(--bg);
 }
-.event .event-title {
-  color: var(--text);
-}
+/* The cut between an event and the one it is drawn over is an element of its
+   own — see `cuts` in CalendarWeekDayEvent — not a shadow on the pill: a shadow
+   falls on whatever is beside the pill, the grid included, and cannot be told
+   to stop at the other event's edge. */
 .event .event-subtitle {
   color: var(--subtext);
 }
 .event .event-border {
   background-color: var(--border);
 }
-.event.active {
-  background-color: var(--bg-active);
+/* A draft: saved, but nothing sent. An outline in the event's colour rather
+   than a fill, so it reads as not yet real — on its own white ground, not on
+   the grid showing through it. */
+.event.event-draft {
+  background-color: var(--surface-base);
+  outline: 1px dashed var(--border);
+  outline-offset: -1px;
 }
-.event.active .event-title {
-  color: var(--text-active, var(--ink-base));
+/* Every hover behind `(hover: hover)`, the way the utilities are: a phone has no
+   pointer to take away, so it leaves :hover on whatever was last tapped. A
+   tapped draft kept `.event.event-draft:hover` — three classes' worth of
+   specificity — over `.event.active`, and the one event a reader had just opened
+   was the one that did not look open. */
+@media (hover: hover) {
+  /* Pointed at: one step deeper in the event's own colour. The palette's own
+     hover step was the same as its rest, so hovering an event changed nothing —
+     the pill a reader was about to click looked like every pill they were not. */
+  .event:hover {
+    background-color: var(--bg-active);
+  }
+  .event.event-draft:hover {
+    background-color: var(--surface-base);
+  }
 }
-.event.active .event-subtitle {
-  color: var(--subtext-active);
+/* Open: the event whose panel or popover is showing — a shade past the one
+   hovering gives it, mixed from the event's own colour rather than taken from
+   the palette, which has no step above `bgActive`. The pointer is usually on the
+   open event, so the two states are rarely seen apart; what separates them is
+   that the open one stays where it is when the pointer leaves.
+
+   Under the pointer as well, spelled out: a draft's hover rule above carries
+   three classes to this one's two, and the open draft — which the pointer is
+   on, having just opened it — went back to its white ground and looked like
+   the one draft that was not open. */
+.event.active,
+.event.active:hover {
+  background-color: color-mix(in srgb, var(--border) 10%, var(--bg-active));
 }
-.event.active .event-border {
-  background-color: var(--border-active);
-}
-.event:not(.active):hover {
-  background-color: var(--bg-hover);
-}
-.event:not(.active) .past,
+/* Behind you: the event fades whole. Not the open one: the event the reader
+   has chosen is not behind them. */
 .event.past:not(.active) {
   opacity: 0.5;
+}
+
+/* ── Listed events: the Agenda's rows ─────────────────────────────────────── */
+
+/* A day already spent says so from its header too — a date in full ink over a
+   card of faded rows reads as the live one. Its ink alone, for the reason the
+   rows fade their contents: the band's wash and the rules closing it are the
+   card's structure, and structure that changes weight with the date makes the
+   card look creased. The rows carry their own fading, so dimming the day as a
+   whole would apply it twice and take them past legible. */
+.calendar-day-header.past > * {
+  opacity: 0.55;
+}
+/* The label carries no fill and no rule — nothing to hold at full strength — so
+   it fades whole. A week whose last day is behind the reader fades with the
+   days in it, so a spent stretch is spent from its heading down. */
+.calendar-week-label.past {
+  opacity: 0.55;
+}
+
+/* A consumer fills `#event-description` once for every row, and for a given
+   event it may have nothing to say. The box it renders is then empty but still
+   present, taking a flex gap on either side — twice the space between the title
+   and the tags that a row without the slot gets. */
+.calendar-row-description:empty {
+  display: none;
+}
+
+/* On a narrow row the description follows the time on the second line, and a
+   middle dot between the two says where one stops and the other starts — the
+   same mark the description uses inside itself, between a venue and a "Day
+   2/3". Drawn by the description rather than as a span between them so that
+   an empty description, hidden by the rule above, takes its separator with it:
+   a consumer fills the slot for every row and has nothing to say on some. */
+.event.narrow .calendar-row-description::before {
+  content: '· ';
 }

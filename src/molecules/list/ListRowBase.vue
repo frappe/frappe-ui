@@ -4,8 +4,8 @@
     data-slot="list-row"
     :role="context?.hasHeader.value ? 'row' : 'listitem'"
     :data-interactive="interactive || undefined"
-    :data-state="selected ? 'selected' : undefined"
-    :data-active="active || undefined"
+    :data-selected="selected || undefined"
+    :data-state="active ? 'active' : 'inactive'"
     :aria-current="active || undefined"
     :type="tag === 'button' ? 'button' : undefined"
     :class="[

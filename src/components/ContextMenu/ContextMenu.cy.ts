@@ -2,7 +2,11 @@ import ContextMenu from './ContextMenu.vue'
 import { defineComponent, h, ref } from 'vue'
 
 const trigger = () =>
-  h('div', { 'data-cy': 'trigger', style: 'padding: 20px; display: inline-block' }, 'Right-click me')
+  h(
+    'div',
+    { 'data-cy': 'trigger', style: 'padding: 20px; display: inline-block' },
+    'Right-click me',
+  )
 
 const simpleOptions = [
   { label: 'Open', icon: 'lucide-external-link' },
@@ -70,10 +74,7 @@ describe('ContextMenu', () => {
         options: [
           {
             label: 'Share',
-            submenu: [
-              { label: 'Copy link' },
-              { label: 'Invite people' },
-            ],
+            submenu: [{ label: 'Copy link' }, { label: 'Invite people' }],
           },
         ],
       },
@@ -90,7 +91,16 @@ describe('ContextMenu', () => {
     const onToggle = cy.stub().as('onToggle')
 
     cy.mount(ContextMenu, {
-      props: { options: [{ label: 'Dark mode', switch: true, switchValue: false, onClick: onToggle }] },
+      props: {
+        options: [
+          {
+            label: 'Dark mode',
+            switch: true,
+            switchValue: false,
+            onClick: onToggle,
+          },
+        ],
+      },
       slots: { default: trigger },
     })
 
@@ -105,12 +115,98 @@ describe('ContextMenu', () => {
       props: { options: simpleOptions },
       slots: {
         trigger: () =>
-          h('div', { 'data-cy': 'named-trigger', style: 'padding: 20px' }, 'Named trigger'),
+          h(
+            'div',
+            { 'data-cy': 'named-trigger', style: 'padding: 20px' },
+            'Named trigger',
+          ),
       },
     })
 
     cy.get('[data-cy=named-trigger]').rightclick()
     cy.get('[role=menu]').should('exist')
+  })
+
+  it('exposes open controls to the trigger slot', () => {
+    let controls: any
+    cy.mount(ContextMenu, {
+      props: { options: simpleOptions },
+      slots: {
+        trigger: (props) => {
+          controls = props
+          return h(
+            'div',
+            { 'data-cy': 'controlled-trigger' },
+            String(props.open),
+          )
+        },
+      },
+    })
+
+    cy.then(() => controls.setOpen(true))
+    cy.get('[role=menu]').should('exist')
+    cy.get('[data-cy=controlled-trigger]').should('have.text', 'true')
+    cy.then(() => controls.setOpen(false))
+    cy.get('[role=menu]').should('not.exist')
+    cy.get('[data-cy=controlled-trigger]').should('have.text', 'false')
+    cy.then(() => {
+      const wheel = new WheelEvent('wheel', { cancelable: true })
+      expect(document.dispatchEvent(wheel)).to.equal(true)
+    })
+
+    cy.then(() => controls.setOpen(true))
+    cy.get('[role=menu]').should('exist')
+    cy.then(() => controls.close())
+    cy.get('[role=menu]').should('not.exist')
+  })
+
+  it('honors an open and close request in the same tick', () => {
+    let controls: any
+    cy.mount(ContextMenu, {
+      props: { options: simpleOptions },
+      slots: {
+        trigger: (props) => {
+          controls = props
+          return h(
+            'div',
+            { 'data-cy': 'same-tick-trigger' },
+            String(props.open),
+          )
+        },
+      },
+    })
+
+    cy.then(() => {
+      controls.setOpen(true)
+      controls.setOpen(false)
+    })
+    cy.get('[role=menu]').should('not.exist')
+    cy.get('[data-cy=same-tick-trigger]').should('have.text', 'false')
+    cy.then(() => {
+      const wheel = new WheelEvent('wheel', { cancelable: true })
+      expect(document.dispatchEvent(wheel)).to.equal(true)
+    })
+  })
+
+  it('portals content to portalTo and drops arbitrary attributes', () => {
+    const target = document.createElement('div')
+    target.id = 'context-menu-target'
+    document.body.appendChild(target)
+
+    cy.mount(ContextMenu, {
+      props: {
+        options: simpleOptions,
+        portalTo: target,
+        'data-consumer-attr': 'ignored',
+      } as any,
+      slots: { default: trigger },
+    })
+
+    cy.get('[data-cy=trigger]').rightclick()
+    cy.get('#context-menu-target [data-slot="content"]')
+      .should('exist')
+      .and('not.have.attr', 'data-consumer-attr')
+    cy.then(() => target.remove())
   })
 
   it('opens without an enter/exit animation (instant motion)', () => {
@@ -144,26 +240,34 @@ describe('ContextMenu', () => {
   it('updates v-model:open when the menu opens and closes', () => {
     const open = ref(false)
 
-    cy.mount(defineComponent({
-      setup() {
-        return () =>
-          h('div', [
-            h('span', { 'data-cy': 'state' }, open.value ? 'open' : 'closed'),
-            h(
-              ContextMenu,
-              {
-                open: open.value,
-                'onUpdate:open': (val: boolean) => { open.value = val },
-                options: [{ label: 'Edit' }],
-              },
-              {
-                default: () =>
-                  h('div', { 'data-cy': 'trigger', style: 'padding: 20px' }, 'Right-click me'),
-              },
-            ),
-          ])
-      },
-    }))
+    cy.mount(
+      defineComponent({
+        setup() {
+          return () =>
+            h('div', [
+              h('span', { 'data-cy': 'state' }, open.value ? 'open' : 'closed'),
+              h(
+                ContextMenu,
+                {
+                  open: open.value,
+                  'onUpdate:open': (val: boolean) => {
+                    open.value = val
+                  },
+                  options: [{ label: 'Edit' }],
+                },
+                {
+                  default: () =>
+                    h(
+                      'div',
+                      { 'data-cy': 'trigger', style: 'padding: 20px' },
+                      'Right-click me',
+                    ),
+                },
+              ),
+            ])
+        },
+      }),
+    )
 
     cy.get('[data-cy=trigger]').rightclick()
     cy.get('[data-cy=state]').should('have.text', 'open')
@@ -181,7 +285,11 @@ describe('ContextMenu', () => {
     cy.get('[role=menu]').should('exist')
 
     cy.window().then((win) => {
-      const event = new WheelEvent('wheel', { deltaY: 100, cancelable: true, bubbles: true })
+      const event = new WheelEvent('wheel', {
+        deltaY: 100,
+        cancelable: true,
+        bubbles: true,
+      })
       win.dispatchEvent(event)
       expect(event.defaultPrevented).to.be.true
     })
@@ -199,7 +307,11 @@ describe('ContextMenu', () => {
     cy.get('[role=menu]').should('not.exist')
 
     cy.window().then((win) => {
-      const event = new WheelEvent('wheel', { deltaY: 100, cancelable: true, bubbles: true })
+      const event = new WheelEvent('wheel', {
+        deltaY: 100,
+        cancelable: true,
+        bubbles: true,
+      })
       win.dispatchEvent(event)
       expect(event.defaultPrevented).to.be.false
     })

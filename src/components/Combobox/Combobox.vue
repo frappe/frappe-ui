@@ -1,13 +1,5 @@
 <script setup lang="ts">
-import {
-  computed,
-  nextTick,
-  ref,
-  useAttrs,
-  useSlots,
-  useTemplateRef,
-  watch,
-} from 'vue'
+import { computed, nextTick, ref, useAttrs, useTemplateRef, watch } from 'vue'
 import {
   ComboboxAnchor,
   ComboboxContent,
@@ -21,6 +13,7 @@ import OptionIcon from '../shared/selection/OptionIcon.vue'
 import PopoverPanel from '../shared/popover/PopoverPanel.vue'
 import ComboboxResults from './ComboboxResults.vue'
 import { useInputLabeling } from '../../composables/useInputLabeling'
+import { useReactiveSlots } from '../../composables/useReactiveSlots'
 import { usePortalTarget } from '../../composables/usePortalTarget'
 import { useEmptyValueMapping } from '../shared/selection/useEmptyValueMapping'
 import { useFilteredGroups } from '../shared/selection/useFilteredGroups'
@@ -87,10 +80,25 @@ const portalTarget = usePortalTarget(() => props.portalTo)
 
 const emit = defineEmits<ComboboxEmits>()
 const attrs = useAttrs()
-const slots = useSlots()
+const slots = useReactiveSlots<ComboboxSlots>()
 
-const model = defineModel<ComboboxOptionValue | null>({ default: null })
+// `ComboboxResults` dispatches on dynamic names (`item-${slot}`), which the
+// enumerated `ComboboxSlots` cannot express. Same object, so reads still go
+// through the proxy.
+const slotFns = slots as Record<string, ((props?: any) => any) | undefined>
+
+// No `default`. A `defineModel` default stays inside the component, so a
+// `v-model` holding `undefined` would leave the parent at `undefined` while
+// this component read `null`. `currentValue` reads both as the empty value,
+// `clear()` emits `null`, and nothing is emitted on mount (INP-Q2). Select
+// does the same.
+const model = defineModel<ComboboxOptionValue | null>()
+// Documented on `open` in `./types.ts`. A JSDoc block here would be appended
+// to that description by `propsgen`, not replace it.
 const open = defineModel<boolean>('open', { default: false })
+// Optional outside-in control of the search box. Unbound, `defineModel` keeps
+// the value local, so `v-model:query` is never required. Documented on `query`
+// in `./types.ts`.
 const query = defineModel<string>('query', { default: '' })
 // Bound, the query is the consumer's — the component never resets it on its
 // own (see `skipInitialDisplaySync` and the open watcher below).
@@ -155,31 +163,35 @@ const {
   toExternal: toExternalSelectableValue,
 } = useEmptyValueMapping(allSelectableOptions, EMPTY_SELECTABLE_VALUE_PREFIX)
 
+/** The model with `undefined` read as the empty value (INP-Q2). */
+const currentValue = computed<ComboboxOptionValue | null>(
+  () => model.value ?? null,
+)
+
 const internalModelValue = computed(() => {
-  if (model.value === null || model.value === undefined) return undefined
+  if (currentValue.value === null) return undefined
 
   const selectableOption = allSelectableOptions.value.find(
-    (option) => option.value === model.value,
+    (option) => option.value === currentValue.value,
   )
 
   return selectableOption
     ? getSelectableInternalValue(selectableOption)
-    : model.value
+    : currentValue.value
 })
 
 const selectedOption = computed<ComboboxSelectableOption | null>(() => {
-  if (model.value === null || model.value === undefined) return null
+  if (currentValue.value === null) return null
   return (
-    allSelectableOptions.value.find((option) => option.value === model.value) ??
-    null
+    allSelectableOptions.value.find(
+      (option) => option.value === currentValue.value,
+    ) ?? null
   )
 })
 
 const displayValue = computed(() => {
   if (selectedOption.value) return selectedOption.value.label
-  return model.value === null || model.value === undefined
-    ? ''
-    : String(model.value)
+  return currentValue.value === null ? '' : String(currentValue.value)
 })
 
 const triggerClasses = computed(() => [
@@ -256,8 +268,12 @@ function handleTriggerClick() {
 }
 
 function setOpen(value: boolean) {
-  if (props.disabled) return
+  if (props.disabled && value) return
   open.value = value
+}
+
+function close() {
+  setOpen(false)
 }
 
 function setQuery(value: string) {
@@ -280,6 +296,7 @@ const controlSlotProps = computed<ComboboxControlSlotProps>(() => ({
   displayValue: displayValue.value,
   clear,
   setOpen,
+  close,
 }))
 
 const searchSlotProps = computed<ComboboxSearchSlotProps>(() => ({
@@ -436,7 +453,21 @@ if (isButtonMode.value && isQueryBound() && query.value !== '') {
   hasTypedSinceOpen.value = true
 }
 
-defineExpose<SelectionExposed>({ clear, focus })
+defineExpose<SelectionExposed>({
+  /**
+   * Clears the current selection (sets the model to `null`). In
+   * `trigger="button"` mode the typed search query stays. In
+   * `trigger="input"` mode the input empties, because there it shows the
+   * selected option's label.
+   */
+  clear,
+  /**
+   * Moves focus to the input in `trigger="input"` mode, and to the button in
+   * `trigger="button"` mode. While the popover's search input is showing, it
+   * focuses that instead.
+   */
+  focus,
+})
 defineSlots<ComboboxSlots>()
 </script>
 
@@ -570,7 +601,7 @@ defineSlots<ComboboxSlots>()
 
               <span
                 :class="[
-                  'min-w-0 flex-1 truncate text-left font-normal',
+                  'min-w-0 flex-1 truncate text-left font-normal leading-tighter',
                   !selectedOption && 'text-ink-gray-4',
                 ]"
               >
@@ -579,6 +610,7 @@ defineSlots<ComboboxSlots>()
 
               <slot name="suffix" v-bind="controlSlotProps">
                 <span
+                  data-slot="chevron"
                   :class="[
                     'lucide-chevron-down size-4 shrink-0 text-ink-gray-4 transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)]',
                     open && 'rotate-180',
@@ -732,11 +764,11 @@ defineSlots<ComboboxSlots>()
                   :groups="filteredGroups"
                   :size="size"
                   :query="typedQuery"
-                  :model="model ?? null"
+                  :model="currentValue"
                   :loading="loading"
                   :empty-text="emptyText"
                   :show-empty="showEmpty"
-                  :slot-fns="slots"
+                  :slot-fns="slotFns"
                   :all-selectable-options="allSelectableOptions"
                   @select-custom="handleCustomItemSelect"
                 />

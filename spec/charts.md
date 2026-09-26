@@ -23,7 +23,7 @@ release, and the current family covers everything the earlier one drew.
 ## The conventions
 
 1. **A prop says what the data means. It does not say what the renderer should
-   do.** `x`, `y`, `series`, `stacked`, and `horizontal` describe a reading of
+   do.** `x`, `y`, `splitBy`, `stacked`, and `horizontal` describe a reading of
    the data. `barGap: '-100%'` is an instruction to echarts. Instructions go
    through `echartOptions`.
 2. **The library owns the look. The caller owns the meaning.** Dotted gridlines,
@@ -94,6 +94,48 @@ the established pattern. `NumberCard` draws one by default, because a reading
 with no plot is a card, and `:card="false"` lets an app lay out several readings
 inside its own card.
 
+## The engine composable
+
+`useChart` and `registerChartModules` are exported for a plot the library does
+not draw, beside the chrome components that dress it. The library owns the
+composable's shape and its lifecycle: init once the container has a size and the
+fonts settle, resize following, disposal on unmount, the SVG renderer, and
+reduced motion. The echarts types it carries — the option, the instance, the
+modules — are echarts' and move with that dependency.
+[ADR-0018](./adr/0018-charts-engine-composable-is-public.md) records why they are
+public and what freezes with them.
+
+## Where `format` lives
+
+A formatter lives where the values it prints live.
+
+A chart whose values are measured against a value axis takes `format` on that
+axis: `yAxis.format`, `y2Axis.format`, and `xAxis.format` for the category
+labels. `y` and `y2` are there to carry two units, so one chart-level formatter
+could only be right for one of them. This is the axis charts and the scatter.
+
+A chart with one measure and no value axis takes `format` at the chart level,
+because there is one unit and nowhere else to put it: the donut, the funnel, the
+heatmap and the number card.
+
+The scatter carries both. `ScatterChartProps.format` prints every number the
+chart shows — x, y and size — and `xAxis.format` and `yAxis.format` override it
+on their own axis. The chart-level one is the fallback because the size column
+sits on no scale, so no axis formatter can reach it; an axis that states its own
+units overrides the fallback there.
+
+`tooltipColumns[].format` is another place, and it is the same rule: a tooltip
+column is drawn on no axis, so it carries its own.
+
+`SeriesStyle.format` is the same rule one level down. Two series can share an
+axis without sharing a unit, so a series whose unit differs from its axis
+carries its own. It prints that series' values in the tooltip and its data
+labels. The ticks keep the axis' `format`, since an axis draws one scale.
+
+`HeatmapAxisOptions` carries `format` and no `title`, where every other axis
+options type carries both. That is a gap, not a decision: a title on a heatmap
+axis is additive and can land in a 1.x minor.
+
 ## The template ref
 
 Every echarts-backed chart hands back one member, the echarts instance, as
@@ -121,10 +163,14 @@ between them — the `palette` prop, `ChartPalette`, `paletteColors` — never a
 ramp itself.
 
 The slot vocabulary is P6's: `actions`, `loading`, `error` and `empty` come from
-the shared list, and the family adds four slots for parts only a chart has.
+the shared list, and the family adds five slots for parts only a chart has.
 `legend` and `tooltip` are regions of the chrome, on the container and on every
-plot that draws one. The other two belong to one component each, because only
-one component has the part:
+plot that draws one. `title-suffix` is a region of the title, drawn by the
+container and the card and forwarded by every plot that heads one: it takes the
+`suffix` the list header cell already uses for a trailing adornment, qualified
+because `NumberCard` spends `suffix` on the string after its reading. The last
+two belong to one component each,
+because only one component has the part:
 
 - `center` on `DonutChart` — the readout in the hole of the ring, which reads
   the total until a slice is hovered.

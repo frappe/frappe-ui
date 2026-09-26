@@ -7,6 +7,9 @@
     :empty="isEmpty"
     :dir="dir"
   >
+    <template v-if="$slots['title-suffix']" #title-suffix>
+      <slot name="title-suffix" />
+    </template>
     <template v-if="$slots.actions" #actions><slot name="actions" /></template>
 
     <!-- The container owns the three states, so an app that wants a retry
@@ -73,6 +76,7 @@
         :x="tooltip.x"
         :y="tooltip.y"
         :items="tooltip.items"
+        :rows="tooltip.rows"
         :dir="dir"
       >
         <template v-if="$slots.tooltip" #default="slotProps">
@@ -216,6 +220,7 @@ const tooltip = reactive({
   x: 0,
   y: 0,
   items: [] as ChartTooltipItem[],
+  rows: [] as Record<string, any>[],
 })
 
 function hover(segment: ProportionSegment, event: MouseEvent) {
@@ -244,8 +249,11 @@ function read(segment: ProportionSegment) {
       value: segment.value,
       formattedValue: formatMeasure(segment.value),
       percent: segment.percent,
+      kind: 'series',
     },
   ]
+  // A named segment carries one row; "Others" carries every row it collapsed.
+  tooltip.rows = segment.rows
 }
 
 function track(event: MouseEvent) {

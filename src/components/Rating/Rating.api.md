@@ -3,6 +3,7 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
+  import ExposedTable from '@/components/Docs/ExposedTable.vue'
 
   const propsData = [
   {
@@ -34,17 +35,17 @@
   },
   {
     name: 'icon',
-    description: 'Icon to render for each star. Accepts a Vue component (e.g. an auto-imported\nlucide icon: `import Heart from \'~icons/lucide/heart\'`).\nThe component receives `fill="currentColor"` so closed-path SVGs render filled.\nDefaults to a filled lucide-star.',
+    description: 'Icon to render for each star. Accepts a class-icon name\n(`icon="lucide-heart"`), which renders as a `<span>` carrying that class,\nor a Vue component. A component receives `fill="currentColor"` so\nclosed-path SVGs render filled.\n\nDefaults to an inline filled star. The `lucide-star` class icon is a mask\nof lucide\'s outline star, so it cannot draw a solid one.',
     required: false,
     type: 'string | Component',
-    default: 'LucideStar'
+    default: 'RatingStar'
   },
   {
     name: 'size',
     description: 'Size of the rating component.',
     required: false,
     type: 'InputSize',
-    default: '"md"'
+    default: '"sm"'
   },
   {
     name: 'label',
@@ -60,9 +61,9 @@
   },
   {
     name: 'error',
-    description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. May be either a string\nor an `Error` object whose `messages?: string[]` is rendered as stacked\nlines (with `Error.message` as the fallback).',
+    description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. Takes a string, an\narray of strings, or an `Error` whose `messages` are rendered as stacked\nlines (with `Error.message` as the fallback). This is the same value\n`ErrorMessage.message` takes. An empty array and an empty string both\nmean no error.',
     required: false,
-    type: 'string | FrappeUIError'
+    type: 'ErrorMessageValue'
   },
   {
     name: 'required',
@@ -103,6 +104,14 @@
     type: '[value: number]'
   }
 ]
+
+  const exposedData = [
+  {
+    name: 'focus',
+    description: 'Moves focus to the selected star, or to the first star when nothing is\nselected. That is the star `Tab` reaches. In half-star mode the whole\ncontrol is one slider, so it focuses the control itself.',
+    type: '(options?: FocusOptions) => void'
+  }
+]
 </script>
 
 ## API Reference
@@ -112,3 +121,5 @@
 <SlotsTable :data="slotsData"/>
 
 <EmitsTable :data="emitsData"/>
+
+<ExposedTable :data="exposedData"/>

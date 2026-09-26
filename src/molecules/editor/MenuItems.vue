@@ -9,7 +9,7 @@ import TooltipProvider from '#components/Tooltip/TooltipProvider.vue'
 const props = defineProps<{
   editor: Editor | null
   items: MenuItem[]
-  buttonSize?: 'xs' | 'sm'
+  size?: 'xs' | 'sm'
 }>()
 
 // The editor from `useEditor` is built on `@tiptap/core` (not `@tiptap/vue-3`),
@@ -101,7 +101,7 @@ function run(item: CommandMenuItem, event?: MouseEvent) {
   }
 }
 
-const menuButtonSize = computed(() => props.buttonSize ?? 'xs')
+const menuButtonSize = computed(() => props.size ?? 'xs')
 </script>
 
 <template>

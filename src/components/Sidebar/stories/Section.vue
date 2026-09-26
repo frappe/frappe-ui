@@ -12,7 +12,7 @@ const viewsCollapsed = ref(false)
 
 <template>
   <div class="flex h-[360px] w-fit overflow-hidden rounded-5 border">
-    <Sidebar disable-collapse width="14rem">
+    <Sidebar :collapsible="false" width="14rem">
       <div class="flex-1 overflow-y-auto px-2 pt-2">
         <SidebarLabel>Pipeline</SidebarLabel>
         <SidebarItem

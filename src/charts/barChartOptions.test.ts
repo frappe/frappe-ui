@@ -3,20 +3,20 @@ import { buildAxisChartOption } from './axisChartOptions'
 import { AXIS_LABEL_FONT_SIZE, resolveSeriesColors } from './axisChartCommon'
 import { estimateTextWidth } from './format'
 import type { ChartTokens } from './tokens'
-import type { AxisChartConfig } from './types'
+import type { AxisChartConfig, AxisChartSeriesConfig } from './types'
 
 const tokens: ChartTokens = {
   categorical: ['#111111', '#222222', '#333333'],
-  // Five stops so the sequential pale-tail trim and even spacing are visible.
-  sequential: ['#000011', '#000022', '#000033', '#000044', '#000055'],
+  // Three stops so even spacing across the ramp is visible.
+  sequential: ['#000011', '#000022', '#000033'],
   diverging: ['#001100', '#002200', '#003300'],
   axisLabel: 'ink-5',
   axisTitle: 'ink-7',
   axisLine: 'outline-2',
-  splitLine: 'outline-1',
+  gridline: 'outline-1',
   dataLabel: 'ink-6',
   insideLabel: 'ink-8',
-  cellGap: '#ffffff',
+  backdrop: '#ffffff',
 }
 
 /** What `BarChart` hands the builder: the shared config, marked `'bar'`. */
@@ -70,13 +70,13 @@ describe('resolveSeriesColors', () => {
     ).toEqual({ sales: '#000011', refunds: 'red' })
   })
 
-  it('gives a lone sequential series a mid stop, not the darkest', () => {
+  it('gives a lone sequential series the darkest stop', () => {
     expect(colorsFor({ series: [{ name: 'sales' }] })).toEqual({
-      sales: '#000022',
+      sales: '#000011',
     })
   })
 
-  it('spaces sequential series out dark to light, skipping the palest stops', () => {
+  it('spaces sequential series out dark to light', () => {
     expect(Object.values(colorsFor({ series: named(3) }))).toEqual([
       '#000011',
       '#000022',
@@ -84,10 +84,10 @@ describe('resolveSeriesColors', () => {
     ])
   })
 
-  it('cycles the sequential ramp once there are more series than usable stops', () => {
-    const colors = colorsFor({ series: named(6) })
+  it('cycles the sequential ramp once there are more series than stops', () => {
+    const colors = colorsFor({ series: named(4) })
     expect(colors.a).toBe('#000011')
-    expect(colors.f).toBe(colors.a)
+    expect(colors.d).toBe(colors.a)
   })
 
   it('cycles the categorical ramp in series order', () => {
@@ -107,9 +107,129 @@ describe('resolveSeriesColors', () => {
     ])
   })
 
+  describe('on a ramp of five dark and light pairs', () => {
+    const pairs = ['d1', 'l1', 'd2', 'l2', 'd3', 'l3', 'd4', 'l4', 'd5', 'l5']
+    const colorsOn = (series: AxisChartSeriesConfig[]) =>
+      Object.values(
+        resolveSeriesColors(config({ series }), {
+          ...tokens,
+          categorical: pairs,
+        }),
+      )
+
+    it('keeps bars and a lone line among them on the sequential ramp', () => {
+      expect(colorsOn(named(3))).toEqual(['#000011', '#000022', '#000033'])
+      expect(colorsOn([{ name: 'a' }, { name: 'b', type: 'line' }])).toEqual([
+        '#000033',
+        '#000011',
+      ])
+    })
+
+    it('keeps a bar among two lines on the sequential ramp', () => {
+      expect(
+        colorsOn([
+          { name: 'a' },
+          { name: 'b', type: 'line' },
+          { name: 'c', type: 'line' },
+        ]),
+      ).toEqual(['#000033', '#000011', '#000022'])
+    })
+
+    it('draws two or more lines and nothing else in separate hues', () => {
+      expect(
+        colorsOn([
+          { name: 'a', type: 'line' },
+          { name: 'b', type: 'line' },
+          { name: 'c', type: 'line' },
+        ]),
+      ).toEqual(['d1', 'l2', 'd3'])
+    })
+  })
+
   it('cycles an explicit color list from palette', () => {
     expect(colorsFor({ palette: ['a', 'b'] }).sales).toBe('a')
     expect(colorsFor({ palette: ['a', 'b'] }).refunds).toBe('b')
+  })
+})
+
+describe('resolveSeriesColors by ink weight', () => {
+  it('hands the deep stop to the line and the pale one to the bar', () => {
+    expect(
+      colorsFor({
+        series: [{ name: 'sales' }, { name: 'refunds', type: 'line' }],
+      }),
+    ).toEqual({ sales: '#000033', refunds: '#000011' })
+  })
+
+  it('reads the same whichever order the series arrive in', () => {
+    expect(
+      colorsFor({
+        series: [{ name: 'refunds', type: 'line' }, { name: 'sales' }],
+      }),
+    ).toEqual({ sales: '#000033', refunds: '#000011' })
+  })
+
+  it('ranks an area between the line and the bar', () => {
+    expect(
+      colorsFor({
+        series: [
+          { name: 'a' },
+          { name: 'b', type: 'area' },
+          { name: 'c', type: 'line' },
+        ],
+      }),
+    ).toEqual({ a: '#000033', b: '#000022', c: '#000011' })
+  })
+
+  it('keeps series order among marks of the same weight', () => {
+    expect(
+      colorsFor({
+        series: [
+          { name: 'a', type: 'line' },
+          { name: 'b', type: 'line' },
+          { name: 'c' },
+        ],
+      }),
+    ).toEqual({ a: '#000011', b: '#000022', c: '#000033' })
+  })
+
+  it('still honours an explicit series color', () => {
+    expect(
+      colorsFor({
+        series: [
+          { name: 'sales' },
+          { name: 'refunds', type: 'line', color: 'red' },
+        ],
+      }),
+    ).toEqual({ sales: '#000033', refunds: 'red' })
+  })
+
+  it('leaves the other palettes on series order', () => {
+    const mixed: AxisChartSeriesConfig[] = [
+      { name: 'sales' },
+      { name: 'refunds', type: 'line' },
+    ]
+    expect(colorsFor({ palette: 'categorical', series: mixed })).toEqual({
+      sales: '#111111',
+      refunds: '#222222',
+    })
+    expect(colorsFor({ palette: 'diverging', series: mixed })).toEqual({
+      sales: '#001100',
+      refunds: '#003300',
+    })
+    expect(colorsFor({ palette: ['a', 'b'], series: mixed })).toEqual({
+      sales: 'a',
+      refunds: 'b',
+    })
+  })
+
+  it('draws every series as a bar on a horizontal chart, so order stands', () => {
+    expect(
+      colorsFor({
+        horizontal: true,
+        series: [{ name: 'sales' }, { name: 'refunds', type: 'line' }],
+      }),
+    ).toEqual({ sales: '#000011', refunds: '#000033' })
   })
 })
 
@@ -149,10 +269,10 @@ describe('bar chart option axes', () => {
 
     // Gridlines run across the values; the category axis carries the baseline.
     expect(option.yAxis.splitLine.show).toBe(true)
-    expect(option.yAxis.splitLine.lineStyle.color).toBe(tokens.splitLine)
+    expect(option.yAxis.splitLine.lineStyle.color).toBe(tokens.gridline)
     expect(option.xAxis.splitLine.show).toBe(false)
     expect(option.yAxis.axisLine.show).toBe(false)
-    expect(option.xAxis.axisLine.lineStyle.color).toBe(tokens.splitLine)
+    expect(option.xAxis.axisLine.lineStyle.color).toBe(tokens.gridline)
   })
 
   it('puts dates on a time axis without being told to', () => {
@@ -447,15 +567,10 @@ describe('bar chart option series', () => {
     expect(option.series[1].itemStyle.color).toBe('#000033')
   })
 
-  it('emphasises a whole series at a time, and only gently', () => {
+  it('never emphasises a series, so nothing else fades', () => {
     const option = build()
-    expect(option.series[0].emphasis).toEqual({
-      focus: 'series',
-      blurScope: 'coordinateSystem',
-    })
-    // Legend hover is the only thing that blurs, so it has to stay readable.
-    expect(option.series[0].blur.itemStyle.opacity).toBeGreaterThan(0.5)
-    expect(option.series[0].blur.itemStyle.opacity).toBeLessThan(1)
+    expect(option.series[0].emphasis).toEqual({ disabled: true })
+    expect(option.series[0].blur).toBeUndefined()
   })
 
   it('hides data labels unless asked, and formats them compactly', () => {
@@ -465,6 +580,15 @@ describe('bar chart option series', () => {
     expect(option.series[0].label.position).toBe('top')
     expect(option.series[0].label.formatter({ value: ['Jan', 2500] })).toBe(
       '2.5K',
+    )
+  })
+
+  it('prints data labels in the series format', () => {
+    const option = build({
+      series: [{ name: 'sales', showDataLabels: true, format: (v) => `$${v}` }],
+    })
+    expect(option.series[0].label.formatter({ value: ['Jan', 2500] })).toBe(
+      '$2500',
     )
   })
 
@@ -518,6 +642,7 @@ describe('bar chart option series', () => {
 })
 
 describe('bar chart option second value axis', () => {
+  // What `y: 'sales', y2: 'refunds'` normalizes to.
   const dualSeries = [
     { name: 'sales' },
     { name: 'refunds', axis: 'y2' as const },
@@ -531,7 +656,7 @@ describe('bar chart option second value axis', () => {
     expect(option.series.map((s: any) => s.yAxisIndex)).toEqual([0, 1])
   })
 
-  it('ignores the second axis on horizontal bars, where the value axis is x', () => {
+  it('ignores y2 on horizontal bars, where the value axis is x', () => {
     const option = build({
       horizontal: true,
       y2Axis: { title: 'rate' },

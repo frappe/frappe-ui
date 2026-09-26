@@ -145,6 +145,26 @@ describe('FrappeUI plugin', () => {
     expect(proxy.$resources.todos).toBeDefined()
   })
 
+  // DAT-Q9: the object form was never read — the plugin only checked whether
+  // the value was set. The type is a boolean now; an app still passing an
+  // object keeps the resources API, so upgrading cannot break it silently.
+  it('still installs the resources plugin for a legacy object value', () => {
+    const app = mountWith(
+      { resources: { todos: {} } } as unknown as { resources: boolean },
+      OptionsApiConsumer,
+    )
+
+    const proxy = (app._instance as any).proxy
+    expect(typeof proxy.$getResource).toBe('function')
+  })
+
+  it('leaves the resources API off for resources: false', () => {
+    const app = mountWith({ resources: false }, Blank)
+    const proxy = (app._instance as any).proxy
+
+    expect(() => proxy.$resources).toThrow(/this\.\$resources is not set/)
+  })
+
   it('warns and points at setConfig when passed the removed config option', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
 

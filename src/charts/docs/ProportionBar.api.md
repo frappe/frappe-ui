@@ -31,7 +31,7 @@
   },
   {
     name: 'error',
-    description: 'Puts the chart in its error state and prints this message under it. A\nchart that fails to draw sets its own; this is for a failed request.',
+    description: 'Puts the chart in its error state and prints this message under it. Data\nthe chart cannot draw shows the empty state, not this one.',
     required: false,
     type: 'string | null'
   },
@@ -108,9 +108,14 @@
     type: 'any'
   },
   {
+    name: 'title-suffix',
+    description: 'A mark right after the title, on the same line. The title truncates\naround it and it keeps its width. It renders in the title\'s font size, so\ncontent sized in `em` is smaller on a NumberCard than on a chart.',
+    type: 'any'
+  },
+  {
     name: 'tooltip',
-    description: 'Replaces the tooltip body. `items` holds the hovered segment alone.',
-    type: '{ items: ChartTooltipItem[]; }'
+    description: 'Replaces the tooltip body. `items` holds the hovered segment alone. A\nnamed segment carries one row, and "Others" every row it collapsed.',
+    type: 'ChartTooltipSlotProps'
   }
 ]
 

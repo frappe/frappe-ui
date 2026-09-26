@@ -19,7 +19,7 @@ function createTestRouter() {
 describe('<Sidebar /> composition', () => {
   it('renders whatever the default slot provides (bare frame)', () => {
     cy.mount(Sidebar, {
-      props: { disableCollapse: true },
+      props: { collapsible: false },
       slots: {
         default: () => [
           h(SidebarLabel, () => 'Spaces'),
@@ -31,6 +31,32 @@ describe('<Sidebar /> composition', () => {
     cy.get('[data-slot=sidebar]').should('exist')
     cy.get('[data-slot=sidebar-label]').should('contain.text', 'Spaces')
     cy.get('[data-slot=sidebar-item]').should('contain.text', 'Design')
+  })
+
+  it('is the one nav landmark, named `Main` by default', () => {
+    cy.mount(Sidebar, {
+      props: { collapsible: false },
+      slots: {
+        default: () => [
+          h(SidebarSection, { label: 'Spaces' }, () =>
+            h(SidebarItem, { label: 'Design' }),
+          ),
+          h(SidebarSection, { label: 'More', collapsible: true }, () =>
+            h(SidebarItem, { label: 'Junk' }),
+          ),
+        ],
+      },
+      global: { plugins: [createTestRouter()] },
+    })
+    cy.get('nav').should('have.length', 1)
+    cy.get('nav[data-slot=sidebar]').should('have.attr', 'aria-label', 'Main')
+
+    cy.mount(Sidebar, { props: { ariaLabel: 'Workspace' } })
+    cy.get('nav[data-slot=sidebar]').should(
+      'have.attr',
+      'aria-label',
+      'Workspace',
+    )
   })
 
   it('v-model round-trip: `collapsed` drives data-state, and the toggle writes it back', () => {
@@ -107,6 +133,30 @@ describe('<SidebarSection />', () => {
     cy.get("[aria-label='Junk']").should('be.visible')
   })
 
+  it('names its body group from the label, collapsible or not', () => {
+    for (const collapsible of [true, false]) {
+      cy.mount(SidebarSection, {
+        props: { label: 'More', collapsible },
+        slots: { default: () => h(SidebarItem, { label: 'Junk' }) },
+      })
+      cy.get('[data-slot=sidebar-section] [role=group]')
+        .should('have.attr', 'aria-labelledby')
+        .then((id) => {
+          // The accessible name resolves to the <h3>'s text.
+          cy.get(`h3#${id}`).should('contain.text', 'More')
+        })
+    }
+
+    // No label, no name to give: the group stays anonymous.
+    cy.mount(SidebarSection, {
+      slots: { default: () => h(SidebarItem, { label: 'Junk' }) },
+    })
+    cy.get('[data-slot=sidebar-section] [role=group]').should(
+      'not.have.attr',
+      'aria-labelledby',
+    )
+  })
+
   it('keyboard: the collapsible trigger is a focusable, labeled toggle button', () => {
     cy.mount(SidebarSection, {
       props: { label: 'More', collapsible: true },
@@ -121,12 +171,31 @@ describe('<SidebarSection />', () => {
 })
 
 describe('<SidebarItem />', () => {
-  it('renders a router link when `to` is set, a button otherwise', () => {
+  it('renders links for `route` and `href`, and a button otherwise', () => {
     cy.mount(SidebarItem, {
-      props: { label: 'Deals', to: '/deals' },
+      props: { label: 'Deals', route: '/deals' },
       global: { plugins: [createTestRouter()] },
     })
     cy.get('a[href="/deals"]').should('exist')
+
+    cy.mount(SidebarItem, {
+      props: { label: 'Docs', href: 'https://frappe.io/docs' },
+    })
+    cy.get('[data-slot=sidebar-item] > a').should(
+      'have.attr',
+      'href',
+      'https://frappe.io/docs',
+    )
+
+    cy.mount(SidebarItem, {
+      props: {
+        label: 'Route wins',
+        route: '/deals',
+        href: 'https://frappe.io/docs',
+      },
+      global: { plugins: [createTestRouter()] },
+    })
+    cy.get('[data-slot=sidebar-item] > a').should('have.attr', 'href', '/deals')
 
     const onClick = cy.stub().as('click')
     cy.mount(SidebarItem, { props: { label: 'Action', onClick } })
@@ -137,6 +206,28 @@ describe('<SidebarItem />', () => {
   it('drives data-state from `active`', () => {
     cy.mount(SidebarItem, { props: { label: 'Design', active: true } })
     cy.get('[data-slot=sidebar-item][data-state=active]').should('exist')
+  })
+
+  it('renders the `icon` prop through the shared Icon: lucide, emoji, component', () => {
+    cy.mount(SidebarItem, {
+      props: { label: 'Design', icon: 'lucide-palette' },
+    })
+    cy.get('[data-slot=sidebar-item] span.lucide-palette')
+      .should('have.class', 'size-4')
+      .and('have.class', 'text-ink-gray-6')
+
+    cy.mount(SidebarItem, { props: { label: 'Launch', icon: '🚀' } })
+    cy.get('[data-slot=sidebar-item] span.size-4').should('contain.text', '🚀')
+
+    const StarIcon = { render: () => h('svg', { 'data-test': 'star-icon' }) }
+    cy.mount(SidebarItem, { props: { label: 'Starred', icon: StarIcon } })
+    cy.get('[data-test=star-icon]')
+      .should('have.class', 'size-4')
+      .and('have.class', 'text-ink-gray-6')
+
+    // A bare name is not a supported icon string: nothing renders.
+    cy.mount(SidebarItem, { props: { label: 'Home', icon: 'home' } })
+    cy.get('[data-slot=sidebar-item]').should('not.contain.text', 'home')
   })
 
   it('renders #prefix, default, and #suffix slots', () => {
@@ -158,7 +249,7 @@ describe('<SidebarItem />', () => {
   it('keeps a #suffix options button a sibling of the link (not nested inside it)', () => {
     const onOptions = cy.stub().as('options')
     cy.mount(SidebarItem, {
-      props: { label: 'Design', to: '/design' },
+      props: { label: 'Design', route: '/design' },
       slots: {
         suffix: () =>
           h('button', { 'data-test': 'options', onClick: onOptions }, '...'),
@@ -171,8 +262,93 @@ describe('<SidebarItem />', () => {
     cy.get('@options').should('have.been.calledOnce')
   })
 
+  it('sends class and style to the row, every other attr to the control', () => {
+    cy.mount(SidebarItem, {
+      props: { label: 'Docs', href: 'https://frappe.io/docs' },
+      attrs: {
+        class: 'my-row',
+        style: 'opacity: 0.5',
+        'data-testid': 'docs-link',
+        target: '_blank',
+        rel: 'noopener',
+      },
+    })
+    cy.get('[data-slot=sidebar-item]')
+      .should('have.class', 'my-row')
+      // The component's own classes survive the merge.
+      .and('have.class', 'rounded-4')
+    // `have.css` and `not.have.attr` swap the subject for the value they read,
+    // so each one ends its chain.
+    cy.get('[data-slot=sidebar-item]').should('have.css', 'opacity', '0.5')
+    cy.get('[data-slot=sidebar-item]').should('not.have.attr', 'target')
+    cy.get('[data-slot=sidebar-item]').should('not.have.attr', 'data-testid')
+    cy.get('[data-slot=sidebar-item] > a')
+      .should('have.attr', 'data-testid', 'docs-link')
+      .and('have.attr', 'target', '_blank')
+      .and('have.attr', 'rel', 'noopener')
+      .and('have.attr', 'href', 'https://frappe.io/docs')
+
+    cy.mount(SidebarItem, {
+      props: { label: 'Action' },
+      attrs: {
+        class: 'my-row',
+        style: 'opacity: 0.5',
+        'data-testid': 'action-button',
+        title: 'Run it',
+      },
+    })
+    cy.get('[data-slot=sidebar-item]').should('have.class', 'my-row')
+    cy.get('[data-slot=sidebar-item]').should('have.css', 'opacity', '0.5')
+    cy.get('[data-slot=sidebar-item]').should('not.have.attr', 'data-testid')
+    cy.get('[data-slot=sidebar-item] > button')
+      .should('have.attr', 'data-testid', 'action-button')
+      .and('have.attr', 'title', 'Run it')
+  })
+
+  it("a caller's aria-label replaces the one derived from the label", () => {
+    cy.mount(SidebarItem, {
+      props: { label: 'Junk', route: '/junk' },
+      attrs: { 'aria-label': 'Junk, 4 unread' },
+      global: { plugins: [createTestRouter()] },
+    })
+    cy.get('[data-slot=sidebar-item] > a').should(
+      'have.attr',
+      'aria-label',
+      'Junk, 4 unread',
+    )
+
+    cy.mount(SidebarItem, {
+      props: { label: 'Junk' },
+      attrs: { 'aria-label': 'Junk, 4 unread' },
+    })
+    cy.get('[data-slot=sidebar-item] > button').should(
+      'have.attr',
+      'aria-label',
+      'Junk, 4 unread',
+    )
+  })
+
+  it('keeps listeners on the row, so a #suffix drop target still fires', () => {
+    // Mail and Drive make a whole folder row a drop target. The suffix holds
+    // the unread count and the options menu, so the listener has to sit on the
+    // row and not on the link inside it.
+    const onDragover = cy.stub().as('dragover')
+    const onMouseenter = cy.stub().as('mouseenter')
+    cy.mount(SidebarItem, {
+      props: { label: 'Inbox', route: '/inbox' },
+      attrs: { onDragover, onMouseenter },
+      slots: { suffix: () => h('span', { 'data-test': 'count' }, '4') },
+      global: { plugins: [createTestRouter()] },
+    })
+    cy.get('[data-slot=sidebar-item] > a').should('not.have.attr', 'ondragover')
+    cy.get('[data-test=count]').trigger('dragover')
+    cy.get('@dragover').should('have.been.calledOnce')
+    cy.get('[data-slot=sidebar-item]').trigger('mouseenter')
+    cy.get('@mouseenter').should('have.been.calledOnce')
+  })
+
   it('is keyboard reachable and shows a visible focus-visible outline', () => {
-    cy.mount(SidebarItem, { props: { label: 'Design', to: '/design' } })
+    cy.mount(SidebarItem, { props: { label: 'Design', route: '/design' } })
     cy.get('a')
       .focus()
       .should('have.focus')
@@ -197,6 +373,48 @@ describe('<SidebarHeader />', () => {
     cy.contains('crm.frappe.io').should('exist')
     cy.get('[aria-haspopup=menu]').click()
     cy.get('[role=menuitem]').should('have.length', menuItems.length)
+  })
+
+  it('is a dropdown trigger with a chevron only when there are menuItems', () => {
+    cy.mount(SidebarHeader, { props: { title: 'Frappe CRM', menuItems } })
+    cy.get('[data-slot=sidebar-header] button').should('exist')
+    cy.get('[data-slot=sidebar-header] .lucide-chevron-down').should('exist')
+
+    // Nothing to open: no button, no chevron, no tab stop.
+    cy.mount(SidebarHeader, { props: { title: 'Frappe CRM' } })
+    cy.get('[data-slot=sidebar-header]').should('contain.text', 'Frappe CRM')
+    cy.get('[data-slot=sidebar-header] button').should('not.exist')
+    cy.get('[data-slot=sidebar-header] .lucide-chevron-down').should(
+      'not.exist',
+    )
+
+    // An empty array is the same as no menu at all.
+    cy.mount(SidebarHeader, { props: { title: 'Frappe CRM', menuItems: [] } })
+    cy.get('[data-slot=sidebar-header] button').should('not.exist')
+  })
+
+  it('keeps the logo and title in the same place with and without menuItems', () => {
+    cy.viewport(1280, 720)
+    // `.text-base-medium` is the title line, `.size-7` the logo box.
+    const boxes = (selector: string) =>
+      cy
+        .get(`[data-slot=sidebar-header] ${selector}`)
+        .then(($el) => $el[0].getBoundingClientRect())
+
+    cy.mount(SidebarHeader, { props: { title: 'Frappe CRM', menuItems } })
+    boxes('.text-base-medium').then((title) => {
+      boxes('.size-7').then((logo) => {
+        cy.mount(SidebarHeader, { props: { title: 'Frappe CRM' } })
+        boxes('.text-base-medium').then((plainTitle) => {
+          expect(plainTitle.x).to.eq(title.x)
+          expect(plainTitle.y).to.eq(title.y)
+        })
+        boxes('.size-7').then((plainLogo) => {
+          expect(plainLogo.x).to.eq(logo.x)
+          expect(plainLogo.y).to.eq(logo.y)
+        })
+      })
+    })
   })
 
   it('renders the #prefix slot filling the default logo box', () => {
@@ -356,10 +574,14 @@ describe('<SidebarCollapseToggle />', () => {
     const collapsed = ref(false)
     cy.mount(
       () =>
-        h(Sidebar, {
-          collapsed: collapsed.value,
-          'onUpdate:collapsed': (v: boolean | null) => (collapsed.value = v),
-        }, () => h(SidebarCollapseToggle)),
+        h(
+          Sidebar,
+          {
+            collapsed: collapsed.value,
+            'onUpdate:collapsed': (v: boolean | null) => (collapsed.value = v),
+          },
+          () => h(SidebarCollapseToggle),
+        ),
       { global: { plugins: [createTestRouter()] } },
     )
     cy.contains('Collapse').should('exist')

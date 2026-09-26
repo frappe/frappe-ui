@@ -8,6 +8,7 @@ import {
 import {
   List,
   ListCell,
+  ListGroup,
   ListHeader,
   ListHeaderCell,
   ListHeaderCellSort,
@@ -66,13 +67,14 @@ describe('List (feed mode)', () => {
       })
   })
 
-  it('renders rows as links with `to`, buttons with a click listener, divs otherwise', () => {
+  it('renders rows with `route` or `href` as links, click rows as buttons, and static rows as divs', () => {
     const clicked = cy.spy().as('rowClick')
     cy.mount(
       {
         render: () =>
           h(List, () => [
-            feedRow('1', { to: { name: 'Item', params: { id: '1' } } }),
+            feedRow('1', { route: { name: 'Item', params: { id: '1' } } }),
+            feedRow('external', { href: 'https://frappe.io' }),
             feedRow('2', { onClick: clicked }),
             feedRow('3'),
           ]),
@@ -80,11 +82,37 @@ describe('List (feed mode)', () => {
       { global: { plugins: [makeRouter()] } },
     )
     cy.get('a[data-slot=list-row]')
+      .eq(0)
       .should('have.attr', 'href', '/item/1')
-      .and('have.attr', 'data-interactive')
+      .and('have.attr', 'data-interactive', 'true')
+      .and('have.attr', 'data-state', 'inactive')
+    cy.get('a[data-slot=list-row]')
+      .eq(1)
+      .should('have.attr', 'href', 'https://frappe.io')
     cy.get('button[data-slot=list-row]').click()
     cy.get('@rowClick').should('have.been.calledOnce')
     cy.get('div[data-slot=list-row]').should('exist')
+  })
+
+  it('renders ListGroup label content through the #label slot', () => {
+    cy.mount({
+      render: () =>
+        h(List, () =>
+          h(
+            ListGroup,
+            { label: 'Fallback' },
+            {
+              label: () => 'Custom label',
+              default: () => feedRow('1'),
+            },
+          ),
+        ),
+    })
+
+    cy.get('[data-slot=list-group]')
+      .should('have.attr', 'role', 'rowgroup')
+      .and('have.attr', 'aria-label', 'Fallback')
+    cy.get('[data-slot=list-group-header]').should('have.text', 'Custom label')
   })
 
   it('navigates on row click', () => {
@@ -94,7 +122,7 @@ describe('List (feed mode)', () => {
         render: () => [
           h(RouterView),
           h(List, () => [
-            feedRow('1', { to: { name: 'Item', params: { id: '1' } } }),
+            feedRow('1', { route: { name: 'Item', params: { id: '1' } } }),
           ]),
         ],
       },
@@ -107,7 +135,6 @@ describe('List (feed mode)', () => {
       })
   })
 })
-
 describe('List (selection)', () => {
   function mountSelectable(rowProps: Record<string, unknown> = {}) {
     const selection = ref<string[]>([])
@@ -139,7 +166,8 @@ describe('List (selection)', () => {
     cy.get('@rowClick').should('not.have.been.called')
     cy.get('[data-slot=list-row]')
       .first()
-      .should('have.attr', 'data-state', 'selected')
+      .should('have.attr', 'data-selected', 'true')
+      .and('have.attr', 'data-state', 'inactive')
     cy.get('[data-slot=list-row]')
       .first()
       .click()
@@ -267,6 +295,28 @@ describe('List (select all)', () => {
       })
   })
 
+  it('follows a selection array the consumer mutates in place', () => {
+    // Membership is read off a Set derived from `selection`, so the derivation
+    // has to track the array's contents, not just the array identity.
+    const { selection } = mountSelectAll()
+    cy.get('[data-slot=list-header-checkbox]').should(
+      'have.attr',
+      'aria-checked',
+      'false',
+    )
+    cy.then(() => {
+      selection.value.push('1', '2', '3')
+    })
+    cy.get('[data-slot=list-header-checkbox]').should(
+      'have.attr',
+      'aria-checked',
+      'true',
+    )
+    cy.get('[data-slot=list-row]')
+      .first()
+      .should('have.attr', 'data-selected', 'true')
+  })
+
   it('clicking mixed promotes to all selected', () => {
     const { selection } = mountSelectAll(['2'])
     cy.get('[data-slot=list-header-checkbox]')
@@ -363,6 +413,215 @@ describe('List (select all)', () => {
   })
 })
 
+describe('List (select all, changing items)', () => {
+  // The select-all universe is derived from the same row identities the rows
+  // render with, so it has to follow every way `items` can change: a push or
+  // splice into the array already passed, an entry swapped in place, an id
+  // mutated on an item, a different rowKey, or a wholly new array. Each mount
+  // here keeps one `ref` array, so the prop the component sees never changes
+  // identity.
+  type LiveItem = { id: string; code?: string }
+
+  function mountLive(options: {
+    items: LiveItem[]
+    selection?: string[]
+    rowKey?: string
+  }) {
+    const selection = ref<string[]>(options.selection ?? [])
+    const items = ref<LiveItem[]>(options.items)
+    const rowKey = ref<string | undefined>(options.rowKey)
+    cy.mount({
+      render: () =>
+        h(
+          List,
+          {
+            selectable: true,
+            selection: selection.value,
+            'onUpdate:selection': (next: string[]) => (selection.value = next),
+          },
+          () => [
+            h(ListHeader, () => h(ListHeaderCell, () => 'Name')),
+            h(
+              ListRows,
+              { items: items.value, rowKey: rowKey.value },
+              {
+                default: ({ value }: { value: string }) =>
+                  h(ListRow, { value }, () => h(ListCell, () => value)),
+              },
+            ),
+          ],
+        ),
+    })
+    return { selection, items, rowKey }
+  }
+
+  function header() {
+    return cy.get('[data-slot=list-header-checkbox]')
+  }
+
+  it('covers a row pushed into the same array', () => {
+    const { selection, items } = mountLive({
+      items: [{ id: '1' }, { id: '2' }],
+    })
+    header()
+      .click()
+      .then(() => {
+        expect([...selection.value].sort()).to.deep.equal(['1', '2'])
+      })
+    header().should('have.attr', 'aria-checked', 'true')
+
+    cy.then(() => items.value.push({ id: '3' }))
+    // The pushed row is unselected, so "all" has to fall back to "some".
+    header().should('have.attr', 'aria-checked', 'mixed')
+    header()
+      .click()
+      .then(() => {
+        expect([...selection.value].sort()).to.deep.equal(['1', '2', '3'])
+      })
+    header().should('have.attr', 'aria-checked', 'true')
+  })
+
+  it('drops a spliced-out row from the universe, keeping its selected value', () => {
+    const { selection, items } = mountLive({
+      items: [{ id: '1' }, { id: '2' }, { id: '3' }],
+      selection: ['3'],
+    })
+    header().should('have.attr', 'aria-checked', 'mixed')
+
+    cy.then(() => items.value.splice(2, 1))
+    // Nothing that is still listed is selected.
+    header().should('have.attr', 'aria-checked', 'false')
+    // Selection is the consumer's — the removed row's value stays in it.
+    cy.then(() => expect(selection.value).to.deep.equal(['3']))
+
+    header()
+      .click()
+      .then(() => {
+        expect(selection.value).to.deep.equal(['3', '1', '2'])
+      })
+    header().should('have.attr', 'aria-checked', 'true')
+  })
+
+  it('follows an entry replaced in place', () => {
+    const { selection, items } = mountLive({
+      items: [{ id: '1' }, { id: '2' }, { id: '3' }],
+    })
+    cy.then(() => items.value.splice(1, 1, { id: '9' }))
+    header()
+      .click()
+      .then(() => {
+        expect([...selection.value].sort()).to.deep.equal(['1', '3', '9'])
+      })
+  })
+
+  it('follows a mutated identity field', () => {
+    const { selection, items } = mountLive({
+      items: [{ id: '1' }, { id: '2' }],
+      selection: ['1'],
+    })
+    header().should('have.attr', 'aria-checked', 'mixed')
+
+    cy.then(() => (items.value[0].id = '7'))
+    // '1' no longer names a listed row.
+    header().should('have.attr', 'aria-checked', 'false')
+    header()
+      .click()
+      .then(() => {
+        expect([...selection.value].sort()).to.deep.equal(['1', '2', '7'])
+      })
+  })
+
+  it('follows a rowKey change', () => {
+    const { selection, rowKey } = mountLive({
+      items: [
+        { id: '1', code: 'a' },
+        { id: '2', code: 'b' },
+      ],
+      selection: ['a'],
+    })
+    // Keyed by id, 'a' is not a row value at all.
+    header().should('have.attr', 'aria-checked', 'false')
+
+    cy.then(() => (rowKey.value = 'code'))
+    header().should('have.attr', 'aria-checked', 'mixed')
+    header()
+      .click()
+      .then(() => {
+        expect([...selection.value].sort()).to.deep.equal(['a', 'b'])
+      })
+  })
+
+  it('follows a wholly replaced array', () => {
+    const { selection, items } = mountLive({
+      items: [{ id: '1' }, { id: '2' }],
+    })
+    cy.then(() => (items.value = [{ id: '4' }, { id: '5' }]))
+    header()
+      .click()
+      .then(() => {
+        expect([...selection.value].sort()).to.deep.equal(['4', '5'])
+      })
+  })
+
+  it('keeps the whole item list in the universe while virtualization hides rows', () => {
+    const selection = ref<string[]>([])
+    const items = ref(
+      Array.from({ length: 100 }, (_, i) => ({ id: String(i + 1) })),
+    )
+    cy.mount({
+      render: () =>
+        h(
+          'div',
+          {
+            style: 'height: 200px; overflow-y: auto',
+            'data-testid': 'virtual-viewport',
+          },
+          h(
+            List,
+            {
+              selectable: true,
+              rowHeight: 40,
+              columns: ['minmax(0,1fr)'],
+              selection: selection.value,
+              'onUpdate:selection': (next: string[]) =>
+                (selection.value = next),
+            },
+            () => [
+              h(ListHeader, () => h(ListHeaderCell, () => 'Name')),
+              h(
+                ListRows,
+                { items: items.value, virtual: true },
+                {
+                  default: ({ value }: { value: string }) =>
+                    h(ListRow, { value }, () => h(ListCell, () => value)),
+                },
+              ),
+            ],
+          ),
+        ),
+    })
+
+    cy.get('[data-slot=list-row]').should('have.length.lessThan', 100)
+    header()
+      .click()
+      .then(() => {
+        expect(selection.value).to.have.length(100)
+      })
+    header().should('have.attr', 'aria-checked', 'true')
+
+    // A row appended while it is out of the rendered window still joins the
+    // universe, so select-all reaches it.
+    cy.then(() => items.value.push({ id: '101' }))
+    header().should('have.attr', 'aria-checked', 'mixed')
+    header()
+      .click()
+      .then(() => {
+        expect(selection.value).to.have.length(101)
+        expect(selection.value).to.include('101')
+      })
+  })
+})
+
 describe('List (active row)', () => {
   // Four rows so the active row (row 2) has a divider on both sides plus an
   // untouched row 4 to prove only the hugging pair is hidden.
@@ -391,7 +650,7 @@ describe('List (active row)', () => {
     mountActive()
     // Binding v-model:active opts every row into interactivity → buttons.
     cy.get('button[data-slot=list-row]').should('have.length', 4)
-    cy.get('[data-slot=list-row][data-active]')
+    cy.get('[data-slot=list-row][data-state=active]')
       .should('have.length', 1)
       .and('contain.text', 'Content 2')
       .and('have.attr', 'aria-current', 'true')
@@ -408,8 +667,12 @@ describe('List (active row)', () => {
       })
     // Unlike selection, activation is additive — the app’s handler still runs.
     cy.get('@rowClick').should('have.been.calledOnce')
-    cy.get('[data-slot=list-row]').eq(0).should('have.attr', 'data-active')
-    cy.get('[data-slot=list-row]').eq(1).should('not.have.attr', 'data-active')
+    cy.get('[data-slot=list-row]')
+      .eq(0)
+      .should('have.attr', 'data-state', 'active')
+    cy.get('[data-slot=list-row]')
+      .eq(1)
+      .should('have.attr', 'data-state', 'inactive')
   })
 
   it('hides the dividers directly above and below the active row', () => {
@@ -422,9 +685,35 @@ describe('List (active row)', () => {
     cy.get('[data-slot=list-divider]').eq(3).should('have.css', 'opacity', '1')
   })
 
+  it('exposes active and selected as independent row states', () => {
+    cy.mount({
+      render: () =>
+        h(
+          List,
+          {
+            selectable: true,
+            selection: ['2'],
+            active: '2',
+            'onUpdate:active': () => undefined,
+          },
+          () => [feedRow('1'), feedRow('2')],
+        ),
+    })
+
+    cy.get('[data-slot=list-row]')
+      .eq(0)
+      .should('have.attr', 'data-state', 'inactive')
+      .and('not.have.attr', 'data-selected')
+    cy.get('[data-slot=list-row]')
+      .eq(1)
+      .should('have.attr', 'data-state', 'active')
+      .and('have.attr', 'data-selected', 'true')
+      .and('have.attr', 'data-interactive', 'true')
+  })
+
   it('stays inert when v-model:active is not bound', () => {
     cy.mount({ render: () => h(List, () => [feedRow('1'), feedRow('2')]) })
-    cy.get('[data-slot=list-row][data-active]').should('not.exist')
+    cy.get('[data-slot=list-row][data-state=active]').should('not.exist')
     cy.get('button[data-slot=list-row]').should('not.exist')
   })
 })
@@ -457,7 +746,11 @@ describe('List (column mode)', () => {
               {
                 default: () => 'User',
                 // Adornments are app-supplied; expose the scoped direction for assertions.
-                suffix: ({ direction }: { direction: string | null }) =>
+                'sort-indicator': ({
+                  direction,
+                }: {
+                  direction: string | null
+                }) =>
                   h(
                     'span',
                     { 'data-testid': 'sort-icon' },
@@ -561,7 +854,8 @@ describe('List (column mode)', () => {
               },
               {
                 default: () => 'Size',
-                suffix: () => h('span', { 'data-testid': 'glyph' }, 'icon'),
+                'sort-indicator': () =>
+                  h('span', { 'data-testid': 'glyph' }, 'icon'),
               },
             ),
             h(ListHeaderCell, () => ''),
@@ -590,7 +884,468 @@ describe('List (column mode)', () => {
   })
 })
 
+describe('List (styling hooks)', () => {
+  // The v1 CSS-var contract (ADR-0017): --list-gap and --list-row-padding-x
+  // are the public hooks. Defaults live in var() fallbacks at the use sites,
+  // so a consumer value — a class on the List or a declaration inherited from
+  // any ancestor — always beats the built-in defaults. Column templates are
+  // deliberately not a hook: they come from the `columns` prop alone, and each
+  // list root resolves its own (see the responsive-columns block below).
+
+  it('keeps the columns prop the only source of the template', () => {
+    cy.mount({
+      render: () =>
+        h(
+          List,
+          {
+            columns: ['50px', '50px', '50px'],
+            // The var is internal now: setting it by hand does nothing, and
+            // there is no list-cols-[…] utility that compiles to it.
+            class: '[--list-columns:60px_90px_120px]',
+          },
+          () => [feedRow('1')],
+        ),
+    })
+    cy.get('[data-slot=list-row]').should(($row) => {
+      expect(getComputedStyle($row[0]).gridTemplateColumns).to.equal(
+        '50px 50px 50px',
+      )
+    })
+  })
+
+  it('applies hooks inherited from an ancestor, over props and defaults', () => {
+    cy.mount({
+      render: () =>
+        h(
+          'div',
+          {
+            style:
+              '--list-columns: 70px 110px 130px; --list-gap: 20px; --list-row-padding-x: 24px',
+          },
+          // --list-columns is in there on purpose: it is not a hook, so the
+          // list below keeps its own 50px tracks while gap and inset cross.
+          [
+            h(List, { columns: ['50px', '50px', '50px'] }, () => [
+              h(ListHeader, () => [
+                h(ListHeaderCell, () => 'A'),
+                h(ListHeaderCell, () => 'B'),
+                h(ListHeaderCell, () => 'C'),
+              ]),
+              feedRow('1', { onClick: () => {} }),
+              feedRow('2'),
+            ]),
+          ],
+        ),
+    })
+    cy.get('[data-slot=list-row]').should(($row) => {
+      const style = getComputedStyle($row[0])
+      expect(style.gridTemplateColumns).to.equal('50px 50px 50px')
+      expect(style.columnGap).to.equal('20px')
+    })
+    // One --list-row-padding-x value lands everywhere — interactive row,
+    // static row, and header — so none of them can drift.
+    cy.get('button[data-slot=list-row]').should(
+      'have.css',
+      'padding-inline-start',
+      '24px',
+    )
+    cy.get('div[data-slot=list-row]').should(
+      'have.css',
+      'padding-inline-start',
+      '24px',
+    )
+    cy.get('[data-slot=list-header]').should(
+      'have.css',
+      'padding-inline-start',
+      '24px',
+    )
+  })
+
+  it('defaults the row inset to 12px and the header to flush until the hook is set', () => {
+    // The documented asymmetric default: interactive rows carry a 0.75rem
+    // hover-surface inset; static rows and the header (which can't know
+    // whether its rows are interactive) stay flush at 0 — the consumer aligns
+    // everything by declaring the hook once.
+    cy.mount({
+      render: () =>
+        h(List, { columns: ['minmax(0,1fr)', '10rem', '4rem'] }, () => [
+          h(ListHeader, () => [
+            h(ListHeaderCell, () => 'A'),
+            h(ListHeaderCell, () => 'B'),
+            h(ListHeaderCell, () => 'C'),
+          ]),
+          feedRow('1', { onClick: () => {} }),
+          feedRow('2'),
+        ]),
+    })
+    // Also pins the preflight escape: the interactive row is a <button>, and
+    // preflight's `button { padding: 0 }` must not eat the inset (the padding
+    // rule deliberately keeps attribute specificity instead of :where()).
+    cy.get('button[data-slot=list-row]').should(
+      'have.css',
+      'padding-inline-start',
+      '12px',
+    )
+    cy.get('div[data-slot=list-row]').should(
+      'have.css',
+      'padding-inline-start',
+      '0px',
+    )
+    cy.get('[data-slot=list-header]').should(
+      'have.css',
+      'padding-inline-start',
+      '0px',
+    )
+  })
+
+  it('drives the preset sugar utilities through the same vars', () => {
+    cy.mount({
+      render: () =>
+        h(
+          List,
+          {
+            columns: ['minmax(0,1fr)', '10rem'],
+            // list-gap-4 → --list-gap: 1rem; list-row-px-3 → 0.75rem.
+            class: 'list-gap-4 list-row-px-3',
+          },
+          () => [
+            h(ListHeader, () => [
+              h(ListHeaderCell, () => 'A'),
+              h(ListHeaderCell, () => 'B'),
+            ]),
+            feedRow('1', { onClick: () => {} }),
+          ],
+        ),
+    })
+    cy.get('[data-slot=list-row]')
+      .should('have.css', 'column-gap', '16px')
+      .and('have.css', 'padding-inline-start', '12px')
+    cy.get('[data-slot=list-header]').should(
+      'have.css',
+      'padding-inline-start',
+      '12px',
+    )
+  })
+
+  it('applies rowHeight to every row', () => {
+    cy.mount({
+      render: () => h(List, { rowHeight: 48 }, () => [feedRow('1')]),
+    })
+    cy.get('[data-slot=list-row]').should('have.css', 'height', '48px')
+  })
+
+  it('contains prop carriers to their own list; public hooks cross into nested lists', () => {
+    // The outer list's columns/selectable/rowHeight ride internal --_list-*
+    // carriers, which reset at every list root — a nested list that omits
+    // those props falls back to its own defaults instead of inheriting the
+    // outer geometry. The two public hooks (--list-gap here) keep crossing by
+    // design; column templates deliberately do not.
+    cy.mount({
+      render: () =>
+        h('div', { style: '--list-gap: 20px' }, [
+          h(
+            List,
+            {
+              columns: ['50px', '50px', '50px'],
+              selectable: true,
+              rowHeight: 64,
+            },
+            () => [
+              feedRow('1'),
+              h(ListRow, { value: 'host' }, () => [
+                h(ListCell, () => h(List, () => [feedRow('inner')])),
+              ]),
+            ],
+          ),
+        ]),
+    })
+    cy.get('[data-slot=list] [data-slot=list] [data-slot=list-row]').should(
+      ($row) => {
+        const style = getComputedStyle($row[0])
+        // Feed template, not the outer 50px tracks.
+        expect(style.gridTemplateColumns).to.not.equal('50px 50px 50px')
+        // No leaked checkbox column (32px) and no hover inset inherited from
+        // the outer selectable list or its interactive host row.
+        expect(style.paddingInlineStart).to.equal('0px')
+        expect(style.paddingInlineEnd).to.equal('0px')
+        // Not the outer fixed rowHeight.
+        expect(style.height).to.not.equal('64px')
+        // The public hook crossed both list boundaries.
+        expect(style.columnGap).to.equal('20px')
+      },
+    )
+  })
+})
+
+describe('List (responsive columns)', () => {
+  // `columns` as an object is one complete template per breakpoint, resolved
+  // in CSS against the app's own Tailwind screens (sm 640 / md 768 / lg 1024 /
+  // xl 1280 in this repo's preset). A supplied tier applies from its width
+  // upward until the next supplied one; nothing is merged track by track.
+
+  const responsive = {
+    base: ['minmax(0, 1fr)', '80px', '64px'],
+    md: ['minmax(0, 1fr)', '140px', '100px'],
+    lg: ['minmax(0, 2fr)', '180px', '120px'],
+  }
+
+  function tracksOf(selector: string) {
+    return cy
+      .get(selector)
+      .then(($el) => getComputedStyle($el[0]).gridTemplateColumns)
+  }
+
+  // The 1fr tracks resolve to pixels, so pin the fixed tracks instead — they
+  // are what identifies the tier.
+  function fixedTracks(template: string) {
+    return template.split(' ').slice(1).join(' ')
+  }
+
+  function mountResponsive(columns: unknown = responsive) {
+    cy.mount({
+      render: () =>
+        h('div', { style: 'width: 100%' }, [
+          h(List, { columns } as never, () => [
+            h(ListHeader, () => [
+              h(ListHeaderCell, () => 'A'),
+              h(ListHeaderCell, () => 'B'),
+              h(ListHeaderCell, () => 'C'),
+            ]),
+            feedRow('1'),
+          ]),
+        ]),
+    })
+  }
+
+  it('picks the tier the viewport is in, below, at and above each breakpoint', () => {
+    mountResponsive()
+
+    // Below md → base.
+    cy.viewport(500, 400)
+    tracksOf('[data-slot=list-row]').should((tracks) =>
+      expect(fixedTracks(tracks)).to.equal('80px 64px'),
+    )
+    // Exactly md → md (min-width is inclusive).
+    cy.viewport(768, 400)
+    tracksOf('[data-slot=list-row]').should((tracks) =>
+      expect(fixedTracks(tracks)).to.equal('140px 100px'),
+    )
+    // Between md and lg → still md.
+    cy.viewport(900, 400)
+    tracksOf('[data-slot=list-row]').should((tracks) =>
+      expect(fixedTracks(tracks)).to.equal('140px 100px'),
+    )
+    // Exactly lg, and above it → lg.
+    cy.viewport(1024, 400)
+    tracksOf('[data-slot=list-row]').should((tracks) =>
+      expect(fixedTracks(tracks)).to.equal('180px 120px'),
+    )
+    cy.viewport(1200, 400)
+    tracksOf('[data-slot=list-row]').should((tracks) =>
+      expect(fixedTracks(tracks)).to.equal('180px 120px'),
+    )
+  })
+
+  it('keeps the header and the rows on one template at every width', () => {
+    mountResponsive()
+    for (const width of [500, 768, 900, 1024, 1200]) {
+      cy.viewport(width, 400)
+      cy.get('[data-slot=list-header]').should(($header) => {
+        const header = getComputedStyle($header[0]).gridTemplateColumns
+        const row = getComputedStyle(
+          document.querySelector('[data-slot=list-row]') as Element,
+        ).gridTemplateColumns
+        expect(header, `header and row tracks at ${width}px`).to.equal(row)
+      })
+    }
+  })
+
+  it('carries an omitted breakpoint up from the tier below it', () => {
+    // sm and xl are omitted: sm keeps base, xl keeps lg.
+    mountResponsive()
+    cy.viewport(700, 400) // ≥ sm, < md
+    tracksOf('[data-slot=list-row]').should((tracks) =>
+      expect(fixedTracks(tracks)).to.equal('80px 64px'),
+    )
+    cy.viewport(1280, 400) // ≥ xl
+    tracksOf('[data-slot=list-row]').should((tracks) =>
+      expect(fixedTracks(tracks)).to.equal('180px 120px'),
+    )
+  })
+
+  it('warns about a key that names no screen, and only about that key', () => {
+    // The silent failure this catches: `medium` is not a breakpoint, so it
+    // writes a carrier no media rule reads and the list renders `base` at
+    // every width. The types cannot reject it — screen names belong to the
+    // app, so `ListColumnsByBreakpoint` keeps an open index signature — and
+    // the component cannot read the app's Tailwind config either. The preset
+    // publishes the names it emitted tiers for on `--_list-screens`; this is
+    // the check reading them back.
+    cy.window().then((win) => cy.stub(win.console, 'warn').as('warn'))
+    mountResponsive({
+      base: ['minmax(0, 1fr)', '80px'],
+      md: ['minmax(0, 1fr)', '140px'],
+      medium: ['minmax(0, 1fr)', '200px'],
+    })
+    cy.get('@warn').should(
+      'have.been.calledWithMatch',
+      /`medium` is not one of this app's Tailwind screens \(base, sm, md, lg, xl\)/,
+    )
+    // `base` and `md` are real screens here, so exactly one key is reported.
+    cy.get('@warn').should('have.been.calledOnce')
+    // And the ignored key really is ignored: `md` still wins above 768px.
+    cy.viewport(900, 400)
+    tracksOf('[data-slot=list-row]').should((tracks) =>
+      expect(fixedTracks(tracks)).to.equal('140px'),
+    )
+  })
+
+  it('says nothing when every key names a screen', () => {
+    cy.window().then((win) => cy.stub(win.console, 'warn').as('warn'))
+    mountResponsive()
+    cy.get('@warn').should('not.have.been.called')
+  })
+
+  it('replaces the whole template, track count included', () => {
+    mountResponsive({ base: ['minmax(0, 1fr)'], lg: ['120px', '90px', '60px'] })
+    cy.viewport(500, 400)
+    tracksOf('[data-slot=list-row]').should((tracks) =>
+      expect(tracks.split(' ')).to.have.length(1),
+    )
+    cy.viewport(1200, 400)
+    tracksOf('[data-slot=list-row]').should((tracks) =>
+      expect(tracks).to.equal('120px 90px 60px'),
+    )
+  })
+
+  it('keeps a fixed rowHeight, so virtual windowing still matches', () => {
+    // Row height is a prop, never a breakpoint var — the virtualizer's
+    // itemHeight has to stay true at every width.
+    cy.mount({
+      render: () =>
+        h(List, { columns: responsive, rowHeight: 48 }, () => [feedRow('1')]),
+    })
+    for (const width of [500, 900, 1200]) {
+      cy.viewport(width, 400)
+      cy.get('[data-slot=list-row]').should('have.css', 'height', '48px')
+    }
+  })
+
+  it('gives every nesting combination its own template', () => {
+    // Three combinations in one tree: responsive outer with a static inner,
+    // static outer with a responsive inner, and an inner that sets no columns
+    // at all (it must land on the default feed template, not the outer's).
+    cy.mount({
+      render: () =>
+        h('div', [
+          h('div', { 'data-testid': 'outer-responsive' }, [
+            h(List, { columns: responsive }, () => [
+              h(ListRow, { value: 'host' }, () => [
+                h(ListCell, () =>
+                  h(List, { columns: ['30px', '40px'] }, () => [
+                    feedRow('inner'),
+                  ]),
+                ),
+              ]),
+            ]),
+          ]),
+          h('div', { 'data-testid': 'outer-static' }, [
+            h(List, { columns: ['50px', '50px', '50px'] }, () => [
+              h(ListRow, { value: 'host' }, () => [
+                h(ListCell, () =>
+                  h(
+                    List,
+                    {
+                      columns: {
+                        base: ['20px', '20px'],
+                        lg: ['70px', '90px'],
+                      },
+                    },
+                    () => [feedRow('inner')],
+                  ),
+                ),
+              ]),
+            ]),
+          ]),
+          h('div', { 'data-testid': 'inner-default' }, [
+            h(List, { columns: responsive }, () => [
+              h(ListRow, { value: 'host' }, () => [
+                h(ListCell, () => h(List, () => [feedRow('inner')])),
+              ]),
+            ]),
+          ]),
+        ]),
+    })
+
+    const innerRow = (testid: string) =>
+      `[data-testid=${testid}] [data-slot=list] [data-slot=list] [data-slot=list-row]`
+
+    cy.viewport(1200, 600)
+    // Static inner ignores the outer's lg tier.
+    tracksOf(innerRow('outer-responsive')).should((tracks) =>
+      expect(tracks).to.equal('30px 40px'),
+    )
+    // Responsive inner runs its own ladder inside a static outer.
+    tracksOf(innerRow('outer-static')).should((tracks) =>
+      expect(tracks).to.equal('70px 90px'),
+    )
+    // No columns at all → the default feed template, three tracks, not the
+    // outer's lg tier.
+    tracksOf(innerRow('inner-default')).should((tracks) => {
+      expect(tracks.split(' ')).to.have.length(3)
+      expect(tracks).to.not.contain('180px')
+    })
+
+    cy.viewport(500, 600)
+    tracksOf(innerRow('outer-responsive')).should((tracks) =>
+      expect(tracks).to.equal('30px 40px'),
+    )
+    tracksOf(innerRow('outer-static')).should((tracks) =>
+      expect(tracks).to.equal('20px 20px'),
+    )
+    tracksOf(innerRow('inner-default')).should((tracks) => {
+      expect(tracks.split(' ')).to.have.length(3)
+      expect(tracks).to.not.contain('80px 64px')
+    })
+  })
+})
+
 describe('ListRows (virtual)', () => {
+  it('exposes independent selected and active slot state', () => {
+    cy.mount({
+      render: () =>
+        h(
+          List,
+          {
+            selectable: true,
+            selection: ['1'],
+            active: '2',
+            'onUpdate:active': () => {},
+          },
+          () =>
+            h(
+              ListRows,
+              { items: [{ id: '1' }, { id: '2' }] },
+              {
+                default: ({ value, selected, active }) =>
+                  h('span', {
+                    'data-cy': `row-${value}`,
+                    'data-selected': String(selected),
+                    'data-active': String(active),
+                  }),
+              },
+            ),
+        ),
+    })
+
+    cy.get('[data-cy=row-1]')
+      .should('have.attr', 'data-selected', 'true')
+      .and('have.attr', 'data-active', 'false')
+    cy.get('[data-cy=row-2]')
+      .should('have.attr', 'data-selected', 'false')
+      .and('have.attr', 'data-active', 'true')
+  })
+
   it('windows rows against the nearest scrollable ancestor', () => {
     const items = Array.from({ length: 500 }, (_, i) => ({ id: String(i + 1) }))
     cy.mount({
@@ -622,5 +1377,44 @@ describe('ListRows (virtual)', () => {
     cy.get('[data-testid=viewport]').scrollTo('bottom')
     cy.contains('[data-slot=list-row]', 'Row 500').should('exist')
     cy.contains('[data-slot=list-row]', 'Row 1').should('not.exist')
+  })
+
+  it('updates the rendered window when overscan changes', () => {
+    const overscan = ref(0)
+    const items = Array.from({ length: 100 }, (_, i) => ({ id: String(i + 1) }))
+    cy.mount({
+      render: () =>
+        h(
+          'div',
+          {
+            style: 'height: 200px; overflow-y: auto',
+            'data-testid': 'overscan-viewport',
+          },
+          h(List, { rowHeight: 40 }, () =>
+            h(
+              ListRows,
+              { items, virtual: true, overscan: overscan.value },
+              {
+                default: ({ item }: { item: { id: string } }) =>
+                  h(ListRow, { key: item.id }, () => `Row ${item.id}`),
+              },
+            ),
+          ),
+        ),
+    })
+
+    cy.contains('[data-slot=list-row]', 'Row 1').should('exist')
+    cy.get('[data-testid=overscan-viewport]').scrollTo(0, 20)
+    cy.contains('[data-slot=list-row]', 'Row 1').should('exist')
+    cy.contains('[data-slot=list-row]', 'Row 6').should('exist')
+
+    let initialRows = 0
+    cy.get('[data-slot=list-row]').then(($rows) => {
+      initialRows = $rows.length
+    })
+    cy.then(() => (overscan.value = 20))
+    cy.get('[data-slot=list-row]').should(($rows) => {
+      expect($rows.length).to.be.greaterThan(initialRows)
+    })
   })
 })

@@ -52,7 +52,7 @@ export const recipeGroups: RecipeGroup[] = [
     title: 'Discussions',
     components: [
       'DesktopShell',
-      'Rail',
+      'SidebarRail',
       'Sidebar',
       'ScrollArea',
       'List',

@@ -195,7 +195,16 @@ export function useAction<TResponse, TParams extends Record<string, any>>(
         }),
       )!
 
-      let response = await call.submit(body ? body(params) : params)
+      // `useCall.submit` rejects on a failed request (DAT-Q1). This wrapper
+      // has its own newest-wins rules to apply first, so it reads the failure
+      // off `call.error` and decides below. An unexpected rejection — one
+      // that left no error behind — still propagates.
+      let response = await call.submit(body ? body(params) : params).catch(
+        (thrown) => {
+          if (!call!.error) throw thrown
+          return null
+        },
+      )
       let callError = (call.error ?? null) as Error | null
 
       // A newer submit started while this one was in flight, so this answer is

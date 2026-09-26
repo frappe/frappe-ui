@@ -549,4 +549,29 @@ describe('Slider', () => {
         .and('include', 'right: 50%')
     })
   })
+
+  // INP-Q5.
+  describe('template ref', () => {
+    it('exposes focus() which focuses the thumb, not the root', () => {
+      cy.mount(Slider, { props: { modelValue: [40] } }).then(
+        (mounted: any) => {
+          const vm = mounted.component ?? mounted.wrapper?.vm ?? mounted
+          vm?.focus?.()
+        },
+      )
+
+      cy.get('[role="slider"]').should('be.focused')
+    })
+
+    it('focuses the first thumb of a range slider', () => {
+      cy.mount(Slider, { props: { modelValue: [20, 80] } }).then(
+        (mounted: any) => {
+          const vm = mounted.component ?? mounted.wrapper?.vm ?? mounted
+          vm?.focus?.()
+        },
+      )
+
+      cy.get('[role="slider"]').eq(0).should('be.focused')
+    })
+  })
 })

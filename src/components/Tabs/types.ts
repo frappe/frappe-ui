@@ -1,10 +1,10 @@
 import type { Component } from 'vue'
-import type { RouteLocationRaw } from 'vue-router'
+import type { RouteDestination } from '../shared/route'
 
 export type TabValue = string | number
 export type TabsVariant = 'underline' | 'subtle' | 'ghost' | 'browser-tab'
 export type TabsSize = 'sm' | 'md'
-export type TabsSide = 'left' | 'right'
+export type TabsEdge = 'start' | 'end'
 
 /** A `lucide-*` class string or a Vue component. */
 export type TabIcon = string | Component
@@ -29,7 +29,7 @@ export interface TabsProps {
   size?: TabsSize
 
   /** Shorthand mode only; forwarded to the generated TabList. */
-  side?: TabsSide
+  edge?: TabsEdge
 }
 
 export interface TabsEmits {
@@ -44,8 +44,11 @@ export interface TabListProps {
   /** Size of the triggers. */
   size?: TabsSize
 
-  /** browser-tab + vertical only: which edge the tabs attach to. */
-  side?: TabsSide
+  /**
+   * browser-tab + vertical only: the edge of the list the tabs attach to.
+   * `start` is the left edge in left-to-right text.
+   */
+  edge?: TabsEdge
 }
 
 export interface TabTriggerProps {
@@ -63,10 +66,10 @@ export interface TabTriggerProps {
   disabled?: boolean
 
   /** Renders the trigger as a RouterLink. See route mode in the spec. */
-  route?: RouteLocationRaw
+  route?: RouteDestination
 }
 
-export type TabTriggerSlotProps = { selected: boolean; disabled: boolean }
+export type TabTriggerSlotProps = { active: boolean; disabled: boolean }
 
 export interface TabPanelProps {
   value: TabValue
@@ -79,7 +82,7 @@ export interface TabItem {
   icon?: TabIcon
   iconLeft?: TabIcon
   disabled?: boolean
-  route?: RouteLocationRaw
+  route?: RouteDestination
   /** Item renders only while this returns true. */
   condition?: () => boolean
   /**

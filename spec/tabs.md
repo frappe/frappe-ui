@@ -72,7 +72,7 @@ styles them directly. A `tabs` shorthand remains for generated tab sets.
 type TabValue = string | number
 type TabsVariant = 'underline' | 'subtle' | 'ghost' | 'browser-tab'
 type TabsSize = 'sm' | 'md'
-type TabsSide = 'left' | 'right'
+type TabsEdge = 'start' | 'end'
 ```
 
 ### `Tabs` (root)
@@ -87,7 +87,7 @@ interface TabsProps {
   /** Shorthand mode only; forwarded to the generated TabList. */
   variant?: TabsVariant
   size?: TabsSize
-  side?: TabsSide
+  edge?: TabsEdge
 }
 
 interface TabsEmits {
@@ -125,24 +125,32 @@ State rules:
 interface TabListProps {
   variant?: TabsVariant
   size?: TabsSize
-  /** browser-tab + vertical only: which edge the tabs attach to. */
-  side?: TabsSide
+  /**
+   * browser-tab + vertical only: the edge of the list the tabs attach to.
+   * `start` is the left edge in left-to-right text.
+   */
+  edge?: TabsEdge
 }
 ```
 
-Defaults: `variant = 'underline'`, `size = 'sm'`, `side = 'left'`.
+Defaults: `variant = 'underline'`, `size = 'sm'`, `edge = 'start'`.
 
 - `TabList` renders one element the app can style directly: padding, gap,
   borders, and visibility belong to the call site. The v0
   `[&_[role='tablist']]` selectors and the hidden-tablist hack are no longer
   needed
-- no component in the family ships layout defaults. v0 forced `flex flex-1
-  overflow-hidden flex-col` on the root, `overflow-x-auto` on the list, and
-  `flex flex-col overflow-auto` on every panel. A `Tabs` that force-grows to
-  fill its parent is wrong everywhere the tabs are not the whole screen, and
-  apps fought those defaults more often than they used them. Scrolling is the
-  call site's decision; the migration guide carries the recipe for both modes
-- every variant supports both orientations. `side` applies only when
+- composed mode ships no layout defaults. The root renders no layout classes
+  at all, and a `TabPanel` is a bare element. `TabList` carries only what its
+  own track needs — the display mode, and `self-start` on the pill tracks so
+  they hug their content. v0 instead forced `flex flex-1 overflow-hidden
+  flex-col` on the root, `overflow-x-auto` on the list, and `flex flex-col
+  overflow-auto` on every panel. A `Tabs` that force-grows to fill its parent
+  is wrong everywhere the tabs are not the whole screen, and apps fought those
+  defaults more often than they used them. Scrolling is the call site's
+  decision; the migration guide carries the recipe for both modes.
+  [Shorthand mode](#shorthand-mode) is the one exception, and only for the
+  parts it generates itself
+- every variant supports both orientations. `edge` applies only when
   `variant = 'browser-tab'` and the root is `vertical`, matching v0
   `TabButtons`
 - `underline` renders the animated active indicator; `subtle` renders raised
@@ -161,7 +169,7 @@ interface TabTriggerProps {
   iconLeft?: string | Component
   disabled?: boolean
   /** Renders the trigger as a RouterLink. See Route mode. */
-  route?: RouteLocationRaw
+  route?: RouteDestination
 }
 ```
 
@@ -180,12 +188,12 @@ interface TabTriggerProps {
 Slots:
 
 ```ts
-type TabTriggerSlotProps = { selected: boolean; disabled: boolean }
+type TabTriggerSlotProps = { active: boolean; disabled: boolean }
 ```
 
-- `#prefix="{ selected, disabled }"` — leading content, after `iconLeft`
-- default slot `="{ selected, disabled }"` — replaces the label region
-- `#suffix="{ selected, disabled }"` — trailing content (badges, counts)
+- `#prefix="{ active, disabled }"` — leading content, after `iconLeft`
+- default slot `="{ active, disabled }"` — replaces the label region
+- `#suffix="{ active, disabled }"` — trailing content (badges, counts)
 
 The trigger shell — variant styling, selected state, focus ring — is always
 owned by the component. There is no full-trigger escape hatch in v1; the v0
@@ -222,7 +230,7 @@ interface TabItem {
   icon?: string | Component
   iconLeft?: string | Component
   disabled?: boolean
-  route?: RouteLocationRaw
+  route?: RouteDestination
   condition?: () => boolean
   data?: Record<string, unknown>
 }
@@ -230,17 +238,25 @@ interface TabItem {
 
 Shorthand slots:
 
-- `#tab-prefix="{ tab, selected, disabled }"` / `#tab-suffix="{ ... }"` —
+- `#tab-prefix="{ tab, active, disabled }"` / `#tab-suffix="{ ... }"` —
   forwarded into every generated trigger
-- `#tab-label="{ tab, selected, disabled }"` — replaces the label region of
+- `#tab-label="{ tab, active, disabled }"` — replaces the label region of
   every generated trigger
-- `#tab-panel="{ tab }"` — the panel body for the selected tab
+- `#tab-panel="{ tab }"` — the panel body for the selected tab. It is the one
+  slot the v1 family kept from v0 under its old name. Without it, shorthand
+  mode renders triggers only, which is what route mode wants
 
 Rules:
 
+- shorthand mode is the only place the family sets layout: with `tabs` bound,
+  the root gets `flex flex-col`, or `flex-row` when `vertical` is set, so the
+  generated list and panel stack. The component wrote both elements, so it
+  owns how they sit together. Composed mode still gets nothing
 - `condition()` is evaluated before rendering; items that return false are
   omitted. The model fallback rule above handles the selected tab
   disappearing
+- composed triggers keep `#prefix` / `#suffix`; shorthand slots keep the `tab-` prefix so the two modes are unambiguous
+- `TabList` defaults to `underline`, while value-picking `TabButtons` defaults to `subtle`
 - app-defined extras go in `data` and reach the slots as `tab.data`. The item
   itself takes no unknown keys, so a misspelled `label` or `route` is a type
   error instead of silent passthrough
@@ -260,30 +276,99 @@ A trigger with `route` renders as a `RouterLink`.
   URL must not select one, and one on its own does not turn route mode on
 - lists may mix route and non-route triggers. A non-route trigger has nothing
   to navigate, so clicking it selects it and emits `update:modelValue`, even
-  while a route matches elsewhere. Selection returns to the route on the next
-  navigation, or when that trigger turns disabled or unmounts. Those exits are
-  final: re-enabling the trigger, or a `condition` flipping back, does not let
-  the tab reclaim selection without another click
+  while a route matches elsewhere. The root remembers that click until one of
+  the rules below releases it
+- **the path changed.** A navigation lands and `to.path !== from.path`. A
+  navigation that did not land keeps the click: aborted by a guard, cancelled
+  by a newer navigation, or a duplicate of the URL already showing. A
+  redirected navigation releases it, because the redirect target lands
+- **the tab the URL matches changed**, by whatever means: a navigation, a
+  trigger's `route` prop changing, or a routed trigger mounting that matches
+  the current URL. The last two have no navigation behind them and still
+  release the click
+- clicking a routed trigger releases the click at the click, before navigation
+  completes. It therefore works even when the click repeats the current URL
+  and no navigation lands
+- the last two exits are the clicked trigger turning disabled, and it
+  unmounting. Every exit is final: re-enabling the trigger, or a `condition`
+  flipping back, does not let the tab reclaim selection without another click
+
+What that means for navigation:
+
+- `/inbox` → `/sent` releases it. The path changed
+- `/inbox` → `/inbox/42`, a child route, releases it. The path changed, even
+  though the same tab still matches
+- `/inbox` → `/inbox?page=2` or `/inbox#recent` does not release it
+- a matched-tab change with no navigation behind it releases it: a trigger's
+  `route` prop changing, or a routed trigger mounting onto the current URL.
+  The path test cannot see either, and both have always ended the click
+
+Known gap: **tabs routed by query alone do not work**, and this rule does not
+rescue them. Route matching comes from vue-router's `useLink`
+(`TabTrigger.vue:48`), which matches on route records and params and ignores
+query and hash. Triggers at `/mail?folder=inbox` and `/mail?folder=sent` both
+report active at either URL, so the first one wins and stays lit wherever the
+user goes. Navigating between them changes neither the path nor the matched
+tab, so a click is kept. Fixing this means changing how `routeSelected`
+matches, which is a separate decision.
+
+The kept case has a cost, and it is deliberate. A query-only or hash-only
+navigation made from outside the clicked tab — background code writing
+`?filter=unread` while the user stands on Drafts — leaves Drafts selected.
+`afterEach` reports the URL before and after and nothing else, so the root
+cannot tell that navigation apart from the Drafts panel saving its own page
+number. Throwing a user out of the panel they are working in is the worse of
+the two failures. See
+[A non-route tab that owns URL state](#a-non-route-tab-that-owns-url-state).
+
+The rest of route mode:
+
+- `Tabs` works with no router installed. The navigation listener is registered
+  only when a router is present, and is removed when the component unmounts
 - when no route matches, selection falls back to the first selectable
   non-route trigger. An all-route list starts with nothing selected —
   highlighting a trigger would claim a route the app is not on
 - a `route` added after the trigger mounts does nothing — `useLink` runs at
   setup only. DEV warns; remount with a `:key` to change it
 - panels are usually omitted in route mode; the app places a `<router-view>`
-- if the root also binds `v-model`, the model wins and `route` is only a
-  navigation side effect
+- a bound `v-model` turns route mode off entirely: navigation neither changes
+  the selection nor emits. `route` is then only the side effect of clicking
+  the trigger, which emits its value like any other trigger
 
 This replaces the hand-rolled route sync in press (`TabsWithRouter`), crm and
 helpdesk (hash + localStorage managers), and gameplan (route-name maps). Hash
 or query persistence stays app-owned; a value-based model makes it a one-line
 computed.
 
+### A non-route tab that owns URL state
+
+Some non-route tabs write to the URL themselves: a page number, a filter, a
+sort order. Give such a tab a route of its own. Its selection then lives in
+the URL like every other tab's, and there is no remembered click to release.
+
+```js
+{ value: 'drafts', label: 'Drafts', route: { query: { tab: 'drafts' } } }
+```
+
+The app must then merge the query when it writes to the URL:
+
+```js
+router.push({ query: { ...route.query, page: 2 } })
+```
+
+Replacing it instead — `router.push({ query: { page: 2 } })` — drops
+`tab=drafts`, and the tab loses its selection.
+
+The other option is to bind `v-model`. That takes selection over completely
+and turns route mode off for the whole list, so the app has to set the model
+from the route itself for the tabs that have one.
+
 ## Relationship to TabButtons
 
 `TabButtons` stays a separate component with radiogroup semantics. It is a
 value input, not a panel switcher. The two share:
 
-- `TabValue`, `TabsVariant`, `TabsSize`, `TabsSide`
+- `TabValue`, `TabsVariant`, `TabsSize`, `TabsEdge`
 - the item vocabulary: `value` (required), `label`, `icon`, `iconLeft`,
   `disabled`
 - trigger visuals: at the same `variant` and `size`, a `TabButtons` and a
@@ -298,6 +383,8 @@ value input, not a panel switcher. The two share:
   [ADR-0008](./adr/0008-no-deprecated-members-in-1-0-0.md)
 - the `active: true` fallback and the label-as-value fallback are removed;
   `value` is required and the model is the single source of truth
+- `label` is a required string. `tooltip` is removed; apps own any additional
+  help UI. `route`, `href`, and data-object `onClick` remain supported
 - with no `v-model`, `TabButtons` keeps internal state and still emits, the
   same rule as `Tabs`. It never hands `RadioGroupRoot` an undefined model:
   reka would then track selection privately, and the sliding indicator —
@@ -397,15 +484,45 @@ Before/afters live in [`migration.md`](../docs/content/docs/migration.md):
 
 - the index-based `modelValue` — the model is the trigger `value`
 - the `as` prop — composition covers container rendering
-- the `#tab-item` and `#tab-panel` slots — `TabTrigger` slots and `TabPanel`
-  replace them
-- `Tab.route` as a string — `route` is a `RouteLocationRaw` on `TabTrigger`
-  and `TabItem`
+- the `#tab-item` slot — `TabTrigger`'s own slots replace it. `#tab-panel`
+  stays, on its v0 name, as the shorthand-mode panel body; composed mode uses
+  `TabPanel` instead
+- hand-rolled route syncing — `route` on `TabTrigger` and `TabItem` takes a
+  `RouteDestination` (a path string or a route object, see
+  `src/components/shared/route.ts`), and selection derives from the route
 - `Tab.label` as the implied value — `value` is required
 - `iconRight` on `TabTrigger`, `TabItem`, and `TabButtons` options — the
   `#suffix` slot covers trailing content
 
 ## Changelog
+
+### 2026-09-24 (edge)
+
+- **`side` is now `edge`** on `Tabs`, `TabList` and `TabButtons`, with values
+  `start` and `end` instead of `left` and `right`; `TabsSide` is `TabsEdge`.
+  The prop never moved the list. It picks the edge of the list that carries
+  the line, so it clashed with `side` on `Tooltip` and `Popover`, which means
+  placement. `start` and `end` follow text direction: `start` is the left edge
+  in left-to-right text and the right edge in right-to-left text.
+
+### 2026-09-17 (route reset)
+
+- **A path change releases the mixed-list click, as well as a matched-tab
+  change.** Route mode used to release the local click only when the value the
+  route selected changed, so `/inbox` → `/inbox/42` left it standing while the
+  URL moved under it. The root now also listens to the router's `afterEach`
+  and releases the click when the path changed, ignoring navigations that
+  failed. It injects the router rather than calling `useRouter`, which warns
+  in the far more common case of no router at all, and it drops the listener
+  on unmount.
+- **Query-only and hash-only navigation keeps the click.** The first version
+  of this change released it on any navigation that landed. That threw the
+  user out of a non-route tab whose own panel wrote to the URL — a Drafts tab
+  paginating with `router.push({ query: { page: 2 } })` fell back to whichever
+  tab the path still matched. [Route mode](#route-mode) states the limit this
+  leaves in place, and
+  [A non-route tab that owns URL state](#a-non-route-tab-that-owns-url-state)
+  covers what such an app should do instead.
 
 ### 2026-08-12 (shadow clip)
 

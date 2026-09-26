@@ -3,6 +3,7 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
+  import ExposedTable from '@/components/Docs/ExposedTable.vue'
 
   const propsData = [
   {
@@ -58,9 +59,9 @@
   },
   {
     name: 'error',
-    description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. May be either a string\nor an `Error` object whose `messages?: string[]` is rendered as stacked\nlines (with `Error.message` as the fallback).',
+    description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. Takes a string, an\narray of strings, or an `Error` whose `messages` are rendered as stacked\nlines (with `Error.message` as the fallback). This is the same value\n`ErrorMessage.message` takes. An empty array and an empty string both\nmean no error.',
     required: false,
-    type: 'string | FrappeUIError'
+    type: 'ErrorMessageValue'
   },
   {
     name: 'required',
@@ -76,11 +77,32 @@
   }
 ]
 
+  const slotsData = [
+  {
+    name: 'label',
+    description: 'Overrides the rendered label content. Receives `{ required }`.',
+    type: '{ required: boolean; }'
+  },
+  {
+    name: 'description',
+    description: 'Overrides the rendered description content.',
+    type: 'any'
+  }
+]
+
   const emitsData = [
   {
     name: 'update:modelValue',
     description: 'Fired when the model value changes.',
     type: '[value: number | null]'
+  }
+]
+
+  const exposedData = [
+  {
+    name: 'focus',
+    description: 'Moves focus to the input.',
+    type: '(options?: FocusOptions) => void'
   }
 ]
 </script>
@@ -89,4 +111,8 @@
 
 <PropsTable name="Duration" :data="propsData"/>
 
+<SlotsTable :data="slotsData"/>
+
 <EmitsTable :data="emitsData"/>
+
+<ExposedTable :data="exposedData"/>

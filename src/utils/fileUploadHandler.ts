@@ -1,4 +1,8 @@
-import { isPrivateUpload, type UploadOptions } from './useFileUpload'
+import {
+  isPrivateUpload,
+  UploadError,
+  type UploadOptions,
+} from './useFileUpload'
 import { getMaxFileSize, formatBytes, fileSizeLimitMessage } from './fileSize'
 
 type EventListenerOption = 'start' | 'progress' | 'finish' | 'error'
@@ -65,7 +69,7 @@ class FileUploadHandler {
     return new Promise((resolve, reject) => {
       const limitMessage = fileSizeLimitMessage(file)
       if (limitMessage) {
-        reject(new Error(limitMessage))
+        reject(new UploadError(limitMessage, { kind: 'file-size' }))
         return
       }
       let xhr = new XMLHttpRequest()
@@ -82,7 +86,12 @@ class FileUploadHandler {
       })
       xhr.addEventListener('error', () => {
         this.trigger('error')
-        reject()
+        reject(new UploadError('Upload failed', { kind: 'network' }))
+      })
+
+      xhr.addEventListener('abort', () => {
+        this.trigger('error')
+        reject(new UploadError('Upload cancelled', { kind: 'abort' }))
       })
       xhr.onreadystatechange = () => {
         if (xhr.readyState == XMLHttpRequest.DONE) {
@@ -125,7 +134,14 @@ class FileUploadHandler {
               console.error(JSON.parse(error.exc)[0])
             }
             this.trigger('error', error)
-            reject(new Error(extractUploadErrorMessage(error)))
+            reject(
+              new UploadError(extractUploadErrorMessage(error), {
+                kind: 'server',
+                status: xhr.status,
+                messages: parseServerMessages(error),
+                response: error,
+              }),
+            )
           }
         }
       }

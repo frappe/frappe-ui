@@ -1,6 +1,8 @@
 import { defineComponent, h } from 'vue'
+import { createMemoryHistory, createRouter } from 'vue-router'
 import PageHeader from './PageHeader.vue'
 import PageHeaderBase from './PageHeaderBase.vue'
+import PageHeaderBackButton from './PageHeaderBackButton.vue'
 import PageHeaderTarget from './PageHeaderTarget.vue'
 import PageHeaderMobile from './PageHeaderMobile.vue'
 import PageHeaderMobileTitle from './PageHeaderMobileTitle.vue'
@@ -44,6 +46,28 @@ describe('PageHeader', () => {
     cy.get('[data-testid=page] header').should('not.exist')
   })
 
+  // SHELL-Q9: one click, and `data-no-scroll-top` keeps its name.
+  it('honours data-no-scroll-top on a non-interactive element', () => {
+    cy.mount(Layout, {
+      slots: {
+        default: () => [
+          h(PageHeader, null, {
+            default: () => [
+              h('span', { 'data-no-scroll-top': '' }, 'Breadcrumb'),
+              h('span', 'Title'),
+            ],
+          }),
+          h('div', { style: 'height: 2000px' }),
+        ],
+      },
+    })
+    cy.get('[data-testid=page]').scrollTo(0, 500)
+    cy.get('header [data-no-scroll-top]').click()
+    cy.get('[data-testid=page]').should(($el) => {
+      expect($el[0].scrollTop).to.be.greaterThan(0)
+    })
+  })
+
   it('scrolls its scroll container to top on empty-area clicks, ignoring interactive elements', () => {
     cy.mount(Layout, {
       slots: {
@@ -70,6 +94,28 @@ describe('PageHeader', () => {
   })
 })
 
+describe('PageHeaderBackButton', () => {
+  it('uses fallbackRoute after a cold load', () => {
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        { path: '/new', component: { render: () => null } },
+        { path: '/drafts', component: { render: () => null } },
+      ],
+    })
+    router.push('/new')
+    cy.wrap(router.isReady()).then(() => {
+      cy.mount(PageHeaderBackButton, {
+        props: { fallbackRoute: '/drafts' },
+        global: { plugins: [router] },
+      })
+      cy.get('button').click().then(() => {
+        expect(router.currentRoute.value.fullPath).to.equal('/drafts')
+      })
+    })
+  })
+})
+
 describe('PageHeaderTitle', () => {
   it('renders `title`, overridden by the default slot', () => {
     cy.mount(PageHeaderTitle, { props: { title: 'From prop' } })
@@ -85,6 +131,24 @@ describe('PageHeaderTitle', () => {
 })
 
 describe('PageHeaderMobile', () => {
+  // VOC-Q7: the height is fixed at 52px. `--mobile-header-height` is gone, so
+  // setting it on an ancestor changes nothing.
+  it('is 52px tall and reads no CSS variable for its height', () => {
+    cy.mount(
+      defineComponent({
+        setup() {
+          return () =>
+            h('div', { style: '--mobile-header-height: 120px' }, [
+              h(PageHeaderMobile, { title: 'Discussion' }),
+            ])
+        },
+      }),
+    )
+    cy.get('header').should(($el) => {
+      expect($el[0].getBoundingClientRect().height).to.equal(52)
+    })
+  })
+
   it('renders the #prefix, default, and #suffix slots', () => {
     cy.mount(PageHeaderMobile, {
       slots: {

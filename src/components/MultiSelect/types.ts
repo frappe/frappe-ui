@@ -1,8 +1,11 @@
 import type { Component, VNodeChild } from 'vue'
+import type { InputSize, InputVariant } from '../../composables/inputTypes'
 import type { InputLabelingProps } from '../../composables/useInputLabeling'
+import type { PortalTarget } from '../../composables/usePortalTarget'
 
-export type MultiSelectVariant = 'subtle' | 'outline' | 'ghost'
-export type MultiSelectSize = 'sm' | 'md' | 'lg' | 'xl'
+/** The input scales under MultiSelect's own names. See `ComboboxSize`. */
+export type MultiSelectVariant = InputVariant
+export type MultiSelectSize = InputSize
 
 import type { PopoverSide, PopoverAlign } from '../shared/selection/types'
 export type { PopoverSide, PopoverAlign }
@@ -87,7 +90,11 @@ export interface MultiSelectProps extends InputLabelingProps {
   /** Hides the in-popover search input. */
   hideSearch?: boolean
 
-  /** Replaces the results with a loading state. */
+  /**
+   * Marks a fetch as in flight. With the search row showing, a spinner appears
+   * in it and the options you passed stay selectable; under `hide-search` a
+   * loading row replaces the results instead.
+   */
   loading?: boolean
 
   /**
@@ -112,7 +119,7 @@ export interface MultiSelectProps extends InputLabelingProps {
   offset?: number
 
   /** Teleport target for the popover content. Unset, an embedding host's target is used, else `body`. */
-  portalTo?: string | HTMLElement
+  portalTo?: PortalTarget
 }
 
 /**
@@ -139,6 +146,8 @@ export interface MultiSelectSlotProps {
 
   /** Sets the popover open state. */
   setOpen: (value: boolean) => void
+  /** Closes the popover. Equivalent to `setOpen(false)`. */
+  close: () => void
 }
 
 export type MultiSelectTriggerSlotProps = MultiSelectSlotProps
@@ -299,19 +308,16 @@ interface MultiSelectItemSlotsByName {
 export interface MultiSelectSlots
   extends MultiSelectFixedSlots, MultiSelectItemSlotsByName {}
 
+/**
+ * The events the component declares itself. `update:modelValue`,
+ * `update:open` and `update:query` are not here: `defineModel` declares those,
+ * and listing them again published one event twice with two payload types
+ * that could drift apart.
+ */
 export interface MultiSelectEmits {
-  /** Fired when the selection changes. */
-  'update:modelValue': [value: Array<string | number>]
-
   /**
    * Fired alongside `update:modelValue` with the original option objects
    * resolved out of `options`, so custom fields on an option survive.
    */
   'update:selectedOptions': [value: MultiSelectOption[]]
-
-  /** Fired when the open state changes. */
-  'update:open': [value: boolean]
-
-  /** Fired when the search query changes. */
-  'update:query': [value: string]
 }

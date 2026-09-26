@@ -1,43 +1,114 @@
 # SettingsDialog
 
-A modal for app settings: a sidebar of grouped tabs on the left, the active
-tab's content on the right. Built on `Dialog`, composed from small building
-blocks rather than a config object.
+A dialog for app settings, with a sidebar of grouped tabs on the left and the
+selected tab's content on the right.
 
 <ComponentPreview name="SettingsDialog-Default" layout="stacked" />
 
 ## Anatomy
 
-It's a [reka-ui Tabs](https://reka-ui.com/docs/components/tabs) set, so you get
-`tablist`/`tab`/`tabpanel` roles, `aria-selected`, and arrow-key focus for free.
-Instead of tracking an `active` flag, give each nav item and panel a matching
-`value`.
+`SettingsDialog` is built on `Dialog` and is made of small parts rather than a
+config object. Give each nav item and its panel the same `value`.
 
-- **`SettingsDialog`** — wraps `Dialog`; owns open state (`v-model:open`), the
-  selected tab (`v-model:tab`), and the `Cmd/Ctrl+Shift+,` shortcut. Full-screen
-  on mobile, centered panel on desktop.
-- **`SettingsSidebar`** / **`SettingsNavGroup`** / **`SettingsNavItem`** — the
-  navigation. Give each item a `:value`; it also takes `#prefix` and `#suffix`.
-- **`SettingsContent`** / **`SettingsPanel`** — the right pane; one panel per
-  tab, each with a `:value` matching its nav item.
+```vue
+<SettingsDialog v-model:open="open" v-model:tab="tab">
+  <SettingsSidebar>
+    <SettingsNavGroup label="User settings">
+      <SettingsNavItem value="profile">
+        <template #prefix><Avatar size="xs" label="Alex Rivera" /></template>
+        Profile
+      </SettingsNavItem>
+      <SettingsNavItem value="notifications">Notifications</SettingsNavItem>
+    </SettingsNavGroup>
+  </SettingsSidebar>
 
-`v-model:tab` is optional — bind it to drive selection yourself (Gameplan uses
-it for deep-linkable `/settings/:tab` URLs). Set `:unmount-on-hide="false"` to
-keep visited panels mounted across switches.
+  <SettingsContent>
+    <SettingsPanel value="profile">…</SettingsPanel>
+    <SettingsPanel value="notifications">
+      <SettingsHeader title="Notifications" />
+      <SettingsBody>
+        <SettingsRow title="Email digests" description="A summary of missed activity.">
+          <Switch v-model="digest" />
+        </SettingsRow>
+      </SettingsBody>
+    </SettingsPanel>
+  </SettingsContent>
+</SettingsDialog>
+```
 
-## Panels: fixed header, scrolling body
+- `SettingsDialog` holds the open state (`v-model:open`), the selected tab
+  (`v-model:tab`) and the keyboard shortcut.
+- `SettingsSidebar`, `SettingsNavGroup` and `SettingsNavItem` are the
+  navigation. A nav item takes `#prefix` and `#suffix`.
+- `SettingsContent` and `SettingsPanel` are the right side, with one panel per
+  tab.
+- `SettingsHeader`, `SettingsBody` and `SettingsRow` lay out a panel.
 
-A `SettingsPanel` holds a `SettingsHeader` (pinned) and a `SettingsBody`
-(scrolls), so titles, search inputs, and column headers never scroll away.
-`SettingsHeader` takes `title` + `description` (+ `#actions`), or arbitrary
-content via its default slot.
+## Examples
+
+### Notification settings
+
+A panel with a `SettingsHeader` that stays in place, a `SettingsBody` that
+scrolls, and one `SettingsRow` per setting.
 
 <ComponentPreview name="SettingsDialog-PanelBasic" />
 
-## SettingsRow
+## Behavior
 
-Lays out a setting as label + description on the left, control on the right. A
-slotted frappe-ui control (e.g. `Switch`) is auto-wired to the title `<label>` —
-no `label-for` needed.
+### Selected tab
+
+The selected tab is the `value` of a nav item, not an `active` flag.
+`v-model:tab` is optional. Bind it to drive the selection yourself, for example
+from a `/settings/:tab` URL. Left unbound, the dialog tracks the selection
+itself.
+
+### Keeping panels mounted
+
+A panel's content is unmounted when its tab is not selected. Set
+`:unmount-on-hide="false"` to keep visited panels mounted, so they keep their
+state and scroll position across tab switches.
+
+### Keyboard shortcut
+
+`Cmd+Shift+,` (`Ctrl+Shift+,` on Windows and Linux) opens and closes the dialog,
+even while focus is in an input. Pass another combo to `keyboardShortcut` to
+change it, or `false` to turn it off.
+
+### Size and mobile layout
+
+The dialog fills the screen on mobile, with the sidebar above the content. On
+desktop it is a centered panel. `size` sets its maximum width and takes the
+same values as `Dialog`'s `size`.
+
+### Panel header and body
+
+Put a `SettingsHeader` and a `SettingsBody` in each `SettingsPanel`. The header
+stays in place and the body scrolls, so titles, search inputs and column
+headers never scroll away. `SettingsHeader` takes `title`, `description` and an
+`#actions` slot, or any content in its default slot.
+
+### Setting rows
+
+`SettingsRow` shows a setting's title and description on the left and its
+control on the right. When the control is a frappe-ui control such as `Switch`,
+the title becomes its `<label>`, with no `label-for` needed. Set `labelFor` to
+point the label at another element's id.
+
+## Accessibility
+
+The dialog is a tab set: the sidebar has the `tablist` role, each nav item the
+`tab` role, and each panel the `tabpanel` role.
+
+| Keys                             | Action                                 |
+| -------------------------------- | -------------------------------------- |
+| `ArrowDown` / `ArrowUp`          | Move focus to the next or previous tab |
+| `Enter` / `Space`                | Select the focused tab                 |
+| `Cmd+Shift+,` / `Ctrl+Shift+,`   | Open or close the dialog               |
+
+Arrow keys move focus without selecting a tab, so a dialog that drives its tab
+from the route does not navigate on every key press.
+
+The dialog has a visually hidden title, "Settings", and a hidden description.
+Replace them with the `#title` and `#description` slots.
 
 <!-- @include: ./SettingsDialog.api.md -->

@@ -1,6 +1,7 @@
 import type { Component, VNodeChild } from 'vue'
-import type { RouteLocationRaw } from 'vue-router'
+import type { RouteDestination } from '../shared/route'
 import type { NormalizedMenuGroup } from './utils'
+import type { PortalTarget } from '../../composables/usePortalTarget'
 
 export type MenuTheme = 'gray' | 'red'
 
@@ -53,10 +54,10 @@ export interface MenuActionOption extends MenuBaseOption {
   label: string
 
   /** Router destination to navigate to when the item is clicked. */
-  route?: RouteLocationRaw
+  route?: RouteDestination
 
   /** Click handler invoked when the action item is selected. */
-  onClick?: (event: PointerEvent) => void
+  onClick?: (event: Event) => void
 
   submenu?: never
   switch?: never
@@ -143,10 +144,10 @@ export interface MenuProps {
   close: () => void
 
   /** Dynamic `item-*` slot implementations resolved by name. */
-  slotFns?: Record<string, ((props?: any) => any) | undefined>
+  slotFns?: MenuSlots
 
   /** Portal target for submenu content. Unset, an embedding host's target is used, else `body`. */
-  portalTo?: string | HTMLElement
+  portalTo?: PortalTarget
 
   /** Reka-ui primitives supplied by the wrapping menu component. */
   primitives: MenuPrimitives
@@ -170,13 +171,7 @@ export interface MenuGroupSlotProps {
   group: MenuGroupOption
 }
 
-export interface MenuSlots {
-  /** Alternate trigger renderer. */
-  default?: (props: any) => any
-
-  /** Explicit trigger slot renderer. */
-  trigger?: (props: any) => any
-
+export interface MenuFixedSlots {
   /** Replaces the entire item row. */
   item?: (props: MenuItemSlotProps) => any
 
@@ -194,6 +189,11 @@ export interface MenuSlots {
 
   /** Fallback content rendered when no items are available. */
   empty?: () => any
-
-  [slotName: string]: ((props: any) => any) | undefined
 }
+
+export interface MenuDynamicSlots {
+  /** Per-item slot selected by an option's `slot` field. */
+  [slotName: `item-${string}`]: ((props: MenuItemSlotProps) => any) | undefined
+}
+
+export type MenuSlots = MenuFixedSlots & MenuDynamicSlots

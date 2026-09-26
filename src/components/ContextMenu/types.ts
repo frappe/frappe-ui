@@ -1,4 +1,9 @@
-import type { MenuOptions, MenuSlots } from '../Menu/types'
+import type {
+  MenuDynamicSlots,
+  MenuFixedSlots,
+  MenuOptions,
+} from '../Menu/types'
+import type { PortalTarget } from '../../composables/usePortalTarget'
 
 export type {
   MenuTheme as ContextMenuTheme,
@@ -20,6 +25,10 @@ export type {
 export interface ContextMenuTriggerSlotProps {
   /** Whether the context menu is currently open. */
   open: boolean
+  /** Sets the context menu open state. */
+  setOpen: (value: boolean) => void
+  /** Closes the context menu. */
+  close: () => void
 }
 
 export interface ContextMenuProps {
@@ -28,11 +37,30 @@ export interface ContextMenuProps {
 
   /** Controls the visibility of the context menu. */
   open?: boolean
+  /** Teleport target for menu content. Unset uses the nearest host target or `body`. */
+  portalTo?: PortalTarget
 }
 
-export type ContextMenuSlots = Omit<MenuSlots, 'default' | 'trigger'> & {
-  /** The right-clickable region that opens the menu. */
-  default?: (props: ContextMenuTriggerSlotProps) => any
-  /** Explicit trigger slot; same as default. */
-  trigger?: (props: ContextMenuTriggerSlotProps) => any
+// Exported for consumers to import, and deliberately **not** passed to
+// `defineEmits`. `update:open` is declared by `defineModel('open')` in the SFC;
+// declaring it a second time through `defineEmits` makes Vue's generated
+// `__VLS_ModelEmit & __VLS_Emit` an intersection of two tuples, which collapses
+// `$emit` and every listener to `(...args: unknown[]) => any` — the defect
+// #1098 removed from `Combobox` and `MultiSelect`.
+//
+// Those two are wired because they carry events no model declares (`focus`,
+// `blur`, `update:selectedOption`); this component has none, so `defineEmits`
+// would add nothing and cost the typed listener. `DropdownEmits`, `SelectEmits`,
+// `SettingsDialogEmits`, `RatingEmits`, `DurationEmits` and `RadioGroupEmits`
+// are unwired for the same reason.
+export interface ContextMenuEmits {
+  'update:open': [open: boolean]
 }
+
+export type ContextMenuSlots = MenuFixedSlots &
+  MenuDynamicSlots & {
+    /** The right-clickable region that opens the menu. */
+    default?: (props: ContextMenuTriggerSlotProps) => any
+    /** Explicit trigger slot; same as default. */
+    trigger?: (props: ContextMenuTriggerSlotProps) => any
+  }

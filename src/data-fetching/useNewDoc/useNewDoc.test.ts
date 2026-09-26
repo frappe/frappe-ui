@@ -22,6 +22,30 @@ describe('useNewDoc', () => {
     expect(typeof user.submit).toBe('function')
   })
 
+  // DAT-Q6: `params()` reads the reactive `doc`, so `refetch: true` would send
+  // an insert on every edit and make `submit()` send nothing at all. The
+  // option is gone from the type, and the value is forced after the caller's
+  // spread so an untyped caller cannot put it back.
+  it('inserts on submit only, whatever the caller passes', async () => {
+    const fetchSpy = vi.spyOn(global, 'fetch')
+    const user = useNewDoc<User>(
+      'User',
+      { name: 'forced-user', email: 'first@example.com' },
+      { baseUrl, ...({ refetch: true, immediate: true } as {}) },
+    )
+
+    // An edit before the first submit sends nothing.
+    user.doc.email = 'second@example.com'
+    await Promise.resolve()
+    expect(fetchSpy).not.toHaveBeenCalled()
+
+    await expect(user.submit()).resolves.toMatchObject({
+      name: 'forced-user',
+      email: 'second@example.com',
+    })
+    expect(fetchSpy).toHaveBeenCalledTimes(1)
+  })
+
   it('submits the current value of doc, not the initial value', async () => {
     const user = useNewDoc<User>(
       'User',

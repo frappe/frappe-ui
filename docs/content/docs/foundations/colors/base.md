@@ -1,13 +1,16 @@
 ---
-outline: false
+search: false
 ---
 
 <script setup>
-import PalettePage from '@/components/foundations/PalettePage.vue'
+import { onMounted } from 'vue'
+import { useRouter, withBase } from 'vitepress'
+
+// This page moved. Old links and bookmarks land here and are sent on.
+const router = useRouter()
+onMounted(() => router.go(withBase('/docs/foundations/colors#palette')))
 </script>
 
 # Base Colors
 
-The raw palette. Twelve hues, eleven shades each, plus alpha ramps and neutrals.
-
-<PalettePage />
+This page moved to [Colors](/docs/foundations/colors#palette).

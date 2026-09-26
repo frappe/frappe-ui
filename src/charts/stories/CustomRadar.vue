@@ -55,8 +55,8 @@ const option = computed(() => ({
     indicator: CRITERIA.map((name) => ({ name, max: 100 })),
     radius: '62%',
     axisName: { color: tokens.value.axisLabel, fontSize: 11 },
-    axisLine: { lineStyle: { color: tokens.value.splitLine } },
-    splitLine: { lineStyle: { color: tokens.value.splitLine, type: 'dashed' } },
+    axisLine: { lineStyle: { color: tokens.value.gridline } },
+    splitLine: { lineStyle: { color: tokens.value.gridline, type: 'dashed' } },
     splitArea: { show: false },
   },
   series: [

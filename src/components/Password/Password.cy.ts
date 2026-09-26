@@ -6,9 +6,26 @@ describe('Password', () => {
     cy.mount(Password)
     cy.get('input[type=password]').should('exist')
 
-    cy.get('[data-grace-area-trigger]').click()
+    cy.get('button[aria-label="Show password"]').click()
     cy.get('input[type=password]').should('not.exist')
     cy.get('input[type=text]').should('exist')
+    cy.get('button[aria-label="Hide password"]').should('exist')
+  })
+
+  it('reaches the toggle with Tab and toggles with Enter', () => {
+    cy.mount(Password)
+    cy.get('input').focus()
+    cy.press(Cypress.Keyboard.Keys.TAB)
+    cy.focused().should('have.attr', 'aria-label', 'Show password')
+
+    cy.focused().type('{enter}')
+    cy.get('input').should('have.attr', 'type', 'text')
+    cy.focused().should('have.attr', 'aria-label', 'Hide password')
+  })
+
+  it('disables the toggle with the input', () => {
+    cy.mount(Password, { props: { disabled: true } })
+    cy.get('button[aria-label="Show password"]').should('be.disabled')
   })
 
   it('v-model with modelValue', () => {

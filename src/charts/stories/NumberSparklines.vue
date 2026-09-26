@@ -13,6 +13,12 @@ const pipeline = [
 ]
 const storageUsed = [42, 44, 46, 49, 51, 52, 54, 56, 57, 59, 60, 61]
 
+const compact = (value: number) =>
+  new Intl.NumberFormat('en-US', {
+    notation: 'compact',
+    maximumFractionDigits: 1,
+  }).format(value)
+
 const cards: NumberCardProps[] = [
   {
     title: 'Signups',
@@ -31,7 +37,7 @@ const cards: NumberCardProps[] = [
     title: 'Pipeline',
     value: 18_450_000,
     prefix: '$',
-    compact: true,
+    format: compact,
     sparkline: { data: pipeline },
   },
   {

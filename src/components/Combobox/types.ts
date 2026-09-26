@@ -1,8 +1,16 @@
 import type { Component, VNodeChild } from 'vue'
+import type { InputSize, InputVariant } from '../../composables/inputTypes'
 import type { InputLabelingProps } from '../../composables/useInputLabeling'
+import type { PortalTarget } from '../../composables/usePortalTarget'
 
-export type ComboboxVariant = 'subtle' | 'outline' | 'ghost'
-export type ComboboxSize = 'sm' | 'md' | 'lg' | 'xl'
+/**
+ * Combobox renders the same trigger geometry and surfaces as every other text
+ * input, so these are the input scales under the component's own names. They
+ * stay aliases, not copies — a Combobox-only scale would have to come with a
+ * Combobox-only renderer.
+ */
+export type ComboboxVariant = InputVariant
+export type ComboboxSize = InputSize
 
 import type { PopoverSide, PopoverAlign } from '../shared/selection/types'
 export type { PopoverSide, PopoverAlign }
@@ -133,7 +141,7 @@ export interface ComboboxProps extends InputLabelingProps {
   offset?: number
 
   /** Teleport target for the popover content. Unset, an embedding host's target is used, else `body`. */
-  portalTo?: string | HTMLElement
+  portalTo?: PortalTarget
 
   /** Replaces the results with a loading state. */
   loading?: boolean
@@ -188,6 +196,8 @@ export interface ComboboxControlSlotProps {
 
   /** Sets the popover open state (no-op while disabled). */
   setOpen: (value: boolean) => void
+  /** Closes the popover. Equivalent to `setOpen(false)`. */
+  close: () => void
 }
 
 export interface ComboboxSearchSlotProps {
@@ -307,16 +317,13 @@ interface ComboboxItemSlotsByName {
 export interface ComboboxSlots
   extends ComboboxFixedSlots, ComboboxItemSlotsByName {}
 
+/**
+ * The events the component declares itself. `update:modelValue`,
+ * `update:open` and `update:query` are not here: `defineModel` declares those,
+ * and listing them again published one event twice with two payload types
+ * that could drift apart.
+ */
 export interface ComboboxEmits {
-  /** Fired when the committed value changes. */
-  'update:modelValue': [value: ComboboxOptionValue | null]
-
-  /** Fired when the open state changes. */
-  'update:open': [value: boolean]
-
-  /** Fired when the query changes. */
-  'update:query': [value: string]
-
   /** Fired when the resolved selected option changes. */
   'update:selectedOption': [
     option: ComboboxSelectableOption | ComboboxCustomOption | null,

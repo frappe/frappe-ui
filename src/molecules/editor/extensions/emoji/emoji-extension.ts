@@ -50,5 +50,5 @@ export default createSuggestionExtension<EmojiItem>({
       )
     }
   },
-  component: EmojiList,
+  listComponent: EmojiList,
 })

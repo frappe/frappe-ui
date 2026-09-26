@@ -2,7 +2,11 @@ import type { InputSize, InputVariant } from '../../composables/inputTypes'
 import type { InputLabelingProps } from '../../composables/useInputLabeling'
 
 export interface TextareaProps extends InputLabelingProps {
-  /** Controls the visual size of the textarea. */
+  /**
+   * Controls spacing, corner radius and the minimum height of the textarea.
+   * Textarea text is a fixed 13px at every size, so `size` does not change
+   * the type scale the way it does on a single-line input.
+   */
   size?: InputSize
 
   /** Visual style variant. */

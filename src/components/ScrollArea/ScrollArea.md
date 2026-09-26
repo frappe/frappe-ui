@@ -1,32 +1,43 @@
 # ScrollArea
 
-A styled, cross-browser scroll container: overlay scrollbars that fade in on
-hover or scroll and stay off native scrollbar rendering differences. A general
-primitive, not specific to the app shell — `DesktopShell` uses it for its main
-content region, and `SettingsDialog` uses it for a panel body.
+A scroll container with scrollbars that look the same in every browser. The
+scrollbars show while the pointer is over the area.
 
 <ComponentPreview name="ScrollArea-Default" />
 
-Pass content as the default slot; `orientation` picks which scrollbars render
-(`vertical` by default). Reach the real scrolling element through the exposed
-`viewportElement` when something outside needs it — driving a virtualization
-library, or registering the region with `shellScrollContainer`.
+## Examples
 
-```ts
-const scrollArea = useTemplateRef('scrollArea')
-scrollArea.value?.viewportElement // HTMLElement | null
-```
+### Wide table
 
-## ScrollBar
+`orientation="both"` lets a table scroll in both directions, with one
+scrollbar per axis.
 
-The scrollbar thumb, rendered internally by `ScrollArea` — not something apps
-mount on its own. Exported for the rare case of composing it into a custom
-scroll root.
+<ComponentPreview name="ScrollArea-WideTable" />
 
-## Styling
+## Behavior
 
-`data-slot="scroll-area"` / `"scroll-area-viewport"` / `"scroll-area-scrollbar"`
-/ `"scroll-area-thumb"` mark the root, the scrolling viewport, the scrollbar
-track, and the thumb, for app-level CSS.
+### Orientation
+
+`orientation` picks which scrollbars render. `vertical` (the default) and
+`horizontal` render one. `both` renders two, one per axis, for content that can
+overflow either way, such as a wide table or a canvas.
+
+### Hiding the scrollbars
+
+The scrollbars hide `scrollHideDelay` milliseconds after the pointer leaves
+the area. The default is 600.
+
+### Viewport classes
+
+The element that scrolls is inside the root, so a `class` on `ScrollArea` does
+not reach it. `viewportClass` adds classes to that element, for layout that has
+to sit on the scrolling element itself: padding, a grid, a minimum width, or
+`h-full` on its child.
+
+### Where it is used
+
+`ScrollArea` is a general component, not only part of the app shell.
+`DesktopShell` uses it for its content area, and `SettingsBody` uses it for a
+settings panel.
 
 <!-- @include: ./ScrollArea.api.md -->

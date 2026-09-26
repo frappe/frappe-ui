@@ -3,6 +3,7 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
+  import ExposedTable from '@/components/Docs/ExposedTable.vue'
 
   const propsData = [
   {
@@ -31,7 +32,7 @@
   },
   {
     name: 'error',
-    description: 'Puts the chart in its error state and prints this message under it. A\nchart that fails to draw sets its own; this is for a failed request.',
+    description: 'Puts the chart in its error state and prints this message under it. Data\nthe chart cannot draw shows the empty state, not this one.',
     required: false,
     type: 'string | null'
   },
@@ -60,8 +61,8 @@
     type: 'string'
   },
   {
-    name: 'series',
-    description: 'Grouping column: one series per distinct value.',
+    name: 'splitBy',
+    description: 'Splits the points into one series per distinct value.',
     required: false,
     type: 'string'
   },
@@ -80,7 +81,7 @@
   },
   {
     name: 'showDataLabels',
-    description: 'Prints the point\'s own name beside it, the way an axis series prints its\nvalue. `label` is what it prints, so a chart that names no label column has\nnothing to show and says so in a dev-mode warning. Names that would collide\nwith a neighbour are dropped, so a dense cloud carries few.',
+    description: 'Prints each point\'s own name beside it, the way an axis series prints its\nvalue. The `label` prop names the column those come from; without it there\nis nothing to print, and a development build warns. A name that would\ncollide with its neighbour is dropped, so a dense cloud carries few.',
     required: false,
     type: 'boolean'
   },
@@ -144,9 +145,14 @@
     type: 'any'
   },
   {
+    name: 'title-suffix',
+    description: 'A mark right after the title, on the same line. The title truncates\naround it and it keeps its width. It renders in the title\'s font size, so\ncontent sized in `em` is smaller on a NumberCard than on a chart.',
+    type: 'any'
+  },
+  {
     name: 'tooltip',
-    description: 'Replaces the tooltip body. `items` holds the point\'s two measures, and\nits size when the chart draws one.',
-    type: '{ label?: string | undefined; items: ChartTooltipItem[]; }'
+    description: 'Replaces the tooltip body. `items` holds the point\'s two measures, and\nits size when the chart draws one. `rows` holds the row behind the point,\nso a body can read a column the plot never drew.',
+    type: 'ChartTooltipSlotProps'
   }
 ]
 
@@ -158,8 +164,16 @@
   },
   {
     name: 'update:hiddenSeries',
-    description: 'Fired when the hidden series changes.',
+    description: 'The legend switched a group off or back on. Carries the new list.',
     type: '[value: string[]]'
+  }
+]
+
+  const exposedData = [
+  {
+    name: 'chart',
+    description: 'The echarts instance, once the plot has a size to initialise into.',
+    type: 'EChartsType | undefined'
   }
 ]
 </script>
@@ -171,3 +185,5 @@
 <SlotsTable :data="slotsData"/>
 
 <EmitsTable :data="emitsData"/>
+
+<ExposedTable :data="exposedData"/>

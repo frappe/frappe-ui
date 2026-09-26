@@ -36,9 +36,9 @@ async function handleItemSelect(item: MenuOption, event: Event) {
     await router.push(item.route)
     return
   }
-  ;(item.onClick as ((event: PointerEvent) => void) | undefined)?.(
-    event as PointerEvent,
-  )
+  if (!isMenuSwitchOption(item) && !isMenuSubmenuOption(item)) {
+    item.onClick?.(event)
+  }
 }
 </script>
 

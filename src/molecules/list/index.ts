@@ -11,14 +11,12 @@ export { default as ListHeaderCellSort } from './ListHeaderCellSort.vue'
 export { default as ListRows } from './ListRows.vue'
 export { default as ListGroup } from './ListGroup.vue'
 
-// The windowing composable behind <ListRows virtual>, for exotic cases.
-export { useVirtualRows, type UseVirtualRowsOptions } from './useVirtualRows'
-
 export type {
+  ListColumns,
+  ListColumnsByBreakpoint,
   ListProps,
   ListRowProps,
   ListHeaderCellSortProps,
-  ListVirtualOptions,
   ListDivider,
   ListSortDirection,
 } from './types'

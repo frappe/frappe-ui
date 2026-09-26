@@ -104,8 +104,8 @@ v1 must make an explicit keep / refine / remove decision on each — tracked in 
 
 - **Pill** — used only inside `TabButtons` in practice. Decision: stop exporting from the public package surface.
 - **Duration** — publicly exported. Decision: whether it is core v1 surface; if it holds a value, align with the input-family contract.
-- **ThemeSwitcher** — publicly exported for v1 migration, but deprecated. Prefer `Select` plus the `useColorScheme` composable for app-specific theme switching.
-- **CodeEditor** — exported from `frappe-ui/experimental` (ADR-0010, #939). Decided: stays internal under P14 unless there is demand to promote it to a public entry point.
+- **ThemeSwitcher** — moved out of the root export to `frappe-ui/experimental` (#1094, P14), where it parks still deprecated. Prefer `Select` plus the `useColorScheme` composable for app-specific theme switching.
+- **CodeEditor** — ~~exported from `frappe-ui/experimental` (ADR-0010, #939). Decided: stays internal under P14 unless there is demand to promote it to a public entry point.~~ **Superseded** ([ADR-0019](../spec/adr/0019-code-editor-family-composition-model.md)): the demand arrived from `@framework/ui`, which already imports the component. A CodeMirror 6 family (`useCodeEditor`, a renderless `CodeEditor`, `CodeEditorContent`, `CodeKit`) ships at `frappe-ui/code-editor` before the tag, and the experimental `CodeEditor`/`CodePreview` pair is deleted with no deprecation window (P14). The labeled field moves to `@framework/ui`. Spec: [`../spec/code-editor.md`](../spec/code-editor.md).
 - **ListView** — moved from root to `frappe-ui/experimental` (#985, P14). The parity gap with `frappe-ui/list` is real and structural (resizable columns, per-column function props, tooltips, disabled-row exclusion, select banner). Decided: stays there, unstable, until `frappe-ui/list` reaches parity.
 
 `MonthPicker` stays in the core list above for now but is under a remove-or-rebuild
@@ -156,7 +156,7 @@ Items typed **decision** are scope calls to make *first*: resolving several of t
 | Component | Direction | Type | Open PR / branch | Effort | Blocks v1 |
 | --- | --- | --- | --- | --- | --- |
 | **Alert** | Replace type-specific `#icon` slot with `#prefix` (deprecate `#icon`, P6); add uniform `icon?: string \| Component` prop (P11); reconcile `dismissible`/`theme` default drift (code vs JSDoc); add focus-visible on the dismiss button (P12). | refine | — | S | yes |
-| **CodeEditor** | Exported from `frappe-ui/experimental` (ADR-0010, #939). Decided: keep internal under P14 unless there is demand to promote it. | decided | #939 | — | no |
+| **CodeEditor** | ~~Exported from `frappe-ui/experimental` (ADR-0010, #939). Decided: keep internal under P14 unless there is demand to promote it.~~ **Superseded** ([ADR-0019](../spec/adr/0019-code-editor-family-composition-model.md)): the demand arrived from `@framework/ui`. Not kept internal and not promoted as-is. The field is redesigned into a family (`useCodeEditor` + renderless `CodeEditor` + `CodeEditorContent` + `CodeKit`) and ships at `frappe-ui/code-editor`, which returns as a subpath on all three ADR-0010 limbs. The experimental `CodeEditor`/`CodePreview` pair is deleted; the labeled field and `CodePreview` become `@framework/ui`'s. | decided (family ships at `frappe-ui/code-editor`) | ADR-0019 | M | yes |
 | **Duration** | Exported, never classified. Decide if it is core v1 surface; if it holds a value, align with the input-family labeling contract (P5). | decision / refine | — | S→M | only if kept core |
 | **FileUploader** | Bring to structural bar: TS + `<script setup>`, `types.ts`, `*.cy.ts`; declare/deprecate `success`/`failure` emits (P1); flat props over the `uploadArgs` blob (P3); default uploads to `is_private` (security #206). | refactor | #788 (closed unmerged), #673 (CSV MIME) | L | yes |
 | **ListView** | ~~Deprecate in favor of `frappe-ui/list`; do not refactor the legacy component for v1.~~ ~~Superseded (sweep #882): parity isn't reached and can't close passively... ListView ships **frozen, not deprecated**, for v1.~~ **Superseded again** (#985): not taken to bar at root. Moved to `frappe-ui/experimental` (P14, no stability promise) instead of frozen at root — stays there until `frappe-ui/list` reaches full functional parity (config-driven columns, per-column functions, tooltips, disabled-row exclusion, select banner). | decided (moved to experimental) | #985 | — | no |
@@ -166,19 +166,20 @@ Items typed **decision** are scope calls to make *first*: resolving several of t
 | **Sidebar** | Refactor to **molecule-style composable sub-components, no slots**: expose `SidebarHeader` / `SidebarSection` / `SidebarItem` for composition instead of `header`/`sections` config blobs (P3) + generic slots (P10). | refactor | conflicts with #770 (adds a slot — redirect/close) | L | yes |
 | **Switch + Checkbox** | Add the `padded` variant. | land PR | #751 (also adds a new **Radio** — decide if Radio enters v1 scope) | S | yes |
 | **Tabs + TabButtons** | Unify the two overlapping public components — nest TabButtons' segmented rendering inside `Tabs`, or merge into one `Tabs` with a style axis (P8: a purely-visual variant → one component). Resolve before freeze. | refactor | branches: refactor-tabs, tabs-rewrite, improved-tab-buttons | M | yes |
-| **ThemeSwitcher** | Keep exported for v1 compatibility, mark deprecated, and recommend `Select` + `useColorScheme` for new theme switchers. The composable remains the stable primitive. | decision (deprecate) | — | S | yes |
+| **ThemeSwitcher** | ~~Keep exported for v1 compatibility, mark deprecated.~~ **Superseded** (#1094): not taken to bar at root. Moved to `frappe-ui/experimental` (P14, no stability promise), where it stays deprecated, rather than shipping deprecated on the frozen surface. `Select` + `useColorScheme` remains the recommendation for new theme switchers, and the composable remains the stable primitive. | decided (moved to experimental) | #1094 | — | no |
 | **Tree** | Land the rework PR (adds the WAI-ARIA tree pattern + keyboard nav, P12; resolves the `options` config-blob, P3). | land PR | #783 (draft) | track PR | yes |
 
 ### Decisions to make first (they shrink scope)
 
 - **MonthPicker → remove / deprecate** rather than rebuild.
 - **Pill → un-export** (internal-only).
-- **CodeEditor → keep internal**, exported from `frappe-ui/experimental` (#939), unless there is demand to promote it.
-- **ThemeSwitcher → deprecated compatibility export**; `useColorScheme` stays available as the stable primitive.
+- ~~**CodeEditor → keep internal**, exported from `frappe-ui/experimental` (#939), unless there is demand to promote it.~~ **Superseded** ([ADR-0019](../spec/adr/0019-code-editor-family-composition-model.md)): **CodeEditor → ship the family** at `frappe-ui/code-editor` before the tag, delete the experimental pair, and hand the labeled field to `@framework/ui`. This one grows scope instead of shrinking it.
+- **ThemeSwitcher → parked in `frappe-ui/experimental`**, still deprecated (#1094); `useColorScheme` stays available at root as the stable primitive.
 - **Radio (from #751) → confirm** whether a new component enters v1 scope or lands post-v1.
 
-Resolving these five as "remove / keep-internal / defer" turns five potential
-modernization efforts into doc + deprecation edits.
+Resolving these as "remove / keep-internal / defer" turns four potential
+modernization efforts into doc + deprecation edits. CodeEditor is now the exception:
+ADR-0019 replaces its keep-internal decision with a family to build.
 
 ### Open-PR alignment
 
@@ -438,7 +439,7 @@ v1 should not ship before all of these are done:
 
 - release contract and quality gates are defined
 - core components are migrated to TypeScript and `<script setup>` and have docs/stories/tests baselines (FileUploader remaining; ListView moved to `frappe-ui/experimental` and is out of the core set — see [ListView row](#v1-component-refinement-pass))
-- the [v1 component refinement pass](#v1-component-refinement-pass) is complete: the refactors (FileUploader, Popover, Sidebar, Tabs/TabButtons, Tree) and refinements (Alert, Switch/Checkbox padded) land, and the keep/remove decisions (MonthPicker, Pill, Duration, ThemeSwitcher, CodeEditor, Radio) are made and executed
+- the [v1 component refinement pass](#v1-component-refinement-pass) is complete: the refactors (FileUploader, Popover, Sidebar, Tabs/TabButtons, Tree) and refinements (Alert, Switch/Checkbox padded) land, and the keep/remove decisions (MonthPicker, Pill, Duration, ThemeSwitcher, Radio) are made and executed. CodeEditor left that set: [ADR-0019](../spec/adr/0019-code-editor-family-composition-model.md) makes it a build, not a keep/remove call, and the `frappe-ui/code-editor` family must land before the tag
 - selection/input family stabilization is complete enough for v1
 - Dialog/floating stabilization is complete enough for v1
 - TextEditor 1.0 carve-out documented (public API unchanged; refactor in 1.1)

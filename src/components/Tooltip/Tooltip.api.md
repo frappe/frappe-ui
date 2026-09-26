@@ -14,10 +14,10 @@
   },
   {
     name: 'hoverDelay',
-    description: 'Delay (in seconds) before showing the tooltip on hover.',
+    description: 'Delay in milliseconds before showing the tooltip on hover. Default: `500`.',
     required: false,
     type: 'number',
-    default: '0.5'
+    default: '500'
   },
   {
     name: 'side',
@@ -65,17 +65,17 @@
   const tooltipProviderProps = [
   {
     name: 'hoverDelay',
-    description: 'Delay (in seconds) before the first tooltip in the group opens.',
+    description: 'Delay in milliseconds before the first tooltip in the group opens.',
     required: false,
     type: 'number',
-    default: '0.5'
+    default: '500'
   },
   {
     name: 'skipDelay',
-    description: 'Window (in seconds) during which moving to another trigger in this\ngroup opens its tooltip with no delay. Mirrors reka\'s\n`skipDelayDuration`.',
+    description: 'Window in milliseconds during which moving to another trigger in this\ngroup opens its tooltip with no delay. Mirrors reka\'s\n`skipDelayDuration`.',
     required: false,
     type: 'number',
-    default: '0.3'
+    default: '300'
   },
   {
     name: 'disableHoverableContent',

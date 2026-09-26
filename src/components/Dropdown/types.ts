@@ -1,5 +1,10 @@
 import type { ButtonProps } from '../Button'
-import type { MenuOptions, MenuSlotProps, MenuSlots } from '../Menu/types'
+import type {
+  MenuDynamicSlots,
+  MenuFixedSlots,
+  MenuOptions,
+  MenuSlotProps,
+} from '../Menu/types'
 
 export type {
   MenuTheme as DropdownTheme,
@@ -17,6 +22,7 @@ export type {
   MenuItemSlotProps as DropdownItemSlotProps,
   MenuGroupSlotProps as DropdownGroupSlotProps,
 } from '../Menu/types'
+import type { PortalTarget } from '../../composables/usePortalTarget'
 
 export type DropdownSide = 'top' | 'right' | 'bottom' | 'left'
 export type DropdownAlign = 'start' | 'center' | 'end'
@@ -44,25 +50,31 @@ export interface DropdownProps {
   matchTriggerWidth?: boolean
 
   /** Teleport target for dropdown portal content. Unset, an embedding host's target is used, else `body`. */
-  portalTo?: string | HTMLElement
+  portalTo?: PortalTarget
 }
 
 export interface DropdownTriggerSlotProps extends MenuSlotProps {
+  /** Fallthrough attributes passed to the trigger slot at runtime. */
+  [key: string]: any
+
   /** Whether the dropdown menu is currently open. */
   open: boolean
 
   /** Whether the trigger should render as disabled. */
   disabled: boolean
-
-  [key: string]: any
+  /** Sets the dropdown open state. */
+  setOpen: (value: boolean) => void
+  /** Closes the dropdown. */
+  close: () => void
 }
 
-export type DropdownSlots = Omit<MenuSlots, 'default' | 'trigger'> & {
-  /** Alternate trigger renderer. */
-  default?: (props: DropdownTriggerSlotProps) => any
-  /** Explicit trigger slot renderer. */
-  trigger?: (props: DropdownTriggerSlotProps) => any
-}
+export type DropdownSlots = MenuFixedSlots &
+  MenuDynamicSlots & {
+    /** Alternate trigger renderer. */
+    default?: (props: DropdownTriggerSlotProps) => any
+    /** Explicit trigger slot renderer. */
+    trigger?: (props: DropdownTriggerSlotProps) => any
+  }
 
 export interface DropdownEmits {
   /** Fired when the dropdown open state changes. */

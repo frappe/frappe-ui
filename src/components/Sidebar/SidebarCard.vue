@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watchEffect } from 'vue'
+import { useReactiveSlots } from '../../composables/useReactiveSlots'
 import Button from '../Button/Button.vue'
 import { warnUnsupportedIconString } from '../../utils/iconString'
 import { mergeActionProps } from '../shared/action'
@@ -26,7 +27,8 @@ const props = withDefaults(defineProps<SidebarCardProps>(), {
 
 const emit = defineEmits<SidebarCardEmits>()
 
-const slots = defineSlots<SidebarCardSlots>()
+defineSlots<SidebarCardSlots>()
+const slots = useReactiveSlots<SidebarCardSlots>()
 
 watchEffect(() => {
   if (typeof props.icon === 'string') {

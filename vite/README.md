@@ -36,10 +36,21 @@ export default defineConfig({
 })
 ```
 
-All plugins except `frappeTypes` are **enabled by default**. `frontendRoute`
-and `frappeTypes` require explicit configuration — `frontendRoute` sets the app route,
-and `frappeTypes` needs an `input` map of app names to doctype names. Pass
-custom options to override any plugin, or `false` to disable it.
+All plugins except `lucideIcons` and `frappeTypes` are **enabled by default**.
+`frontendRoute` and `frappeTypes` require explicit configuration —
+`frontendRoute` sets the app route, and `frappeTypes` needs an `input` map of
+app names to doctype names. Pass custom options to override any plugin, or
+`false` to disable it.
+
+| Sub-plugin | Default |
+| --- | --- |
+| `barrelImports` | on |
+| `codeLanguages` | on |
+| `frappeProxy` | on |
+| `jinjaBootData` | on |
+| `buildConfig` | on |
+| `lucideIcons` | **off** |
+| `frappeTypes` | off |
 
 ---
 
@@ -91,6 +102,11 @@ frappeui({
 
 Integrates [Lucide icons](https://lucide.dev/) with auto-import support and a
 standardized stroke-width of 1.5.
+
+**Off by default (`lucideIcons: false`).** frappe-ui's own components use class
+icons (`<span class="lucide-arrow-right" />`), which the Tailwind plugin draws
+as a CSS mask and which need no Vite plugin. Pass `lucideIcons: true` when your
+app uses either form below.
 
 **Auto-import** — use directly in templates, no import needed:
 
@@ -201,3 +217,45 @@ frappeui({
   },
 })
 ```
+
+### Code Languages
+
+Lets an app build `frappe-ui/code-editor` with only the `@codemirror/lang-*`
+packages it installed. **On by default (`codeLanguages: true`).**
+
+`loadLanguage(key)` reaches ten language packages through literal dynamic
+imports, and they are optional peer dependencies. Both of Vite's bundlers
+resolve those imports ahead of time, so one package the app did not install
+stops the build:
+
+```
+[vite]: Rollup failed to resolve import "@codemirror/lang-sql"
+```
+
+and stops the dev server, which exits rather than degrading:
+
+```
+Error during dependency optimization:
+✘ [ERROR] Could not resolve "@codemirror/lang-sql"
+```
+
+The plugin replaces an absent package with a stub that throws when
+`loadLanguage` reaches it. It covers both paths: a Rollup `resolveId` hook for
+the build, and an esbuild twin through `optimizeDeps.esbuildOptions.plugins` for
+dependency pre-bundling, which runs no Rollup hooks. The build and the dev
+server both succeed, and the error names the package to install:
+
+```
+[frappe-ui] loadLanguage('sql') could not load @codemirror/lang-sql: Cannot find module '@codemirror/lang-sql'. If it is not installed: yarn add @codemirror/lang-sql
+```
+
+Only frappe-ui's own imports are stubbed. The plugin finds that module by
+resolving `frappe-ui/code-editor` in your app, so an app file of its own at
+`src/code-editor/languages.js` is left alone, and so is a language package the
+app imports itself. Both still fail the build, because nothing catches those.
+
+```javascript
+frappeui({ codeLanguages: false })
+```
+
+Turning it off means installing all ten packages.

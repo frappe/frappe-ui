@@ -109,50 +109,58 @@ describe('Textarea', () => {
   })
 
   describe('sizes', () => {
+    // `size` moves spacing and the minimum height. The type does not move:
+    // Textarea text is a flat 13px at every size.
     const sizes = [
-      {
-        size: 'sm',
-        fontClass: 'text-p-base',
-        minHClass: 'min-h-9',
-        px: 14,
-        lineHeight: '21px',
-      },
-      {
-        size: 'md',
-        fontClass: 'text-p-lg',
-        minHClass: 'min-h-10',
-        px: 16,
-        lineHeight: '24px',
-      },
-      {
-        size: 'lg',
-        fontClass: 'text-p-2xl',
-        minHClass: 'min-h-11',
-        px: 18,
-        lineHeight: '27px',
-      },
-      {
-        size: 'xl',
-        fontClass: 'text-p-3xl',
-        minHClass: 'min-h-11',
-        px: 20,
-        lineHeight: '29.6px',
-      },
+      { size: 'xs', minHClass: 'min-h-8', minHeight: 32 },
+      { size: 'sm', minHClass: 'min-h-9', minHeight: 36 },
+      { size: 'md', minHClass: 'min-h-10', minHeight: 40 },
+      { size: 'lg', minHClass: 'min-h-11', minHeight: 44 },
     ] as const
 
-    sizes.forEach(({ size, fontClass, minHClass, px, lineHeight }) => {
-      it(`size="${size}" applies ${fontClass}, ${minHClass}, and renders at ${px}px`, () => {
+    sizes.forEach(({ size, minHClass, minHeight }) => {
+      it(`size="${size}" applies ${minHClass} and stays at 13px`, () => {
         cy.mount(Textarea, { props: { size } })
 
         cy.get('textarea')
-          .should('have.class', fontClass)
+          .should('have.class', 'text-p-sm')
           .and('have.class', minHClass)
-          .and('have.css', 'font-size', `${px}px`)
-          .and('have.css', 'line-height', lineHeight)
+          .and('have.css', 'font-size', '13px')
+          .and('have.css', 'line-height', '19.5px')
+          .and('have.css', 'min-height', `${minHeight}px`)
+      })
+
+      it(`size="${size}" fits one full line inside ${minHClass}`, () => {
+        // The min-heights are sized to hold one line of 13px prose plus the
+        // size's own padding and border. If a padding row grows past its
+        // min-height the empty box gets taller than the token says.
+        cy.mount(Textarea, { props: { size, rows: 1 } })
+        cy.get('textarea').should(($el) => {
+          expect($el[0].getBoundingClientRect().height).to.equal(minHeight)
+        })
+      })
+
+      it(`size="${size}" keeps 13px across multiline content`, () => {
+        cy.mount(Textarea, {
+          props: {
+            size,
+            rows: 4,
+            modelValue: 'first line\nsecond line\nthird line',
+          },
+        })
+        cy.get('textarea')
+          .should('have.css', 'font-size', '13px')
+          .and('have.value', 'first line\nsecond line\nthird line')
+        // Four rows of 13px prose must be taller than the one-line minimum.
+        cy.get('textarea').should(($el) => {
+          expect($el[0].getBoundingClientRect().height).to.be.greaterThan(
+            minHeight,
+          )
+        })
       })
     })
 
-    it('increases font size monotonically across sizes', () => {
+    it('holds the type scale flat across every size', () => {
       const rendered: number[] = []
 
       sizes.forEach(({ size }) => {
@@ -163,10 +171,33 @@ describe('Textarea', () => {
       })
 
       cy.then(() => {
+        expect(rendered).to.deep.equal([13, 13, 13, 13])
+      })
+    })
+
+    it('grows the minimum height monotonically across sizes', () => {
+      const rendered: number[] = []
+
+      sizes.forEach(({ size }) => {
+        cy.mount(Textarea, { props: { size } })
+        cy.get('textarea').then(($el) => {
+          rendered.push(parseFloat(getComputedStyle($el[0]).minHeight))
+        })
+      })
+
+      cy.then(() => {
         rendered.slice(1).forEach((px, i) => {
           expect(px).to.be.greaterThan(rendered[i])
         })
       })
+    })
+
+    it('falls back to sm geometry for a size outside the union', () => {
+      cy.mount(Textarea, { props: { size: 'xl' as never } })
+      cy.get('textarea')
+        .should('have.class', 'min-h-9')
+        .and('have.class', 'text-p-sm')
+        .and('have.css', 'min-height', '36px')
     })
   })
 

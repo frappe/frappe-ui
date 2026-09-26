@@ -15,7 +15,9 @@ import { appendFileSync, readFileSync } from 'node:fs'
 //   tag=<dist-tag>     (only when changed)
 //   version=<x.y.z>    (only when changed)
 
-const PRERELEASE_RE = /^\d+\.\d+\.\d+-([a-zA-Z][a-zA-Z0-9]*)(?:\.\d+)?$/
+// A prerelease needs a numbered id, so a typo such as 1.0.0-rc1 fails the
+// publish instead of creating an `rc1` dist-tag.
+const PRERELEASE_RE = /^\d+\.\d+\.\d+-([a-zA-Z]+)\.\d+$/
 const STABLE_RE = /^\d+\.\d+\.\d+$/
 
 function distTag(version: string): string {

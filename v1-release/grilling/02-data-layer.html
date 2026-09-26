@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Data layer | frappe-ui v1 RC</title>
+    <link rel="stylesheet" href="_shared.css" />
+  </head>
+  <body>
+    <div data-grill-page></div>
+    <script>
+      const AREA = 'data-layer'
+      const TITLE = 'Data layer'
+      const INTRO =
+        'Set the permanent behavior of requests, document actions, uploads, caching, and date utilities. Start with failure behavior because the later error and display contracts depend on it.'
+      const QUESTIONS = [
+        {
+          id: 'DAT-Q1',
+          title: 'v2 action failure behavior',
+          covers: ['H01'],
+          severity: 'High',
+          tier: 'T3 · 58 sites',
+          what: `<p>The v2 composables expose actions through <code>submit()</code>. <code>useCall</code> and the actions returned by <code>useDoc</code>, including <code>setValue</code>, <code>delete</code>, and consumer-defined methods, currently resolve <code>null</code> after a request fails. Actions from <code>useList</code>, <code>useDoctype</code>, and <code>useNewDoc</code> reject, so identical-looking calls need different error handling.</p>`,
+          visual: {
+            label: 'Consumer error handling',
+            code: `- const result = await doc.setValue.submit(values)
+- if (result === null) showError(doc.setValue.error)
++ try {
++   await doc.setValue.submit(values)
++ } catch (error) {
++   showError(error)
++ }
+  await list.setValue.submit({ name, ...values }) // already rejects`,
+          },
+          found: `<p>The two action families have opposite failure contracts even though the docs say both reject. <code>src/data-fetching/useCall/useCall.ts:188-212</code> resolves its pending promise on fetch errors, while <code>src/data-fetching/useAction.ts:198-217</code> converts a recorded call error into a rejection.</p>`,
+          said: `<div class="source-quote"><div class="source-label">H01 choice</div><p>"Every listed v2 action rejects on failure; fix tests/docs"</p><div class="source-label">Comment</div><p>Nothing yet.</p></div><div class="source-quote"><div class="source-label">Migration review</div><p>The migration report found 58 v1-app calls that need behavior review and says a codemod cannot determine whether each caller relies on <code>null</code>. The zero-cost alternative is to keep the runtime split and make the docs match the code.</p></div>`,
+          tradeoff: `<p>Keeping the split freezes a trap: two <code>submit()</code> APIs report the same failure through different channels, so shared wrappers can silently miss errors. Rejecting everywhere requires manual review of 58 v1-app sites and no codemod can make that review safe. Resolving <code>null</code> everywhere creates the same review burden in the action family that already rejects; documenting the split avoids the break but makes the inconsistency permanent.</p>`,
+          options: [
+            'Make every listed v2 action reject on failure and review all 58 sites',
+            'Make every listed v2 action resolve null on failure and review all affected rejecting callers',
+            'Keep both behaviors and document exactly which composables reject or resolve null',
+          ],
+          recommended: 0,
+          why: 'A single rejection contract removes a control-flow trap from the permanent v2 API, even though the 58 sites require manual review.',
+        },
+        {
+          id: 'DAT-Q2',
+          title: 'useDoc method names and reserved members',
+          covers: ['H02'],
+          severity: 'High',
+          tier: 'not measured',
+          what: `<p><code>useDoc</code> accepts a <code>methods</code> object whose keys are chosen by the consumer. It creates one action for each key and spreads those actions directly onto the returned document resource. A method named <code>reload</code>, <code>delete</code>, or any future built-in member can replace or be replaced by the composable's own API.</p>`,
+          visual: {
+            label: 'Current return shape',
+            code: `const todo = useDoc({
+  doctype: 'ToDo',
+  name: 'TODO-1',
+  methods: { close: 'close', reload: 'reopen' },
+})
+
+todo.close.submit()
+todo.reload() // built-in name collides with consumer method`,
+          },
+          found: `<p><code>useDoc</code> builds <code>docMethods</code> from arbitrary keys at <code>src/data-fetching/useDoc/useDoc.ts:116-141</code> and spreads them after all built-in members at <code>src/data-fetching/useDoc/useDoc.ts:198-224</code>. That prevents the return shape from growing safely.</p>`,
+          said: `<div class="source-quote"><div class="source-label">H02 choice</div><p>"Ship the open-ended top-level spread of consumer methods on <code>useDoc</code>"</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Shipping the spread without a check freezes a collision trap and makes every future built-in name a possible break. A development-time reserved-name check preserves the chosen call shape and catches known collisions, but the reserved list becomes part of the contract and must grow before new members ship. Nesting methods avoids the problem but would break existing calls, and H02 has no measured migration row.</p>`,
+          options: [
+            'Keep top-level methods and throw a clear development-time error for reserved names',
+            'Keep top-level methods with no check and document the reserved names',
+          ],
+          recommended: 0,
+          why: 'A development-time check preserves the chosen API while stopping consumer methods from silently replacing built-in members.',
+        },
+        {
+          id: 'DAT-Q3',
+          title: 'FrappeResponseError and FrappeRequestError',
+          covers: ['H03'],
+          severity: 'High',
+          tier: 'not measured',
+          dependsOn: 'DAT-Q1',
+          what: `<p>frappe-ui has two public request stacks. The v2 composables use the <code>FrappeResponseError</code> class, while the v1 <code>frappeRequest</code> helper returns objects typed as <code>FrappeRequestError</code>. They represent server failures but expose different fields and only the v2 class supports <code>instanceof FrappeResponseError</code>.</p>`,
+          visual: {
+            label: 'Error fields by request stack',
+            html: `<table><thead><tr><th>Caller</th><th>Error</th><th>Distinct fields</th></tr></thead><tbody><tr><td><code>useCall</code>, <code>useDoc</code>, <code>useList</code></td><td><code>FrappeResponseError</code></td><td><code>title</code>, <code>type</code>, <code>exception</code></td></tr><tr><td><code>frappeRequest</code>, v1 resources</td><td><code>FrappeRequestError</code></td><td><code>exc_type</code>, <code>exc</code>, <code>status</code>, <code>messages</code></td></tr></tbody></table>`,
+          },
+          found: `<p>The contracts overlap in purpose but differ in names, fields, and runtime identity. The class is declared at <code>src/data-fetching/useFrappeFetch.ts:6-37</code>; the v1 interface is declared at <code>src/utils/frappeRequest.ts:20-26</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">H03 choice</div><p>"Ship both error shapes as independent contracts"</p><div class="source-label">Comment</div><p>"ship two separate v1 and v2 error response shapes, frappeRequest is based v1 and useFrappeFetch is based on v2"</p></div>`,
+          tradeoff: `<p>Keeping both names is a documentable inconsistency: developers must know which request stack produced an error before reading its fields. Renaming or unifying them could break error guards and field access, and H03 has no measured migration row. Clear documentation preserves the intentional v1 versus v2 boundary; leaving the mapping implicit makes the two similar names easy to confuse.</p>`,
+          options: [
+            'Keep both names and document a composable-to-error table with field differences',
+            'Keep both contracts but rename them to V1RequestError and V2ResponseError',
+            'Define one shared base error and keep both current names as stack-specific extensions',
+          ],
+          recommended: 0,
+          why: 'The maintainer wants separate v1 and v2 contracts, and a direct mapping documents that boundary without an unmeasured rename.',
+        },
+        {
+          id: 'DAT-Q4',
+          title: 'useFileUpload rejection and privacy options',
+          covers: ['H04'],
+          severity: 'High',
+          tier: 'T3 · 7 sites',
+          dependsOn: 'DAT-Q3',
+          what: `<p><code>useFileUpload</code> uploads a file with <code>XMLHttpRequest</code> and exposes progress, result, and error state. Network failure rejects with a string, cancellation rejects with a <code>DOMException</code>, and server failure rejects with an <code>Error</code>. Its options also accept both <code>private</code> and the old <code>is_private</code> spelling.</p>`,
+          visual: {
+            label: 'Proposed upload contract',
+            code: `- error: any | null
+- private?: boolean
+- is_private?: boolean | 0 | 1 | '0' | '1'
+- reject('Upload failed')
+- reject(new DOMException('Upload cancelled', 'AbortError'))
++ error: UploadError | null
++ private?: boolean
++ reject(new UploadError('Upload failed', { reason: 'network' }))
++ reject(new UploadError('Upload cancelled', { reason: 'aborted' }))`,
+          },
+          found: `<p>The public state uses <code>any</code> and the options keep the v0 alias at <code>src/utils/useFileUpload.ts:4-52</code>. The error and abort handlers reject different values at <code>src/utils/useFileUpload.ts:199-210</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">H04 choice</div><p>"Normalize upload rejection to one exported error type, type <code>UploadState.error</code>, remove <code>is_private</code>"</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>The current union is a trap because callers cannot safely inspect a rejection and <code>UploadState.error</code> disables type checking. Removing <code>is_private</code> also enforces the v1-only spelling. The change requires behavior review at 7 v1-app upload sites and no codemod can prove their catch paths still work; keeping the current union is not a safe documentation-only option.</p>`,
+          options: [
+            'Export UploadError, reject it for network, server, and abort failures, type state.error with it, and remove is_private',
+            'Reject standard Error for every failure, type state.error as Error, and remove is_private',
+            'Use FrappeRequestError for server failures and a separate exported UploadAbortError for cancellation; remove is_private',
+          ],
+          recommended: 0,
+          why: 'One owned UploadError gives every upload caller a stable type and can preserve the failure reason without pretending every failure came from Frappe.',
+        },
+        {
+          id: 'DAT-Q5',
+          title: 'useDoc onSuccess and onError callbacks',
+          covers: ['B1'],
+          severity: 'Medium',
+          tier: 'T0 · 0 sites',
+          dependsOn: 'DAT-Q1',
+          what: `<p><code>useDoc</code> currently returns an <code>onSuccess(callback)</code> subscription method. Unlike the other v2 composables, its options have no <code>onSuccess</code> or <code>onError</code> callbacks. Supporting both lets a caller declare initial hooks in the options and subscribe later through the returned resource.</p>`,
+          visual: {
+            label: 'Two callback times',
+            code: `const todo = useDoc({
+  doctype: 'ToDo',
+  name,
++ onSuccess: syncBadge,
++ onError: showFailure,
+})
+
+const stop = todo.onSuccess(refreshPanel)
+stop()`,
+          },
+          found: `<p><code>UseDocOptions</code> has neither callback at <code>src/data-fetching/useDoc/useDoc.ts:36-45</code>, while the returned subscription method is at <code>src/data-fetching/useDoc/useDoc.ts:198-219</code>. There is no equivalent returned <code>onError</code> subscription.</p>`,
+          said: `<div class="source-quote"><div class="source-label">B1 choice</div><p>"<code>useDoc</code> supports both the return-method subscription and option callbacks"</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping only the returned subscription leaves <code>useDoc</code> inconsistent with the other composables and provides no error hook. Adding option callbacks is additive, touches zero measured v1-app sites, and a codemod is not needed. Removing the subscription would simplify the API but needlessly break callers that subscribe after creation.</p>`,
+          options: [
+            'Support option onSuccess and onError callbacks and keep the returned onSuccess subscription',
+            'Keep only the returned onSuccess subscription and document the difference',
+            'Move callbacks to options only and remove the returned subscription',
+          ],
+          recommended: 0,
+          why: 'Supporting both adds the missing error hook at zero measured migration cost and keeps late subscription use working.',
+        },
+        {
+          id: 'DAT-Q6',
+          title: 'v2 cache and refetch defaults',
+          covers: ['B2'],
+          severity: 'Medium',
+          tier: 'not measured',
+          what: `<p>The read composables decide whether a write should fetch fresh server data or use their local stores. <code>useCall</code> defaults <code>refetch</code> to false, <code>useList</code> defaults it to true, and <code>useDoc</code> hard-codes its own behavior. <code>useNewDoc</code> inherits cache options even though it performs a one-shot POST.</p>`,
+          visual: {
+            label: 'Current defaults',
+            html: `<table><thead><tr><th>Composable</th><th>Default</th></tr></thead><tbody><tr><td><code>useCall</code></td><td><code>refetch: false</code></td></tr><tr><td><code>useList</code></td><td><code>refetch: true</code></td></tr><tr><td><code>useDoc</code></td><td>hard-coded read/store behavior</td></tr><tr><td><code>useNewDoc</code></td><td>inherits cache options</td></tr></tbody></table>`,
+          },
+          found: `<p>The defaults differ at <code>src/data-fetching/useCall/useCall.ts:38-48</code> and <code>src/data-fetching/useList/useList.ts:26-44</code>. <code>useNewDoc</code> derives its options from <code>UseCallOptions</code> at <code>src/data-fetching/useNewDoc/useNewDoc.ts:6-18</code>, including cache settings that do not describe an insert.</p>`,
+          said: `<div class="source-quote"><div class="source-label">B2 choice</div><p>"Keep the current per-composable cache and refetch defaults"</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping the defaults freezes a merely inconsistent API, so each composable must document its own cache and refetch rules. Standardizing reads on cache-first or refetch-first behavior is easier to remember but can change data freshness without a type error. B2 was not measured, so the number of default-dependent sites is unknown and a codemod cannot validate runtime expectations.</p>`,
+          options: [
+            'Keep the per-composable defaults and document each one beside its options',
+            'Default every read composable to cached data with explicit refetch',
+            'Default every read composable to refetch and make caching explicit',
+          ],
+          recommended: 0,
+          why: 'The current defaults reflect different jobs, and documenting them avoids an unmeasured data-freshness change before the freeze.',
+        },
+        {
+          id: 'DAT-Q7',
+          title: 'useDoctype and useNewDoc options objects',
+          covers: ['B3'],
+          severity: 'Medium',
+          tier: 'T0 · 0 sites',
+          what: `<p><code>useCall</code>, <code>useList</code>, and <code>useDoc</code> take one named options object. <code>useDoctype</code> and <code>useNewDoc</code> instead put the doctype and initial values in positional arguments. Object overloads can add the consistent form while keeping every existing call valid.</p>`,
+          visual: {
+            label: 'Additive call shapes',
+            code: `  useDoctype('ToDo', { baseUrl })
++ useDoctype({ doctype: 'ToDo', baseUrl })
+
+  useNewDoc('ToDo', { description }, { baseUrl })
++ useNewDoc({
++   doctype: 'ToDo',
++   initialValues: { description },
++   baseUrl,
++ })`,
+          },
+          found: `<p>The positional signatures are declared at <code>src/data-fetching/useDoctype/useDoctype.ts:6-13</code> and <code>src/data-fetching/useNewDoc/useNewDoc.ts:6-19</code>. <code>runDocMethod</code> also places <code>validate</code> inside its submitted params at <code>src/data-fetching/useDoctype/useDoctype.ts:80-98</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">B3 choice</div><p>"Add object overloads; keep the positional forms"</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping only positional forms preserves a merely inconsistent API. Adding object overloads touches zero measured v1-app sites and needs no codemod, but it permanently supports two ways to call the same composables. Replacing the positional forms would make one clean convention at the cost of unnecessary breaks.</p>`,
+          options: [
+            'Add object overloads and keep the positional forms',
+            'Keep the positional forms and document the exception',
+            'Replace the positional forms with object-only calls before v1',
+          ],
+          recommended: 0,
+          why: 'The additive overload gives new code the consistent form without breaking existing consumers.',
+        },
+        {
+          id: 'DAT-Q8',
+          title: 'Root dayjs exports',
+          covers: ['B4'],
+          severity: 'Medium',
+          tier: 'not measured',
+          what: `<p>The root package exports the configured <code>dayjs</code> instance and <code>dayjsLocal</code>, which converts stored system-time strings for local display. The same module also defines <code>dayjsSystem</code> and uses the third-party <code>Dayjs</code> type, but neither is public. Keeping the root utilities overrides ADR-0010, so the freeze must say whether the public family stops at the two names apps already use.</p>`,
+          visual: {
+            label: 'Current and possible root exports',
+            code: `  export { dayjs, dayjsLocal } from './utils/dayjs'
++ export {
++   dayjs,
++   dayjsLocal,
++   dayjsSystem,
++   type Dayjs,
++ } from './utils/dayjs'`,
+          },
+          found: `<p>The module defines <code>dayjsLocal</code>, <code>dayjsSystem</code>, and <code>dayjs</code> at <code>src/utils/dayjs.ts:27-47</code>. The root exports only <code>dayjs</code> and <code>dayjsLocal</code> at <code>src/index.ts:170-172</code>, while the audit notes that ADR-0010 rejects leaving them at root without an explicit exception.</p>`,
+          said: `<div class="source-quote"><div class="source-label">B4 choice</div><p>"Keep <code>dayjs</code> and <code>dayjsLocal</code> exported from the root"</p><div class="source-label">Comment</div><p>"dayjs exports are necessary and must be exported from frappe-ui, it is supposed to be used in app code"</p></div>`,
+          tradeoff: `<p>Keeping only the two current names is a documentable asymmetry: consumers can convert system time to local time but cannot import the inverse helper or its return type from frappe-ui. Exporting <code>dayjsSystem</code> and <code>Dayjs</code> completes the family without breaking code, but it freezes more API and exposes a dependency type at the root. Moving or removing the current exports would break app code, and B4 has no measured migration row.</p>`,
+          options: [
+            'Keep dayjs and dayjsLocal at root; document that Dayjs and dayjsSystem are not public',
+            'Keep dayjs and dayjsLocal and also export dayjsSystem and the Dayjs type from root',
+            'Move all four names to a typed frappe-ui/dayjs subpath',
+            'Remove the root utilities and require direct dayjs imports',
+          ],
+          recommended: 0,
+          why: 'It preserves the two app-facing utilities the maintainer requires without freezing two unmeasured exports that consumers have not asked for.',
+        },
+        {
+          id: 'DAT-Q9',
+          title: 'M-data mechanical fixes and 1.1 deferrals',
+          covers: ['M-data/A', 'M-data/C', 'X6'],
+          severity: 'Medium',
+          tier: 'T0-T1 · 2 sites; C not measured',
+          dependsOn: 'DAT-Q3',
+          what: `<p>The M-data triage separates rule-driven cleanup from work that can wait for 1.1. The audit proposed removing <code>execute</code>, <code>fetch</code>, and <code>isFetching</code>, but the later triage keeps them under the accepted v1 alias carve-out. The other mechanical fixes narrow an unread plugin option and replace resource wildcard exports with explicit lists; the deferred group fills type gaps and fixes configuration or upload behavior.</p>`,
+          visual: {
+            label: 'Mechanical and deferred checklist',
+            code: `A  Decide execute/fetch/isFetching: remove or document carve-out
+A  resources?: boolean
+A  Replace resources export * with named exports
+C  Export data, return, plugin, and v1 resource types
+C  Fix FileUploadHandler options, return, and progress types
+C  Apply request headers and base URL to v2 composables
+C  Type composable errors, debounce, and vOnOutsideClick`,
+          },
+          found: `<p>The aliases remain together at <code>src/data-fetching/useCall/useCall.ts:252-269</code>, the unread object branch is declared at <code>src/utils/plugin.ts:4-17</code>, and the wildcard barrels are at <code>src/resources/index.ts:6-8</code>. The remaining type and configuration gaps are listed at <code>v1-release/rc-api-audit.md:166-186</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">M-data choice</div><p>"resolve all before RC"</p><div class="source-label">Comment</div><p>Nothing yet.</p></div><div class="source-quote"><div class="source-label">Triage</div><p>The later triage classifies the three listed rule-driven items as A, "Mechanical," and the four type, upload-handler, configuration, and loose-typing items as C, "Can wait for 1.1."</p></div>`,
+          tradeoff: `<p>Leaving the unread <code>resources</code> object branch is a trap because it accepts configuration that the plugin ignores; narrowing it touches 2 v1-app sites and is codemod-able. Wildcard exports can add public names by accident, while the alias set is merely inconsistent and must be kept and documented under the accepted carve-out. Pulling the C items into RC improves types and configuration behavior but expands the release scope; deferring them leaves known bugs and gaps for 1.1 without freezing new API.</p>`,
+          options: [
+            'Apply the three A dispositions before RC and defer all four C items to 1.1',
+            'Apply the three A dispositions and complete all four C items before RC',
+            'Apply the resources and barrel fixes, but remove execute, fetch, and isFetching before RC',
+          ],
+          recommended: 0,
+          why: 'It closes the two rule-defined traps, records the intentional aliases, and keeps the larger bug and typing batch out of the RC.',
+        },
+        {
+          id: 'DAT-Q10',
+          title: 'ErrorMessage.messages value shape',
+          covers: ['L-root'],
+          severity: 'Low',
+          tier: 'T0 · 0 sites',
+          dependsOn: 'DAT-Q3, DAT-Q4',
+          what: `<p><code>ErrorMessage</code> renders either a string or an <code>Error</code>. When an error has a <code>messages</code> field, the component reads that field before falling back to <code>Error.message</code>. <code>FrappeRequestError.messages</code> is an array, but the component casts it to a string and then calls string methods on it.</p>`,
+          visual: {
+            label: 'Normalize before rendering',
+            code: `- const message = error.messages || error.message
+- return message.replace(/[&<>"']/g, escape)
++ const messages = Array.isArray(error.messages)
++   ? error.messages
++   : [error.messages || error.message]
++ return messages.map(sanitize).join('\n')`,
+          },
+          found: `<p>The prop accepts <code>Error</code> at <code>src/components/ErrorMessage/types.ts:1-4</code>. The renderer casts <code>messages</code> to <code>string</code> and later calls <code>replace</code> at <code>src/components/ErrorMessage/ErrorMessage.vue:25-47</code>, while <code>FrappeRequestError.messages</code> is <code>string[]</code> at <code>src/utils/frappeRequest.ts:20-26</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">L-root choice</div><p>"Fix all before RC"</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>The current type assertion is a runtime trap because a valid v1 request error can reach <code>replace</code> as an array. Normalizing string and array forms changes no measured v1-app call sites, needs no codemod, and lets both error contracts render. Ignoring <code>messages</code> would avoid the crash but discard the server's useful error list, so keeping the current behavior is not a documentation option.</p>`,
+          options: [
+            'Accept string or string-array messages, normalize them, and render every message',
+            'Ignore messages and always render the standard Error.message field',
+            'Narrow ErrorMessage to one owned display-error type and adapt both request errors before rendering',
+          ],
+          recommended: 0,
+          why: 'Normalization fixes the runtime mismatch at zero measured migration cost and preserves every server message from both request stacks.',
+        },
+      ]
+    </script>
+    <script src="_shared.js"></script>
+  </body>
+</html>

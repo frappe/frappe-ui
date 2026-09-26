@@ -1,20 +1,36 @@
 import { describe, expect, test } from "bun:test";
-import { parseCommentId, resolveMarkerFile } from "./add-comment.ts";
+import {
+  parseCommentArgs,
+  parseCommentId,
+  resolveMarkerFile,
+} from "./add-comment.ts";
+
+describe("parseCommentArgs", () => {
+  test("treats help flags as help requests", () => {
+    expect(parseCommentArgs(["--help"])).toEqual({ type: "help" });
+    expect(parseCommentArgs(["-h"])).toEqual({ type: "help" });
+  });
+
+  test("preserves comment bodies and files", () => {
+    expect(parseCommentArgs(["Review complete"])).toEqual({
+      type: "body",
+      body: "Review complete",
+    });
+    expect(parseCommentArgs(["--file", "review.md"])).toEqual({
+      type: "file",
+      file: "review.md",
+    });
+  });
+});
 
 describe("parseCommentId", () => {
-  test("extracts the id from a gh issue comment URL", () => {
-    expect(parseCommentId("https://github.com/frappe/frappe-ui/issues/751#issuecomment-4603536352"))
-      .toBe("4603536352");
+  test("extracts the id returned by the GitHub API", () => {
+    expect(parseCommentId("5791950878\n")).toBe("5791950878");
   });
 
-  test("extracts the id from a PR-thread comment URL", () => {
-    expect(parseCommentId("https://github.com/frappe/frappe-ui/pull/896#issuecomment-5178987334"))
-      .toBe("5178987334");
-  });
-
-  test("returns undefined for output with no comment id", () => {
+  test("rejects a missing or invalid id", () => {
     expect(parseCommentId("")).toBeUndefined();
-    expect(parseCommentId("gh: something went wrong")).toBeUndefined();
+    expect(parseCommentId("null")).toBeUndefined();
   });
 });
 

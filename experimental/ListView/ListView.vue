@@ -24,7 +24,8 @@ import ListHeader from './ListHeader.vue'
 import ListRows from './ListRows.vue'
 import ListGroups from './ListGroups.vue'
 import ListSelectBanner from './ListSelectBanner.vue'
-import { ref, reactive, computed, provide, watch, useSlots } from 'vue'
+import { ref, reactive, computed, provide, watch } from 'vue'
+import { useReactiveSlots } from '../../src/composables/useReactiveSlots'
 
 defineOptions({
   inheritAttrs: false,
@@ -60,7 +61,7 @@ const props = defineProps({
   },
 })
 
-const slots = useSlots()
+const slots = useReactiveSlots()
 
 let selections = reactive(new Set())
 let activeRow = ref(null)
@@ -169,9 +170,16 @@ provide(
 )
 
 defineExpose({
+  /** The keys (`rowKey` values) of the selected rows. */
   selections,
+  /** Whether every enabled row is selected. */
   allRowsSelected,
+  /** Selects the row with this key, or deselects it if it is selected. */
   toggleRow,
+  /**
+   * Selects every enabled row. Clears the selection instead when `select` is
+   * false or every row is already selected.
+   */
   toggleAllRows,
 })
 </script>

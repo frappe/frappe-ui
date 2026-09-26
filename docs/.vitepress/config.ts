@@ -34,7 +34,6 @@ function buildSidebar(): SidebarSection[] {
       text: name,
       link: `/docs/components/${name.toLowerCase()}`,
     })),
-    { text: 'Legacy components', link: '/docs/components/legacy' },
   ]
 
   const experimentalItems = [
@@ -50,7 +49,16 @@ function buildSidebar(): SidebarSection[] {
       text: 'Getting Started',
       items: [
         { text: 'Introduction', link: '/docs/introduction' },
-        { text: 'Getting Started', link: '/docs/getting-started' },
+        { text: 'Installation', link: '/docs/getting-started' },
+        {
+          text: 'Frappe app',
+          link: '/docs/getting-started/frappe',
+        },
+        {
+          text: 'Standalone app',
+          link: '/docs/getting-started/standalone',
+        },
+        { text: 'Tailwind Setup', link: '/docs/getting-started/tailwind' },
         { text: 'Migration from v0', link: '/docs/migration' },
         { text: 'Changelog', link: '/docs/changelog' },
       ],
@@ -58,14 +66,11 @@ function buildSidebar(): SidebarSection[] {
     {
       text: 'Foundations',
       items: [
-        { text: 'Tailwind Setup', link: '/docs/foundations/tailwind' },
-        { text: 'Base Colors', link: '/docs/foundations/colors/base' },
-        { text: 'Semantic Colors', link: '/docs/foundations/colors/semantic' },
-        { text: 'Chart Colors', link: '/docs/foundations/colors/charts' },
+        { text: 'Colors', link: '/docs/foundations/colors' },
         { text: 'Typography', link: '/docs/foundations/typography' },
         { text: 'Radius', link: '/docs/foundations/radius' },
-        { text: 'Elevation', link: '/docs/foundations/elevation' },
-        { text: 'Focus Ring', link: '/docs/foundations/focus-ring' },
+        { text: 'Shadows', link: '/docs/foundations/shadows' },
+        { text: 'Focus ring', link: '/docs/foundations/focus-ring' },
       ],
     },
     { text: 'Components', items: componentItems },
@@ -73,6 +78,7 @@ function buildSidebar(): SidebarSection[] {
       text: 'Charts',
       items: [
         { text: 'Overview', link: '/docs/charts/overview' },
+        { text: 'Colors', link: '/docs/charts/colors' },
         { text: 'BarChart', link: '/docs/charts/barchart' },
         { text: 'LineChart', link: '/docs/charts/linechart' },
         { text: 'AreaChart', link: '/docs/charts/areachart' },
@@ -95,6 +101,7 @@ function buildSidebar(): SidebarSection[] {
       text: 'Molecules',
       items: [
         { text: 'Editor', link: '/docs/molecules/editor' },
+        { text: 'CodeEditor', link: '/docs/molecules/code-editor' },
         { text: 'List', link: '/docs/molecules/list' },
       ],
     },
@@ -119,7 +126,6 @@ function buildSidebar(): SidebarSection[] {
         },
       ],
     },
-    { text: 'Experimental', items: experimentalItems },
     {
       text: 'Other',
       items: [
@@ -131,6 +137,7 @@ function buildSidebar(): SidebarSection[] {
         { text: 'VitePress theme', link: '/docs/other/vitepress-theme' },
       ],
     },
+    { text: 'Experimental', items: experimentalItems },
   ]
 }
 
@@ -244,6 +251,10 @@ const config = defineDocsConfig({
     '@utils': path.resolve(repoRoot, 'src/utils'),
     '@composables': path.resolve(repoRoot, 'src/composables'),
     'frappe-ui/editor': path.resolve(repoRoot, 'src/molecules/editor'),
+    'frappe-ui/code-editor': path.resolve(
+      repoRoot,
+      'src/molecules/code-editor',
+    ),
     'frappe-ui/list': path.resolve(repoRoot, 'src/molecules/list'),
     'frappe-ui': path.resolve(repoRoot, 'src'),
     'dayjs/esm': 'dayjs',

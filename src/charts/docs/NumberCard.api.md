@@ -25,7 +25,7 @@
   },
   {
     name: 'error',
-    description: 'Puts the chart in its error state and prints this message under it. A\nchart that fails to draw sets its own; this is for a failed request.',
+    description: 'Puts the chart in its error state and prints this message under it. Data\nthe chart cannot draw shows the empty state, not this one.',
     required: false,
     type: 'string | null'
   },
@@ -54,10 +54,22 @@
     type: 'string'
   },
   {
+    name: 'target',
+    description: 'What the reading is measured against, printed as a muted ` / target` in the value\'s own formatting.',
+    required: false,
+    type: 'number | string'
+  },
+  {
     name: 'delta',
     description: 'Change against the comparison period. Sign drives the arrow.',
     required: false,
     type: 'number | null'
+  },
+  {
+    name: 'deltaPrefix',
+    description: 'Unit printed before the delta, e.g. `\'$\'`.',
+    required: false,
+    type: 'string'
   },
   {
     name: 'deltaSuffix',
@@ -78,16 +90,16 @@
     type: 'boolean'
   },
   {
-    name: 'precision',
-    description: 'Decimal places. Defaults to as many as the value carries, up to 2.',
+    name: 'format',
+    description: 'Prints the reading and the target: they are one measure, read against each other.',
     required: false,
-    type: 'number'
+    type: 'ChartValueFormatter'
   },
   {
-    name: 'compact',
-    description: 'Shortens the value, `12300` -> `12.3K`.',
+    name: 'deltaFormat',
+    description: 'Prints the delta. It takes the absolute value: the arrow beside it carries the sign.',
     required: false,
-    type: 'boolean'
+    type: 'ChartValueFormatter'
   },
   {
     name: 'sparkline',
@@ -123,6 +135,11 @@
   {
     name: 'actions',
     description: '',
+    type: 'any'
+  },
+  {
+    name: 'title-suffix',
+    description: 'A mark right after the title, on the same line. The title truncates\naround it and it keeps its width. It renders in the title\'s font size, so\ncontent sized in `em` is smaller on a NumberCard than on a chart.',
     type: 'any'
   },
   {

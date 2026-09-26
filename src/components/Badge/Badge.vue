@@ -1,6 +1,6 @@
 <template>
   <div
-    class="inline-flex select-none items-center gap-1 overflow-clip rounded-full whitespace-nowrap"
+    class="inline-flex select-none items-center gap-1 overflow-clip rounded-full leading-tighter whitespace-nowrap"
     :class="classes"
   >
     <div
@@ -32,7 +32,7 @@ const props = withDefaults(defineProps<BadgeProps>(), {
   variant: 'subtle',
 })
 
-// The semantic scale (Figma export → tailwind/generated/colors.json) is
+// The semantic scale (Figma export → tailwind/tokens/colors.js) is
 // consistent across all themes — gray is the only exception (`-7` is its
 // saturated step, since gray needs more headroom). Tailwind's JIT needs
 // literal class names so the per-theme strings are inlined below.

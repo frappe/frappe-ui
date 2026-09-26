@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed, useAttrs, useSlots, useTemplateRef } from 'vue'
+import { computed, useAttrs, useTemplateRef } from 'vue'
 import { useInputLabeling } from '../../composables/useInputLabeling'
+import { useReactiveSlots } from '../../composables/useReactiveSlots'
 import { usePortalTarget } from '../../composables/usePortalTarget'
 import { useEmptyValueMapping } from '../shared/selection/useEmptyValueMapping'
 import type { SelectionExposed } from '../shared/selection/types'
@@ -49,7 +50,12 @@ defineOptions({
   inheritAttrs: false,
 })
 
-const model = defineModel<SelectOptionValue | undefined>()
+// No `default`. A `defineModel` default does not reach the parent, so a
+// `v-model` holding `undefined` would leave the parent at `undefined` while
+// this component read `null`, and the caller's `v === null` check would never
+// fire. Nothing is emitted on mount. The component normalizes `undefined` to
+// `null` where it reads the value, and `clear()` emits `null` (INP-Q2).
+const model = defineModel<SelectOptionValue | null>()
 const open = defineModel<boolean>('open', { default: false })
 
 const props = withDefaults(defineProps<SelectProps>(), {
@@ -63,7 +69,7 @@ const props = withDefaults(defineProps<SelectProps>(), {
 const portalTarget = usePortalTarget(() => props.portalTo)
 
 const attrs = useAttrs()
-const slots = useSlots()
+const slots = useReactiveSlots<SelectSlots>()
 
 const triggerRef = useTemplateRef<{ $el?: HTMLElement } | null>('trigger')
 
@@ -181,18 +187,27 @@ const internalOptions = computed(() =>
   })),
 )
 
-function toInternalValue(value: SelectOptionValue | undefined) {
+function toInternalValue(value: SelectOptionValue | null) {
+  // Empty is `null` on this side of the boundary and `undefined` on reka's,
+  // which is the only value its Select reads as "nothing selected".
+  if (value === null) return undefined
   if (value !== '') return value
   const empty = selectOptions.value.find((option) => option.value === '')
   return empty ? toInternal(empty) : value
 }
 
 function toExternalValue(value: SelectOptionValue | undefined) {
+  if (value === undefined) return null
   return toExternal(value)
 }
 
+/** The model with `undefined` read as the empty value (INP-Q2). */
+const currentValue = computed<SelectOptionValue | null>(
+  () => model.value ?? null,
+)
+
 const internalModel = computed<SelectOptionValue | undefined>({
-  get: () => toInternalValue(model.value),
+  get: () => toInternalValue(currentValue.value),
   set: (value) => {
     model.value = toExternalValue(value)
   },
@@ -200,16 +215,25 @@ const internalModel = computed<SelectOptionValue | undefined>({
 
 const selectedOption = computed(() => {
   return (
-    selectOptions.value.find((option) => option.value === model.value) ?? null
+    selectOptions.value.find(
+      (option) => option.value === currentValue.value,
+    ) ?? null
   )
 })
 
 function clear() {
-  model.value = undefined
+  // `null`, not `undefined`: an empty value survives JSON, and it is what a
+  // Frappe empty field holds. Combobox uses the same one (INP-Q2).
+  model.value = null
 }
 
 function setOpen(value: boolean) {
+  if (props.disabled && value) return
   open.value = value
+}
+
+function close() {
+  setOpen(false)
 }
 
 function focus(options?: FocusOptions) {
@@ -225,6 +249,7 @@ const controlSlotProps = computed<SelectSlotProps>(() => ({
   selectedOption: selectedOption.value,
   clear,
   setOpen,
+  close,
 }))
 
 function isBlank(value: unknown) {
@@ -269,7 +294,7 @@ function usesDynamicItemSlot(option: SelectNormalizedOption) {
 }
 
 function getItemSlotProps(option: SelectNormalizedOption): SelectItemSlotProps {
-  return { item: option, selected: option.value === model.value }
+  return { item: option, selected: option.value === currentValue.value }
 }
 
 function getOptionKey(option: SelectNormalizedOption, index: number) {
@@ -278,7 +303,12 @@ function getOptionKey(option: SelectNormalizedOption, index: number) {
 
 defineSlots<SelectSlots>()
 
-const exposed: SelectionExposed = { clear, focus }
+const exposed: SelectionExposed = {
+  /** Clears the selection and sets the model to `null`. */
+  clear,
+  /** Moves focus to the trigger. */
+  focus,
+}
 defineExpose(exposed)
 </script>
 
@@ -337,7 +367,7 @@ defineExpose(exposed)
           >
             <SelectValue
               :placeholder="placeholder"
-              class="max-w-full truncate opacity-0"
+              class="max-w-full truncate leading-tighter opacity-0"
               :class="{ 'text-ink-gray-4': showPlaceholderForSelected }"
             >
               <template v-if="selectedOption">
@@ -375,7 +405,7 @@ defineExpose(exposed)
           <div class="grid min-w-0 text-left truncate">
             <SelectValue
               :placeholder="placeholder"
-              class="col-start-1 row-start-1 max-w-full truncate"
+              class="col-start-1 row-start-1 max-w-full truncate leading-tighter"
               :class="{ 'text-ink-gray-4': showPlaceholderForSelected }"
             >
               <template v-if="selectedOption">
@@ -467,7 +497,7 @@ defineExpose(exposed)
                   <ItemListRow
                     v-else
                     :size="itemSize"
-                    :selected="internalOption.option.value === model"
+                    :selected="internalOption.option.value === currentValue"
                     :disabled="internalOption.option.disabled"
                   >
                     <template #prefix>
@@ -515,7 +545,7 @@ defineExpose(exposed)
                           name="item-label"
                           v-bind="getItemSlotProps(internalOption.option)"
                         >
-                          <div class="truncate">
+                          <div class="truncate leading-tighter">
                             {{ internalOption.option.label }}
                           </div>
                           <div

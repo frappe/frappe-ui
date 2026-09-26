@@ -2,14 +2,17 @@
   <ChartContainer
     :title="title"
     :subtitle="subtitle"
-    :plot-label="plotLabel"
-    :plot-label-secondary="plotLabelSecondary"
+    :y-axis-title="yAxisTitle"
+    :y2-axis-title="y2AxisTitle"
     :loading="loading"
     :error="error || renderError"
     :empty="isEmpty"
     :dir="dir"
   >
     <template v-if="$slots.actions" #actions><slot name="actions" /></template>
+    <template v-if="$slots['title-suffix']" #title-suffix>
+      <slot name="title-suffix" />
+    </template>
 
     <!-- The container owns the three states, so an app that wants a retry
          button beside the message or a skeleton of its own reaches them here
@@ -40,6 +43,7 @@
         :y="tooltip.y"
         :label="tooltip.label"
         :items="tooltip.items"
+        :rows="tooltip.rows"
         :dir="dir"
       >
         <template v-if="$slots.tooltip" #default="slotProps">
@@ -49,11 +53,7 @@
     </template>
 
     <template v-if="legendItems.length > 1" #legend>
-      <ChartLegend
-        :items="legendItems"
-        @change="toggleSeries"
-        @highlight="hoverSeries"
-      />
+      <ChartLegend :items="legendItems" @change="toggleSeries" />
     </template>
   </ChartContainer>
 </template>
@@ -79,7 +79,7 @@ import ChartLegend from './components/ChartLegend.vue'
 import ChartTooltip from './components/ChartTooltip.vue'
 import type {
   AxisChartConfig,
-  ChartExposed,
+  ChartExposedRefs,
   LineChartEmits,
   LineChartProps,
   LineChartSlots,
@@ -109,8 +109,6 @@ const config = computed<AxisChartConfig>(() => ({
   ...normalized.value.config,
   type: 'line',
   stacked: props.stacked,
-  connectNulls: props.connectNulls,
-  fillOpacity: props.fillOpacity,
 }))
 
 const {
@@ -118,13 +116,12 @@ const {
   chart,
   dir,
   isEmpty,
-  plotLabel,
-  plotLabelSecondary,
+  yAxisTitle,
+  y2AxisTitle,
   renderError,
   tooltip,
   legendItems,
   toggleSeries,
-  hoverSeries,
   plotAttrs,
   reading,
 } = useAxisChart({
@@ -132,9 +129,10 @@ const {
   format: () => normalized.value.format,
   buildOption: buildAxisChartOption,
   stackShares: () => buildStackShares(config.value, hiddenSeries.value),
+  tooltipColumns: () => normalized.value.tooltipColumns,
   hiddenSeries,
   onSelect: (event) => emit('select', event),
 })
 
-defineExpose<ChartExposed>({ chart: computed(() => chart.value) })
+defineExpose<ChartExposedRefs>({ chart: computed(() => chart.value) })
 </script>

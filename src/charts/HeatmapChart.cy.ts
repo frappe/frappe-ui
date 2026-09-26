@@ -60,7 +60,9 @@ const axisLabel = (text: string) =>
     .get('[data-slot="chart-plot"] svg text')
     .filter((_, el) => el.textContent === text)
     .first()
-    .then(($el) => ($el[0] as unknown as SVGGraphicsElement).getBoundingClientRect())
+    .then(($el) =>
+      ($el[0] as unknown as SVGGraphicsElement).getBoundingClientRect(),
+    )
 
 describe('HeatmapChart', () => {
   it('draws a cell per row, on axes taken from the data', () => {
@@ -141,7 +143,7 @@ describe('HeatmapChart', () => {
   })
 
   it('prints the values in the cells on request', () => {
-    mountChart({ showValues: true })
+    mountChart({ showDataLabels: true })
     cy.get('[data-slot="chart-plot"] svg text').should('contain.text', '8')
   })
 
@@ -244,6 +246,18 @@ describe('HeatmapChart', () => {
       cy.get('[data-slot="chart-tooltip"]')
         .should('contain.text', 'at Mon · 9am')
         .and('not.contain.text', 'Tickets')
+    })
+
+    // The row reaches every chart's tooltip slot, not just the axis charts', so
+    // a replacement body can read a column the plot never drew.
+    it('hands the row behind the cell to the tooltip slot', () => {
+      mountChart(
+        {},
+        { tooltip: ({ rows }: any) => h('span', `day ${rows[0]?.day}`) },
+      )
+      cells().should('have.length', data.length)
+      plot().focus()
+      cy.get('[data-slot="chart-tooltip"]').should('contain.text', 'day Mon')
     })
   })
 

@@ -80,11 +80,11 @@
     name: 'route',
     description: 'Router destination when used as a link',
     required: false,
-    type: 'string | kt | Tt'
+    type: 'RouteDestination'
   },
   {
-    name: 'link',
-    description: 'External link URL',
+    name: 'href',
+    description: 'External URL, opened in a new tab.',
     required: false,
     type: 'string'
   },

@@ -17,7 +17,7 @@ const planMix = [
       value="subscriptions"
       variant="half"
       palette="sequential"
-      show-inline-labels
+      show-data-labels
       title="Plan mix"
       subtitle="Active subscriptions, July 2026"
     />

@@ -6,15 +6,15 @@ import type { DonutChartConfig } from './types'
 
 const tokens: ChartTokens = {
   categorical: ['#111111', '#222222', '#333333'],
-  sequential: ['#000011', '#000022', '#000033', '#000044', '#000055'],
+  sequential: ['#000011', '#000022', '#000033'],
   diverging: ['#001100', '#002200', '#003300'],
   axisLabel: 'ink-5',
   axisTitle: 'ink-7',
   axisLine: 'outline-2',
-  splitLine: 'outline-1',
+  gridline: 'outline-1',
   dataLabel: 'ink-6',
   insideLabel: 'ink-8',
-  cellGap: '#ffffff',
+  backdrop: '#ffffff',
 }
 
 function config(overrides: Partial<DonutChartConfig> = {}): DonutChartConfig {
@@ -235,7 +235,7 @@ describe('buildDonutChartOption', () => {
     expect(plain.label.show).toBe(false)
     expect(plain.labelLine.show).toBe(false)
 
-    const labelled = build({ showInlineLabels: true }).series[0]
+    const labelled = build({ showDataLabels: true }).series[0]
     expect(labelled.label.show).toBe(true)
     expect(parseFloat(labelled.radius[1])).toBeLessThan(
       parseFloat(plain.radius[1]),
@@ -243,7 +243,7 @@ describe('buildDonutChartOption', () => {
   })
 
   it('labels a slice with its category and share', () => {
-    const { label } = build({ showInlineLabels: true }).series[0]
+    const { label } = build({ showDataLabels: true }).series[0]
     expect(label.formatter({ name: 'Search', percent: 50.2 })).toBe(
       'Search 50%',
     )
@@ -288,7 +288,7 @@ describe('buildDonutChartOption', () => {
     })
 
     it('gives inline labels the same room as the full ring does', () => {
-      const labelled = build({ variant: 'half', showInlineLabels: true })
+      const labelled = build({ variant: 'half', showDataLabels: true })
         .series[0]
       expect(labelled.radius).toEqual(['54%', '80%'])
       expect(labelled.label.show).toBe(true)

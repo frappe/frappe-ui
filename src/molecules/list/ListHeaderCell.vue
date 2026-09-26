@@ -7,7 +7,7 @@
     <span v-if="$slots.prefix" class="shrink-0">
       <slot name="prefix" />
     </span>
-    <span class="truncate"><slot /></span>
+    <span class="truncate leading-tighter"><slot /></span>
     <span v-if="$slots.suffix" class="shrink-0">
       <slot name="suffix" />
     </span>

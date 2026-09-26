@@ -14,9 +14,25 @@
 import { $ } from "bun";
 import { readFileSync } from "node:fs";
 
+const USAGE = `Usage:
+  ./add-comment.ts "Body text, multi-line OK"
+  ./add-comment.ts --file body.md`;
+
+type CommentArgs =
+  | { type: "help" }
+  | { type: "file"; file: string | undefined }
+  | { type: "body"; body: string | undefined };
+
+export function parseCommentArgs(argv: string[]): CommentArgs {
+  if (argv[0] === "--help" || argv[0] === "-h") return { type: "help" };
+  if (argv[0] === "--file") return { type: "file", file: argv[1] };
+  return { type: "body", body: argv[0] };
+}
+
 // Exported for tests — pure parsing, no I/O.
-export function parseCommentId(ghOutputUrl: string): string | undefined {
-  return ghOutputUrl.match(/issuecomment-(\d+)/)?.[1];
+export function parseCommentId(value: string): string | undefined {
+  const commentId = value.trim();
+  return /^\d+$/.test(commentId) ? commentId : undefined;
 }
 
 export function resolveMarkerFile(env: NodeJS.ProcessEnv = process.env): string {
@@ -24,6 +40,12 @@ export function resolveMarkerFile(env: NodeJS.ProcessEnv = process.env): string 
 }
 
 async function main() {
+  const input = parseCommentArgs(process.argv.slice(2));
+  if (input.type === "help") {
+    console.log(USAGE);
+    return;
+  }
+
   let issue = process.env.BARISTA_ISSUE ?? "";
   if (!/^\d+$/.test(issue)) {
     const eventPath = process.env.GITHUB_EVENT_PATH;
@@ -39,28 +61,33 @@ async function main() {
     process.exit(1);
   }
 
-  const argv = process.argv.slice(2);
-  let url: string;
-  if (argv[0] === "--file") {
-    const file = argv[1];
+  const repo = process.env.GITHUB_REPOSITORY ?? "";
+  if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repo)) {
+    console.error("Error: GITHUB_REPOSITORY must be an owner/repo name");
+    process.exit(1);
+  }
+
+  let createdId: string;
+  if (input.type === "file") {
+    const file = input.file;
     if (!file) { console.error("Error: --file requires a path"); process.exit(1); }
     if (!(await Bun.file(file).exists())) {
       console.error(`Error: file not found: ${file}`);
       process.exit(1);
     }
-    url = (await $`gh issue comment ${issue} --body-file ${file}`.text()).trim();
+    createdId = await $`gh api --method POST repos/${repo}/issues/${issue}/comments --field ${`body=@${file}`} --jq .id`.text();
   } else {
-    const body = argv[0];
+    const body = input.body ?? "";
     if (!body) { console.error("Error: body required"); process.exit(1); }
-    url = (await $`gh issue comment ${issue} --body ${body}`.text()).trim();
+    createdId = await $`gh api --method POST repos/${repo}/issues/${issue}/comments --raw-field body=${body} --jq .id`.text();
   }
 
-  const commentId = parseCommentId(url);
-  if (commentId) {
-    await Bun.write(resolveMarkerFile(), commentId);
-  } else {
-    console.error(`Warning: couldn't parse comment id from gh output: ${url}`);
+  const commentId = parseCommentId(createdId);
+  if (!commentId) {
+    console.error(`Error: GitHub returned an invalid comment id: ${createdId.trim()}`);
+    process.exit(1);
   }
+  await Bun.write(resolveMarkerFile(), commentId);
 
   console.log(`Commented on #${issue}`);
 }

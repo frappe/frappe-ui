@@ -30,14 +30,15 @@
 </template>
 
 <script setup lang="ts">
-import { useEventListener } from '@vueuse/core'
+import { computed } from 'vue'
 import { TabsRoot } from 'reka-ui'
 import { Dialog } from '../Dialog'
 import type { SettingsDialogProps } from './types'
+import { useKeyboardShortcut } from '../../composables/useKeyboardShortcut'
 
 const props = withDefaults(defineProps<SettingsDialogProps>(), {
   size: '4xl',
-  shortcut: true,
+  keyboardShortcut: 'Mod+Shift+,',
   unmountOnHide: true,
 })
 
@@ -60,17 +61,16 @@ defineSlots<{
   default?: () => any
 }>()
 
-// Cmd/Ctrl+Shift+, toggles the dialog. Use e.code (physical key) since Shift
-// rewrites e.key for "," to "<" on most layouts.
-useEventListener(
-  () => (typeof window === 'undefined' ? null : window),
-  'keydown',
-  (e: KeyboardEvent) => {
-    if (!props.shortcut) return
-    if (e.code === 'Comma' && e.shiftKey && (e.metaKey || e.ctrlKey)) {
-      e.preventDefault()
-      open.value = !open.value
-    }
-  },
-)
+useKeyboardShortcut({
+  combo: computed(() =>
+    props.keyboardShortcut === false || props.keyboardShortcut === 'Mod+Shift+,'
+      ? 'Mod+Shift+Comma'
+      : props.keyboardShortcut,
+  ),
+  description: 'Toggle settings',
+  enabled: computed(() => props.keyboardShortcut !== false),
+  allowInInput: true,
+  allowInDialog: true,
+  handler: () => (open.value = !open.value),
+})
 </script>

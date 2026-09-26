@@ -1,2 +1,2 @@
 export { default as Divider } from './Divider.vue'
-export type { DividerProps } from './types'
+export type { DividerAction, DividerProps } from './types'

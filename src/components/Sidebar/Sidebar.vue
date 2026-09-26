@@ -1,7 +1,12 @@
 <template>
-  <div
+  <!-- A <nav> landmark, so screen-reader users can jump to the app's
+       navigation. It is the only one the sidebar family emits: SidebarSection
+       bodies are `role="group"`, because nested landmarks add noise instead of
+       structure. Keep app-written wrappers inside the slot as plain divs. -->
+  <nav
     data-slot="sidebar"
     :data-state="shouldCollapse ? 'collapsed' : 'expanded'"
+    :aria-label="ariaLabel"
     class="flex h-full flex-shrink-0 flex-col overflow-x-hidden bg-surface-sidebar transition-[width] duration-300 ease-in-out"
     :style="{ width: shouldCollapse ? collapsedWidth : width }"
   >
@@ -9,7 +14,7 @@
          it from SidebarHeader / SidebarSection / SidebarLabel / SidebarItem
          and plain markup. -->
     <slot />
-  </div>
+  </nav>
 </template>
 
 <script setup lang="ts">
@@ -18,8 +23,10 @@ import { computed, provide } from 'vue'
 import { SidebarProps, sidebarCollapsedKey, sidebarToggleKey } from './types'
 
 const props = withDefaults(defineProps<SidebarProps>(), {
+  collapsible: true,
   width: '15rem',
   collapsedWidth: '3rem',
+  ariaLabel: 'Main',
 })
 
 defineSlots<{
@@ -41,9 +48,8 @@ const isCollapsed = defineModel<boolean | null>('collapsed', { default: null })
 const breakpoints = useBreakpoints(breakpointsTailwind)
 const isMobile = breakpoints.smaller('sm')
 
-// Unset (`null`) falls back to collapsing on mobile; `disableCollapse` pins open.
 const shouldCollapse = computed(
-  () => (isCollapsed.value ?? isMobile.value) && !props.disableCollapse,
+  () => props.collapsible && (isCollapsed.value ?? isMobile.value),
 )
 
 function toggle() {

@@ -42,12 +42,23 @@ describe('Progress', () => {
     }
   })
 
-  it('hint prop & slot', () => {
+  it('renders the label without a hint', () => {
+    cy.mount(Progress, { props: { label: 'Uploading', value: 20 } })
+
+    cy.contains('span', 'Uploading').should('be.visible')
+    cy.contains('20%').should('not.exist')
+  })
+
+  it('renders the hint prop without a label', () => {
+    cy.mount(Progress, { props: { value: 20, hint: true } })
+
+    cy.contains('span', '20%').should('be.visible')
+  })
+
+  it('renders the hint slot without a label or hint prop', () => {
     cy.mount(Progress, {
       props: {
-        label: 'label',
         value: 20,
-        hint: true,
       },
       slots: {
         hint: () => 'hint 20%',
@@ -65,8 +76,7 @@ describe('Progress', () => {
       props: {
         label: 'label',
         value,
-        intervals: true,
-        intervalCount,
+        intervals: intervalCount,
       },
     })
 
@@ -109,7 +119,7 @@ describe('Progress', () => {
       props: {
         label: 'label',
         value: 60,
-        intervals: true,
+        intervals: 6,
       },
     })
 

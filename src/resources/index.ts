@@ -3,7 +3,7 @@ export {
   getCachedDocumentResource,
 } from './documentResource'
 export { createListResource, getCachedListResource } from './listResource'
-export * from './local'
+export { deleteLocal, getLocal, saveLocal } from './local'
 export { default as resourcesPlugin } from './plugin'
-export * from './realtime'
+export { onDocUpdate } from './realtime'
 export { createResource, getCachedResource } from './resources'

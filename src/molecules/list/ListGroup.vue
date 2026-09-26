@@ -5,12 +5,12 @@
        something a raw <p> spliced between rows silently breaks. -->
   <div data-slot="list-group" role="rowgroup" :aria-label="ariaLabel">
     <div
-      v-if="label || $slots.header"
+      v-if="label || $slots.label"
       data-slot="list-group-header"
-      class="flex h-8 items-center text-sm-medium text-ink-gray-5"
+      class="flex h-8 items-center text-sm-medium leading-tighter text-ink-gray-5"
       :class="sticky && 'sticky top-0 z-10 bg-surface-base'"
     >
-      <slot name="header">{{ label }}</slot>
+      <slot name="label">{{ label }}</slot>
     </div>
     <slot />
   </div>
@@ -20,7 +20,7 @@
 import { computed } from 'vue'
 
 const props = defineProps<{
-  /** Section label shown in the group header. Overridden by the #header slot. */
+  /** Section label shown in the group header. Overridden by the #label slot. */
   label?: string
   /**
    * Pin the group header to the top of the scroll container while its rows
@@ -32,8 +32,8 @@ const props = defineProps<{
 defineSlots<{
   /** The group's rows — `<ListRow>` elements. */
   default?: () => unknown
-  /** Replaces the header content (the label). */
-  header?: () => unknown
+  /** Replaces the group label. */
+  label?: () => unknown
 }>()
 
 const ariaLabel = computed(() => props.label || undefined)

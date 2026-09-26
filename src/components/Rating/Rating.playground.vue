@@ -6,7 +6,7 @@ import type { Knob } from 'frappe-ui/vitepress'
 const model = ref(3)
 
 const knobs: Knob[] = [
-  { name: 'max', type: 'text', default: '5', width: '4rem' },
+  { name: 'max', type: 'number', default: 5, min: 1 },
   {
     name: 'step',
     type: 'tabs',
@@ -21,10 +21,10 @@ const knobs: Knob[] = [
     type: 'tabs',
     default: 'sm',
     options: [
+      { label: 'xs', value: 'xs' },
       { label: 'sm', value: 'sm' },
       { label: 'md', value: 'md' },
       { label: 'lg', value: 'lg' },
-      { label: 'xl', value: 'xl' },
     ],
   },
   { name: 'disabled', type: 'switch', default: false },
@@ -32,8 +32,8 @@ const knobs: Knob[] = [
 
 function buildCode(v: Record<string, any>) {
   const attrs = []
-  const max = Number(v.max)
-  if (max && max !== 5) attrs.push(`:max="${max}"`)
+  const max = v.max || 5
+  if (max !== 5) attrs.push(`:max="${max}"`)
   if (v.step !== '1') attrs.push(`:step="${v.step}"`)
   if (v.size !== 'sm') attrs.push(`size="${v.size}"`)
   if (v.disabled) attrs.push('disabled')
@@ -47,7 +47,7 @@ function buildCode(v: Record<string, any>) {
     <template #preview="{ values }">
       <Rating
         v-model="model"
-        :max="Number(values.max) || 5"
+        :max="values.max || 5"
         :step="Number(values.step) as 1 | 0.5"
         :size="values.size"
         :disabled="values.disabled"

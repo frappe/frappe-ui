@@ -2,7 +2,7 @@ import type { EChartsCoreOption } from 'echarts/core'
 import { BLUR_OPACITY, DATA_LABEL_FONT_SIZE, toNumber } from './axisChartCommon'
 import { formatPercent } from './format'
 import { CHART_FONT_FAMILY } from './measureText'
-import { chartColors, type ChartTokens } from './tokens'
+import { paletteColors, type ChartTokens } from './tokens'
 import { mergeDeep, OTHERS_KEY, OTHERS_LABEL } from './utils'
 import type { ChartPaletteName, DonutChartConfig, DonutSlice } from './types'
 
@@ -53,10 +53,12 @@ export function buildDonutSlices(
   { tokens, hiddenSlices = [] }: DonutChartOptionContext,
 ): DonutSlice[] {
   const grouped = groupRows(config)
-  const colors = chartColors(config.palette, tokens, {
-    fallback: DONUT_PALETTE,
-    count: grouped.length,
-  })
+  const colors = paletteColors(
+    config.palette,
+    tokens,
+    grouped.length,
+    DONUT_PALETTE,
+  )
 
   const visibleTotal = grouped.reduce(
     (sum, slice) =>
@@ -166,10 +168,10 @@ export function buildDonutChartOption(
         type: 'pie',
         name: config.valueColumn,
         radius: isHalf
-          ? config.showInlineLabels
+          ? config.showDataLabels
             ? HALF_RADIUS_WITH_LABELS
             : HALF_RADIUS
-          : config.showInlineLabels
+          : config.showDataLabels
             ? DONUT_RADIUS_WITH_LABELS
             : DONUT_RADIUS,
         center: ['50%', isHalf ? HALF_CENTER_Y : '50%'],
@@ -186,7 +188,7 @@ export function buildDonutChartOption(
         itemStyle: { borderRadius: SLICE_RADIUS, borderWidth: 0 },
         avoidLabelOverlap: true,
         label: {
-          show: Boolean(config.showInlineLabels),
+          show: Boolean(config.showDataLabels),
           color: tokens.dataLabel,
           fontSize: DATA_LABEL_FONT_SIZE,
           // `params.percent` is echarts' own share of the series total, which is
@@ -197,7 +199,7 @@ export function buildDonutChartOption(
             )}`,
         },
         labelLine: {
-          show: Boolean(config.showInlineLabels),
+          show: Boolean(config.showDataLabels),
           length: 8,
           length2: 12,
           smooth: true,

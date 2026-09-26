@@ -12,8 +12,8 @@
     :disabled="disabled"
     :placeholder="placeholder"
     :id="id"
-    @keydown.meta.i.prevent="show = !show"
-    @keydown.ctrl.i.prevent="show = !show"
+    @keydown.meta.i.prevent="toggle"
+    @keydown.ctrl.i.prevent="toggle"
   >
     <template v-if="$slots.label" #label="slotProps">
       <slot name="label" v-bind="slotProps" />
@@ -27,23 +27,28 @@
     <template #suffix>
       <Tooltip>
         <template #content>
-          <span class="flex items-center gap-1">
-            {{ show ? 'Hide Password' : 'Show Password' }}
-            <KeyboardShortcut
-              bg
-              combo="Mod+I"
-              class="!bg-surface-gray-8 !text-ink-gray-2 px-1"
-            />
+          <span class="flex items-center gap-1.5">
+            {{ toggleLabel }}
+            <KeyboardShortcut combo="Mod+I" />
           </span>
         </template>
-        <div>
+        <button
+          v-show="showEye"
+          type="button"
+          :aria-label="toggleLabel"
+          :disabled="disabled"
+          class="grid size-5 place-items-center rounded-3 text-ink-gray-5 hover:bg-surface-gray-3 hover:text-ink-gray-7 disabled:pointer-events-none"
+          @pointerdown.prevent
+          @click="toggle"
+          @keydown.meta.i.prevent="toggle"
+          @keydown.ctrl.i.prevent="toggle"
+        >
           <span
-            v-show="showEye"
             :class="show ? 'lucide-eye-off' : 'lucide-eye'"
-            class="size-3 cursor-pointer mr-1"
-            @click="show = !show"
+            class="size-3.5"
+            aria-hidden="true"
           />
-        </div>
+        </button>
       </Tooltip>
     </template>
   </TextInput>
@@ -67,6 +72,13 @@ const model = defineModel<string>()
 
 const show = ref(false)
 const showEye = computed(() => !model.value?.includes('*'))
+const toggleLabel = computed(() =>
+  show.value ? 'Hide password' : 'Show password',
+)
+
+function toggle() {
+  show.value = !show.value
+}
 
 defineSlots<{
   /** Content shown before the input field (left icon / custom content) */
@@ -86,6 +98,7 @@ function focus(options?: FocusOptions) {
 // A getter rather than `computed(...)`: see TextInput.vue's defineExpose for
 // why — a ComputedRef doesn't structurally match the type's plain element.
 defineExpose<TextInputExposed>({
+  /** Moves focus to the password input. */
   focus,
   get inputElement() {
     return textInputRef.value?.inputElement ?? null

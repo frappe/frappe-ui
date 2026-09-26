@@ -7,16 +7,14 @@ export type TreeKey = string | number
  * A tree node. Carries a display `label`, nested `children`, and a unique id
  * under the field named by the `nodeKey` prop. Any extra fields are preserved
  * and passed through to slots.
+ *
+ * A node holds your data only. Expansion state lives outside it, in the
+ * `expanded` model, so the tree never writes to the objects you pass in.
  */
 export type TreeNode = {
   [key: string]: unknown
   label?: string
   children?: TreeNode[]
-  /**
-   * Whether this node is expanded — the per-node source of truth. Expanded by
-   * default; set `false` to start it collapsed.
-   */
-  expanded?: boolean
 }
 
 /** Where a dragged node lands relative to the hovered target. */
@@ -90,6 +88,15 @@ export interface TreeProps {
    * @default false
    */
   disabled?: boolean
+
+  /**
+   * Keys of the expanded nodes. Two-way via `v-model:expanded` — the tree
+   * replaces the array as rows toggle and never writes to your nodes. A key
+   * that is absent means that node is collapsed, so the default renders only
+   * the roots.
+   * @default []
+   */
+  expanded?: TreeKey[]
 }
 
 /** State + callbacks shared from `Tree` down to every recursive `TreeItem`. */
@@ -125,6 +132,28 @@ export interface TreeContext {
 }
 
 export const TreeContextKey: InjectionKey<TreeContext> = Symbol('TreeContext')
+
+/**
+ * What a `<Tree>` template ref exposes. These write the `expanded` model, so
+ * they are programmatic — `disabled`, which freezes user interaction, does not
+ * block them.
+ */
+export interface TreeExposed {
+  /**
+   * Opens the node with this key. A key whose children have not loaded yet
+   * opens as soon as they arrive. Like every method here, it works while the
+   * tree is `disabled`.
+   */
+  expand: (key: TreeKey) => void
+  /** Closes the node with this key. */
+  collapse: (key: TreeKey) => void
+  /** Flips the node with this key. */
+  toggle: (key: TreeKey) => void
+  /** Opens every node that has children, keeping any keys already open. */
+  expandAll: () => void
+  /** Closes every node. */
+  collapseAll: () => void
+}
 
 export interface TreeNodeSlotProps {
   node: TreeNode

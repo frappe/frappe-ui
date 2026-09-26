@@ -1,60 +1,56 @@
 # Tree
 
-Displays hierarchical data as a collapsible tree. Renders a forest of roots with
-keyboard navigation and optional drag-and-drop reparenting/reordering. Connector
-guides visually link parents to their children.
-
-## Default
-
-The simplest tree — pass `nodes` and tell it which field is the key. Nodes are
-expanded by default; here **Documents** carries `expanded: false` to start
-collapsed.
+Shows nested data as rows that open and close, such as folders or an org
+chart. It supports keyboard navigation and, when you turn it on, drag and drop
+to move nodes.
 
 <ComponentPreview name="Tree-Example" />
 
-## Expand / collapse all
+## Examples
 
-Bind `v-model:expanded` to a boolean for a master switch — toggling it opens or
-closes every node. It's two-way, so it also reflects whether all nodes are
-currently open as the user toggles rows individually.
+### Expand and collapse all
+
+Buttons above the tree call `expandAll()`, `collapseAll()` and `toggle(key)`
+on a template ref. They write the same `expanded` model that clicking a row
+does.
 
 <ComponentPreview name="Tree-ExpandAll" />
 
-## Indentation guides
+### Folder outline
 
-`guides` controls how nesting is drawn: `connectors` (elbow lines), `lines`
-(plain vertical rules), or `none`. The indentation itself stays either way —
-`guides` only changes the lines.
+`guides` sets the lines that link parents to children: `connectors`, `lines`
+or `none`.
 
 <ComponentPreview name="Tree-Guides" />
 
-## Drag and drop
+### Move files between folders
 
-Set `draggable` to let nodes be dragged onto one another to reparent, or between
-siblings to reorder. A `move` predicate gates where drops are allowed (here,
-only into folders), and `@drag-end` hands you the committed move to persist.
-This example is fully working — drag a file into a folder and it stays there.
-Flip **Disable interaction** to see the `disabled` state freeze drag and
-expand/collapse.
+`draggable` lets people drag a file into a folder or between siblings. The
+`move` function allows drops only into folders, and `@drag-end` saves the
+move to the data. Turn on **Disable interaction** to see `disabled` stop both
+dragging and opening rows.
 
 <ComponentPreview name="Tree-DragDrop" />
 
-## List view with avatars and row actions
+### Reporting lines
 
-Use the `#item-prefix`, `#item-label`, and `#item-suffix` slots to turn the tree
-into a rich list — an avatar on the left, a two-line label, and a row action (an
-add button) on the right. `guides="none"` drops the connector lines for a plain
-list look.
+The `#item-prefix`, `#item-label` and `#item-suffix` slots turn each row into
+an avatar, a name with a role, and an add button. `guides="none"` removes the
+lines.
 
 <ComponentPreview name="Tree-ListView" />
 
-## Usage
+## Behavior
+
+### Node shape
+
+Pass the top-level nodes as `nodes`. Each node is a plain object with a
+`label` and optional `children`. Its unique key lives in the field named by
+`nodeKey`, such as `name`. A node with no `children`, or an empty array, is a
+leaf. Extra fields reach the slots, so you can show avatars, roles or badges.
 
 ```vue
 <script setup>
-import { ref } from 'vue'
-import { Tree } from 'frappe-ui'
-
 const nodes = ref([
   {
     name: 'src',
@@ -65,86 +61,81 @@ const nodes = ref([
     ],
   },
 ])
+const expanded = ref(['src'])
 </script>
 
 <template>
-  <Tree :nodes="nodes" node-key="name" />
+  <Tree :nodes="nodes" node-key="name" v-model:expanded="expanded" />
 </template>
 ```
 
-## Node shape
+To show a field other than `label`, use the `#item-label` slot rather than
+renaming the field. The tree never writes to the objects you pass in.
 
-Each node is a plain object with a `label` (display text) and optional
-`children`. Its unique id lives under the field named by `nodeKey` (e.g.
-`name`). A node is a leaf when `children` is missing or empty. Extra fields are
-passed through to the slots, so you can render avatars, roles, badges, etc.
+### Expansion
 
-To display a field other than `label`, use the `#item-label` slot rather than
-remapping.
+`v-model:expanded` holds the keys of the open nodes. A missing key means
+closed, so a tree with no bound model shows only its top-level nodes.
+Clicking a row, or pressing `Enter` or `Space` on it, opens or closes it.
 
-## Expansion
+Every change assigns a new array, so shallow watchers, immutable stores and
+undo logs see it.
 
-Each node owns its own state via an `expanded` field — the source of truth the
-tree reads and writes as rows toggle, so expansion travels with your data. Nodes
-are **expanded by default**; set `expanded: false` to start one collapsed.
+### Drag and drop
 
-`v-model:expanded` is a separate, optional boolean **switch** for the whole
-tree: toggle it to open or close everything at once (see
-[Expand / collapse all](#expand-collapse-all)). It's two-way, reflecting whether
-all nodes are currently open.
+Set `draggable` to turn on dragging. The tree works out the drop position from
+the pointer (`before`, `inside` or `after`) and shows where the node will land.
 
-Clicking a row, or pressing `Enter`/`Space` on it, toggles that node.
-
-## Keyboard
-
-Following the WAI-ARIA Tree View pattern: `↑`/`↓` move between visible rows, `→`
-expands or steps into children, `←` collapses or steps to the parent,
-`Home`/`End` jump to the first/last row, `Enter`/`Space` toggle expansion, and
-typing letters jumps to the next matching label.
-
-## Drag and drop
-
-Set `draggable` to enable dragging. The tree resolves the drop position from the
-cursor (`before` / `inside` / `after`) and shows a live indicator.
-
-- `move(ctx)` — an optional predicate called as you hover. Return `false` to
-  reject a target (it shows the no-drop cursor and hides the indicator).
-  Built-in guards already reject drop-on-self and drop-into-own-descendant, so
-  `move` only carries your domain rules. `ctx` is `{ node, target, position }`.
-- `@drag-start(node)` — fires when a drag is picked up.
-- `@drag-end(info)` — fires when the drag ends. `info` is a `DropInfo` on a
-  committed move, or `null` if the drag was cancelled. Apply it to your data and
-  update `nodes`.
+- `move(ctx)` runs while you hover a target. Return `false` to reject it: the
+  pointer shows no-drop and the marker hides. The tree already rejects a drop
+  on the node itself or into its own children, so `move` only needs your own
+  rules. `ctx` is `{ node, target, position }`.
+- `@drag-start` fires with the node when a drag starts.
+- `@drag-end` fires when the drag ends, with a `DropInfo` for a finished move
+  or `null` for a cancelled one. Apply the move to your data and update
+  `nodes`.
 
 ```vue
 <Tree
   :nodes="nodes"
   node-key="name"
   draggable
-  :move="({ node, target, position }) => Array.isArray(target.children)"
+  :move="({ target }) => Array.isArray(target.children)"
   @drag-end="onDragEnd"
 />
 ```
 
-`DropInfo` is `{ node, from, to, position, oldIndex, newIndex }` — `from`/`to`
-are the old/new parent keys (`null` at root level) and `newIndex` is the node's
-final index within its new parent, already accounting for its removal.
+`DropInfo` is `{ node, from, to, position, oldIndex, newIndex }`. `from` and
+`to` are the keys of the old and new parents, `null` at the top level.
+`newIndex` is the node's final index in its new parent, counted after it was
+removed from the old one.
 
-## Customizing rows
+### Disabled
 
-Use the `#item` slot to fully replace a row (you receive `toggle` plus state),
-or the lighter `#item-label`, `#item-prefix`, and `#item-suffix` slots to keep
-the default layout. Style via the `data-slot`, `data-state`, `data-drop` and
-`data-level` attributes rather than class props.
+`disabled` stops people from opening, closing and dragging rows.
 
-Row height and indentation are CSS variables — override them in CSS rather than
-through props:
+### Custom rows
 
-```css
-.my-tree {
-  --tree-row-height: 40px;
-  --tree-indent: 24px;
-}
-```
+`#item-prefix`, `#item-label` and `#item-suffix` fill parts of the default
+row. `#item` replaces the whole row and receives `toggle` along with the
+row's state.
+
+## Accessibility
+
+The tree follows the WAI-ARIA tree view pattern, with `role="tree"`,
+`treeitem` and `group`. Each row reports its level, its position among its
+siblings and, for a parent, whether it is open.
+
+| Keys              | Action                                        |
+| ----------------- | --------------------------------------------- |
+| `ArrowDown` / `ArrowUp`         | Move to the next or previous visible row      |
+| `ArrowRight`               | Open the row, or move to its first child      |
+| `ArrowLeft`               | Close the row, or move to its parent          |
+| `Home` / `End`    | Move to the first or last row                 |
+| `Enter` / `Space` | Open or close the row                         |
+| Letters           | Move to the next row whose label starts with them |
+
+Drag and drop announces "Picked up", "Moved" and "Cancelled move" to screen
+readers.
 
 <!-- @include: ./Tree.api.md -->

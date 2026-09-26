@@ -41,6 +41,29 @@ describe('Divider', () => {
     cy.get('div').should('exist')
   })
 
+  it('accepts shared Button action fields', () => {
+    cy.mount(Divider, {
+      props: {
+        action: { label: 'Delete', theme: 'red', variant: 'solid', size: 'md' },
+      },
+    })
+
+    cy.contains('button', 'Delete')
+      .should('have.class', 'bg-surface-red-7')
+      .and('have.class', 'h-8')
+      .and('have.class', 'text-base-medium')
+  })
+
+  it('aligns an action along the divider', () => {
+    cy.mount(Divider, {
+      props: { align: 'start', action: { label: 'Add row' } },
+    })
+
+    cy.contains('button', 'Add row')
+      .parent()
+      .should('have.class', 'justify-start')
+  })
+
   it('does not overlap sibling content in vertical action mode', () => {
     cy.mount({
       render() {

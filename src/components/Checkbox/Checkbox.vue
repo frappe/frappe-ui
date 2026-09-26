@@ -1,7 +1,12 @@
 <template>
   <div
     class="flex-col"
-    :class="[props.padded ? 'flex' : 'inline-flex', containerClasses]"
+    :class="[
+      props.padded ? 'flex' : 'inline-flex',
+      containerClasses,
+      attrs.class as any,
+    ]"
+    :style="attrs.style as any"
     @click="onContainerClick"
   >
     <div class="inline-flex items-center gap-2 rounded-4 transition">
@@ -20,7 +25,7 @@
         :aria-errormessage="hasError ? errorMessageId : undefined"
         :aria-describedby="describedBy"
         data-slot="control"
-        v-bind="{ ...dataAttrs, ...attrs }"
+        v-bind="{ ...dataAttrs, ...controlAttrs }"
         @change="onChange"
       />
       <InputLabel
@@ -56,12 +61,20 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, useAttrs, watchEffect, useSlots } from 'vue'
+import { computed, ref, useAttrs, watchEffect } from 'vue'
 import { useInputLabeling } from '../../composables/useInputLabeling'
+import { useReactiveSlots } from '../../composables/useReactiveSlots'
 import InputLabel from '../InputLabeling/InputLabel.vue'
 import InputDescription from '../InputLabeling/InputDescription.vue'
 import InputError from '../InputLabeling/InputError.vue'
 import type { CheckboxBaseProps } from './types'
+import type { InputExposed } from '../../composables/inputTypes'
+
+// INP-Q6: `class` and `style` go on the layout wrapper, every other attribute
+// and listener goes once to the `<input>`. Without this, Vue applied the whole
+// set to the wrapper as well, so `aria-label` named a `<div>` and a `@click`
+// listener ran twice.
+defineOptions({ inheritAttrs: false })
 
 const props = withDefaults(defineProps<CheckboxBaseProps>(), {
   size: 'sm',
@@ -71,6 +84,12 @@ const props = withDefaults(defineProps<CheckboxBaseProps>(), {
 
 const model = defineModel<boolean | 1 | 0>()
 const attrs = useAttrs()
+
+const controlAttrs = computed(() =>
+  Object.fromEntries(
+    Object.entries(attrs).filter(([key]) => key !== 'class' && key !== 'style'),
+  ),
+)
 
 const checked = computed(() => Boolean(model.value))
 
@@ -86,14 +105,19 @@ function onChange(e: Event) {
   model.value = (e.target as HTMLInputElement).checked
 }
 
-defineSlots<{
+defineExpose<InputExposed>({
+  /** Moves focus to the checkbox. */
+  focus: (options?: FocusOptions) => inputRef.value?.focus(options),
+})
+
+const declaredSlots = defineSlots<{
   /** Overrides the rendered label content. Receives `{ required }`. */
   label?: (props: { required: boolean }) => any
   /** Overrides the rendered description content. */
   description?: () => any
 }>()
 
-const slots = useSlots()
+const slots = useReactiveSlots<typeof declaredSlots>()
 
 const {
   inputId,

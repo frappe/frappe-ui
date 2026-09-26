@@ -31,7 +31,7 @@
   },
   {
     name: 'error',
-    description: 'Puts the chart in its error state and prints this message under it. A\nchart that fails to draw sets its own; this is for a failed request.',
+    description: 'Puts the chart in its error state and prints this message under it. Data\nthe chart cannot draw shows the empty state, not this one.',
     required: false,
     type: 'string | null'
   },
@@ -52,13 +52,6 @@
     description: 'Row key holding how many reached the stage.',
     required: true,
     type: 'string'
-  },
-  {
-    name: 'showPercentages',
-    description: 'Prints each stage\'s share of the first stage. On by default.',
-    required: false,
-    type: 'boolean',
-    default: 'true'
   },
   {
     name: 'format',
@@ -96,16 +89,21 @@
     type: 'any'
   },
   {
+    name: 'title-suffix',
+    description: 'A mark right after the title, on the same line. The title truncates\naround it and it keeps its width. It renders in the title\'s font size, so\ncontent sized in `em` is smaller on a NumberCard than on a chart.',
+    type: 'any'
+  },
+  {
     name: 'tooltip',
-    description: 'Replaces the tooltip body. `stage` carries the two conversion rates the\ndefault body prints under the value.',
-    type: '{ label?: string | undefined; items: ChartTooltipItem[]; stage?: FunnelStage | undefined; }'
+    description: 'Replaces the tooltip body. `items` holds the stage\'s value and its two\nconversion rates, which are `\'context\'` items; `rows` holds the row\nbehind the stage.',
+    type: 'ChartTooltipSlotProps'
   }
 ]
 
   const emitsData = [
   {
     name: 'select',
-    description: 'A stage was selected, by click or by Enter on the keyboard cursor. Carries\nits position in the funnel and the row behind it; the whole column is the\nhit area, not just the shape it draws.',
+    description: 'A stage was selected, by click or by Enter on the keyboard cursor. Carries\nits label, its value and the row behind it; the whole column is the hit\narea, not just the shape it draws.',
     type: '[event: FunnelStageEvent]'
   }
 ]

@@ -2,7 +2,9 @@
 /**
  * Token drift audit for the Espresso v2 migration.
  *
- * Source of truth = the Figma export under espresso-v2-design-tokens/.
+ * Reads the committed tokens (tailwind/tokens/colors.js) and, when a raw
+ * Figma export is present in .figma-export/, the Figma style set too. The
+ * export is no longer committed, so section 3 is skipped without one.
  * Compares the resolved values of every themed token (surface/ink/outline)
  * against a baseline git ref, and against the Figma token set, then reports:
  *
@@ -27,15 +29,46 @@ const BASELINE = process.argv[2] || 'v0.1.278'
 const GROUPS = ['surface', 'ink', 'outline']
 const MODES = ['light', 'dark']
 
+// The colors file moved three times: tailwind/colors.json ->
+// tailwind/generated/ -> tailwind/tokens/colors.json -> tailwind/tokens/colors.js.
+// A baseline ref predates the current path, so try each.
+const COLORS_PATHS = [
+  'tailwind/tokens/colors.js',
+  'tailwind/tokens/colors.json',
+  'tailwind/generated/colors.json',
+  'tailwind/colors.json',
+]
+
 function loadJSON(p) {
   return JSON.parse(fs.readFileSync(path.join(ROOT, p), 'utf8'))
 }
-function loadFromRef(ref, p) {
-  try {
-    return JSON.parse(execSync(`git show ${ref}:${p}`, { cwd: ROOT }).toString())
-  } catch (e) {
-    return null
+// The .js form is `export default ` + the same JSON body build.js always
+// wrote, under a header comment. Cut to the first brace and the rest parses
+// as JSON, which keeps this script free of a bundler at any ref.
+function parseColors(source, file) {
+  const text = file.endsWith('.js') ? source.slice(source.indexOf('{')) : source
+  return JSON.parse(text)
+}
+function loadColors() {
+  for (const p of COLORS_PATHS) {
+    const full = path.join(ROOT, p)
+    if (fs.existsSync(full)) return parseColors(fs.readFileSync(full, 'utf8'), p)
   }
+  throw new Error(`no colors file found; looked in ${COLORS_PATHS.join(', ')}`)
+}
+function loadFromRef(ref, paths) {
+  for (const p of paths) {
+    try {
+      const source = execSync(`git show ${ref}:${p}`, {
+        cwd: ROOT,
+        stdio: ['pipe', 'pipe', 'ignore'],
+      }).toString()
+      return parseColors(source, p)
+    } catch (e) {
+      continue
+    }
+  }
+  return null
 }
 
 // Resolve a color ref like "lightMode/gray/900" or "neutral/white" to a hex.
@@ -52,7 +85,7 @@ function resolveRef(ref, palette) {
   return { missing: ref }
 }
 
-// All themed tokens resolved to hex for a given colors.json object.
+// All themed tokens resolved to hex for a given colors object.
 function resolveAll(colors) {
   const out = {}
   for (const mode of MODES) {
@@ -68,9 +101,17 @@ function resolveAll(colors) {
 }
 
 // Figma semantic token keys per group (union of Light + Dark styles).
+// Returns null when there is no export to read: the raw export is an input,
+// not a committed record, so a checkout without one is the normal case.
+const FIGMA_DIR = '.figma-export'
+
 function figmaKeySet() {
-  const fl = loadJSON('espresso-v2-design-tokens/Styles.Light.tokens.json')
-  const fd = loadJSON('espresso-v2-design-tokens/Styles.Dark.tokens.json')
+  const light = path.join(FIGMA_DIR, 'Styles.Light.tokens.json')
+  const dark = path.join(FIGMA_DIR, 'Styles.Dark.tokens.json')
+  const present = [light, dark].every((p) => fs.existsSync(path.join(ROOT, p)))
+  if (!present) return null
+  const fl = loadJSON(light)
+  const fd = loadJSON(dark)
   const set = {}
   for (const g of GROUPS) {
     set[g] = new Set([...Object.keys(fl[g] || {}), ...Object.keys(fd[g] || {})])
@@ -94,8 +135,8 @@ function usageCount(group, key) {
 }
 
 function main() {
-  const headColors = loadJSON('tailwind/colors.json')
-  const baseColors = loadFromRef(BASELINE, 'tailwind/colors.json')
+  const headColors = loadColors()
+  const baseColors = loadFromRef(BASELINE, COLORS_PATHS)
   const head = resolveAll(headColors)
   const base = baseColors ? resolveAll(baseColors) : null
   const figma = figmaKeySet()
@@ -108,7 +149,7 @@ function main() {
   const hexToFigma = {}
   for (const id of Object.keys(head)) {
     const [, group, key] = id.split('.')
-    if (figma[group].has(key) && head[id].hex) {
+    if (figma && figma[group].has(key) && head[id].hex) {
       ;(hexToFigma[head[id].hex] ||= new Set()).add(`${group}.${key}`)
     }
   }
@@ -131,7 +172,7 @@ function main() {
       })
     }
 
-    if (!figma[group].has(key)) {
+    if (figma && !figma[group].has(key)) {
       const suggestions = [...(hexToFigma[h.hex] || [])].filter((s) => s !== `${group}.${key}`)
       legacy.push({ id, group, key, hex: h.hex, uses: usageCount(group, key), suggestions })
     }
@@ -161,6 +202,15 @@ function main() {
       const refCol = d.kind === 'mapping' ? `${d.refFrom} → ${d.refTo}` : d.refTo
       console.log(`| \`${d.id}\` | ${d.kind} | ${d.from} | ${d.to} | ${refCol} |`)
     }
+  }
+
+  if (!figma) {
+    console.log(
+      `\n## 3. Legacy tokens (in code, absent from Figma) — skipped\n\n` +
+        `_no Figma style export in \`${FIGMA_DIR}/\` (needs both ` +
+        `Styles.Light.tokens.json and Styles.Dark.tokens.json); drop one there and re-run_`,
+    )
+    return
   }
 
   console.log(`\n## 3. Legacy tokens (in code, absent from Figma) — ${dedupLegacy.length}\n`)

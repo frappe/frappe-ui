@@ -528,6 +528,37 @@ describe('BottomSheet drag to dismiss', () => {
     app.unmount()
   })
 
+  // SHELL-Q9: the opt-out attribute is public and keeps this name.
+  it('leaves a gesture that starts on data-no-sheet-drag alone', async () => {
+    const { sheet, content, app } = await openSheet()
+    const carousel = document.createElement('div')
+    carousel.setAttribute('data-no-sheet-drag', '')
+    content.appendChild(carousel)
+
+    touch('touchstart', carousel, 0, 300)
+    const move = touch('touchmove', carousel, 0, 320)
+
+    expect(move.defaultPrevented).toBe(false)
+    expect(isDragging(sheet)).toBe(false)
+    app.unmount()
+  })
+
+  it('also covers a child of a data-no-sheet-drag element', async () => {
+    const { sheet, content, app } = await openSheet()
+    const carousel = document.createElement('div')
+    carousel.setAttribute('data-no-sheet-drag', '')
+    const slide = document.createElement('div')
+    carousel.appendChild(slide)
+    content.appendChild(carousel)
+
+    touch('touchstart', slide, 0, 300)
+    const move = touch('touchmove', slide, 0, 320)
+
+    expect(move.defaultPrevented).toBe(false)
+    expect(isDragging(sheet)).toBe(false)
+    app.unmount()
+  })
+
   it('drags a sheet that was mounted closed and opened afterwards', async () => {
     const { sheet, content, openUpdates, app } = await openSheet(
       {},
@@ -685,6 +716,31 @@ describe('BottomSheet drag to dismiss', () => {
 
     expect(later.defaultPrevented).toBe(true)
     expect(sheet.style.transform).toBe('translateY(60px)')
+    app.unmount()
+  })
+})
+
+describe('BottomSheet accessibility wiring', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+    document.body.innerHTML = ''
+  })
+
+  /*
+   * A sheet is titled and carries no description. reka warns once per open
+   * DialogContent that has neither a Description nor an explicit opt-out, so
+   * an app with a few sheets logged a warning for every one of them.
+   */
+  it('opens without reka warning about a missing description', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const { app } = await openSheet({}, { startClosed: true })
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    await nextTick()
+
+    const described = warn.mock.calls.filter((args) =>
+      String(args[0]).includes('Description'),
+    )
+    expect(described).toEqual([])
     app.unmount()
   })
 })

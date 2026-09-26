@@ -8,9 +8,6 @@ import {
   type SidebarSection,
 } from './sidebarList'
 
-import LucideLeft from '~icons/lucide/arrow-left'
-import LucideRight from '~icons/lucide/arrow-right'
-
 const route = useRoute()
 const { frontmatter, site } = useData()
 
@@ -58,13 +55,13 @@ const subtleMdLink =
 <template>
   <div class="flex justify-between gap-5 mt-10" v-if="visible">
     <a v-if="prevLink" :href="withBase(prevLink.link)" :class="subtleMdLink">
-      <LucideLeft class="h-4 w-4" />
+      <span class="lucide-arrow-left h-4 w-4" />
       {{ prevLink.text }}
     </a>
 
     <a v-if="nextLink" :href="withBase(nextLink.link)" :class="subtleMdLink">
       {{ nextLink.text }}
-      <LucideRight class="h-4 w-4" />
+      <span class="lucide-arrow-right h-4 w-4" />
     </a>
   </div>
 </template>

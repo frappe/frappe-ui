@@ -1,8 +1,9 @@
-import { computed, ref, type ComputedRef, type Ref } from 'vue'
+import { computed, type ComputedRef, type Ref } from 'vue'
 import {
-  resolvedColorScheme,
+  getResolvedColorScheme,
   type ResolvedColorScheme,
 } from '../composables/useColorScheme'
+import { documentAttributes } from './utils'
 import type { ChartPalette, ChartPaletteName } from './types'
 
 /**
@@ -17,21 +18,13 @@ export type ChartTokens = {
   axisLabel: string
   axisTitle: string
   axisLine: string
-  splitLine: string
+  gridline: string
   dataLabel: string
   /** Ink for a label printed on a pale fill rather than beside it. */
   insideLabel: string
-  /** What a heatmap draws between two cells, i.e. the surface behind the plot. */
-  cellGap: string
+  /** The surface behind the plot. Read off the page, not named: see `backdropColor`. */
+  backdrop: string
 }
-
-/**
- * The scheme a chart picks its fallback colors by. The package-root
- * `resolvedColorScheme` is the one resolution of `data-theme`, the `dark` class
- * and the OS setting; a chart has no `'system'` state to hold, because it reads
- * what the document is painted in rather than what the user selected.
- */
-export type { ResolvedColorScheme } from '../composables/useColorScheme'
 
 export const CHART_CATEGORICAL_LENGTH = 10
 export const CHART_SEQUENTIAL_LENGTH = 9
@@ -46,6 +39,7 @@ export const CHART_DIVERGING_LENGTH = 9
  * series keeps its hue across a theme flip. See style.css for the derivation.
  */
 // "Jewel": five hue families, each a dark member then its light partner.
+// blue, emerald, violet, amber, red.
 const LIGHT_CATEGORICAL = [
   '#2283c3',
   '#84c5f9',
@@ -55,8 +49,8 @@ const LIGHT_CATEGORICAL = [
   '#bb9df1',
   '#c98c28',
   '#f5ca8e',
-  '#ba205a',
-  '#f98da7',
+  '#c54b58',
+  '#fca0a4',
 ]
 
 const LIGHT_SEQUENTIAL = [
@@ -94,8 +88,8 @@ const DARK_CATEGORICAL = [
   '#b294e7',
   '#bf8319',
   '#ebc085',
-  '#af0f52',
-  '#ef849e',
+  '#ba4250',
+  '#f2979b',
 ]
 
 const DARK_SEQUENTIAL = [
@@ -146,13 +140,16 @@ const TOKENS = {
   // elevated card surface, so a gridline drawn in it is invisible. The two
   // `--chart-*` vars name a hairline stop per mode instead. See style.css.
   axisLine: '--chart-axis-line',
-  splitLine: '--chart-gridline',
+  gridline: '--chart-gridline',
   dataLabel: '--ink-gray-6',
   // Its own token rather than `--ink-gray-8`: the ink on a fill answers to the
   // fill, not to the page, and `--ink-gray-8` inverts to a light gray in dark
   // mode — invisible on the categorical ramp's light-tier stops. See style.css.
   insideLabel: '--chart-inside-label',
-  cellGap: '--chart-cell-gap',
+  // Unset by default, unlike every other token here: the surface behind the plot
+  // is read off the page. This is the override for a chart drawn on something
+  // the walk cannot see, an image say. See `backdropColor`.
+  backdrop: '--chart-backdrop',
 } as const
 
 const FALLBACK_TOKENS: Record<
@@ -163,21 +160,46 @@ const FALLBACK_TOKENS: Record<
     axisLabel: 'oklch(0.586 0 0)',
     axisTitle: 'oklch(0.341 0 0)',
     axisLine: 'oklch(0.913 0 0)',
-    splitLine: 'oklch(0.946 0 0)',
+    gridline: 'oklch(0.946 0 0)',
     dataLabel: 'oklch(0.439 0 0)',
     insideLabel: 'oklch(0.271 0 0)',
-    cellGap: '#ffffff',
+    backdrop: '#ffffff',
   },
   dark: {
     axisLabel: 'oklch(0.58 0 0)',
     axisTitle: 'oklch(0.754 0 0)',
     axisLine: 'oklch(0.379 0 0)',
-    splitLine: 'oklch(0.341 0 0)',
+    gridline: 'oklch(0.341 0 0)',
     dataLabel: 'oklch(0.683 0 0)',
     // Same near-black as light: see the note on `TOKENS.insideLabel`.
     insideLabel: 'oklch(0.271 0 0)',
-    cellGap: '#242424',
+    backdrop: '#242424',
   },
+}
+
+/**
+ * The painted background behind `el`: its first ancestor whose own background is
+ * not see-through, which is what a viewer actually sees behind the plot.
+ *
+ * Not a named surface token, because there is no one surface a chart sits on. A
+ * card puts it on `--surface-elevation-2` and a bare page on `--surface-base`,
+ * and in dark mode those are two different grays, so a plate filled with the
+ * card's color on a page draws a visible box. Light mode hides the mistake
+ * entirely: every light surface token is white.
+ */
+function backdropColor(el: HTMLElement | null | undefined): string {
+  let node: HTMLElement | null = el ?? document.documentElement
+  while (node) {
+    const background = getComputedStyle(node).backgroundColor
+    if (!isTransparent(background)) return background
+    node = node.parentElement
+  }
+  return ''
+}
+
+/** An alpha of zero, in any notation a computed `background-color` comes back in. */
+function isTransparent(color: string) {
+  return !color || color === 'transparent' || /[,/]\s*0\s*\)$/.test(color)
 }
 
 /**
@@ -185,7 +207,7 @@ const FALLBACK_TOKENS: Record<
  * lookup so a subtree that redefines `--chart-*` wins over the document root.
  */
 export function resolveChartTokens(el?: HTMLElement | null): ChartTokens {
-  const scheme = resolvedColorScheme()
+  const scheme = getResolvedColorScheme()
   const fallbacks = FALLBACK_TOKENS[scheme]
 
   if (typeof window === 'undefined' || typeof getComputedStyle !== 'function') {
@@ -214,31 +236,19 @@ export function resolveChartTokens(el?: HTMLElement | null): ChartTokens {
   const diverging = readRamp('--chart-diverging-', CHART_DIVERGING_LENGTH)
 
   return {
-    categorical: categorical.length ? categorical : FALLBACK_CATEGORICAL[scheme],
+    categorical: categorical.length
+      ? categorical
+      : FALLBACK_CATEGORICAL[scheme],
     sequential: sequential.length ? sequential : FALLBACK_SEQUENTIAL[scheme],
     diverging: diverging.length ? diverging : FALLBACK_DIVERGING[scheme],
     axisLabel: read(TOKENS.axisLabel) || fallbacks.axisLabel,
     axisTitle: read(TOKENS.axisTitle) || fallbacks.axisTitle,
     axisLine: read(TOKENS.axisLine) || fallbacks.axisLine,
-    splitLine: read(TOKENS.splitLine) || fallbacks.splitLine,
+    gridline: read(TOKENS.gridline) || fallbacks.gridline,
     dataLabel: read(TOKENS.dataLabel) || fallbacks.dataLabel,
     insideLabel: read(TOKENS.insideLabel) || fallbacks.insideLabel,
-    cellGap: read(TOKENS.cellGap) || fallbacks.cellGap,
+    backdrop: read(TOKENS.backdrop) || backdropColor(el) || fallbacks.backdrop,
   }
-}
-
-// One observer for the whole page: the theme flips on `<html>`, so a per-chart
-// observer would watch the same node N times over.
-const themeVersion = ref(0)
-let observer: MutationObserver | undefined
-
-function ensureThemeObserver() {
-  if (observer || typeof MutationObserver === 'undefined') return
-  observer = new MutationObserver(() => themeVersion.value++)
-  observer.observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ['data-theme', 'class'],
-  })
 }
 
 export function pickSeriesColor(ramp: string[], index: number) {
@@ -246,10 +256,6 @@ export function pickSeriesColor(ramp: string[], index: number) {
   return ramp[index % ramp.length]
 }
 
-/** The two palest sequential stops vanish against a white card. */
-const SEQUENTIAL_TAIL_TRIM = 2
-/** A lone series reads best as one confident mid-blue, not the ramp's dark end. */
-const SEQUENTIAL_SOLO_INDEX = 1
 /**
  * Below this relative luminance a fill needs white text on top of it. It is the
  * crossover, not a taste call: white and the near-black inside-label ink
@@ -259,23 +265,57 @@ const SEQUENTIAL_SOLO_INDEX = 1
 const DARK_FILL_LUMINANCE = 0.22
 
 /**
- * `count` evenly spaced stops from a continuous ramp, so a stack reads as one
- * progression rather than n unrelated hues. Cycles instead once there are more
- * series than usable stops, where even spacing would hand out duplicates.
+ * How much of the sequential ramp a chart spends before it must widen. The
+ * last two stops of a nine-stop ramp are pale enough that a series in them is
+ * hard to read against a card, so a chart stays inside the first seven until
+ * it has more series than that.
  */
-function rampStops(ramp: string[], count: number, lastIndex: number): string[] {
-  if (count > lastIndex + 1) {
+const SEQUENTIAL_SPAN = 7
+/**
+ * The most stops apart two neighbouring series sit. Without it two series
+ * take the two ends of the span, and a third then recolors the second. With
+ * it a chart of one, two or three series is a prefix of the next.
+ */
+const SEQUENTIAL_MAX_STEP = 3
+
+/**
+ * `count` stops from the deep end of a sequential ramp: spread evenly over the
+ * first `SEQUENTIAL_SPAN` stops, never more than `SEQUENTIAL_MAX_STEP` apart,
+ * widening past the span only for a chart with more series than it holds.
+ * Cycles once there are more series than stops.
+ */
+function sequentialStops(ramp: string[], count: number): string[] {
+  if (count === 1) return [ramp[0]]
+  if (count > ramp.length) {
     return Array.from({ length: count }, (_, i) => pickSeriesColor(ramp, i))
   }
+  const lastIndex = Math.min(Math.max(SEQUENTIAL_SPAN, count), ramp.length) - 1
+  return Array.from(
+    { length: count },
+    (_, i) =>
+      ramp[
+        Math.min(
+          Math.round((i * lastIndex) / (count - 1)),
+          i * SEQUENTIAL_MAX_STEP,
+        )
+      ],
+  )
+}
+
+/**
+ * `count` evenly spaced stops across the whole of a diverging ramp, which is
+ * read by its extremes. Cycles once there are more series than stops.
+ */
+function divergingStops(ramp: string[], count: number): string[] {
+  if (count === 1) return [ramp[0]]
+  if (count > ramp.length) {
+    return Array.from({ length: count }, (_, i) => pickSeriesColor(ramp, i))
+  }
+  const lastIndex = ramp.length - 1
   return Array.from(
     { length: count },
     (_, i) => ramp[Math.round((i * lastIndex) / (count - 1))],
   )
-}
-
-/** The sequential ramp without the stops that vanish against a card. */
-function usableSequential(ramp: string[]) {
-  return ramp.slice(0, Math.max(1, ramp.length - SEQUENTIAL_TAIL_TRIM))
 }
 
 /**
@@ -283,7 +323,7 @@ function usableSequential(ramp: string[]) {
  * hues, so it is cycled in order; the continuous ramps are sampled instead,
  * dark to light — which for a stack runs bottom to top.
  */
-export function paletteColors(
+function rampSlots(
   name: ChartPaletteName,
   tokens: ChartTokens,
   count: number,
@@ -297,54 +337,16 @@ export function paletteColors(
 
   const ramp = name === 'diverging' ? tokens.diverging : tokens.sequential
   if (!ramp.length) return cycle(tokens.categorical)
-
-  if (count === 1) {
-    if (name === 'diverging') return [ramp[0]]
-    return [ramp[Math.min(SEQUENTIAL_SOLO_INDEX, ramp.length - 1)]]
-  }
-
-  // A diverging ramp is read by its extremes, so it always spans end to end.
-  const lastIndex =
-    name === 'diverging' ? ramp.length - 1 : usableSequential(ramp).length - 1
-  return rampStops(ramp, count, lastIndex)
+  return name === 'diverging'
+    ? divergingStops(ramp, count)
+    : sequentialStops(ramp, count)
 }
 
-/**
- * A named ramp as a ramp: every stop it holds, in the order it was authored.
- * What a plot that interpolates between the stops reads, where the sampled
- * `paletteColors` would hand it a set of slots instead.
- */
+/** A named ramp as it was authored, every stop in order. */
 function namedRamp(name: ChartPaletteName, tokens: ChartTokens): string[] {
   if (name === 'categorical') return tokens.categorical
-  const ramp =
-    name === 'diverging' ? tokens.diverging : usableSequential(tokens.sequential)
+  const ramp = name === 'diverging' ? tokens.diverging : tokens.sequential
   return ramp.length ? ramp : tokens.categorical
-}
-
-/**
- * How a chart spends the palette: one color per thing it draws, or `'ramp'` for
- * the stops themselves, which a plot with a continuous scale interpolates
- * between rather than handing out.
- */
-export type ChartColorCount = number | 'ramp'
-
-/**
- * Which end of a sequential ramp leads. It is authored deep to pale, which is
- * how a list of series reads — the first one is the heaviest. `'last'` flips it
- * for a plot whose color runs with the value instead: a funnel that darkens as
- * it narrows, a heatmap where the heavier number is the heavier color.
- *
- * Only the sequential ramp has a deep end to place. A categorical set has no
- * order to reverse, a diverging ramp's direction is its meaning, and a caller's
- * own colors are drawn in the order they were written.
- */
-export type SequentialDeepEnd = 'first' | 'last'
-
-export type ChartColorsOptions = {
-  /** Ramp to read when the caller named none. Each chart family picks its own. */
-  fallback: ChartPaletteName
-  count: ChartColorCount
-  deepEnd?: SequentialDeepEnd
 }
 
 /**
@@ -352,29 +354,54 @@ export type ChartColorsOptions = {
  * Every chart resolves its palette through this one call, so the precedence —
  * the caller's own colors, then the ramp they named, then the family default —
  * is stated once and reads the same whatever is being painted.
+ *
+ * `count` is one color per thing drawn: a caller's own list is handed out in
+ * the order it was written and cycled once it runs out, a named ramp is spent
+ * over the count.
  */
-export function chartColors(
+export function paletteColors(
   palette: ChartPalette | undefined,
   tokens: ChartTokens,
-  { fallback, count, deepEnd = 'first' }: ChartColorsOptions,
+  count: number,
+  fallback: ChartPaletteName = 'sequential',
 ): string[] {
-  // A caller's colors are a list, not a ramp: handed out in the order written,
-  // and cycled once they run out.
   const explicit = Array.isArray(palette) ? palette : undefined
   if (explicit?.length) {
-    if (count === 'ramp') return [...explicit]
+    if (count <= 0) return []
     return Array.from({ length: count }, (_, i) => pickSeriesColor(explicit, i))
   }
 
-  const name = typeof palette === 'string' ? palette : fallback
-  const colors =
-    count === 'ramp'
-      ? namedRamp(name, tokens)
-      : paletteColors(name, tokens, count)
+  return rampSlots(
+    typeof palette === 'string' ? palette : fallback,
+    tokens,
+    count,
+  )
+}
 
-  return name === 'sequential' && deepEnd === 'last'
-    ? colors.slice().reverse()
-    : colors
+/**
+ * The same palette as a ramp: every stop it holds, in the order it was
+ * authored. What a plot that interpolates between the stops reads, where
+ * `paletteColors` would hand it a set of slots instead.
+ */
+export function rampStops(
+  palette: ChartPalette | undefined,
+  tokens: ChartTokens,
+  fallback: ChartPaletteName = 'sequential',
+): string[] {
+  const explicit = Array.isArray(palette) ? palette : undefined
+  if (explicit?.length) return [...explicit]
+  return namedRamp(typeof palette === 'string' ? palette : fallback, tokens)
+}
+
+/**
+ * `color` at a fraction of its opacity. `color-mix` rather than an alpha channel
+ * written into the value, because a `--chart-*` token is read back in whatever
+ * notation it was authored in, oklch for the surface tokens and hex for the
+ * ramps, and only a mix takes all of them without a branch per notation. Both the SVG
+ * renderer and the canvas one resolve it.
+ */
+export function translucent(color: string, percent: number) {
+  return `color-mix(in srgb, ${color} ${percent}%, transparent)`
 }
 
 /**
@@ -416,10 +443,8 @@ function hexLuminance(color: string): number | null {
 export function useChartTokens(el: Ref<HTMLElement | undefined>): {
   tokens: ComputedRef<ChartTokens>
 } {
-  ensureThemeObserver()
-
   const tokens = computed<ChartTokens>(() => {
-    themeVersion.value
+    documentAttributes()
     return resolveChartTokens(el.value)
   })
 

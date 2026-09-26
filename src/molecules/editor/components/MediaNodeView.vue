@@ -54,22 +54,25 @@ const isEditable = useNodeViewEditable(editor)
 const isVideo = computed(() => props.node.type.name === 'video')
 
 /**
- * Whether THIS media is the fullscreen element.
+ * Whether THIS media is fullscreen through either browser API.
  *
  * The browser stretches the fullscreen element to the viewport with UA
  * `!important` rules, but everything inside it kept the committed pixel size:
  * the video stayed small at the top, its playback bar pinned under it, with a
  * black slab filling the rest of the screen. In fullscreen the media is
  * centered in the black field and the controls run along the bottom of the
- * screen — and the editing chrome (toolbar, resize handles, caption) is not
- * rendered at all, since none of it is actionable there.
+ * screen. iPhone instead moves the video into its native player and leaves the
+ * in-page container alone. Editing chrome (toolbar, resize handles, caption)
+ * is not rendered in either mode, since none of it is actionable there.
  */
 const isFullscreen = ref(false)
+const isStandardFullscreen = ref(false)
 
 function syncFullscreen(): void {
-  isFullscreen.value =
+  isStandardFullscreen.value =
     containerRef.value !== null &&
     document.fullscreenElement === containerRef.value
+  isFullscreen.value = isStandardFullscreen.value
 }
 
 onMounted(() => document.addEventListener('fullscreenchange', syncFullscreen))
@@ -311,7 +314,7 @@ function setVideoOptions(options: {
       ref="containerRef"
       class="group relative isolate overflow-hidden not-prose rounded-4"
       :class="
-        isFullscreen
+        isStandardFullscreen
           ? 'flex items-center justify-center bg-black'
           : containerClasses(node.attrs, selected)
       "
@@ -322,7 +325,8 @@ function setVideoOptions(options: {
         v-if="isUploaded || fileContent || node.attrs.loading"
         class="relative"
         :class="
-          isFullscreen && 'flex h-full w-full items-center justify-center'
+          isStandardFullscreen &&
+          'flex h-full w-full items-center justify-center'
         "
       >
         <img
@@ -356,7 +360,7 @@ function setVideoOptions(options: {
             // committed size the width/height attributes carry. `!outline-none`
             // drops the selected-node outline from `style.css`, which would
             // otherwise frame the video mid-screen.
-            isFullscreen &&
+            isStandardFullscreen &&
               'size-full rounded-none object-contain !outline-none',
           ]"
           :src="node.attrs.src || fileContent"
@@ -371,9 +375,10 @@ function setVideoOptions(options: {
 
         <VideoControls
           v-if="isVideo && isUploaded"
+          v-model:fullscreen="isFullscreen"
           :video-el="mediaRef as HTMLVideoElement | null"
           :hidden="isResizing"
-          :fullscreen="isFullscreen"
+          :standard-fullscreen="isStandardFullscreen"
         />
 
         <MediaToolbar

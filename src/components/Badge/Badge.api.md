@@ -30,7 +30,7 @@
     name: 'label',
     description: 'Content displayed inside the badge',
     required: false,
-    type: 'Label | string | number'
+    type: 'string | number'
   }
 ]
 

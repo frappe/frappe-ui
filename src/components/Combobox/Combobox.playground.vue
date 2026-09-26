@@ -14,13 +14,7 @@ const options = [
 ]
 
 const knobs: Knob[] = [
-  { name: 'label', type: 'text', default: 'Status', width: '12rem' },
-  {
-    name: 'placeholder',
-    type: 'text',
-    default: 'Pick or search…',
-    width: '16rem',
-  },
+  { name: 'label', type: 'text', default: 'Status' },
   {
     name: 'trigger',
     type: 'tabs',
@@ -35,10 +29,10 @@ const knobs: Knob[] = [
     type: 'tabs',
     default: 'sm',
     options: [
+      { label: 'xs', value: 'xs' },
       { label: 'sm', value: 'sm' },
       { label: 'md', value: 'md' },
       { label: 'lg', value: 'lg' },
-      { label: 'xl', value: 'xl' },
     ],
   },
   {
@@ -58,7 +52,7 @@ const knobs: Knob[] = [
 function buildCode(v: Record<string, any>) {
   const attrs = []
   if (v.label) attrs.push(`label="${v.label}"`)
-  if (v.placeholder) attrs.push(`placeholder="${v.placeholder}"`)
+  attrs.push('placeholder="Pick or search…"')
   if (v.trigger !== 'input') attrs.push(`trigger="${v.trigger}"`)
   if (v.size !== 'sm') attrs.push(`size="${v.size}"`)
   if (v.variant !== 'subtle') attrs.push(`variant="${v.variant}"`)
@@ -77,7 +71,7 @@ function buildCode(v: Record<string, any>) {
         <Combobox
           v-model="model"
           :label="values.label || undefined"
-          :placeholder="values.placeholder || undefined"
+          placeholder="Pick or search…"
           :trigger="values.trigger"
           :size="values.size"
           :variant="values.variant"

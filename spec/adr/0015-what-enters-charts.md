@@ -25,6 +25,14 @@ costs an app to reach the chrome — and those belong to the plot-and-chrome
 contract in [charts.md](../charts.md) rather than here. The other three are
 decided below, by the same rule, and are marked as second-pass entries.
 
+**Names since renamed (2026-09-12).** The reasoning below is recorded as it
+stood. Three of the props it names have moved: `showInlineLabels` on the donut
+and `showValues` on the heatmap are both `showDataLabels`, the one name the
+family uses for a data label, and the funnel's `showPercentages` is removed
+because a funnel always prints its conversion rates. The decisions are
+unchanged — what entered still entered. See the
+[RC API audit](https://github.com/frappe/frappe-ui/issues/1139), item 4.
+
 ## Decision
 
 ### Enters
@@ -38,7 +46,7 @@ decided below, by the same rule, and are marked as second-pass entries.
 | Scatter | `ScatterChart`, with an optional size measure | Convention 1. It is a way to read two measures against each other. With `referenceLines` it also covers Insights' quadrant lines, so no `show_quadrants` prop. |
 | Sankey | `SankeyChart` | Convention 1. A flow between a source and a target is a reading of the data. |
 | Numeric x axis | `xAxis.type: 'value'` | Convention 1. Reading a measure against a quantity — conversion against discount, revenue against distance — is a statement about the data, the same one `'time'` already makes about a date. It is a third reading of the x column the axis is typed with, not a prop beside it, and the caller still says only what the column means. |
-| Series axis (2nd pass) | `seriesConfig[key].axis: 'y' \| 'y2'` | Convention 4. Which scale a series is measured against is per-series meaning, and `seriesConfig` is the one place per-series meaning lives. It replaces `y2`, which said the same thing in a second place and said it by moving the series — see Leaves. |
+| Series axis (3rd pass, 2026-09-21) | `y2`, a column prop beside `y` | Convention 4, read from the caller's side. The column props pair with the axis options — `x`/`xAxis`, `y`/`yAxis`, `y2`/`y2Axis` — so which scale a column is measured against is said where the column is named. It replaces `seriesConfig[key].axis`, which the 2nd pass had put in its place — see Leaves. |
 | Scatter point labels (2nd pass) | `showDataLabels` on `ScatterChart` | Convention 4. A donut prints `showInlineLabels` and an axis series prints `showDataLabels`, so a scatter that cannot name its points is the odd one out. It prints the `label` column: both measures are already on the axes. |
 | `NumberCard` value color (2nd pass) | `color` on `NumberCardProps` | Consistency, against convention 2. See below. |
 
@@ -105,23 +113,13 @@ Convention 3 turns two requested options into library work.
 
 ### Leaves
 
-- **`y2`** (2nd pass) — the column list naming what the second value axis
-  measures. Convention 4: beside `seriesConfig[key].axis` it is a second
-  spelling of one idea. It is not sugar over the first either, because the two
-  can disagree — `y2` naming a column whose entry says `axis: 'y'` needs a
-  precedence rule, and a shorthand that needs one is a mechanism. It also
-  carried a side effect the per-series key does not. The series list was
-  `[...y, ...y2]` and series colors are handed out along it, so a caller moving
-  a column from `y` to `y2` moved it down the list and changed its color. v2 is
-  in beta, Insights is the only consumer and is updated in the same cycle, so
-  `y2` goes rather than staying on as a second way in. `y2Axis` stays: it
-  configures the axis, and one axis is one thing.
+- **`seriesConfig[key].axis`** (3rd pass, 2026-09-21) — which value axis a series is measured against, set per series. The 2nd pass put it in place of `y2` on three grounds, and this pass reverses that. Two spellings of one idea: still true, so one of them goes, and `axis` is the one. The precedence rule the pair needed goes with it, and a stale `axis` in a saved config is dropped before it reaches the series. A column changing color when it moves to the second axis: series draw and take palette slots in `y` order then `y2` order, so the last `y` column keeps its slot and any other does not. That cost is accepted. What decided it is how a chart reads when written by hand. `axis` spread a two-axis chart over `y`, two `seriesConfig` keys and `y2Axis`, and left `y2Axis` as the one axis option with no column prop beside it. `y2Axis` stays: it configures the axis, and one axis is one thing.
 
 ### Not a gap: the adapter layer
 
 Insights configs reference columns through `Dimension` and `Measure` objects,
 and Insights pivots wide before it plots. Library props take plain row keys and
-read long data through the `series` prop. Insights needs a mapping layer
+read long data through the `splitBy` prop. Insights needs a mapping layer
 whatever the library does, and convention 5 puts that layer in the app. Library
 props are not shaped around a stored config format.
 
@@ -133,9 +131,49 @@ props are not shaped around a stored config format.
 `timeGrain` all exist, as do the heatmap, the empty and loading and error
 states, theme-reactive palettes, HTML tooltips with slots, and typed events.
 
+### Not a gap any more: four props left before 1.0.0 (2026-09-12)
+
+Convention 2 reads on the way out as well. Each of these named a renderer
+setting rather than a reading of the data, and each is breaking to remove after
+the tag.
+
+- `SeriesStyle.lineWidth` is stroke weight, which the library decides once for
+  every line it draws. `echartOptions: { lineStyle: { width } }` sets it per
+  series.
+- `fillOpacity`, chart-level and per-series, handed a caller the alpha the
+  library already decides twice over: a fading gradient for a free area, a solid
+  wash for a banded one. `echartOptions: { areaStyle: { opacity } }` sets it per
+  series.
+- `SeriesStyle.lineType` offered three textures where the meaning that survives
+  is "this line is a comparison or a projection". It is `dashed?: boolean`, the
+  shape and the dash `ReferenceLine.dashed` already uses.
+- `SankeyChartProps.orient` was echarts' own key and value set for what
+  `BarChart` spells `horizontal?: boolean`. It is `vertical?: boolean`.
+  `nodeAlign` stays: which end a node with nothing leaving it sits at is a
+  reading of the flow.
+
+### Stays in: four looks read once more before 1.0.0 (2026-09-12)
+
+The same reading of convention 2 was run over what the family already ships.
+These four stay, and the reason is recorded here so the question is closed for
+1.x.
+
+- `ReferenceLine.color` stays. A reference line is furniture and carries no
+  identity, so the identity argument above does not admit it. What does is that
+  a chart carries several rules at once — a target, a threshold, last year's
+  average — and the color is what says which line is which.
+- `smooth` stays. A curve says the measure runs between the points and a
+  straight join says the points are all that was measured, so it reads the data
+  and not only the stroke.
+- `showDataPoints` stays. The marks say where a measurement was taken, which a
+  dense line otherwise hides.
+- Donut `variant` stays. `'half'` is a look, admitted because it already ships
+  and is named in `DonutChart.md`. Removing it after the tag is breaking, so it
+  is closed rather than argued.
+
 ## Consequences
 
-Three decisions fell out of the work and answer questions this record raised.
+These decisions fell out of the work and answer questions this record raised.
 
 - **A reference line does not stretch the value axis.** A target far outside the
   data would flatten the data it is read against, so a line beyond the range is
@@ -143,10 +181,11 @@ Three decisions fell out of the work and answer questions this record raised.
 - **`maxSeries` has no default.** A ring cannot show 20 arcs, so `maxSlices`
   defaults. An axis chart with 20 series is legible enough that a default would
   silently redraw every existing long-data chart.
-- **A long-data series can reach the second axis.** `y2` named columns, and long
-  data has none to name — the series come out of a grouping column — so a
-  grouped chart had no way to put one group on its own scale. Keying the axis by
-  series identity gives it one, and drops a branch instead of adding a prop.
+- **A long-data series cannot reach the second axis.** `y2` names columns, and long data has none to name — the series come out of the `splitBy` column — so a grouped chart cannot put one group on its own scale. `splitBy` splits `y` only, and a `y2` column beside it draws as one unsplit series, read from the first row at each `x`. The 2nd pass had closed this by keying the axis by series identity. The 3rd pass reopens it knowingly.
+- **`NumberCard` prints through `format`.** `compact` and `precision` named in
+  the "already present" list above left before 1.0.0: they were a second
+  formatting mechanism beside the `ChartValueFormatter` every other chart takes,
+  which `spec/charts.md` already promised the card.
 - **A numeric x axis is asked for, never inferred.** `'time'` is inferred
   because a column of dates is a column of dates. A column of numbers is as
   often a list of categories — quarters, store numbers, shirt sizes — so

@@ -209,4 +209,43 @@ describe('formatDuration', () => {
     expect(formatDuration(null)).to.equal('')
     expect(formatDuration(undefined)).to.equal('')
   })
+
+  // INP-Q5 / INP-Q7.
+  describe('template ref and labeling slots', () => {
+    it('exposes focus() which focuses the input', () => {
+      cy.mount(Duration).then((mounted: any) => {
+        const vm = mounted.component ?? mounted.wrapper?.vm ?? mounted
+        vm?.focus?.()
+      })
+
+      cy.get('input').should('be.focused')
+    })
+
+    it('forwards the #label and #description slots to the input', () => {
+      cy.mount(Duration, {
+        props: { label: 'Ignored', description: 'Ignored too' },
+        slots: {
+          label: ({ required }: { required: boolean }) =>
+            h('span', { 'data-cy': 'label' }, `Time spent ${required}`),
+          description: () => h('span', { 'data-cy': 'description' }, 'HH MM SS'),
+        },
+      })
+
+      cy.get('[data-cy="label"]').should('have.text', 'Time spent false')
+      cy.get('[data-cy="description"]').should('have.text', 'HH MM SS')
+      cy.contains('Ignored').should('not.exist')
+    })
+
+    it('passes required through to the #label slot', () => {
+      cy.mount(Duration, {
+        props: { required: true },
+        slots: {
+          label: ({ required }: { required: boolean }) =>
+            h('span', { 'data-cy': 'label' }, String(required)),
+        },
+      })
+
+      cy.get('[data-cy="label"]').should('have.text', 'true')
+    })
+  })
 })

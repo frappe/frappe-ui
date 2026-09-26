@@ -11,9 +11,6 @@ export interface ProgressProps {
   /** Whether to show a hint/tooltip for the progress value */
   hint?: boolean
 
-  /** Whether to show interval markers on the progress bar */
-  intervals?: boolean
-
-  /** Number of intervals to display if `intervals` is true */
-  intervalCount?: number
+  /** Number of interval markers to show; omit for a continuous progress bar */
+  intervals?: number
 }

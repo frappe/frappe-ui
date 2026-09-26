@@ -10,8 +10,8 @@ Specs describe the current contract. ADRs explain why decisions were made. Super
 | [0002 — Imperative dialog resolves on click](./0002-imperative-dialog-caller-closes.md) | Superseded | Replaced by ADR-0003. Historical only. |
 | [0003 — Imperative dialog uses `onConfirm`](./0003-imperative-dialog-onconfirm.md) | Accepted | Current imperative dialog lifecycle. |
 | [0004 — Editor composition model](./0004-editor-family-composition-model.md) | Accepted | One `<TextEditor>` + kits at `frappe-ui/editor`; no ready-mades. |
-| [0005 — 2px focus ring](./0005-focus-ring-2px.md) | Accepted | `focus-visible:ring-2` matches Figma's 2px focus shadow. |
-| [0006 — Numbered radius tokens](./0006-numbered-radius-tokens.md) | Accepted | `rounded-1`…`rounded-9` are canonical; named aliases deprecated. |
+| [0005 — 2px focus ring](./0005-focus-ring-2px.md) | Accepted | A global `:focus-visible` outline from `--focus-outline-<name>`; the box-shadow form is not emitted. |
+| [0006 — Numbered radius tokens](./0006-numbered-radius-tokens.md) | Accepted | `rounded-1`…`rounded-9` are canonical; named aliases removed. |
 | [0007 — Named typography style utilities](./0007-typography-style-utilities.md) | Accepted | `text-{size}-medium` utilities for Figma's medium-weight tracking. |
 | [0008 — No deprecated members in `1.0.0`](./0008-no-deprecated-members-in-1-0-0.md) | Accepted | Everything `@deprecated` is deleted before the stable tag. |
 | [0009 — Client filtering is opt-out](./0009-client-filtering-is-opt-out.md) | Accepted | `filterable` exists so server-driven options aren't filtered twice. |
@@ -22,3 +22,6 @@ Specs describe the current contract. ADRs explain why decisions were made. Super
 | [0014 — Chart props are flat and name the columns](./0014-flat-props-name-columns.md) | Accepted | One tag, plain-data props, no `config` object — a saved chart is spread with `v-bind`. Rejects composition and grammar-of-graphics. |
 | [0015 — What enters the chart family](./0015-what-enters-charts.md) | Accepted | How the 2026-08-05 Insights audit was decided, case by case. Conventions and the rule live in [`charts.md`](../charts.md). |
 | [0016 — Charts hand back the echarts instance](./0016-charts-expose-echarts-instance.md) | Accepted | `ChartExposed` is the second and last §2.4 exception: `echartOptions` reaches every option key and no instance method, and `getInstanceByDom` reaches the instance anyway. Limits in [`charts.md`](../charts.md). |
+| [0017 — CSS variable styling hooks](./0017-css-variable-styling-hooks.md) | Accepted | Public hooks are unprefixed `--<family>-<knob>` with use-site `var()` fallbacks (settable on the component or any ancestor; classes beat props via internal `-default` carriers); `--_<family>` vars are internal. Hooks are pure paint — behavior stays in props. |
+| [0018 — The chart engine composable is public](./0018-charts-engine-composable-is-public.md) | Accepted | `useChart`, `registerChartModules` and their three types stay on `frappe-ui/charts` and freeze. frappe-ui owns the composable's shape and lifecycle; echarts owns the option and instance types it carries. |
+| [0019 — Code editor family composition model](./0019-code-editor-family-composition-model.md) | Accepted | A `useCodeEditor` engine, a renderless `CodeEditor`, `CodeEditorContent` and `CodeKit` at `frappe-ui/code-editor`; capability is a reactive raw-CodeMirror `extensions` array. No labeled field and no `variant`/`size`; the field moves to `@framework/ui`. Contract in [`code-editor.md`](../code-editor.md). |

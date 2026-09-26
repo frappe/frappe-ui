@@ -4,8 +4,8 @@ inputs:
   oauth-token:
     description: Claude Code OAuth token (from `claude setup-token`)
     required: true
-  app-token:
-    description: barista[bot] GitHub App installation token
+  github-token:
+    description: GitHub token exposed to Claude for repository access
     required: true
   repo:
     description: owner/repo
@@ -33,7 +33,7 @@ inputs:
     required: false
     default: ''
   prompt:
-    description: "Slash-command prompt for the agent (e.g. `/barista-triage REPO: …`)"
+    description: "Slash-command prompt for the agent (e.g. `/barista-review REPO: …`)"
     required: true
   model:
     description: "Claude model to use (e.g. `claude-opus-4-7`, `opus`). Empty = action default."
@@ -50,8 +50,8 @@ runs:
       id: run
       uses: anthropics/claude-code-action@v1
       env:
-        GITHUB_TOKEN: ${{ inputs.app-token }}
-        GH_TOKEN: ${{ inputs.app-token }}
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+        GH_TOKEN: ${{ inputs.github-token }}
         GITHUB_REPOSITORY: ${{ inputs.repo }}
         BARISTA_ISSUE: ${{ inputs.issue-number }}
         BARISTA_EVENT: ${{ inputs.event }}
@@ -69,7 +69,7 @@ runs:
         CLAUDE_CODE_SUBPROCESS_ENV_SCRUB: "0"
       with:
         claude_code_oauth_token: ${{ inputs.oauth-token }}
-        github_token: ${{ inputs.app-token }}
+        github_token: ${{ inputs.github-token }}
         allowed_non_write_users: "*"
         # Renders a human-readable transcript in the Actions run's Step Summary.
         # Avoid show_full_output which dumps raw JSON in logs.

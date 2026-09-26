@@ -2,29 +2,37 @@
 import { computed } from 'vue'
 import { FloatingMenu } from '@tiptap/vue-3/menus'
 import MenuItems from './MenuItems.vue'
-import type { MenuItem } from './menu'
+import { editorMenuPlacement } from './menu-placement'
+import type { EditorMenuOptions, MenuItem } from './menu'
 import type { Editor } from './useEditor'
 import { useResolvedEditor } from './editor-context'
 
-type FloatingOptions = NonNullable<InstanceType<typeof FloatingMenu>['$props']['options']>
+type TiptapFloatingOptions = NonNullable<
+  InstanceType<typeof FloatingMenu>['$props']['options']
+>
 
 const props = defineProps<{
   // Optional inside <Editor> — falls back to the provided editor context.
   editor?: Editor | null
   items: MenuItem[]
-  options?: FloatingOptions & {
-    shouldShow?: (props: any) => boolean
-  }
+  // Positioning, plus `shouldShow`. One owned narrow type for both menus.
+  options?: EditorMenuOptions
 }>()
 
 const editor = useResolvedEditor(() => props.editor)
 const shouldShow = computed(() => props.options?.shouldShow)
-const floatingOptions = computed(() => {
-  const options = { ...(props.options ?? {}) } as FloatingOptions & {
-    shouldShow?: unknown
-  }
-  delete options.shouldShow
-  return options
+// `shouldShow` is a separate prop on TipTap's component, so it never goes
+// into the positioning bag. `side` and `align` become Floating UI's single
+// `placement` string; TipTap's own default for this menu is `right`.
+const floatingOptions = computed<TiptapFloatingOptions>(() => {
+  const {
+    shouldShow: _shouldShow,
+    side: _side,
+    align: _align,
+    ...positioning
+  } = props.options ?? {}
+  const placement = editorMenuPlacement(props.options, 'right')
+  return placement ? { ...positioning, placement } : positioning
 })
 </script>
 

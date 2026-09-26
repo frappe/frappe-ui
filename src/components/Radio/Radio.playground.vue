@@ -6,8 +6,8 @@ import type { Knob } from 'frappe-ui/vitepress'
 const model = ref('email')
 
 const knobs: Knob[] = [
-  { name: 'label', type: 'text', default: 'Notify me by', width: '14rem' },
-  { name: 'description', type: 'text', default: '', width: '20rem' },
+  { name: 'label', type: 'text', default: 'Notify me by' },
+  { name: 'description', type: 'text', default: '' },
   {
     name: 'size',
     type: 'tabs',

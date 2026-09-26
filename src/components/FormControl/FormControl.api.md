@@ -3,6 +3,7 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
+  import ExposedTable from '@/components/Docs/ExposedTable.vue'
 
   const propsData = [
   {
@@ -21,7 +22,7 @@
     name: 'error',
     description: 'Error message shown below the input. Sets aria-invalid on the control.',
     required: false,
-    type: 'string | FrappeUIError'
+    type: 'ErrorMessageValue'
   },
   {
     name: 'type',
@@ -32,9 +33,9 @@
   },
   {
     name: 'size',
-    description: 'Size of the input',
+    description: 'Size of the input. The full input scale — `xs` 24px, `sm` 28px, `md` 32px,\n`lg` 40px. `type="checkbox"` renders on the narrower toggle scale, so `lg`\nis clamped to that scale\'s largest value there.',
     required: false,
-    type: '"sm" | "md"',
+    type: 'InputSize',
     default: '"sm"'
   },
   {
@@ -84,6 +85,14 @@
     type: 'any'
   }
 ]
+
+  const exposedData = [
+  {
+    name: 'focus',
+    description: 'Moves focus to the control that `type` renders.',
+    type: '(options?: FocusOptions) => void'
+  }
+]
 </script>
 
 ## API Reference
@@ -91,3 +100,5 @@
 <PropsTable name="FormControl" :data="propsData"/>
 
 <SlotsTable :data="slotsData"/>
+
+<ExposedTable :data="exposedData"/>

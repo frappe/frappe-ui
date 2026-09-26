@@ -1,15 +1,13 @@
 # Icons
 
-Frappe UI ships with the full [Lucide](https://lucide.dev) icon set. There are
-three ways to use an icon in your templates. Pick the first one that fits —
-they all render the same icon, but the recommended path keeps your code
-simpler and your bundle smaller.
+Frappe UI includes every [Lucide](https://lucide.dev) icon. Put the class
+`lucide-<name>` on an element to show an icon, and pass the same string to any
+component prop that takes an icon.
 
 ## Browse all icons
 
-Every icon below is keyed by its kebab-case name — use that name directly as
-`lucide-<name>` in the Tailwind class form, or import it from
-`~icons/lucide/<name>`.
+Search the set below and click an icon to copy its name. Add `lucide-` in front
+of the name to get its class.
 
 <script setup>
 import LucideGallery from '../../../components/LucideGallery.vue'
@@ -19,194 +17,91 @@ import LucideGallery from '../../../components/LucideGallery.vue'
   <LucideGallery />
 </ClientOnly>
 
-## Recommended: class-based icons
+## Class form
 
-Every Lucide icon is exposed as a Tailwind utility class named
-`lucide-<icon-name>`. Drop it on any element and size/tint it with the usual
-utilities:
+Each icon is a Tailwind class named `lucide-<name>`. Put it on an empty
+`<span>`:
 
 ```vue
 <template>
-  <span class="lucide-menu size-4 text-ink-gray-7" />
+  <span class="lucide-menu size-4" />
   <span class="lucide-chevron-down size-3" />
   <span class="lucide-circle-check size-5 text-ink-green-5" />
 </template>
 ```
 
-No imports, no component registration, no auto-import magic. Icon names match
-Lucide's own kebab-case names — search them at
-[lucide.dev/icons](https://lucide.dev/icons).
+You need no imports and no Vite setup. The classes come from the frappe-ui
+Tailwind preset (see [Getting Started](../getting-started)).
 
-### How it works
+The preset draws each icon as a CSS mask filled with the text color. Tailwind
+adds CSS only for classes it finds as complete strings in your source, so your
+bundle holds only the icons you use.
 
-A Tailwind plugin (`tailwind/iconPackPlugin.js`) reads every SVG from the
-`lucide-static` package at build time and registers each one as a Tailwind
-component class via `matchComponents`. The generated rule sets
-`mask-image` to a data-URI of the icon's SVG and `background-color` to
-`currentColor`, so the icon paints in whatever color the element inherits
-and crops to whatever size you give it.
+### Write the full class name
 
-Tailwind's JIT only emits CSS for classes it can find as literal strings in
-your source — so even though ~1800 icons are registered, only the ones you
-actually use end up in the output bundle. That's why a dynamic class like
-`` `lucide-${name}` `` produces no CSS: the JIT scanner can't see what to
-emit.
-
-### Sizing and color
-
-The icon defaults to `1em × 1em` (it scales with surrounding text) and uses
-`currentColor`, so any `text-*` utility tints it.
+Tailwind cannot see a class built at runtime, so this icon does not show:
 
 ```vue
-<!-- Inherits the parent's text color and font-size -->
-<div class="flex items-center gap-1 text-base text-ink-gray-7">
-  <span class="lucide-info" /> heads up
-</div>
-
-<!-- Or set both explicitly -->
-<span class="lucide-info size-5 text-ink-blue-5" />
-```
-
-Icons render as `display: block` (matching Tailwind's preflight default
-for `<svg>`), so put them inside a flex container — `flex` /
-`inline-flex` / `grid` — when you want them to sit next to text.
-
-### Always write the full class name
-
-Tailwind only generates CSS for classes it can find as complete strings in
-your source. **Do not** build the icon class dynamically:
-
-```vue
-<!-- ❌ Won't render — Tailwind cannot see this class -->
+<!-- Does not render: Tailwind cannot see this class -->
 <span :class="`lucide-${name}`" />
 ```
 
-Instead, list each option as a complete literal:
+Write each class in full instead:
 
 ```vue
-<!-- ✅ Both classes are statically visible -->
 <span :class="open ? 'lucide-chevron-down' : 'lucide-chevron-right'" />
 ```
 
-If your icon name is genuinely data-driven (e.g. coming from an API or a
-config object built at runtime), use the import-based approach below.
+For a name that comes from data, map each value to a full class name:
 
-## Also supported: `~icons/lucide/*` imports
-
-The Vite plugin resolves `~icons/lucide/<name>` to a Vue component. Useful
-when you need an actual SVG node — for example, when the icon name is
-dynamic, or when something downstream expects a component reference rather
-than a class string.
-
-```vue
-<script setup>
-import LucideMenu from '~icons/lucide/menu'
-import LucideChevronDown from '~icons/lucide/chevron-down'
-</script>
-
-<template>
-  <LucideMenu class="size-4" />
-  <LucideChevronDown class="size-3" />
-</template>
+```js
+const statusIcons = {
+  open: 'lucide-circle',
+  done: 'lucide-circle-check',
+  cancelled: 'lucide-circle-x',
+}
 ```
 
-You can also pass the imported component into props that accept a component
-reference:
+If you cannot list the names ahead of time, import the icons as components.
+See [Other ways to import](#other-ways-to-import).
+
+## Size and color
+
+An icon is `1em` square by default, so it follows the font size around it. It
+takes the text color, so any `text-*` class colors it.
 
 ```vue
-<Button :icon-left="LucideMenu" />
+<!-- Uses the parent's font size and text color -->
+<div class="flex items-center gap-1 text-base text-ink-gray-7">
+  <span class="lucide-info" /> Heads up
+</div>
+
+<!-- Set both on the icon -->
+<span class="lucide-info size-5 text-ink-blue-5" />
 ```
 
-### How it works
+Icons are `display: block`, the same as Tailwind's default for `<svg>`. To
+place an icon next to text, put both in a `flex`, `inline-flex` or `grid`
+container.
 
-`~icons/lucide/*` is a virtual module backed by a Vite plugin
-(`vite/lucideIcons.js`). When Vite resolves an import like
-`~icons/lucide/menu`, the plugin reads the matching SVG from
-`lucide-static` and synthesizes a small Vue component that renders the
-icon as an inline `<svg>` element. The component is bundled into your JS
-like any other module, so each icon you import adds a few hundred bytes
-to the bundle.
+## Icons in component props
 
-## Also supported: auto-imported `<LucideName />`
-
-For convenience, every Lucide icon is also available as a global Vue
-component named `<Lucide<PascalName> />` — no import needed.
+Components that take an icon accept a `lucide-*` string or a Vue component.
 
 ```vue
-<template>
-  <LucideMenu class="size-4" />
-  <LucideChevronDown class="size-3" />
-</template>
-```
-
-This is functionally identical to the `~icons/lucide/*` import form; pick
-whichever reads better in context.
-
-### How it works
-
-`unplugin-vue-components` scans your templates and, when it sees a tag
-like `<LucideMenu />`, automatically inserts an import for
-`~icons/lucide/menu` at compile time. From there it's the same path as
-the manual-import form above — a virtual-module Vue component rendered as
-an inline `<svg>`.
-
-## Which one should I use?
-
-| Situation                                   | Use                          |
-| ------------------------------------------- | ---------------------------- |
-| Static icon in a template                   | Class — `lucide-menu`        |
-| Icon name from props/data with a known set  | Class — list each literal    |
-| Icon name truly dynamic (loops, API data)   | `~icons/lucide/*` import     |
-| Passing an icon as a prop value             | `~icons/lucide/*` import     |
-| Inside an `<svg>` (need real SVG children)  | `~icons/lucide/*` import     |
-| Quick prototyping in a template             | `<LucideName />` auto-import |
-
-In most components you write, the class form is the right answer.
-
-## Using icons in Frappe UI components
-
-Most Frappe UI components that take an icon accept either a `lucide-*`
-class string, a Vue component reference, or a slot. The class string is
-the recommended form — keep using imports when the icon is genuinely
-dynamic or you need a real SVG node.
-
-### Button
-
-`Button` exposes `iconLeft`, `iconRight`, and `icon` props, plus matching
-`prefix` / `suffix` / `icon` slots. All three props accept a `lucide-*`
-class string or a component reference.
-
-```vue
-<!-- ✅ Class form (recommended) -->
 <Button icon-left="lucide-plus" label="New task" />
 <Button icon-right="lucide-arrow-right" label="Continue" />
-<Button icon="lucide-settings" />  <!-- icon-only -->
-
-<!-- Component form — for dynamic icons or pass-through cases -->
-<script setup>
-import LucidePlus from '~icons/lucide/plus'
-</script>
-<Button :icon-left="LucidePlus" label="New task" />
-
-<!-- Slot form — when you need full control over the icon markup -->
-<Button label="New task">
-  <template #prefix>
-    <span class="lucide-plus size-4" />
-  </template>
-</Button>
+<Button icon="lucide-settings" tooltip="Settings" />
 ```
 
-### Dropdown
-
-`Dropdown` items take an `icon` field on each option. It accepts the same
-shapes as `Button.iconLeft`:
+Menu options take an `icon` field in the same way:
 
 ```vue
 <script setup>
 const options = [
-  { label: 'Profile',  icon: 'lucide-user',     onClick: () => {} },
+  { label: 'Profile', icon: 'lucide-user', onClick: () => {} },
   { label: 'Settings', icon: 'lucide-settings', onClick: () => {} },
-  { label: 'Sign out', icon: 'lucide-log-out',  onClick: () => {} },
+  { label: 'Sign out', icon: 'lucide-log-out', onClick: () => {} },
 ]
 </script>
 
@@ -217,31 +112,49 @@ const options = [
 </template>
 ```
 
-Because each option's `icon` is a complete literal string in your source,
-Tailwind's JIT picks it up correctly. If you build an options array
-dynamically — say, from a server response — and the icon names aren't
-known at build time, fall back to importing components:
+The strings are complete in your source, so Tailwind finds them. The same
+applies to `Alert`, `Dialog`, `Select`, `Combobox`, `MultiSelect`, `Switch`,
+`Tabs`, `TabButtons`, `Sidebar` and others. Check each component's reference
+for the prop names. To show an icon outside a prop, use a `<span>` with the
+class, or the [Icon](../components/icon) component.
+
+## Other ways to import
+
+Two more forms render the icon as an inline `<svg>` Vue component. Use them
+when you cannot list the icon names ahead of time, or when you need real SVG
+elements. Each icon you use adds a few hundred bytes to your JavaScript bundle.
+
+Both need the `lucideIcons` option on the frappe-ui Vite plugin. It is off by
+default:
+
+```js
+// vite.config.js
+frappeui({ lucideIcons: true })
+```
+
+Without it, an import fails the build, and a `<LucideMenu />` tag renders
+nothing (development shows a "Failed to resolve component" warning).
+
+**`~icons/lucide/<name>` imports.** Import the icon and use it as a component,
+or pass it to an icon prop:
 
 ```vue
 <script setup>
-import LucideUser from '~icons/lucide/user'
-import LucideSettings from '~icons/lucide/settings'
-
-const options = computed(() =>
-  serverItems.value.map((item) => ({
-    label: item.label,
-    icon: item.kind === 'user' ? LucideUser : LucideSettings,
-    onClick: () => open(item),
-  })),
-)
+import LucideMenu from '~icons/lucide/menu'
 </script>
+
+<template>
+  <LucideMenu class="size-4" />
+  <Button :icon-left="LucideMenu" label="Menu" />
+</template>
 ```
 
-### Other components
+**Auto-imported `<LucideName />` tags.** Write the icon's PascalCase name as a
+tag, with no import. The plugin adds the `~icons/lucide/<name>` import when it
+compiles the template.
 
-`TextInput`, `FormControl`, `Tabs`, `Tooltip`, `Alert`, `Sidebar` and similar
-components either accept an `icon` prop of the same shape (some add
-`iconLeft` / `iconRight`) or expose a slot where you can drop a
-`<span class="lucide-..." />`
-directly. Check each component's reference page for the exact prop
-names — the icon API conventions are consistent across the library.
+```vue
+<template>
+  <LucideChevronDown class="size-3" />
+</template>
+```

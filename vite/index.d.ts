@@ -132,7 +132,13 @@ export interface FrappeuiPluginOptions {
   frontendRoute?: string
   /**
    * Lucide icon auto-import support, plus explicit `~icons/lucide/*` imports.
-   * @default true
+   *
+   * Off by default. frappe-ui draws its own icons from `lucide-<name>` class
+   * names, which the Tailwind plugin generates; none of that needs Vite. Turn
+   * it on when your app imports `~icons/lucide/*` or writes `<LucideX />`
+   * tags. A missing import fails the build; a `<LucideX />` tag only warns and
+   * renders nothing.
+   * @default false
    */
   lucideIcons?: boolean | LucideIconsOptions
   /**
@@ -166,6 +172,13 @@ export interface FrappeuiPluginOptions {
    * @default false
    */
   frappeTypes?: FrappeTypesOptions | false
+  /**
+   * Stubs the optional `@codemirror/lang-*` peers this app did not install, so
+   * `frappe-ui/code-editor` builds with the languages it renders and no more.
+   * A stubbed package throws its install hint when `loadLanguage` reaches it.
+   * @default true
+   */
+  codeLanguages?: boolean
 }
 
 /**
@@ -173,8 +186,9 @@ export interface FrappeuiPluginOptions {
  * auto-imports, barrel-import rewriting, TypeScript type generation, boot
  * data injection, and production build configuration.
  *
- * Every sub-plugin except `frappeTypes` is enabled by default — pass `false`
- * to disable one, or an options object to override its defaults.
+ * Every sub-plugin except `frappeTypes` and `lucideIcons` is enabled by
+ * default. Pass `false` to disable one, or an options object to override its
+ * defaults.
  */
 declare function frappeuiPlugin(options?: FrappeuiPluginOptions): PluginOption[]
 export default frappeuiPlugin
@@ -186,3 +200,12 @@ export declare function lucideIcons(
 
 /** The `barrelImports` sub-plugin, importable standalone instead of via `frappeuiPlugin`'s `barrelImports` option. */
 export declare function barrelImports(options?: BarrelImportsOptions): Plugin
+
+/** The `codeLanguages` sub-plugin, importable standalone instead of via `frappeuiPlugin`'s `codeLanguages` option. */
+export declare function codeLanguages(): Plugin
+
+/**
+ * The `~icons/lucide/*` resolver on its own, without the two unplugins.
+ * `index.js` re-exports it, so the declaration has to be here too.
+ */
+export { lucideIconsPlugin } from './lucideIconsPlugin.js'

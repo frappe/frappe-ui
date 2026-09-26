@@ -1,9 +1,4 @@
-import type {
-  CalendarColor,
-  CalendarConfig,
-  CalendarEvent,
-  CalendarTimeFormat,
-} from './types'
+import type { CalendarColor, CalendarEvent, CalendarTimeFormat } from './types'
 
 export function getCalendarDates(month: number, year: number): Date[] {
   let daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
@@ -72,24 +67,6 @@ export function getCalendarDates(month: number, year: number): Date[] {
   }
 }
 
-export function groupBy<T>(
-  obj: T[],
-  fn: (value: T) => string | number,
-): Record<string, T[]> {
-  if (typeof fn !== 'function') throw new Error(`${fn} should be a function`)
-  return obj.reduce(
-    (acc, value) => {
-      const group = String(fn(value))
-      if (!acc[group]) {
-        acc[group] = []
-      }
-      acc[group].push(value)
-      return acc
-    },
-    {} as Record<string, T[]>,
-  )
-}
-
 export function calculateMinutes(time: string): number {
   let [hours, minutes] = time.split(':')
   return parseInt(hours) * 60 + parseInt(minutes)
@@ -136,16 +113,6 @@ export function parseDateEventPopupFormat(
   return date.toLocaleDateString('en-US', options)
 }
 
-export function parseDateWithComma(date: Date, showDay = false): string {
-  return parseDateEventPopupFormat(date, showDay).split(' ').join(', ')
-}
-
-export function parseDateWithDay(date: Date, fullDay = false): string {
-  return fullDay
-    ? daysListFull[date.getDay()] + ', ' + date.getDate()
-    : daysList[date.getDay()] + ' ' + date.getDate()
-}
-
 export function calculateDiff(from: string, to: string): number {
   let fromMinutes = calculateMinutes(from)
   let toMinutes = calculateMinutes(to)
@@ -156,9 +123,62 @@ export function handleSeconds(time: string): string {
   return time.split(':').slice(0, 2).join(':') + ':00'
 }
 
+/**
+ * Below this the pill is held at `MINIMUM_EVENT_HEIGHT`, which is the height a
+ * title and a time need to stay readable.
+ */
+export const EVENT_HEIGHT_THRESHOLD = 40
+export const MINIMUM_EVENT_HEIGHT = 32.5
+
+/**
+ * How tall a timed event is drawn, against how long it runs.
+ *
+ * An event shorter than the grid can draw is padded to a floor, so a quarter of
+ * an hour ends a good deal further down the column than it does on the clock —
+ * which is how two events that follow each other in time can still collide.
+ */
+export function paintedEventHeight(
+  durationMinutes: number,
+  minuteHeight: number,
+): number {
+  const height = durationMinutes * minuteHeight
+  return height < EVENT_HEIGHT_THRESHOLD ? MINIMUM_EVENT_HEIGHT : height
+}
+
+/**
+ * Lays a day's timed events out into overlap columns ("halls"), and says of
+ * each which of its edges lie over another event.
+ *
+ * `hallNumber` is the column: 0 at the back, and anything past that is laid
+ * over an event in an earlier column, since a new column is only opened for an
+ * event that fits in none of the existing ones at its start — so its left edge
+ * is on another pill by construction. `idx` is the event's place within its
+ * column, where events follow each other in time and should not collide; they
+ * do anyway, because an event shorter than the grid can draw is painted at a
+ * floor, so a quarter of an hour ends a good deal further down the column than
+ * it does on the clock and the next one starts under that padding.
+ *
+ * `over` is the events the pill is actually drawn on: those in earlier columns
+ * and the one before it in its own, whose painted extent its own crosses —
+ * judged in pixels, as the pills are, given `minuteHeight`; without it, in
+ * minutes. The pill draws its cut against each of them from their geometry,
+ * and they are the laid-out events, each carrying its own `over`: where a pill
+ * beneath was itself set in from the pill beneath it, the one on top must know.
+ * Two pills that only share an edge are not over each other.
+ */
 export function findOverlappingEventsCount(
   events: CalendarEvent[],
+  minuteHeight?: number,
 ): CalendarEvent[] {
+  // A declined event claims no room: the others lay out as if it were not
+  // there, and it sits full width beneath them. Grid events all carry the same
+  // z-index, so "beneath" is DOM order — the declined go first, before the
+  // events they underlie.
+  const declined: CalendarEvent[] = events
+    .filter((event) => event.isDeclined)
+    .map((event) => ({ ...event, hallNumber: 0, idx: -1 }))
+  events = events.filter((event) => !event.isDeclined)
+
   // Sort events based on start time
   events = events.sort((a, b) => (a.startTime || 0) - (b.startTime || 0))
 
@@ -178,16 +198,42 @@ export function findOverlappingEventsCount(
     }
   }
 
-  // flattening halls and events
-  return result
-    .map((hall, idx) =>
-      hall.map((event, eventIdx) => ({
+  // Where an event starts and ends on the grid rather than on the clock: its
+  // start, and its start plus the height it is actually painted at.
+  const painted = (event: CalendarEvent): [number, number] => {
+    const start = event.startTime || 0
+    const minutes = (event.endTime || 0) - start
+    const end = minuteHeight
+      ? start + paintedEventHeight(minutes, minuteHeight) / minuteHeight
+      : start + minutes
+    return [start, end]
+  }
+  const crosses = (a: [number, number], b: [number, number]) =>
+    a[0] < b[1] && b[0] < a[1]
+
+  // flattening halls and events — in order, so that everything beneath a pill
+  // is laid out, with its own `over`, by the time the pill looks for it
+  const placed: CalendarEvent[][] = []
+  for (const [hallIdx, hall] of result.entries()) {
+    const placedHall: CalendarEvent[] = []
+    placed.push(placedHall)
+    for (const [eventIdx, event] of hall.entries()) {
+      // Everything drawn beneath this pill: the earlier columns, which run
+      // under it in full, and the event before it in its own.
+      const beneath = placed
+        .slice(0, hallIdx)
+        .flat()
+        .concat(placedHall.slice(Math.max(eventIdx - 1, 0), eventIdx))
+      const own = painted(event)
+      placedHall.push({
         ...event,
-        hallNumber: idx,
+        hallNumber: hallIdx,
         idx: eventIdx,
-      })),
-    )
-    .flat()
+        over: beneath.filter((other) => crosses(painted(other), own)),
+      })
+    }
+  }
+  return declined.concat(placed.flat())
 }
 
 // Helpers
@@ -282,7 +328,8 @@ export function formattedDuration(
     fromTime = fromTime.split(' ')[0]
   }
 
-  return fromTime + ' - ' + toTime
+  // An en dash, as the design sets it: a range, not a subtraction.
+  return fromTime + ' – ' + toTime
 }
 
 export function formatTime(time: string, format: CalendarTimeFormat): string {
@@ -306,129 +353,52 @@ export const colorMap: Record<string, CalendarColor> = {
   amber: {
     color: 'var(--ink-amber-6)',
     border: 'var(--ink-amber-6)',
-    borderActive: 'var(--outline-amber-2)',
-    text: 'var(--ink-amber-6)',
-    textActive: 'white',
     subtext: 'var(--ink-gray-6)',
-    subtextActive: 'white',
     bg: 'var(--surface-amber-1)',
-    bgHover: 'var(--surface-amber-1)',
     bgActive: 'var(--surface-amber-2)',
   },
   violet: {
     color: 'var(--ink-violet-6)',
     border: 'var(--ink-violet-6)',
-    borderActive: 'var(--outline-gray-4)',
-    text: 'var(--ink-violet-6)',
-    textActive: 'white',
     subtext: 'var(--ink-gray-6)',
-    subtextActive: 'var(--ink-base)',
     bg: 'var(--surface-violet-1)',
-    bgHover: 'var(--surface-violet-1)',
-    bgActive: 'var(--surface-violet-7)',
+    bgActive: 'var(--surface-violet-2)',
   },
   pink: {
     color: 'var(--ink-pink-6)',
     border: 'var(--ink-pink-6)',
-    borderActive: 'var(--outline-gray-4)',
-    text: 'var(--ink-pink-6)',
-    textActive: 'white',
     subtext: 'var(--ink-gray-6)',
-    subtextActive: 'var(--ink-base)',
     bg: 'var(--surface-pink-1)',
-    bgHover: 'var(--surface-pink-1)',
-    bgActive: 'var(--surface-pink-7)',
+    bgActive: 'var(--surface-pink-2)',
   },
   cyan: {
     color: 'var(--ink-cyan-6)',
     border: 'var(--ink-cyan-6)',
-    borderActive: 'var(--ink-cyan-6)',
-    text: 'var(--ink-cyan-6)',
-    textActive: 'white',
     subtext: 'var(--ink-gray-6)',
-    subtextActive: 'var(--ink-base)',
     bg: 'var(--surface-cyan-1)',
-    bgHover: 'var(--surface-cyan-1)',
-    bgActive: 'var(--surface-cyan-7)',
+    bgActive: 'var(--surface-cyan-2)',
   },
   blue: {
     color: 'var(--ink-blue-6)',
     border: 'var(--ink-blue-6)',
-    borderActive: 'var(--outline-blue-2)',
-    text: 'var(--ink-blue-6)',
-    textActive: 'white',
     subtext: 'var(--ink-gray-6)',
-    subtextActive: 'white',
     bg: 'var(--surface-blue-1)',
-    bgHover: 'var(--surface-blue-1)',
     bgActive: 'var(--surface-blue-2)',
   },
   orange: {
     color: 'var(--ink-orange-6)',
     border: 'var(--outline-orange-1)',
-    borderActive: 'var(--outline-orange-1)',
-    text: 'var(--ink-orange-6)',
-    textActive: 'white',
     subtext: 'var(--ink-gray-6)',
-    subtextActive: 'var(--ink-base)',
     bg: 'var(--surface-orange-1)',
-    bgHover: 'var(--surface-orange-1)',
-    bgActive: 'var(--outline-orange-1)',
+    bgActive: 'var(--surface-orange-2)',
   },
   green: {
     color: 'var(--ink-green-6)',
     border: 'var(--ink-green-6)',
-    borderActive: 'var(--outline-green-2)',
-    text: 'var(--ink-green-6)',
-    textActive: 'white',
     subtext: 'var(--ink-gray-6)',
-    subtextActive: 'white',
     bg: 'var(--surface-green-1)',
-    bgHover: 'var(--surface-green-1)',
-    bgActive: 'var(--surface-green-3)',
+    bgActive: 'var(--surface-green-2)',
   },
-}
-
-export const colorMapDark: Record<string, CalendarColor> = colorMap
-
-// config.weekends can be array of numbers [0-6] (0=Sun) or weekday names (e.g., 'Saturday').
-// Falls back to [0] (Sunday) if not provided / invalid.
-const _weekdayNameToIndex = {
-  sunday: 0,
-  monday: 1,
-  tuesday: 2,
-  wednesday: 3,
-  thursday: 4,
-  friday: 5,
-  saturday: 6,
-}
-
-export function getWeekendDays(
-  config?: Partial<CalendarConfig> & { weekendDays?: Array<number | string> },
-): number[] {
-  // Support both weekendDays (preferred) and weekends (legacy) keys
-  const raw = config?.weekendDays || config?.weekends
-  if (!raw || !Array.isArray(raw) || raw.length === 0) return [0]
-  return raw
-    .map((d) => {
-      if (typeof d === 'number') return d
-      if (typeof d === 'string') {
-        const key = d.trim().toLowerCase()
-        if (Object.prototype.hasOwnProperty.call(_weekdayNameToIndex, key))
-          return _weekdayNameToIndex[key as keyof typeof _weekdayNameToIndex]
-      }
-      return null
-    })
-    .filter((v): v is number => v !== null && v >= 0 && v <= 6)
-}
-
-export function isWeekend(
-  date: Date | string,
-  config?: CalendarConfig,
-): boolean {
-  const day = new Date(date).getDay()
-  const weekendDays = getWeekendDays(config)
-  return weekendDays.includes(day)
 }
 
 // Format single month & year (e.g., "August, 2025")

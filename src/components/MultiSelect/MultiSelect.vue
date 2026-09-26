@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, useAttrs, useSlots, useTemplateRef, watch } from 'vue'
+import { computed, ref, useAttrs, useTemplateRef, watch } from 'vue'
 import {
   ComboboxAnchor,
   ComboboxContent,
@@ -9,9 +9,10 @@ import {
   FocusScope,
 } from 'reka-ui'
 import Button from '../Button/Button.vue'
-import { LoadingIndicator } from '../LoadingIndicator'
+import { Spinner } from '../Spinner'
 import MultiSelectResults from './MultiSelectResults.vue'
 import { useInputLabeling } from '../../composables/useInputLabeling'
+import { useReactiveSlots } from '../../composables/useReactiveSlots'
 import { usePortalTarget } from '../../composables/usePortalTarget'
 import { useEmptyValueMapping } from '../shared/selection/useEmptyValueMapping'
 import { useFilteredGroups } from '../shared/selection/useFilteredGroups'
@@ -68,12 +69,20 @@ const portalTarget = usePortalTarget(() => props.portalTo)
 
 const emit = defineEmits<MultiSelectEmits>()
 const attrs = useAttrs()
-const slots = useSlots()
+const slots = useReactiveSlots<MultiSelectSlots>()
+
+// `MultiSelectResults` dispatches on dynamic names (`item-${slot}`), which the
+// enumerated `MultiSelectSlots` cannot express. Same object, so reads still go
+// through the proxy.
+const slotFns = slots as Record<string, ((props?: any) => any) | undefined>
 
 const model = defineModel<Array<string | number>>({ default: () => [] })
+// Documented on `open` in `./types.ts`. A JSDoc block here would be appended
+// to that description by `propsgen`, not replace it.
 const open = defineModel<boolean>('open', { default: false })
-// Optional outside-in control of the search box. Unbound, `defineModel`
-// keeps the value local, so `v-model:query` is never required.
+// Optional outside-in control of the search box. Unbound, `defineModel` keeps
+// the value local, so `v-model:query` is never required. Documented on `query`
+// in `./types.ts`.
 const query = defineModel<string>('query', { default: '' })
 // Bound, the query is the consumer's — the component never resets it (see the
 // open watcher at the bottom of this block).
@@ -234,8 +243,12 @@ function handleTriggerClick() {
 }
 
 function setOpen(value: boolean) {
-  if (props.disabled) return
+  if (props.disabled && value) return
   open.value = value
+}
+
+function close() {
+  setOpen(false)
 }
 
 function setQuery(value: string) {
@@ -271,6 +284,7 @@ const slotProps = computed<MultiSelectSlotProps>(() => ({
   selectedOptions: selectedOptions.value,
   clear,
   setOpen,
+  close,
 }))
 
 const searchSlotProps = computed<MultiSelectSearchSlotProps>(() => ({
@@ -331,7 +345,11 @@ watch(open, (isOpen, wasOpen) => {
   hasTypedSinceOpen.value = false
 })
 
-defineExpose<SelectionExposed>({ clear, focus })
+defineExpose<SelectionExposed>({
+  clear,
+  /** Moves focus to the trigger. */
+  focus,
+})
 defineSlots<MultiSelectSlots>()
 </script>
 
@@ -512,7 +530,7 @@ defineSlots<MultiSelectSlots>()
                   class="min-w-0 flex-1 border-0 bg-transparent px-0 py-2 text-base text-ink-gray-8 outline-none placeholder:text-ink-gray-4 focus:ring-0"
                   @input="handleInputChange"
                 />
-                <LoadingIndicator
+                <Spinner
                   v-if="loading"
                   class="size-4 shrink-0 text-ink-gray-5"
                 />
@@ -532,7 +550,7 @@ defineSlots<MultiSelectSlots>()
                 :hide-search="hideSearch"
                 :empty-text="emptyText"
                 :show-empty="showEmpty"
-                :slot-fns="slots"
+                :slot-fns="slotFns"
                 :all-options="allOptions"
               />
 

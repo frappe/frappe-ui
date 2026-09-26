@@ -35,12 +35,23 @@ const props = defineProps<{
   videoEl: HTMLVideoElement | null
   /** Hidden entirely while true (e.g. during a resize drag). */
   hidden?: boolean
-  /**
-   * The media is the fullscreen element: the row spans the screen instead of a
-   * media box, so it drops the rounded corner and takes more breathing room.
-   */
-  fullscreen?: boolean
+  /** The wrapper uses the standard API and stretches this row to the screen. */
+  standardFullscreen?: boolean
 }>()
+
+/**
+ * Whether this video is fullscreen through either browser API. The node view
+ * writes standard Fullscreen API changes; WebKit native-player events write
+ * their changes here.
+ */
+const fullscreen = defineModel<boolean>('fullscreen', { default: false })
+
+type WebKitVideoElement = HTMLVideoElement & {
+  readonly webkitSupportsFullscreen?: boolean
+  readonly webkitDisplayingFullscreen?: boolean
+  webkitEnterFullscreen?: () => void
+  webkitExitFullscreen?: () => void
+}
 
 const playing = ref(false)
 const muted = ref(false)
@@ -97,6 +108,16 @@ function bind(el: HTMLVideoElement) {
   on('loadedmetadata', () => (duration.value = el.duration || 0))
   on('durationchange', () => (duration.value = el.duration || 0))
   on('volumechange', () => (muted.value = el.muted))
+  // iPhone presents video through its native fullscreen player rather than
+  // the standard Fullscreen API, so `document.fullscreenElement` never moves.
+  // Write those transitions through the shared fullscreen model to keep the
+  // node view's editing chrome in sync with either implementation.
+  on('webkitbeginfullscreen', () => (fullscreen.value = true))
+  on('webkitendfullscreen', () => (fullscreen.value = false))
+
+  if ((el as WebKitVideoElement).webkitDisplayingFullscreen) {
+    fullscreen.value = true
+  }
 }
 
 function unbind(el: HTMLVideoElement) {
@@ -158,16 +179,67 @@ function toggleMute() {
   if (el) el.muted = !el.muted
 }
 
+function ignoreFullscreenRejection(promise: Promise<void> | undefined) {
+  // A fullscreen request can be refused by browser policy. It is an optional
+  // presentation affordance, so a rejection must not become an unhandled app
+  // error.
+  void promise?.catch(() => {})
+}
+
 function toggleFullscreen() {
   const el = props.videoEl
   if (!el) return
-  if (document.fullscreenElement) {
-    void document.exitFullscreen()
+  const webkitVideo = el as WebKitVideoElement
+
+  if (webkitVideo.webkitDisplayingFullscreen) {
+    try {
+      webkitVideo.webkitExitFullscreen?.()
+    } catch {
+      // The native player may already be leaving fullscreen.
+    }
     return
   }
+
+  if (document.fullscreenElement) {
+    try {
+      ignoreFullscreenRejection(document.exitFullscreen?.())
+    } catch {
+      // Fullscreen state may have changed between the check and the request.
+    }
+    return
+  }
+
   // Fullscreen the wrapper so these controls stay visible over the video.
   const root = el.closest('[data-video-fullscreen-root]') ?? el
-  void (root as HTMLElement).requestFullscreen?.()
+  const requestFullscreen = (root as HTMLElement).requestFullscreen
+
+  // `fullscreenEnabled` is false on iPhone even though the video-specific
+  // WebKit API is available. Choose that path before making an asynchronous
+  // standard request: `webkitEnterFullscreen()` must run directly inside the
+  // click's user-activation window.
+  if (
+    typeof requestFullscreen === 'function' &&
+    document.fullscreenEnabled !== false
+  ) {
+    try {
+      ignoreFullscreenRejection(requestFullscreen.call(root))
+      return
+    } catch {
+      // A synchronous standard-API failure can still fall through to WebKit
+      // while this click retains user activation.
+    }
+  }
+
+  if (
+    webkitVideo.webkitSupportsFullscreen &&
+    typeof webkitVideo.webkitEnterFullscreen === 'function'
+  ) {
+    try {
+      webkitVideo.webkitEnterFullscreen()
+    } catch {
+      // Native fullscreen can be unavailable until media metadata is ready.
+    }
+  }
 }
 
 function timeFromPointer(event: PointerEvent): number {
@@ -267,7 +339,7 @@ const SCRIM =
     class="absolute inset-x-0 bottom-0 z-20 flex items-center gap-3 text-white transition-opacity [filter:drop-shadow(0_1px_2px_rgb(0_0_0/0.45))]"
     :style="{ backgroundImage: SCRIM }"
     :class="[
-      fullscreen ? 'px-6 pt-16 pb-6' : 'rounded-b-4 px-3.5 pt-12 pb-3',
+      standardFullscreen ? 'px-6 pt-16 pb-6' : 'rounded-b-4 px-3.5 pt-12 pb-3',
       playing && !scrubbing
         ? 'opacity-0 group-hover:opacity-100 focus-within:opacity-100'
         : 'opacity-100',
@@ -367,14 +439,20 @@ const SCRIM =
       </button>
     </Tooltip>
 
-    <Tooltip text="Fullscreen" class="flex h-5">
+    <Tooltip
+      :text="fullscreen ? 'Exit fullscreen' : 'Fullscreen'"
+      class="flex h-5"
+    >
       <button
         type="button"
         class="opacity-90 transition-opacity hover:opacity-100"
-        aria-label="Fullscreen"
+        :aria-label="fullscreen ? 'Exit fullscreen' : 'Fullscreen'"
         @click="toggleFullscreen"
       >
-        <span class="lucide-maximize-2 size-5" />
+        <span
+          :class="fullscreen ? 'lucide-minimize-2' : 'lucide-maximize-2'"
+          class="size-5"
+        />
       </button>
     </Tooltip>
   </div>

@@ -29,7 +29,7 @@ const tickets = DAYS.flatMap((day, dayIndex) =>
       x="hour"
       y="day"
       value="tickets"
-      show-values
+      show-data-labels
       title="Support load"
       subtitle="Tickets opened by hour of the working week"
     />

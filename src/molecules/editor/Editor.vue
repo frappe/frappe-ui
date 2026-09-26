@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import type { JSONContent } from '@tiptap/core'
-import type { Extension } from '@tiptap/core'
-import { useEditor, type Editor, type UploadedFile } from './useEditor'
+import type { Extensions } from '@tiptap/core'
+import { useEditor, type Editor, type UploadFunction } from './useEditor'
 import { setPlaceholder } from './extensions'
 import { provideEditor } from './editor-context'
 
@@ -12,15 +12,22 @@ const model = defineModel<Content>()
 
 const props = withDefaults(
   defineProps<{
-    // capability — the complete extension list; include a kit
-    extensions: Extension[]
+    // capability — the complete extension list; include a kit.
+    // `Extensions` is TipTap's own array type, so marks and nodes go in the
+    // same array as plain extensions.
+    extensions: Extensions
 
     // content / behavior knobs (universal, reactive where noted)
     format?: 'html' | 'json' | 'markdown'
     placeholder?: string
     editable?: boolean
     autofocus?: boolean
-    uploadFunction?: (file: File) => Promise<UploadedFile>
+    /**
+     * Upload handler for images, videos and attachments. It must resolve with
+     * a `file_url`. The editor passes an options bag (abort signal + progress
+     * callback) as the second argument; a one-parameter function still works.
+     */
+    uploadFunction?: UploadFunction
   }>(),
   {
     format: 'html',

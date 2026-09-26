@@ -32,6 +32,10 @@
    heading under the 3rem sticky navbar. */
 html {
   scroll-padding-top: 5rem;
+  /* Width of the docs sidebar rail. */
+  --docs-sidebar-width: 220px;
+  /* Width of the "On this page" column pinned to the right edge. */
+  --docs-toc-width: 240px;
 }
 
 body {
@@ -56,7 +60,10 @@ code {
   @apply !text-xs;
 }
 
-[class*='language'] {
+/* Markdown code blocks, and the playground's generated code, which has the
+   same copy button but no language- class. */
+[class*='language'],
+.component-preview-code {
   position: relative;
 
   .lang {
@@ -211,4 +218,25 @@ code {
    to keep prose-v3). Restore prose-v3's zero paragraph margin inside the editor. */
 [data-slot='editor-content'] p {
   margin-bottom: 0;
+}
+
+/* Typography zeroes the top margin of whatever follows an h2. Component pages
+   open Examples and Behavior with an h3, which then touches its heading. */
+.prose h2 + h3 {
+  margin-top: 1.25em;
+}
+
+/* Numbered steps for install guides: wrap the steps in <div class="steps">
+   and each h3 inside gets its number in front. */
+.steps {
+  counter-reset: step;
+
+  h3 {
+    counter-increment: step;
+  }
+
+  h3::before {
+    content: counter(step) '.';
+    @apply mr-2 font-normal tabular-nums text-ink-gray-4;
+  }
 }

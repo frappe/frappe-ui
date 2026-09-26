@@ -1,22 +1,67 @@
 # Button
 
-An interactive element used to trigger actions, submit forms, or navigate between views.
+A clickable element that runs an action, submits a form or opens a link.
 
-## Active state
+<ComponentPlayground name="Button" />
 
-`Button` holds the pressed look while its own `data-state` is `open` or
-`active` — there is no `active` prop.
+## Examples
 
-Used as a menu trigger, this needs no wiring at all: the menu primitive stamps
-`data-state="open"` on the trigger, so the button stays pressed for as long as
-the menu is open.
+### List view controls
+
+Filter and view controls above a list. `icon-left` and `icon-right` put an icon
+beside the label, `icon` alone makes an icon-only button, and the `#suffix` slot
+holds a count.
+
+<ComponentPreview name='Button-SectionControls' />
+
+### Section header
+
+A `ghost` button with the section name, and an add action at the other end of
+the row.
+
+<ComponentPreview name='Button-SectionAction' />
+
+### Selection toolbar
+
+A row of `ghost` buttons that act on the selected items. `theme="red"` marks the
+destructive action.
+
+<ComponentPreview name='Button-SelectionToolbar' />
+
+### Primary and secondary action
+
+A `solid` button for the main action beside a default `subtle` one.
+
+<ComponentPreview name='Button-InlineActions' />
+
+### Full-width actions
+
+Add `class="w-full"` to stack buttons in a narrow column.
+
+<ComponentPreview name='Button-StackedActions' />
+
+### Card actions
+
+Two actions that share the width of a card, each with `class="flex-1"`.
+
+<ComponentPreview name='Button-LiveClassCard' />
+
+## Behavior
+
+### Pressed state
+
+`Button` shows its pressed look while its `data-state` attribute is `open` or
+`active`. There is no `active` prop.
+
+As a menu trigger, this needs no wiring. The menu sets `data-state="open"` on
+the trigger, so the button stays pressed while the menu is open.
 
 ```vue
 <Dropdown :options="options" :button="{ label: 'Options' }" />
 ```
 
-For a standalone toggle — a toolbar control, a filter chip — set the attribute
-yourself. It is visual only, so pair it with `aria-pressed`:
+For a standalone toggle, such as a toolbar control or a filter chip, set the
+attribute yourself. It changes only the look, so pair it with `aria-pressed`:
 
 ```vue
 <Button
@@ -26,32 +71,23 @@ yourself. It is visual only, so pair it with `aria-pressed`:
 />
 ```
 
-## Playground
+### Loading
 
-<ComponentPlayground name="Button" />
+`loading` shows a spinner in place of the left icon and makes the button
+non-interactive, without the dimmed disabled look. `loading-text` replaces the
+label while it loads. Only `disabled` dims the button.
 
-## Section controls
+### Links
 
-<ComponentPreview name='Button-SectionControls' />
+With `route`, the button renders as a router link. With `href`, it renders as
+an `<a>` that opens the URL in a new tab. A disabled or loading button always
+renders as a native `<button>`, so it cannot be followed. `type` sets the native
+button type and defaults to `button`.
 
-## Section action
+## Accessibility
 
-<ComponentPreview name='Button-SectionAction' />
-
-## Selection toolbar
-
-<ComponentPreview name='Button-SelectionToolbar' />
-
-## Inline actions
-
-<ComponentPreview name='Button-InlineActions' />
-
-## Stacked actions
-
-<ComponentPreview name='Button-StackedActions' />
-
-## Card actions
-
-<ComponentPreview name='Button-LiveClassCard' />
+- An icon-only button needs a `label`. The label is not shown. It becomes the
+  button's `aria-label`.
+- A loading button sets `aria-busy="true"`.
 
 <!-- @include: ./Button.api.md -->

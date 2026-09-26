@@ -1,19 +1,20 @@
 import { describe, expect, it } from 'vitest'
-import { buildAxisChartOption } from './axisChartOptions'
+import { buildAxisChartOption, DEFAULT_LINE_WIDTH } from './axisChartOptions'
+import { dashedLine } from './axisChartCommon'
 import type { ChartTokens } from './tokens'
 import type { AxisChartConfig } from './types'
 
 const tokens: ChartTokens = {
   categorical: ['#111111', '#222222', '#333333'],
-  sequential: ['#000011', '#000022', '#000033', '#000044', '#000055'],
+  sequential: ['#000011', '#000022', '#000033'],
   diverging: ['#001100', '#002200', '#003300'],
   axisLabel: 'ink-5',
   axisTitle: 'ink-7',
   axisLine: 'outline-2',
-  splitLine: 'outline-1',
+  gridline: 'outline-1',
   dataLabel: 'ink-6',
   insideLabel: 'ink-8',
-  cellGap: '#ffffff',
+  backdrop: '#ffffff',
 }
 
 /** What `LineChart` hands the builder: the shared config, marked `'line'`. */
@@ -34,7 +35,10 @@ function build(
   overrides: Partial<AxisChartConfig> = {},
   hiddenSeries?: string[],
 ) {
-  return buildAxisChartOption(config(overrides), { tokens, hiddenSeries }) as any
+  return buildAxisChartOption(config(overrides), {
+    tokens,
+    hiddenSeries,
+  }) as any
 }
 
 describe('line chart option axes', () => {
@@ -54,7 +58,7 @@ describe('line chart option axes', () => {
     const option = build()
     expect(option.xAxis.splitLine.show).toBe(false)
     expect(option.yAxis.splitLine.show).toBe(true)
-    expect(option.yAxis.splitLine.lineStyle.color).toBe(tokens.splitLine)
+    expect(option.yAxis.splitLine.lineStyle.color).toBe(tokens.gridline)
     expect(option.yAxis.axisLine.show).toBe(false)
     expect(option.xAxis.axisLabel.color).toBe(tokens.axisLabel)
     expect(option.yAxis.axisLabel.color).toBe(tokens.axisLabel)
@@ -116,6 +120,17 @@ describe('line chart option series', () => {
     expect(option.series[1].lineStyle.color).toBe('#000033')
   })
 
+  it('draws more than one line in separate hues on a ramp of five pairs', () => {
+    const pairs = ['d1', 'l1', 'd2', 'l2', 'd3', 'l3', 'd4', 'l4', 'd5', 'l5']
+    const option = buildAxisChartOption(config(), {
+      tokens: { ...tokens, categorical: pairs },
+    }) as any
+    expect(option.series.map((s: any) => s.lineStyle.color)).toEqual([
+      'd1',
+      'l2',
+    ])
+  })
+
   it('honours explicit colors and palettes', () => {
     expect(build({ palette: ['a', 'b'] }).series[0].lineStyle.color).toBe('a')
     expect(build({ palette: 'categorical' }).series[1].lineStyle.color).toBe(
@@ -127,18 +142,15 @@ describe('line chart option series', () => {
     ).toBe('red')
   })
 
-  it('takes the dash pattern and width from the series, solid otherwise', () => {
+  it('breaks the line of a dashed series, solid otherwise', () => {
     expect(build().series[0].lineStyle.type).toBe('solid')
 
-    const option = build({
-      series: [
-        { name: 'sales', lineType: 'dashed', lineWidth: 3 },
-        { name: 'refunds', lineType: 'dotted' },
-      ],
-    })
-    expect(option.series[0].lineStyle.type).toBe('dashed')
-    expect(option.series[0].lineStyle.width).toBe(3)
-    expect(option.series[1].lineStyle.type).toBe('dotted')
+    const option = build({ series: [{ name: 'sales', dashed: true }] })
+    // The reference lines' dash, at the one stroke width the library draws.
+    expect(option.series[0].lineStyle.type).toEqual(
+      dashedLine(DEFAULT_LINE_WIDTH).type,
+    )
+    expect(option.series[0].lineStyle.width).toBe(DEFAULT_LINE_WIDTH)
   })
 
   it('hides datapoints unless asked for', () => {
@@ -147,6 +159,19 @@ describe('line chart option series', () => {
       build({ series: [{ name: 'sales', showDataPoints: true }] }).series[0]
         .showSymbol,
     ).toBe(true)
+  })
+
+  it('keeps the symbols that carry data labels, drawn at no size', () => {
+    const labelled = build({
+      series: [{ name: 'sales', showDataLabels: true }],
+    }).series[0]
+    expect(labelled.showSymbol).toBe(true)
+    expect(labelled.symbolSize).toBe(0)
+
+    const both = build({
+      series: [{ name: 'sales', showDataLabels: true, showDataPoints: true }],
+    }).series[0]
+    expect(both.symbolSize).toBeGreaterThan(0)
   })
 
   it('draws straight segments unless smoothing is asked for', () => {
@@ -175,16 +200,16 @@ describe('line chart option series', () => {
       ['Apr', null],
       ['May', 30],
     ])
-    expect(build({ connectNulls: true }).series[0].connectNulls).toBe(true)
+    expect(
+      build({ series: [{ name: 'sales', connectNulls: true }] }).series[0]
+        .connectNulls,
+    ).toBe(true)
   })
 
-  it('lifts a whole line on hover and fades the others', () => {
+  it('never emphasises a line, so the others keep their opacity', () => {
     const option = build()
-    expect(option.series[0].emphasis).toEqual({
-      focus: 'series',
-      blurScope: 'coordinateSystem',
-    })
-    expect(option.series[0].blur.lineStyle.opacity).toBeLessThan(1)
+    expect(option.series[0].emphasis).toEqual({ disabled: true })
+    expect(option.series[0].blur).toBeUndefined()
   })
 
   it('hides data labels unless asked, and formats them compactly', () => {
@@ -194,6 +219,15 @@ describe('line chart option series', () => {
     expect(option.series[0].label.position).toBe('top')
     expect(option.series[0].label.formatter({ value: ['Jan', 2500] })).toBe(
       '2.5K',
+    )
+  })
+
+  it('prints data labels in the series format', () => {
+    const option = build({
+      series: [{ name: 'sales', showDataLabels: true, format: (v) => `$${v}` }],
+    })
+    expect(option.series[0].label.formatter({ value: ['Jan', 2500] })).toBe(
+      '$2500',
     )
   })
 

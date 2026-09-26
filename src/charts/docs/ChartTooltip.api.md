@@ -36,6 +36,12 @@
     type: 'ChartTooltipItem[]'
   },
   {
+    name: 'rows',
+    description: 'The rows behind the reading, handed to the slot so a body can read a column\nthe plot never drew. Empty when the pointer is over an aggregate that\nstands for no single row.',
+    required: true,
+    type: 'Record<string, any>[]'
+  },
+  {
     name: 'dir',
     description: 'Forces layout direction; defaults to document.documentElement.dir',
     required: false,
@@ -47,7 +53,7 @@
   {
     name: 'default',
     description: 'Replaces the whole tooltip body, headline row included.',
-    type: '{ label?: string | undefined; items: ChartTooltipItem[]; }'
+    type: 'ChartTooltipSlotProps'
   }
 ]
 </script>

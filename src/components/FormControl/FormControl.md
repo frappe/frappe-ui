@@ -1,18 +1,30 @@
 # FormControl
 
-A uniform wrapper for form inputs. `FormControl` picks an underlying control from its `type` prop and threads `label`, `description`, `error`, `required`, `size`, and `variant` down to it. Use it when you want one consistent shape for every field in a form.
-
-## Playground
+One component that renders any form field from its `type` prop, with the same
+`label`, `description`, `error` and `required` props for every type. When you
+need a field's full set of props and slots, or its exact value type, use that
+component directly.
 
 <ComponentPlayground name="FormControl" />
 
-## Example
+## Examples
 
-A create-account form using every control type.
+### Create-account form
+
+Most `type` values in one form. Submit it empty to see each field's `error`.
 
 <ComponentPreview name="FormControl-RealForm" layout="stacked" />
 
-## Supported types
+### Settings form from a field list
+
+One `FormControl` in a `v-for` renders a list of field definitions, whatever
+their types. This is the main reason to use it over the individual components.
+
+<ComponentPreview name="FormControl-FieldList" />
+
+## Behavior
+
+### Supported types
 
 | `type`            | Renders                                                       |
 | ----------------- | ------------------------------------------------------------- |
@@ -27,13 +39,14 @@ A create-account form using every control type.
 | `datetime`        | [`DateTimePicker`](./datepicker#datetime-picker)              |
 | `time`            | [`TimePicker`](./timepicker)                                  |
 
-> **Breaking change in v1:** `type="date"` and `type="time"` used to render native HTML inputs through `TextInput`. They now resolve to `DatePicker` and `TimePicker`. Use `TextInput` directly (or `type="datetime-local"`) if you need the native input.
+For the browser's native date or time input, use `<TextInput type="date" />`,
+or `type="datetime-local"` here.
 
-> **Breaking change in v1:** `type="autocomplete"` was removed — use `type="combobox"`. This one is silent: the removed type falls through to a plain text input instead of failing. See the [migration guide](../migration#formcontrol-type-autocomplete-removed).
+### Label, description and error
 
-## Labeling and errors
-
-`label`, `description`, `error`, and `required` are forwarded to the underlying control, which owns the rendered label, helper text, and error message. Setting `error` flips `aria-invalid` on the control and swaps the description for the error message.
+`FormControl` passes `label`, `description`, `error` and `required` to the
+component it renders, and that component draws them. `error` replaces the
+description and marks the field invalid.
 
 ```vue
 <FormControl
@@ -46,18 +59,30 @@ A create-account form using every control type.
 />
 ```
 
-## Forwarding
+### Props, slots and attributes
 
-Everything else is forwarded generically:
+- **Props and listeners.** `placeholder`, `disabled`, `modelValue`, `options`,
+  `min`/`max`, `formatter` and the rest go to the rendered component.
+  `FormControl` does not declare them itself.
+- **Slots.** Every slot you pass goes through by name. The slots you can use
+  depend on `type`: `#prefix` and `#suffix` for `TextInput` and the pickers,
+  `#item-prefix` and `#item-label` for `Select` and `Combobox`, and so on. See
+  each component's page.
+- **`class` and `style`.** They go to the rendered component, which places
+  them on its outer element.
 
-- **Props and listeners** — `placeholder`, `disabled`, `modelValue`, `options`, `min`/`max`, `formatter`, etc. land on the resolved component. `FormControl` does not redeclare control-specific props.
-- **Slots** — every slot you pass is forwarded by name. Which slots are available depends on `type` (`#prefix` / `#suffix` for `TextInput` and the pickers, `#item-prefix` / `#item-label` for `Select` and `Combobox`, and so on — see the target component's docs).
+`size` and `variant` go to every type, with two exceptions for
+`type="checkbox"`. A checkbox draws no box, so it does not get `variant`. Its
+size scale ends at `md`, so `size="lg"` renders as `md`.
 
-Because forwarding is generic, `FormControl` does not type-check control-specific props or the `v-model` shape per `type`. The value shape follows the underlying component — `daterange` emits a tuple string from `DateRangePicker`, `multiselect` emits an array, `checkbox` emits a boolean, and so on. When the prop surface starts to drive your decision, reach for the underlying component directly.
+The `select`, `combobox`, `multiselect` and picker types fill the width of
+their container.
 
-## When to reach past it
+### Value types
 
-- **Use `FormControl`** when the goal is a consistent stack of labelled fields and you want one API to remember.
-- **Use the underlying component** when you need its specific layout (custom triggers, complex slots) or its full typed surface.
+`FormControl` does not check type-specific props or the `v-model` type for
+each `type`. The value follows the rendered component: `multiselect` emits an
+array, `checkbox` a boolean, `daterange` the value `DateRangePicker` emits, and
+so on.
 
 <!-- @include: ./FormControl.api.md -->

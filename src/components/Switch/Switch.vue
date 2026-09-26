@@ -1,7 +1,8 @@
 <template>
   <div
     class="flex flex-col"
-    :class="containerClasses"
+    :class="[containerClasses, attrs.class as any]"
+    :style="attrs.style as any"
     @click="onContainerClick"
   >
     <div :class="switchGroupClasses">
@@ -34,6 +35,7 @@
         </div>
       </div>
       <SwitchRoot
+        ref="switchRef"
         :id="inputId"
         v-model="model"
         :class="switchClasses"
@@ -43,7 +45,7 @@
         :aria-errormessage="hasError ? errorMessageId : undefined"
         :aria-describedby="describedBy"
         data-slot="control"
-        v-bind="dataAttrs"
+        v-bind="{ ...dataAttrs, ...controlAttrs }"
       >
         <SwitchThumb :class="switchCircleClasses" />
       </SwitchRoot>
@@ -66,13 +68,19 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, useSlots } from 'vue'
+import { computed, ref, useAttrs } from 'vue'
 import { SwitchRoot, SwitchThumb } from 'reka-ui'
 import { useInputLabeling } from '../../composables/useInputLabeling'
+import { useReactiveSlots } from '../../composables/useReactiveSlots'
 import InputLabel from '../InputLabeling/InputLabel.vue'
 import InputDescription from '../InputLabeling/InputDescription.vue'
 import InputError from '../InputLabeling/InputError.vue'
 import type { SwitchProps } from './types'
+import type { InputExposed } from '../../composables/inputTypes'
+
+// INP-Q6: `class` and `style` stay on the layout wrapper; every other attribute
+// and listener goes once to the switch itself, which is the interactive element.
+defineOptions({ inheritAttrs: false })
 
 const props = withDefaults(defineProps<SwitchProps>(), {
   size: 'sm',
@@ -81,9 +89,25 @@ const props = withDefaults(defineProps<SwitchProps>(), {
 })
 
 const model = defineModel<boolean>({ default: false })
-const slots = useSlots()
+const attrs = useAttrs()
+// reka-ui's SwitchRoot is a generic function component, so `InstanceType` does
+// not apply. The ref only needs `$el`, the rendered `<button>`.
+const switchRef = ref<{ $el: HTMLElement } | null>(null)
 
-defineSlots<{
+const controlAttrs = computed(() =>
+  Object.fromEntries(
+    Object.entries(attrs).filter(([key]) => key !== 'class' && key !== 'style'),
+  ),
+)
+
+defineExpose<InputExposed>({
+  /** Moves focus to the switch. */
+  focus: (options?: FocusOptions) =>
+    switchRef.value?.$el?.focus(options),
+})
+const slots = useReactiveSlots<typeof declaredSlots>()
+
+const declaredSlots = defineSlots<{
   /** Overrides the rendered label content. Receives `{ required }`. */
   label?: (props: { required: boolean }) => any
   /** Overrides the rendered description content. */
@@ -166,7 +190,10 @@ const controlPosition = computed(() => props.controlPosition ?? 'end')
 const switchGroupClasses = computed(() => {
   const hasLabel = props.label || slots.label
   const hasDescription = props.description || slots.description
-  if (!hasLabel && !hasDescription) return undefined
+  // A bare switch still gets `flex`: in a plain block the inline-flex control
+  // sits on a text line, and that line takes its height from the parent's
+  // line-height. In a 28px menu row that made the row 29px.
+  if (!hasLabel && !hasDescription) return 'flex'
 
   // `flex-row-reverse` / `justify-*` are inline-axis aware, so this flips
   // correctly under RTL without any physical left/right values.

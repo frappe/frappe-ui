@@ -6,24 +6,18 @@ import type { Knob } from 'frappe-ui/vitepress'
 const model = ref('')
 
 const knobs: Knob[] = [
-  { name: 'label', type: 'text', default: 'Notes', width: '12rem' },
-  { name: 'description', type: 'text', default: '', width: '20rem' },
-  {
-    name: 'placeholder',
-    type: 'text',
-    default: 'Write something…',
-    width: '16rem',
-  },
-  { name: 'rows', type: 'text', default: '3', width: '4rem' },
+  { name: 'label', type: 'text', default: 'Notes' },
+  { name: 'description', type: 'text', default: '' },
+  { name: 'rows', type: 'number', default: 3, min: 1 },
   {
     name: 'size',
     type: 'tabs',
     default: 'sm',
     options: [
+      { label: 'xs', value: 'xs' },
       { label: 'sm', value: 'sm' },
       { label: 'md', value: 'md' },
       { label: 'lg', value: 'lg' },
-      { label: 'xl', value: 'xl' },
     ],
   },
   {
@@ -44,9 +38,9 @@ function buildCode(v: Record<string, any>) {
   const attrs = []
   if (v.label) attrs.push(`label="${v.label}"`)
   if (v.description) attrs.push(`description="${v.description}"`)
-  if (v.placeholder) attrs.push(`placeholder="${v.placeholder}"`)
-  const rowsNum = Number(v.rows)
-  if (rowsNum && rowsNum !== 3) attrs.push(`:rows="${rowsNum}"`)
+  attrs.push('placeholder="Write something…"')
+  const rowsNum = v.rows || 3
+  if (rowsNum !== 3) attrs.push(`:rows="${rowsNum}"`)
   if (v.size !== 'sm') attrs.push(`size="${v.size}"`)
   if (v.variant !== 'subtle') attrs.push(`variant="${v.variant}"`)
   if (v.required) attrs.push('required')
@@ -64,8 +58,8 @@ function buildCode(v: Record<string, any>) {
           v-model="model"
           :label="values.label || undefined"
           :description="values.description || undefined"
-          :placeholder="values.placeholder || undefined"
-          :rows="Number(values.rows) || 3"
+          placeholder="Write something…"
+          :rows="values.rows || 3"
           :size="values.size"
           :variant="values.variant"
           :required="values.required"

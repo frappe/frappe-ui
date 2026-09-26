@@ -3,11 +3,12 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
+  import ExposedTable from '@/components/Docs/ExposedTable.vue'
 
   const propsData = [
   {
     name: 'size',
-    description: 'Controls the visual size of the textarea.',
+    description: 'Controls spacing, corner radius and the minimum height of the textarea.\nTextarea text is a fixed 13px at every size, so `size` does not change\nthe type scale the way it does on a single-line input.',
     required: false,
     type: 'InputSize',
     default: '"sm"'
@@ -64,9 +65,9 @@
   },
   {
     name: 'error',
-    description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. May be either a string\nor an `Error` object whose `messages?: string[]` is rendered as stacked\nlines (with `Error.message` as the fallback).',
+    description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. Takes a string, an\narray of strings, or an `Error` whose `messages` are rendered as stacked\nlines (with `Error.message` as the fallback). This is the same value\n`ErrorMessage.message` takes. An empty array and an empty string both\nmean no error.',
     required: false,
-    type: 'string | FrappeUIError'
+    type: 'ErrorMessageValue'
   },
   {
     name: 'required',
@@ -102,6 +103,19 @@
     type: '[value: string]'
   }
 ]
+
+  const exposedData = [
+  {
+    name: 'inputElement',
+    description: 'The native element the user types into. `null` before mount.',
+    type: 'HTMLTextAreaElement | null'
+  },
+  {
+    name: 'focus',
+    description: 'Moves focus to the textarea.',
+    type: '(options?: FocusOptions) => void'
+  }
+]
 </script>
 
 ## API Reference
@@ -111,3 +125,5 @@
 <SlotsTable :data="slotsData"/>
 
 <EmitsTable :data="emitsData"/>
+
+<ExposedTable :data="exposedData"/>

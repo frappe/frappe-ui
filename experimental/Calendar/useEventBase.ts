@@ -1,12 +1,35 @@
-import { ref, inject, computed, watch, reactive } from 'vue'
+import { ref, inject, computed, watch, reactive, onUnmounted } from 'vue'
+import { isTargetEditable } from '#composables/useKeyboardShortcut'
 import { activeEvent } from './composables/useCalendarData'
-import { colorMap, colorMapDark } from './calendarUtils'
+import { colorMap } from './calendarUtils'
 import {
   CALENDAR_ACTIONS_KEY,
   CALENDAR_CONFIG_KEY,
   type CalendarColor,
   type CalendarEvent,
 } from './types'
+
+/**
+ * The roles of a colour the palette does not know — a calendar carrying its own,
+ * set wherever its owner set it, rather than one of the seven names this library
+ * ships.
+ *
+ * Everything but the colour itself is mixed into `--surface-base`, so the fills
+ * are a wash of it on whatever the page's own ground is and follow the theme
+ * without the colour having to know there is one. The steps are the ones the
+ * palette uses between `bg` and `bgActive`, so an event in a calendar's own
+ * colour sits at the same weights as one in green.
+ *
+ * It used to fall back to green, which said the calendar was a calendar and
+ * nothing about which.
+ */
+const derivedColor = (value: string): CalendarColor => ({
+  color: value,
+  border: value,
+  subtext: 'var(--ink-gray-6)',
+  bg: `color-mix(in srgb, ${value} 10%, var(--surface-base))`,
+  bgActive: `color-mix(in srgb, ${value} 16%, var(--surface-base))`,
+})
 
 const legacyColorNamesByHex: Record<string, keyof typeof colorMap> = {
   '#db7706': 'amber',
@@ -49,42 +72,25 @@ export function useEventBase(props: { event: CalendarEvent; date: Date }) {
 
   // ── Theming ──────────────────────────────────────────────────────────────
 
-  const getTheme = () => {
-    const theme = document.documentElement.getAttribute('data-theme')
-    if (theme) return theme
-    return document.documentElement.classList.contains('htw-dark')
-      ? 'dark'
-      : 'light'
-  }
-
+  // The palette is tokens, so one map serves both themes.
   function color(colorValue?: string): CalendarColor {
-    const map = getTheme() === 'dark' ? colorMapDark : colorMap
     if (!colorValue?.startsWith('#'))
-      return map[colorValue || 'green'] || map['green']!
+      return colorMap[colorValue || 'green'] || colorMap['green']!
     const legacyColorName = legacyColorNamesByHex[colorValue.toLowerCase()]
-    if (legacyColorName) return map[legacyColorName]!
-    for (const value of Object.values(map)) {
-      if (value.color === colorValue) return value
-    }
-    return map['green']!
+    if (legacyColorName) return colorMap[legacyColorName]!
+    return derivedColor(colorValue)
   }
 
   const eventBgStyle = computed(() => {
     const _color = color(props.event.color || 'green')
     return {
       '--bg': _color.bg,
-      '--text': _color.text,
       '--subtext': _color.subtext,
-      '--text-active': _color.textActive,
-      '--subtext-active': _color.subtextActive,
-      '--bg-hover': _color.bgHover,
       '--bg-active': _color.bgActive,
+      // On the root, not only the colour bar: a draft's dashed outline reads
+      // it there, and a draft has no bar.
+      '--border': _color.border,
     }
-  })
-
-  const eventBorderStyle = computed(() => {
-    const _color = color(props.event.color || 'green')
-    return { '--border': _color.border, '--border-active': _color.borderActive }
   })
 
   // ── Delete shortcut ──────────────────────────────────────────────────────
@@ -98,11 +104,23 @@ export function useEventBase(props: { event: CalendarEvent; date: Date }) {
     document.removeEventListener('keydown', handleDeleteShortcut)
   }
 
+  // `close` is the ordinary way out, but it never comes if the event goes away
+  // with its popover still open — which is exactly what the shortcut itself
+  // does: the delete drops the event, the pill unmounts, and the listener would
+  // outlive the component that owns it.
+  onUnmounted(unregisterDeleteShortcut)
+
+  // Asked of the document, so it hears keys that are owed to something else:
+  // Backspace in a text field is an edit, not a delete, and swallowing it there
+  // leaves the field looking uneditable. An overlay is not excluded the way the
+  // view shortcuts exclude one, since an open popover is exactly when this
+  // listener is meant to be live.
   function handleDeleteShortcut(e: KeyboardEvent) {
-    if (e.key === 'Delete' || e.key === 'Backspace') {
-      e.preventDefault()
-      handleEventDelete()
-    }
+    if (e.key !== 'Delete' && e.key !== 'Backspace') return
+    if (isTargetEditable(e)) return
+
+    e.preventDefault()
+    handleEventDelete()
   }
 
   // ── Click / edit / delete ────────────────────────────────────────────────
@@ -120,19 +138,42 @@ export function useEventBase(props: { event: CalendarEvent; date: Date }) {
       preventClick.value = false
       return
     }
-    if (e.detail === 1) {
-      clickTimer = setTimeout(() => {
-        if (calendarActions.props.onClick)
-          calendarActions.props.onClick({
-            e,
-            calendarEvent: calendarEvent.value,
-          })
-        else {
-          togglePopover()
-          isAnyPopoverOpen.value = !isPopoverOpen
-        }
-      }, 200)
+    if (e.detail !== 1) return
+
+    const open = () => {
+      markActive()
+      if (calendarActions.props.onClick)
+        calendarActions.props.onClick({
+          e,
+          calendarEvent: calendarEvent.value,
+        })
+      else {
+        togglePopover()
+        isAnyPopoverOpen.value = !isPopoverOpen
+      }
     }
+
+    // The wait is for a second click, not for its own sake: it is what lets a
+    // double click edit instead of open. Where nothing answers a double click —
+    // no `onDblClick`, and editing turned off, which is how a phone is set up —
+    // there is nothing to wait for, and 200ms of nothing between a tap and the
+    // sheet it opens is the whole of what the surface feels like.
+    if (!calendarActions.props.onDblClick && !config.isEditMode) {
+      open()
+      return
+    }
+
+    clickTimer = setTimeout(open, 200)
+  }
+
+  /**
+   * The event the reader last reached for, which the Agenda draws as a raised
+   * card. Set here rather than left to the host: a host with its own `onClick`
+   * — a detail panel of its own, say — would otherwise get no selection at all.
+   * `activeEvent` is exported, so a host can still move or clear it.
+   */
+  function markActive() {
+    activeEvent.value = props.event.id || props.event.name || ''
   }
 
   const showEventModal = ref(false)
@@ -164,7 +205,7 @@ export function useEventBase(props: { event: CalendarEvent; date: Date }) {
     eventIcons: config.eventIcons,
     showEventModal,
     eventBgStyle,
-    eventBorderStyle,
+    markActive,
     preventClick,
     handleEventClick,
     handleEventEdit,

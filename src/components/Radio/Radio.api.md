@@ -3,6 +3,7 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
+  import ExposedTable from '@/components/Docs/ExposedTable.vue'
 
   const radioProps = [
   {
@@ -113,9 +114,9 @@
   },
   {
     name: 'error',
-    description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. May be either a string\nor an `Error` object whose `messages?: string[]` is rendered as stacked\nlines (with `Error.message` as the fallback).',
+    description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. Takes a string, an\narray of strings, or an `Error` whose `messages` are rendered as stacked\nlines (with `Error.message` as the fallback). This is the same value\n`ErrorMessage.message` takes. An empty array and an empty string both\nmean no error.',
     required: false,
-    type: 'string | FrappeUIError'
+    type: 'ErrorMessageValue'
   },
   {
     name: 'required',
@@ -156,6 +157,14 @@
     type: '[value: RadioValue | undefined]'
   }
 ]
+
+  const radioGroupExposed = [
+  {
+    name: 'focus',
+    description: 'Moves focus to the checked radio, or to the first enabled radio when\nnothing is checked.',
+    type: '(options?: FocusOptions) => void'
+  }
+]
 </script>
 
 ## API Reference
@@ -173,3 +182,5 @@
 <SlotsTable :data="radioGroupSlots"/>
 
 <EmitsTable :data="radioGroupEmits"/>
+
+<ExposedTable :data="radioGroupExposed"/>

@@ -1,26 +1,32 @@
 # Duration
 
-A text input for entering a length of time. The caller works in **seconds** (via
-`v-model`); the user types a human-readable duration in any common notation and
-the component parses it on commit.
-
-## Playground
+A text input for a length of time. The value is a number of seconds, and people
+can type it as `1h 30m`, `1:30:00` or `5400`.
 
 <ComponentPlayground name="Duration" />
 
-<ComponentPreview name="Duration-Default" layout="stacked" />
+## Examples
 
-## Example
+### Logging time
 
-Logging effort against a task: the user enters a duration in any notation and
-the saved seconds roll up into a total.
+Each entry is typed in whatever notation is quickest, and the saved seconds add
+up into a total. `formatDuration` renders a value outside the input.
 
 <ComponentPreview name="Duration-RealWorld" />
 
-## Input notation
+### Service targets
 
-The field accepts several notations, case-insensitive, with units in any order.
-Parsing happens when the field is committed (blur or `Enter`):
+`format="long"` writes the saved value out in words, which reads better in a
+settings form.
+
+<ComponentPreview name="Duration-SlaPolicy" />
+
+## Behavior
+
+### What people can type
+
+The input accepts several notations. Case does not matter, and units can come
+in any order.
 
 | Notation     | Example                                | Seconds            |
 | ------------ | -------------------------------------- | ------------------ |
@@ -29,19 +35,16 @@ Parsing happens when the field is committed (blur or `Enter`):
 | Colon        | `1:30:45`, `1:30`, `:45`               | `5445`, `90`, `45` |
 | Bare integer | `90`                                   | `90`               |
 
-Invalid input keeps the field open with the typed text and an inline error so it
-can be corrected; the saved value is left untouched until a valid commit.
-`Escape` abandons the edit, and clearing the field commits `null`.
+The typed text is read when the input loses focus or on `Enter`. Text that
+cannot be read keeps the input open with an error, and the saved value stays as
+it was. `Escape` drops the edit. An empty input saves `null`.
 
-## Display format
+### Display format
 
-When the field is not focused, the saved value is rendered using `format`. This
-is either a **named preset** or a **token template string**. The default is the
-`short` preset, which renders `2h 2m 3s` and omits zero parts.
+When the input is not focused, it shows the saved value in the `format` you
+pass. `format` is a preset name or a template.
 
-### Presets
-
-Presets are smart — they omit zero components (and `long` pluralizes):
+The presets leave out parts that are zero, and `long` adds plurals:
 
 | `format`            | `5445`                         | `90`                  |
 | ------------------- | ------------------------------ | --------------------- |
@@ -49,11 +52,10 @@ Presets are smart — they omit zero components (and `long` pluralizes):
 | `long`              | `1 hour 30 minutes 45 seconds` | `1 minute 30 seconds` |
 | `colon`             | `1:30:45`                      | `1:30`                |
 
-### Token templates
-
-Any other `format` value is a template, rendered literally (no zero-omission).
-`h`/`m`/`s` are unit tokens; double them (`hh`/`mm`/`ss`) to zero-pad to two
-digits. Wrap label text in single quotes so the unit letters render as text.
+Any other value is a template, and every part in it is shown, zero or not.
+`h`, `m` and `s` stand for hours, minutes and seconds. Double a letter (`hh`)
+to pad it to two digits. Put text in single quotes so its letters are not read
+as units.
 
 | `format`         | `7323`     |
 | ---------------- | ---------- |
@@ -61,38 +63,40 @@ digits. Wrap label text in single quotes so the unit letters render as text.
 | `hh:mm:ss`       | `02:02:03` |
 | `h':'mm`         | `2:02`     |
 
-Each token renders only its own component — `m` is the minutes-within-the-hour
-(`2`), not the total minutes (`122`). Include every unit you want to keep, or a
-higher unit's value is dropped from the output.
+`m` is the minutes left over after the hours (`2`), not the total minutes
+(`122`). A template without `h` drops the hours from the output.
 
-> Editing always switches to the canonical `2h 2m 3s` notation so the typed
-> value round-trips reliably through the parser, whatever the display format.
+While the input has focus, it always shows the short notation (`2h 2m 3s`), so
+the text can be edited and read back the same way whatever the format.
 
-<ComponentPreview name="Duration-Formats" />
+### Label, description and error
 
-## Sizes
+`label` renders above the field and `description` below it. `error` renders
+below the field and hides `description`. It takes a string, an array of strings
+(one line each), or an `Error`, the same values as
+[ErrorMessage](./errormessage). An empty string or an empty array means no
+error. `required` adds a red asterisk to the label and sets `required` on the
+`<input>`.
 
-<ComponentPreview name="Duration-Sizes" />
+The `#label` slot replaces the label text and the required marker, and receives
+`{ required }`. A `#description` slot is not hidden by `error`. It renders
+above the error.
 
-## Labeling
+```vue
+<Duration v-model="seconds">
+  <template #label="{ required }">
+    Time spent <Badge v-if="required" label="Required" />
+  </template>
+  <template #description>Type 1h 30m, or 01:30:00.</template>
+</Duration>
+```
 
-Duration implements the shared input labeling contract (`label`, `description`,
-`error`, `required`), forwarded to the underlying `TextInput`.
+## Accessibility
 
-<ComponentPreview name="Duration-States" />
-
-## Keyboard
-
-| Keys         | Action                                        |
-| ------------ | --------------------------------------------- |
-| `Enter`      | Commit the typed value                        |
-| `Escape`     | Cancel the edit and revert to the saved value |
-| `Tab` / blur | Commit the typed value                        |
-
-## Customization
-
-Duration renders a `TextInput`, so the same data-attribute styling hooks apply —
-`data-slot="control"`, `data-size`, `data-disabled`, and `data-state="invalid"`
-on error. See TextInput for the full taxonomy.
+| Keys         | Action                                     |
+| ------------ | ------------------------------------------ |
+| `Enter`      | Save the typed value                       |
+| `Tab` / blur | Save the typed value                       |
+| `Escape`     | Drop the edit and show the saved value     |
 
 <!-- @include: ./Duration.api.md -->

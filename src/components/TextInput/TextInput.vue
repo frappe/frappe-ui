@@ -72,14 +72,17 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, useAttrs, useSlots } from 'vue'
+import { computed, ref, useAttrs } from 'vue'
 import type { StyleValue } from 'vue'
 import debounce from '../../utils/debounce'
+import { resolvePropValue } from '../../utils/resolvePropValue'
 import { useInputLabeling } from '../../composables/useInputLabeling'
+import { useReactiveSlots } from '../../composables/useReactiveSlots'
 import InputLabel from '../InputLabeling/InputLabel.vue'
 import InputDescription from '../InputLabeling/InputDescription.vue'
 import InputError from '../InputLabeling/InputError.vue'
 import LabelingWrapper from '../InputLabeling/LabelingWrapper.vue'
+import type { InputSize } from '../../composables/inputTypes'
 import type { TextInputEmits, TextInputExposed, TextInputProps } from './types'
 
 defineOptions({
@@ -92,10 +95,35 @@ const props = withDefaults(defineProps<TextInputProps>(), {
   variant: 'subtle',
 })
 
-const emit = defineEmits<TextInputEmits>()
-const slots = useSlots()
+const SIZE_FALLBACK = 'sm'
+const SIZE_CONTEXT = { component: 'TextInput', prop: 'size' } as const
 
-defineSlots<{
+// Heights are fixed, not derived from line-height: 24/28/32/40px.
+const sizeClassesBySize: Record<InputSize, string> = {
+  xs: 'text-xs rounded-3 h-6',
+  sm: 'text-base rounded-4 h-7',
+  md: 'text-base rounded-4 h-8',
+  lg: 'text-lg rounded-5 h-10',
+}
+
+const prefixPaddingBySize: Record<InputSize, string> = {
+  xs: 'ps-1.5',
+  sm: 'ps-2',
+  md: 'ps-2.5',
+  lg: 'ps-3',
+}
+
+const suffixPaddingBySize: Record<InputSize, string> = {
+  xs: 'pe-1.5',
+  sm: 'pe-2',
+  md: 'pe-2.5',
+  lg: 'pe-3',
+}
+
+const emit = defineEmits<TextInputEmits>()
+const slots = useReactiveSlots<typeof declaredSlots>()
+
+const declaredSlots = defineSlots<{
   /** Content rendered before the input (left side) */
   prefix?: () => any
 
@@ -156,6 +184,7 @@ function focus(options?: FocusOptions) {
 // type-checks the object literal itself, and a ComputedRef doesn't
 // structurally match the plain `HTMLInputElement | null` the type declares.
 defineExpose<TextInputExposed>({
+  /** Moves focus to the input. */
   focus,
   get inputElement() {
     return inputRef.value
@@ -167,14 +196,12 @@ const textColor = computed(() => {
 })
 
 const inputClasses = computed(() => {
-  let sizeClasses = {
-    sm: 'text-base rounded-4 h-7',
-    md: 'text-base rounded-4 h-8',
-    lg: 'text-lg rounded-5 h-10',
-    xl: 'text-2xl rounded-5 h-10',
-  }[props.size]
-
-  let paddingClasses = {
+  const paddingBySize: Record<InputSize, string[]> = {
+    xs: [
+      'py-1',
+      slots.prefix ? 'ps-7' : 'ps-1.5',
+      slots.suffix ? 'pe-7' : 'pe-1.5',
+    ],
     sm: [
       'py-1.5',
       slots.prefix ? 'ps-8' : 'ps-2',
@@ -190,12 +217,21 @@ const inputClasses = computed(() => {
       slots.prefix ? 'ps-10' : 'ps-3',
       slots.suffix ? 'pe-10' : 'pe-3',
     ],
-    xl: [
-      'py-1.5',
-      slots.prefix ? 'ps-10' : 'ps-3',
-      slots.suffix ? 'pe-10' : 'pe-3',
-    ],
-  }[props.size]
+  }
+
+  let sizeClasses = resolvePropValue(
+    sizeClassesBySize,
+    props.size,
+    SIZE_FALLBACK,
+    SIZE_CONTEXT,
+  )
+
+  let paddingClasses = resolvePropValue(
+    paddingBySize,
+    props.size,
+    SIZE_FALLBACK,
+    SIZE_CONTEXT,
+  )
 
   let variant = props.disabled ? 'disabled' : props.variant
   let variantClasses = {
@@ -217,26 +253,26 @@ const inputClasses = computed(() => {
     paddingClasses,
     variantClasses,
     textColor.value,
-    'transition-colors w-full dark:[color-scheme:dark]',
+    'leading-tighter transition-colors w-full dark:[color-scheme:dark]',
   ]
 })
 
 let prefixClasses = computed(() => {
-  return {
-    sm: 'ps-2',
-    md: 'ps-2.5',
-    lg: 'ps-3',
-    xl: 'ps-3',
-  }[props.size]
+  return resolvePropValue(
+    prefixPaddingBySize,
+    props.size,
+    SIZE_FALLBACK,
+    SIZE_CONTEXT,
+  )
 })
 
 let suffixClasses = computed(() => {
-  return {
-    sm: 'pe-2',
-    md: 'pe-2.5',
-    lg: 'pe-3',
-    xl: 'pe-3',
-  }[props.size]
+  return resolvePropValue(
+    suffixPaddingBySize,
+    props.size,
+    SIZE_FALLBACK,
+    SIZE_CONTEXT,
+  )
 })
 
 let emitChange = (value: string) => {

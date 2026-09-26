@@ -1,4 +1,8 @@
-import type { InputSize, InputVariant } from '../../composables/inputTypes'
+import type {
+  InputExposed,
+  InputSize,
+  InputVariant,
+} from '../../composables/inputTypes'
 import type { InputLabelingProps } from '../../composables/useInputLabeling'
 import type { TextInputTypes } from '../types/TextInput'
 
@@ -39,10 +43,7 @@ export interface TextInputEmits {
  */
 export interface TextInputExposed<
   TElement extends HTMLElement = HTMLInputElement,
-> {
-  /** Moves focus to the native element. */
-  focus: (options?: FocusOptions) => void
-
+> extends InputExposed {
   /** The native element the user types into. `null` before mount. */
   inputElement: TElement | null
 }

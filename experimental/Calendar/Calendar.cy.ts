@@ -50,6 +50,10 @@ const events: CalendarEvent[] = [
 ]
 
 describe('Calendar', () => {
+  // Below the `sm` breakpoint the Month view stacks days instead of drawing
+  // week rows; the desktop specs want the rows.
+  beforeEach(() => cy.viewport(1024, 768))
+
   // Behavior 1: renders with default props
   it('renders the month view with the default header', () => {
     cy.mount(Calendar, { props: { events: [] } })
@@ -77,12 +81,63 @@ describe('Calendar', () => {
     cy.contains('Design review').should('exist')
     cy.contains('Team offsite').should('exist')
 
-    // Open the event popover (single click applies after a 200ms delay),
-    // then delete it with the keyboard shortcut.
+    // Open the event popover (single click applies after a 200ms delay) and
+    // wait for it — the shortcut is armed by the popover actually opening, not
+    // by the click — then delete it with the keyboard shortcut.
     cy.contains('Design review').click()
+    cy.get('[data-slot=content]').should('exist')
     cy.get('body').type('{del}')
     cy.get('@onDelete').should('have.been.calledWith', 'EV-001')
     cy.contains('Design review').should('not.exist')
+
+    // The pill unmounted with its popover still open, so no `close` came to
+    // take the listener down. A second press must find nothing listening.
+    cy.get('body').type('{del}')
+    cy.get('@onDelete').should('have.been.calledOnce')
+  })
+
+  // The delete shortcut listens on the document, so it hears keys that belong
+  // to something else. Backspace in a text field is an edit.
+  it('leaves Backspace to a text field while the popover is open', () => {
+    cy.mount(Calendar, {
+      props: {
+        events,
+        config: { isEditMode: true, enableShortcuts: true },
+        onDelete: cy.spy().as('onDelete'),
+      },
+      slots: {
+        'event-popover-content': () => h('input', { 'data-cy': 'note' }),
+      },
+    })
+
+    cy.contains('Design review').click()
+    cy.get('[data-cy=note]').type('ab{backspace}')
+    cy.get('[data-cy=note]').should('have.value', 'a')
+    cy.get('@onDelete').should('not.have.been.called')
+    cy.contains('Design review').should('exist')
+  })
+
+  // A consumer that takes over the click never opens the popover, so nothing
+  // should be listening for the shortcut. It used to arm anyway — the popover
+  // announced an open it never performed — and stayed armed, swallowing
+  // Backspace and Delete across the page for the rest of its life.
+  it('does not arm the delete shortcut when onClick suppresses the popover', () => {
+    cy.mount(Calendar, {
+      props: {
+        events,
+        config: { isEditMode: true, enableShortcuts: true },
+        onClick: cy.spy().as('onClick'),
+        onDelete: cy.spy().as('onDelete'),
+      },
+    })
+
+    cy.contains('Design review').click()
+    cy.get('@onClick').should('have.been.called')
+    cy.get('[data-slot=content]').should('not.exist')
+
+    cy.get('body').type('{del}')
+    cy.get('@onDelete').should('not.have.been.called')
+    cy.contains('Design review').should('exist')
   })
 
   it('draws a multi-day event as one bar in the month view', () => {
@@ -110,6 +165,99 @@ describe('Calendar', () => {
         const cellWidth = cell.width()! / 7
         expect($bar.width()!).to.be.greaterThan(cellWidth * 1.5)
       })
+  })
+
+  it('sizes a month row to its day and shows every event in it', () => {
+    const titles = [
+      'Standup',
+      'Design review',
+      'Interview',
+      'Team lunch',
+      'Retro',
+    ]
+    cy.mount(Calendar, {
+      props: {
+        events: titles.map((title, i) => ({
+          id: `EV-${i}`,
+          title,
+          fromDate: today,
+          toDate: today,
+          fromTime: `${9 + i}:00`,
+          toTime: `${10 + i}:00`,
+        })),
+      },
+    })
+
+    // Five events on one day: all five rendered, nothing folded behind a
+    // count.
+    for (const title of titles)
+      cy.contains('.event', title).should('be.visible')
+    cy.contains('more').should('not.exist')
+  })
+
+  it('names the month on its first day', () => {
+    // Pinned mid-month: today's own number is a bare pill, so on the 1st the
+    // label would not be there to find.
+    cy.clock(new Date(2026, 7, 15), ['Date'])
+    cy.mount(Calendar, { props: { events: [] } })
+
+    cy.get('[data-strip-date]').first().contains('Aug 1').should('exist')
+  })
+
+  // A phone's month is the same grid a size down, not a stack: the rows stay
+  // and a stay still runs as one bar across its days.
+  it('keeps the grid on a narrow screen', () => {
+    cy.viewport(390, 800)
+    cy.mount(Calendar, {
+      props: {
+        events: [
+          {
+            id: 'EV-STAY',
+            title: 'Offsite',
+            fromDate: thisWeek(1),
+            toDate: thisWeek(3),
+            isFullDay: true,
+          },
+        ],
+      },
+    })
+
+    cy.get('[data-week-row]').should('have.length.at.least', 4)
+    cy.contains('.event', 'Offsite').should('exist')
+  })
+
+  // Carried over: an event that began yesterday and has not finished. The Day
+  // view is showing today, which is neither the day it starts nor a day it owns
+  // outright, and it still has to be on screen.
+  it('shows an event carried over from yesterday in the day view', () => {
+    cy.mount(Calendar, {
+      props: {
+        events: [
+          {
+            id: 'EV-CARRY',
+            title: 'Afterparty',
+            fromDate: monthYear(-1),
+            toDate: today,
+            fromTime: '23:00',
+            toTime: '02:00',
+            color: 'violet',
+          },
+          {
+            id: 'EV-LONG',
+            title: 'Conference',
+            fromDate: monthYear(-1),
+            toDate: monthYear(1),
+            fromTime: '09:00',
+            toTime: '17:00',
+            color: 'cyan',
+          },
+        ],
+        config: { defaultMode: 'Day' },
+      },
+    })
+
+    cy.contains('Afterparty').should('exist')
+    cy.contains('Conference').should('exist')
   })
 
   it('puts a multi-day event in the all-day row and splits an overnight one', () => {
@@ -150,7 +298,7 @@ describe('Calendar', () => {
       .filter(':contains("Release night")')
       .should('have.length', 2)
       .each(($piece) => {
-        expect($piece.text()).to.contain('10 pm - 2 am')
+        expect($piece.text()).to.contain('10 pm – 2 am')
       })
   })
 
@@ -180,6 +328,13 @@ describe('Calendar', () => {
     cy.get('body').type('m')
     cy.contains('All day').should('not.exist')
 
+    // a -> Agenda, which lists days rather than drawing a grid. Mounted with
+    // no events, so it is the empty month it reports.
+    cy.get('body').type('a')
+    cy.contains('Nothing on between').should('exist')
+    cy.contains('All day').should('not.exist')
+    cy.get('body').type('m')
+
     // ArrowRight moves forward, t returns to today
     cy.contains('button', 'Today')
       .parent()
@@ -199,6 +354,26 @@ describe('Calendar', () => {
 
     cy.get('body').type('w')
     cy.contains('All day').should('not.exist')
+  })
+
+  // Anything layered over the calendar owns the keyboard. The shortcuts are bare
+  // letters, so without this they reached straight through an open dialog and
+  // switched the view behind it.
+  it('ignores shortcuts while an overlay is open', () => {
+    cy.mount(Calendar, { props: { events: [] } })
+
+    // The month/year button is the header's first control; its picker is a dialog.
+    cy.get('button').first().click()
+    cy.get('[role=dialog]').should('exist')
+
+    cy.get('body').type('w')
+    cy.contains('All day').should('not.exist')
+
+    // Closed again, the same key does what it always did.
+    cy.get('body').type('{esc}')
+    cy.get('[role=dialog]').should('not.exist')
+    cy.get('body').type('w')
+    cy.contains('All day').should('exist')
   })
 
   // Behavior 5: every documented slot renders
@@ -234,6 +409,14 @@ describe('Calendar', () => {
     cy.get('[aria-label=cycle-calendar-view]').should('exist')
   })
 
+  // `Calendar` forwards the slot to every view whether or not the consumer
+  // filled it; an empty forward still yields to the popover's own content.
+  it('renders the default popover content when the slot is not filled', () => {
+    cy.mount(Calendar, { props: { events } })
+    cy.contains('Design review').click()
+    cy.get('[data-slot=content]').should('contain.text', 'Jane Doe')
+  })
+
   it('renders the #event-popover-content slot inside the event popover', () => {
     cy.mount(Calendar, {
       props: { events },
@@ -252,5 +435,135 @@ describe('Calendar', () => {
       'have.text',
       'custom: Design review',
     )
+  })
+
+  describe('Agenda view', () => {
+    // Two events either side of a three-day hole, both inside the window.
+    const spread: CalendarEvent[] = [
+      {
+        id: 'AG-1',
+        title: 'Kickoff',
+        fromDate: monthYear(1),
+        toDate: monthYear(1),
+        fromTime: '10:00',
+        toTime: '11:00',
+      },
+      {
+        id: 'AG-2',
+        title: 'Retro',
+        fromDate: monthYear(5),
+        toDate: monthYear(5),
+        fromTime: '15:00',
+        toTime: '16:00',
+      },
+    ]
+
+    it('lists only the days that have something on them', () => {
+      cy.mount(Calendar, {
+        props: { events: spread, config: { defaultMode: 'Agenda' } },
+      })
+
+      cy.contains('Kickoff').should('exist')
+      cy.contains('Retro').should('exist')
+      // The days between the two hold nothing, so they are not listed at all.
+      cy.get('[data-strip-date]').should('have.length', 2)
+    })
+
+    it('groups the cards by week', () => {
+      cy.mount(Calendar, {
+        props: { events: spread, config: { defaultMode: 'Agenda' } },
+      })
+
+      // Whichever days of the week the 1st and the 5th land on, the cards sit
+      // under at least one week label.
+      cy.get('[data-strip-week]').should('exist')
+      // Each of these days holds one event, which the row itself already says.
+      cy.contains('1 event').should('not.exist')
+    })
+
+    it('lists the days already spent, and marks today among them', () => {
+      // The 1st of the month under way: already spent unless today is the 1st,
+      // in which case it is today — listed either way, which is the point.
+      const firstOfMonth = (() => {
+        const now = new Date()
+        return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`
+      })()
+
+      cy.mount(Calendar, {
+        props: {
+          events: [
+            {
+              id: 'AG-PAST',
+              title: 'Month opener',
+              fromDate: firstOfMonth,
+              toDate: firstOfMonth,
+              fromTime: '09:00',
+              toTime: '09:15',
+            },
+            {
+              id: 'AG-TODAY',
+              title: 'Today standup',
+              fromDate: monthYear(),
+              toDate: monthYear(),
+              fromTime: '10:00',
+              toTime: '10:15',
+            },
+          ],
+          config: { defaultMode: 'Agenda' },
+        },
+      })
+
+      // The month runs whole, so a day behind today is still part of it — the
+      // view scrolls to today rather than cutting the month short at it.
+      cy.contains('Month opener').should('exist')
+      cy.get('[data-today]').should('exist')
+    })
+
+    // A list is a blank panel whether the span is empty or the events have not
+    // arrived, and only one of the two is worth saying out loud.
+    it('waits before saying a span has nothing on it', () => {
+      cy.mount(Calendar, {
+        props: { events: [], loading: true, config: { defaultMode: 'Agenda' } },
+      })
+      cy.contains('Nothing on between').should('not.exist')
+
+      // Named by the months the header names, not the week-padded dates the
+      // list happens to start and end on. The clock is pinned so the sentence
+      // is the same one every day: the span from August runs to October.
+      cy.clock(new Date(2026, 7, 20), ['Date'])
+      cy.mount(Calendar, {
+        props: { events: [], config: { defaultMode: 'Agenda' } },
+      })
+      cy.contains('Nothing on between August and October.').should('exist')
+    })
+
+    it('renders the row slots, the participant one without the field', () => {
+      // One event with a `participant`, one without: the slot is the consumer's
+      // to fill on either, so the row renders it for both.
+      const unattended = { ...events[1], participant: undefined }
+      cy.mount(Calendar, {
+        props: {
+          events: [events[0], unattended],
+          config: { defaultMode: 'Agenda' },
+        },
+        slots: {
+          'event-description': (props: any) =>
+            h(
+              'span',
+              { 'data-cy': 'row-description' },
+              `at ${props.date.getDate()}`,
+            ),
+          'event-suffix': (props: any) =>
+            h('span', { 'data-cy': 'row-suffix' }, props.calendarEvent.title),
+          'event-participant': (props: any) =>
+            h('span', { 'data-cy': 'row-participant' }, props.calendarEvent.id),
+        },
+      })
+
+      cy.get('[data-cy=row-description]').first().should('contain.text', 'at')
+      cy.get('[data-cy=row-suffix]').should('have.length', 2)
+      cy.get('[data-cy=row-participant]').should('have.length', 2)
+      cy.contains('[data-cy=row-participant]', 'EV-002').should('exist')
+    })
   })
 })

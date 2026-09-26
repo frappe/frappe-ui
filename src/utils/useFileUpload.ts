@@ -1,11 +1,8 @@
 import { reactive, computed } from 'vue'
 import { getMaxFileSize, formatBytes, fileSizeLimitMessage } from './fileSize'
 
-export type UploadPrivacy = boolean | 0 | 1 | '0' | '1'
-
 export interface UploadOptions {
   private?: boolean
-  is_private?: UploadPrivacy
   folder?: string
   file_url?: string
   doctype?: string
@@ -27,21 +24,54 @@ export interface UploadOptions {
 }
 
 /**
- * Resolves whether an upload is private. `private` wins over `is_private`;
- * unset resolves to **private** — a file with no stated intent is treated as
- * access-controlled, not world-readable. Pass `private: false` for
- * intentionally public files.
+ * Resolves whether an upload is private. Unset resolves to **private** — a
+ * file with no stated intent is treated as access-controlled, not
+ * world-readable. Pass `private: false` for intentionally public files.
+ *
+ * Internal: shared with `FileUploadHandler`, not exported from the package.
  */
 export function isPrivateUpload(options: UploadOptions = {}) {
-  if (options.private !== undefined) return options.private
-  if (options.is_private !== undefined) {
-    return (
-      options.is_private === true ||
-      options.is_private === 1 ||
-      options.is_private === '1'
-    )
+  return options.private ?? true
+}
+
+/** What made an upload fail. */
+export type UploadErrorKind = 'file-size' | 'network' | 'server' | 'abort'
+
+/**
+ * The error every upload path rejects with: `upload()`, `useFileUpload()`,
+ * and `FileUploadHandler.upload()`. Read `kind` to tell a cancelled upload
+ * from a failed one; `messages` carries the server's messages when it sent
+ * any.
+ */
+export class UploadError extends Error {
+  /** What made the upload fail. */
+  readonly kind: UploadErrorKind
+
+  /** HTTP status, when the server answered. */
+  readonly status?: number
+
+  /** Server messages, in the order the server sent them. Empty otherwise. */
+  readonly messages: string[]
+
+  /** The parsed error payload, when the server sent one. */
+  readonly response?: unknown
+
+  constructor(
+    message: string,
+    options: {
+      kind: UploadErrorKind
+      status?: number
+      messages?: string[]
+      response?: unknown
+    },
+  ) {
+    super(message)
+    this.name = 'UploadError'
+    this.kind = options.kind
+    this.status = options.status
+    this.messages = options.messages ?? []
+    this.response = options.response
   }
-  return true
 }
 
 export interface UploadState {
@@ -49,11 +79,11 @@ export interface UploadState {
   progress: number
   uploaded: number
   total: number
-  error: any | null
+  error: UploadError | null
   result: UploadedFile | null
 }
 
-export interface UploadedFile {
+export type UploadedFile = {
   file_name: string
   file_size: number
   file_url: string
@@ -159,7 +189,7 @@ async function uploadWithState(
   reset()
   const limitMessage = fileSizeLimitMessage(file)
   if (limitMessage) {
-    state.error = new Error(limitMessage)
+    state.error = new UploadError(limitMessage, { kind: 'file-size' })
     return Promise.reject(state.error)
   }
   state.uploading = true
@@ -196,18 +226,18 @@ async function uploadWithState(
       state.progress = 100
     })
 
-    xhr.addEventListener('error', (error) => {
+    xhr.addEventListener('error', () => {
       state.uploading = false
-      state.error = 'Upload failed'
+      state.error = new UploadError('Upload failed', { kind: 'network' })
       options.signal?.removeEventListener('abort', abort)
-      reject('Upload failed')
+      reject(state.error)
     })
 
     xhr.addEventListener('abort', () => {
       state.uploading = false
-      state.error = 'Upload cancelled'
+      state.error = new UploadError('Upload cancelled', { kind: 'abort' })
       options.signal?.removeEventListener('abort', abort)
-      reject(new DOMException('Upload cancelled', 'AbortError'))
+      reject(state.error)
     })
 
     xhr.onreadystatechange = () => {
@@ -245,7 +275,12 @@ async function uploadWithState(
               // eslint-disable-next-line no-empty
             } catch (e) {}
           }
-          let e = new Error(extractUploadErrorMessage(error))
+          let e = new UploadError(extractUploadErrorMessage(error), {
+            kind: 'server',
+            status: xhr.status,
+            messages: parseServerMessages(error),
+            response: error,
+          })
           state.error = e
           reject(e)
         }

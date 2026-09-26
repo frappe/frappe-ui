@@ -1,5 +1,5 @@
 import { toNumber } from './axisChartCommon'
-import { chartColors, type ChartTokens } from './tokens'
+import { paletteColors, type ChartTokens } from './tokens'
 import { OTHERS_KEY, OTHERS_LABEL } from './utils'
 import type {
   ChartPaletteName,
@@ -42,10 +42,12 @@ export function buildProportionSegments(
   { tokens, hiddenSegments = [] }: ProportionSegmentContext,
 ): ProportionSegment[] {
   const grouped = groupRows(config)
-  const colors = chartColors(config.palette, tokens, {
-    fallback: PROPORTION_PALETTE,
-    count: grouped.length,
-  })
+  const colors = paletteColors(
+    config.palette,
+    tokens,
+    grouped.length,
+    PROPORTION_PALETTE,
+  )
 
   const visibleTotal = grouped.reduce(
     (sum, segment) =>

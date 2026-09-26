@@ -15,7 +15,16 @@
     @blur="handleBlur"
     @input="handleInput"
     @keydown="handleKeydown"
-  />
+  >
+    <!-- INP-Q7: Duration renders a TextInput, so the labeling slots every other
+         input accepts have to be forwarded or they silently render nothing. -->
+    <template v-if="$slots.label" #label="slotProps">
+      <slot name="label" v-bind="slotProps" />
+    </template>
+    <template v-if="$slots.description" #description>
+      <slot name="description" />
+    </template>
+  </TextInput>
 </template>
 
 <script setup lang="ts">
@@ -30,6 +39,13 @@ const props = withDefaults(defineProps<DurationProps>(), {
 })
 
 const model = defineModel<number | null>({ default: null })
+
+defineSlots<{
+  /** Overrides the rendered label content. Receives `{ required }`. */
+  label?: (props: { required: boolean }) => any
+  /** Overrides the rendered description content. */
+  description?: () => any
+}>()
 
 const inputRef = ref<InstanceType<typeof TextInput> | null>(null)
 const isFocused = ref(false)
@@ -111,6 +127,7 @@ function commit() {
 }
 
 defineExpose<DurationExposed>({
+  /** Moves focus to the input. */
   focus: (options) => inputRef.value?.focus(options),
 })
 </script>

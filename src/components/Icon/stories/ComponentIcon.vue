@@ -20,5 +20,5 @@ const CustomIcon = () =>
 </script>
 
 <template>
-  <Icon :name="CustomIcon" class="text-ink-gray-8" />
+  <Icon :icon="CustomIcon" class="text-ink-gray-8" />
 </template>

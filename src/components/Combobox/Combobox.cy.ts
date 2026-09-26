@@ -23,6 +23,43 @@ describe('Combobox', () => {
       )
     })
 
+    it('leaves an untouched model alone', () => {
+      // Nothing is emitted on mount. There is no model default to write back,
+      // so a parent that starts at `undefined` stays there until the user
+      // picks or clears (INP-Q2). Select behaves the same.
+      cy.mount(Combobox, {
+        props: {
+          options: fruits,
+          placeholder: 'Pick fruit',
+          modelValue: undefined,
+          'onUpdate:modelValue': cy.spy().as('onUpdate'),
+        },
+      })
+
+      cy.get('[role="combobox"]').should('have.value', '')
+      cy.get('@onUpdate').should('not.have.been.called')
+    })
+
+    it('emits null from clear even when the model started undefined', () => {
+      cy.mount(Combobox, {
+        props: {
+          options: fruits,
+          modelValue: undefined,
+          'onUpdate:modelValue': cy.spy().as('onUpdate'),
+          'onUpdate:selectedOption': cy.spy().as('onSelectedOption'),
+        },
+      }).then((mounted: any) => {
+        const vm = mounted.component ?? mounted.wrapper?.vm ?? mounted
+        vm?.clear?.()
+      })
+
+      cy.get('@onUpdate').should('have.been.calledOnce')
+      cy.get('@onUpdate').then((spy: any) => {
+        expect(spy.firstCall.args[0]).to.be.null
+      })
+      cy.get('@onSelectedOption').should('have.been.calledWith', null)
+    })
+
     it('forwards `id` to the input element', () => {
       cy.mount(Combobox, { props: { options: fruits, id: 'my-fruit' } })
       cy.get('[role="combobox"]#my-fruit').should('exist')
@@ -895,12 +932,8 @@ describe('Combobox', () => {
       cy.mount(Combobox, {
         props: { open: true, options: fruits },
         slots: {
-          footer: ({ setOpen }: any) =>
-            h(
-              'button',
-              { 'data-cy': 'footer', onClick: () => setOpen(false) },
-              'FOOTER',
-            ),
+          footer: ({ close }: any) =>
+            h('button', { 'data-cy': 'footer', onClick: close }, 'FOOTER'),
         },
       })
       cy.get('[data-slot="footer"] [data-cy="footer"]').should(

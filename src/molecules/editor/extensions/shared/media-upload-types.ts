@@ -39,11 +39,18 @@ declare module '@tiptap/core' {
   }
 }
 
-/** Result of a successful upload. Must carry a `file_url`. */
-export interface UploadedFile extends Partial<FrappeUploadedFile> {
+/**
+ * Result of a successful upload. `file_url` is required: every media node
+ * reads it to set `src`, so a result without one inserts a broken node.
+ *
+ * The index signature keeps server fields the editor does not know about, so
+ * an upload handler can return the raw File document.
+ */
+export interface UploadedMedia extends Partial<FrappeUploadedFile> {
   file_url: string
   width?: number | null
   height?: number | null
+  [key: string]: unknown
 }
 
 export interface MediaUploadProgress {
@@ -65,7 +72,7 @@ export interface MediaUploadRequestOptions {
 export type UploadFunction = (
   file: File,
   options?: MediaUploadRequestOptions,
-) => Promise<UploadedFile>
+) => Promise<UploadedMedia>
 
 /**
  * Effective upload options. Mirrors the legacy extension option shape: the only
@@ -81,7 +88,7 @@ export interface MediaUploadOptions {
 /** Outcome of a no-doc-mutation single-file upload. */
 export interface UploadResult {
   success: boolean
-  file?: UploadedFile
+  file?: UploadedMedia
   error?: Error
 }
 

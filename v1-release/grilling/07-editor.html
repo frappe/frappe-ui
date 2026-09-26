@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Editor | frappe-ui v1 RC</title>
+    <link rel="stylesheet" href="_shared.css" />
+  </head>
+  <body>
+    <div data-grill-page></div>
+    <script>
+      const AREA = 'editor'
+      const TITLE = 'Editor'
+      const INTRO =
+        'Set the permanent editor types, kit behavior, suggestion model, and customization hooks. Fixed constraints: serialized <code>--prose-color-*</code> and <code>--prose-highlight-*</code> names must never change; they are stored in document HTML. The editor <code>export *</code> cleanup is covered by <a href="01-vocabulary.html">VOC-Q5 on the vocabulary page</a> and is not repeated here.'
+      const QUESTIONS = [
+        {
+          id: 'ED-Q1',
+          title: 'Editor extensions type',
+          covers: ['H23'],
+          severity: 'High',
+          tier: 'T0 · 0 sites',
+          what: `<p><code>Editor</code> and <code>useEditor</code> both receive the TipTap extensions that define the document schema and editing behavior. TipTap calls the full array type <code>Extensions</code>; it includes extensions, nodes, and marks. A consumer can therefore pass <code>Link</code>, <code>Image</code>, or a complete kit in the same array.</p>`,
+          visual: {
+            label: 'Current versus proposed prop type',
+            code: `import type { Extensions } from '@tiptap/core'
+
+- extensions: Extension[]
++ extensions: Extensions
+
+<Editor :extensions="[RichTextKit, Link, Image]" />`,
+          },
+          found: `<p><code>Editor</code> narrows the prop to <code>Extension[]</code>, which rejects valid TipTap <code>Node</code> and <code>Mark</code> values even though <code>useEditor</code> accepts the full shape. The mismatch is at <code>src/molecules/editor/Editor.vue:3-16</code> and <code>src/molecules/editor/useEditor.ts:12-26</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">H23 choice</div><p>“Use TipTap's <code>Extensions</code> type in Editor and useEditor”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping <code>Extension[]</code> freezes a wrong type: valid TipTap nodes and marks work at runtime but fail Vue type-checking. Changing to <code>Extensions</code> widens the accepted type, touches zero measured v1-app sites, and needs no consumer codemod. The two entry points then promise the same input.</p>`,
+          options: [
+            'Use TipTap Extensions in both Editor and useEditor',
+            'Define an owned EditorExtensions alias over TipTap Extensions',
+            'Remove the extensions prop and require one built-in kit',
+          ],
+          recommended: 0,
+          why: 'It describes the values TipTap already accepts and creates no measured consumer migration.',
+        },
+        {
+          id: 'ED-Q2',
+          title: 'UploadedFile and the upload callback',
+          covers: ['H24', 'H25'],
+          severity: 'High',
+          tier: 'H24 T2 · 6 sites; H25 T0 · 0 sites',
+          what: `<p><code>uploadFunction</code> lets an application upload a file while the editor manages its temporary node, cancellation, and progress UI. The callback returns an <code>UploadedFile</code>, whose <code>file_url</code> becomes the saved image, video, or attachment URL. Its second argument carries an abort signal and an <code>onProgress</code> callback with a <code>MediaUploadProgress</code> value.</p>`,
+          visual: {
+            label: 'Upload callback contract',
+            code: `- type UploadedFile = { file_url?: string }
+- uploadFunction?: (file: File) => Promise<UploadedFile>
++ type UploadedFile = { file_url: string }
++ type UploadFunction = (
++   file: File,
++   options?: MediaUploadRequestOptions,
++ ) => Promise<UploadedFile>
++ options.onProgress?.({ loaded, total, percent })`,
+          },
+          found: `<p>The exported result makes <code>file_url</code> optional even though the upload engine throws when it is absent, and the public callback hides the request-options argument that the engine supplies. See <code>src/molecules/editor/useEditor.ts:20-38</code> and the actual engine contract at <code>src/molecules/editor/extensions/shared/media-upload-types.ts:42-68</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">H24 choice</div><p>“One exported <code>UploadedFile</code> with required <code>file_url</code>”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div><div class="source-quote"><div class="source-label">H25 choice</div><p>“Expose the second upload-callback argument; export <code>MediaUploadProgress</code>”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping the optional URL is a trap because TypeScript permits a result that the engine rejects; hiding the second argument also prevents typed cancellation and progress handling. Requiring <code>file_url</code> needs manual proof at 6 type-use sites, while exposing the optional second argument affects zero sites and keeps one-argument functions valid. A codemod cannot prove that constructed upload results always contain a URL.</p>`,
+          options: [
+            'Require file_url, expose request options, and export MediaUploadProgress',
+            'Require file_url but expose only AbortSignal as the second argument',
+            'Replace the callback with a new uploader object contract',
+          ],
+          recommended: 0,
+          why: 'It makes the declared success value match the engine and adds cancellation and progress without breaking one-argument callbacks.',
+        },
+        {
+          id: 'ED-Q3',
+          title: 'StarterKit dead configuration keys',
+          covers: ['H26'],
+          severity: 'High',
+          tier: 'T1 · 1 site',
+          what: `<p><code>StarterKit</code> is frappe-ui's base editing bundle. Its option object currently lists <code>code</code>, <code>codeBlock</code>, and <code>link</code>, but this kit does not add those three extensions. They are separate frappe-ui extensions that a larger kit can configure independently.</p>`,
+          visual: {
+            label: 'StarterKit configuration surface',
+            code: `StarterKit.configure({
+- code: false,
+- codeBlock: false,
+- link: false,
+  heading: { levels: [2, 3, 4] },
+})
+
+RichTextKit.configure({ link: false })`,
+          },
+          found: `<p>The three accepted keys are dead options, so callers can set them without changing the schema; the docs even instruct consumers to do so. The declarations and omission from <code>addExtensions()</code> are visible at <code>src/molecules/editor/extensions.ts:94-117</code> and <code>src/molecules/editor/extensions.ts:139-166</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">H26 choice</div><p>“Remove the three dead StarterKit keys; correct docs”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping these keys is a trap because accepted configuration silently does nothing. Removing them breaks one measured v1-app configuration site, but the T1 deletion is codemod-able and points the caller to the kit that actually owns each extension. The resulting option object contains only behavior that StarterKit can change.</p>`,
+          options: [
+            'Remove code, codeBlock, and link from StarterKitOptions and correct the docs',
+            'Make StarterKit add and control those three extensions',
+            'Remove all StarterKit configuration and expose only fixed defaults',
+          ],
+          recommended: 0,
+          why: 'Deleting dead keys removes a silent failure and costs one mechanical consumer edit.',
+        },
+        {
+          id: 'ED-Q4',
+          title: 'Typed kit keys and honored configuration',
+          covers: ['H27', 'M-editor/A'],
+          severity: 'High · Medium',
+          tier: 'H27 T2 · 5 sites; slashCommands T2 · 1 site; InlineKit T3 · 0 sites',
+          dependsOn: 'ED-Q3',
+          what: `<p><code>CommentKit</code>, <code>RichTextKit</code>, and <code>InlineKit</code> bundle many TipTap extensions behind one <code>.configure()</code> call. Eighteen keys currently accept open <code>Record&lt;string, any&gt;</code> values, <code>slashCommands</code> does not state that it needs items, and <code>InlineKit.starterKit</code> accepts objects but mostly reads only <code>false</code>. This decision depends on ED-Q3 because the real StarterKit key list must be settled before it can be typed.</p>`,
+          visual: {
+            label: 'Current versus enforceable kit configuration',
+            code: `- image: { uplaodFunction: upload }
+- slashCommands: {}
+- starterKit: { bold: { HTMLAttributes: attrs } } // ignored
++ image: { uploadFunction: upload }
++ slashCommands: { items: commands }
++ starterKit: { bold: { HTMLAttributes: attrs } } // honored
+
+type Member<Options> = Partial<Options> | false`,
+          },
+          found: `<p>The open bag lets misspelled and impossible options compile, while two accepted object forms do not provide their promised behavior. The open member type and affected keys are at <code>src/molecules/editor/kits.ts:52-63</code>, <code>src/molecules/editor/kits.ts:196-206</code>, and <code>src/molecules/editor/kits.ts:257-299</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">H27 choice</div><p>“Export the real option interfaces; type all 18 kit keys”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div><div class="source-quote"><div class="source-label">M-editor choice</div><p>“resolve all before RC”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping open or ignored options freezes traps: misspellings compile and object configuration can have no effect. Real interfaces require manual checks at 5 H27 sites and 1 <code>slashCommands</code> site; honoring InlineKit objects changes behavior at zero measured v1-app sites. These checks are not safely codemod-able, but they make every accepted kit value meaningful after the freeze.</p>`,
+          options: [
+            'Type all kit members, require slash command items, and honor InlineKit StarterKit objects',
+            'Type all kit members and slash commands, but allow InlineKit only boolean StarterKit control',
+            'Split each configurable member into a separately imported extension',
+          ],
+          recommended: 0,
+          why: 'It turns the complete kit surface into an enforceable contract and removes two silent configuration failures.',
+        },
+        {
+          id: 'ED-Q5',
+          title: 'Suggestion component names',
+          covers: ['B12'],
+          severity: 'Medium',
+          tier: 'T1 · 0 sites',
+          what: `<p>Editor suggestions use one Vue component to render an inserted mention node and another to render the floating result list. Both configuration fields are currently called <code>component</code>. The proposed names state which of those two jobs the component performs: <code>nodeView</code> and <code>listComponent</code>.</p>`,
+          visual: {
+            label: 'Two distinct render targets',
+            code: `Mention.configure({
+- component: MentionChip,
++ nodeView: MentionChip,
+})
+
+createSuggestionExtension({
+- component: SuggestionList,
++ listComponent: SuggestionList,
+})`,
+          },
+          found: `<p>One name currently means two unrelated render targets, which makes extension configuration ambiguous. The node-view use is at <code>src/molecules/editor/extensions/mention/mention-extension.ts:36-39</code>, while the popup renderer field is at <code>src/molecules/editor/extensions/suggestion/createSuggestionExtension.ts:49-61</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">B12 choice</div><p>“<code>nodeView</code> and <code>listComponent</code> replace the two meanings of <code>component</code>”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping <code>component</code> freezes a misleading name whose meaning changes by location. Renaming has zero measured v1-app sites and is a T1 codemod-able edit. The new names let a developer identify the render target without reading the implementation.</p>`,
+          options: [
+            'Rename the fields to nodeView and listComponent',
+            'Rename the fields to renderer and popup',
+            'Keep component in both locations and document the two meanings',
+          ],
+          recommended: 0,
+          why: 'The chosen names identify the exact TipTap and list responsibilities at zero measured consumer cost.',
+        },
+        {
+          id: 'ED-Q6',
+          title: 'Mention and tag suggestion item model',
+          covers: ['B13'],
+          severity: 'Medium',
+          tier: 'not measured',
+          what: `<p>Mention and tag sources pass records into a suggestion list and then insert an identity and label into the document. The current library types include application-shaped fields such as <code>email</code>, <code>full_name</code>, and <code>isNew</code>. The maintainer proposed one small shared shape, <code>{ label, value }</code>, with the original item still available to a custom item slot.</p>`,
+          visual: {
+            label: 'Small shared model with original item access',
+            code: `- { id, label, email, full_name, isNew }
++ { label, value }
+
+<template #item="{ item }">
+  <Avatar :image="item.image" />
+  {{ item.label }}
+</template>`,
+          },
+          found: `<p>The exported records freeze app-specific data into the library and expose <code>isNew</code>, which is internal creation state. The fields are declared at <code>src/molecules/editor/extensions/mention/mention-extension.ts:24-30</code> and <code>src/molecules/editor/extensions/tag/tag-extension.ts:105-110</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">B13 choice</div><p>“Generic items with accessors picked”</p><div class="source-label">Comment</div><p>“why cant SuggestionItem just be { label, value }, transformation can be done in user app code? am i missing something?”</p></div><div class="source-quote"><div class="source-label">Orchestrator answer</div><p>You are not missing anything. <code>{ label, value }</code> plus an item slot that receives the original item is the simplest contract: applications transform their records once, while custom rendering can still read extra fields.</p></div>`,
+          tradeoff: `<p>Keeping the current records freezes fields from particular applications and makes internal tag-creation state look public. A fully generic accessor API preserves source records but adds configuration and concepts to every suggestion setup; the migration cost was not measured. A <code>{ label, value }</code> contract makes callers transform data, then gives custom slots the original item when more display data is needed.</p>`,
+          options: [
+            'Use { label, value } and pass the original item to the item slot',
+            'Accept generic records and require getLabel and getValue accessors',
+            'Keep separate MentionSuggestionItem and TagSuggestionItem records',
+          ],
+          recommended: 0,
+          why: 'It is the smallest stable data contract and still preserves custom rendering through the original slot item.',
+        },
+        {
+          id: 'ED-Q7',
+          title: 'RichTextKit opt-in extensions',
+          covers: ['B14'],
+          severity: 'Medium',
+          tier: 'T3 · 6 setups',
+          dependsOn: 'ED-Q4',
+          what: `<p><code>RichTextKit</code> is the default full-document extension bundle. It currently enables <code>StyleClipboard</code>, <code>Toc</code>, and <code>ImageViewer</code> for every editor, even though their configuration and test contracts are not ready to freeze. Making them opt-in means callers add each feature deliberately through the typed kit configuration settled in ED-Q4.</p>`,
+          visual: {
+            label: 'Default kit composition',
+            code: `RichTextKit.configure({
+- styleClipboard: {},
+- toc: {},
+- imageViewer: {},
++ styleClipboard: false,
++ toc: false,
++ imageViewer: false,
+})
+
+RichTextKit.configure({ toc: {} })`,
+          },
+          found: `<p><code>StyleClipboard</code> ships without a trigger or tests, while <code>Toc</code> and <code>ImageViewer</code> have no designed option contracts. They are enabled by the defaults at <code>src/molecules/editor/kits.ts:196-224</code> and added at <code>src/molecules/editor/kits.ts:236-248</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">B14 choice</div><p>“StyleClipboard, Toc, ImageViewer become opt-in”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping all three by default freezes under-designed behavior into every RichTextKit editor. Making them opt-in changes behavior across 6 measured setups and a codemod cannot tell which editors depend on each extension. The chosen break gives each feature time to earn a tested configuration contract while callers that need it can enable it explicitly.</p>`,
+          options: [
+            'Make StyleClipboard, Toc, and ImageViewer opt-in before RC',
+            'Move all three to the experimental entry point',
+            'Remove all three until their contracts are designed',
+          ],
+          recommended: 0,
+          why: 'Opt-in preserves access without freezing unfinished behavior into every RichTextKit editor.',
+        },
+        {
+          id: 'ED-Q8',
+          title: 'Bubble and Floating menu options',
+          covers: ['M-editor/A'],
+          severity: 'Medium',
+          tier: 'T2 · 6 sites',
+          what: `<p><code>EditorBubbleMenu</code> and <code>EditorFloatingMenu</code> position toolbars beside a selection or empty line. Their <code>options</code> prop currently exposes TipTap's full Floating UI option bag and mixes in a <code>shouldShow</code> callback typed with <code>any</code>. An owned editor type would expose only the positioning and visibility controls frappe-ui supports.</p>`,
+          visual: {
+            label: 'Owned menu option surface',
+            code: `- options?: TipTapFloatingOptions & {
+-   shouldShow?: (props: any) => boolean
+- }
++ interface EditorMenuOptions {
++   placement?: Placement
++   strategy?: Strategy
++   shouldShow?: (context: EditorMenuContext) => boolean
++ }`,
+          },
+          found: `<p>The public prop structurally leaks a dependency's option bag and lets <code>any</code> escape through <code>shouldShow</code>. Both declarations are at <code>src/molecules/editor/EditorBubbleMenu.vue:9-27</code> and <code>src/molecules/editor/EditorFloatingMenu.vue:9-27</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">M-editor choice</div><p>“resolve all before RC”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping the leaked bag is a trap because a dependency upgrade can silently alter the frozen frappe-ui API, and <code>any</code> removes useful checking. Narrowing it requires manual review at 6 measured v1-app sites; a codemod cannot know which leaked fields each object relies on. The owned type lets frappe-ui evolve its implementation without changing the permanent contract.</p>`,
+          options: [
+            'Export one owned narrow options type for both menu components',
+            'Give Bubble and Floating menus separate owned option types',
+            'Remove the options prop and expose fixed positioning only',
+          ],
+          recommended: 0,
+          why: 'A shared owned type closes the dependency leak while retaining the controls both menus actually support.',
+        },
+        {
+          id: 'ED-Q9',
+          title: 'EditorFixedMenu size prop',
+          covers: ['M-editor/A'],
+          severity: 'Medium',
+          tier: 'T1 · 2 sites',
+          what: `<p><code>EditorFixedMenu</code> renders a persistent row of editor command buttons. It calls the button-size input <code>buttonSize</code>, while frappe-ui's shared size axis is named <code>size</code>. The accepted values remain <code>xs</code> and <code>sm</code>; only the prop name is in question.</p>`,
+          visual: {
+            label: 'Consumer prop rename',
+            code: `- <EditorFixedMenu
+-   :items="toolbar"
+-   button-size="sm"
+- />
++ <EditorFixedMenu
++   :items="toolbar"
++   size="sm"
++ />`,
+          },
+          found: `<p>This is the only editor menu that adds <code>button</code> to the shared size vocabulary. The prop and forwarding code are at <code>src/molecules/editor/EditorFixedMenu.vue:7-19</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">M-editor choice</div><p>“resolve all before RC”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping <code>buttonSize</code> freezes a merely inconsistent name, but its meaning is still clear. Renaming touches 2 measured sites and is a T1 mechanical change a codemod can handle. Changing now gives editor controls the same size vocabulary as the rest of the library.</p>`,
+          options: [
+            'Rename buttonSize to size before RC',
+            'Keep buttonSize and document why it names the child buttons',
+            'Accept size as an alias and keep buttonSize through v1',
+          ],
+          recommended: 0,
+          why: 'Two codemod-able sites are a small cost for one permanent size vocabulary.',
+        },
+        {
+          id: 'ED-Q10',
+          title: 'EditorContent prose font default',
+          covers: ['M-editor/A'],
+          severity: 'Medium',
+          tier: 'T3 · 22 sites',
+          what: `<p><code>EditorContent</code> applies the <code>prose-v3</code> typography scale to editable content. Its CSS falls back to a 15px base when <code>--prose-font-size</code> is absent, while the editor documentation says the default is 14px. This question changes the rendered default, not the fixed serialized color-variable names listed above.</p>`,
+          visual: {
+            label: 'Default font-size choice',
+            code: `/* current runtime */
+- font-size: var(--prose-font-size, 15px)
++ font-size: var(--prose-font-size, 14px)
+
+<!-- explicit consumer override is unchanged -->
+<EditorContent class="[--prose-font-size:1rem]" />`,
+          },
+          found: `<p>The runtime fallback and docs disagree at <code>tailwind/plugin.js:440-449</code> and <code>docs/content/docs/molecules/editor.md:68-78</code>. Editors without an explicit override therefore render one pixel larger than the documented contract.</p>`,
+          said: `<div class="source-quote"><div class="source-label">M-editor choice</div><p>“resolve all before RC”</p><div class="source-label">Constraint</div><p>“preserving serialized prose variable names”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div><div class="source-quote"><div class="source-label">Orchestrator recommendation after migration measurement</div><p>Keep the current 15px runtime default for v1 and correct the documentation.</p></div>`,
+          tradeoff: `<p>Freezing 15px keeps a docs mismatch unless the documentation is corrected, but avoids changing the appearance and pagination of 22 measured editors. Moving to 14px is a T3 behavior change: a codemod cannot determine whether each editor relies on the current rhythm. Keeping 15px as the documented v1 default treats the shipped behavior as intentional; changing gives the originally documented size but requires visual review at every site.</p>`,
+          options: [
+            'Freeze 15px as the v1 default and correct the documentation',
+            'Change the runtime fallback to the documented 14px before RC',
+            'Remove the fallback and require every consumer to set --prose-font-size',
+          ],
+          recommended: 0,
+          why: 'The one-pixel consistency gain does not justify unreviewed rendering changes across 22 editors.',
+        },
+        {
+          id: 'ED-Q11',
+          title: 'EditorDropZone context and public editor types',
+          covers: ['M-editor/C'],
+          severity: 'Medium',
+          tier: 'not measured',
+          what: `<p><code>EditorDropZone</code> wraps editor chrome so dropped files upload into the correct editor. Unlike sibling editor building blocks, it requires an explicit <code>editor</code> prop and its root has no <code>data-slot</code> styling hook. Several types already used by public editor signatures, including <code>UseEditorOptions</code>, <code>SuggestionFloatingOptions</code>, image option types, and <code>EditorCommandMeta</code>, are also not exported from the editor entry point.</p>`,
+          visual: {
+            label: 'Additive 1.1 surface',
+            code: `<Editor>
+  <EditorDropZone>
+    <EditorContent />
+  </EditorDropZone>
+</Editor>
+
++ <div data-slot="editor-drop-zone">
++ export type {
++   UseEditorOptions, SuggestionFloatingOptions,
++   SetImageOptions, EditorCommandMeta,
++ }`,
+          },
+          found: `<p>The required prop and hook gap are at <code>src/molecules/editor/components/EditorDropZone.vue:26-35</code> and <code>src/molecules/editor/components/EditorDropZone.vue:75-76</code>. The missing entry-point exports can be compared with the current list at <code>src/molecules/editor/index.ts:6-33</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">M-editor choice</div><p>“resolve all before RC”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div><div class="source-quote"><div class="source-label">Medium triage</div><p>Both findings are in “C. Can wait for 1.1.” The proposed work is additive: use editor context without removing the prop, add <code>data-slot</code>, and export the existing types.</p></div>`,
+          tradeoff: `<p>Deferring leaves composition less convenient and public signature types harder to name, but it does not require preserving a wrong value or dead option. Adding context fallback, a hook, and exports later can be backward-compatible; the migration cost was not measured. Doing it now completes the family surface before RC, while deferring reduces release scope without closing off the additions.</p>`,
+          options: [
+            'Defer both additive improvements to 1.1 and record them',
+            'Add context fallback, data-slot, and all missing type exports before RC',
+            'Export the types before RC but defer EditorDropZone improvements',
+          ],
+          recommended: 0,
+          why: 'Both changes can be added compatibly after the freeze, so they do not need to expand the RC scope.',
+        },
+        {
+          id: 'ED-Q12',
+          title: 'Editor menu and drop-zone strings',
+          covers: ['L-editor'],
+          severity: 'Low',
+          tier: 'not measured',
+          what: `<p>The built-in editor toolbar items and drop overlay contain English labels such as <code>Bold</code>, <code>Undo</code>, and <code>Drop files to upload</code>. Applications can replace whole menus or the drop overlay, but there is no shared hook for translating the built-in copy. This is a localization extension point, not a change to editing data.</p>`,
+          visual: {
+            label: 'Possible localized copy input',
+            code: `- export const Undo = { label: 'Undo', ... }
+- label: 'Drop files to upload'
++ createEditorCopy({
++   undo: t('Undo'),
++   dropFiles: t('Drop files to upload'),
++ })`,
+          },
+          found: `<p>Menu labels are fixed in <code>src/molecules/editor/menu.ts:95-236</code>, and the drop-zone default and derived labels are fixed at <code>src/molecules/editor/components/EditorDropZone.vue:26-34</code> and <code>src/molecules/editor/components/EditorDropZone.vue:60-71</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">L-editor status</div><p>“not answered”</p><div class="source-label">Earlier draft position</div><p>“can wait for 1.1”</p></div>`,
+          tradeoff: `<p>Deferring keeps built-in editor copy English-only for v1, so localized apps must replace menus or overlays. Adding a copy hook is additive and the consumer impact was not measured; it can ship in 1.1 without breaking the frozen API. Resolving it now improves localization but expands the RC design and testing surface.</p>`,
+          options: [
+            'Confirm that editor localization hooks can wait for 1.1',
+            'Add one owned editor copy object before RC',
+            'Add per-component label props before RC',
+          ],
+          recommended: 0,
+          why: 'The hook is additive, so deferring it avoids RC scope without freezing the English strings as the only future design.',
+        },
+      ]
+    </script>
+    <script src="_shared.js"></script>
+  </body>
+</html>

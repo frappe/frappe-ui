@@ -3,8 +3,9 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
+  import ExposedTable from '@/components/Docs/ExposedTable.vue'
 
-  const scrollAreaProps = [
+  const propsData = [
   {
     name: 'orientation',
     description: 'Which scrollbars to render.',
@@ -27,7 +28,7 @@
   }
 ]
 
-  const scrollAreaSlots = [
+  const slotsData = [
   {
     name: 'default',
     description: 'The scrolling content.',
@@ -35,25 +36,19 @@
   }
 ]
 
-  const scrollBarProps = [
+  const exposedData = [
   {
-    name: 'orientation',
-    description: 'Which axis this bar scrolls.',
-    required: false,
-    type: '"vertical" | "horizontal"',
-    default: '"vertical"'
+    name: 'viewportElement',
+    description: 'The element that actually scrolls. Null until mounted.',
+    type: 'HTMLElement | null'
   }
 ]
 </script>
 
 ## API Reference
 
-### ScrollArea
+<PropsTable name="ScrollArea" :data="propsData"/>
 
-<PropsTable name="ScrollArea" :data="scrollAreaProps"/>
+<SlotsTable :data="slotsData"/>
 
-<SlotsTable :data="scrollAreaSlots"/>
-
-### ScrollBar
-
-<PropsTable folder="ScrollArea" name="ScrollBar" :data="scrollBarProps"/>
+<ExposedTable :data="exposedData"/>

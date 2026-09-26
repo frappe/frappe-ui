@@ -1,4 +1,6 @@
 import type { ItemListSize } from '../../ItemListRow'
+import type { InputSize, InputVariant } from '../../../composables/inputTypes'
+import { resolvePropValue } from '../../../utils/resolvePropValue'
 
 /**
  * Shared helpers for the Select / MultiSelect / Combobox component family.
@@ -8,38 +10,79 @@ import type { ItemListSize } from '../../ItemListRow'
  * the pieces that were proven duplicates across at least two of those files.
  */
 
-export type SelectionSize = 'sm' | 'md' | 'lg' | 'xl'
-export type SelectionVariant = 'subtle' | 'outline' | 'ghost'
+/**
+ * Trigger size scale for the selection family. The trigger is a text input in
+ * every way but the caret, so this is `InputSize` itself — same 24/28/32/40px
+ * heights — under a name the selection components' public types reference
+ * directly. An alias rather than a copy: the two cannot drift apart while the
+ * trigger renders on the input geometry.
+ */
+export type SelectionSize = InputSize
+export type SelectionVariant = InputVariant
+
+const SIZE_FALLBACK = 'sm'
+
+// One context for the whole family, deliberately. `resolvePropValue` dedupes
+// on `component.prop=value`, so a single `<Select size="xl">` — which hits the
+// trigger map, the font map, the item map and then `ItemListRow` — reports the
+// stale value once instead of four times. The name is the family rather than
+// the component because these helpers are shared and exported; naming the
+// caller would mean a new parameter on public API.
+const sizeContext = {
+  component: 'Select / Combobox / MultiSelect',
+  prop: 'size',
+}
+
+const triggerSizeMap: Record<SelectionSize, string> = {
+  xs: 'min-h-6 rounded-3 px-1.5',
+  sm: 'min-h-7 rounded-4 px-2',
+  md: 'min-h-8 rounded-4 px-2.5',
+  lg: 'min-h-10 rounded-5 px-3',
+}
+
+const inputFontSizeMap: Record<SelectionSize, string> = {
+  xs: 'text-xs',
+  sm: 'text-base',
+  md: 'text-base',
+  lg: 'text-lg',
+}
+
+const itemRootSizeMap: Record<SelectionSize, string> = {
+  xs: 'min-h-6',
+  sm: 'min-h-7',
+  md: 'min-h-8',
+  lg: 'min-h-10',
+}
 
 export function triggerSizeClasses(size: SelectionSize) {
-  return {
-    sm: 'min-h-7 rounded-4 px-2',
-    md: 'min-h-8 rounded-4 px-2.5',
-    lg: 'min-h-10 rounded-5 px-3',
-    xl: 'min-h-10 rounded-5 px-3',
-  }[size]
+  return resolvePropValue(triggerSizeMap, size, SIZE_FALLBACK, sizeContext)
 }
 
 export function inputFontSizeClasses(size: SelectionSize) {
-  return {
-    sm: 'text-base',
-    md: 'text-base',
-    lg: 'text-lg',
-    xl: 'text-2xl',
-  }[size]
+  return resolvePropValue(inputFontSizeMap, size, SIZE_FALLBACK, sizeContext)
 }
 
 export function itemRootSizeClasses(size: SelectionSize) {
-  return {
-    sm: 'min-h-7',
-    md: 'min-h-8',
-    lg: 'min-h-10',
-    xl: 'min-h-10',
-  }[size]
+  return resolvePropValue(itemRootSizeMap, size, SIZE_FALLBACK, sizeContext)
 }
 
 export function toItemListSize(size: SelectionSize): ItemListSize {
-  return size
+  // Resolve here rather than forwarding the raw value: `ItemListRow` has the
+  // same scale and the same fallback, so passing an unsupported size straight
+  // through would make it warn a second time about the same call site.
+  return resolvePropValue(
+    itemListSizePassthrough,
+    size,
+    SIZE_FALLBACK,
+    sizeContext,
+  )
+}
+
+const itemListSizePassthrough: Record<SelectionSize, ItemListSize> = {
+  xs: 'xs',
+  sm: 'sm',
+  md: 'md',
+  lg: 'lg',
 }
 
 export function triggerVariantClasses(

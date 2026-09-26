@@ -2,22 +2,24 @@ import { describe, expect, it } from 'vitest'
 import {
   buildAxisChartOption,
   DEFAULT_FILL_OPACITY,
+  DEFAULT_LINE_WIDTH,
   DEFAULT_STACKED_FILL_OPACITY,
 } from './axisChartOptions'
+import { dashedLine } from './axisChartCommon'
 import type { ChartTokens } from './tokens'
 import type { AxisChartConfig } from './types'
 
 const tokens: ChartTokens = {
   categorical: ['#111111', '#222222', '#333333'],
-  sequential: ['#000011', '#000022', '#000033', '#000044', '#000055'],
+  sequential: ['#000011', '#000022', '#000033'],
   diverging: ['#001100', '#002200', '#003300'],
   axisLabel: 'ink-5',
   axisTitle: 'ink-7',
   axisLine: 'outline-2',
-  splitLine: 'outline-1',
+  gridline: 'outline-1',
   dataLabel: 'ink-6',
   insideLabel: 'ink-8',
-  cellGap: '#ffffff',
+  backdrop: '#ffffff',
 }
 
 /** What `AreaChart` hands the builder: the shared config, marked `'area'`. */
@@ -38,7 +40,10 @@ function build(
   overrides: Partial<AxisChartConfig> = {},
   hiddenSeries?: string[],
 ) {
-  return buildAxisChartOption(config(overrides), { tokens, hiddenSeries }) as any
+  return buildAxisChartOption(config(overrides), {
+    tokens,
+    hiddenSeries,
+  }) as any
 }
 
 function alphaOf(rgba: string) {
@@ -68,17 +73,19 @@ describe('area chart option', () => {
 
   it('keeps the line options a line chart has', () => {
     const option = build({
-      connectNulls: true,
       series: [
         {
           name: 'sales',
-          lineType: 'dashed',
+          dashed: true,
           showDataPoints: true,
           smooth: true,
+          connectNulls: true,
         },
       ],
     })
-    expect(option.series[0].lineStyle.type).toBe('dashed')
+    expect(option.series[0].lineStyle.type).toEqual(
+      dashedLine(DEFAULT_LINE_WIDTH).type,
+    )
     expect(option.series[0].showSymbol).toBe(true)
     expect(option.series[0].smooth).toBe(true)
     expect(option.series[0].connectNulls).toBe(true)
@@ -161,19 +168,6 @@ describe('area chart option', () => {
     })
   })
 
-  it('takes fillOpacity from the series, then the chart', () => {
-    expect(
-      build({ fillOpacity: 0.5 }).series[0].areaStyle.color.colorStops[0].color,
-    ).toBe('rgba(0, 0, 17, 0.5)')
-    expect(
-      build({
-        fillOpacity: 0.5,
-        series: [{ name: 'sales', fillOpacity: 0.25 }],
-        // A lone series takes the ramp's mid stop, hence the shifted blue.
-      }).series[0].areaStyle.color.colorStops[0].color,
-    ).toBe('rgba(0, 0, 34, 0.25)')
-  })
-
   it('falls back to a flat fill for a color it cannot add alpha to', () => {
     const option = build({ palette: ['oklch(0.5 0 0)'] })
     expect(option.series[0].areaStyle).toEqual({
@@ -182,10 +176,8 @@ describe('area chart option', () => {
     })
   })
 
-  it('dims the fill relative to its own opacity when blurred', () => {
-    expect(build().series[0].blur.areaStyle.opacity).toBeLessThan(
-      DEFAULT_FILL_OPACITY,
-    )
+  it('never blurs the fill: no series emphasis to blur against', () => {
+    expect(build().series[0].blur).toBeUndefined()
   })
 
   it('drops hidden series', () => {

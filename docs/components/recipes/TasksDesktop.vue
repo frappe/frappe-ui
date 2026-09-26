@@ -834,7 +834,7 @@ function addComment() {
           />
 
           <ScrollArea class="min-h-0 flex-1" viewport-class="px-2 pt-0.5 pb-10">
-            <nav class="space-y-0.5">
+            <div class="space-y-0.5">
               <SidebarItem>
                 <template #prefix>
                   <span class="lucide-inbox size-4" aria-hidden="true" />
@@ -859,7 +859,7 @@ function addComment() {
                 </template>
                 <span class="flex-1 truncate text-sm">Search</span>
               </SidebarItem>
-            </nav>
+            </div>
 
             <div class="mt-4 flex h-7 items-center justify-between">
               <SidebarLabel>Projects</SidebarLabel>
@@ -870,7 +870,7 @@ function addComment() {
                 label="New project"
               />
             </div>
-            <nav class="mt-0.5 space-y-0.5">
+            <div class="mt-0.5 space-y-0.5">
               <SidebarItem
                 v-for="project in projects"
                 :key="project.name"
@@ -893,7 +893,7 @@ function addComment() {
                   />
                 </template>
               </SidebarItem>
-            </nav>
+            </div>
           </ScrollArea>
         </Sidebar>
       </template>
@@ -1025,21 +1025,34 @@ function addComment() {
                 </span>
               </button>
 
+              <!-- list-row-px-3 keeps the 12px inset the rows carried while
+                   they were interactive — they're static now (see below), and
+                   static rows default to flush. -->
               <List
                 v-if="groupOpen(group.key)"
-                class="mt-1"
+                class="mt-1 list-row-px-3"
                 :columns="taskColumns"
               >
+                <!-- A row is one interactive element, so a clickable row
+                     can't nest the status button (invalid HTML). The row
+                     stays static: an "open" button stretches over it from the
+                     first cell (rows are `position: relative`), and anything
+                     with its own pointer interaction — the status dropdown,
+                     the assignees tooltip — layers above with `relative`.
+                     Hover/active classes restore the interactive look. -->
                 <ListRow
                   v-for="task in group.tasks"
                   :key="task.id"
-                  class="h-10"
-                  @click="selectedTaskId = task.id"
+                  class="h-10 active:bg-surface-gray-2 sm:rounded-[10px] sm:hover:bg-surface-gray-1"
                 >
                   <ListCell>
-                    <!-- Changing status shouldn't open the task: stop the
-                         click before it reaches the row. -->
-                    <span @click.stop>
+                    <button
+                      type="button"
+                      class="absolute inset-0 sm:rounded-[10px]"
+                      :aria-label="`Open ${task.title}`"
+                      @click="selectedTaskId = task.id"
+                    />
+                    <span class="relative">
                       <Tooltip text="Change status">
                         <Dropdown :options="statusDropdownOptions(task)">
                           <button
@@ -1127,7 +1140,10 @@ function addComment() {
                       v-if="task.assignees.length"
                       :text="task.assignees.join(', ')"
                     >
-                      <div class="flex -space-x-1">
+                      <!-- `relative` lifts the avatars above the stretched
+                           open button, so their tooltip still gets the
+                           hover. -->
+                      <div class="relative flex -space-x-1">
                         <Avatar
                           v-for="name in task.assignees"
                           :key="name"

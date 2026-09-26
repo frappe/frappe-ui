@@ -1,78 +1,79 @@
 # ProportionBar
 
-A breakdown as one bar: parts of a whole, side by side.
+One bar split into the parts that make up a total.
 
-A single 100% stacked bar — a segmented bar, in the other common name. It is the
-ring unrolled, and it is what fits where a ring does not: a strip a few pixels
-tall at the foot of a card that is mostly a number, beside the total it breaks
-down. Reach for `DonutChart` when the breakdown is the card; reach for this when
-the breakdown is a footnote to a reading.
+A single 100% stacked bar, also called a segmented bar. It is a ring unrolled,
+and it fits where a ring does not: a strip a few pixels tall under a number,
+splitting up the total above it. Use `DonutChart` when the breakdown fills the
+card, and this when the breakdown sits under something else. It is drawn as
+plain divs, with no echarts.
 
-Three or four parts read at a glance. Past that the bar is still honest but the
-legend is doing the work, and a `DonutChart` or a `BarChart` gives each part a
+Three or four parts read at a glance. Past that the bar is still accurate, but
+the legend is doing the work, and `DonutChart` or `BarChart` gives each part a
 label of its own.
 
 ## Parts of a whole
 
-One row per part, drawn in row order — a breakdown is usually written in the
-order it is read, and sorting it by size would break a sequence the caller built
-on purpose. Each segment is sized by its share of the total, and `format` runs
-on the values.
+`category` and `value` name the two columns the bar needs, the same pair
+`DonutChart` takes. One row is one segment, and each segment is as wide as its
+share of the total. `format` formats the numbers in the tooltip.
+
+Rows draw in the order you pass them. They are not sorted by size, because a
+breakdown is usually written in the order it is read, and sorting would break
+that order.
 
 <ComponentPreview name="Charts-ProportionTickets" csr="true" self-layout />
 
-## Capping the tail
+## Grouping the tail
 
-`maxSegments` keeps the largest parts and sums the rest into "Others", named
-`OTHERS_KEY`. It defaults to 6: a track a few hundred pixels wide runs out of
-readable width long before the palette runs out of hues. `select` reports the
-segment and every row behind it, so the tail can be drilled into as well.
+`maxSegments` limits how many segments the bar draws, and "Others" counts as
+one of them. So `maxSegments` of 4 draws three named segments plus "Others", as
+in this example. It defaults to 6. If there are no more categories than the
+limit, the bar draws them all with no "Others" segment. `select` reports the
+data rows behind the segment, and for "Others" that is every grouped row.
 
-A share too small to see is widened to a floor, and the difference comes off the
-segments above it — a part that is in the legend but nowhere in the bar reads as
-a bug. `percent` on the event and in the tooltip is the true share; only the
-drawn width moves.
+A share too small to see is widened to a readable width, and the difference
+comes off the wider segments. Without that, a part would show in the legend and
+be missing from the bar, which reads as a bug. The `percent` in the tooltip and
+on the `select` event is still the true share — only the drawn width changes.
 
 <ComponentPreview name="Charts-ProportionStorage" csr="true" self-layout />
 
 ## Thickness
 
-Two sizes, because the bar is read two ways. `sm`, the default, is 8px — a
-strip under the number it breaks down. `md` is 12px, for a card whose subject
-is the breakdown itself.
+`size` is `sm`, 8px and the default, or `md`, 12px. Use `sm` for a bar under a
+number or inside a table row, and `md` where the breakdown is what the card is
+about.
 
-The corner follows the thickness: `md` carries the donut's own, and `sm` steps
-it back. One corner across both would round the thinner one into capsules, and
-a row of capsules reads as separate objects rather than as one track cut into
-parts.
+The corner rounds with the thickness: `md` uses the same corner as a donut
+slice, and `sm` uses a smaller one. A corner half the height would round each
+segment into a capsule, and a row of capsules reads as separate objects instead
+of one bar cut into parts.
 
-Segments are separated by 3px, whatever the size — the ring's gap is an angle
-rather than a distance, and 3px is what it comes to on a normally sized ring.
-
-Pointing at a segment grows it and steps the others back, the same pair the ring
-uses to emphasise a slice. The legend does it too, so hovering a name finds its
-block in the bar.
+Hovering a segment grows it and fades the others, the same pair `DonutChart`
+uses on a slice. The legend does it too, so hovering a name finds its segment in
+the bar.
 
 <ComponentPreview name="Charts-ProportionSizes" csr="true" self-layout />
 
 ## Hiding a part
 
-The legend switches parts off, and the rest re-percentage over the visible
-total. Bind `v-model:hiddenSegments` to drive that from the app, or to keep what
-a reader hid across a reload. The last visible segment cannot be hidden — an
-empty bar reads as a failure to load.
+The legend switches parts off, and the remaining segments re-share the bar over
+the visible total. Bind `v-model:hiddenSegments` to control that from your app,
+or to keep what a reader hid across a reload. The last visible segment cannot be
+hidden, because an empty bar reads as a failure to load.
 
 ```vue
 <ProportionBar
   v-model:hiddenSegments="hidden"
-  :data="thisCycle"
-  category="part"
-  value="amount"
+  :data="ticketsByState"
+  category="state"
+  value="tickets"
 />
 ```
 
-Each segment is a button: it takes focus, opens its tooltip there, and answers
+Each segment is a button. It takes focus, shows its tooltip there, and answers
 Enter with `select`. Its accessible name carries the share as well as the value,
-because the width is the whole point of the bar.
+because the width is what a reader who can see the bar reads first.
 
 <!-- @include: ./ProportionBar.api.md -->

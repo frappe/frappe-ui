@@ -20,21 +20,28 @@
     :disabled="props.disabled"
     :readonly="inputReadonly"
     :display-label="displayLabel"
-    :content-class="contentClass"
     @blur="commitInput()"
     @enter="commitInput(true)"
     @open="onShellOpen"
     @close="onShellClose"
     @request-focus="onShellRequestFocus"
   >
-    <template v-if="$slots.trigger" #trigger="ts"><slot name="trigger" v-bind="ts" /></template>
-    <template v-if="$slots.prefix" #prefix="ts"><slot name="prefix" v-bind="ts" /></template>
-    <template v-if="$slots.suffix" #suffix="ts"><slot name="suffix" v-bind="ts" /></template>
+    <template v-if="$slots.trigger" #trigger="ts"
+      ><slot name="trigger" v-bind="ts"
+    /></template>
+    <template v-if="$slots.prefix" #prefix="ts"
+      ><slot name="prefix" v-bind="ts"
+    /></template>
+    <template v-if="$slots.suffix" #suffix="ts"
+      ><slot name="suffix" v-bind="ts"
+    /></template>
 
-    <template #default="{ close }">
+    <template #default="{ close, open, disabled, setOpen }">
       <div
         class="flex"
-        :class="$slots.actions ? 'divide-x divide-outline-gray-2' : ''"
+        :class="
+          $slots.actions ? 'w-fit divide-x divide-outline-gray-2' : 'w-56'
+        "
       >
         <aside
           v-if="$slots.actions"
@@ -50,34 +57,28 @@
               setDate: handleDateCellClick,
               clear: handleClearClick,
               close,
+              open,
+              disabled,
+              setOpen,
             }"
           />
         </aside>
         <div class="flex flex-col">
-          <CalendarPanel
-            ref="panelRef"
-            :view="view"
-            :current-year="currentYear"
-            :current-month="currentMonth"
-            :weeks="weeks"
+          <DateCalendar
+            ref="calendarRef"
+            :model-value="selectedDate"
             today-label="Now"
             :min="resolvedMin"
             :max="resolvedMax"
-            v-model:focused-date="focusedDate"
-            @prev="prev"
-            @next="next"
+            :is-date-unavailable="props.isDateUnavailable"
+            @select="handleDateCellClick"
             @today="handleNowClick"
-            @cycle-view="cycleView"
-            @select-month="selectMonth"
-            @select-year="selectYear"
-            @select-date="handleDateCellClick"
-            @navigate="onPanelNavigate"
           />
           <div class="flex flex-col gap-2 p-2 pt-0">
             <TimePicker
               ref="timePickerRef"
               :modelValue="timeValue"
-              :typeable="props.allowCustomTime"
+              :typeable="props.typeable"
               side="bottom"
               align="start"
               placeholder="Select time"
@@ -96,11 +97,9 @@
 import { ref, computed, nextTick, watch } from 'vue'
 import TimePicker from '../TimePicker/TimePicker.vue'
 import { dayjs, dayjsLocal, dayjsSystem } from '../../utils/dayjs'
-import { generateWeeks } from './utils'
-import CalendarPanel, { type CalendarPanelCell } from './CalendarPanel.vue'
+import DateCalendar from './DateCalendar.vue'
 import PickerShell from '../shared/picker/PickerShell.vue'
 import {
-  useCalendarView,
   usePopoverPositioning,
   useKeepOpen,
   useTypeable,
@@ -112,6 +111,11 @@ import type {
   DateTimePickerEmits,
   DateTimePickerSlots,
 } from './types'
+import type { DateCalendarExposed } from './calendarTypes'
+import type {
+  PickerExposed,
+  PickerShellExposed,
+} from '../shared/picker/types'
 
 const props = withDefaults(defineProps<DateTimePickerProps>(), {
   modelValue: '',
@@ -120,22 +124,19 @@ const props = withDefaults(defineProps<DateTimePickerProps>(), {
   typeable: true,
   disabled: false,
   clearable: true,
-  allowCustomTime: true,
   openOnFocus: false,
   openOnClick: true,
 })
 const emit = defineEmits<DateTimePickerEmits>()
 
-const slots = defineSlots<DateTimePickerSlots>()
-
-// Layout only — the elevated shell (rounded/bg/shadow/ring) is owned by
-// PopoverPanel inside PickerShell.
-const contentClass = computed(() => (slots.actions ? 'w-fit' : 'w-56'))
+defineSlots<DateTimePickerSlots>()
 
 // ── Popover open state ───────────────────────────────────────────────────────
 
-const shellRef = ref<{ open: () => void } | null>(null)
-const isOpen = ref(false)
+const shellRef = ref<PickerShellExposed | null>(null)
+// Seeded from the prop, so a parent that mounts the picker with `open` already
+// true gets an open panel. The watch below only sees later changes.
+const isOpen = ref(props.open === true)
 
 watch(
   () => props.open,
@@ -152,51 +153,33 @@ watch(isOpen, (val) => {
 
 function onShellOpen() {
   initFromValue()
-  seedFocusedDate()
 }
 
 function onShellClose() {
-  resetView()
   if (isTyping.value) {
     commitInput()
     isTyping.value = false
   }
-  focusedDate.value = null
 }
 
-defineExpose({
+// ADR-0012: a picker owns its trigger, so `open` and `close` earn a place on
+// the ref. `focus` is the method every input guarantees (INP-Q5).
+defineExpose<PickerExposed>({
   open: () => shellRef.value?.open(),
+  close: () => shellRef.value?.close(),
+  /**
+   * Moves focus to the input. With a custom `#trigger`, it focuses the first
+   * focusable element inside it.
+   */
+  focus: (options?: FocusOptions) => shellRef.value?.focus(options),
 })
 
-const panelRef = ref<{ focusInitialCell: () => void } | null>(null)
+const calendarRef = ref<DateCalendarExposed | null>(null)
 const timePickerRef = ref<{ focus: () => void } | null>(null)
-const focusedDate = ref<Dayjs | null>(null)
-
-function seedFocusedDate() {
-  if (focusedDate.value) return
-  if (selectedDate.value) {
-    const d = dayjs(selectedDate.value)
-    if (!checkUnavailable(d)) {
-      focusedDate.value = d
-      return
-    }
-  }
-  const today = dayjsLocal()
-  if (!checkUnavailable(today)) {
-    focusedDate.value = today
-    return
-  }
-  const first = weeks.value.flat().find((c) => c.inMonth && !c.isUnavailable)
-  if (first) focusedDate.value = first.date
-}
 
 function onShellRequestFocus() {
-  seedFocusedDate()
-  nextTick(() => panelRef.value?.focusInitialCell())
-}
-
-function onPanelNavigate(target: Dayjs) {
-  focusOn(target)
+  // The calendar only mounts with the popover, so wait a tick for it.
+  nextTick(() => calendarRef.value?.focus())
 }
 
 // ── Positioning / keepOpen ────────────────────────────────────────────────────
@@ -207,19 +190,6 @@ const shouldKeepOpen = useKeepOpen(props)
 const inputReadonly = useTypeable(props)
 
 // ── Calendar state ───────────────────────────────────────────────────────────
-
-const {
-  view,
-  currentYear,
-  currentMonth,
-  prev,
-  next,
-  cycleView,
-  selectMonth,
-  selectYear,
-  focusOn,
-  resetView,
-} = useCalendarView()
 
 const DATE_FORMAT = 'YYYY-MM-DD'
 const DATE_TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss'
@@ -259,7 +229,6 @@ function syncFromValue(val?: string): void {
   if (!val) {
     if (!props.clearable) {
       const now = dayjsLocal()
-      focusOn(now)
       selectedDate.value = now.format(DATE_FORMAT)
       timeValue.value = now.format('HH:mm:ss')
     } else {
@@ -274,7 +243,6 @@ function syncFromValue(val?: string): void {
     timeValue.value = ''
     return
   }
-  focusOn(d)
   selectedDate.value = d.format(DATE_FORMAT)
   timeValue.value = d.format('HH:mm:ss')
 }
@@ -313,18 +281,6 @@ const isTyping = ref(false)
 watch(displayLabel, (val) => {
   if (!isTyping.value) inputValue.value = val
 })
-
-// ── Calendar grid ────────────────────────────────────────────────────────────
-
-const weeks = computed<CalendarPanelCell[][]>(() =>
-  generateWeeks(currentYear.value, currentMonth.value, selectedDate.value).map(
-    (week) =>
-      week.map((d) => ({
-        ...d,
-        isUnavailable: checkUnavailable(d.date),
-      })),
-  ),
-)
 
 const computedMinTime = computed<string>(() => {
   if (!minDT.value || !selectedDate.value) return ''
@@ -379,18 +335,14 @@ function selectDate(date: string | Date | Dayjs): void {
   const d = dayjs(date as any)
   if (!d.isValid() || checkUnavailable(d)) return
   selectedDate.value = d.format(DATE_FORMAT)
-  focusOn(d)
 }
 
 function handleDateCellClick(date: string | Date | Dayjs) {
   selectDate(date)
   emitChange()
-  // Keep the popover open — DateTimePicker is a two-step selection (date
-  // then time). Auto-close on date alone strands the embedded TimePicker.
   isTyping.value = false
-  resetView()
-  // Move keyboard focus to the time input so the user can immediately
-  // continue with the time. Harmless for mouse users.
+  // A date alone is half a selection. Keep the popover open and move focus to
+  // the TimePicker.
   nextTick(() => timePickerRef.value?.focus?.())
 }
 
@@ -428,19 +380,18 @@ function clearSelection() {
   inputValue.value = ''
 }
 
-function handleNowClick() {
-  const now = dayjsLocal()
-  selectDate(now)
-  timeValue.value = now.format('HH:mm:ss')
+// Now commits date and time together, in one emit.
+function handleNowClick(date: string) {
+  selectDate(date)
+  timeValue.value = dayjsLocal().format('HH:mm:ss')
   emitChange()
-  if (!shouldKeepOpen.value) isOpen.value = false
   isTyping.value = false
+  if (!shouldKeepOpen.value) isOpen.value = false
 }
 
 function handleClearClick() {
   clearSelection()
   if (!shouldKeepOpen.value) isOpen.value = false
   isTyping.value = false
-  resetView()
 }
 </script>

@@ -41,11 +41,13 @@ components.d.ts
 docs/css/shiki.css
 
 # Auto-generated proxies for colocated component docs.
-# Keep legacy.md (the only hand-written file in this dir).
 docs/content/docs/components/*.md
-!docs/content/docs/components/legacy.md
+# MobileNav moved onto the MobileShell page; this page sends old links there.
+!docs/content/docs/components/mobilenav.md
 docs/content/docs/experimental/*.md
 docs/content/docs/charts/*.md
+# Chart colors is written here, not generated from src/charts/docs.
+!docs/content/docs/charts/colors.md
 
 coverage
 .nyc_output
@@ -59,3 +61,10 @@ cypress/screenshots
 
 # Emitted by the composite tsconfig.node.json project on every type-check.
 *.tsbuildinfo
+
+# Raw Figma token export, dropped here by whoever runs the sync. It is an
+# input to `yarn sync-tokens`, not a record of anything: the committed record
+# is tailwind/tokens/*.js, and build.js holds every place frappe-ui
+# deliberately overrules the export (radius 9, font weights, dropped sizes,
+# the oklch conversion). See docs/content/docs/getting-started/tailwind.md.
+.figma-export/

@@ -1,5 +1,6 @@
 import type { TextInputTypes } from '../types/TextInput'
-import type { FrappeUIError } from '../../composables/useInputLabeling'
+import type { InputSize } from '../../composables/inputTypes'
+import type { InputLabelingProps } from '../../composables/useInputLabeling'
 
 export interface FormControlProps {
   /** Label text displayed above the input */
@@ -7,7 +8,7 @@ export interface FormControlProps {
   /** Optional description or helper text shown below the input */
   description?: string
   /** Error message shown below the input. Sets aria-invalid on the control. */
-  error?: string | FrappeUIError
+  error?: InputLabelingProps['error']
   /**
    * Type of input to render. FormControl is a thin dispatcher — it forwards
    * `label`/`description`/`error`/`required`/`size`/`variant` plus all
@@ -29,8 +30,12 @@ export interface FormControlProps {
     | 'daterange'
     | 'datetime'
     | 'time'
-  /** Size of the input */
-  size?: 'sm' | 'md'
+  /**
+   * Size of the input. The full input scale — `xs` 24px, `sm` 28px, `md` 32px,
+   * `lg` 40px. `type="checkbox"` renders on the narrower toggle scale, so `lg`
+   * is clamped to that scale's largest value there.
+   */
+  size?: InputSize
   /** Visual variant of the input */
   variant?: 'subtle' | 'outline'
   /** Whether the input is required */

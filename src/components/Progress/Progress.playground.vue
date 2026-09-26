@@ -3,8 +3,8 @@ import { Progress } from 'frappe-ui'
 import type { Knob } from 'frappe-ui/vitepress'
 
 const knobs: Knob[] = [
-  { name: 'value', type: 'text', default: '60', width: '5rem' },
-  { name: 'label', type: 'text', default: 'Upload', width: '12rem' },
+  { name: 'value', type: 'number', default: 60, min: 0, max: 100 },
+  { name: 'label', type: 'text', default: 'Upload' },
   {
     name: 'size',
     type: 'tabs',
@@ -17,20 +17,16 @@ const knobs: Knob[] = [
     ],
   },
   { name: 'hint', type: 'switch', default: true },
-  { name: 'intervals', type: 'switch', default: false },
-  { name: 'intervalCount', type: 'text', default: '6', width: '4rem' },
+  { name: 'intervals', type: 'number', default: null, min: 0 },
 ]
 
 function buildCode(v: Record<string, any>) {
-  const attrs: string[] = [`:value="${Number(v.value) || 0}"`]
+  const attrs: string[] = [`:value="${v.value ?? 0}"`]
   if (v.label) attrs.push(`label="${v.label}"`)
   if (v.size !== 'sm') attrs.push(`size="${v.size}"`)
   if (v.hint) attrs.push('hint')
-  if (v.intervals) {
-    attrs.push('intervals')
-    const ic = Number(v.intervalCount)
-    if (ic && ic !== 6) attrs.push(`:interval-count="${ic}"`)
-  }
+  const intervals = v.intervals ?? 0
+  if (intervals > 0) attrs.push(`:intervals="${intervals}"`)
   return ['<Progress', ...attrs.map((a) => '  ' + a), '/>'].join('\n')
 }
 </script>
@@ -40,12 +36,11 @@ function buildCode(v: Record<string, any>) {
     <template #preview="{ values }">
       <div class="w-full max-w-sm">
         <Progress
-          :value="Number(values.value) || 0"
+          :value="values.value ?? 0"
           :label="values.label || undefined"
           :size="values.size"
           :hint="values.hint"
-          :intervals="values.intervals"
-          :interval-count="Number(values.intervalCount) || 6"
+          :intervals="values.intervals || undefined"
         />
       </div>
     </template>

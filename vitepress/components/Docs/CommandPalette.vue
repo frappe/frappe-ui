@@ -11,7 +11,8 @@ import {
   ListboxRoot,
 } from 'reka-ui'
 
-import { Dialog } from 'frappe-ui'
+import { Dialog, KeyboardShortcut, toast, useColorScheme } from 'frappe-ui'
+import { pageMarkdown } from './pageMarkdown'
 import type { SidebarItem, SidebarSection } from './sidebarList'
 
 const open = defineModel<boolean>('open', { default: true })
@@ -33,6 +34,62 @@ const sectionOrder = sidebarList.map((s) => s.text)
 watch(open, (isOpen) => {
   if (!isOpen) filterText.value = ''
 })
+
+const { toggleColorScheme } = useColorScheme()
+async function copy(text: string, message: string) {
+  try {
+    await navigator.clipboard.writeText(text)
+    toast.success(message)
+  } catch {
+    toast.error('Could not copy to the clipboard')
+  }
+}
+const actions = [
+  {
+    id: 'theme',
+    text: 'Toggle dark mode',
+    run: toggleColorScheme,
+  },
+  {
+    id: 'install',
+    text: 'Copy install command',
+    hint: 'npm install frappe-ui',
+    run: () => copy('npm install frappe-ui', 'Install command copied'),
+  },
+  {
+    id: 'markdown',
+    text: 'Copy this page as Markdown',
+    run: () => copy(pageMarkdown(), 'Page copied as Markdown'),
+  },
+  {
+    id: 'github',
+    text: 'Open frappe-ui on GitHub',
+    run: () => window.open(theme.value.githubUrl, '_blank', 'noopener'),
+  },
+  {
+    id: 'llms',
+    text: 'Open llms.txt',
+    run: () => window.open(withBase('/llms.txt'), '_blank', 'noopener'),
+  },
+]
+const footerHints = [
+  { combo: 'ArrowDown', altCombos: ['ArrowUp'], label: 'to navigate' },
+  { combo: 'Enter', label: 'to select' },
+  { combo: 'Mod+Enter', label: 'new tab' },
+  { combo: 'Escape', label: 'to close' },
+]
+
+const matchedActions = computed(() => {
+  const query = filterText.value.trim()
+  if (!query) return actions
+  return fuzzysort
+    .go(query, actions, { key: 'text', threshold: 0.3 })
+    .map((m) => m.obj)
+})
+function runAction(action: (typeof actions)[number]) {
+  open.value = false
+  action.run()
+}
 
 const groupedResults = computed(() => {
   const query = filterText.value.trim()
@@ -56,14 +113,19 @@ const groupedResults = computed(() => {
     .map((name) => ({ text: name, items: bySection.get(name)! }))
 })
 
-const hasResults = computed(() =>
-  groupedResults.value.some((g) => g.items.length > 0),
+const hasResults = computed(
+  () =>
+    matchedActions.value.length > 0 ||
+    groupedResults.value.some((g) => g.items.length > 0),
 )
 
 const highlightedLink = ref<string | null>(null)
+// Actions share the list with links, as `action:<id>` values. Only links can
+// open in a new tab.
 const onHighlight = (payload: { value: unknown } | undefined) => {
+  const value = payload?.value
   highlightedLink.value =
-    typeof payload?.value === 'string' ? payload.value : null
+    typeof value === 'string' && !value.startsWith('action:') ? value : null
 }
 
 const navigateTo = (item: SidebarItem) => {
@@ -122,6 +184,35 @@ const onFilterKeydown = (e: KeyboardEvent) => {
           class="max-h-96 overflow-auto border-t border-outline-gray-1 dark:border-outline-gray-2"
         >
           <ListboxGroup
+            v-if="matchedActions.length"
+            class="mb-2 mt-4.5 first:mt-3"
+          >
+            <ListboxGroupLabel
+              class="mb-2.5 block px-4.5 text-base text-ink-gray-5"
+            >
+              Actions
+            </ListboxGroupLabel>
+            <div
+              v-for="action in matchedActions"
+              :key="action.id"
+              class="px-2.5"
+            >
+              <ListboxItem
+                :value="`action:${action.id}`"
+                class="flex w-full min-w-0 cursor-pointer items-center gap-2.5 rounded-4 px-2 py-2 text-base font-medium text-ink-gray-7 outline-none data-[highlighted]:bg-surface-gray-3"
+                @select.prevent="runAction(action)"
+              >
+                {{ action.text }}
+                <code
+                  v-if="action.hint"
+                  class="ml-auto rounded-1 bg-surface-gray-2 px-1.5 text-sm font-normal text-ink-gray-5"
+                  >{{ action.hint }}</code
+                >
+              </ListboxItem>
+            </div>
+          </ListboxGroup>
+
+          <ListboxGroup
             v-for="group in groupedResults"
             :key="group.text"
             class="mb-2 mt-4.5 first:mt-3"
@@ -158,56 +249,25 @@ const onFilterKeydown = (e: KeyboardEvent) => {
 
         <!-- footer -->
         <div
-          class="mt-2 flex items-center justify-between border-t border-outline-gray-1 px-2.5 py-2 text-xs text-ink-gray-6 dark:border-outline-gray-2"
+          class="mt-2 flex items-center justify-between border-t border-outline-gray-1 px-2.5 py-2 text-xs text-ink-gray-5 dark:border-outline-gray-2"
         >
-          <div class="flex items-center gap-4">
-            <div class="flex items-center gap-1">
-              <kbd
-                class="inline-flex items-center gap-0.5 whitespace-nowrap rounded-1 bg-surface-gray-2 p-0.5 font-[inherit] text-[11px] font-medium leading-normal tracking-[0.02em] text-ink-gray-5"
-              >
-                <span class="lucide-arrow-down size-4" />
-              </kbd>
-              <kbd
-                class="inline-flex items-center gap-0.5 whitespace-nowrap rounded-1 bg-surface-gray-2 p-0.5 font-[inherit] text-[11px] font-medium leading-normal tracking-[0.02em] text-ink-gray-5"
-              >
-                <span class="lucide-arrow-up size-4" />
-              </kbd>
-              <span class="ml-1">to navigate</span>
-            </div>
-            <div class="flex items-center gap-1">
-              <kbd
-                class="inline-flex items-center gap-0.5 whitespace-nowrap rounded-1 bg-surface-gray-2 p-0.5 font-[inherit] text-[11px] font-medium leading-normal tracking-[0.02em] text-ink-gray-5"
-              >
-                <span class="lucide-corner-down-left size-4" />
-              </kbd>
-              <span class="ml-1">to select</span>
-            </div>
-            <div class="flex items-center gap-1">
-              <kbd
-                class="inline-flex items-center gap-0.5 whitespace-nowrap rounded-1 bg-surface-gray-2 p-0.5 font-[inherit] text-[11px] font-medium leading-normal tracking-[0.02em] text-ink-gray-5"
-              >
-                <span class="lucide-command w-3 h-3" />
-                <span class="lucide-corner-down-left size-4" />
-              </kbd>
-              <span class="ml-1">new tab</span>
-            </div>
-            <div class="flex items-center gap-1">
-              <kbd
-                class="inline-flex items-center gap-0.5 whitespace-nowrap rounded-1 bg-surface-gray-2 p-0.5 px-1 font-[inherit] font-medium leading-normal tracking-[0.02em] text-sm text-ink-gray-5"
-              >
-                esc
-              </kbd>
-              <span class="ml-1">to close</span>
+          <div class="flex items-center gap-3">
+            <div
+              v-for="hint in footerHints"
+              :key="hint.label"
+              class="flex items-center gap-1.5"
+            >
+              <KeyboardShortcut
+                :combo="hint.combo"
+                :alt-combos="hint.altCombos"
+                bg
+              />
+              <span class="whitespace-nowrap">{{ hint.label }}</span>
             </div>
           </div>
-          <div class="flex items-center gap-1">
-            <kbd
-              class="inline-flex items-center gap-0.5 whitespace-nowrap rounded-1 bg-surface-gray-2 p-0.5 font-[inherit] text-[11px] font-medium leading-normal tracking-[0.02em] text-ink-gray-5"
-            >
-              <span class="lucide-command w-3 h-3" />
-              <span class="text-sm">K</span>
-            </kbd>
-            <span class="ml-1">to open</span>
+          <div class="flex items-center gap-1.5">
+            <KeyboardShortcut combo="Mod+K" bg />
+            <span class="whitespace-nowrap">to open</span>
           </div>
         </div>
       </ListboxRoot>

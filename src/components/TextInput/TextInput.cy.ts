@@ -15,11 +15,14 @@ const inputTypes = [
 ]
 
 const sizeCLass = {
+  xs: 'text-xs rounded-3 h-6',
   sm: 'text-base rounded-4 h-7',
   md: 'text-base rounded-4 h-8',
   lg: 'text-lg rounded-5 h-10',
-  xl: 'text-2xl rounded-5 h-10',
 }
+
+/** The accepted single-line control heights, in px. */
+const sizeHeights = { xs: 24, sm: 28, md: 32, lg: 40 } as const
 
 const variantClasses = {
   subtle: ['bg-surface-gray-2'],
@@ -156,15 +159,15 @@ describe('Textinput', () => {
       })
       cy.contains('label', 'Email').should('exist')
       cy.contains('label', 'Email')
-        .should('have.class', 'text-base')
-        .and('have.class', 'text-ink-gray-5')
+        .should('have.class', 'text-sm')
+        .and('have.class', 'text-ink-gray-6')
       cy.get('input').then(($input) => {
         const id = $input.attr('id')!
         const describedBy = $input.attr('aria-describedby')!
         expect(describedBy).to.equal(`${id}-description`)
         cy.get(`#${id}-description`)
           .should('contain.text', 'We never share')
-          .and('have.class', 'text-ink-gray-5')
+          .and('have.class', 'text-ink-gray-6')
         cy.get(`label[for="${id}"]`).should('exist')
       })
     })
@@ -184,6 +187,40 @@ describe('Textinput', () => {
           expect($input.attr('aria-errormessage')).to.equal(`${id}-error`)
           cy.get(`#${id}-error`).should('contain.text', 'Required')
           cy.get(`#${id}-description`).should('not.exist')
+        })
+    })
+
+    it('renders an array of errors as stacked lines', () => {
+      cy.mount(TextInput, {
+        props: {
+          label: 'Email',
+          description: 'helper',
+          error: ['Email is required', 'Password too short'],
+        },
+      })
+      cy.get('input')
+        .should('have.attr', 'aria-invalid', 'true')
+        .and('have.attr', 'data-state', 'invalid')
+        .then(($input) => {
+          const id = $input.attr('id')!
+          cy.get(`#${id}-error`)
+            .should('contain.text', 'Email is required')
+            .and('contain.text', 'Password too short')
+          cy.get(`#${id}-description`).should('not.exist')
+        })
+    })
+
+    it('treats an empty array as no error', () => {
+      cy.mount(TextInput, {
+        props: { label: 'Email', description: 'helper', error: [] },
+      })
+      cy.get('input').should('not.have.attr', 'aria-invalid')
+      cy.get('input')
+        .should('have.attr', 'data-state', 'valid')
+        .then(($input) => {
+          const id = $input.attr('id')!
+          cy.get(`#${id}-error`).should('not.exist')
+          cy.get(`#${id}-description`).should('contain.text', 'helper')
         })
     })
 
@@ -257,5 +294,158 @@ describe('Textinput', () => {
     })
     cy.get('[data-cy="prefix"]').should('exist').and('have.text', '$')
     cy.get('[data-cy="suffix"]').should('exist').and('have.text', '.00')
+  })
+
+  it('reserves room for #prefix and #suffix', () => {
+    cy.mount(TextInput, {
+      slots: { prefix: '<span>$</span>', suffix: '<span>.00</span>' },
+    })
+    cy.get('input').should('have.class', 'ps-8').and('have.class', 'pe-8')
+
+    cy.mount(TextInput)
+    cy.get('input').should('have.class', 'ps-2').and('have.class', 'pe-2')
+  })
+
+  // The docs playground toggles both slots at runtime. The padding is read
+  // from `useSlots()`, which is not reactive, so a cached value used to leave
+  // the input at `ps-2` and the prefix painted over the text.
+  it('repads when a slot appears or disappears after mount', () => {
+    const Harness = defineComponent({
+      setup() {
+        const show = ref(false)
+
+        return () =>
+          h('div', [
+            h(
+              'button',
+              {
+                'data-cy': 'toggle',
+                onClick: () => (show.value = !show.value),
+              },
+              'Toggle',
+            ),
+            h(
+              TextInput,
+              null,
+              show.value
+                ? {
+                    prefix: () => h('span', '$'),
+                    suffix: () => h('span', '.00'),
+                  }
+                : {},
+            ),
+          ])
+      },
+    })
+
+    cy.mount(Harness)
+    cy.get('input').should('have.class', 'ps-2').and('have.class', 'pe-2')
+
+    cy.get('[data-cy="toggle"]').click()
+    cy.get('input').should('have.class', 'ps-8').and('have.class', 'pe-8')
+
+    cy.get('[data-cy="toggle"]').click()
+    cy.get('input').should('have.class', 'ps-2').and('have.class', 'pe-2')
+  })
+  describe('computed geometry', () => {
+    // Class strings can stay right while the rendered box drifts — a stale
+    // `h-*` scale, a padding change that overflows a fixed height, a prefix
+    // that stretches the row. These assert the box, not the classes.
+    for (const [size, height] of Object.entries(sizeHeights)) {
+      it(`size="${size}" renders a ${height}px control`, () => {
+        cy.mount(TextInput, { props: { size, placeholder: 'Enter input' } })
+        cy.get('input').should('have.css', 'height', `${height}px`)
+      })
+
+      it(`size="${size}" holds ${height}px with a prefix and a suffix`, () => {
+        cy.mount(TextInput, {
+          props: { size, placeholder: 'Enter input' },
+          slots: {
+            prefix: '<span data-cy="prefix" class="lucide-search size-4" />',
+            suffix: '<span data-cy="suffix" class="lucide-x size-4" />',
+          },
+        })
+        cy.get('input').should('have.css', 'height', `${height}px`)
+        // The prefix/suffix rows are absolutely positioned inside the same
+        // relative row, so the row must not grow past the control either.
+        cy.get('input')
+          .parent()
+          .should(($row) => {
+            expect($row[0].getBoundingClientRect().height).to.equal(height)
+          })
+      })
+
+      it(`size="${size}" keeps its label and description at 13px`, () => {
+        cy.mount(TextInput, {
+          props: { size, label: 'Email', description: 'We never share it.' },
+        })
+        cy.get('label').should('have.css', 'font-size', '13px')
+        cy.get('[data-slot="description"]').should(
+          'have.css',
+          'font-size',
+          '13px',
+        )
+      })
+    }
+
+    it('falls back to sm geometry for a size outside the union', () => {
+      // JS call sites and bound values (`:size="config.size"`) are invisible
+      // to TypeScript. Before `resolvePropValue` a stale `xl` indexed to
+      // `undefined` and the input shipped with no height, font, radius or
+      // padding class at all.
+      cy.mount(TextInput, {
+        props: { size: 'xl' as never, placeholder: 'Enter input' },
+      })
+      cy.get('input')
+        .should('have.class', 'h-7')
+        .and('have.class', 'text-base')
+        .and('have.class', 'rounded-4')
+        .and('have.css', 'height', '28px')
+    })
+  })
+
+  describe('labeling typography', () => {
+    it('renders the label at 13px in ink-gray-6', () => {
+      cy.mount(TextInput, { props: { label: 'Email' } })
+      cy.get('label')
+        .should('have.class', 'text-sm')
+        .and('have.class', 'text-ink-gray-6')
+        .and('have.css', 'font-size', '13px')
+    })
+
+    it('renders the description at 13px in ink-gray-6', () => {
+      cy.mount(TextInput, {
+        props: { label: 'Email', description: 'We never share it.' },
+      })
+      cy.get('[data-slot="description"]')
+        .should('have.class', 'text-ink-gray-6')
+        .and('have.css', 'font-size', '13px')
+    })
+
+    it('dims the label and description when disabled', () => {
+      cy.mount(TextInput, {
+        props: {
+          label: 'Email',
+          description: 'We never share it.',
+          disabled: true,
+        },
+      })
+      cy.get('input').should('have.attr', 'data-disabled', 'true')
+      cy.get('input').should('be.disabled')
+      // The disabled label and description still read at 13px — only the
+      // colour changes.
+      cy.get('label').should('have.css', 'font-size', '13px')
+      cy.get('[data-slot="description"]').should('have.css', 'font-size', '13px')
+    })
+
+    it('keeps the required indicator on the 13px label', () => {
+      cy.mount(TextInput, { props: { label: 'Name', required: true } })
+      cy.contains('label', 'Name')
+        .should('have.css', 'font-size', '13px')
+        .within(() => {
+          cy.get('span[aria-hidden="true"]').should('contain.text', '*')
+          cy.get('span.sr-only').should('contain.text', '(required)')
+        })
+    })
   })
 })

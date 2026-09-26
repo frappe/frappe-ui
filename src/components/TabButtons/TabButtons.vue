@@ -26,7 +26,9 @@ import type { BrowserTabBase } from '../shared/tabs/pillTypes'
 import type {
   TabButton,
   TabButtonsEmits,
+  TabButtonsExposed,
   TabButtonsProps,
+  TabButtonsSlots,
   TabButtonValue,
 } from './types'
 
@@ -39,11 +41,13 @@ const props = withDefaults(defineProps<TabButtonsProps>(), {
   variant: 'subtle',
   size: 'sm',
   vertical: false,
-  side: 'left',
+  edge: 'start',
   fluid: false,
 })
 
 const emit = defineEmits<TabButtonsEmits>()
+
+defineSlots<TabButtonsSlots>()
 
 const options = computed(() => props.options ?? [])
 
@@ -56,16 +60,15 @@ watchEffect(() => {
 
 const resolvedButtons = computed(() => {
   return options.value.map((button) => {
-    const { value, label, icon, tooltip } = button
+    const { value, label, icon } = button
 
     const isIconOnly = Boolean(icon)
     const visibleLabel = hasLabel(label) && !isIconOnly
-    const accessibleLabel = hasLabel(label) ? String(label) : tooltip
+    const accessibleLabel = hasLabel(label) ? label : undefined
 
     return {
       ...button,
       value,
-      customClass: button.class,
       visibleLabel,
       accessibleLabel,
     }
@@ -109,7 +112,7 @@ const rootClasses = computed(() => [
     variant: props.variant,
     size: props.size,
     orientation: props.vertical ? 'vertical' : 'horizontal',
-    side: props.side,
+    edge: props.edge,
   }),
 ])
 
@@ -145,15 +148,19 @@ const indicatorRect = ref<{
 // slides in on mount.
 const indicatorAnimated = ref(false)
 
+// The rendered tab itself — the `<button>`, `<a href>` or `<RouterLink>` that
+// takes focus and that the indicator measures. Not the track around it, and
+// not the `Pill` inside it.
+const TAB_BUTTON = '[data-slot="tab-button"]'
+const ACTIVE_TAB_BUTTON = `${TAB_BUTTON}[data-state="active"]`
+
 function measureIndicator() {
   const track = trackRef.value
   if (!track || !hasIndicator.value) {
     indicatorRect.value = null
     return
   }
-  const checked = track.querySelector<HTMLElement>(
-    '[data-slot="tab-button"][data-state="checked"]',
-  )
+  const checked = track.querySelector<HTMLElement>(ACTIVE_TAB_BUTTON)
   if (!checked) {
     indicatorRect.value = null
     return
@@ -238,7 +245,7 @@ watch(
 )
 
 const browserCardBase = computed<BrowserTabBase>(() =>
-  props.vertical ? props.side : 'default',
+  props.vertical ? props.edge : 'default',
 )
 
 // Layer that clips the pill indicator's shadow to the track's rounded box.
@@ -274,7 +281,7 @@ const indicatorStyle = computed(() => {
 function browserTabBase(checked: boolean): BrowserTabBase {
   if (props.variant !== 'browser-tab') return 'none'
   if (!props.vertical) return 'default'
-  return checked ? props.side : 'default'
+  return checked ? props.edge : 'default'
 }
 
 function hasLabel(label: TabButton['label']) {
@@ -304,6 +311,30 @@ function tabElementProps(button: (typeof resolvedButtons.value)[number]) {
   }
   return { type: 'button' as const, disabled: button.disabled }
 }
+
+// INP-Q5: the group is one tabstop, so focus goes to the selected option, or
+// to the first enabled one when nothing is selected — where a Tab press lands.
+// A disabled option is skipped whichever form it renders as: `tabElement`
+// gives a disabled `route`/`href` option a real disabled `<button>`, which
+// cannot take focus at all. With nothing left to focus the call does nothing.
+defineExpose<TabButtonsExposed>({
+  /**
+   * Moves focus to the selected tab, or to the first enabled tab when nothing
+   * is selected. That is the tab `Tab` reaches, since the group is one tab
+   * stop. Disabled tabs are skipped, so a group with no enabled tab does
+   * nothing.
+   */
+  focus: (options?: FocusOptions) => {
+    const track = trackRef.value
+    if (!track) return
+    const target =
+      track.querySelector<HTMLElement>(
+        `${ACTIVE_TAB_BUTTON}:not([data-disabled])`,
+      ) ??
+      track.querySelector<HTMLElement>(`${TAB_BUTTON}:not([data-disabled])`)
+    target?.focus(options)
+  },
+})
 </script>
 
 <template>
@@ -342,7 +373,8 @@ function tabElementProps(button: (typeof resolvedButtons.value)[number]) {
           :is="tabElement(button)"
           v-bind="tabElementProps(button)"
           data-slot="tab-button"
-          :data-state="checked ? 'checked' : 'unchecked'"
+          :data-value="button.value"
+          :data-state="checked ? 'active' : 'inactive'"
           :data-disabled="disabled ? '' : undefined"
           :aria-label="
             button.accessibleLabel && !button.visibleLabel
@@ -352,14 +384,13 @@ function tabElementProps(button: (typeof resolvedButtons.value)[number]) {
           :title="
             button.accessibleLabel && !button.visibleLabel
               ? button.accessibleLabel
-              : button.tooltip
+              : undefined
           "
           :class="[
             tabShellClasses,
             tabRadiusClasses(variant, size, browserTabBase(checked)),
             vertical && 'w-full',
             fluid && 'flex-1 min-w-0',
-            button.customClass,
           ]"
           @click="button.onClick?.($event)"
         >
@@ -381,7 +412,7 @@ function tabElementProps(button: (typeof resolvedButtons.value)[number]) {
               <slot
                 name="prefix"
                 :button="button"
-                :checked="checked"
+                :active="checked"
                 :disabled="disabled"
               />
             </template>
@@ -389,7 +420,7 @@ function tabElementProps(button: (typeof resolvedButtons.value)[number]) {
               <slot
                 name="suffix"
                 :button="button"
-                :checked="checked"
+                :active="checked"
                 :disabled="disabled"
               />
             </template>

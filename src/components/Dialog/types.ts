@@ -1,3 +1,4 @@
+import type { Component } from 'vue'
 import type { ButtonProps } from '../Button'
 import type { Action } from '../shared/action'
 
@@ -17,12 +18,6 @@ export type DialogSize =
 export type DialogTheme = 'amber' | 'blue' | 'red' | 'green'
 
 export type DialogPosition = 'center' | 'top'
-
-export type DialogIcon = {
-  name: string
-  /** Color tone. */
-  theme?: DialogTheme
-}
 
 export type DialogActionContext = {
   close: () => void
@@ -48,8 +43,17 @@ export interface DialogProps {
   /** Description text rendered below the title. */
   message?: string
 
-  /** Icon shown next to the title in the auto-header. */
-  icon?: string | DialogIcon
+  /**
+   * Icon shown next to the title in the auto-header. A `lucide-*` class name
+   * or a Vue component. Its badge takes its tone from `theme`.
+   */
+  icon?: string | Component
+
+  /**
+   * Tone of the header icon badge: `amber`, `blue`, `red` or `green`.
+   * Unset renders the neutral gray badge.
+   */
+  theme?: DialogTheme
 
   // Layout.
   /** Max-width size of the dialog. Default `'lg'`. */

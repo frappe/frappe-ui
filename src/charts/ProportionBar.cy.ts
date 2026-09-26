@@ -55,6 +55,18 @@ describe('ProportionBar', () => {
       .and('contain', 'Compute')
   })
 
+  it('colors the segments from the categorical ramp', () => {
+    mountBar()
+    const seen: string[] = []
+    segments().each(($el) => {
+      const color = $el.css('background-color')
+      expect(color).to.match(/^rgba?\(/)
+      expect(color).not.to.equal('rgba(0, 0, 0, 0)')
+      seen.push(color)
+    })
+    cy.then(() => expect(new Set(seen).size).to.equal(3))
+  })
+
   it('sizes each segment by its share of the total', () => {
     mountBar()
     widthOf('Compute').should('be.closeTo', 60, 0.01)

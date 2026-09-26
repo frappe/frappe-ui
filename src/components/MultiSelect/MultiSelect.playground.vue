@@ -14,22 +14,16 @@ const options = [
 ]
 
 const knobs: Knob[] = [
-  { name: 'label', type: 'text', default: 'Labels', width: '12rem' },
-  {
-    name: 'placeholder',
-    type: 'text',
-    default: 'Select labels',
-    width: '14rem',
-  },
+  { name: 'label', type: 'text', default: 'Labels' },
   {
     name: 'size',
     type: 'tabs',
     default: 'sm',
     options: [
+      { label: 'xs', value: 'xs' },
       { label: 'sm', value: 'sm' },
       { label: 'md', value: 'md' },
       { label: 'lg', value: 'lg' },
-      { label: 'xl', value: 'xl' },
     ],
   },
   {
@@ -49,7 +43,7 @@ const knobs: Knob[] = [
 function buildCode(v: Record<string, any>) {
   const attrs = []
   if (v.label) attrs.push(`label="${v.label}"`)
-  if (v.placeholder) attrs.push(`placeholder="${v.placeholder}"`)
+  attrs.push('placeholder="Select labels"')
   if (v.size !== 'sm') attrs.push(`size="${v.size}"`)
   if (v.variant !== 'subtle') attrs.push(`variant="${v.variant}"`)
   if (v.hideSearch) attrs.push('hide-search')
@@ -67,7 +61,7 @@ function buildCode(v: Record<string, any>) {
         <MultiSelect
           v-model="model"
           :label="values.label || undefined"
-          :placeholder="values.placeholder || undefined"
+          placeholder="Select labels"
           :size="values.size"
           :variant="values.variant"
           :hide-search="values.hideSearch"

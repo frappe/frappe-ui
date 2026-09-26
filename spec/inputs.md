@@ -35,6 +35,17 @@ treated as a warn-and-keep deprecation (see the superseded note below).
 > becomes `.inputElement` (typed, read-only) plus a `focus(options?)` method.
 > What shipped is in
 > [`migration.md`](../docs/content/docs/migration.md#inputs).
+>
+> **Superseded on deprecated aliases and the size scale.** ADR-0008 applies to
+> the whole input family, so `1.0.0` ships no `@deprecated` input members.
+> `Rating.rating_from`, `Rating.readonly`, `Switch.labelClasses`, the `Switch`
+> `change` emit, and `Checkbox.padding` are **removed**, not warned;
+> `Checkbox.padding` is replaced by `padded`. `size="xl"` is removed from the
+> text-input scale and `xs` is added. Everything below that promises a
+> `warnDeprecated` alias, a still-functional legacy prop, or "no breaking
+> changes" is history. What shipped is in
+> [`migration.md`](../docs/content/docs/migration.md#inputs) and
+> [`#input-sizes`](../docs/content/docs/migration.md#input-sizes).
 
 It is a sibling of [`selection.md`](./selection.md), which covers the pickers
 these controls sit next to.
@@ -46,7 +57,7 @@ This spec answers:
 - what the shared labeling, sizing, variant, and `v-model` contracts look like
   across every input
 - which existing per-component issues must be resolved before v1
-- which deprecations must be wired with dev warnings
+- which members are removed before the tag, and what replaces them
 
 Decisions involving real-world usage data are backed by a bench-wide usage
 audit of the input family.
@@ -57,26 +68,31 @@ audit of the input family.
   `error`, `required`
 - every input auto-generates an `id` and wires label-for, `aria-describedby`,
   and `aria-errormessage` automatically
-- text-style inputs and binary/numeric controls follow two separate size
-  scales by component class
+- text-style inputs, binary controls, and range controls follow three separate
+  size scales by component class
 - text inputs converge on a single `subtle | outline | ghost` variant set
 - every input uses `defineModel<T>()` for the primary value, with typed
   `*Emits` interfaces only for non-model events
 - `FeatherIcon` is removed from `Switch` and `Rating`; both use Lucide
-- `Rating.rating_from` is renamed to `max`, with a deprecated alias
-- `Input.vue` gains a dev-mode deprecation warning via a shared utility
-  (`Autocomplete` and the `FormControl type='autocomplete'` route did too, and
-  were then removed outright — see the note above)
+- `Rating.rating_from` becomes `max`; the old name is removed, not aliased
 - `FormControl` stays a type-routing component for v1 (185 router-style call
   sites, 0 wrapper-style)
-- `Switch.labelClasses` and `Checkbox.padding` are deprecated (warned, still
-  functional) in favor of `data-*` styling hooks; removal is post-v1
-- **v1 introduces no breaking changes.** Every API change is additive or
-  ships behind a `warnDeprecated` alias that keeps the old call site working
+- `Switch.labelClasses` is removed and `Checkbox.padding` becomes `padded`;
+  external styling goes through the `data-*` hooks
+- **v1 removes the deprecated members rather than shipping them.** ADR-0008
+  starts the freeze at `1.0.0`, so an alias kept for one minor would be frozen
+  for the whole major. Each removal is listed in `migration.md`.
+
+Historical: this document was first written when v1 was to introduce no
+breaking changes, with every removal behind a `warnDeprecated` alias. The
+bullets above record what shipped.
 
 ## Shared labeling contract
 
-Every input that has a labelable role accepts the same four props.
+Every input that has a labelable role accepts the same four props, plus `id`.
+`InputLabelingProps` and `InputLabelingSlots` in
+`src/composables/useInputLabeling.ts` are the declarations; the blocks below
+summarize them.
 
 ### Props
 
@@ -87,17 +103,23 @@ interface InputLabelingProps {
 
   /**
    * Helper text rendered below the input.
-   * Hidden when `error` is set.
+   * Hidden when `error` is set. A `#description` slot is not — it keeps
+   * rendering above the error. See "Description versus error" below.
    */
   description?: string
 
   /**
    * Error message rendered below the input.
    * Sets `aria-invalid="true"` and `data-state="invalid"` on the control.
-   * Accepts an `Error` object; `Error.messages` is rendered as stacked
-   * plain text, `Error.message` is the fallback.
+   * Accepts a string, an array of strings, or an `Error` object;
+   * `Error.messages` is rendered as stacked plain text, `Error.message` is
+   * the fallback.
+   *
+   * This is the same value `ErrorMessage.message` takes, so the two never
+   * disagree. A component that forwards the prop reads it from
+   * `InputLabelingProps['error']`.
    */
-  error?: string | Error
+  error?: ErrorMessageValue
 
   /**
    * Marks the field as required.
@@ -168,23 +190,60 @@ indicator inside their custom label content.
 ### `error` prop rules
 
 - `error: string` renders as a single line of text below the control.
+- `error: string[]` renders one line per entry. Empty entries are dropped.
 - `error: Error` renders `Error.messages` (joined with line breaks via
   `whitespace-pre-line`) when present, otherwise `Error.message`.
+- An empty string, an empty array, and an `Error` with neither `message` nor
+  `messages` all mean no error: no error region, and no `aria-invalid`.
+- One function, `errorLines` in `src/utils/errorLines.ts`, decides this for
+  both `ErrorMessage` and the input family.
 - The error region is rendered as plain text. **`v-html` is not used.**
 - `error` text uses `text-ink-red-5` (matches the required asterisk for
   visual consistency of "needs attention" affordances).
-- Setting `error` automatically suppresses the `description` region.
+- Setting `error` suppresses the `description` **prop**.
+
+### Description versus error
+
+The `description` prop and the `#description` slot behave differently once
+`error` is set.
+
+- The `description` prop is hidden. `showDescription` in `useInputLabeling` is
+  `description && !hasError`.
+- A `#description` slot keeps rendering. It stacks above the error region and
+  stays in `aria-describedby`. The slot is app-owned content the component
+  cannot summarize, so hiding it would silently drop it.
+- `aria-describedby` follows what renders, not what the props say: it lists the
+  description id when either the prop or the slot renders, then the error id
+  when there is an error.
+
+### Form typography
+
+Label and description type do not follow `size`.
+
+- Labels are a fixed 13px (`text-sm`), `ink-gray-6`, and `ink-gray-4` when
+  disabled.
+- Descriptions are a fixed 13px (`text-p-sm`), `ink-gray-6`, and `ink-gray-4`
+  when disabled.
+- `Textarea` text is a fixed 13px at every size. `Textarea` `size` still moves
+  padding, corner radius, and minimum height.
 
 ## Shared types
 
+`src/composables/inputTypes.ts` is the single declaration of the size and
+variant vocabulary. It exports `InputSize`, `ToggleSize`, `RangeSize`,
+`InputVariant`, and `InputExposed`. Do not restate the unions elsewhere.
+
 ```ts
-/** Size scale for text-style inputs. */
-export type InputSize = 'sm' | 'md' | 'lg' | 'xl'
+/** Text-style inputs. Fixed control heights: 24 / 28 / 32 / 40px. */
+export type InputSize = 'xs' | 'sm' | 'md' | 'lg'
 
-/** Size scale for binary and numeric range controls. */
-export type ToggleSize = 'sm' | 'md'
+/** Binary controls. */
+export type ToggleSize = 'xs' | 'sm' | 'md'
 
-/** Variant scale for text-style inputs that have a container surface. */
+/** Numeric range controls. */
+export type RangeSize = 'sm' | 'md'
+
+/** Text-style inputs that have a container surface. */
 export type InputVariant = 'subtle' | 'outline' | 'ghost'
 ```
 
@@ -198,12 +257,24 @@ Apply per component:
 | `Rating`       | `InputSize` | n/a                |
 | `Checkbox`     | `ToggleSize`| n/a                |
 | `Switch`       | `ToggleSize`| n/a                |
-| `Slider`       | `ToggleSize`| n/a                |
+| `Slider`       | `RangeSize` | n/a                |
 
-Rationale: `lg` and `xl` produce useful visual range for text inputs and
-trigger surfaces but produce oversized chunky controls for binary
-affordances and sliders. Size scales follow the control's visual nature,
-not API symmetry.
+Every component implements every value on its own scale, so the three unions
+carry no dead values.
+
+- `xl` was removed from `InputSize`. It drew `lg`'s 40px height with an 18px
+  font, so it was a font override wearing a size name. `xs` was added for the
+  24px row.
+- `RangeSize` is separate from `ToggleSize` because `Slider` has no `xs`
+  dimensions. Sharing the type would let `xs` type-check and then render `sm`.
+- On the `InputSize` components, an unsupported `size` falls back to the
+  component's own default through `resolvePropValue` and warns once in dev,
+  rather than dropping the geometry classes. `Checkbox`, `Switch`, and `Slider`
+  pick their classes inline, so an unsupported value lands on the smallest
+  branch without a warning.
+
+Size scales follow the control's visual nature, not API symmetry: the range a
+text field needs makes a binary affordance chunky.
 
 ## `v-model` pattern
 
@@ -272,10 +343,14 @@ the model itself is documented at the component file via the
   `modelValue` on the exported public prop type for consumer compatibility.
 - Apply shared labeling props (inline-row layout).
 - Switch to `defineModel`.
-- Deprecate the `padding` prop (warn via `warnDeprecated`); keep functional
-  through `v1.x`. Styling moves to `data-*` hooks (see "Styling hooks"
-  below). Audit found 0 real call sites, so the warning is essentially a
-  no-op in practice.
+- `size` is `ToggleSize`.
+- Remove the `padding` prop. `padded` replaces it: it wraps the control and
+  label in a clickable surface with hover, active, and focus states. Other
+  spacing overrides go through the `data-*` hooks (see "Styling hooks" below).
+  The audit found 0 real `padding` call sites, so nothing to migrate.
+
+Historical: this spec first planned to keep `padding` working through `v1.x`
+behind a `warnDeprecated` call. ADR-0008 replaced that with removal.
 
 ### Switch
 
@@ -285,36 +360,52 @@ the model itself is documented at the component file via the
   `lucide-` route through the shared Lucide Tailwind utility (matches the
   pattern recently adopted by `Button.icon`). Existing values continue to
   resolve.
-- Deprecate the `change` emit (warn via `warnDeprecated` when the parent
-  binds `@change`); keep firing through `v1.x`. It duplicates
-  `update:modelValue`; switches do not have a meaningful `input` vs
-  `change` distinction.
+- Remove the `change` emit. It duplicated `update:modelValue`; switches have no
+  meaningful `input` versus `change` distinction.
 - Apply shared labeling props (inline-row layout).
 - `Switch` already uses `defineModel<boolean>()` — no change to the model
   wiring beyond the refactor.
-- Deprecate the `labelClasses` prop (warn via `warnDeprecated` when set);
-  keep applied to the `<label>` through `v1.x`. Styling moves to `data-*`
-  hooks (see "Styling hooks" below). Audit found 0 real call sites on
-  frappe-ui's `Switch`, so the warning is essentially a no-op in practice.
+- `size` is `ToggleSize`.
+- Remove the `labelClasses` prop. Styling moves to the `data-*` hooks (see
+  "Styling hooks" below). The audit found 0 real call sites on frappe-ui's
+  `Switch`, so nothing to migrate.
+- Add `padded` and `controlPosition` (`'start' | 'end'`, default `'end'`).
+
+Historical: this spec first planned to keep the `change` emit and
+`labelClasses` working through `v1.x` behind `warnDeprecated` calls. ADR-0008
+replaced that with removal.
 
 ### Rating
 
-- Remove internal `FeatherIcon` import. Default icon becomes `lucide-star`
-  via the shared Lucide Tailwind utility. Star icon stays hardcoded for v1;
-  configurable shape is a post-v1 additive change if needed.
-- Rename `rating_from` to `max`. Default `5`. Keep `rating_from` working as
-  a deprecated alias through `v1.x` with a `warnDeprecated` call.
+- Remove internal `FeatherIcon` import.
+- The icon is configurable. `icon` takes a class-icon name
+  (`icon="lucide-heart"`), which renders as a `<span>` carrying that class, or
+  a Vue component, which receives `fill="currentColor"` so closed-path SVGs
+  render filled. The default is the inline `RatingStar` component, not
+  `lucide-star`: the Lucide class icon is a mask of the outline star, so it
+  cannot draw a solid one.
+- An `#icon` slot overrides the icon per star. It is stamped once per half so
+  half-step clipping still works, and receives `RatingIconSlotProps`:
+  `index`, `side`, `state`, `leftState`, `rightState`, `value`, `previewValue`,
+  and `max`.
+- Rename `rating_from` to `max`. Default `5`. `rating_from` is removed, not
+  aliased.
+- `size` is `InputSize`. `step` is `1` or `0.5`.
 - Type emits via a `RatingEmits` interface (replace the current
   `defineEmits(['update:modelValue'])` string-array form).
 - Apply shared labeling props.
 - Switch to `defineModel<number>()`.
 
+Historical: this spec first held the star shape fixed for v1 and planned a
+`rating_from` alias. Neither shipped.
+
 ### Slider
 
 - Add `disabled` prop, forwarded to `SliderRoot.disabled` and
   `aria-disabled`.
-- Add `size: ToggleSize` (`'sm' | 'md'`), default `'sm'`. `md` increases
-  track and thumb proportionally.
+- Add `size: RangeSize` (`'sm' | 'md'`), default `'sm'`. `md` increases
+  track and thumb proportionally. `RangeSize` is its own type rather than
+  `ToggleSize` because `Slider` has no `xs` dimensions.
 - **Bug fix:** remove the hardcoded `aria-label="Volume"`. The string was
   a leftover from a specific consumer and was incorrect for every other
   call site (assistive tech announces every Slider as "Volume"). Labeling
@@ -333,10 +424,9 @@ the model itself is documented at the component file via the
 
 - **`v-html` is preserved as-is for v1.** Removal is deferred — revisit
   post-v1 once consumers are tracked.
-- Type the message prop as `string | Error` cleanly; remove the
-  `(message as any).messages` cast by typing `Error.messages?: string[]`
-  via a small library-level interface. (Internal typing improvement, not a
-  runtime change.)
+- The message prop is typed as `ErrorMessageValue`: a string, an array of
+  strings, or an `Error` that may carry `messages`. The input `error` prop
+  takes the same value, and `errorLines` reads it for both.
 - Most consumers should migrate to the input-level `error` prop. Document
   `ErrorMessage` as the standalone option for contexts where an input is
   not present (e.g. form-level error banners).
@@ -350,25 +440,9 @@ component.
 
 ### `warnDeprecated` utility
 
-Add `src/utils/warnDeprecated.ts`:
-
-```ts
-const warned = new Set<string>()
-
-export function warnDeprecated(
-  name: string,
-  replacement: string,
-  docHref?: string,
-) {
-  if (import.meta.env.PROD) return
-  if (warned.has(name)) return
-  warned.add(name)
-  const suffix = docHref ? ` See ${docHref}` : ''
-  console.warn(
-    `[frappe-ui] ${name} is deprecated. Use ${replacement} instead.${suffix}`,
-  )
-}
-```
+Add `src/utils/warnDeprecated.ts`. It shipped with three exports — `warnOnce`,
+`warnDeprecated`, and `warnRemoved` — all built on one deduped dev-only
+`console.warn`. Read the module for the signatures.
 
 Rules:
 
@@ -379,36 +453,52 @@ Rules:
 - consolidates the existing one-off pattern used by
   `Divider.action.handler`
 
-### Wired warnings for v1
+### What shipped in 1.0.0
 
-| Component / API                     | Warning name                       | Replacement                  |
-| ----------------------------------- | ---------------------------------- | ---------------------------- |
-| ~~`Input.vue`~~                     | removed, no warning left           | `TextInput`                  |
-| ~~`Autocomplete`~~                  | removed, no warning left           | `Combobox` or `MultiSelect`  |
-| ~~`FormControl type='autocomplete'`~~ | removed; dev-only `console.error` | `type="combobox"`           |
-| ~~`Password.value` prop~~           | removed; silent — falls through as a DOM attribute | `v-model` / `modelValue` |
-| `Rating.rating_from` prop           | `Rating.rating_from`               | `max`                        |
-| `Switch.change` emit                | `Switch.change`                    | `update:modelValue` / `v-model` |
-| `Switch.labelClasses` prop          | `Switch.labelClasses`              | `data-*` styling hooks       |
-| `Checkbox.padding` prop             | `Checkbox.padding`                 | `data-*` styling hooks       |
-| `Divider.action.handler` (existing) | `Divider.action.handler`           | `Divider.action.onClick`     |
+No input member ships with a `warnDeprecated` alias. The table below is the
+planned wiring; the right-hand column records the outcome.
 
-`FeatherIcon` removal is tracked in the broader v1 plan and uses the same
-utility once finalized.
+| Component / API                     | Planned warning                    | Replacement                  | Outcome in 1.0.0 |
+| ----------------------------------- | ---------------------------------- | ---------------------------- | ---------------- |
+| `Input.vue`                         | `Input`                            | `TextInput`                  | Removed; the import fails |
+| `Autocomplete`                      | `Autocomplete`                     | `Combobox` or `MultiSelect`  | Removed          |
+| `FormControl type='autocomplete'`   | `FormControl.type`                 | `type="combobox"`            | Removed; dev-only `console.error` |
+| `Password.value` prop               | `Password.value`                   | `v-model` / `modelValue`     | Removed; silent — falls through as a DOM attribute |
+| `Rating.rating_from` prop           | `Rating.rating_from`               | `max`                        | Removed; silently ignored |
+| `Rating.readonly` prop              | —                                  | `disabled`                   | Removed; silently ignored |
+| `Switch.change` emit                | `Switch.change`                    | `update:modelValue` / `v-model` | Removed; the handler never fires |
+| `Switch.labelClasses` prop          | `Switch.labelClasses`              | `data-*` styling hooks       | Removed; styles nothing |
+| `Checkbox.padding` prop             | `Checkbox.padding`                 | `padded`                     | Removed; styles nothing |
+| `size="xl"` on any input            | —                                  | `size="lg"`                  | Removed; falls back to the component default and warns |
+| `Divider.action.handler` (existing) | `Divider.action.handler`           | `Divider.action.onClick`     | Removed; `Divider` reads `onClick` only |
+
+None of the removals break at build time, so the migration guide tells apps to
+grep for the old names.
+
+`src/utils/warnDeprecated.ts` shipped, but with `warnOnce` and `warnRemoved`
+next to `warnDeprecated`. `warnRemoved` is the one this family's removals would
+use; it says "X was removed. Use Y instead." No input component calls any of
+them, because a removed prop has nowhere left to call from. `Tree` and the
+editor extensions are the current callers.
+
+`FeatherIcon` removal is tracked in the broader v1 plan.
 
 ### Deprecation policy
 
-Per the v1 plan:
+Historical. This was the policy before ADR-0008:
 
 - deprecated APIs continue to work through `v1.x`
 - removal is a future-major concern
 - legacy and deprecated components move out of standard docs and onto the
   single legacy-docs page
-- ~~`FormControl type='autocomplete'` route warns but keeps rendering
-  `Autocomplete`~~ — reversed by
-  [#869](https://github.com/frappe/frappe-ui/issues/869): the route is removed
-  before the tag, because ADR-0008 forbids shipping `@deprecated` members in
-  `1.0.0` and the whole point of `1.0.0` is that the freeze starts there
+- the `FormControl type='autocomplete'` route warns but keeps rendering
+  `Autocomplete`
+
+ADR-0008 replaced every rule but the third for `1.0.0`: the API freeze starts
+at the tag, so a member kept for one minor would be frozen for the whole major.
+Deprecated input members are removed before the tag instead. The
+`type='autocomplete'` route went first, in
+[#869](https://github.com/frappe/frappe-ui/issues/869).
 
 ## Decisions backed by the usage audit
 
@@ -434,7 +524,7 @@ arrays of `{ label, value }` shape.
 - a router-vs-wrapper redesign is not pursued; the data shows no real-world
   consumer leans on a wrapper-style use that would block the router approach
 
-### 2. Class-injection props are deprecated, not removed in v1
+### 2. Class-injection props are removed in v1
 
 The audit found:
 
@@ -448,15 +538,19 @@ The audit found:
 
 **v1 decision:**
 
-- both props remain functional in v1, with a `warnDeprecated` warning when
-  set; removal is post-v1
-- inputs additionally expose a `data-*` vocabulary for external styling:
+- both props are removed. The zero-call-site count is what made removal safe,
+  and ADR-0008 made keeping them expensive: a member that ships in `1.0.0` is
+  frozen for the major.
+- inputs expose a `data-*` vocabulary for external styling instead:
   `data-slot`, `data-size`, `data-variant`, `data-state`, `data-disabled`,
   `data-required`
-- this matches the selection-spec (rule 4) precedent and keeps v1 strictly
-  non-breaking
+- `Checkbox.padded` covers what `padding` was reached for in practice — a
+  clickable surface around the control and label.
 
 Migration load: zero apps affected.
+
+Historical: the audit's own conclusion was to warn and keep both through
+`v1.x`. ADR-0008 superseded it.
 
 ## Implementation notes
 
@@ -473,10 +567,11 @@ test/story expectations that apply to every input in scope.
   shared `InputLabelingProps` and `InputLabelingSlots` interfaces from the
   same module.
 - `src/composables/inputTypes.ts` — exports `InputSize`, `ToggleSize`,
-  `InputVariant` (shared types live next to composables; no separate
-  `src/types/` directory).
-- `src/components/FormLabel.vue` — required-indicator markup is extracted
-  here so every input reuses the same DOM.
+  `RangeSize`, `InputVariant`, and `InputExposed` (shared types live next to
+  composables; no separate `src/types/` directory).
+- `src/components/InputLabeling/` — `InputLabel`, `InputDescription`,
+  `InputError`, `RequiredIndicator`, and `LabelingWrapper`, so every input
+  renders the same label, description, and error DOM.
 
 ### Repo conventions
 
@@ -497,14 +592,15 @@ Every change against this spec must pass:
 - `yarn typecheck` clean
 - `yarn test` (Cypress component tests) clean for touched components
 - Storybook stories render without console warnings or errors
-- No new `console.warn` from `warnDeprecated` in clean (non-deprecated) call
-  paths
+- No new dev `console.warn` on a clean call path — neither from
+  `warnDeprecated` nor from a `resolvePropValue` fallback
 - No regressions in `propsgen`-generated meta — diffs reviewed
 - `dist/` builds without new warnings (`yarn build`)
-- **No breaking changes.** Every existing call site continues to work with
-  no source edits required. New behaviors are additive; old behaviors that
-  are being phased out fire `warnDeprecated` and continue to function
-  through `v1.x`.
+- **Every break is listed in `migration.md`.** A removal that is not in the
+  migration guide is a bug in the change, not an accepted break.
+
+Historical: the last gate read "no breaking changes — every existing call site
+continues to work with no source edits required". ADR-0008 replaced it.
 
 ### Tests for every component
 
@@ -526,10 +622,11 @@ Each touched component must ship updated/new Cypress tests
   - `Password` — toggling visibility, no plaintext leak in DOM when hidden
   - `Switch` / `Checkbox` — clicking the label toggles the control
   - `Slider` — `value-commit` fires on drag end (not on every step)
-  - `Rating` — `max` controls star count; `rating_from` alias still works
-- **Deprecation warnings** — when a deprecated API is used, the test
-  asserts `console.warn` fires once with the expected message; when the
-  modern API is used, the test asserts no warning fires
+  - `Rating` — `max` controls star count; `icon` and `#icon` override the
+    star, and the slot runs for both halves under `step="0.5"`
+- **Removed members** — a removed prop or emit is inert: passing
+  `rating_from`, `labelClasses`, or `padding` changes nothing, and a `@change`
+  handler on `Switch` never fires
 
 Stories must cover the same surface visually so consumers can see the
 labeling contract in action.
@@ -552,16 +649,15 @@ component gets:
   `aria-*` wiring (verify in browser devtools)
 - **Disabled** — disabled state rendered alongside enabled for visual
   contrast
-- **Deprecated API** — one story per deprecated prop/emit on the component
-  that explicitly uses the old API, so the reviewer can confirm the
-  `console.warn` fires once and the component still works (e.g. a
-  `Switch` story binding `@change`, a `Rating` story passing
-  `:rating_from="10"`)
 - **Component-specific scenarios** — anything worth eyeballing:
   - `Password` — visibility toggle in action
   - `Slider` — drag interaction, watch `value-commit` in the actions panel
-  - `Rating` — different `max` values, hover state
+  - `Rating` — different `max` values, hover state, a custom `icon`
   - `Switch` / `Checkbox` — clicking the label vs the control
+
+No story demonstrates a removed member. The earlier plan asked for one story
+per deprecated prop so a reviewer could watch the warning fire; nothing is
+left to fire.
 
 Stories should be runnable with `yarn dev` against the local frappe-ui
 copy, so the reviewer can manually exercise every code path the spec
@@ -574,32 +670,20 @@ stories out of inertia. If a current story:
   `<label>` next to the control,
 - duplicates what the new "All sizes" / "All variants" / "Labeling
   contract" stories cover,
-- demos a deprecated API as the primary example (e.g. `Rating` showing
+- demos a removed API as the primary example (e.g. `Rating` showing
   `rating_from`, `Switch` showing `@change`), or
 - exists only to demo a removed structural detail,
 
 replace it with the v1 equivalent rather than keeping both. Keep an old
 story only when it covers a real scenario the new stories don't (e.g. an
 integration with another component, a non-obvious prop combination).
-Deprecated APIs still need their own dedicated story per the list above —
-that's separate from rewriting the *primary* examples to use the new
-contract.
 
 ### Deprecation wiring
 
-`warnDeprecated(...)` is wired in the following files (matching the
-Deprecations table):
-
-- ~~`src/components/Input.vue` — warn on mount: `Input` → `TextInput`~~ —
-  reversed like `Autocomplete`: `Input.vue` is deleted outright, no warning
-  wired
-- ~~`src/components/Password/Password.vue` — `value` prop~~ — reversed: the
-  prop is deleted outright, no warning wired
-- `src/components/Rating/Rating.vue` — `rating_from` prop
-- `src/components/Switch/Switch.vue` — `change` emit, `labelClasses` prop
-- `src/components/Checkbox/Checkbox.vue` — `padding` prop
-- `src/components/Divider/Divider.vue` — `Divider.action.handler` (replaces
-  the prior ad-hoc deprecation log)
+Historical. This section planned a `warnDeprecated(...)` call in `Input.vue`,
+`Password.vue`, `Rating.vue`, `Switch.vue`, `Checkbox.vue`, and `Divider.vue`.
+Every one of those members was removed instead, so no input component wires a
+warning. See "What shipped in 1.0.0" above.
 
 `Input` is removed rather than moved to the legacy-components docs page; the
 v1 migration guide points at the new API. `Autocomplete` and
@@ -614,37 +698,60 @@ Every input shell renders the canonical `data-*` vocabulary:
 - `data-size` — current `size` value
 - `data-variant` — current `variant` value (where applicable)
 - `data-state` — `"valid" | "invalid" | "checked" | "unchecked" | …`
-- `data-disabled` — `"true"` when disabled, absent otherwise
-- `data-required` — `"true"` when required, absent otherwise
+- `data-disabled` — present when disabled, absent otherwise
+- `data-required` — present when required, absent otherwise
+
+Select the two booleans by presence (`[data-disabled]`). Their value is not
+part of the contract (P10).
 
 The `useInputLabeling` composable returns a `dataAttrs` object that
 components spread onto their root element so the vocabulary stays
 consistent.
 
-`Switch.labelClasses` and `Checkbox.padding` continue to work alongside
-the `data-*` hooks. They are deprecated, not removed in v1.
+**`control` versus `trigger` (INP-Q10).** Every input marks its main
+interactive element `data-slot="control"`. `trigger` is reserved for the
+selection family — `Select`, `Combobox` and `MultiSelect` — whose box shows the
+selection and opens the popover. The date and time pickers use `control`: their
+`<input>` is something you type into, so it is a control that also opens a
+panel. Both names would otherwise mean "the thing you click", and an app
+styling `[data-slot="control"]` would miss half the inputs.
+
+The pickers add two more hooks on top:
+
+- `data-slot="chevron"` on the trailing chevron, so an app can restyle or hide
+  it without replacing the `#suffix` slot.
+- `role="combobox"`, `aria-haspopup` and `aria-expanded` on the picker
+  `<input>`, so a screen reader announces that the field opens a panel and
+  whether that panel is open. `aria-haspopup` is `dialog` on the date pickers
+  and `listbox` on `TimePicker`, matching what each one opens.
+
+`FormLabel` carries `data-slot="label"`, the same marker `InputLabel` already
+rendered, so one selector reaches every label in the library.
+
+The `data-*` hooks are the whole external styling surface.
+`Switch.labelClasses` and `Checkbox.padding` are gone.
 
 ### Out of scope (do not silently expand)
 
 - `FileUploader` (covered in a separate spec)
-- removing `Switch.labelClasses`, `Checkbox.padding`, `Switch.change` emit,
-  or any other deprecated API in v1 (warn only — removal is post-v1)
 - narrowing `Checkbox.modelValue` to `boolean` (breaking; deferred to a
   future major)
 - adding an `#error` slot on inputs (the spec rejects this)
 - removing `v-html` from `ErrorMessage` (deferred — preserved as-is for v1)
-- new size or variant tokens beyond `InputSize` / `ToggleSize` /
+- new size or variant tokens beyond `InputSize` / `ToggleSize` / `RangeSize` /
   `InputVariant`
-- any change that requires consumer source edits to keep working
 
 ## v1 release contract for this spec
 
-- **strictly no breaking changes** — every existing call site keeps working
-  with no source edits required
+- **every break is listed in `migration.md`** — `rating_from`, `readonly`,
+  `Switch.change`, `labelClasses`, `padding`, `Password.value`, `size="xl"`,
+  and `Input.vue` are removed, not aliased
 - new shared labeling contract is additive on every input in scope
-- size and variant scales are codified into shared types
-- deprecated APIs continue to function with dev-mode warnings; removal is
-  post-v1
+- size and variant scales are codified into `src/composables/inputTypes.ts` and
+  restated nowhere
 - a more consistent mental model across `TextInput`, `Textarea`, `Password`,
   `Checkbox`, `Switch`, `Rating`, and `Slider`
 - `FileUploader` is out of scope and addressed in a separate spec
+
+Historical: this contract read "strictly no breaking changes — every existing
+call site keeps working with no source edits required" until ADR-0008.

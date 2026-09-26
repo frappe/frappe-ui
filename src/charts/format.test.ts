@@ -133,6 +133,9 @@ describe('formatValue', () => {
     expect(formatValue(NaN)).toBe('')
     expect(formatValue(null as unknown as number)).toBe('')
   })
+
+  // This file runs with no DOM, which is also the SSR case: `documentLocale`
+  // answers `en-US` there. What the page's own `lang` does is in utils.test.ts.
 })
 
 describe('formatDate', () => {

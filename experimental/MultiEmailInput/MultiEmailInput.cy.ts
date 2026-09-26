@@ -17,6 +17,7 @@ function host(
     required?: boolean
     error?: string
     disabled?: boolean
+    size?: 'xs' | 'sm' | 'md' | 'lg'
   } = {},
 ) {
   return defineComponent({
@@ -46,6 +47,7 @@ function host(
           required: options.required,
           error: options.error,
           disabled: options.disabled,
+          size: options.size,
           placeholder: 'Add email…',
         }),
       ]
@@ -152,4 +154,29 @@ describe('MultiEmailInput', () => {
     cy.mount(host({ disabled: true }))
     cy.get('[data-slot="input"]').should('have.attr', 'disabled')
   })
+
+  // The option-row avatar has to shrink with the row. `md` (24px) is the whole
+  // height of an `xs` row before its padding, so a size-invariant avatar makes
+  // the smallest control draw the biggest picture.
+  const rowAvatarHeights: Array<[size: 'xs' | 'sm' | 'md' | 'lg', px: number]> =
+    [
+      ['xs', 16],
+      ['sm', 20],
+      ['md', 24],
+      ['lg', 24],
+    ]
+
+  for (const [size, px] of rowAvatarHeights) {
+    it(`draws a ${px}px option-row avatar at size="${size}"`, () => {
+      cy.mount(host({ size }))
+      cy.get('[data-slot="input"]').click()
+      cy.get('[data-slot="item"]')
+        .first()
+        .find('[data-slot="item-prefix"] > div')
+        .first()
+        .then(($avatar) => {
+          expect($avatar[0].getBoundingClientRect().height).to.equal(px)
+        })
+    })
+  }
 })

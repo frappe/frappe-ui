@@ -1,97 +1,103 @@
 # TabButtons
 
-A segmented control with radiogroup semantics. It picks a value for a filter, a
-setting, or a form field.
-
-Use [Tabs](./tabs) when the UI switches visible panels or routes. The two share
-variants, sizes, and the item vocabulary, and are pixel-identical at the same
-`variant` and `size`. The choice is semantic, not visual.
-
-## Playground
+A row of buttons that picks one value, such as a filter, a setting or a form
+field. To switch between panels or pages, use [Tabs](./tabs) instead.
 
 <ComponentPlayground name="TabButtons" />
 
-## Variants
+## Examples
 
-<ComponentPreview name="TabButtons-Variants" />
+### Settings rows
 
-## Sizes
-
-<ComponentPreview name="TabButtons-Sizes" />
-
-## Filter
-
-The plain `subtle` control: a content filter above a list.
-
-<ComponentPreview name="TabButtons-Filter" />
-
-## Settings rows
-
-Value pickers on the trailing side of settings rows.
+A value picker at the end of each settings row.
 
 <ComponentPreview name="TabButtons-SettingsRows" />
 
-## Toolbar
+### Calendar toolbar
 
-The `sm` size lines up with toolbar buttons and selects.
+The default `sm` size has the same height as the toolbar buttons around it.
 
 <ComponentPreview name="TabButtons-Toolbar" />
 
-## View toggle
+### List or calendar view
 
-Icon-only options take `icon`; the `label` becomes the accessible name.
+Options with `icon` show only the icon. The `label` becomes the name screen
+readers announce.
 
 <ComponentPreview name="TabButtons-ViewToggle" />
 
-## Fluid
+### Report period
 
-With `fluid`, the buttons stretch to equal widths and fill the container.
+With `fluid`, the buttons share the container width equally.
 
 <ComponentPreview name="TabButtons-Fluid" />
 
-## Inspector rows
+### Property panel
 
-Fixed-width `fluid` controls in a property panel. Options mix icon-only and text
-items.
+Fixed-width `fluid` controls in a property panel. The options mix icon-only and
+text items.
 
 <ComponentPreview name="TabButtons-InspectorRows" />
 
-## Vertical
+### Notification filter with counts
 
-<ComponentPreview name="TabButtons-Vertical" />
+The `#prefix` slot puts an icon before each label, and the `#suffix` slot shows
+a count after it. Both receive `{ button, active, disabled }`.
 
-## Prefix and suffix
+<ComponentPreview name="TabButtons-InboxCounts" />
 
-<ComponentPreview name="TabButtons-PrefixSuffix" />
+## Behavior
+
+### TabButtons or Tabs
+
+TabButtons and Tabs share the same variants, sizes and option fields, and look
+the same at the same `variant` and `size`. The difference is meaning:
+TabButtons is a radio group that picks a value, and Tabs switches the content
+shown below it.
+
+### Options
+
+Each option needs a `value` and a `label`.
+
+- `icon` makes an icon-only tab. The `label` becomes its `aria-label` and
+  `title`.
+- `iconLeft` shows an icon before the visible label.
+- `route` renders the tab as a router link. `href` renders it as an `<a>` that
+  opens in a new tab.
+- `disabled` makes the tab a disabled `<button>`, even when it has a `route` or
+  `href`.
+- `onClick` runs when the tab is clicked.
+
+### Without v-model
+
+Without a `v-model`, TabButtons keeps the selected value itself and still
+emits `update:modelValue`.
+
+### Vertical
+
+`vertical` stacks the buttons in a column. With `variant="browser-tab"`,
+`edge="start"` or `edge="end"` sets the edge of the list the selected tab
+attaches to. `start` is the left edge in left-to-right text.
+
+### Attributes
+
+Attributes and classes on `TabButtons` go to the root element. Each tab has a
+`data-value` attribute set to its option's `value`, so CSS can target one tab.
+Options have no `class` field.
+
+## Accessibility
+
+TabButtons is a `radiogroup`, and each tab is a radio. The group is a single
+tab stop: `Tab` moves focus to the selected option, or to the first enabled
+option when nothing is selected.
+
+| Keys                                     | Action                                    |
+| ---------------------------------------- | ----------------------------------------- |
+| `Tab`                                    | Move focus into the group, then out of it |
+| `ArrowRight` (`ArrowDown` when vertical) | Select the next option                    |
+| `ArrowLeft` (`ArrowUp` when vertical)    | Select the previous option                |
+| `Space`                                  | Select the focused option                 |
+
+The arrow keys skip disabled options.
 
 <!-- @include: ./TabButtons.api.md -->
-
-## Migration from v0
-
-See the [migration guide](../migration#tabbuttons) for the full list.
-
-- `type` is renamed to `variant`, matching `TabList`.
-- The deprecated `buttons` prop is removed — use `options`.
-- `value` is required on every option, and boolean values are no longer
-  accepted. The label-as-value fallback and the `active: true` fallback are
-  removed; the model is the single source of truth.
-- `fluid` is new — buttons stretch to fill the container width. It replaces
-  raw-CSS and wrapper-div workarounds.
-
-TabButtons no longer wraps `<Button>` internally — each tab is a native
-`<button>`, `<a href>`, or `<RouterLink>` rendering a `<Pill>` for its visual
-treatment. This breaks consumers that passed Button props through option
-entries:
-
-- `theme`, `variant`, `size`, `loading`, `prefix` on individual options are no
-  longer honored. Use `Button` or `Pill` directly if you need per-tab theming or
-  a loading spinner.
-- `hideLabel` on options is gone. Use `icon` for an icon-only tab — its `label`,
-  if provided, is automatically exposed as accessibility text. Use `iconLeft`
-  for an accent icon before a visible label, and the `#suffix` slot for
-  trailing content.
-- `route` and `href` on options are honored: a tab renders as a `<RouterLink>`
-  when `route` is set, or an `<a href target=_blank>` when `href` is set.
-- The per-tab `tooltip` value surfaces as the native `title` attribute rather
-  than the floating `<Tooltip>` popover. Wrap the `TabButtons` instance in a
-  custom tooltip if you need styled behavior.

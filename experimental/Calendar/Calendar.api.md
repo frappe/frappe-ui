@@ -3,6 +3,7 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
+  import ExposedTable from '@/components/Docs/ExposedTable.vue'
 
   const propsData = [
   {
@@ -11,6 +12,12 @@
     required: true,
     type: 'CalendarEvent[]',
     default: '[]'
+  },
+  {
+    name: 'loading',
+    description: 'Whether the events for the visible range are still on their way.\n\nOnly the Agenda reads it, and only to tell an empty list apart from one that\nhas not arrived: a grid with nothing in it still draws the days, where a list\nwith nothing in it is a blank panel, and saying "nothing on" of a range still\nbeing fetched is saying something that may not be true.',
+    required: false,
+    type: 'boolean'
   },
   {
     name: 'config',
@@ -23,7 +30,7 @@
     name: 'onClick',
     description: 'Replaces the default single-click behavior (opening the event\npopover) with your own handler.',
     required: false,
-    type: '((data: { e: MouseEvent; calendarEvent: CalendarEvent; }) => void)'
+    type: '((data: { e: MouseEvent | KeyboardEvent; calendarEvent: CalendarEvent; }) => void)'
   },
   {
     name: 'onDblClick',
@@ -48,12 +55,22 @@
   {
     name: 'event-popover-content',
     description: '',
-    type: '{ calendarEvent: { [x: string]: unknown; id?: string | number | undefined; name?: string | number | '
+    type: '{ calendarEvent: CalendarEvent; date: Date; isEditMode: boolean; close: () => void; }'
   },
   {
-    name: 'daily-header',
+    name: 'event-description',
     description: '',
-    type: '{ parseDateWithDay: any; currentDate: any; fullDay: any; }'
+    type: '{ calendarEvent: CalendarEvent; date: Date; description: string; timing: CalendarRowTag | null; }'
+  },
+  {
+    name: 'event-suffix',
+    description: '',
+    type: '{ calendarEvent: CalendarEvent; date: Date; description: string; timing: CalendarRowTag | null; }'
+  },
+  {
+    name: 'event-participant',
+    description: '',
+    type: '{ calendarEvent: CalendarEvent; date: Date; description: string; timing: CalendarRowTag | null; }'
   }
 ]
 
@@ -79,6 +96,74 @@
     type: '[payload: { view: CalendarMode; startDate: string; endDate: string; }]'
   }
 ]
+
+  const exposedData = [
+  {
+    name: 'reloadEvents',
+    description: 'Rebuilds the calendar\'s own copy of `events`. The calendar already does\nthis whenever `events` changes.',
+    type: '() => void'
+  },
+  {
+    name: 'currentMonthYear',
+    description: 'The title of the visible range, e.g. "August 2026".',
+    type: 'string'
+  },
+  {
+    name: 'currentYear',
+    description: 'The year of the visible month.',
+    type: 'number'
+  },
+  {
+    name: 'currentMonth',
+    description: 'The visible month, `0` for January.',
+    type: 'number'
+  },
+  {
+    name: 'currentDay',
+    description: 'The day of the month the view is anchored on.',
+    type: 'number | null'
+  },
+  {
+    name: 'enabledModes',
+    description: 'The views that `config` does not disable. Read once, when the calendar\nmounts.',
+    type: 'CalendarActionOption[]'
+  },
+  {
+    name: 'activeView',
+    description: 'The visible view.',
+    type: 'CalendarMode'
+  },
+  {
+    name: 'decrement',
+    description: 'Moves back one day, week or month, depending on the view.',
+    type: '() => void'
+  },
+  {
+    name: 'increment',
+    description: 'Moves forward one day, week or month, depending on the view.',
+    type: '() => void'
+  },
+  {
+    name: 'updateActiveView',
+    description: 'Switches to this view.',
+    type: '(value: CalendarMode, d?: Date, isPreviousMonth?: boolean, isNextMonth?: boolean) => void'
+  },
+  {
+    name: 'setCalendarDate',
+    description: 'Jumps to this date, or to today when no date is given.',
+    type: '(d?: string | Date) => void'
+  },
+  {
+    name: 'onMonthYearChange',
+    description: 'Jumps to this date and moves the month picker to it.',
+    type: '(val?: string | Date) => void'
+  },
+  {
+    name: 'selectedMonthDate',
+    description: 'The month picker\'s date, as `YYYY-MM-DD`.',
+    type: 'string'
+  }
+]
 </script>
 
 ## API Reference
@@ -88,3 +173,5 @@
 <SlotsTable :data="slotsData"/>
 
 <EmitsTable :data="emitsData"/>
+
+<ExposedTable :data="exposedData"/>

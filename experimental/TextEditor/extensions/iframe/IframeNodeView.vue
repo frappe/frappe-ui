@@ -3,11 +3,11 @@
 import { ref, onMounted, computed, nextTick } from 'vue'
 import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3'
 import { detectPlatform, calculateAspectRatio } from './utils'
-import LucideMoveDiagonal2 from '~icons/lucide/move-diagonal-2'
-import LucideAlignLeft from '~icons/lucide/align-left'
-import LucideAlignCenter from '~icons/lucide/align-center'
-import LucideAlignRight from '~icons/lucide/align-right'
-
+import { classIcon } from '../../classIcon'
+const LucideMoveDiagonal2 = classIcon('lucide-move-diagonal-2')
+const LucideAlignLeft = classIcon('lucide-align-left')
+const LucideAlignCenter = classIcon('lucide-align-center')
+const LucideAlignRight = classIcon('lucide-align-right')
 const props = defineProps(nodeViewProps)
 
 const iframeRef = ref<HTMLIFrameElement | null>(null)

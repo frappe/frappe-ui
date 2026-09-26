@@ -41,23 +41,26 @@ describe('formatCardValue', () => {
     expect(formatCardValue({ suffix: ' MRR' }, 1200)).toBe('1,200 MRR')
   })
 
-  it('shortens on request', () => {
-    expect(formatCardValue({ compact: true }, 12345)).toBe('12.3K')
-    expect(formatCardValue({ compact: true, prefix: '$' }, 2_400_000)).toBe(
-      '$2.4M',
-    )
+  it('groups and keeps up to two decimals with no format', () => {
+    expect(formatCardValue({}, 12345)).toBe('12,345')
+    expect(formatCardValue({}, 1234.567)).toBe('1,234.57')
   })
 
-  it('honours an explicit precision', () => {
-    expect(formatCardValue({ precision: 2 }, 12)).toBe('12.00')
-    expect(formatCardValue({ precision: 0 }, 12.7)).toBe('13')
+  it('prints through format, inside the prefix and suffix', () => {
+    const compact = (value: number) =>
+      new Intl.NumberFormat('en-US', { notation: 'compact' }).format(value)
+    expect(formatCardValue({ format: compact }, 12345)).toBe('12K')
+    expect(formatCardValue({ format: compact, prefix: '$' }, 2_400_000)).toBe(
+      '$2.4M',
+    )
+    expect(formatCardValue({ format: (v) => v.toFixed(2) }, 12)).toBe('12.00')
   })
 
   it('prints a string reading exactly as given', () => {
     expect(formatCardValue({ prefix: '$', suffix: ' MRR' }, '2h 14m')).toBe(
       '2h 14m',
     )
-    expect(formatCardValue({ precision: 0, compact: true }, '1234.567')).toBe(
+    expect(formatCardValue({ format: () => 'formatted' }, '1234.567')).toBe(
       '1234.567',
     )
   })
@@ -76,6 +79,15 @@ describe('formatCardDelta', () => {
 
   it('shortens a large delta', () => {
     expect(formatCardDelta({}, 12400)).toBe('12.4K')
+  })
+
+  it('prints through deltaFormat, which takes the unsigned delta', () => {
+    expect(
+      formatCardDelta(
+        { deltaFormat: (v) => v.toFixed(1), deltaSuffix: '%' },
+        -3.14,
+      ),
+    ).toBe('3.1%')
   })
 
   it('prints nothing for a missing delta', () => {

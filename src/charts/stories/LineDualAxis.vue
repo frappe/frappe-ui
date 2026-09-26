@@ -22,14 +22,15 @@ const performance = [
     <LineChart
       :data="performance"
       x="month"
-      :y="['revenue', 'target', 'attainment']"
+      :y="['revenue', 'target']"
+      y2="attainment"
       :x-axis="{ type: 'time', timeGrain: 'month' }"
       :y-axis="{ title: 'Revenue ($)' }"
       :y2-axis="{ title: 'Attainment (%)', min: 90, max: 110 }"
       palette="categorical"
       :series-config="{
-        target: { lineType: 'dashed', lineWidth: 1.5 },
-        attainment: { label: 'Attainment', axis: 'y2' },
+        target: { dashed: true },
+        attainment: { label: 'Attainment' },
       }"
       title="Revenue against target"
       subtitle="Committed plan vs actuals, last 12 months"

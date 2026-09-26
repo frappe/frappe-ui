@@ -81,8 +81,7 @@ describe('BarChart', () => {
       mountChart({ onSelect: cy.spy().as('onSelect') })
       bars().first().click()
       cy.get('@onSelect').should('have.been.calledWithMatch', {
-        seriesName: 'sales',
-        dataIndex: 0,
+        name: 'sales',
         value: 10,
         row: { month: 'Jan', sales: 10 },
       })
@@ -97,6 +96,56 @@ describe('BarChart', () => {
         .and('contain.text', 'Jan')
         .and('contain.text', 'Sales')
         .and('contain.text', '10')
+    })
+
+    // `tooltipColumns` is the context in another unit — the count behind a
+    // rate. It reaches the tooltip and nothing else.
+    describe('a tooltip-only column', () => {
+      const withOrders = data.map((row, index) => ({
+        ...row,
+        orders: (index + 1) * 1000,
+      }))
+
+      const mountWithExtra = (props: Record<string, any> = {}) =>
+        mountChart({
+          data: withOrders,
+          tooltipColumns: [{ name: 'orders', label: 'Orders' }],
+          ...props,
+        })
+
+      it('prints in the tooltip', () => {
+        mountWithExtra()
+        cy.get('[data-slot="chart-plot"]').trigger('mousemove', 100, 150)
+        cy.get('[data-slot="chart-tooltip"]')
+          .should('contain.text', 'Orders')
+          .and('contain.text', '1,000')
+      })
+
+      it('carries no swatch, which would claim a mark on the plot', () => {
+        mountWithExtra()
+        cy.get('[data-slot="chart-plot"]').trigger('mousemove', 100, 150)
+        // Two series, and the column adds no third.
+        cy.get('[data-slot="chart-tooltip"] .size-2').should('have.length', 2)
+      })
+
+      it('draws no mark and takes no legend entry', () => {
+        mountWithExtra()
+        bars().should('have.length', data.length * 2)
+        cy.get('[data-slot="chart-legend"] button').should('have.length', 2)
+        cy.get('[data-slot="chart-legend"]').should(
+          'not.contain.text',
+          'Orders',
+        )
+      })
+
+      it('stays in the tooltip when the legend hides a series', () => {
+        mountWithExtra()
+        cy.get('[aria-label="Hide Sales"]').click()
+        cy.get('[data-slot="chart-plot"]').trigger('mousemove', 100, 150)
+        cy.get('[data-slot="chart-tooltip"]')
+          .should('not.contain.text', 'Sales')
+          .and('contain.text', 'Orders')
+      })
     })
   })
 
@@ -174,7 +223,9 @@ describe('BarChart', () => {
 
     it('measures a line series against a second axis', () => {
       mountChart({
-        seriesConfig: { refunds: { type: 'line', axis: 'y2' } },
+        y: 'sales',
+        y2: 'refunds',
+        seriesConfig: { refunds: { type: 'line' } },
       })
       bars().should('have.length', data.length)
       lines().should('have.length', 1)
@@ -234,7 +285,7 @@ describe('BarChart', () => {
       mountChart({
         data: byRegion,
         y: 'amount',
-        series: 'region',
+        splitBy: 'region',
         maxSeries: 3,
       })
       cy.get('[data-slot="chart-legend"] button')
@@ -248,7 +299,7 @@ describe('BarChart', () => {
       mountChart({
         data: byRegion,
         y: 'amount',
-        series: 'region',
+        splitBy: 'region',
         maxSeries: 2,
         seriesConfig: { __others__: { label: 'Everywhere else' } },
       })
@@ -262,7 +313,7 @@ describe('BarChart', () => {
       mountChart({
         data: byRegion,
         y: 'amount',
-        series: 'region',
+        splitBy: 'region',
         maxSeries: 3,
         stacked: 'normalized',
       })
@@ -426,6 +477,18 @@ describe('BarChart', () => {
       container().should('have.attr', 'data-state', 'empty')
     })
 
+    it('says so when no row carries a number for a series', () => {
+      mountChart({ y: ['typo'] })
+      cy.contains('No data to show').should('be.visible')
+      container().should('have.attr', 'data-state', 'empty')
+    })
+
+    it('says so once the legend has switched every series off', () => {
+      mountChart({ hiddenSeries: ['sales', 'refunds'] })
+      cy.contains('No data to show').should('be.visible')
+      container().should('have.attr', 'data-state', 'empty')
+    })
+
     it('reads as ready once the bars are drawn', () => {
       mountChart()
       bars().should('have.length', data.length * 2)
@@ -479,6 +542,15 @@ describe('BarChart', () => {
       cy.get('[data-slot="chart-header"]').should('contain.text', 'Week')
     })
 
+    // The mark belongs to the title, so it is forwarded to the container
+    // rather than folded into `#actions` at the far end of the row.
+    it('forwards a title suffix to the header', () => {
+      mountChart({ title: 'Revenue' }, {
+        'title-suffix': () => h('span', { id: 'lock' }, '*'),
+      } as any)
+      cy.get('[data-slot="chart-header"] #lock').should('exist')
+    })
+
     it('replaces the tooltip body with the app’s own', () => {
       // Opened from the keyboard rather than a hover: the cursor lands on a
       // known category, so the slot props are January's every run.
@@ -491,6 +563,94 @@ describe('BarChart', () => {
       cy.get('[data-slot="chart-tooltip"]')
         .should('contain.text', 'at Jan: 2')
         .and('not.contain.text', 'Sales')
+    })
+
+    describe('dismissal', () => {
+      function openTooltip() {
+        mountChart()
+        bars().should('have.length', data.length * 2)
+        plot().trigger('mousemove', 100, 150)
+        cy.get('[data-slot="chart-tooltip"]').should('exist')
+      }
+
+      it('closes when the page scrolls', () => {
+        openTooltip()
+        // Dispatched on the plot, not the window: a scroll event does not
+        // bubble, so this reaches the listener only through the capture phase.
+        // That is how a scroll inside a nested container arrives.
+        plot().then(($el) => $el[0].dispatchEvent(new Event('scroll')))
+        cy.get('[data-slot="chart-tooltip"]').should('not.exist')
+      })
+
+      it('closes when the window resizes', () => {
+        openTooltip()
+        cy.window().then((win) => win.dispatchEvent(new Event('resize')))
+        cy.get('[data-slot="chart-tooltip"]').should('not.exist')
+      })
+
+      it('closes when the pointer leaves the plot', () => {
+        openTooltip()
+        plot().trigger('pointerleave')
+        cy.get('[data-slot="chart-tooltip"]').should('not.exist')
+      })
+
+      it('closes when the window goes away', () => {
+        openTooltip()
+        cy.window().then((win) => win.dispatchEvent(new Event('blur')))
+        cy.get('[data-slot="chart-tooltip"]').should('not.exist')
+      })
+
+      it('closes when the tab is hidden', () => {
+        openTooltip()
+        cy.document().then((doc) => {
+          Object.defineProperty(doc, 'hidden', {
+            value: true,
+            configurable: true,
+          })
+          doc.dispatchEvent(new Event('visibilitychange'))
+        })
+        cy.get('[data-slot="chart-tooltip"]').should('not.exist')
+      })
+
+      it('closes when the rows behind it change', () => {
+        const rows = ref(data)
+        cy.mount(
+          defineComponent({
+            setup() {
+              return () =>
+                h('div', { style: 'width: 480px; height: 300px' }, [
+                  h(BarChart, {
+                    data: rows.value,
+                    x: 'month',
+                    y: ['sales', 'refunds'],
+                    echartOptions: { animation: false },
+                  }),
+                ])
+            },
+          }),
+        )
+        bars().should('have.length', data.length * 2)
+        plot().trigger('mousemove', 100, 150)
+        cy.get('[data-slot="chart-tooltip"]').should('exist')
+        cy.then(() => {
+          rows.value = data.map((row) => ({ ...row, sales: row.sales * 2 }))
+        })
+        cy.get('[data-slot="chart-tooltip"]').should('not.exist')
+      })
+    })
+
+    it('hands the plotted row to the tooltip slot', () => {
+      // The row carries every column, `tooltipColumns` or not: a tooltip the
+      // app draws itself needs no prop to reach one.
+      mountChart({ data: data.map((row) => ({ ...row, orders: 1000 })) }, {
+        tooltip: ({ rows }: any) => h('span', `${rows[0].orders} orders`),
+      } as any)
+      bars().should('have.length', data.length * 2)
+      plot().focus()
+      cy.get('[data-slot="chart-tooltip"]').should(
+        'contain.text',
+        '1000 orders',
+      )
     })
   })
 
@@ -520,8 +680,7 @@ describe('BarChart', () => {
       plot().focus()
       plot().type('{rightarrow}{enter}')
       cy.get('@onSelect').should('have.been.calledWithMatch', {
-        seriesName: 'sales',
-        dataIndex: 1,
+        name: 'sales',
         value: 20,
         row: { month: 'Feb', sales: 20 },
       })
@@ -535,8 +694,7 @@ describe('BarChart', () => {
       plot().focus()
       plot().type('{downarrow}{enter}')
       cy.get('@onSelect').should('have.been.calledWithMatch', {
-        seriesName: 'refunds',
-        dataIndex: 0,
+        name: 'refunds',
         value: 4,
       })
     })
@@ -547,8 +705,7 @@ describe('BarChart', () => {
       plot().focus()
       plot().type('{downarrow}{uparrow}{enter}')
       cy.get('@onSelect').should('have.been.calledWithMatch', {
-        seriesName: 'sales',
-        dataIndex: 0,
+        name: 'sales',
         value: 10,
       })
     })

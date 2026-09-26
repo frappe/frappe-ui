@@ -2,15 +2,19 @@
 import {
   computed,
   getCurrentInstance,
+  inject,
+  onUnmounted,
   provide,
   ref,
   shallowRef,
   watch,
 } from 'vue'
 import { TabsRoot } from 'reka-ui'
+import { routerKey } from 'vue-router'
 import TabList from './TabList.vue'
 import TabTrigger from './TabTrigger.vue'
 import TabPanel from './TabPanel.vue'
+import { useReactiveSlots } from '../../composables/useReactiveSlots'
 import { tabsRootKey, type TabTriggerRegistration } from './context'
 import type {
   TabItem,
@@ -28,7 +32,7 @@ const props = withDefaults(defineProps<TabsProps>(), {
 
 const emit = defineEmits<TabsEmits>()
 
-const slots = defineSlots<{
+const declaredSlots = defineSlots<{
   /** Composed mode: `TabList` / `TabPanel` children. */
   default?: () => any
   /** Shorthand mode: leading content in every generated trigger. */
@@ -40,6 +44,7 @@ const slots = defineSlots<{
   /** Shorthand mode: panel body for the selected tab. */
   'tab-panel'?: (props: { tab: TabItem }) => any
 }>()
+const slots = useReactiveSlots<typeof declaredSlots>()
 
 if (import.meta.env.DEV) {
   let warned = false
@@ -210,6 +215,38 @@ function triggerFor(value: TabValue) {
   return triggers.value.find((t) => t.value() === value)
 }
 
+// The override lasts until the route leaves the page the user clicked from.
+// Two things end it.
+//
+// A navigation that lands on a different path. That covers `/inbox` →
+// `/sent`, and `/inbox` → `/inbox/42` too, where the same tab stays matched
+// but the URL is a page the clicked tab does not stand for.
+//
+// A navigation that did not land — aborted by a guard, cancelled by a newer
+// one, or a duplicate of the current URL — leaves `failure` set and changed
+// nothing the user can see, so it must not throw away their click.
+//
+// `inject` rather than `useRouter`: Tabs is used with no router at all far
+// more often than with one, and `useRouter` warns when the injection is
+// missing.
+const router = inject(routerKey, null)
+if (router) {
+  const stopRouteReset = router.afterEach((to, from, failure) => {
+    if (failure) return
+    if (to.path !== from.path) routeOverride.value = null
+  })
+  onUnmounted(stopRouteReset)
+}
+
+// And a change in which tab the URL matches, whatever moved it. That includes
+// a change with no navigation behind it, which the hook above cannot see — a
+// trigger's `route` prop changing, or a routed trigger mounting that matches
+// the current URL. Both have always ended the click.
+//
+// What neither rule catches keeps the click: a query-only or hash-only write
+// that leaves the same tab matched. A panel that keeps its own state in the
+// URL — a page number, a filter — writes exactly that, and clearing there
+// would throw the user out of the panel they are standing in.
 watch(routeSelected, () => {
   routeOverride.value = null
 })
@@ -350,7 +387,7 @@ const visibleTabs = computed(() =>
       <TabList
         :variant="props.variant"
         :size="props.size"
-        :side="props.side"
+        :edge="props.edge"
       >
         <TabTrigger
           v-for="tab in visibleTabs"

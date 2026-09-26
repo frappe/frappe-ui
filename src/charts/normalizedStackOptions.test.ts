@@ -5,10 +5,7 @@ import {
   DEFAULT_STACKED_FILL_OPACITY,
 } from './axisChartOptions'
 import { normalizeAxisChartProps } from './seriesData'
-import type {
-  AxisChartConfig,
-  AxisChartProps,
-} from './types'
+import type { AxisChartConfig, AxisChartProps } from './types'
 import type { ChartTokens } from './tokens'
 
 const tokens: ChartTokens = {
@@ -18,10 +15,10 @@ const tokens: ChartTokens = {
   axisLabel: 'ink-5',
   axisTitle: 'ink-7',
   axisLine: 'outline-2',
-  splitLine: 'outline-1',
+  gridline: 'outline-1',
   dataLabel: 'ink-6',
   insideLabel: 'ink-8',
-  cellGap: '#ffffff',
+  backdrop: '#ffffff',
 }
 
 /** Two series whose totals are round numbers, so the shares read at a glance. */
@@ -43,7 +40,10 @@ function build(
   overrides: Partial<AxisChartConfig> = {},
   hiddenSeries?: string[],
 ) {
-  return buildAxisChartOption(config(overrides), { tokens, hiddenSeries }) as any
+  return buildAxisChartOption(config(overrides), {
+    tokens,
+    hiddenSeries,
+  }) as any
 }
 
 /** The plotted number of each point, whichever way the pairs are ordered. */
@@ -471,7 +471,7 @@ describe('normalized stacking with maxSeries', () => {
   // the tail is one series by the time anything is divided.
   it('takes the shares after the tail has collapsed, so they sum to 100', () => {
     const option = buildAxisChartOption(
-      fromProps({ data: longRows, series: 'region', maxSeries: 3 }),
+      fromProps({ data: longRows, splitBy: 'region', maxSeries: 3 }),
       { tokens },
     ) as any
     expect(option.series.map((s: any) => s.name)).toEqual([
@@ -487,7 +487,7 @@ describe('normalized stacking with maxSeries', () => {
   it('pins the axis and labels the collapsed series “Others”', () => {
     const config = fromProps({
       data: longRows,
-      series: 'region',
+      splitBy: 'region',
       maxSeries: 3,
     })
     const option = buildAxisChartOption(config, { tokens }) as any

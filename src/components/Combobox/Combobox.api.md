@@ -3,14 +3,14 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
+  import ExposedTable from '@/components/Docs/ExposedTable.vue'
 
   const propsData = [
   {
     name: 'modelValue',
     description: 'Committed value. `null` when nothing is selected.',
     required: false,
-    type: 'ComboboxOptionValue | null',
-    default: 'null'
+    type: 'ComboboxOptionValue | null'
   },
   {
     name: 'options',
@@ -30,14 +30,14 @@
     name: 'variant',
     description: 'Visual style of the combobox.',
     required: false,
-    type: 'ComboboxVariant',
+    type: 'InputVariant',
     default: '"subtle"'
   },
   {
     name: 'size',
     description: 'Size of the trigger and option rows.',
     required: false,
-    type: 'ComboboxSize',
+    type: 'InputSize',
     default: '"sm"'
   },
   {
@@ -107,7 +107,7 @@
     name: 'portalTo',
     description: 'Teleport target for the popover content. Unset, an embedding host\'s target is used, else `body`.',
     required: false,
-    type: 'string | HTMLElement'
+    type: 'PortalTarget'
   },
   {
     name: 'loading',
@@ -151,9 +151,9 @@
   },
   {
     name: 'error',
-    description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. May be either a string\nor an `Error` object whose `messages?: string[]` is rendered as stacked\nlines (with `Error.message` as the fallback).',
+    description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. Takes a string, an\narray of strings, or an `Error` whose `messages` are rendered as stacked\nlines (with `Error.message` as the fallback). This is the same value\n`ErrorMessage.message` takes. An empty array and an empty string both\nmean no error.',
     required: false,
-    type: 'string | FrappeUIError'
+    type: 'ErrorMessageValue'
   },
   {
     name: 'required',
@@ -260,8 +260,8 @@
   },
   {
     name: 'update:modelValue',
-    description: 'Fired when the committed value changes.',
-    type: '[value: ComboboxOptionValue | null]'
+    description: 'Fired when the model value changes.',
+    type: '[value: ComboboxOptionValue | null | undefined]'
   },
   {
     name: 'update:query',
@@ -274,6 +274,19 @@
     type: '[option: ComboboxSelectableOption | ComboboxCustomOption | null]'
   }
 ]
+
+  const exposedData = [
+  {
+    name: 'clear',
+    description: 'Clears the current selection (sets the model to `null`). In\n`trigger="button"` mode the typed search query stays. In\n`trigger="input"` mode the input empties, because there it shows the\nselected option\'s label.',
+    type: '() => void'
+  },
+  {
+    name: 'focus',
+    description: 'Moves focus to the input in `trigger="input"` mode, and to the button in\n`trigger="button"` mode. While the popover\'s search input is showing, it\nfocuses that instead.',
+    type: '(options?: FocusOptions) => void'
+  }
+]
 </script>
 
 ## API Reference
@@ -283,3 +296,5 @@
 <SlotsTable :data="slotsData"/>
 
 <EmitsTable :data="emitsData"/>
+
+<ExposedTable :data="exposedData"/>

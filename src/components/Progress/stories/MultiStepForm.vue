@@ -21,12 +21,7 @@ function continueForm() {
 
 <template>
   <div class="w-full max-w-[400px] rounded-7 border border-outline-gray-1 p-4">
-    <Progress
-      :value="percent"
-      :label="steps[step]"
-      :intervals="true"
-      :interval-count="steps.length"
-    >
+    <Progress :value="percent" :label="steps[step]" :intervals="steps.length">
       <template #hint>
         <span class="text-base text-ink-gray-5">
           Step {{ step + 1 }} of {{ steps.length }}

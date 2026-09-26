@@ -20,8 +20,13 @@ import {
 } from '#molecules/editor/extensions/shared/suggestion-helpers'
 import { toValue, type MaybeRefOrGetter } from 'vue'
 
-type TagOption = TagSuggestionItem & { id?: string }
-type TagsOption = MaybeRefOrGetter<TagOption[]> | null
+type TagsOption = MaybeRefOrGetter<TagSuggestionItem[]> | null
+
+/**
+ * The "New tag" entry the list synthesizes for an unmatched query. `isNew` is
+ * internal: it tells `command` to insert the tag without an id.
+ */
+type TagListItem = TagSuggestionItem & { isNew?: boolean }
 
 interface TagSuggestionOptions {
   tags: MaybeRefOrGetter<TagSuggestionItem[]>
@@ -102,18 +107,23 @@ export const TagNode = Node.create({
   },
 })
 
+/**
+ * One entry in the `#` list.
+ *
+ * `label` is the tag text; `value` is the stored tag id (`data-tag-id`).
+ * Leave `value` out for a tag that has no record yet. Extra fields are
+ * allowed and reach the item slot untouched.
+ */
 export interface TagSuggestionItem extends BaseSuggestionItem {
-  id?: string
-  name?: string
   label: string
-  isNew?: boolean
+  value?: string
 }
 
 export const TagExtension = createSuggestionExtension<TagSuggestionItem>({
   name: 'tagSuggestion',
   char: '#',
   pluginKey: new PluginKey('tagSuggestion'),
-  component: SuggestionList,
+  listComponent: SuggestionList,
 
   addOptions() {
     return {
@@ -128,11 +138,9 @@ export const TagExtension = createSuggestionExtension<TagSuggestionItem>({
     )
     const tags = toValue(options?.tags ?? [])
 
-    const filteredTags: TagSuggestionItem[] = filterByQuery(
-      tags,
-      query,
-      'label',
-    ).map((tag) => ({ ...tag, display: tag.label }))
+    // The matched items are passed through as they came in, so the item slot
+    // receives the caller's own object, extra fields and all.
+    const filteredTags: TagListItem[] = filterByQuery(tags, query, 'label')
 
     if (
       query.length > 0 &&
@@ -148,9 +156,10 @@ export const TagExtension = createSuggestionExtension<TagSuggestionItem>({
   },
 
   command: ({ editor, range, props }) => {
+    const item = props as TagListItem
     insertSuggestionNode(editor, range, TagNode.name, {
-      tagLabel: props.label,
-      ...(props.id && !props.isNew && { tagId: props.id }),
+      tagLabel: item.label,
+      ...(item.value && !item.isNew && { tagId: item.value }),
     })
   },
 

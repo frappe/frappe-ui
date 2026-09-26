@@ -1,7 +1,7 @@
 <template>
   <div class="w-full space-y-[10px]">
     <div
-      v-if="props.label || props.hint"
+      v-if="props.label || props.hint || $slots.hint"
       class="flex items-baseline justify-between"
     >
       <span v-if="props.label" class="text-base-medium text-ink-gray-8">
@@ -42,7 +42,7 @@
       <!-- Interval Progress Bar -->
       <div
         v-else
-        v-for="index in intervalCount"
+        v-for="index in props.intervals"
         class="h-full w-full"
         :class="
           index <= filledIntervalCount
@@ -66,8 +66,6 @@ const props = withDefaults(defineProps<ProgressProps>(), {
   size: 'sm',
   hint: false,
   label: '',
-  intervals: false,
-  intervalCount: 6,
 })
 
 const indicatorContainerClasses = computed(() => {
@@ -104,7 +102,7 @@ const valueLabel = computed(
 )
 
 const filledIntervalCount = computed(() =>
-  Math.round((clampedValue.value / MAX_VALUE) * props.intervalCount),
+  Math.round((clampedValue.value / MAX_VALUE) * (props.intervals ?? 0)),
 )
 
 defineSlots<{

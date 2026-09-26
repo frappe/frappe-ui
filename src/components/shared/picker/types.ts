@@ -1,0 +1,102 @@
+import type {
+  InputExposed,
+  InputSize,
+  InputVariant,
+} from '../../../composables/inputTypes'
+import type { InputLabelingProps } from '../../../composables/useInputLabeling'
+
+export interface PickerShellProps {
+  /** Side of the trigger to render the panel on. Already resolved by the caller. */
+  side: 'top' | 'right' | 'bottom' | 'left'
+
+  /** Alignment of the panel along the chosen side. */
+  align: 'start' | 'center' | 'end'
+
+  /** Distance in px between the input row and the panel. */
+  offset: number
+
+  /** Whether focusing the input opens the panel. */
+  openOnFocus?: boolean
+
+  /** Whether clicking the input opens the panel. */
+  openOnClick?: boolean
+
+  /** Id of the underlying input. */
+  id?: string
+
+  /** Label above the input. */
+  label?: string
+
+  /** Help text below the input. */
+  description?: string
+
+  /** Error message, as a string or an `Error` carrying `messages`. */
+  error?: InputLabelingProps['error']
+
+  /** Whether the input is required. */
+  required?: boolean
+
+  /** Input size token. */
+  size?: InputSize
+
+  /** Input variant token. */
+  variant?: InputVariant
+
+  /** Placeholder for the input. */
+  placeholder?: string
+
+  /** Whether the input is disabled. */
+  disabled?: boolean
+
+  /** Whether the input is read-only. */
+  readonly?: boolean
+
+  /** Formatted value, passed to the trigger slots so a custom trigger can render it. */
+  displayLabel?: string
+}
+
+/** Slot props passed to the `#trigger`, `#prefix` and `#suffix` slots. */
+export interface PickerShellTriggerSlotProps {
+  /** Whether the panel is currently open. */
+  open: boolean
+  /** Whether the picker is disabled. */
+  disabled: boolean
+  /** Sets the panel open state. */
+  setOpen: (value: boolean) => void
+  /** Closes the panel. Equivalent to `setOpen(false)`. */
+  close: () => void
+  /** The formatted value. */
+  displayLabel: string
+  /** The raw text in the input. */
+  inputValue: string
+}
+
+export interface PickerShellSlots {
+  /** Replaces the whole `TextInput` trigger. */
+  trigger?: (props: PickerShellTriggerSlotProps) => any
+  /** Content before the input text. */
+  prefix?: (props: PickerShellTriggerSlotProps) => any
+  /** Content after the input text. Replaces the chevron. */
+  suffix?: (props: PickerShellTriggerSlotProps) => any
+  /** The panel body. */
+  default?: (props: PickerShellTriggerSlotProps) => any
+}
+
+/** Methods available on a `<PickerShell>` template ref. */
+export interface PickerShellExposed extends PickerExposed {}
+
+/**
+ * The template-ref surface every picker shares: `DatePicker`,
+ * `DateRangePicker`, `DateTimePicker` and `TimePicker`.
+ *
+ * `open` and `close` are here because a picker owns its trigger (ADR-0012), so
+ * a parent's script has no other handle on the panel. `focus` comes from
+ * `InputExposed`, which every input implements.
+ */
+export interface PickerExposed extends InputExposed {
+  /** Opens the panel. A disabled picker stays closed. */
+  open: () => void
+
+  /** Closes the panel. */
+  close: () => void
+}

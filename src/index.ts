@@ -18,7 +18,7 @@ export * from './resources/index.ts'
 // `frappeRequest` and the v1 resources are built on, with none of the Frappe
 // response handling a consumer wants.
 export { default as call } from './utils/call'
-export { frappeRequest, type FrappeRequestError } from './utils/frappeRequest'
+export { frappeRequest, type FrappeResourceError } from './utils/frappeRequest'
 
 // Base components
 export * from './components/Alert'
@@ -52,7 +52,11 @@ export * from './components/Radio'
 export * from './components/Select'
 // Shared by Select / MultiSelect / Combobox, so it belongs to the family
 // rather than to any one of their barrels.
-export type { SelectionExposed } from './components/shared/selection/types'
+export type {
+  SelectionExposed,
+  SelectionGroup,
+  SelectionOption,
+} from './components/shared/selection/types'
 export type { StatusTheme } from './components/shared/statusIcon'
 export * from './components/Slider'
 export * from './components/Switch'
@@ -74,12 +78,18 @@ export {
   type DialogControl,
   type DialogHandle,
   type DialogNamespace,
+  type ImperativeDialogAction,
   type PromptArgs,
   type PromptControl,
   type PromptField,
   type PromptFieldValidator,
 } from './utils/dialog'
 export { toast } from './components/Toast/toast'
+export type {
+  ToastAction,
+  ToastId,
+  ToastOptions,
+} from './components/Toast/types'
 export { default as ToastProvider } from './components/Toast/ToastProvider.vue'
 
 // Lists and collection views
@@ -96,10 +106,10 @@ export * from './components/DesktopShell/index.ts'
 export * from './components/MobileNav/index.ts'
 export * from './components/MobileShell/index.ts'
 export * from './components/PageHeader'
-export * from './components/Rail'
 export * from './components/ScrollArea'
 export * from './components/SettingsDialog'
 export * from './components/Sidebar/index.ts'
+export * from './components/SidebarRail'
 export * from './components/TabButtons'
 export * from './components/Tabs'
 
@@ -120,9 +130,8 @@ export {
   type PressKeyboardShortcutConfig,
 } from './composables/useKeyboardShortcut'
 
-// Deprecated component compatibility
-/** @deprecated Use `Select` with `useColorScheme` instead. */
-export * from './components/ThemeSwitcher'
+// ThemeSwitcher moved to `frappe-ui/experimental` (#1094, P14) — parked
+// there, deprecated, while apps move to `Select` plus `useColorScheme`.
 
 // v1 Charts family moved to `frappe-ui/experimental` (#942, P14) — parked
 // there, API unchanged, while apps migrate to `frappe-ui/charts`.
@@ -131,19 +140,22 @@ export * from './components/ThemeSwitcher'
 export { usePageMeta, type PageMeta } from './utils/pageMeta'
 export {
   useColorScheme,
-  resolvedColorScheme,
+  useResolvedColorScheme,
   type ColorScheme,
   type ResolvedColorScheme,
 } from './composables/useColorScheme'
+// `getResolvedColorScheme` is not exported (SHELL-Q11). It reads the document
+// once and does not react. Components read `useColorScheme().resolvedColorScheme`,
+// which is a ref; charts import the function internally to paint outside a
+// component. `useResolvedColorScheme()` is the reactive read for anything that
+// must not own the scheme: it observes `data-theme` and writes nothing.
 export {
   shellScrollContainer,
   useShellScrolled,
 } from './composables/useShellScrolled'
-export {
-  useSheetDrag,
-  type UseSheetDrag,
-  type UseSheetDragOptions,
-} from './composables/useSheetDrag'
+// `useSheetDrag` is not exported (SHELL-Q7). `BottomSheet` is the only caller,
+// its thresholds are fixed constants, and no app used it. It can come back when
+// a second surface needs it.
 
 // Embedding: name one portal target for every overlay under a Vue app
 export {
@@ -153,12 +165,41 @@ export {
 } from './composables/usePortalTarget'
 export type { PortalTarget } from './composables/usePortalTarget'
 
+// Shared input scales. Every generated API table prints these alias names as a
+// prop's type (`size: InputSize`), and the per-component aliases built on them
+// — ComboboxSize, MultiSelectSize, ItemListSize — are already exported, so a
+// consumer typing a wrapper around TextInput can import the base too.
+export type {
+  InputSize,
+  InputVariant,
+  RangeSize,
+  ToggleSize,
+} from './composables/inputTypes'
+
+// The one method every input guarantees on a template ref, and the picker
+// family's larger surface on top of it (INP-Q5, ADR-0012). A generic form types
+// its control refs as `InputExposed` and calls `focus()` without a type guard.
+export type { InputExposed } from './composables/inputTypes'
+export type { PickerExposed } from './components/shared/picker/types'
+
+// The labeling props every input shares. A wrapper that forwards an input
+// error types it as `InputLabelingProps['error']`; the library owns no
+// separate name for that value (ADR-0008, VOC-Q4).
+export type { InputLabelingProps } from './composables/useInputLabeling'
+
+// One owned name for a router destination, so every `route` prop prints the
+// same type instead of vue-router's minified internal union.
+export type {
+  RouteDestination,
+  RouteLocationObject,
+} from './components/shared/route'
+
 // Directives
 export { vFocus } from './directives/focus'
 export { vOnOutsideClick } from './directives/onOutsideClick'
 
 // Utilities
-export { dayjs, dayjsLocal } from './utils/dayjs'
+export { dayjs, dayjsLocal, type Dayjs } from './utils/dayjs'
 export { default as debounce } from './utils/debounce'
 // FileUploadHandler is the class FileUploader is built on; useFileUpload is
 // the recommended composable entry point for headless/custom-UI uploads.
@@ -167,11 +208,11 @@ export { default as debounce } from './utils/debounce'
 // stay internal to the upload paths that use them.
 export { default as FileUploadHandler } from './utils/fileUploadHandler'
 export {
-  isPrivateUpload,
   upload,
+  UploadError,
   useFileUpload,
   type UploadedFile,
+  type UploadErrorKind,
   type UploadOptions,
-  type UploadPrivacy,
   type UploadState,
 } from './utils/useFileUpload'

@@ -232,6 +232,28 @@ describe('Dropdown', () => {
     cy.get('[aria-haspopup=menu]').should('have.text', 'Trigger')
   })
 
+  it('exposes open controls and disabled state to the trigger slot', () => {
+    let controls: any
+    cy.mount(Dropdown, {
+      props: { options },
+      slots: {
+        trigger: (props) => {
+          controls = props
+          return h('button', { 'data-cy': 'trigger' }, String(props.open))
+        },
+      },
+    })
+
+    cy.get('[data-slot="trigger"]').should('exist')
+    cy.then(() => {
+      expect(controls.disabled).to.equal(false)
+      controls.setOpen(true)
+    })
+    cy.get('[role=menu]').should('exist')
+    cy.then(() => controls.close())
+    cy.get('[role=menu]').should('not.exist')
+  })
+
   it('round-trips v-model:open', () => {
     cy.mount(Dropdown, {
       props: {
@@ -315,9 +337,7 @@ describe('Dropdown', () => {
   })
 
   it('renders group labels, and #group-label overrides them', () => {
-    const grouped = [
-      { group: 'Edit', options: [{ label: 'Rename' }] },
-    ]
+    const grouped = [{ group: 'Edit', options: [{ label: 'Rename' }] }]
     cy.mount(Dropdown, { props: { options: grouped } })
     cy.get('[aria-haspopup=menu]').click()
     cy.get('[data-slot=group-label]').should('contain.text', 'Edit')
@@ -346,6 +366,61 @@ describe('Dropdown', () => {
     })
     cy.get('[aria-haspopup=menu]').click()
     cy.get('[data-slot=empty]').should('contain.text', 'Nothing here')
+  })
+
+  it('lets a custom suffix replace the built-in switch and chevron', () => {
+    // The suffix region holds one thing. A suffix that renders something owns
+    // it; a suffix that renders nothing hands it back to the shell.
+    const suffixOptions = [
+      { label: 'Notifications', switch: true, switchValue: true },
+      { label: 'Share', submenu: [{ label: 'Copy link' }] },
+    ]
+    const suffix = () => h('span', { 'data-cy': 'suffix' }, 'S')
+
+    // A nonempty template #item-suffix replaces both built-in controls.
+    cy.mount(Dropdown, {
+      props: { options: suffixOptions },
+      slots: { 'item-suffix': suffix },
+    })
+    cy.get('[aria-haspopup=menu]').click()
+    cy.get('[data-slot="item-suffix"] [data-cy="suffix"]').should(
+      'have.length',
+      2,
+    )
+    cy.get('[role=switch]').should('not.exist')
+    cy.get('.lucide-chevron-right').should('not.exist')
+
+    // A nonempty item.slots.suffix does the same with no template slot bound.
+    cy.mount(Dropdown, {
+      props: {
+        options: suffixOptions.map((option) => ({
+          ...option,
+          slots: { suffix },
+        })),
+      },
+    })
+    cy.get('[aria-haspopup=menu]').click()
+    cy.get('[data-slot="item-suffix"] [data-cy="suffix"]').should(
+      'have.length',
+      2,
+    )
+    cy.get('[role=switch]').should('not.exist')
+    cy.get('.lucide-chevron-right').should('not.exist')
+
+    // Both suffixes render nothing, so the switch and the chevron come back.
+    cy.mount(Dropdown, {
+      props: {
+        options: suffixOptions.map((option) => ({
+          ...option,
+          slots: { suffix: () => null },
+        })),
+      },
+      slots: { 'item-suffix': () => null },
+    })
+    cy.get('[aria-haspopup=menu]').click()
+    cy.get('[data-cy="suffix"]').should('not.exist')
+    cy.get('[role=switch]').should('exist')
+    cy.get('[data-slot="item-suffix"] .lucide-chevron-right').should('exist')
   })
 
   it('does not render the removed { group, items } shape', () => {

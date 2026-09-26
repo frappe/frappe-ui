@@ -1,18 +1,16 @@
 ---
-outline: false
+search: false
 ---
 
 <script setup>
-import ChartColorsPage from '@/components/foundations/ChartColorsPage.vue'
+import { onMounted } from 'vue'
+import { useRouter, withBase } from 'vitepress'
+
+// This page moved. Old links and bookmarks land here and are sent on.
+const router = useRouter()
+onMounted(() => router.go(withBase('/docs/charts/colors')))
 </script>
 
 # Chart Colors
 
-Three ramps every chart draws from. They ship with `frappe-ui/charts` as
-`--chart-*` custom properties, and each has a dark counterpart that keeps a
-series' hue identity across a theme flip.
-
-Pick a ramp per chart with `palette`, or hand it an explicit list of colors.
-Redefine the tokens in your own CSS to rebrand every chart at once.
-
-<ChartColorsPage />
+This page moved to [Chart colors](/docs/charts/colors).

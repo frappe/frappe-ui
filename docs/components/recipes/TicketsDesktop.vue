@@ -327,7 +327,7 @@ const selection = ref([])
           />
 
           <ScrollArea class="min-h-0 flex-1" viewport-class="px-2 pt-0.5 pb-10">
-            <nav class="space-y-0.5">
+            <div class="space-y-0.5">
               <SidebarItem
                 v-for="item in nav"
                 :key="item.label"
@@ -346,19 +346,19 @@ const selection = ref([])
                   />
                 </template>
               </SidebarItem>
-            </nav>
+            </div>
 
             <div class="mt-4 flex h-7 items-center">
               <SidebarLabel>Views</SidebarLabel>
             </div>
-            <nav class="mt-0.5 space-y-0.5">
+            <div class="mt-0.5 space-y-0.5">
               <SidebarItem v-for="view in views" :key="view">
                 <template #prefix>
                   <span class="lucide-list-filter size-4" aria-hidden="true" />
                 </template>
                 <span class="flex-1 truncate text-sm">{{ view }}</span>
               </SidebarItem>
-            </nav>
+            </div>
           </ScrollArea>
 
           <div class="mt-auto px-2 pb-2">
@@ -432,7 +432,7 @@ const selection = ref([])
             </ListHeaderCellSort>
           </ListHeader>
           <ListRows :items="sortedTickets" v-slot="{ item: ticket, value }">
-            <ListRow :value="value" @click="() => {}">
+            <ListRow :value="value">
               <ListCell>
                 <div class="min-w-0">
                   <div class="truncate text-base text-ink-gray-8">

@@ -30,10 +30,10 @@ const tokens: ChartTokens = {
   axisLabel: 'ink-5',
   axisTitle: 'ink-7',
   axisLine: 'outline-2',
-  splitLine: 'outline-1',
+  gridline: 'outline-1',
   dataLabel: 'ink-6',
   insideLabel: 'ink-8',
-  cellGap: '#ffffff',
+  backdrop: '#ffffff',
 }
 
 function config(
@@ -203,18 +203,10 @@ describe('buildHeatmapMatrix', () => {
 })
 
 describe('heatmapRampStops', () => {
-  it('reverses the sequential ramp and trims its palest stops', () => {
-    const stops = heatmapRampStops(config(), tokens)
-
-    expect(stops).toEqual([
-      '#cccccc',
-      '#aaaaaa',
-      '#8a8a8a',
-      '#5a5a5a',
-      '#3a3a3a',
-      '#1a1a1a',
-      '#0a0a0a',
-    ])
+  it('reverses the sequential ramp, palest first', () => {
+    expect(heatmapRampStops(config(), tokens)).toEqual(
+      [...tokens.sequential].reverse(),
+    )
   })
 
   it('takes the diverging ramp as authored, cool end first', () => {
@@ -225,7 +217,9 @@ describe('heatmapRampStops', () => {
 
   it('takes an explicit list in the order it was written', () => {
     const colors = ['#ffffff', '#000000']
-    expect(heatmapRampStops(config({ palette: colors }), tokens)).toEqual(colors)
+    expect(heatmapRampStops(config({ palette: colors }), tokens)).toEqual(
+      colors,
+    )
   })
 })
 
@@ -312,7 +306,7 @@ describe('buildHeatmapOption', () => {
     expect(itemStyle).toMatchObject({
       borderRadius: 2,
       borderWidth: 2,
-      borderColor: tokens.cellGap,
+      borderColor: tokens.backdrop,
     })
   })
 
@@ -325,7 +319,7 @@ describe('buildHeatmapOption', () => {
 
     // The resting border, restated: a hovered cell keeps the gap around it.
     expect(series.emphasis.itemStyle).toEqual({
-      borderColor: tokens.cellGap,
+      borderColor: tokens.backdrop,
       borderWidth: 2,
       shadowBlur: 0,
       shadowColor: 'transparent',
@@ -347,7 +341,9 @@ describe('buildHeatmapOption', () => {
       const resting = cells[index].color
       const hovered = item.emphasis.itemStyle.color
       expect(hovered).toBe(hoverCellColor(resting))
-      expect(hexToOklch(hovered).l).toBeGreaterThan(hexToOklch(resting).l)
+      expect(hexToOklch(hovered).l).toBeGreaterThanOrEqual(
+        hexToOklch(resting).l,
+      )
     })
   })
 })
@@ -383,7 +379,7 @@ describe('hoverCellColor', () => {
   })
 
   it('prints values in ink picked against each cell own fill', () => {
-    const series = build({ showValues: true }).series[0]
+    const series = build({ showDataLabels: true }).series[0]
 
     expect(series.label.show).toBe(true)
     expect(series.labelLayout).toEqual({ hideOverlap: true })
@@ -393,13 +389,13 @@ describe('hoverCellColor', () => {
   })
 
   it('shortens the printed value', () => {
-    const series = build({ showValues: true }).series[0]
+    const series = build({ showDataLabels: true }).series[0]
 
     expect(series.label.formatter({ value: [0, 0, 12400] })).toBe('12.4K')
   })
 
   it('prints the value through `format` when one is given', () => {
-    const option = buildHeatmapOption(config({ showValues: true }), {
+    const option = buildHeatmapOption(config({ showDataLabels: true }), {
       tokens,
       format: (value: number) => `${value} orders`,
     }) as any

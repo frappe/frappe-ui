@@ -1,4 +1,4 @@
-import type { TabsSide, TabsSize, TabsVariant } from '../../Tabs/types'
+import type { TabsEdge, TabsSize, TabsVariant } from '../../Tabs/types'
 import type { BrowserTabBase, PillOrientation } from './pillTypes'
 
 // Single source of styling truth for tab tracks and triggers, shared by
@@ -18,9 +18,9 @@ export function tabTrackClasses(opts: {
   variant: TabsVariant
   size: TabsSize
   orientation: PillOrientation
-  side: TabsSide
+  edge: TabsEdge
 }): string[] {
-  const { variant, size, orientation, side } = opts
+  const { variant, size, orientation, edge } = opts
   const isSm = size === 'sm'
   const vertical = orientation === 'vertical'
 
@@ -51,9 +51,9 @@ export function tabTrackClasses(opts: {
       if (!vertical) return ['gap-1 border-b border-outline-gray-1']
       return [
         'gap-1',
-        side === 'right'
-          ? 'border-r border-outline-gray-1'
-          : 'border-l border-outline-gray-1',
+        edge === 'end'
+          ? 'border-e border-outline-gray-1'
+          : 'border-s border-outline-gray-1',
       ]
   }
 }
@@ -138,11 +138,11 @@ export function tabIndicatorInsetClasses(opts: {
  * positioning and `tabRadiusClasses` themselves.
  */
 export function browserTabCardClasses(base: BrowserTabBase): string {
-  if (base === 'left') {
-    return 'border border-outline-gray-1 border-l-transparent bg-surface-base after:absolute after:-inset-y-px after:-left-[2px] after:w-px after:bg-surface-base'
+  if (base === 'start') {
+    return 'border border-outline-gray-1 border-s-transparent bg-surface-base after:absolute after:-inset-y-px after:-start-[2px] after:w-px after:bg-surface-base'
   }
-  if (base === 'right') {
-    return 'border border-outline-gray-1 border-r-transparent bg-surface-base after:absolute after:-inset-y-px after:-right-[2px] after:w-px after:bg-surface-base'
+  if (base === 'end') {
+    return 'border border-outline-gray-1 border-e-transparent bg-surface-base after:absolute after:-inset-y-px after:-end-[2px] after:w-px after:bg-surface-base'
   }
   return 'border border-outline-gray-1 border-b-transparent bg-surface-base after:absolute after:-inset-x-px after:-bottom-[2px] after:h-px after:bg-surface-base'
 }
@@ -162,7 +162,7 @@ export const tabIndicatorMotionClasses =
  * Reset, focus ring, and disabled treatment for the focusable element
  * wrapping a pill. The shell owns the ring (P12) so every track and both
  * components get the same one; `focus-visible:ring-0` clears the UA ring
- * first, matching `SidebarItem` and `RailItem`.
+ * first, matching `SidebarItem` and `SidebarRailItem`.
  */
 export const tabShellClasses =
   'inline-flex appearance-none border-0 bg-transparent p-0 text-inherit no-underline focus-visible:ring-0 focus-visible:focus-ring disabled:pointer-events-none disabled:opacity-60'
@@ -183,8 +183,8 @@ export function tabRadiusClasses(
     return size === 'sm' ? 'rounded-[7px]' : 'rounded-[9px]'
   }
   if (variant === 'browser-tab') {
-    if (browserTabBase === 'left') return 'rounded-r-4'
-    if (browserTabBase === 'right') return 'rounded-l-4'
+    if (browserTabBase === 'start') return 'rounded-e-4'
+    if (browserTabBase === 'end') return 'rounded-s-4'
     if (browserTabBase === 'default') return 'rounded-t-4'
   }
   return size === 'sm' ? 'rounded-[7px]' : 'rounded-4'

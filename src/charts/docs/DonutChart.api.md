@@ -3,6 +3,7 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
+  import ExposedTable from '@/components/Docs/ExposedTable.vue'
 
   const propsData = [
   {
@@ -31,7 +32,7 @@
   },
   {
     name: 'error',
-    description: 'Puts the chart in its error state and prints this message under it. A\nchart that fails to draw sets its own; this is for a failed request.',
+    description: 'Puts the chart in its error state and prints this message under it. Data\nthe chart cannot draw shows the empty state, not this one.',
     required: false,
     type: 'string | null'
   },
@@ -60,8 +61,15 @@
     type: 'number'
   },
   {
-    name: 'showInlineLabels',
-    description: 'Prints each slice\'s name and share beside the ring, and drops the readout\nin the middle. Off by default: the legend says the same without the\nleader lines.',
+    name: 'hiddenSlices',
+    description: 'Slices the legend has switched off, by name. Bind it with\n`v-model:hiddenSlices` to drive the legend from the app. Left unbound, the\nlegend owns it.',
+    required: false,
+    type: 'string[]',
+    default: '[]'
+  },
+  {
+    name: 'showDataLabels',
+    description: 'Prints each slice\'s name and share beside the ring, and drops the readout\nin the middle. Off by default. The legend already names every slice and its\nshare, without the lines that tie a label back to its arc.',
     required: false,
     type: 'boolean'
   },
@@ -79,7 +87,7 @@
   },
   {
     name: 'format',
-    description: 'Prints every number the ring shows: the readout, the tooltip, the labels.',
+    description: 'Prints the readout and the tooltip. The slice labels print shares.',
     required: false,
     type: 'ChartValueFormatter'
   },
@@ -119,22 +127,40 @@
     type: 'any'
   },
   {
+    name: 'title-suffix',
+    description: 'A mark right after the title, on the same line. The title truncates\naround it and it keeps its width. It renders in the title\'s font size, so\ncontent sized in `em` is smaller on a NumberCard than on a chart.',
+    type: 'any'
+  },
+  {
     name: 'center',
     description: 'Replaces the readout in the middle of the ring. Reads the total, or the\nhovered slice while one is hovered.',
-    type: '{ value: string; label: string; percent?: string | undefined; }'
+    type: '{ label: string; value: number; formattedValue: string; percent?: number | undefined; }'
   },
   {
     name: 'tooltip',
-    description: 'Replaces the tooltip body. `items` holds the hovered slice alone.',
-    type: '{ items: ChartTooltipItem[]; }'
+    description: 'Replaces the tooltip body. `items` holds the hovered slice alone. A named\nslice carries one row, and the "Others" slice every row it collapsed.',
+    type: 'ChartTooltipSlotProps'
   }
 ]
 
   const emitsData = [
   {
     name: 'select',
-    description: 'A slice was selected, by click or by Enter on the keyboard cursor. The\n"Others" slice carries every row it grouped, so a caller can drill into\nthe tail as well as into a named slice.',
+    description: 'A slice was selected, by click or by Enter on the keyboard cursor. `name`\nidentifies the slice and `label` is what it printed. The collapsed tail is\nnamed `OTHERS_KEY` and carries every row it grouped, so a caller can drill\ninto it as well as into a named slice.',
     type: '[event: DonutSliceEvent]'
+  },
+  {
+    name: 'update:hiddenSlices',
+    description: 'The legend switched a slice off or back on. Carries the new list.',
+    type: '[value: string[]]'
+  }
+]
+
+  const exposedData = [
+  {
+    name: 'chart',
+    description: 'The echarts instance, once the plot has a size to initialise into.',
+    type: 'EChartsType | undefined'
   }
 ]
 </script>
@@ -146,3 +172,5 @@
 <SlotsTable :data="slotsData"/>
 
 <EmitsTable :data="emitsData"/>
+
+<ExposedTable :data="exposedData"/>

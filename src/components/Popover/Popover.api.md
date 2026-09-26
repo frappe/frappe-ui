@@ -3,6 +3,7 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
+  import ExposedTable from '@/components/Docs/ExposedTable.vue'
 
   const propsData = [
   {
@@ -36,7 +37,7 @@
     name: 'portalTo',
     description: 'Where to portal the content. Unset, an embedding host\'s target is used, else `body`.',
     required: false,
-    type: 'string | HTMLElement'
+    type: 'PortalTarget'
   },
   {
     name: 'collisionPadding',
@@ -51,6 +52,26 @@
     required: false,
     type: 'boolean',
     default: 'true'
+  },
+  {
+    name: 'autoFocus',
+    description: 'Whether the content takes focus when it opens. Set to `false` when typing\nin the trigger drives the panel, so the caret stays in the input.\nDefault: `true`.',
+    required: false,
+    type: 'boolean',
+    default: 'true'
+  },
+  {
+    name: 'trigger',
+    description: 'What opens the popover. `click` toggles it from the trigger element.\n`manual` does nothing on click; only `v-model:open` opens and closes it.\nIn `manual` mode the trigger gets no `aria-expanded` or `aria-controls`.\nDefault: `click`.',
+    required: false,
+    type: '"click" | "manual"',
+    default: '"click"'
+  },
+  {
+    name: 'reference',
+    description: 'Element to position the content against, instead of the trigger. Use it\nwhen the trigger is a labelled field, so the panel sits under the input row\nrather than under the description.',
+    required: false,
+    type: 'Element'
   },
   {
     name: 'matchTriggerWidth',
@@ -105,6 +126,24 @@
     type: '[]'
   }
 ]
+
+  const exposedData = [
+  {
+    name: 'open',
+    description: 'Opens the popover. Does nothing when it is already open.',
+    type: '() => void'
+  },
+  {
+    name: 'close',
+    description: 'Closes the popover. Does nothing when it is already closed.',
+    type: '() => void'
+  },
+  {
+    name: 'contentEl',
+    description: 'The content element. `null` while the popover is closed.',
+    type: 'HTMLElement | null'
+  }
+]
 </script>
 
 ## API Reference
@@ -114,3 +153,5 @@
 <SlotsTable :data="slotsData"/>
 
 <EmitsTable :data="emitsData"/>
+
+<ExposedTable :data="exposedData"/>

@@ -24,7 +24,7 @@ const weekly = [
       palette="categorical"
       :series-config="{
         signups: { type: 'area' },
-        plan: { lineType: 'dashed', lineWidth: 1.5 },
+        plan: { dashed: true },
       }"
       title="Signups against plan"
       subtitle="The reading carries a fill; the plan stays a line"

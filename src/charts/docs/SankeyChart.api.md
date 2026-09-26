@@ -3,6 +3,7 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
+  import ExposedTable from '@/components/Docs/ExposedTable.vue'
 
   const propsData = [
   {
@@ -31,7 +32,7 @@
   },
   {
     name: 'error',
-    description: 'Puts the chart in its error state and prints this message under it. A\nchart that fails to draw sets its own; this is for a failed request.',
+    description: 'Puts the chart in its error state and prints this message under it. Data\nthe chart cannot draw shows the empty state, not this one.',
     required: false,
     type: 'string | null'
   },
@@ -60,10 +61,10 @@
     type: 'string'
   },
   {
-    name: 'orient',
-    description: 'Defaults to `\'horizontal\'`: the flow runs left to right.',
+    name: 'vertical',
+    description: 'Flow runs top to bottom, in rows of nodes. Defaults to left to right.',
     required: false,
-    type: 'SankeyOrient'
+    type: 'boolean'
   },
   {
     name: 'nodeAlign',
@@ -113,9 +114,14 @@
     type: 'any'
   },
   {
+    name: 'title-suffix',
+    description: 'A mark right after the title, on the same line. The title truncates\naround it and it keeps its width. It renders in the title\'s font size, so\ncontent sized in `em` is smaller on a NumberCard than on a chart.',
+    type: 'any'
+  },
+  {
     name: 'tooltip',
-    description: 'Replaces the tooltip body. `items` holds the hovered band or node alone.',
-    type: '{ label?: string | undefined; items: ChartTooltipItem[]; }'
+    description: 'Replaces the tooltip body. `items` holds the hovered band or node alone.\nA node\'s `rows` is empty: it stands for every row through it, not one.',
+    type: 'ChartTooltipSlotProps'
   }
 ]
 
@@ -124,6 +130,14 @@
     name: 'select',
     description: 'A band was selected, by click or by Enter on the keyboard cursor. Carries\nits two nodes and the row behind it. A node emits nothing: it stands for\nevery row that passes through it, not one.',
     type: '[event: SankeyLinkEvent]'
+  }
+]
+
+  const exposedData = [
+  {
+    name: 'chart',
+    description: 'The echarts instance, once the plot has a size to initialise into.',
+    type: 'EChartsType | undefined'
   }
 ]
 </script>
@@ -135,3 +149,5 @@
 <SlotsTable :data="slotsData"/>
 
 <EmitsTable :data="emitsData"/>
+
+<ExposedTable :data="exposedData"/>

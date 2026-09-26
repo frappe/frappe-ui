@@ -3,6 +3,7 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
+  import ExposedTable from '@/components/Docs/ExposedTable.vue'
 
   const propsData = [
   {
@@ -39,11 +40,11 @@
     default: 'false'
   },
   {
-    name: 'side',
-    description: 'Edge the active browser tab attaches to. Only used when `variant=\'browser-tab\'` and `vertical`.',
+    name: 'edge',
+    description: 'browser-tab + vertical only: the edge of the list the tabs attach to.\n`start` is the left edge in left-to-right text.',
     required: false,
-    type: 'TabsSide',
-    default: '"left"'
+    type: 'TabsEdge',
+    default: '"start"'
   },
   {
     name: 'fluid',
@@ -57,13 +58,13 @@
   const slotsData = [
   {
     name: 'prefix',
-    description: '',
-    type: '{ button: { value: TabValue; customClass: NativeButtonClass | undefined; visibleLabel: boolean; acce'
+    description: 'Slot before the tab button label.',
+    type: '{ button: TabButton; active: boolean; disabled: boolean; }'
   },
   {
     name: 'suffix',
-    description: '',
-    type: '{ button: { value: TabValue; customClass: NativeButtonClass | undefined; visibleLabel: boolean; acce'
+    description: 'Slot after the tab button label.',
+    type: '{ button: TabButton; active: boolean; disabled: boolean; }'
   }
 ]
 
@@ -72,6 +73,14 @@
     name: 'update:modelValue',
     description: 'Fired when the model value changes.',
     type: '[value: TabValue]'
+  }
+]
+
+  const exposedData = [
+  {
+    name: 'focus',
+    description: 'Moves focus to the selected tab, or to the first enabled tab when nothing\nis selected. That is the tab `Tab` reaches, since the group is one tab\nstop. Disabled tabs are skipped, so a group with no enabled tab does\nnothing.',
+    type: '(options?: FocusOptions) => void'
   }
 ]
 </script>
@@ -83,3 +92,5 @@
 <SlotsTable :data="slotsData"/>
 
 <EmitsTable :data="emitsData"/>
+
+<ExposedTable :data="exposedData"/>

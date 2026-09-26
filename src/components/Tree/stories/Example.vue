@@ -22,7 +22,6 @@ const nodes = ref<TreeNode[]>([
       {
         name: 'documents',
         label: 'Documents',
-        expanded: false,
         children: [
           { name: 'somefile.txt', label: 'somefile.txt' },
           { name: 'somefile.pdf', label: 'somefile.pdf' },
@@ -31,10 +30,14 @@ const nodes = ref<TreeNode[]>([
     ],
   },
 ])
+
+// Expansion is a list of node keys. A key that is absent stays collapsed, so
+// `Documents` starts closed and the tree writes nothing back to `nodes`.
+const expanded = ref(['guest', 'downloads'])
 </script>
 
 <template>
   <div class="w-80">
-    <Tree :nodes="nodes" node-key="name" />
+    <Tree :nodes="nodes" node-key="name" v-model:expanded="expanded" />
   </div>
 </template>

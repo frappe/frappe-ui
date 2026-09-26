@@ -44,7 +44,7 @@
           >
             <button
               type="button"
-              class="absolute top-1 right-1 z-10 bg-white/80 hover:bg-white rounded-full p-1 shadow transition-opacity opacity-0 group-hover:opacity-100 focus:opacity-100"
+              class="absolute top-1 right-1 z-10 bg-white/80 hover:bg-white rounded-full p-1 shadow transition-opacity opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100 focus:opacity-100"
               aria-label="Remove image"
               @click.stop="removeImage(idx)"
             >
@@ -64,7 +64,7 @@
                 :class="
                   editingCaption === `${item.type}-${idx}`
                     ? 'opacity-100'
-                    : 'opacity-0 group-hover:opacity-100'
+                    : 'opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100'
                 "
               >
                 <div
@@ -127,7 +127,7 @@
                   :class="
                     editingCaption === `${item.type}-${idx}`
                       ? 'opacity-100'
-                      : 'opacity-0 group-hover:opacity-100'
+                      : 'opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100'
                   "
                 >
                   <div
@@ -267,9 +267,9 @@ import Button from '#components/Button/Button.vue'
 import Select from '#components/Select/Select.vue'
 import type { Editor } from '@tiptap/vue-3'
 import type { UploadedFile } from '#utils/useFileUpload'
-import LucideX from '~icons/lucide/x'
-import LucideImagePlus from '~icons/lucide/image-plus'
-
+import { classIcon } from '../../classIcon'
+const LucideX = classIcon('lucide-x')
+const LucideImagePlus = classIcon('lucide-image-plus')
 interface UploadResult {
   success: boolean
   file?: UploadedFile

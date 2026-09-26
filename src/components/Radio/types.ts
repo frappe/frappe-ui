@@ -29,8 +29,11 @@ export interface RadioGroupProps extends InputLabelingProps {
 }
 
 export interface RadioGroupEmits {
-  /** Fired when the selected value changes. */
-  'update:modelValue': [value: RadioValue]
+  /**
+   * Fired when the selected value changes. `undefined` while nothing is
+   * selected, which is what an unbound group starts at.
+   */
+  'update:modelValue': [value: RadioValue | undefined]
 }
 
 // `required` and `error` are intentionally omitted: a radio is one option within

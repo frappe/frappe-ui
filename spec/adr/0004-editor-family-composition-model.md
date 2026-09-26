@@ -42,6 +42,38 @@ Primitives recipe). The win is ergonomic — the common case
 (`<Editor v-slot="{ editor }">` composing `EditorContent` + menus in the slot)
 no longer needs `:editor="editor"` threaded onto every building block by hand.
 
+## Amendment (2026-09-14): explicit editor component roles
+
+Suggestion configuration now names the component's role: Mention calls its
+rendered node a `nodeView`, while reusable suggestion extensions call their
+popup a `listComponent`. `EditorFixedMenu` exposes its button `size` directly,
+using the library's canonical size vocabulary.
+
+## Amendment (2026-09-15): every kit member is typed, and two members are opt-in
+
+Point 3 said kit members are configured through `.configure()` but did not say
+what a member accepts. Each member now carries its extension's real options
+type, so a misspelled key is a compile error instead of a setting that is kept
+and never read. Members whose extension takes no options (`imageViewer`,
+`emoji`, `toc`) accept `{}` or `false` only.
+
+Three consequences follow.
+
+- The frappe `StarterKit` has no `code`, `codeBlock`, or `link` member. It
+  never registered TipTap's versions, so the keys did nothing. The kits'
+  `starterKit` key is `Omit<StarterKitOptions, 'heading'>`, because the kit's
+  own `heading` member overwrites it. `InlineKit` has its own
+  `InlineStarterKitOptions`: it registers eight stock extensions or none, so
+  each key accepts `false`.
+- "All members are present by default" gains two exceptions. `Toc` and
+  `StyleClipboard` in `RichTextKit` are `false` until asked for: both add
+  visible affordances (a table-of-contents node, a format painter) that most
+  rich-text editors never expose. `ImageViewer` stays on, because it only
+  upgrades an image click.
+- `slashCommands` is not inert-until-configured like `mention` and `tag`. `{}`
+  shows the built-in command menu, `{ items }` replaces that list, and `false`
+  removes the menu.
+
 ## Context
 
 The v0 `TextEditor` is a monolith. Every consumer app (gameplan, helpdesk, drive, crm, insights) wraps it to peel off defaults it can't control: auto-loaded extensions, frappe-coupled upload, fixed menu presets, opinionated layout slots. A bench-wide usage audit showed 4 of 5 apps maintain their own wrapper, five copies of the same toolbar-button array exist in the fleet, and most apps fight the same defaults in slightly different ways. Static imports in `TextEditor.vue` also defeat tree-shaking — everyone pays for every extension.

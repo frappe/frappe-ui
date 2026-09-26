@@ -3,20 +3,21 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
+  import ExposedTable from '@/components/Docs/ExposedTable.vue'
 
   const propsData = [
   {
     name: 'side',
     description: 'Side of the trigger the card is placed on.',
     required: false,
-    type: '"top" | "right" | "bottom" | "left"',
+    type: 'PopoverSide',
     default: '"bottom"'
   },
   {
     name: 'align',
     description: 'Alignment of the card relative to the trigger.',
     required: false,
-    type: '"start" | "center" | "end"',
+    type: 'PopoverAlign',
     default: '"start"'
   },
   {
@@ -30,7 +31,7 @@
     name: 'portalTo',
     description: 'Where the card is teleported to in the DOM. Unset, an embedding host\'s target is used, else `body`.',
     required: false,
-    type: 'string | HTMLElement'
+    type: 'PortalTarget'
   },
   {
     name: 'collisionPadding',
@@ -41,17 +42,17 @@
   },
   {
     name: 'hoverDelay',
-    description: 'Delay (in seconds) from when the pointer enters the trigger until the card\nopens. Matches the Tooltip convention of using seconds.',
+    description: 'Delay in milliseconds before the card opens. Default: `300`.',
     required: false,
     type: 'number',
-    default: '0.3'
+    default: '300'
   },
   {
     name: 'leaveDelay',
-    description: 'Delay (in seconds) from when the pointer leaves the trigger or card until\nthe card closes.',
+    description: 'Delay in milliseconds before the card closes. Default: `300`.',
     required: false,
     type: 'number',
-    default: '0.3'
+    default: '300'
   },
   {
     name: 'arrow',
@@ -62,7 +63,7 @@
   },
   {
     name: 'open',
-    description: '',
+    description: 'Controls the visibility of the hover card.',
     required: false,
     type: 'boolean',
     default: 'false'
@@ -78,7 +79,7 @@
   {
     name: 'default',
     description: 'Card contents, rendered inside the standard PopoverPanel shell.',
-    type: 'any'
+    type: 'HoverCardSlotProps'
   }
 ]
 
@@ -87,6 +88,19 @@
     name: 'update:open',
     description: 'Fired when the open state changes.',
     type: '[value: boolean]'
+  }
+]
+
+  const exposedData = [
+  {
+    name: 'open',
+    description: 'Opens the card.',
+    type: '() => void'
+  },
+  {
+    name: 'close',
+    description: 'Closes the card.',
+    type: '() => void'
   }
 ]
 </script>
@@ -98,3 +112,5 @@
 <SlotsTable :data="slotsData"/>
 
 <EmitsTable :data="emitsData"/>
+
+<ExposedTable :data="exposedData"/>

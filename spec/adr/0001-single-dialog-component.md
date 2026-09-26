@@ -15,7 +15,7 @@ When designing the v1 Dialog API and the imperative `dialog.confirm/danger/promp
 
 Ship **one** public component, `<Dialog>`, with `role="dialog"` always. There is no `<AlertDialog>` component in the public surface. Forced-response semantics are expressed via `dismissible: false` + explicit actions, not via a different ARIA role.
 
-The imperative `dialog.*` helpers internally mount the same `<Dialog>` with `dismissible: false`.
+The imperative `dialog.*` helpers internally mount the same `<Dialog>`. They do not force `dismissible: false`: it defaults to `true` and the caller sets it (`src/utils/dialog.ts`, `const dismissible = args.dismissible !== false`).
 
 ## Rationale
 

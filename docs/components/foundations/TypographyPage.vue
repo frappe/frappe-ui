@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { TabButtons } from 'frappe-ui'
-import typography from '../../../tailwind/generated/typography.json'
+import typography from '../../../tailwind/tokens/typography.js'
 
 type SizeMeta = {
   lineHeight?: string
   letterSpacing?: string
-  fontWeight?: string
+  fontWeight?: number
 }
 type SizeEntry = [string, SizeMeta]
 type Weight = 'regular' | 'medium' | 'semibold' | 'bold'
@@ -123,7 +123,7 @@ const paragraphSample =
 </script>
 
 <template>
-  <div class="grid gap-14">
+  <div class="not-prose my-8 grid gap-14">
     <header class="grid gap-6">
       <div
         class="rounded-7 border border-outline-gray-2 bg-surface-gray-1 px-6 py-5 grid gap-3"
@@ -145,9 +145,9 @@ const paragraphSample =
 
     <section class="grid gap-5">
       <div class="grid gap-1">
-        <h2 class="text-lg font-semibold text-ink-gray-8 m-0">Text sizes</h2>
-        <p class="text-p-sm text-ink-gray-5 m-0">
-          Sizes for UI text like labels, controls, table cells, and body copy.
+        <span class="text-base font-medium text-ink-gray-8">Text sizes</span>
+        <p class="text-p-sm text-ink-gray-5">
+          For labels, controls, table cells and body text.
         </p>
       </div>
       <div
@@ -179,10 +179,8 @@ const paragraphSample =
 
     <section class="grid gap-5">
       <div class="grid gap-1">
-        <h2 class="text-lg font-semibold text-ink-gray-8 m-0">Display sizes</h2>
-        <p class="text-p-sm text-ink-gray-5 m-0">
-          Larger sizes for marketing, landing pages, and headings.
-        </p>
+        <span class="text-base font-medium text-ink-gray-8">Display sizes</span>
+        <p class="text-p-sm text-ink-gray-5">For headings and landing pages.</p>
       </div>
       <div
         class="grid divide-y divide-outline-gray-1 border-y border-outline-gray-1"
@@ -213,10 +211,9 @@ const paragraphSample =
 
     <section class="grid gap-5">
       <div class="grid gap-1">
-        <h2 class="text-lg font-semibold text-ink-gray-8 m-0">Paragraph</h2>
-        <p class="text-p-sm text-ink-gray-5 m-0">
-          The <code class="text-ink-gray-8">text-p-*</code> variants use looser
-          line-height and tracking for multi-line text.
+        <span class="text-base font-medium text-ink-gray-8">Paragraphs</span>
+        <p class="text-p-sm text-ink-gray-5">
+          For text that runs over several lines.
         </p>
       </div>
       <div

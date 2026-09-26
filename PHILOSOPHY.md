@@ -132,7 +132,7 @@ No third axis (`intent`, `severity`, `appearance`, `kind`, `status`). "Warning" 
 
 Icon-only buttons, action toggles, and other controls that don't carry a value are **not** input controls — P5 doesn't apply.
 
-**`Editor` carve-out.** `Editor` (`frappe-ui/editor`) holds a value the user enters, which would put it under P5, but it is **renderless** by design (ADR-0004): it makes zero layout decisions and renders no chrome of its own, so a `label`/`description`/`error` prop would have nowhere to draw itself. Labeling `Editor` is layout, same as its menus and action buttons — the consumer renders a label above the slot the same way it renders everything else inside it, typically via the app's own `FormControl`-style wrapper (see spec/editor.md's "build your app's component on `<Editor>`" pattern).
+**Renderless-editor carve-out.** Two components hold a value the user enters and are still exempt: `Editor` (`frappe-ui/editor`, ADR-0004) and `CodeEditor` (`frappe-ui/code-editor`, ADR-0019). Both are **renderless** by design. Each makes zero layout decisions and renders no chrome of its own, so a `label`/`description`/`error` prop would have nowhere to draw itself. Labeling either one is layout, the same as its menus, its box, and its action buttons. The consumer renders the label the same way it renders everything else around the editor, typically through the app's own `FormControl`-style wrapper. See spec/editor.md's "build your app's component on `<Editor>`" pattern and spec/code-editor.md's equivalent.
 
 **Why:** Forms are clusters of inputs. Inconsistent labeling props mean every form remembers which component spells the label `label` vs `title`, which auto-renders the required indicator, which wires `aria-describedby` correctly. Uniformity is what makes the input family a family and not a grab-bag.
 
@@ -311,7 +311,7 @@ setTimeout(close, 5000)
 **Rule:** Components expose customization through two channels:
 
 1. **Slots** — for *content* injection (governed by P6/P7).
-2. **`data-*` attributes** — for *styling* hooks. Components set stable `data-slot="…"`, `data-state="…"`, `data-disabled`, `data-variant`, `data-size` on rendered DOM so callers and brand themes target them via CSS.
+2. **`data-*` attributes** — for *styling* hooks. Components set stable `data-slot="…"`, `data-state="…"`, `data-disabled`, `data-variant`, `data-size`, `data-color` on rendered DOM so callers and brand themes target them via CSS. `data-color` carries the component's tone (`theme` prop). It is not `data-theme`: that attribute is the light/dark switch the app sets on the document.
 
 **Forbidden:**
 - Class-name injection props (`triggerClass`, `contentClass`, `itemClass`)
@@ -320,7 +320,11 @@ setTimeout(close, 5000)
 
 Root `class` fallthrough — `<MyDropdown class="my-4">` landing on the root via Vue's default attribute inheritance — is fine. P10 forbids *named class props for inner elements*, not the implicit single binding.
 
+**One exception: `ScrollArea.viewportClass`.** The scrolling viewport is an element reka-ui owns inside the root, so root `class` fallthrough cannot reach it, and layout rules that have to sit on the scroller itself (`[&>div]:h-full`, a grid, a min-width) have nowhere else to go. `data-slot="scroll-area-viewport"` covers styling from a stylesheet; it does not cover a Tailwind utility written at the call site. The prop stays, and it stays the only one: a second class prop needs an ADR.
+
 The exact data-slot / data-state taxonomy is per component family; each family's spec defines its own values.
+
+**Boolean states are presence-only.** A boolean attribute such as `data-disabled`, `data-required` or `data-loading` is present when the state is on and absent when it is off. Select it by presence: `[data-disabled]` in CSS, `data-[disabled]:` in Tailwind. The value is not part of the contract. Some components write `""` and some write `"true"`, and a 1.x release can change either. A selector such as `[data-disabled="true"]` is off-contract.
 
 **Why:**
 - Class-injection props leak the internal DOM tree into the public API. Every restructure breaks every caller. `data-slot` keeps the *contract* stable.
@@ -359,6 +363,11 @@ The exact data-slot / data-state taxonomy is per component family; each family's
   - String form: the `lucide-*` namespaced convention. No per-icon imports.
   - Component form: escape hatch for non-lucide icons (brand logos, custom glyphs).
 - The generic **`#prefix` / `#suffix` slots** (P6) are the full-control override — not a parallel `#icon` slot competing with the prop.
+
+**The Icon compatibility exception:** The `Icon` component itself also accepts
+`name?: string | Component | null`. Its canonical `icon` prop accepts the same
+type and wins whenever its value is not `undefined`; `name` remains fully
+supported for existing callers. Other components continue to use only `icon`.
 
 **The Button exception:** Button has a singular `#icon` slot (and `icon` prop with no left/right pair) because square icon-only buttons are a standard, common component.
 
@@ -525,7 +534,7 @@ import { Sidebar, SidebarItem } from 'frappe-ui/app-shell' // Sidebar has no
 
 **`export *` only from a curated barrel.** An entry point may `export *` from an `index.ts` whose export list was reviewed — a component family's barrel, `data-fetching/`, `experimental.ts`. It may never `export *` from an implementation module. The two look identical in a diff and behave completely differently: a barrel's export list is the reviewed decision, while an implementation module exports whatever it happens to need exported next, and a helper added months later joins the public API with no review, no docs, and — after `1.0.0` — a freeze until `2.0.0`.
 
-This is not hypothetical. At the time of the [#870](https://github.com/frappe/frappe-ui/issues/870) audit, six such lines in `src/index.ts` were publishing **31 members nobody had reviewed**, which is how `getSystemTheme`, `scrollTo`, `UseScrollContainerOptions` and `useIsMobile` came to be part of the public surface. `tailwind/tokens.js` reached the same state by the same route ([#887](https://github.com/frappe/frappe-ui/issues/887)).
+This is not hypothetical. At the time of the [#870](https://github.com/frappe/frappe-ui/issues/870) audit, six such lines in `src/index.ts` were publishing **31 members nobody had reviewed**, which is how `getSystemTheme`, `scrollTo`, `UseScrollContainerOptions` and `useIsMobile` came to be part of the public surface. The `tailwind/tokens.js` of the time reached the same state by the same route ([#887](https://github.com/frappe/frappe-ui/issues/887)): it `export *`-ed `colorPalette.js`, an implementation module. The `tailwind/tokens.js` that ships today is the curated kind. It spells out every token it exports, and `colorPalette.js` is not exported at all.
 
 The rule is a one-line grep, and the fix is mechanical — spell the members out:
 
@@ -546,7 +555,7 @@ export * from './components/Button'
 
 Naming the members is also what makes the export surface readable at all: `src/index.ts` becomes the list of what ships, rather than a list of directories to go and expand by hand.
 
-**Build-time and tooling entries are a separate category.** `tailwind`, `vite`, `vitepress`, `tsconfig.base.json`, and the `*-style.css` entries aren't judged by the three bars above — they aren't importable into a component tree, so cost isolation, an extensible registry, and name collision have nothing to say about them. ADR-0010 opened this category without saying what its own terms are; [#887](https://github.com/frappe/frappe-ui/issues/887) settled them:
+**Build-time and tooling entries are a separate category.** `tailwind`, `tailwind/tokens`, `vite`, `vitepress`, `tsconfig.base.json`, and the `*-style.css` entries aren't judged by the three bars above — they aren't importable into a component tree, so cost isolation, an extensible registry, and name collision have nothing to say about them. ADR-0010 opened this category without saying what its own terms are; [#887](https://github.com/frappe/frappe-ui/issues/887) settled them:
 
 **A build-time entry freezes additive-only at `1.0.0`.** Options, tokens, utilities, and compiler options may be *added* in a minor. Nothing may be renamed or removed before `2.0.0`.
 

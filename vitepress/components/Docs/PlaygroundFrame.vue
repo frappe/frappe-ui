@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, reactive, ref, shallowRef, watchEffect } from 'vue'
-import { Switch, TabButtons, TextInput } from 'frappe-ui'
+import { Select, Switch, TabButtons, TextInput } from 'frappe-ui'
 
 export type KnobOption = { label: string; value: string }
 type VisibleWhen = (values: Record<string, any>) => boolean
@@ -9,7 +9,17 @@ export type Knob =
       name: string
       type: 'text'
       default: string
-      width?: string
+      visibleWhen?: VisibleWhen
+    }
+  | {
+      name: string
+      // Renders `<input type="number">`, so ArrowUp/ArrowDown step the
+      // value. The value is a number, or `null` while the input is empty.
+      type: 'number'
+      default: number | null
+      min?: number
+      max?: number
+      step?: number
       visibleWhen?: VisibleWhen
     }
   | {
@@ -43,15 +53,23 @@ const values = reactive<Record<string, any>>(
 
 const rowKnobs = computed(() =>
   props.knobs.filter(
-    (k) =>
-      (k.type === 'text' || k.type === 'tabs') &&
-      (k.visibleWhen?.(values) ?? true),
+    (k) => k.type !== 'switch' && (k.visibleWhen?.(values) ?? true),
   ),
 )
 const switchKnobs = props.knobs.filter((k) => k.type === 'switch') as Extract<
   Knob,
   { type: 'switch' }
 >[]
+
+// The knob column is narrow. Tab buttons whose labels run past about 24
+// characters would overflow it, so those knobs render as a Select.
+const fitsAsTabs = (options: KnobOption[]) =>
+  options.reduce((n, o) => n + o.label.length, 0) <= 24
+
+function setNumber(name: string, raw: string) {
+  const n = raw === '' ? null : Number(raw)
+  values[name] = n === null || Number.isFinite(n) ? n : values[name]
+}
 
 const generatedCode = computed(() => props.code(values))
 
@@ -107,46 +125,72 @@ function onCopy() {
       class="overflow-hidden rounded-7 border border-outline-gray-1 divide-y divide-outline-gray-1"
     >
       <div
-        class="flex items-center justify-center bg-surface-base p-8 dot-grid"
-        :style="{ minHeight: previewMinHeight }"
+        class="grid divide-y divide-outline-gray-1 lg:grid-cols-[minmax(0,1fr)_17rem] lg:divide-x lg:divide-y-0"
       >
-        <slot name="preview" :values="values" />
-      </div>
+        <div
+          class="flex min-w-0 items-center justify-center overflow-auto bg-surface-base p-8 dot-grid"
+          :style="{ minHeight: previewMinHeight }"
+        >
+          <slot name="preview" :values="values" />
+        </div>
 
-      <div
-        class="flex flex-col gap-6 bg-surface-gray-1 p-4 sm:flex-row sm:items-start sm:justify-between sm:gap-10"
-      >
-        <div v-if="rowKnobs.length" class="flex flex-col gap-3">
-          <div v-for="knob in rowKnobs" :key="knob.name" class="knob-row">
+        <!-- Knobs stacked in a column beside the preview, label above control. -->
+        <div class="flex flex-col gap-4 bg-surface-base p-4">
+          <div
+            v-for="knob in rowKnobs"
+            :key="knob.name"
+            class="flex flex-col gap-1.5"
+          >
             <span class="knob-label">{{ knob.name }}</span>
             <TextInput
               v-if="knob.type === 'text'"
               v-model="values[knob.name]"
               :aria-label="knob.name"
               variant="outline"
-              :style="{ width: knob.width ?? '10rem' }"
+            />
+            <TextInput
+              v-else-if="knob.type === 'number'"
+              type="number"
+              :model-value="values[knob.name] ?? ''"
+              :aria-label="knob.name"
+              :min="knob.min"
+              :max="knob.max"
+              :step="knob.step"
+              variant="outline"
+              @update:model-value="setNumber(knob.name, $event)"
             />
             <TabButtons
-              v-else-if="knob.type === 'tabs'"
+              v-else-if="knob.type === 'tabs' && fitsAsTabs(knob.options)"
               v-model="values[knob.name]"
               :options="knob.options"
             />
-          </div>
-        </div>
-        <div
-          v-if="switchKnobs.length"
-          class="flex flex-col gap-3 sm:w-48 sm:shrink-0"
-        >
-          <div
-            v-for="knob in switchKnobs"
-            :key="knob.name"
-            class="flex items-center justify-between gap-4"
-          >
-            <span class="knob-label knob-label-auto">{{ knob.name }}</span>
-            <Switch
+            <Select
+              v-else-if="knob.type === 'tabs'"
               v-model="values[knob.name]"
-              :disabled="knob.disabledWhen?.(values) ?? false"
+              :aria-label="knob.name"
+              :options="knob.options"
+              variant="outline"
             />
+          </div>
+          <div
+            v-if="switchKnobs.length"
+            class="flex flex-col gap-2.5 border-t border-outline-gray-1 pt-4"
+          >
+            <!-- A <label> forwards clicks on the name to the switch inside it. -->
+            <label
+              v-for="knob in switchKnobs"
+              :key="knob.name"
+              class="flex items-center justify-between gap-4"
+              :class="
+                knob.disabledWhen?.(values) ? 'opacity-60' : 'cursor-pointer'
+              "
+            >
+              <span class="knob-label">{{ knob.name }}</span>
+              <Switch
+                v-model="values[knob.name]"
+                :disabled="knob.disabledWhen?.(values) ?? false"
+              />
+            </label>
           </div>
         </div>
       </div>
@@ -167,22 +211,10 @@ function onCopy() {
 </template>
 
 <style scoped>
-.knob-row {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
 .knob-label {
-  display: inline-block;
-  width: 96px;
-  flex-shrink: 0;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 13px;
   color: var(--p-color-ink-gray-6, #7c7c7c);
-}
-/* Toggle rows size their label to the text so the switch hugs the right edge. */
-.knob-label-auto {
-  width: auto;
 }
 .dot-grid {
   /* Black dots vanish on the dark surface, so flip to light ones — the docs

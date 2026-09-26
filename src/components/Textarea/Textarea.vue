@@ -46,14 +46,17 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, useAttrs, useSlots } from 'vue'
+import { computed, ref, useAttrs } from 'vue'
 import type { StyleValue } from 'vue'
 import debounce from '../../utils/debounce'
+import { resolvePropValue } from '../../utils/resolvePropValue'
 import { useInputLabeling } from '../../composables/useInputLabeling'
+import { useReactiveSlots } from '../../composables/useReactiveSlots'
 import InputLabel from '../InputLabeling/InputLabel.vue'
 import InputDescription from '../InputLabeling/InputDescription.vue'
 import InputError from '../InputLabeling/InputError.vue'
 import LabelingWrapper from '../InputLabeling/LabelingWrapper.vue'
+import type { InputSize } from '../../composables/inputTypes'
 import type { TextareaEmits, TextareaProps } from './types'
 import type { TextInputExposed } from '../TextInput/types'
 
@@ -67,12 +70,29 @@ const props = withDefaults(defineProps<TextareaProps>(), {
   rows: 3,
 })
 
+const SIZE_FALLBACK = 'sm'
+const SIZE_CONTEXT = { component: 'Textarea', prop: 'size' } as const
+
+const sizeClassMap: Record<InputSize, string> = {
+  xs: 'text-p-sm rounded-3 min-h-8',
+  sm: 'text-p-sm rounded-4 min-h-9',
+  md: 'text-p-sm rounded-4 min-h-10',
+  lg: 'text-p-sm rounded-5 min-h-11',
+}
+
+const paddingClassMap: Record<InputSize, string[]> = {
+  xs: ['py-1 px-1.5'],
+  sm: ['py-1.5 px-2'],
+  md: ['py-1.5 px-2.5'],
+  lg: ['py-1.5 px-3'],
+}
+
 const emit = defineEmits<TextareaEmits>()
 const attrs = useAttrs()
-const slots = useSlots()
+const slots = useReactiveSlots<typeof declaredSlots>()
 const textareaRef = ref<HTMLTextAreaElement | null>(null)
 
-defineSlots<{
+const declaredSlots = defineSlots<{
   /** Overrides the rendered label content. Receives `{ required }`. */
   label?: (props: { required: boolean }) => any
 
@@ -112,20 +132,26 @@ const attrsWithoutClassStyle = computed(() => {
 })
 
 const inputClasses = computed(() => {
-  // Each min-height fits one full line: line-height + py-1.5 + borders.
-  let sizeClasses = {
-    sm: 'text-p-base rounded-4 min-h-9',
-    md: 'text-p-lg rounded-4 min-h-10',
-    lg: 'text-p-2xl rounded-5 min-h-11',
-    xl: 'text-p-3xl rounded-5 min-h-11',
-  }[props.size]
+  // `size` moves spacing, radius and the minimum height — not the type. The
+  // text is a flat 13px (`text-p-sm`) at every size, matching the label and
+  // description; the single-line input heights do not prescribe a Textarea
+  // height, so a `lg` Textarea is a roomier box of the same 13px prose.
+  //
+  // Every min-height still fits one full line: 13px x 1.5 line-height, plus
+  // the size's vertical padding, plus 2px of border.
+  let sizeClasses = resolvePropValue(
+    sizeClassMap,
+    props.size,
+    SIZE_FALLBACK,
+    SIZE_CONTEXT,
+  )
 
-  let paddingClasses = {
-    sm: ['py-1.5 px-2'],
-    md: ['py-1.5 px-2.5'],
-    lg: ['py-1.5 px-3'],
-    xl: ['py-1.5 px-3'],
-  }[props.size]
+  let paddingClasses = resolvePropValue(
+    paddingClassMap,
+    props.size,
+    SIZE_FALLBACK,
+    SIZE_CONTEXT,
+  )
 
   let variant = props.disabled ? 'disabled' : props.variant
   let variantClasses = {
@@ -169,6 +195,7 @@ function focus(options?: FocusOptions) {
 // A getter rather than `computed(...)`: see TextInput.vue's defineExpose for
 // why — a ComputedRef doesn't structurally match the type's plain element.
 defineExpose<TextInputExposed<HTMLTextAreaElement>>({
+  /** Moves focus to the textarea. */
   focus,
   get inputElement() {
     return textareaRef.value

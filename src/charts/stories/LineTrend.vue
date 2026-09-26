@@ -28,7 +28,7 @@ const sessions = [
       palette="categorical"
       :series-config="{
         mobile: { smooth: true },
-        desktop: { lineType: 'dashed', lineWidth: 1.5, smooth: true },
+        desktop: { dashed: true, smooth: true },
       }"
       title="Sessions by device"
       subtitle="Store sessions, last 12 months"

@@ -1,6 +1,6 @@
 <template>
   <PageHeaderBase
-    class="z-10 flex h-[var(--mobile-header-height,52px)] flex-col justify-center border-b bg-surface-base px-3"
+    class="z-10 flex h-[52px] flex-col justify-center border-b bg-surface-base px-3"
   >
     <div
       class="relative flex h-full w-full items-center"
@@ -19,7 +19,7 @@
            truncate here covers a plain-text title; a PageHeaderMobileTitle caps
            itself at this width and ellipsises its own text, so the two never race. -->
       <h1
-        class="mx-[var(--mobile-header-title-inset)] min-w-0 flex-1 truncate text-center text-xl-semibold leading-tight text-ink-gray-9"
+        class="mx-[var(--\_page-header-mobile-title-inset)] min-w-0 flex-1 truncate text-center text-xl-semibold leading-tight text-ink-gray-9"
       >
         <slot>{{ title }}</slot>
       </h1>
@@ -36,13 +36,14 @@
 
 <script setup lang="ts">
 import { useElementSize } from '@vueuse/core'
-import { computed, useSlots, useTemplateRef, type CSSProperties } from 'vue'
+import { computed, useTemplateRef, type CSSProperties } from 'vue'
+import { useReactiveSlots } from '../../composables/useReactiveSlots'
 import PageHeaderBase from './PageHeaderBase.vue'
 import type { PageHeaderMobileProps } from './types'
 
 defineProps<PageHeaderMobileProps>()
 
-defineSlots<{
+const declaredSlots = defineSlots<{
   /** A control leading the centered title — usually a `PageHeaderBackButton`. */
   prefix?: () => any
   /** The centered title. Overrides `title`; usually a `PageHeaderMobileTitle`. */
@@ -51,7 +52,7 @@ defineSlots<{
   suffix?: () => any
 }>()
 
-const slots = useSlots()
+const slots = useReactiveSlots<typeof declaredSlots>()
 const hasPrefixSlot = computed(() => Boolean(slots.prefix))
 const hasSuffixSlot = computed(() => Boolean(slots.suffix))
 
@@ -81,6 +82,6 @@ const titleInset = computed(() => {
 })
 
 const titleInsetStyle = computed<CSSProperties>(() => ({
-  '--mobile-header-title-inset': titleInset.value,
+  '--_page-header-mobile-title-inset': titleInset.value,
 }))
 </script>

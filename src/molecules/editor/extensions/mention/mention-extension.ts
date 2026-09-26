@@ -14,6 +14,7 @@ import {
   type BaseSuggestionItem,
 } from '../suggestion/createSuggestionExtension'
 import SuggestionList from '../suggestion/SuggestionList.vue'
+import { warnRemoved } from '#utils/warnDeprecated'
 import {
   insertSuggestionNode,
   filterByQuery,
@@ -21,21 +22,26 @@ import {
 } from '#molecules/editor/extensions/shared/suggestion-helpers'
 import './style.css'
 
+/**
+ * One entry in the `@` list.
+ *
+ * `label` is what the list shows and what the mention renders as; `value` is
+ * the stable identifier stored on the node (`data-id`). Extra fields are
+ * allowed and reach the item slot untouched, so an item can carry an avatar
+ * or an email for a custom list component.
+ */
 export interface MentionSuggestionItem extends BaseSuggestionItem {
-  id: string
   label: string
-  value?: string
-  email?: string
-  full_name?: string
+  value: string
 }
 
 interface MentionSuggestionOptions {
   mentions: MaybeRefOrGetter<MentionSuggestionItem[]>
 }
 
-function createMentionNode(component?: Component) {
-  const nodeView = component
-    ? { addNodeView: () => VueNodeViewRenderer(component) }
+function createMentionNode(nodeView?: Component) {
+  const nodeViewExtension = nodeView
+    ? { addNodeView: () => VueNodeViewRenderer(nodeView) }
     : {}
 
   return Node.create({
@@ -44,12 +50,6 @@ function createMentionNode(component?: Component) {
     inline: true,
     selectable: true,
     atom: true,
-    addOptions() {
-      return {
-        component: undefined,
-      }
-    },
-
     addAttributes() {
       return {
         id: {
@@ -104,16 +104,54 @@ function createMentionNode(component?: Component) {
       return `@${node.attrs.label || node.attrs.id || ''}`
     },
 
-    ...nodeView,
+    ...nodeViewExtension,
   })
 }
+
+/**
+ * Characters that may sit immediately before `@`. TipTap defaults to `[' ']`,
+ * so `(@jane` never opened the list. Curly quotes are included because
+ * Typography (on in RichTextKit) rewrites `"`/`'` the moment they are typed.
+ * NBSP is included because pasted-from-email content often uses it as a space.
+ * Closing quotes (`” ’`) are included because Typography curls a quote after a
+ * word into the closing form; CJK and guillemet closers (`」 』 » ›`) match.
+ *
+ * Slash (`/`), tag (`#`), and emoji (`:`) keep the default: those triggers
+ * after a word usually mean a path, a heading, or a colon, not a menu.
+ */
+const ALLOWED_MENTION_PREFIXES = [
+  ' ',
+  '\u00a0',
+  '(',
+  '[',
+  '{',
+  '<',
+  '（',
+  '【',
+  '《',
+  '「',
+  '『',
+  '«',
+  '‹',
+  '"',
+  "'",
+  '“',
+  '”',
+  '‘',
+  '’',
+  '」',
+  '』',
+  '»',
+  '›',
+]
 
 const MentionSuggestionExtension =
   createSuggestionExtension<MentionSuggestionItem>({
     name: 'mentionSuggestion',
     char: '@',
     pluginKey: new PluginKey('mentionSuggestion'),
-    component: SuggestionList,
+    listComponent: SuggestionList,
+    allowedPrefixes: ALLOWED_MENTION_PREFIXES,
 
     addOptions() {
       return {
@@ -128,14 +166,14 @@ const MentionSuggestionExtension =
       )
       const mentions = toValue(options?.mentions ?? [])
 
-      return filterByQuery(mentions, query, 'label')
-        .slice(0, 10)
-        .map((mention) => ({ ...mention, display: mention.label }))
+      // The matched items are passed through as they came in, so the item
+      // slot receives the caller's own object, extra fields and all.
+      return filterByQuery(mentions, query, 'label').slice(0, 10)
     },
 
     command: ({ editor, range, props }) => {
       insertSuggestionNode(editor, range, 'mention', {
-        id: props.id || props.value,
+        id: props.value,
         label: props.label,
       })
     },
@@ -151,19 +189,21 @@ const MentionSuggestionExtension =
 
 export const MentionExtension = Extension.create<{
   items: MaybeRefOrGetter<MentionSuggestionItem[]> | null
-  component?: Component
+  nodeView?: Component
 }>({
   name: 'mentionExtension',
 
   addOptions() {
     return {
       items: null,
-      component: undefined,
     }
   },
 
   addExtensions() {
-    const node = createMentionNode(this.options.component)
+    if ('component' in this.options) {
+      warnRemoved('Mention.component', 'Mention.nodeView')
+    }
+    const node = createMentionNode(this.options.nodeView)
     // Inert until configured: only wire the `@` suggestion when an item source
     // is provided. Existing mentions in content still render through the node.
     if (this.options.items == null) return [node]
@@ -183,7 +223,7 @@ export const MentionExtension = Extension.create<{
           editor.state.doc.descendants((node: ProseMirrorNode) => {
             if (node.type.name === 'mention') {
               mentions.push({
-                id: node.attrs.id,
+                value: node.attrs.id,
                 label: node.attrs.label,
               })
             }

@@ -76,7 +76,7 @@ describe('LineChart', () => {
     // The stroke is a thin target; the symbols are what a reader aims at.
     cy.get(`${MARKS} path[fill^="#"]`).first().click()
     cy.get('@onSelect').should('have.been.calledWithMatch', {
-      seriesName: 'sales',
+      name: 'sales',
       row: { month: 'Jan', sales: 10 },
     })
   })
@@ -152,7 +152,8 @@ describe('LineChart', () => {
 
     it('reads a y2 line against the second axis', () => {
       mountChart({
-        seriesConfig: { refunds: { axis: 'y2' } },
+        y: 'sales',
+        y2: 'refunds',
         referenceLines: [
           { value: 15, label: 'Sales target' },
           { value: 5, axis: 'y2', label: 'Refund cap' },
@@ -163,14 +164,16 @@ describe('LineChart', () => {
         .and('contain.text', 'Refund cap')
     })
 
-    it('leaves the rule in place while every series is switched off', () => {
+    // The legend refuses to hide the last visible series, so one series off is
+    // as empty as the plot gets from here. An all-hidden plot has no scale to
+    // place the rule on, which is its own question.
+    it('leaves the rule in place while a series is switched off', () => {
       // Inside refunds' own range, so the rule stays on the scale the plot
       // settles at: a line off the end of the axis is not drawn, which would
       // pass this test for the wrong reason.
       mountChart({ referenceLines: [{ value: 5, label: 'Target' }] })
       cy.get('[aria-label="Hide Sales"]').click()
-      cy.get('[aria-label="Hide Refunds"]').click()
-      lines().should('not.exist')
+      lines().should('have.length', 1)
       cy.get('[data-slot="chart-plot"] svg text').should(
         'contain.text',
         'Target',
@@ -179,7 +182,7 @@ describe('LineChart', () => {
   })
 
   it('measures a y2 series against a second axis, drawn opposite', () => {
-    mountChart({ seriesConfig: { refunds: { axis: 'y2' } } })
+    mountChart({ y: 'sales', y2: 'refunds' })
     lines().should('have.length', 2)
     // Two scales, so the axis labels no longer share a single set of values.
     cy.get('[data-slot="chart-plot"] svg text').should('contain.text', '6')
@@ -243,7 +246,8 @@ describe('LineChart', () => {
 
   it('titles each value axis over the edge its axis is drawn on', () => {
     mountChart({
-      seriesConfig: { refunds: { axis: 'y2' } },
+      y: 'sales',
+      y2: 'refunds',
       yAxis: { title: 'Sales' },
       y2Axis: { title: 'Refunds' },
     })
@@ -356,8 +360,7 @@ describe('LineChart', () => {
       reading().should('contain.text', 'Refunds')
       plot().type('{enter}')
       cy.get('@onSelect').should('have.been.calledWithMatch', {
-        seriesName: 'refunds',
-        dataIndex: 0,
+        name: 'refunds',
         value: 4,
         row: { month: 'Jan', refunds: 4 },
       })
@@ -370,8 +373,7 @@ describe('LineChart', () => {
       plot().type('{rightarrow}')
       plot().type('{enter}')
       cy.get('@onSelect').should('have.been.calledWithMatch', {
-        seriesName: 'sales',
-        dataIndex: 1,
+        name: 'sales',
         value: 20,
         row: { month: 'Feb', sales: 20 },
       })

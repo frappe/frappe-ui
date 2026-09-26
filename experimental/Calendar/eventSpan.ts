@@ -13,9 +13,81 @@ import type { CalendarEvent, CalendarRowBar, CalendarDaySegment } from './types'
 const DAY_MS = 24 * 60 * 60 * 1000
 const DAY_MINUTES = 24 * 60
 
-/** Height of one all-day bar and the pitch between lanes, in pixels. */
-export const LANE_HEIGHT = 30
-export const LANE_PITCH = LANE_HEIGHT + 4
+/**
+ * A row of the day view's all-day lane, and of a month cell — a pill's height in
+ * either, since both stack them under one heading. They were 30 against the
+ * pill's 28, which read as two kinds of row in one lane.
+ */
+export const LANE_HEIGHT = 28
+
+/**
+ * The air between one all-day bar and the next, and between the row's edge and
+ * the bars inside it — the same 4px the day view's all-day lane puts between its
+ * own rows of pills, and a month cell between the rows it stacks.
+ */
+export const ALL_DAY_LANE_GAP = 4
+export const NARROW_ALL_DAY_LANE_GAP = 2
+
+/**
+ * A bar in a narrow week's all-day row: the line itself, its title being set a
+ * size down there, with nothing above or below it. Three lanes of that and their
+ * gaps is as much of a phone's screen as the row can take from the hours under
+ * it.
+ *
+ * A week with room draws the day view's own lane, since a bar is a pill that
+ * runs over several days and the two sit on the same rule in the same box.
+ */
+export const NARROW_WEEK_LANE_HEIGHT = 20
+
+/**
+ * The lane a week draws its bars in, the air between lanes — which is also the
+ * air between the row's rules and the first and last of them — and the pitch
+ * from one lane to the next. A narrow week halves the gap along with the lane:
+ * the 2px a phone's month cell puts between its rows, so the two grids read as
+ * one at the width they share.
+ */
+export const weekLaneHeight = (narrow?: boolean) =>
+  narrow ? NARROW_WEEK_LANE_HEIGHT : LANE_HEIGHT
+export const weekLaneGap = (narrow?: boolean) =>
+  narrow ? NARROW_ALL_DAY_LANE_GAP : ALL_DAY_LANE_GAP
+export const weekLanePitch = (narrow?: boolean) =>
+  weekLaneHeight(narrow) + weekLaneGap(narrow)
+
+/**
+ * How far inside its day an event is drawn, in pixels — a bar in the all-day
+ * row, a pill in the time grid, and the "+n more" button that stands in for the
+ * bars a row has no room for, alike.
+ *
+ * A pill carries `PILL_MARGIN` of its own on top of this, in `mx-px`; anything
+ * laid out beside pills rather than being one has to add it back, or it starts
+ * a pixel to their left on the same edge.
+ */
+export const COLUMN_INSET = 2
+export const PILL_MARGIN = 1
+
+/**
+ * The gap an event keeps from the edges of its day, in pixels — what a reader
+ * sees, white, between a pill and the rule beside it.
+ *
+ * 4px where the column has the room. A narrow week comes down to `COLUMN_INSET`,
+ * which is the 2px a phone's month cell leaves: the character of title it buys
+ * back is worth more there than the air.
+ */
+export const PILL_INSET = 4
+
+/**
+ * The rule a column draws down its own right edge, and so the pixel that comes
+ * off the gap on that side.
+ *
+ * The divider is a border inside each column's box, where a bar is laid out
+ * against the boundary the border sits on: 4px of inset on the right is 3px of
+ * white and the rule, against 4px of white on the left of the next column. So
+ * anything positioned against the boundary asks for one pixel more on its right
+ * than on its left, and the two gaps a reader sees are equal. Pills in normal
+ * flow are inside the content box, which the border is not part of, and take the
+ * inset as it stands.
+ */
+export const COLUMN_RULE = 1
 
 export function addDays(date: string, days: number): string {
   const d = toDate(date)
@@ -256,4 +328,56 @@ export function shiftEventMinutes(event: CalendarEvent, delta: number) {
 export function stripPlacement(event: CalendarEvent): CalendarEvent {
   const { segFromTime, segToTime, segIsStart, segIsEnd, ...rest } = event
   return rest
+}
+
+/** Whether the event covers more than one day, and so draws as a bar. */
+export function isSpan(event: CalendarEvent): boolean {
+  return eventDayCount(event) > 1
+}
+
+/** Full-day events first, then by start time, then a stable tiebreak. */
+export function sortByStart(
+  events: CalendarEvent[],
+  date?: Date,
+): CalendarEvent[] {
+  // An event that began before `date` is already under way when the day opens,
+  // so it sorts from midnight rather than from the clock time it started at:
+  // a party that began at 11 pm yesterday comes before this evening's meeting,
+  // not after it.
+  const key = date ? parseDate(date) : null
+  const startsOn = (event: CalendarEvent) =>
+    key && eventDays(event).start < key ? 0 : minutes(event.fromTime)
+
+  return [...events].sort((a, b) => {
+    const fullA = a.isFullDay ? 0 : 1
+    const fullB = b.isFullDay ? 0 : 1
+    if (fullA !== fullB) return fullA - fullB
+    const timeA = startsOn(a)
+    const timeB = startsOn(b)
+    if (timeA !== timeB) return timeA - timeB
+    return String(a.id ?? '').localeCompare(String(b.id ?? ''))
+  })
+}
+
+/** Single-day events that fall on `date`. */
+export function dayEvents(
+  events: CalendarEvent[],
+  date: Date,
+): CalendarEvent[] {
+  const key = parseDate(date)
+  return sortByStart(
+    events.filter((e) => !isSpan(e) && eventDays(e).start === key),
+  )
+}
+
+/** Every event that occupies `date`, spans included. */
+export function eventsOn(events: CalendarEvent[], date: Date): CalendarEvent[] {
+  const key = parseDate(date)
+  return sortByStart(
+    events.filter((e) => {
+      const { start, end } = eventDays(e)
+      return start <= key && key <= end
+    }),
+    date,
+  )
 }

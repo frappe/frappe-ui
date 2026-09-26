@@ -37,17 +37,34 @@ describe('buildFunnelStages', () => {
     expect(stages.map((s) => s.percentOfPrevious)).toEqual([100, 50, 50])
   })
 
-  it('reads a missing, unparseable or negative count as nothing reaching the stage', () => {
+  it('drops a stage whose count is missing, unparseable or negative', () => {
     const stages = buildFunnelStages(
       config([
         { stage: 'Leads', count: 100 },
         { stage: 'Qualified', count: null },
         { stage: 'Quotation', count: 'n/a' },
         { stage: 'Won', count: -12 },
+        { stage: 'Renewed', count: 20 },
       ]),
     )
 
-    expect(stages.map((s) => s.value)).toEqual([100, 0, 0, 0])
+    expect(stages.map((s) => s.label)).toEqual(['Leads', 'Renewed'])
+    expect(stages.map((s) => s.value)).toEqual([100, 20])
+    // Dense, and measured against the stage before it in the funnel, not
+    // against a 0 the data never reported.
+    expect(stages.map((s) => s.index)).toEqual([0, 1])
+    expect(stages.map((s) => s.percentOfPrevious)).toEqual([100, 20])
+  })
+
+  it('has no stages when no row carries a count', () => {
+    const stages = buildFunnelStages(
+      config([
+        { stage: 'Leads', count: null },
+        { stage: 'Won', count: 'n/a' },
+      ]),
+    )
+
+    expect(stages).toEqual([])
   })
 
   it('percentages nothing against a first stage of zero', () => {
@@ -68,6 +85,20 @@ describe('buildFunnelStages', () => {
     )
 
     expect(stages.map((s) => s.label)).toEqual(['(Blank)', '(Blank)'])
+    // The identity stays the category value, so a handler can tell a blank
+    // stage from one that reads "(Blank)".
+    expect(stages.map((s) => s.name)).toEqual(['', ''])
+  })
+
+  it('carries the category value as the stage identity', () => {
+    const stages = buildFunnelStages(
+      config([
+        { stage: 'Leads', count: 100 },
+        { stage: 2024, count: 50 },
+      ]),
+    )
+
+    expect(stages.map((s) => s.name)).toEqual(['Leads', '2024'])
   })
 
   it('carries the row behind each stage, for click handlers', () => {

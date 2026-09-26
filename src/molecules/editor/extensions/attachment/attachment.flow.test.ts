@@ -5,50 +5,28 @@
  * upload function, then `uploadAttachmentFiles` (what media-drop / EditorDropZone
  * call). Asserts a chip node is actually inserted and the NodeView mounts.
  */
-import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { createApp, h, nextTick, reactive } from 'vue'
+import { describe, it, expect, vi, afterEach } from 'vitest'
+import { CommentKit } from '../../kits'
+import { cleanupMounted, flush, mount } from '../../test-helpers'
+import type { Editor as TiptapEditor } from '../../useEditor'
 
-let Editor: any
-let EditorContent: any
-let CommentKit: any
-
-beforeEach(async () => {
-  ;({ default: Editor } = await import('../../Editor.vue'))
-  ;({ default: EditorContent } = await import('../../EditorContent.vue'))
-  ;({ CommentKit } = await import('../../kits'))
-})
-
-function mount(staticProps: Record<string, any>) {
-  const state = reactive<Record<string, any>>({ modelValue: '' })
-  let editor: any = null
-  const root = document.createElement('div')
-  document.body.appendChild(root)
-  const app = createApp({
-    render() {
-      return h(Editor, { ...staticProps, ...state }, {
-        default: ({ editor: e }: any) => {
-          editor = e
-          return h(EditorContent, { editor: e })
-        },
-      })
-    },
-  })
-  app.mount(root)
-  return { getEditor: () => editor, app, root }
-}
-
-const flush = async () => {
-  for (let i = 0; i < 5; i++) {
-    await Promise.resolve()
-    await nextTick()
-  }
-}
+afterEach(cleanupMounted)
 
 describe('attachment drop flow (CommentKit)', () => {
   it('inserts a chip node when a non-media file is uploaded', async () => {
-    const upload = vi.fn(async (file: File) => ({ file_url: `/files/${file.name}` }))
-    const ctx = mount({ extensions: [CommentKit], uploadFunction: upload })
-    const editor = ctx.getEditor()
+    const upload = vi.fn(async (file: File) => ({
+      file_url: `/files/${file.name}`,
+    }))
+    const ctx = mount({
+      extensions: [CommentKit],
+      uploadFunction: upload,
+    })
+    // tiptap's `Storage` interface is empty and nothing here augments it, so
+    // the storage diagnostic below reads through a widened handle. Same cast
+    // `resolveUploadOptions` makes.
+    const editor = ctx.getEditor() as TiptapEditor & {
+      storage: Record<string, any>
+    }
 
     // diagnostics: does the editor expose the command + upload storage?
     expect(typeof editor.commands.uploadAttachmentFiles).toBe('function')
@@ -74,7 +52,5 @@ describe('attachment drop flow (CommentKit)', () => {
     expect(node, 'attachment node should be inserted').toBeTruthy()
     expect(node.attrs.src).toBe('/files/report.pdf')
     expect(node.attrs.fileName).toBe('report.pdf')
-
-    ctx.app.unmount()
   })
 })

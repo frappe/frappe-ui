@@ -1,55 +1,52 @@
 import plugin from 'tailwindcss/plugin'
+import { generateColorPalette, generateSemanticColors } from './colorPalette.js'
 import {
-  generateColorPalette,
-  generateSemanticColors,
-  generateCSSVariables,
-  generateEffectVariables,
-} from './colorPalette.js'
-import radiusTokens from './generated/radius.json'
-import typographyTokens from './generated/typography.json'
-import effectsData from './generated/effects.json'
+  cssVariables,
+  focusRing as focusRingTokens,
+  fontSize as fontSizeTokens,
+  fontWeight as fontWeightTokens,
+  radius as radiusTokens,
+  screens as screenTokens,
+  shadows as shadowTokens,
+  tracking as trackingTokens,
+} from './tokens.js'
+import typographyTokens from './tokens/typography.js'
+import { listColumnRules } from './listColumns.js'
+
+// Read straight from the token module. `textTransform` is not a public token
+// export: it is empty, and the one style that filled it went away in #940.
+const textTransformTokens = typographyTokens.textTransform
 
 let colorPalette = generateColorPalette()
 let semanticColors = generateSemanticColors()
-let cssVariables = mergeVariableLayers(
-  generateCSSVariables(),
-  generateEffectVariables(),
-  generateRadiusVariables(),
-)
 
-// Emit `--radius-{key}` for every radius token (the numbered scale plus the
-// kept `none` / `full` names — the deprecated size aliases were removed in
-// 1.0.0 per ADR-0006, #998) so the values are inspectable as real CSS
-// variables. `borderRadius` is rewired below to consume these vars, so
-// `rounded-4` and `--radius-4` stay in sync.
-function generateRadiusVariables() {
-  const vars = {}
-  for (const [key, value] of Object.entries(radiusTokens)) {
-    vars[`--radius-${key}`] = value
-  }
-  return { ':root': vars }
-}
-
-// Each value carries a trailing `/* {px} */` comment so editor tooling
-// (Tailwind IntelliSense) surfaces the resolved px on hover, instead of
-// the opaque `var(--radius-*)` reference. No `DEFAULT` key: the bare
-// `rounded` utility no longer exists — use `rounded-4`.
-function buildRadiusConfig() {
+// The `shadow-*` key list is declared once, in tokens.js#shadows, so a new
+// elevation step reaches both the token map and the utility from one edit.
+// The theme values stay `var(--elevation-*)` so a themed page can retune a
+// step at runtime. `none` and `DEFAULT` are Tailwind key names, not tokens:
+// `none` has no variable and `DEFAULT` shares the `base` one.
+function buildBoxShadowConfig() {
   const out = {}
-  for (const [key, value] of Object.entries(radiusTokens)) {
-    out[key] = `var(--radius-${key}) /* ${value} */`
+  for (const key of Object.keys(shadowTokens)) {
+    if (key === 'none') out[key] = 'none'
+    else if (key === 'DEFAULT') out[key] = 'var(--elevation-base)'
+    else out[key] = `var(--elevation-${key})`
   }
   return out
 }
 
-// Merge two `{ selector: { var: value } }` objects into one, preserving any
-// vars already declared under the same selector.
-function mergeVariableLayers(...layers) {
+// `--radius-{key}` is emitted for every token by tokens.js#cssVariables, and
+// `borderRadius` consumes those vars, so `rounded-4` and `--radius-4` stay in
+// sync by construction.
+//
+// Each value carries a trailing `/* {px} */` comment so editor tooling
+// (Tailwind IntelliSense) surfaces the resolved px on hover, instead of
+// the opaque `var(--radius-*)` reference. No `DEFAULT` key: the bare
+// `rounded` utility no longer exists, so write `rounded-4`.
+function buildRadiusConfig() {
   const out = {}
-  for (const layer of layers) {
-    for (const [selector, vars] of Object.entries(layer)) {
-      out[selector] = { ...(out[selector] || {}), ...vars }
-    }
+  for (const [key, value] of Object.entries(radiusTokens)) {
+    out[key] = `var(--radius-${key}) /* ${value} */`
   }
   return out
 }
@@ -64,28 +61,21 @@ function mergeVariableLayers(...layers) {
 // were corrupt export data.
 const WEIGHT_VARIANTS = ['medium', 'semibold', 'bold']
 
+// tokens.js holds each style as a plain object — it does not speak Tailwind.
+// Tailwind's `fontSize` theme wants the `[size, meta]` tuple. Convert here.
+// Both families are already present: `base` is the text style, `p-base` the
+// paragraph one (same size, looser line-height, its own letter-spacing).
 function buildFontSize() {
-  const out = {}
-  // Each size's regular variant already carries lineHeight, letterSpacing and
-  // fontWeight from the text-styles export (see figma-tokens-to-theme.js).
-  for (const [key, [size, meta]] of Object.entries(typographyTokens.fontSize)) {
-    out[key] = [size, { ...meta }]
-  }
-  // Paragraph variants (`text-p-<size>`): same size, the paragraph style's
-  // looser line-height and its own letter-spacing.
-  for (const [key, p] of Object.entries(typographyTokens.paragraph || {})) {
-    if (!out[key]) continue
-    const [size, meta] = out[key]
-    out[`p-${key}`] = [
-      size,
-      { ...meta, lineHeight: p.lineHeight, letterSpacing: p.letterSpacing },
-    ]
-  }
-  return out
+  return Object.fromEntries(
+    Object.entries(fontSizeTokens).map(([key, { fontSize, ...meta }]) => [
+      key,
+      [fontSize, meta],
+    ]),
+  )
 }
 
 // Focus ring utilities backed by `--focus-outline-*` CSS vars (theme-flipped
-// in colorPalette.js#generateEffectVariables). Implemented as `outline`, not
+// in tokens.js#cssVariables). Implemented as `outline`, not
 // box-shadow, so rings never collide with shadow/ring utilities on the same
 // element and survive forced-colors mode. The default ring is applied
 // globally via `:focus-visible` (see globalStyles); these utilities are for
@@ -94,7 +84,7 @@ function buildFontSize() {
 // Tailwind IntelliSense picks them up.
 function buildFocusRingUtilities() {
   const out = {}
-  for (const name of Object.keys(effectsData.focus.light)) {
+  for (const name of Object.keys(focusRingTokens.light)) {
     const className = name === 'default' ? '.focus-ring' : `.focus-ring-${name}`
     out[className] = {
       outline: `var(--focus-outline-${name})`,
@@ -106,41 +96,39 @@ function buildFocusRingUtilities() {
 
 function buildTextStyleUtilities() {
   const out = {}
-  const t = typographyTokens
   const groups = [
     {
       className: (s, w) => `.text-${s}-${w}`,
-      tracking: t.tracking?.text || {},
-      lineHeight: (s) => t.fontSize[s]?.[1].lineHeight,
+      tracking: trackingTokens?.text || {},
+      style: (s) => fontSizeTokens[s],
     },
     {
       className: (s, w) => `.text-p-${s}-${w}`,
-      tracking: t.tracking?.paragraph || {},
-      lineHeight: (s) => t.paragraph?.[s]?.lineHeight,
+      tracking: trackingTokens?.paragraph || {},
+      style: (s) => fontSizeTokens[`p-${s}`],
     },
   ]
   for (const group of groups) {
     for (const [size, byWeight] of Object.entries(group.tracking)) {
-      const entry = t.fontSize[size]
-      if (!entry) continue
-      const [fontSize] = entry
-      const lineHeight = group.lineHeight(size)
-      const transform = t.textTransform?.[size]
+      const style = group.style(size)
+      if (!style) continue
+      const transform = textTransformTokens?.[size]
       for (const weight of WEIGHT_VARIANTS) {
         if (!(weight in byWeight)) continue
         out[group.className(size, weight)] = {
-          fontSize,
-          lineHeight,
-          fontWeight: String(t.fontWeight[weight]),
+          fontSize: style.fontSize,
+          lineHeight: style.lineHeight,
+          fontWeight: String(fontWeightTokens[weight]),
           letterSpacing: byWeight[weight],
           ...(transform ? { textTransform: transform } : {}),
         }
       }
     }
   }
-  // `tiny` is an uppercase eyebrow style; the bare regular utility needs the
-  // text-transform too (Tailwind's fontSize tuple can't express it).
-  for (const [size, transform] of Object.entries(t.textTransform || {})) {
+  // An uppercase eyebrow style needs the text-transform on its bare regular
+  // utility too — Tailwind's fontSize tuple can't express one. Empty today:
+  // `tiny`, the only such style, was dropped in #940.
+  for (const [size, transform] of Object.entries(textTransformTokens || {})) {
     out[`.text-${size}`] = {
       ...(out[`.text-${size}`] || {}),
       textTransform: transform,
@@ -191,6 +179,17 @@ let componentStyles = {
   '.form-checkbox': {
     '@apply rounded-5 bg-surface-gray-2 text-ink-blue-4 focus:ring-0': {},
   },
+}
+
+// The dark-theme checkmark and dash the forms plugin draws in the light ink.
+// These live in the base layer, not in `addComponents`, because their keys are
+// attribute selectors: Tailwind v4 reads a v3 preset through `@config` and
+// rejects any `addComponents` key that is not a single class name, which fails
+// the whole build. The cascade is unchanged either way. The selector is
+// (0,3,0), above both the forms base rule `input:where([type='checkbox'])
+// :checked` (0,1,1) and the forms class rule `.form-checkbox:checked` (0,2,0).
+// So the rules still win in v3, and the v4 `@config` path still builds.
+let darkCheckboxStyles = {
   "[data-theme='dark'] [type='checkbox']:checked": {
     'background-image': `url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='%230F0F0F' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e")`,
   },
@@ -201,7 +200,18 @@ let componentStyles = {
 
 export default plugin(
   function ({ addBase, addComponents, matchUtilities, theme }) {
-    addBase({ ...globalStyles(theme), ...cssVariables })
+    // tokens.js keys the variables by theme; the selector each theme lands on
+    // is a Tailwind concern, so it is decided here.
+    addBase({
+      ...globalStyles(theme),
+      ':root': cssVariables.light,
+      '[data-theme="dark"]': cssVariables.dark,
+    })
+    // Resolves <List :columns="{ base, md, … }"> against this app's own
+    // breakpoints, so list tracks and `md:hidden` cells switch at the same
+    // width. See tailwind/listColumns.js.
+    addBase(listColumnRules(theme('screens')))
+    addBase(darkCheckboxStyles)
     addComponents(componentStyles)
     addComponents(buildTextStyleUtilities())
     addComponents(buildFocusRingUtilities())
@@ -215,40 +225,27 @@ export default plugin(
       },
       { values: theme('spacing') },
     )
-    // Grid tracks are arbitrary-only (no meaningful scale):
-    // `max-md:list-cols-[minmax(0,1fr)_auto]` instead of
-    // `max-md:[--list-columns:minmax(0,1fr)_auto]`.
-    matchUtilities({
-      'list-cols': (value) => ({ '--list-columns': value }),
-    })
   },
   {
     theme: {
       colors: colorPalette,
       borderRadius: buildRadiusConfig(),
-      boxShadow: {
-        none: 'none',
-        sm: 'var(--elevation-sm)',
-        base: 'var(--elevation-base)',
-        DEFAULT: 'var(--elevation-base)',
-        md: 'var(--elevation-md)',
-        lg: 'var(--elevation-lg)',
-        xl: 'var(--elevation-xl)',
-        '2xl': 'var(--elevation-2xl)',
-      },
+      boxShadow: buildBoxShadowConfig(),
       container: {
         padding: {
           xl: '5rem',
         },
       },
       fontSize: buildFontSize(),
-      screens: {
-        sm: '640px',
-        md: '768px',
-        lg: '1024px',
-        xl: '1280px',
-      },
+      screens: screenTokens,
       extend: {
+        // `leading-tighter` pins text to 1.15. It is the opt-out for
+        // single-line chrome whose height must not move: buttons, badges,
+        // labels, table headers. It sits between Tailwind's `leading-none` (1)
+        // and `leading-tight` (1.25). Tailwind's `leading-tight` does not change.
+        lineHeight: {
+          tighter: '1.15',
+        },
         textColor: {
           ink: semanticColors.ink,
         },
@@ -285,37 +282,6 @@ export default plugin(
         divideColor: {
           outline: semanticColors.outline,
           'outline-alpha': semanticColors['outline-alpha'],
-        },
-        spacing: {
-          4.5: '1.125rem',
-          5.5: '1.375rem',
-          6.5: '1.625rem',
-          7.5: '1.875rem',
-          8.5: '2.125rem',
-          9.5: '2.375rem',
-          10.5: '2.625rem',
-          11.5: '2.875rem',
-          12.5: '3.125rem',
-          13: '3.25rem',
-          13.5: '3.375rem',
-          14.5: '3.625rem',
-          15: '3.75rem',
-          15.5: '3.875rem',
-        },
-        width: {
-          3.5: '0.875rem',
-          112: '28rem',
-          wizard: '650px',
-        },
-        height: {
-          3.5: '0.875rem',
-        },
-        minWidth: {
-          40: '10rem',
-          50: '18rem',
-        },
-        maxHeight: {
-          52: '13rem',
         },
         typography: (theme) => ({
           DEFAULT: {
@@ -436,9 +402,9 @@ export default plugin(
           },
           // prose-v3: zero paragraph margins, user controls spacing with Enter
           // all spacing on 8px grid: 4, 8, 16, 24, 32px
-          // empty <p> = 14px × 1.7 line-height ≈ 23.8px (the user's spacing unit)
+          // empty <p> = 15px × 1.7 line-height ≈ 25.5px (the user's spacing unit)
           //
-          // Base font-size is customizable via `--prose-font-size` (default 14px).
+          // Base font-size is customizable via `--prose-font-size` (default 15px).
           // Every child size is `em`-relative to this base, so overriding the
           // variable rescales the whole editor proportionally — headings, lists,
           // code — while line-height (unitless) and em letter-spacing scale too.

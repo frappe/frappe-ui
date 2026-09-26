@@ -1,40 +1,100 @@
 # Radio
 
-Lets users pick a single option from a set. `RadioGroup` owns the selected
-value; each `Radio` inside it declares the value it represents.
+A set of options where people pick exactly one. For a few options shown as
+buttons, use [TabButtons](./tabbuttons).
+
+<ComponentPlayground name="Radio" />
+
+## Anatomy
+
+`RadioGroup` holds the selected value and the group's label, description and
+error. Each `Radio` inside it sets the `value` it stands for.
 
 ```vue
 <RadioGroup v-model="plan" label="Choose a plan">
   <Radio value="free" label="Free" />
-  <Radio value="pro" label="Pro" />
+  <Radio value="pro" label="Pro" description="For growing teams." />
 </RadioGroup>
 ```
 
-`Radio` must be used inside a `RadioGroup` — it throws otherwise. The group
-handles arrow-key navigation, roving focus and form submission, so options only
-need a `value`.
+## Examples
 
-## Playground
+### Choose a plan
 
-<ComponentPlayground name="Radio" />
-
-## Required
-
-The asterisk belongs on the group heading, not on each option — a radio is one
-choice within a group, so marking every option would be wrong. Set `required` on
-`RadioGroup` and it renders on the heading.
+`required` on `RadioGroup` puts the asterisk on the group label.
 
 <ComponentPreview name="Radio-Required" />
 
-## States
+### Notification settings
 
-<ComponentPreview name="Radio-States" />
-
-## Settings list
-
-Use `padded` for mutually exclusive settings. A `description` stacks below the
-label, and the whole row is the click target.
+`padded` makes each option a row with a clickable surface. A `description`
+shows below the label, and one option is `disabled`.
 
 <ComponentPreview name="Radio-SettingsList" />
+
+## Behavior
+
+### Inside a group
+
+`Radio` must be inside a `RadioGroup`, and throws an error otherwise. The
+group handles arrow keys, focus and form submission, so each option needs only
+a `value`.
+
+### Value
+
+The value can be a `string`, `number` or `boolean`. When nothing is selected,
+the value is `undefined`, which is where an unbound group starts.
+
+### Group props
+
+`required` and `error` are set on `RadioGroup` only, because they describe the
+whole choice, not one option. `size` and `padded` are also set on the group
+and apply to every option. `disabled` on the group disables every option, and
+`disabled` on a `Radio` disables that option only.
+
+### Label, description and error
+
+On `RadioGroup`, `label` renders above the options and `description` below
+them. `error` renders below the options and hides `description`. It takes a
+string, an array of strings (one line each), or an `Error`, the same values as
+[ErrorMessage](./errormessage). An empty string or an empty array means no
+error. `required` adds a red asterisk to the group label.
+
+The `#label` slot replaces the label text and the required marker, and receives
+`{ required }`. A `#description` slot is not hidden by `error`. It renders
+above the error.
+
+### Orientation
+
+`orientation` is `vertical` by default. `horizontal` lays the options in a row
+and switches the arrow keys to left and right. `loop` is `true` by default, so
+the arrow keys go from the last option back to the first.
+
+### Form submission
+
+The group submits its value with a form. `name` sets the field name. Without
+it, a name is generated.
+
+### Attributes
+
+`class` and `style` go to the layout wrapper. Everything else (`name`,
+`aria-*`, `data-*` and listeners) goes once to the interactive element, which
+for `RadioGroup` is the radio group itself.
+
+## Accessibility
+
+`RadioGroup` renders an element with `role="radiogroup"`, labelled by the
+group label. Each `Radio` renders a `role="radio"` button that covers the
+label and description.
+
+| Keys                    | Action                                           |
+| ----------------------- | ------------------------------------------------ |
+| `Tab`                   | Move focus into the group, to the selected option |
+| `ArrowDown` / `ArrowUp` | Select the next or previous option (vertical)    |
+| `ArrowRight` / `ArrowLeft` | Select the next or previous option (horizontal) |
+| `Space`                 | Select the focused option                        |
+
+While `error` is set, the group gets `aria-invalid` and an
+`aria-errormessage` that points to the error text.
 
 <!-- @include: ./Radio.api.md -->

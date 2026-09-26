@@ -97,7 +97,7 @@ jobs:
         uses: ./.github/actions/barista-run
         with:
           oauth-token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          app-token: ${{ steps.app-token.outputs.token }}
+          github-token: ${{ steps.app-token.outputs.token }}
           repo: ${{ github.repository }}
           issue-number: ${{ steps.setup.outputs.number }}
           event: ${{ github.event_name }}

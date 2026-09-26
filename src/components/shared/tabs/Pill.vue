@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useReactiveSlots } from '../../../composables/useReactiveSlots'
 import { Icon } from '../../Icon'
 import { browserTabCardClasses, tabRadiusClasses } from './styles'
 import type { PillProps } from './pillTypes'
@@ -12,11 +13,12 @@ const props = withDefaults(defineProps<PillProps>(), {
   orientation: 'horizontal',
 })
 
-const slots = defineSlots<{
+const declaredSlots = defineSlots<{
   prefix?: () => any
   default?: () => any
   suffix?: () => any
 }>()
+const slots = useReactiveSlots<typeof declaredSlots>()
 
 // `icon` means icon-only intent (label, if provided, is rendered as
 // sr-only). `iconLeft` is an accent icon next to a visible label. Trailing
@@ -74,7 +76,9 @@ const rootClasses = computed(() => [
   'inline-flex box-border shrink-0 select-none items-center justify-center whitespace-nowrap outline-none transition-[background-color,color,box-shadow] duration-150 ease-out motion-reduce:transition-none',
   // Shipped v1 subtle typography (overrides Figma): 13px regular at both
   // sizes, never medium.
-  props.variant === 'subtle' ? 'text-sm leading-[16.1px]' : 'text-base',
+  props.variant === 'subtle'
+    ? 'text-sm leading-[16.1px]'
+    : 'text-base leading-tighter',
   props.active ? 'text-ink-gray-8' : 'text-ink-gray-5',
   // Figma: md ghost/browser labels use text/base/medium (500, 0.015em);
   // md underline and all sm labels stay regular. The selected state
@@ -102,18 +106,17 @@ const iconClass = computed(() => {
 function hasLabel(label: PillProps['label']) {
   return label !== undefined && label !== null && label !== ''
 }
-
 </script>
 
 <template>
   <span :class="rootClasses" :data-state="active ? 'active' : 'inactive'">
-    <Icon v-if="icon" :name="icon" :class="iconClass" />
-    <Icon v-else-if="iconLeft" :name="iconLeft" :class="iconClass" />
+    <Icon v-if="icon" :icon="icon" :class="iconClass" />
+    <Icon v-else-if="iconLeft" :icon="iconLeft" :class="iconClass" />
 
     <span
       v-if="$slots.prefix"
       data-slot="tab-prefix"
-      class="inline-flex items-center"
+      class="inline-flex items-center empty:hidden"
     >
       <slot name="prefix" />
     </span>
@@ -129,7 +132,7 @@ function hasLabel(label: PillProps['label']) {
     <span
       v-if="$slots.suffix"
       data-slot="tab-suffix"
-      class="inline-flex items-center"
+      class="inline-flex items-center empty:hidden"
     >
       <slot name="suffix" />
     </span>

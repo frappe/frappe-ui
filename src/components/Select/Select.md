@@ -1,72 +1,98 @@
 # Select
 
-Lets users select one option from a list. Ideal for forms, settings, or any
-interface where a single choice is required.
-
-## Playground
+A button that opens a list of options and picks one. For a searchable list, use
+[Combobox](./combobox), and to pick several values, use
+[MultiSelect](./multiselect).
 
 <ComponentPlayground name="Select" />
 
-## Example
-The trigger hugs the selected value and the menu expands outward to fit longer options. Options with `disabled: true` render but can't be picked.
+## Examples
 
-<ComponentPreview name="Select-Example" />
+### Dessert menu
 
-## Custom Option Layout
-Use `#item-prefix` and `#item-label` to tailor the standard row — for example, an avatar plus a two-line label with a secondary description. `#prefix` on the trigger reuses the selected option's accessory. Use `#item` when you want to replace the entire row, shell included.
+`#item-prefix` and `#item-label` fill the standard row with a photo and a
+second line of text. `#prefix` shows the selected option's photo on the
+trigger.
 
 <ComponentPreview name="Select-OptionSlot" />
 
-## Custom Trigger
-Use `#trigger` to replace the trigger content entirely. The slot receives `{ open, disabled, selectedOption, clear, setOpen }`. For lighter changes, `#prefix` and `#suffix` sit inside the default trigger shell — `#suffix` replaces the chevron.
+### Inline in a sentence
+
+`#trigger` replaces the whole trigger, so the choice reads as part of the
+sentence.
 
 <ComponentPreview name="Select-CustomTrigger" />
 
-## Footer
-The `#footer` slot renders below the option list and stays pinned to the bottom of the popover — it does not scroll with the options. It receives the same shape as `#trigger`, `#prefix`, and `#suffix`: `{ open, disabled, selectedOption, clear, setOpen }`.
+### Timezone picker
+
+The `#footer` slot sits below the options and stays in place while the list
+scrolls.
 
 <ComponentPreview name="Select-Footer" layout="stacked" />
 
-## Label, Description, Error
-`Select` supports `label`, `description`, `error`, and `required` directly — no `FormControl` wrapper needed. The error suppresses the description and wires `aria-invalid` + `aria-errormessage` onto the trigger.
+## Behavior
 
-<ComponentPreview name="Select-Labeling" />
+### Options
 
-## Template Ref
-A template ref exposes `{ clear, focus }` — the same shape as `Combobox` and `MultiSelect`. `clear()` empties the selection; `focus()` moves focus to the trigger.
+`Select` takes a flat list of options. It has no groups. Empty and nullish
+options are left out. Option values are `string | number`. An option with
+`disabled: true` shows in the list but cannot be picked.
 
-```vue
-<script setup lang="ts">
-import { useTemplateRef } from 'vue'
+### Empty value
 
-const picker = useTemplateRef('picker')
+When nothing is selected, the value is `null`, the same as in `Combobox`. An
+empty string is a real value, so a "None" option with `value: ''` round-trips.
 
-function reset() {
-  picker.value?.clear()
-  picker.value?.focus()
-}
-</script>
+For a "Sort by" menu, add a first option with `value: ''` and
+`disabled: true`. It shows as the label while nothing else is picked, and
+people cannot select it.
 
-<template>
-  <Select ref="picker" v-model="value" :options="options" />
-</template>
-```
+### Width
 
-## Notes
+`Select` sizes itself to fit its options. The trigger fits the selected value,
+and the menu grows to fit longer options. Add `class="w-full"` for a
+full-width trigger.
 
-- Use `v-model:open` when a parent owns the menu state; use `setOpen` from the
-  slot props when the code lives inside `#trigger` or `#footer`.
-- By default, `Select` sizes itself to fit its option content. Set
-  `class="w-full"` when you want a full-width trigger.
-- `Select` accepts flat options only — no groups. Empty and nullish options are
-  omitted. Option values are `string | number`.
-- For the common "Sort by" pattern, add a first option with an empty-string
-  value and `disabled: true`. It shows as the resting label without becoming
-  selectable.
-- The menu is placed item-aligned (anchored over the trigger) by default.
-  Passing `side`, `align`, or `offset` switches it to standard popper
-  placement; `portalTo` changes the teleport target either way.
-- For a searchable single-choice picker, use [`Combobox`](./combobox); for
-  several values, use [`MultiSelect`](./multiselect).
+### Item slots
+
+`#item-prefix`, `#item-label` and `#item-suffix` change parts of the standard
+row. `#item` replaces the whole row, including its outer element.
+
+### Trigger slots
+
+`#trigger` replaces the trigger content. For smaller changes, `#prefix` and
+`#suffix` sit inside the default trigger. `#suffix` replaces the chevron.
+
+`#trigger`, `#prefix`, `#suffix` and `#footer` all receive
+`{ open, disabled, selectedOption, clear, setOpen, close }`. `close()` is the
+same as `setOpen(false)`.
+
+### Open state
+
+Use `v-model:open` when a parent component controls the menu. Inside
+`#trigger` or `#footer`, use the `setOpen` slot prop.
+
+### Menu placement
+
+By default the menu opens over the trigger, lined up with the selected option.
+Pass `side`, `align` or `offset` to place it next to the trigger instead.
+`portalTo` changes where the menu is teleported in both modes.
+
+### Label, description and error
+
+`label` renders above the trigger and `description` below it. `error` renders
+below the trigger and hides `description`. It takes a string, an array of
+strings (one line each), or an `Error`, the same values as
+[ErrorMessage](./errormessage). An empty string or an empty array means no
+error. `required` adds a red asterisk to the label.
+
+The `#label` slot replaces the label text and the required marker, and receives
+`{ required }`. A `#description` slot is not hidden by `error`. It renders
+above the error.
+
+## Accessibility
+
+While `error` is set, the trigger gets `aria-invalid` and an
+`aria-errormessage` that points to the error text.
 
 <!-- @include: ./Select.api.md -->

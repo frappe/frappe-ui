@@ -1,15 +1,13 @@
 # Directives
 
-Two Vue directives that are useful in building frontend apps. Both are named
-`vSomething` on purpose: `<script setup>` auto-registers a directive only when
-the imported binding is spelled `vFoo`, so importing it is all the setup there
-is.
+Two Vue directives for focus and outside clicks. Both are named like `vFocus`
+because `<script setup>` registers a directive only when the imported name is
+`v` followed by a capital letter, so importing one is all the setup it needs.
 
 ## vFocus
 
-Focuses the first focusable element inside the target on mount. Handy in a
-dialog or a popover, where the field the user came for should already be ready
-to type into.
+Focuses the first focusable element inside the target on mount. Use it in a
+dialog or popover, so the user can start typing in the main field right away.
 
 ```vue
 <script setup>
@@ -34,8 +32,8 @@ replaces it:
 </div>
 ```
 
-Bind `false` to skip focusing — useful when the same markup is reused somewhere
-focus would be intrusive:
+Bind `false` to skip focusing, for example when the same markup is reused where
+moving focus would get in the way:
 
 ```vue
 <div v-focus="!isMobile">…</div>
@@ -43,8 +41,8 @@ focus would be intrusive:
 
 ## vOnOutsideClick
 
-Calls the bound handler when a click lands outside the element. In the example
-below the bordered div carries the directive, so clicking anywhere outside it
+Calls the bound handler when the user clicks outside the element. In this
+example the bordered div has the directive, so clicking anywhere outside it
 runs `setInactive`.
 
 ```vue
@@ -65,6 +63,5 @@ const setInactive = () => (active.value = false)
 </template>
 ```
 
-Overlay components in this library (`Dialog`, `Popover`, `Dropdown`) already
-handle outside clicks themselves — reach for this directive for your own
-custom-built surfaces.
+The library's overlay components (`Dialog`, `Popover`, `Dropdown`) already
+handle outside clicks. Use this directive for elements you build yourself.

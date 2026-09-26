@@ -70,12 +70,15 @@ function toggleSelectMode() {
         {{ selectable ? 'Done' : 'Select' }}
       </Button>
     </div>
-    <List :selectable="selectable" v-model:selection="selection" :row-height="60">
+    <List
+      :selectable="selectable"
+      v-model:selection="selection"
+      :row-height="60"
+    >
       <ListRow
         v-for="discussion in discussions"
         :key="discussion.name"
         :value="discussion.name"
-        @click="() => {}"
       >
         <ListCell>
           <Avatar :label="discussion.author" size="2xl" />

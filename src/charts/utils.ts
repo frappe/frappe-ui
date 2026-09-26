@@ -1,3 +1,5 @@
+import { ref } from 'vue'
+
 /**
  * Identity of the bucket a cap collapses its tail into, shared by `maxSeries`
  * and `maxSlices`. Reserved, so a group genuinely named "Others" in the data
@@ -6,7 +8,11 @@
  */
 export const OTHERS_KEY = '__others__'
 
-/** Default display name for the collapsed bucket. `label` overrides it. */
+/**
+ * Default display name for the collapsed bucket. `label` overrides it. Not
+ * exported from the package: it is a printed string, and the family has no
+ * translation hook for one yet.
+ */
 export const OTHERS_LABEL = 'Others'
 
 function isPlainObject(value: any): value is Record<string, any> {
@@ -87,7 +93,52 @@ export function prefersReducedMotion(): boolean {
   )
 }
 
+// One observer for the whole page: `dir`, `lang` and the theme all flip on
+// `<html>`, so a per-chart observer would watch the same node N times over.
+const documentVersion = ref(0)
+let observer: MutationObserver | undefined
+
+/**
+ * The version of `<html>`'s chart-facing attributes, bumped when one changes.
+ * Reading it inside a computed is what makes the computed re-evaluate on a page
+ * that switches direction, language or theme after mount. The first read starts
+ * the observer, so nothing has to remember to.
+ */
+export function documentAttributes(): number {
+  if (typeof document === 'undefined') return 0
+  if (!observer && typeof MutationObserver !== 'undefined') {
+    observer = new MutationObserver(() => documentVersion.value++)
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['dir', 'lang', 'data-theme', 'class'],
+    })
+  }
+  return documentVersion.value
+}
+
 export function documentDir(): 'ltr' | 'rtl' {
+  documentAttributes()
   if (typeof document === 'undefined') return 'ltr'
   return document.documentElement.dir === 'rtl' ? 'rtl' : 'ltr'
+}
+
+/**
+ * The locale numbers print in, read off the page the way `documentDir` reads
+ * direction. Falls back to `en-US` rather than to the runtime's own locale: a
+ * page that declares no language should keep printing what it printed before.
+ */
+export function documentLocale(): string {
+  documentAttributes()
+  if (typeof document === 'undefined') return 'en-US'
+  const lang = document.documentElement.lang
+  if (!lang) return 'en-US'
+  // `lang="en_US"` is a common authoring slip, and `Intl` throws a RangeError on
+  // it rather than falling back. Charts format numbers during render, so an
+  // unguarded throw here would blank the plot.
+  try {
+    Intl.getCanonicalLocales(lang)
+    return lang
+  } catch {
+    return 'en-US'
+  }
 }

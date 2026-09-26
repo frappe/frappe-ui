@@ -5,10 +5,16 @@ the library's APIs, docs, and stories share — the canonical meaning of cross-c
 terms (`open`, `variant`, `theme`, `dismissible`, `atom`, …) and the names to avoid.
 
 The design **rules** that use this vocabulary live in [`PHILOSOPHY.md`](./PHILOSOPHY.md)
-(`P1`–`P14`). Per-component **API contracts** live in [`spec/`](./spec/) — this doc
+(`P1`–`P15`). Per-component **API contracts** live in [`spec/`](./spec/) — this doc
 defines terms, not APIs. Release execution and history live in
 [`v1-release/`](./v1-release/). The published docs in `docs/` are the vitepress site
 and host neither specs nor ADRs.
+
+[`spec/README.md`](./spec/README.md) ranks these documents and carries two rules
+that apply here too. A decision accepted later supersedes the older text, and has
+to be promoted into the spec — or into this file, when it is a name — rather than
+left in the thread that decided it. Shipped code is evidence of what a contract
+says, never the contract itself.
 
 ## Composition
 
@@ -20,6 +26,14 @@ A primitive component that does not compose other public components — e.g. `Te
 A component that composes atoms into a higher-level control — e.g. `Link` (composes
 `Combobox`). Follows the same design rules as atoms (P5 labeling, P10 styling, …). May
 live in `src/components/` or a domain dir (e.g. `frappe/` for Frappe-integrated controls).
+
+**slots (reading your own)**:
+A component that reads its own slots outside the template takes them from
+`useReactiveSlots()`, never `useSlots()`. Vue mutates `instance.slots` in place
+and does not track it, so a `computed` over `useSlots()` caches whichever slots
+were filled at mount. Reading `$slots` in your own template is already correct;
+handing the object to a child (as a prop, or through `provide`) is not, because
+the child re-reads it only when something else re-renders the child.
 
 ## Lifecycle & control
 
@@ -76,13 +90,24 @@ _Avoid_: `theme`, `currentTheme`, `darkMode`, `mode` (for light/dark)
 
 ## Shared component vocabulary
 
+**route / href**:
+Navigation-capable components call a Vue Router destination `route` and a plain
+external URL `href`. When both are supplied, `route` wins. Button and TabButton
+open `href` in a new tab; SidebarItem, SidebarRailItem, MobileNavItem, and
+ListRow render it as a native same-tab anchor. The PageHeader back button calls
+its history fallback `fallbackRoute`, because it is used only when there is no
+in-app history.
+_Avoid_: `to` as a component prop, `link`, `fallback`
+
 **action**:
 A button declared via a component's action prop(s), rendered in its footer/toolbar row.
 Typed by an internal generic `Action<Ctx>` (`ButtonProps` plus `onClick(context)`);
 the public names are `DialogAction` (context `{ close }`) and `AlertAction`
-(context `{ dismiss }`, shared with SidebarCard). Gets reactive
-`loading` state while its async `onClick` runs.
-Shared by Dialog, Alert, SidebarCard and TextEditor (P6-aligned).
+(context `{ dismiss }`, shared with SidebarCard), plus `DividerAction` (no
+callback context). Dialog, Alert, SidebarCard and TextEditor get reactive
+`loading` state while an async `onClick` runs; Divider forwards the click and
+the caller owns its loading state. Shared by Dialog, Alert, SidebarCard, Divider
+and TextEditor (P6-aligned).
 Charts take no action prop — a chart header renders caller-supplied
 buttons through the `#actions` slot (spec/charts.md).
 
@@ -108,7 +133,12 @@ _Avoid_: `fullWidth`, `block`, `stretch`, `grow`
 **side** (Tabs family):
 Prop naming the edge a component attaches to (`left | right`). Distinct from
 `dir`, which is the `ltr`/`rtl` writing direction.
-_Avoid_: `direction`, `placement` (for a single edge), `align`
+_Avoid_: `direction`, `placement` (for a single edge)
+
+**align**:
+Prop naming placement along a side or rule (`start | center | end`). Used by
+overlays and by Divider actions. Distinct from `side`, which selects the edge.
+_Avoid_: `position`, `placement` (when the side is already known)
 
 **chrome** (informal):
 The auto-rendered visual scaffolding around a component's content — padded card, header
@@ -153,8 +183,11 @@ Vocabulary for the editor; the API is specified in [`spec/editor.md`](./spec/edi
 **`frappe-ui/editor`** (subpath):
 The single subpath where the entire editor family lives — the `useEditor` engine,
 `Editor`, building-block components, kits, extensions, menu items, and presets. The
-only subsystem that exports from a subpath rather than top-level; there are no editor
-exports from top-level `frappe-ui`.
+whole family is there and nowhere else: root exports nothing from it. It is one of
+several runtime subpaths (`editor`, `list`, `charts`, `icons`, `experimental`),
+beside the build-time entries; what earns one is
+[ADR-0010](./spec/adr/0010-subpath-export-rule.md). The v0 `TextEditor` family sits
+on `frappe-ui/experimental`, not here.
 _Avoid_: importing the editor surface from `frappe-ui` (top-level); shipping ready-made
 assembled editors (`CommentEditor`/`RichTextEditor`) from the library.
 
@@ -177,10 +210,12 @@ given `items`. The unit of capability defaults and the tree-shaking boundary.
 `StarterKit`, `CommentKit`, `RichTextKit`, `InlineKit`.
 
 **format** (Editor family):
-The content-format axis of an editor: `'html' | 'json'` (default `'html'`), set on
-`Editor` or `useEditor`. Content flows through the unnamed `v-model` (P2); `format`
-decides whether it emits HTML strings or `JSONContent` objects — there is no separate
-`v-model:html`/`v-model:json`.
+The content-format axis of an editor: `'html' | 'json' | 'markdown'` (default
+`'html'`), set on `Editor` or `useEditor`. Content flows through the unnamed
+`v-model` (P2); `format` decides whether it emits an HTML string, a `JSONContent`
+object, or a Markdown string — there is no separate `v-model:html`/`v-model:json`.
+`'markdown'` needs the `Markdown` extension in `extensions`, which is why it is a
+separate import: a development build warns when it is missing.
 _Avoid_: type-sniffing modelValue at runtime; a boolean (`:json="true"`); separate
 v-models per format.
 
@@ -188,6 +223,87 @@ v-models per format.
 The thin component an app builds on `Editor`, encoding that app's mention source,
 local extensions, toolbar preset, and action buttons. frappe-ui ships none — assembled
 editors are app-specific (gameplan's comment editor ≠ helpdesk's).
+
+_Avoid_ (family-wide): `component` for suggestion rendering (`listComponent` names
+the popup and `nodeView` names a document node); `EditorFixedMenu.buttonSize` (it is
+`size`).
+
+## Code editor family
+
+Vocabulary for the code editor; the API is specified in
+[`spec/code-editor.md`](./spec/code-editor.md). Separate from the Editor family above:
+different engine (CodeMirror 6, not TipTap), different subpath, no shared names.
+
+**`frappe-ui/code-editor`** (subpath):
+The single subpath where the whole code-editor family lives: the `useCodeEditor` engine,
+`CodeEditor`, `CodeEditorContent`, `CodeKit`, the `codeChrome` and `codeHighlight`
+extensions, and `loadLanguage`. Earned on all three ADR-0010 limbs (static CodeMirror,
+open extension registry, colliding names). There are no code-editor exports from
+top-level `frappe-ui` and none from `frappe-ui/editor`.
+_Avoid_: importing the code-editor surface from `frappe-ui` (top-level) or from
+`frappe-ui/experimental` (the old `CodeEditor`/`CodePreview` pair is deleted, ADR-0019);
+shipping a ready-made assembled code editor from the library.
+
+**CodeEditor**:
+The single v1 code-editor component (a molecule), built on `useCodeEditor` and
+**renderless**. It owns the `EditorView` lifecycle and the content `v-model`, provides the
+view to its parts, and renders no UI of its own. Capability is the required `extensions`
+array. Content is the unnamed `v-model` with two channels: `update:modelValue` live and
+`change` on blur as the commit point. Spec:
+[`spec/code-editor.md`](./spec/code-editor.md).
+_Avoid_: confusing it with `@framework/ui`'s `CodeEditorField` (formerly its own
+`CodeEditor`), which is the labeled, assembled field an app renders; a `language` prop or
+feature booleans (pass extensions); `variant`/`size` props (they are CSS vars on the
+consumer's wrapper).
+
+**CodeEditorContent**:
+The part that renders the editor box and mounts CodeMirror's DOM. Takes an optional
+`editor` prop that falls back to the view `CodeEditor` provides, the same shape
+`EditorContent` uses. The only part: CodeMirror owns all of its own DOM, so the family has
+no menu parts.
+_Avoid_: menu or toolbar parts in this family; reaching into CodeMirror's DOM from the
+outside instead of passing an extension.
+
+**useCodeEditor**:
+The engine composable. Owns the `EditorView` lifecycle, binds content, re-applies
+`extensions`, and destroys on unmount. Returns the view unwrapped as
+`ShallowRef<EditorView | null>`, the house pattern `useEditor` and `useChart` already use.
+_Avoid_: wrapping the view in a facade object; exposing a `Compartment`.
+
+**kit** (Code editor family):
+`CodeKit`, one configurable bundle of CodeMirror extensions: `basicSetup`'s members plus
+the `highlight`, `keymap` and `chrome` members, with `lineNumbers` off by default. It
+exists because `basicSetup` is a flat array from which no member can be removed. Same role
+as the Editor family's **kit** entry above (capability defaults, the tree-shaking
+boundary), on a different engine.
+_Avoid_: defaulting the kit onto the component; passing `basicSetup` alongside `CodeKit`.
+
+**chrome** (Code editor family):
+The opt-in frappe look. The `codeChrome` extension adds one class, and the family's
+stylesheet is scoped under it, so an app that omits the extension gets none of that CSS.
+One of three independently removable layers: CodeMirror's base, `codeChrome`,
+`codeHighlight`. Painted through the `--code-*` hooks (ADR-0017): `--code-bg`,
+`--code-border`, `--code-radius`, `--code-focus-ring`, `--code-font-size`,
+`--code-padding-x`, `--code-padding-y`, `--code-min-height`,
+`--code-max-height`.
+_Avoid_: shipping ambient CSS that every importer must override; a `theme` or `variant`
+prop; reconfiguring anything for dark mode (the hooks resolve `var(--ink-*)` and
+`var(--surface-*)`).
+
+**extensions** (Code editor family):
+The required capability array of raw CodeMirror `Extension` values. **Reactive here**:
+`MaybeRefOrGetter<Extension[]>`, re-applied with a top-level `StateEffect.reconfigure`. In
+the Editor family it is construction-time, because TipTap cannot swap extensions at
+runtime and CodeMirror can. Real runtime cases drive it: Desk picks the language from
+`df.options`, Builder's `activeScript.script_type` changes.
+_Avoid_: assuming either family's rule applies to the other; a `Compartment` in app code.
+
+**loadLanguage**:
+`loadLanguage(key)` dynamically imports one `@codemirror/lang-*` package and returns its
+extension. The ten language packages are **optional peer dependencies**, so the app that
+calls it installs the package it names.
+_Avoid_: listing a language package as a hard dependency; a `language` prop that hides
+this call.
 
 ## Flagged ambiguities
 

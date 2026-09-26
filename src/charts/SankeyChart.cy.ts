@@ -103,7 +103,7 @@ describe('SankeyChart', () => {
   })
 
   it('turns the flow downwards on request', () => {
-    mountChart({ orient: 'vertical' })
+    mountChart({ vertical: true })
     // The plot is wider than it is tall, so a vertical flow packs the first
     // column across the top rather than down the left edge.
     nodes().should('have.length', NODE_COUNT)
@@ -214,6 +214,25 @@ describe('SankeyChart', () => {
       cy.get('[data-slot="chart-tooltip"]')
         .should('contain.text', 'flow Search → Trial')
         .and('not.contain.text', 'Signups')
+    })
+
+    // The band carries its row down both paths. The keyboard reads a band the
+    // same way the pointer does, so a slot that reads a column is not hover-only.
+    it('hands the row behind the band to the tooltip slot', () => {
+      mountChart(
+        {},
+        {
+          tooltip: ({ rows }: any) => h('span', `signups ${rows[0]?.signups}`),
+        },
+      )
+      bands().should('have.length', data.length)
+      plot().focus()
+      cy.get('[data-slot="chart-tooltip"]').should(
+        'contain.text',
+        'signups 120',
+      )
+      plot().type('{rightarrow}')
+      cy.get('[data-slot="chart-tooltip"]').should('contain.text', 'signups 80')
     })
   })
 

@@ -10,6 +10,7 @@ import {
 } from 'vue'
 import {
   canUseCachedFallback,
+  transformCached,
   useCall,
   type StoreWritingCallOptions,
 } from './useCall/useCall'
@@ -48,8 +49,9 @@ import { BasicParams } from './useCall/types'
  * and drop an older success whose newer submit failed.
  *
  * `submit()` keeps `useCall`'s outcome contract: it resolves with the
- * response, resolves `null` on a failed request (read `error`), and rejects
- * only when `beforeSubmit` throws.
+ * response and rejects when the request fails or when `beforeSubmit` throws.
+ * `execute`/`fetch`/`reload` resolve either way — actions reject, reads
+ * resolve (DAT-Q1).
  *
  * One default differs from `useCall`: `immediate` is `false` here, because
  * every consumer is a write member that must only fire on `submit()`.
@@ -135,6 +137,7 @@ export function useIsolatedCall<
 
   async function run(
     effectiveParams: Record<string, any>,
+    { rejectOnError = false }: { rejectOnError?: boolean } = {},
   ): Promise<TResponse | null> {
     // Take a number. Holding the highest one is what earns the right to
     // write `data` and `error`, checked again when this submit settles.
@@ -155,6 +158,9 @@ export function useIsolatedCall<
     let call: ReturnType<
       typeof useCall<TResponse, Record<string, any>>
     > | null = null
+    // The response as the server sent it, which is what the cache holds.
+    // Copied before `transform` runs, because it may change it in place.
+    let rawResponse: TResponse | undefined
     try {
       call = scope.run(() =>
         useCall<TResponse, Record<string, any>>({
@@ -164,7 +170,12 @@ export function useIsolatedCall<
           immediate: false,
           refetch: false,
           staleOnError,
-          transform,
+          transform:
+            transform &&
+            ((data: TResponse) => {
+              if (normalizedCacheKey) rawResponse = structuredClone(data)
+              return transform(data)
+            }),
           // Passed straight through, ungated: store writes run for every
           // successful submit, carrying this request's stamp, and the stores
           // reject the stale ones per document — a finer and better-informed
@@ -177,7 +188,7 @@ export function useIsolatedCall<
             // one in idb, nor report itself as the current outcome.
             if (!isNewest()) return
             if (normalizedCacheKey) {
-              idbStore.set(normalizedCacheKey, data)
+              idbStore.set(normalizedCacheKey, transform ? rawResponse : data)
             }
             onSuccess?.(data)
           },
@@ -189,9 +200,17 @@ export function useIsolatedCall<
       )!
       inflight.add(call)
 
-      // Resolves with the response, or `null` on a failed request — the same
-      // contract `submit()` keeps toward its own caller.
-      let response = (await call.submit(effectiveParams)) ?? null
+      // Resolves with the response, or `null` on a failed request. `run`
+      // then rejects for `submit()`; `execute()` gets the `null`.
+      // `useCall.submit` rejects on a failed request (DAT-Q1). The
+      // newest-wins gate below decides what happens next, so the failure is
+      // read off `call.error` rather than caught here. An unexpected
+      // rejection — one that left no error behind — still propagates.
+      let response =
+        (await call.submit(effectiveParams).catch((thrown) => {
+          if (!call!.error) throw thrown
+          return null
+        })) ?? null
       let callError = (call.error ?? null) as Error | null
 
       // A newer submit started while this one was in flight, so this answer
@@ -208,6 +227,10 @@ export function useIsolatedCall<
           error.value = null
         }
       }
+      // Actions reject, reads resolve (DAT-Q1). A stale submit still rejects
+      // toward its own caller: it answers for the request it sent, which is
+      // the same rule its resolved value follows.
+      if (rejectOnError && callError) throw callError
       return response
     } finally {
       pending.value -= 1
@@ -228,7 +251,7 @@ export function useIsolatedCall<
       submitParams.value = params
     }
     if (!refetch) {
-      return run(computedParams.value)
+      return run(computedParams.value, { rejectOnError: true })
     }
   }
 
@@ -263,14 +286,7 @@ export function useIsolatedCall<
         submitData.value == null ||
         error.value)
     ) {
-      let cachedData = cachedResponse.value as TResponse
-      if (transform) {
-        let returnValue = transform(cachedData)
-        if (returnValue !== undefined) {
-          cachedData = returnValue
-        }
-      }
-      return cachedData
+      return cachedResponse.value as TResponse
     }
     return submitData.value
   })
@@ -278,7 +294,7 @@ export function useIsolatedCall<
   if (normalizedCacheKey) {
     idbStore.get(normalizedCacheKey).then((data) => {
       if (data) {
-        cachedResponse.value = data
+        cachedResponse.value = transformCached(data as TResponse, transform)
       }
     })
   }

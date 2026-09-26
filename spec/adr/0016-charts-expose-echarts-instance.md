@@ -8,9 +8,10 @@ Seven components in `src/charts/` hand back the echarts instance through a
 template ref — `AreaChart.vue:143`, `BarChart.vue:147`, `DonutChart.vue:370`,
 `HeatmapChart.vue:245`, `LineChart.vue:143`, `SankeyChart.vue:225` and
 `ScatterChart.vue:321`, each calling
-`defineExpose<ChartExposed>({ chart: computed(() => chart.value) })`.
-`ChartExposed` lives at `src/charts/types.ts:8-11` and is exported from
-`src/charts/index.ts:79`.
+`defineExpose<ChartExposedRefs>({ chart: computed(() => chart.value) })`.
+`ChartExposed`, the caller's view of that object, lives in `src/charts/types.ts`
+and is exported from `src/charts/index.ts`; `ChartExposedRefs` types the call and
+stays internal.
 
 The **form** is what [`imperative-api.md`](../imperative-api.md) §2.5 asks for: a
 generic on `defineExpose`, never `satisfies`, one shared exported type, a
@@ -37,7 +38,7 @@ the imperative half. It is a `1.0.0` question because whatever ships freezes.
 **`ChartExposed` stays, on all seven echarts-backed charts.** It is the second
 and last named exception to §2.4.
 
-### `echartOptions` reaches every option key and no instance method
+### `echartOptions` reaches the option and no instance method
 
 The escape hatch is a deep merge into the generated option. It merges at the
 chart root (`axisChartOptions.ts:194`, `donutChartOptions.ts:227`,
@@ -45,7 +46,10 @@ chart root (`axisChartOptions.ts:194`, `donutChartOptions.ts:227`,
 axis (`axisChartCommon.ts:299`, `:572`) and per series
 (`axisChartOptions.ts:409`), through `mergeDeep` at `utils.ts:21-38`.
 
-So no option key is out of reach. echarts' other half — the methods on the
+So an option key an object path reaches is in reach. `mergeDeep` replaces
+arrays, so a key inside a generated array — a series on the donut, sankey or
+heatmap, which have the chart-level hatch only — is reachable by rebuilding
+that array by hand. echarts' other half — the methods on the
 instance — takes no option key, and nothing on the component surface stands in
 for it.
 
@@ -124,9 +128,9 @@ the component's instance handle. Assigning to an unwrapped computed fails loudly
 That is §2.2's reason, and it applies here unchanged.
 
 The published type follows the runtime. `ShallowUnwrapRef` applies to the exposed
-type, so a caller reading `plot.value.chart` gets `ECharts | undefined` and not a
-`ComputedRef` — checked with `vue-tsc` against
-`InstanceType<typeof AreaChart>['chart']`. `ScrollArea`'s getter
+object, so a caller reading `plot.value.chart` gets `ECharts | undefined` and not
+a `ComputedRef`, and `ChartExposed` states that unwrapped shape — checked with
+`vue-tsc` against `InstanceType<typeof AreaChart>['chart']`. `ScrollArea`'s getter
 (`ScrollArea.vue:43-49`) and this computed give the same guarantee.
 
 ### It freezes at `1.0.0`
@@ -161,8 +165,8 @@ sixth verb and §2.3 on a third element role.
 - §2.4 now names two exceptions, `Editor.editor` and charts' `chart`.
   `imperative-api.md` §2.7 carries the chart row and `charts.md` records the
   contract.
-- **The two "may not rely on" clauses have to reach the docs.** No chart docs
-  page mentions the handle today, and the generated API tables have no exposed
-  section. That belongs to the charts docs sweep.
+- **The two "may not rely on" clauses reach the docs.** The charts overview
+  carries them under "The echarts instance", with `getDataURL` as the worked
+  example. The generated API tables still have no exposed section.
 - A repeated use of the handle is a feature request, not a second member. Image
   export is the candidate, and [`charts.md`](../charts.md)'s rule decides it.

@@ -17,7 +17,7 @@ describe('Checkbox', () => {
     cy.get('input[type="checkbox"]').should('be.disabled')
     // A disabled control dims its label — `disabled` outranks `color="gray-7"`.
     cy.get('label')
-      .should('have.class', 'text-base')
+      .should('have.class', 'text-sm')
       .and('have.class', 'text-ink-gray-4')
       .and('not.have.class', 'text-ink-gray-7')
   })
@@ -28,8 +28,8 @@ describe('Checkbox', () => {
     })
 
     cy.get('[data-slot="description"]')
-      .should('have.class', 'text-ink-gray-3')
-      .and('not.have.class', 'text-ink-gray-5')
+      .should('have.class', 'text-ink-gray-4')
+      .and('not.have.class', 'text-ink-gray-6')
   })
 
   it('toggles with the space key', () => {
@@ -235,6 +235,56 @@ describe('Checkbox', () => {
       cy.get('input').then(($el) => {
         expect(($el[0] as HTMLInputElement).indeterminate).to.eq(true)
       })
+    })
+  })
+
+  // INP-Q5 / INP-Q6.
+  describe('template ref and attribute routing', () => {
+    it('exposes focus() which focuses the native checkbox', () => {
+      cy.mount(Checkbox, { props: { label: 'abc' } }).then((mounted: any) => {
+        const vm = mounted.component ?? mounted.wrapper?.vm ?? mounted
+        vm?.focus?.()
+      })
+
+      cy.get('input[type="checkbox"]').should('be.focused')
+    })
+
+    it('puts name, aria-label and data-* on the input, and only once', () => {
+      cy.mount(Checkbox, {
+        props: { label: 'abc' },
+        attrs: {
+          name: 'agree',
+          'aria-label': 'Agree to terms',
+          'data-test': 'agree',
+        },
+      })
+
+      cy.get('input[type="checkbox"]')
+        .should('have.attr', 'name', 'agree')
+        .and('have.attr', 'aria-label', 'Agree to terms')
+        .and('have.attr', 'data-test', 'agree')
+      cy.get('[data-test="agree"]').should('have.length', 1)
+      cy.get('[name="agree"]').should('have.length', 1)
+    })
+
+    it('puts class and style on the layout wrapper', () => {
+      cy.mount(Checkbox, {
+        props: { label: 'abc' },
+        attrs: { class: 'my-wrapper', style: 'margin-top: 12px' },
+      })
+
+      cy.get('.my-wrapper')
+        .should('have.length', 1)
+        .and('have.css', 'margin-top', '12px')
+      cy.get('input[type="checkbox"]').should('not.have.class', 'my-wrapper')
+    })
+
+    it('runs a caller listener once, on the control', () => {
+      const onClick = cy.spy().as('onClick')
+      cy.mount(Checkbox, { props: { label: 'abc' }, attrs: { onClick } })
+
+      cy.get('input[type="checkbox"]').click()
+      cy.get('@onClick').should('have.been.calledOnce')
     })
   })
 })

@@ -14,7 +14,7 @@
       ref="panel"
       v-bind="$attrs"
       :data-state="mode"
-      class="floating-window relative flex flex-col rounded-6 border border-outline-gray-2 bg-surface-elevation-1"
+      class="floating-window relative flex flex-col rounded-6 bg-surface-elevation-1"
       :class="isDocked ? '' : 'shadow-2xl'"
       :style="style"
     >
@@ -59,7 +59,9 @@
                 tooltip="Expand"
                 @click="expandFromTray"
               >
-                <template #icon><LucideMaximize2 class="h-4 w-4" /></template>
+                <template #icon
+                  ><span class="lucide-maximize-2 h-4 w-4"
+                /></template>
               </Button>
               <Button
                 v-else
@@ -68,7 +70,7 @@
                 tooltip="Minimize"
                 @click="minimize"
               >
-                <template #icon><LucideMinus class="h-4 w-4" /></template>
+                <template #icon><span class="lucide-minus h-4 w-4" /></template>
               </Button>
             </template>
             <!-- Expand to a floating window when docked; close (dock back) once
@@ -80,9 +82,9 @@
               @click="isDocked ? float() : dock()"
             >
               <template #icon>
-                <component
-                  :is="isDocked ? LucideMaximize2 : LucideX"
+                <span
                   class="h-4 w-4"
+                  :class="isDocked ? 'lucide-maximize-2' : 'lucide-x'"
                 />
               </template>
             </Button>
@@ -129,9 +131,6 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import LucideX from '~icons/lucide/x'
-import LucideMinus from '~icons/lucide/minus'
-import LucideMaximize2 from '~icons/lucide/maximize-2'
 import { Button } from '#components/Button'
 import { usePortalTarget } from '#composables/usePortalTarget'
 import { useFloatingWindow } from './useFloatingWindow'

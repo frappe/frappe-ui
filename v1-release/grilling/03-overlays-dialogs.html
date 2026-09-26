@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Overlays and dialogs | frappe-ui v1 RC</title>
+    <link rel="stylesheet" href="_shared.css" />
+  </head>
+  <body>
+    <div data-grill-page></div>
+    <script>
+      const AREA = 'overlays-dialogs'
+      const TITLE = 'Overlays and dialogs'
+      const INTRO =
+        'Set the permanent contracts for opening, closing, rendering, and styling overlays and dialogs. Start with the shared vocabulary, then decide the component-specific types and the few compatibility costs that need a case-by-case call.'
+      const QUESTIONS = [
+        {
+          id: 'OVR-Q1',
+          title: 'Trigger slot props across overlays, selections, and pickers',
+          covers: ['X5', 'B6', 'B7'],
+          severity: 'Cross-cutting · Medium',
+          tier: 'T1 · 0 sites',
+          what: `<p>A trigger slot lets application code replace the button or input that opens a component. The slot needs to report whether the component is open, whether its trigger is disabled, and how slot code requests a state change. Today each family exposes a different subset and uses <code>close</code>, <code>toggle</code>, or <code>setOpen</code> for the same job.</p>`,
+          visual: {
+            label: 'Trigger and default slot props today',
+            html: `<table><thead><tr><th>Component</th><th>Props today</th><th>Close from slot</th></tr></thead><tbody>
+              <tr><td>DatePicker family</td><td><code>toggle, open, displayLabel, inputValue</code></td><td><code>toggle(false)</code></td></tr>
+              <tr><td>TimePicker <code>#suffix</code></td><td><code>toggle, open</code></td><td><code>toggle(false)</code></td></tr>
+              <tr><td>Popover</td><td><code>open, close, toggle</code></td><td><code>close()</code></td></tr>
+              <tr><td>HoverCard</td><td><code>open</code></td><td>None</td></tr>
+              <tr><td>Tooltip</td><td>None</td><td>None</td></tr>
+              <tr><td>Select</td><td><code>open, disabled, selectedOption, clear, setOpen</code></td><td><code>setOpen(false)</code></td></tr>
+              <tr><td>Combobox</td><td><code>open, disabled, query, selectedOption, displayValue, clear, setOpen</code></td><td><code>setOpen(false)</code></td></tr>
+              <tr><td>MultiSelect</td><td><code>open, disabled, query, selectedOptions, clear, setOpen</code></td><td><code>setOpen(false)</code></td></tr>
+              <tr><td>Dropdown</td><td><code>open, close, disabled</code> plus attrs</td><td><code>close()</code></td></tr>
+              <tr><td>ContextMenu</td><td><code>open</code></td><td>None</td></tr>
+            </tbody></table>`,
+          },
+          found: `<p>The family has no common trigger contract: picker slots declare <code>toggle</code> at <code>src/components/shared/picker/PickerShell.vue:149-156</code>, Popover declares <code>open</code>, <code>close</code>, and <code>toggle</code> at <code>src/components/Popover/types.ts:52-60</code>, while Dropdown and ContextMenu differ again at <code>src/components/Dropdown/types.ts:51-65</code> and <code>src/components/ContextMenu/types.ts:20-23</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">X5 choice</div><p>“Align slot props with P7; define each family's data-state vocabulary”</p><div class="source-label">Comment</div><p>“why change the slot name from prefix to item-prefix for TabButtons? not intentional? slot prop renames look fine. also what is the slot prop to close?”</p></div><div class="source-quote"><div class="source-label">B6 choice</div><p>“{ open, close, disabled } picked”</p><div class="source-label">Comment</div><p>“is open, close functions or state? should we have setOpen here?”</p></div><div class="source-quote"><div class="source-label">B7 choice</div><p>“State plus setOpen(boolean)”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div><div class="source-quote"><div class="source-label">Research</div><p><code>open</code> is boolean state, not a function. Template-ref <code>open()</code> and <code>close()</code> methods are for parent script; slot helpers are for code inside a slot. Today pickers close with <code>toggle(false)</code>, Popover and Dropdown use <code>close()</code>, selection controls use <code>setOpen(false)</code>, and HoverCard, Tooltip, and ContextMenu expose no close helper. The orchestrator recommends <code>{ open: boolean, setOpen(boolean), disabled }</code> everywhere, with component-specific value fields alongside it.</p></div>`,
+          tradeoff: `<p>Keeping the split freezes a merely inconsistent API: shared trigger wrappers must branch by component and some slots cannot request a close. Changing it touches zero measured v1-app sites for the two measured <code>toggle</code> renames and is codemod-able, though X5 as a whole was not measured. One common state setter also avoids the ambiguity of whether <code>open</code> is state or a method.</p>`,
+          options: [
+            'Expose open boolean, setOpen(boolean), and disabled on every trigger slot',
+            'Use open boolean, close(), and disabled on trigger-owning overlays; use setOpen(boolean) on selections and pickers',
+            'Expose open boolean, open(), close(), and disabled on every trigger slot',
+            'Keep the current per-component slot props and document the differences',
+          ],
+          recommended: 0,
+          why: 'One boolean and one explicit setter work for opening and closing without giving open two meanings.',
+        },
+        {
+          id: 'OVR-Q2',
+          title: 'Data-state values: active, checked, and selected',
+          covers: ['X5'],
+          severity: 'Cross-cutting',
+          tier: 'not measured',
+          what: `<p>Components stamp <code>data-state</code> on rendered elements so applications can style state without reaching into private classes. The value should describe one concept consistently. Today navigation and tabs use <code>active|inactive</code>, controls use <code>checked|unchecked</code>, and some rows use <code>selected</code>.</p>`,
+          visual: {
+            label: 'State vocabulary by meaning',
+            html: `<table><thead><tr><th>Meaning</th><th>Current examples</th><th>Proposed values</th></tr></thead><tbody>
+              <tr><td>Overlay visibility</td><td>Popover, Dropdown</td><td><code>open|closed</code></td></tr>
+              <tr><td>Current item or tab</td><td>Tabs, MobileNavItem</td><td><code>active|inactive</code></td></tr>
+              <tr><td>Binary control value</td><td>Checkbox, Switch</td><td><code>checked|unchecked</code></td></tr>
+              <tr><td>Chosen collection row</td><td>ListRow, menu item</td><td><code>selected|unselected</code></td></tr>
+            </tbody></table>`,
+          },
+          found: `<p>The audit records three competing state vocabularies at <code>v1-release/rc-api-audit.md:33-35</code>. The code confirms <code>active|inactive</code> at <code>src/components/shared/tabs/Pill.vue:111</code> and <code>checked</code> styling at <code>src/components/Select/Select.vue:577-585</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">X5 choice</div><p>“Align slot props with P7; define each family's data-state vocabulary”</p><div class="source-label">Comment</div><p>“why change the slot name from prefix to item-prefix for TabButtons? not intentional? slot prop renames look fine. also what is the slot prop to close?”</p></div><div class="source-quote"><div class="source-label">Research</div><p>Consumers use this vocabulary in CSS selectors. The family specifications are meant to define exact values. The research separates visibility, current-item state, binary value, and collection selection instead of forcing unrelated meanings into one word.</p></div>`,
+          tradeoff: `<p>Keeping the current mix freezes a merely inconsistent styling contract and makes wrapper CSS component-specific. This item was not measured, so the affected v1-app site count is unknown and selector changes may escape TypeScript and codemods. Defining values by meaning makes new components predictable; keeping requires every family spec to record its exception.</p>`,
+          options: [
+            'Use open|closed for visibility, active|inactive for current items, checked|unchecked for binary controls, and selected|unselected for collection rows',
+            'Use active|inactive for every non-overlay state and open|closed for overlays',
+            'Use selected|unselected for every item state and checked|unchecked for controls',
+            'Keep the current family-specific values and document every difference',
+          ],
+          recommended: 0,
+          why: 'The values stay consistent within one meaning without pretending that open, checked, active, and selected are the same state.',
+        },
+        {
+          id: 'OVR-Q3',
+          title: 'MenuActionOption.onClick event type',
+          covers: ['H08'],
+          severity: 'High',
+          tier: 'not measured',
+          what: `<p><code>MenuActionOption</code> is the data shape used for clickable Menu, Dropdown, and ContextMenu entries. Its <code>onClick</code> callback receives the event emitted when Reka selects the item, whether activation came from a pointer or keyboard. The callback can call <code>preventDefault()</code> to keep the menu open.</p>`,
+          visual: {
+            label: 'Consumer callback type',
+            code: `const options: MenuOptions = [{
+  label: 'Open',
+- onClick(event: PointerEvent) {
+-   console.log(event.pointerType)
++ onClick(event: Event) {
++   event.preventDefault()
+  },
+}]`,
+          },
+          found: `<p>The public type promises <code>PointerEvent</code> at <code>src/components/Menu/types.ts:52-60</code>, but Menu receives a Reka <code>Event</code> and only casts it at <code>src/components/Menu/Menu.vue:34-41</code>. A TypeScript cast does not add pointer fields at runtime.</p>`,
+          said: `<div class="source-quote"><div class="source-label">H08 choice</div><p>“Change Menu onClick to the actual reka CustomEvent type”</p><div class="source-label">Comment</div><p>“i would like to understand this in detail before deciding”</p></div><div class="source-quote"><div class="source-label">Research</div><p>Reka's public selection emit is <code>Event</code>, although its current implementation constructs a cancelable <code>CustomEvent</code>. Keyboard and pointer activation both use that path, so pointer-only fields such as coordinates and <code>pointerType</code> are absent at runtime. <code>preventDefault()</code> remains meaningful because Reka uses it to keep the menu open. The corrected public type is <code>Event</code>, which matches Reka without freezing its internal event subclass.</p></div>`,
+          tradeoff: `<p>Keeping <code>PointerEvent</code> is a trap because TypeScript permits fields that the runtime object does not have. H08 has no separate migration row, so its v1-app site count is not measured; the related X2 row reports zero sites and marks the type edit codemod-able. Changing to <code>Event</code> may expose invalid pointer-specific consumer code at compile time, which is the intended correction.</p>`,
+          options: [
+            'Change MenuActionOption.onClick to Event and remove the PointerEvent casts',
+            'Expose CustomEvent as the public type',
+            'Remove the event parameter from Menu action callbacks',
+          ],
+          recommended: 0,
+          why: 'Event matches Reka’s public contract and supports preventDefault without promising pointer-only fields.',
+        },
+        {
+          id: 'OVR-Q4',
+          title: 'Dropdown and ContextMenu slot typing',
+          covers: ['H09'],
+          severity: 'High',
+          tier: 'not measured',
+          what: `<p>Dropdown and ContextMenu reuse Menu's named item slots, including <code>#item-prefix</code>, <code>#item-label</code>, and <code>#item-suffix</code>. Menu also supports option-selected dynamic slots such as <code>#item-avatar</code>. The current unrestricted string index signature keeps dynamic names working but erases useful typing from all fixed slots.</p>`,
+          visual: {
+            label: 'Fixed and dynamic slot types',
+            code: `- interface MenuSlots {
+-  [slotName: string]: ((props: any) => any) | undefined
+- }
++ type MenuDynamicSlots = {
++   [name: \`item-\${string}\`]:
++     ((props: MenuItemSlotProps) => any) | undefined
++ }
++ type DropdownSlots =
++   DropdownFixedSlots & MenuFixedSlots & MenuDynamicSlots`,
+          },
+          found: `<p><code>MenuSlots</code> names six fixed slots and then accepts every string at <code>src/components/Menu/types.ts:174-200</code>. Because <code>keyof MenuSlots</code> becomes <code>string</code>, the <code>Omit</code> constructions at <code>src/components/Dropdown/types.ts:61-66</code> and <code>src/components/ContextMenu/types.ts:49-54</code> lose exact fixed-slot props.</p>`,
+          said: `<div class="source-quote"><div class="source-label">H09 choice</div><p>“Replace the index-signature construction with explicit named slot types”</p><div class="source-label">Comment</div><p>“what are the pros and cons of current state vs recommended option?”</p></div><div class="source-quote"><div class="source-label">Research</div><p>The unrestricted signature accepts misspelled slots and turns their props into <code>any</code>. Explicit fixed slots restore completion and exact <code>{ item, close, selected }</code> props. Dynamic <code>item-*</code> slots remain valid through a narrow template-literal signature, following Select's existing pattern. TypeScript still cannot reject a misspelling that itself starts with <code>item-</code>, but it can type the slot payload.</p></div>`,
+          tradeoff: `<p>Keeping the current construction freezes a merely inconsistent and weak TypeScript API: valid code works, but completion degrades and errors pass unchecked. H09 is not in the migration report, so the site count is not measured. Replacing it should require no runtime edits and preserves dynamic slots, while consumers with incompatible hand-written slot augmentations may see new type errors.</p>`,
+          options: [
+            'Use explicit fixed slots plus a typed item-${string} signature',
+            'Use fixed slots only and remove option-selected dynamic slot names',
+            'Keep the unrestricted string index signature and document the loss of slot precision',
+          ],
+          recommended: 0,
+          why: 'It restores useful typing for known slots without deleting the existing dynamic item-slot feature.',
+        },
+        {
+          id: 'OVR-Q5',
+          title: 'Dialog icon and theme props',
+          covers: ['H20'],
+          severity: 'High',
+          tier: 'T2 · 3 sites',
+          what: `<p><code>Dialog.icon</code> chooses the icon shown beside the title. It currently accepts a string or a <code>DialogIcon</code> object containing both <code>name</code> and <code>theme</code>, while the imperative confirm API already puts <code>theme</code> at the top level. The proposed shape accepts a string or Vue component and gives <code>theme</code> its own prop.</p>`,
+          visual: {
+            label: 'Current versus proposed Dialog props',
+            code: `- <Dialog :icon="{ name: 'lucide-triangle-alert', theme: 'red' }" />
++ <Dialog icon="lucide-triangle-alert" theme="red" />
++ <Dialog :icon="AlertTriangle" theme="red" />
+
+- icon?: string | DialogIcon
++ icon?: string | Component
++ theme?: DialogTheme`,
+          },
+          found: `<p><code>DialogIcon</code> and the current prop are declared at <code>src/components/Dialog/types.ts:21-25,51-52</code>. The component has no top-level theme prop even though the imperative API does, and it cannot accept a Vue component.</p>`,
+          said: `<div class="source-quote"><div class="source-label">H20 choice</div><p>“icon?: string | Component, add theme?: DialogTheme, delete DialogIcon”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping the object is a trap because the component and imperative dialog APIs model the same icon and tone differently, and component icons are rejected. Changing it requires manual classification at 3 v1-app sites, so a codemod cannot finish the migration safely. The new shape aligns Dialog with the shared icon rule and leaves one place for theme.</p>`,
+          options: [
+            'Accept string or Component icons, add theme, and delete DialogIcon',
+            'Accept string, Component, or DialogIcon and add theme with object theme taking precedence',
+            'Accept only string icons and add a separate theme prop',
+          ],
+          recommended: 0,
+          why: 'The chosen shape removes the nested tone contract and adds component icons at a measured cost of three manual sites.',
+        },
+        {
+          id: 'OVR-Q6',
+          title: 'The two DialogAction types',
+          covers: ['H21'],
+          severity: 'High',
+          tier: 'not measured',
+          what: `<p>The Dialog component and the imperative <code>dialog.confirm()</code> helper each accept action objects. Their callbacks receive different context: component actions get <code>{ close }</code>, while imperative actions also get <code>setError</code> and require a label. Both types are currently named <code>DialogAction</code>, and only the component one is reachable from the package root.</p>`,
+          visual: {
+            label: 'Two action contracts',
+            html: `<table><thead><tr><th>API</th><th>Label</th><th>Callback context</th><th>Public name</th></tr></thead><tbody>
+              <tr><td><code>&lt;Dialog :actions&gt;</code></td><td>Optional</td><td><code>{ close }</code></td><td><code>DialogAction</code></td></tr>
+              <tr><td><code>dialog.confirm({ actions })</code></td><td>Required</td><td><code>{ close, setError }</code></td><td>Not exportable</td></tr>
+            </tbody></table>`,
+          },
+          found: `<p>The component type is <code>DialogAction</code> at <code>src/components/Dialog/types.ts:27-34</code>. A different <code>DialogAction</code> types <code>ConfirmArgs.actions</code> at <code>src/utils/dialog.ts:52-55,92-98</code>, so consumers cannot name that public helper input without recreating it.</p>`,
+          said: `<div class="source-quote"><div class="source-label">H21 choice</div><p>“Name and export separate component and imperative action types”</p><div class="source-label">Comment</div><p>“imperative actions will always be written inline in dialog.confirm so is it really needed to export ImperativeDialogAction?”</p></div><div class="source-quote"><div class="source-label">Research</div><p>Inline action arrays are inferred and do not need an import. An export matters when a consumer builds the array in a shared confirm helper or variable, and it follows the rule that named public-signature types are reachable. The name collision still needs a fix because the two public contracts are different. Rename the imperative type to <code>ImperativeDialogAction</code> and export it; the export is one line.</p></div>`,
+          tradeoff: `<p>Keeping two incompatible types under one name is a trap for generated docs, imports, and wrapper authors. H21 was not measured, so the v1-app site count is unknown; the rename is confined to the library unless consumers imported the non-root utility path. Exporting the imperative name adds no runtime API and lets shared helpers annotate the exact contract.</p>`,
+          options: [
+            'Keep DialogAction for the component and export ImperativeDialogAction for dialog.confirm',
+            'Rename both to ComponentDialogAction and ImperativeDialogAction and export both',
+            'Use one shared action type with optional setError in every callback context',
+          ],
+          recommended: 0,
+          why: 'It resolves the collision with the smallest rename and makes the helper input nameable when actions are defined outside the call.',
+        },
+        {
+          id: 'OVR-Q7',
+          title: 'Toast duration default and option types',
+          covers: ['H22'],
+          severity: 'High',
+          tier: 'T0 · 0 sites',
+          what: `<p><code>ToastProvider</code> mounts the styled vue-sonner viewport and intentionally accepts no props. Calls such as <code>toast.success()</code> accept option objects for duration, description, and actions, so consumers may need public types for those objects. The current provider inherits vue-sonner's 4,000ms duration while the frappe-ui spec says 5,000ms.</p>`,
+          visual: {
+            label: 'Frozen Toast contract',
+            code: `  <ToastProvider />
+- duration: 5000 // spec
++ duration: 4000 // inherited runtime default
+
+- import type { ExternalToast } from 'vue-sonner'
++ import type { ExternalToast, ToastOptions } from 'frappe-ui'`,
+          },
+          found: `<p><code>src/components/Toast/ToastProvider.vue:1-30</code> passes styling options but no duration and declares no props. The conflicting 5,000ms promise is at <code>spec/toast.md:16,79</code>; the audit records the inherited 4,000ms behavior at <code>v1-release/rc-api-audit.md:114-117</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">H22 choice</div><p>“Amend the spec to 4000ms; export owned toast option types”</p><div class="source-label">Comment</div><p>“toast is not supposed to be stylable by consumers. ToastProvider does not take any props.”</p></div><div class="source-quote"><div class="source-label">Research</div><p>The option types describe <code>toast()</code> calls, not styling props on <code>ToastProvider</code>. Consumers currently need to import them from <code>vue-sonner</code>, which frappe-ui does not declare as a peer. The earlier choice can stand with the spec amended to 4,000ms and owned option types exported from <code>frappe-ui</code>. ToastProvider continues to take no props.</p></div>`,
+          tradeoff: `<p>Keeping the spec mismatch is a trap because consumers cannot know which default v1 freezes, and direct vue-sonner type imports bind them to a transitive dependency. The chosen change has zero measured v1-app sites and is codemod-able because runtime behavior already uses 4,000ms. Setting 5,000ms instead would deliberately change existing toast timing.</p>`,
+          options: [
+            'Document the existing 4000ms default, export owned toast option types, and keep ToastProvider prop-free',
+            'Set an explicit 5000ms default, export owned option types, and keep ToastProvider prop-free',
+            'Set an explicit 4000ms default but require consumers to import vue-sonner types directly',
+          ],
+          recommended: 0,
+          why: 'It freezes the behavior users already see and makes call-option types public without opening provider styling props.',
+        },
+        {
+          id: 'OVR-Q8',
+          title: 'Dialog-family names and BreadcrumbItem metadata',
+          covers: ['M-dialog', 'B5'],
+          severity: 'Medium',
+          tier: 'T1 · 14 sites',
+          what: `<p>This group names four public concepts: Dialog supporting text, Alert tone hooks, Divider action alignment, and repeated Breadcrumb item slots. <code>BreadcrumbItem</code> also accepts arbitrary application metadata through an open index signature. The names can change mechanically, while the metadata choice decides whether consumers may keep extra fields on each crumb.</p>`,
+          visual: {
+            label: 'Current versus proposed names',
+            code: `- <Dialog message="Delete this file?" />
++ <Dialog description="Delete this file?" />
+- [data-color="red"]
++ [data-theme="red"]
+- <Divider position="start" />
++ <Divider align="start" />
+- <template #prefix="{ item }">
++ <template #item-prefix="{ item }">
+  interface BreadcrumbItem {
+    [key: string]: any
+  }`,
+          },
+          found: `<p>The current names appear at <code>src/components/Dialog/types.ts:48-49</code>, <code>src/components/Alert/Alert.vue:171-176</code>, <code>src/components/Divider/types.ts:17-22</code>, and <code>src/components/Breadcrumbs/Breadcrumbs.vue:17-36</code>. The open breadcrumb index signature is at <code>src/components/Breadcrumbs/types.ts:3-21</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">M-dialog choice</div><p>“Resolve all Dialog-family findings before RC”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div><div class="source-quote"><div class="source-label">B5 choice</div><p>“Keep BreadcrumbItem's open index signature”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping the four names freezes a merely inconsistent API: <code>message</code> means description text, <code>data-color</code> names the theme axis differently, <code>position</code> means alignment, and repeated-item slots lack their scope prefix. Renaming touches 14 measured v1-app sites in T1 and a codemod can handle them; 12 are Breadcrumb slot uses. Keeping the open <code>BreadcrumbItem</code> signature avoids a separate metadata break but continues to allow misspelled known keys.</p>`,
+          options: [
+            'Apply all four renames and keep BreadcrumbItem open to arbitrary fields',
+            'Apply the Dialog, Alert, and Divider renames; keep Breadcrumb slot names and the open item type',
+            'Apply all four renames and replace the index signature with a data field',
+            'Keep the current names and open BreadcrumbItem type, and document every difference',
+          ],
+          recommended: 1,
+          why: 'The three small renames fix misleading names at two sites, while preserving the 12 working Breadcrumb slot sites and the already chosen metadata shape avoids unnecessary breaks.',
+        },
+        {
+          id: 'OVR-Q9',
+          title: 'Dialog statics, paddingTop type, and Alert icon tri-state',
+          covers: ['M-dialog'],
+          severity: 'Medium',
+          tier: 'T0–T2 · 7 sites',
+          what: `<p><code>Dialog.Title</code>, <code>Dialog.Description</code>, and <code>Dialog.Close</code> expose raw Reka components as properties on the frappe-ui Dialog export. <code>Dialog.paddingTop</code> accepts a number even though the value is bound directly into CSS, and <code>Alert.icon</code> uses a boolean branch to show or hide its automatic icon. These are traps because the undocumented statics bypass the owned Dialog contract, numeric padding produces invalid CSS, and a boolean icon mixes visibility with icon value.</p>`,
+          visual: {
+            label: 'Remove invalid and bypass APIs',
+            code: `- Dialog.Title = DialogTitle
+- Dialog.Description = DialogDescription
+- Dialog.Close = DialogClose
+- paddingTop?: string | number
++ paddingTop?: string
+- icon?: boolean | string | Component
++ icon?: string | Component`,
+          },
+          found: `<p>The raw statics are attached at <code>src/components/Dialog/index.ts:19-28</code>, numeric padding is declared at <code>src/components/Dialog/types.ts:61-62</code>, and the Alert boolean branch is at <code>src/components/Alert/types.ts:31-39</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">M-dialog choice</div><p>“Resolve all Dialog-family findings before RC”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping any of these freezes a trap: consumers can build dialogs from unowned primitives, pass a number that becomes invalid CSS, or overload an icon value as a visibility flag. Removing the statics touches 6 codemod-able T1 sites; narrowing <code>paddingTop</code> needs one manual T2 edit to choose a CSS unit; no v1-app uses a boolean Alert icon. Resolving them now leaves the documented component and slots as the only Dialog composition contract.</p>`,
+          options: [
+            'Remove the three statics, narrow paddingTop to string, and remove the boolean Alert icon branch',
+            'Replace the statics with owned wrapper components, narrow paddingTop, and remove the boolean icon branch',
+            'Remove Dialog statics and paddingTop entirely, and replace Alert icon false with a separate showIcon prop',
+          ],
+          recommended: 0,
+          why: 'It removes all three false or bypass contracts with seven measured migrations and only one edit that needs human judgment.',
+        },
+        {
+          id: 'OVR-Q10',
+          title: 'Dialog hooks, PromptField options, and HoverCard delay',
+          covers: ['M-dialog'],
+          severity: 'Medium',
+          tier: 'T3 · 36 sites',
+          what: `<p>Dialog and BottomSheet need stable <code>data-slot</code> hooks so consumers can style their named regions, and BottomSheet should find its own content through a hook instead of a class name. <code>PromptField</code> intentionally accepts simple string label/value pairs for select fields. <code>HoverCard.hoverDelay</code> is changing to milliseconds with the wider delay decision, but its current 0.3-second default also disagrees with the 0.5-second spec and Tooltip default.</p>`,
+          visual: {
+            label: 'Hooks and intentional defaults',
+            code: `+ <DialogContent data-slot="content">
++ <div data-slot="actions">
++ <BottomSheetContent data-slot="content">
+  options: Array<{ label: string; value: string }>
+- hoverDelay: 0.3 // seconds
++ hoverDelay: 500 // milliseconds`,
+          },
+          found: `<p>Dialog content and actions have no hooks at <code>src/components/Dialog/Dialog.vue:30-45,103-126</code>. PromptField's select options are declared at <code>src/utils/dialog.ts:123-133</code>. HoverCard sets <code>hoverDelay: 0.3</code> and converts seconds at <code>src/components/HoverCard/HoverCard.vue:22-39</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">M-dialog choice</div><p>“Resolve all Dialog-family findings before RC”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping the missing hooks and class lookup freezes a merely inconsistent customization path, while adding hooks has no consumer migration. Broadening PromptField options adds coupling without a demonstrated need, so keeping its narrow documented shape costs nothing. Changing delay units and the omitted HoverCard default creates a T3 review set of 36 v1-app sites that a codemod cannot validate; preserving the 300ms behavior would reduce surprise but keep the spec mismatch.</p>`,
+          options: [
+            'Add Dialog and BottomSheet hooks, keep PromptField options narrow, and set HoverCard hoverDelay to 500ms',
+            'Add the hooks and keep PromptField narrow, but preserve a 300ms HoverCard default after changing units',
+            'Add the hooks, reuse the full SelectOption union in PromptField, and set HoverCard to 500ms',
+            'Keep the current hooks, PromptField type, and delay behavior, and document them',
+          ],
+          recommended: 1,
+          why: 'The hooks and narrow PromptField shape are clear wins, while preserving the observed 300ms default avoids an unneeded behavior change across a 36-site review set.',
+        },
+        {
+          id: 'OVR-Q11',
+          title: 'Fallthrough attribute targets across overlays',
+          covers: ['M-overlays'],
+          severity: 'Medium',
+          tier: 'T3 · 213 sites',
+          what: `<p>Fallthrough attributes are undeclared values such as <code>class</code>, <code>id</code>, and event listeners passed to a Vue component. Popover, Dropdown, HoverCard, and ContextMenu currently place them on different DOM elements: a trigger, portaled content, or nowhere. Standardizing the target could change styling, tests, and event handling even when a component call itself still compiles.</p>`,
+          visual: {
+            label: 'Current attribute destinations',
+            html: `<table><thead><tr><th>Component</th><th>Where attrs land</th></tr></thead><tbody>
+              <tr><td>Popover</td><td>Not forwarded after <code>inheritAttrs: false</code></td></tr>
+              <tr><td>Dropdown</td><td>Trigger slot or default Button</td></tr>
+              <tr><td>HoverCard</td><td>Portaled <code>HoverCardContent</code></td></tr>
+              <tr><td>ContextMenu</td><td>Implicit component root path</td></tr>
+            </tbody></table>`,
+          },
+          found: `<p>Popover disables inheritance at <code>src/components/Popover/Popover.vue:55-57</code>, Dropdown forwards attrs into its trigger at <code>src/components/Dropdown/Dropdown.vue:8-23</code>, and HoverCard forwards them to content at <code>src/components/HoverCard/HoverCard.vue:68-76</code>. The audit summarizes the three destinations at <code>v1-release/rc-api-audit.md:209-213</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">M-overlays choice</div><p>“Align every overlay with one documented trigger and portal contract before RC”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping the split freezes a substandard inconsistency: the same <code>class</code> or listener means a different DOM target by component. Changing it requires reviewing 213 v1-app sites, plus 123 v0 sites, because no codemod can prove which element callers intended. Keeping and documenting preserves behavior; standardizing gives wrappers one rule but risks silent UI and event regressions before the RC.</p>`,
+          options: [
+            'Keep each current target and document the exact fallthrough behavior per overlay',
+            'Forward attributes once to each overlay public root before v1',
+            'Disable fallthrough on every overlay and require named trigger or content attrs props',
+          ],
+          recommended: 0,
+          why: 'A consistency-only cleanup does not justify a manual behavior audit across 213 working v1-app sites before the freeze.',
+        },
+        {
+          id: 'OVR-Q12',
+          title: 'Popover control and overlay parity',
+          covers: ['M-overlays'],
+          severity: 'Medium',
+          tier: 'T0–T1 · 0 sites',
+          dependsOn: 'OVR-Q1',
+          what: `<p><code>Popover.toggle</code> currently accepts either a boolean or a DOM <code>Event</code>, because passing it directly as a click handler must ignore the event argument. ContextMenu lacks the <code>portalTo</code> prop that other portaled overlays expose, HoverCard has no exported emits type, and only Popover marks its trigger with <code>data-slot="trigger"</code>. The control-method name should follow OVR-Q1; the other changes add type, portal, and styling parity without changing existing calls.</p>`,
+          visual: {
+            label: 'Proposed overlay parity',
+            code: `- toggle(flag?: boolean | Event)
++ setOpen(open: boolean)
++ <ContextMenu :portal-to="target" />
++ export interface HoverCardEmits {
++   'update:open': [open: boolean]
++ }
++ <PopoverTrigger data-slot="trigger">
++ <DropdownMenuTrigger data-slot="trigger">
++ <HoverCardTrigger data-slot="trigger">
++ <ContextMenuTrigger data-slot="trigger">`,
+          },
+          found: `<p>The event overload and implementation are at <code>src/components/Popover/types.ts:52-60</code> and <code>src/components/Popover/Popover.vue:112-129</code>. ContextMenu resolves only the default portal target at <code>src/components/ContextMenu/ContextMenu.vue:44-55</code>; its types have no <code>portalTo</code> at <code>src/components/ContextMenu/types.ts:25-31</code>. Only Popover marks the trigger at <code>src/components/Popover/Popover.vue:8-10</code>.</p>`,
+          said: `<div class="source-quote"><div class="source-label">M-overlays choice</div><p>“Align every overlay with one documented trigger and portal contract before RC”</p><div class="source-label">Comment</div><p>Nothing yet.</p></div>`,
+          tradeoff: `<p>Keeping the event overload freezes a substandard control API because an interaction event is accepted where the method needs state. Replacing it with <code>setOpen(boolean)</code> has zero measured v1-app migrations and is a T1 codemod-able rename. The portal prop, emits type, and trigger hooks are additive with zero measured sites, so doing them now gives the family deliberate parity without forcing runtime emit shapes to become identical.</p>`,
+          options: [
+            'Use setOpen(boolean), add ContextMenu portalTo, export HoverCardEmits, and add trigger hooks to all overlays',
+            'Use the control shape chosen in OVR-Q1 and defer the additive portal, emits, and hook gaps to 1.1',
+            'Remove the Popover slot control helper and add only the portal, emits, and trigger hooks',
+          ],
+          recommended: 0,
+          why: 'It removes the event-shaped setter at zero measured migration cost and closes three additive family gaps before the API freezes.',
+        },
+        {
+          id: 'OVR-Q13',
+          title: 'Progress #hint renders independently',
+          covers: ['H19'],
+          severity: 'High',
+          tier: 'T0 · 0 sites',
+          what: `<p><code>Progress</code> can show a label on the left and a hint, usually the percentage, on the right. Consumers may provide the hint through the <code>#hint</code> slot even when they omit the <code>hint</code> prop. The outer row currently needs to consider both the prop and the slot independently.</p>`,
+          visual: {
+            label: 'Independent hint rendering',
+            code: `- <div v-if="props.label || props.hint">
++ <div v-if="props.label || props.hint || $slots.hint">
+    <span v-if="props.label">{{ props.label }}</span>
+    <span v-else></span>
+    <span v-if="props.hint || $slots.hint">
+      <slot name="hint">{{ props.value }}%</slot>
+    </span>
+  </div>`,
+          },
+          found: `<p>The hint span checks <code>props.hint || $slots.hint</code> at <code>src/components/Progress/Progress.vue:13-19</code>, but the containing row checks only <code>props.label || props.hint</code> at <code>src/components/Progress/Progress.vue:2-5</code>. A slot-only hint can therefore remain gated out.</p>`,
+          said: `<div class="source-quote"><div class="source-label">H19 choice</div><p>“Render #hint whenever supplied; regression test”</p><div class="source-label">Comment</div><p>“label and hint must render independently”</p></div>`,
+          tradeoff: `<p>Keeping the gate is a trap because a declared slot can silently render nothing. The fix has zero measured v1-app edits and is codemod-able; existing slot content simply starts rendering as requested. Confirming the decision also requires a regression test for label-only, prop-hint, and slot-only combinations.</p>`,
+          options: [
+            'Confirm independent label and #hint rendering and add the regression test',
+            'Remove the #hint slot and require the hint prop',
+          ],
+          recommended: 0,
+          why: 'It makes the existing slot contract work with no consumer migration.',
+        },
+      ]
+    </script>
+    <script src="_shared.js"></script>
+  </body>
+</html>

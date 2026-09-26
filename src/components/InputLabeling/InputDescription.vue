@@ -4,7 +4,7 @@
     :id="id"
     data-slot="description"
     class="text-p-sm"
-    :class="disabled ? 'text-ink-gray-3' : 'text-ink-gray-5'"
+    :class="disabled ? 'text-ink-gray-4' : 'text-ink-gray-6'"
   >
     <slot>{{ description }}</slot>
   </p>

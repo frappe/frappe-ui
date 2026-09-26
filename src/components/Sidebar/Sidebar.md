@@ -1,79 +1,120 @@
 # Sidebar
 
-The wide navigation panel of an app shell. `Sidebar` is a bare frame — a
-fixed-width column with the collapse machinery and a single slot — and you
-compose the body from `SidebarItem`, `SidebarLabel`, and your own markup. The
-app owns its header, scroll region, and empty state; lay them out with plain
-flex utilities.
+The wide navigation column of an app. You fill it with `SidebarItem`,
+`SidebarSection` and your own markup.
 
 <ComponentPreview name="Sidebar-Default" />
 
-There are no layout slots and no built-in scrolling in composition mode. Put a
-header as a direct child, wrap the middle list in your own `overflow-y-auto`
-container, and push a footer down with `mt-auto`.
+## Anatomy
 
-## Collapse
+`Sidebar` is a fixed-width column with one slot, and it owns collapsing. It
+has no layout slots and does not scroll, so lay out the header, the scrolling
+list and the footer yourself with flex classes.
 
-`Sidebar` owns collapse. Bind `v-model:collapsed` to control it, or leave it
-unset to collapse automatically below the `sm` breakpoint. `disableCollapse`
-pins it open. Width comes from the `width` / `collapsedWidth` props (CSS lengths,
-applied inline so an app can override them). Drop a `SidebarCollapseToggle`
-anywhere inside to flip the state; `SidebarLabel divider` turns a section label
-into a divider line while collapsed.
+```vue
+<Sidebar v-model:collapsed="collapsed">
+  <SidebarHeader title="Acme" :menu-items="workspaceMenu" />
+
+  <div class="flex-1 overflow-y-auto">
+    <SidebarItem label="Inbox" icon="lucide-inbox" route="/inbox" />
+    <SidebarLabel>Projects</SidebarLabel>
+    <SidebarItem label="Website" icon="lucide-globe" route="/p/website" />
+
+    <SidebarSection label="Archived" collapsible>
+      <SidebarItem label="Q3 launch" route="/p/q3" />
+    </SidebarSection>
+  </div>
+
+  <SidebarCard class="mt-auto" title="Trial ends in 5 days" :action="upgrade" />
+  <SidebarCollapseToggle />
+</Sidebar>
+```
+
+## Examples
+
+### Collapsing to icons
+
+A collapsed sidebar shows only icons. `SidebarCollapseToggle` switches between
+the two widths, and `SidebarLabel divider` turns a section label into a line
+while collapsed.
 
 <ComponentPreview name="Sidebar-Collapsed" />
 
-## SidebarItem
+### Collapsible sections
 
-A single row. It renders a container with a navigable main area and a **sibling**
-trailing zone, so an options menu in `#suffix` isn't nested inside the link
-(which anchors and buttons disallow).
-
-- `#prefix` — a leading icon or avatar (falls back to the `icon` prop: a lucide
-  class, text, or a component).
-- default slot — the label region (falls back to the `label` prop). Put inline
-  adornments like a lock icon here next to the text.
-- `#suffix` — the trailing zone: an unread count, an options `…` menu, etc.
-
-Set `to` to render a router link; omit it for a button. `active` drives
-`data-state`; when omitted it's inferred by matching `to` against the current
-route. A click invokes `onClick` (bound from `@click`) in both cases.
-
-## SidebarHeader
-
-The app-switcher / workspace-identity row. A fixed 48px region that lines up
-with `PageHeader`, rendered as a dropdown trigger. `title` and `subtitle` are
-plain strings; `#prefix` fills the default logo/initial box (a `size-7
-overflow-hidden` frame — wide content clips), falling back to the `logo` prop,
-or the title's first letter; `showLogo: false` drops the box entirely for a
-flush-left title. `menuItems` renders inside the trigger's
-dropdown — the same structured-options shape `Dropdown` itself takes.
-
-## SidebarSection
-
-A collapsible group. It owns only the label row and the collapse chrome —
-compose `SidebarItem` (or anything else) as children in the default slot.
-Non-collapsible groups don't need this component at all: compose `SidebarLabel`
-+ `SidebarItem` directly instead.
+`SidebarSection` adds a label row that opens and closes the items under it.
 
 <ComponentPreview name="Sidebar-Section" />
 
-Bind `v-model:collapsed` to own a section's state (start a section collapsed,
-persist the choice); left unbound the section manages it internally, starting
-expanded.
+### Trial notice
 
-## SidebarCard
-
-A promotional or onboarding card for the sidebar footer — a trial notice, an
-upgrade prompt, a "what's new" pointer. A white card with an optional
-theme-colored icon and one full-width tinted action button. Like `Alert`, it is
-stateless: `dismiss` is an event and the parent owns hiding the card. It is not
-a status announcement, so it has no live-region role.
+`SidebarCard` holds a notice at the foot of the sidebar: a trial ending, an
+upgrade offer, or a pointer to what is new.
 
 <ComponentPreview name="Sidebar-Card" />
 
-`action` takes `ButtonProps` plus an `onClick({ dismiss })` handler (the same
-shape as `Alert`'s actions). `#prefix`, `#title`, `#description`, and
-`#actions` override the corresponding parts.
+## Behavior
+
+### Collapse
+
+Bind `v-model:collapsed` to control collapsing. Left unbound, the sidebar
+collapses by itself below the `sm` breakpoint. `:collapsible="false"` keeps it
+open. `width` and `collapsedWidth` take CSS lengths.
+
+### Items
+
+`SidebarItem` is one row: a link or button, and a separate area after it for
+`#suffix`. The suffix sits beside the link rather than inside it, so a menu
+button there is valid HTML.
+
+- `#prefix` holds a leading icon or avatar. Without it, the `icon` prop is
+  used: a `lucide-*` class, an emoji or a component. Any other string shows
+  nothing and logs a warning in development, so put initials in `#prefix`.
+- The default slot holds the label, and falls back to the `label` prop.
+- `#suffix` holds an unread count or an options menu.
+
+`route` renders a router link and `href` a plain link. `route` wins when both
+are set, and a row with neither is a button. `active` marks the current row.
+Left unset, it is worked out by matching `route` against the current route.
+
+### Header
+
+`SidebarHeader` is the 48px row at the top, level with `PageHeader`. It shows
+`title`, `subtitle`, and a square logo from `#prefix`, the `logo` prop, or the
+title's first letter. `:show-logo="false"` removes the square. With
+`menuItems` the header opens a dropdown, which takes the same options as
+`Dropdown`. Without them it is plain text, and the logo and title stay in the
+same place.
+
+### Sections
+
+Bind `v-model:collapsed` on a `SidebarSection` to start it closed or to
+remember the choice. Left unbound, it starts open and keeps its own state.
+For a group that never collapses, use `SidebarLabel` and `SidebarItem`
+without a section.
+
+### Card
+
+`SidebarCard` does not hide itself. It emits `dismiss`, and the parent removes
+it. `action` takes `Button` props and an `onClick({ dismiss })` handler, the
+same shape as `Alert`'s actions. `#prefix`, `#title`, `#description` and
+`#actions` replace each part.
+
+### Attributes
+
+Attributes on `SidebarItem` go to two places. `class`, `style` and event
+listeners go on the row, so a background or a drop target covers the
+`#suffix` area too. Every other attribute (`target`, `rel`, `id`, `title`,
+`data-*`, `aria-*`) goes on the link or button inside. Your `aria-label`
+replaces the one taken from the label.
+
+## Accessibility
+
+`Sidebar` renders a `<nav>` named "Main". Set `ariaLabel` to rename it, when a
+page has a second sidebar or to translate it. It is the only landmark in the
+family, so keep your own wrappers as plain `div`s.
+
+`SidebarSection` marks its items as a group, named by its label. A collapsible
+section's toggle reports whether it is open.
 
 <!-- @include: ./Sidebar.api.md -->

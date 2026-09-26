@@ -9,7 +9,7 @@
   -->
   <component
     :is="linkComponent"
-    v-if="to && !isCurrent"
+    v-if="(route && !isCurrent) || (!route && href)"
     v-bind="linkAttrs"
     data-slot="mobile-nav-item"
     :data-state="resolvedActive ? 'active' : 'inactive'"
@@ -19,22 +19,14 @@
     @click="emit('click', $event)"
   >
     <slot :active="resolvedActive">
-      <span
-        v-if="typeof icon === 'string'"
-        :class="[icon, resolvedActive ? 'text-ink-gray-8' : 'text-ink-gray-5']"
-        class="size-6"
-        aria-hidden="true"
-      />
-      <component
-        v-else-if="icon"
-        :is="icon"
+      <Icon
+        :icon="icon"
         :class="resolvedActive ? 'text-ink-gray-8' : 'text-ink-gray-5'"
         class="size-6"
-        aria-hidden="true"
       />
     </slot>
     <span
-      class="text-xs-medium"
+      class="text-xs-medium leading-tighter"
       :class="resolvedActive ? 'text-ink-gray-8' : 'text-ink-gray-5'"
     >
       {{ label }}
@@ -52,22 +44,14 @@
     @click="onButtonClick"
   >
     <slot :active="resolvedActive">
-      <span
-        v-if="typeof icon === 'string'"
-        :class="[icon, resolvedActive ? 'text-ink-gray-8' : 'text-ink-gray-5']"
-        class="size-6"
-        aria-hidden="true"
-      />
-      <component
-        v-else-if="icon"
-        :is="icon"
+      <Icon
+        :icon="icon"
         :class="resolvedActive ? 'text-ink-gray-8' : 'text-ink-gray-5'"
         class="size-6"
-        aria-hidden="true"
       />
     </slot>
     <span
-      class="text-xs-medium"
+      class="text-xs-medium leading-tighter"
       :class="resolvedActive ? 'text-ink-gray-8' : 'text-ink-gray-5'"
     >
       {{ label }}
@@ -78,6 +62,7 @@
 <script setup lang="ts">
 import { computed, getCurrentInstance } from 'vue'
 import { RouterLink } from 'vue-router'
+import Icon from '../Icon/Icon.vue'
 import { scrollShellToTop } from '../../composables/useShellScrolled'
 import type { MobileNavItemProps } from './types'
 
@@ -94,15 +79,19 @@ defineSlots<{
 const globals = getCurrentInstance()?.appContext.config.globalProperties
 const hasRouter = computed(() => Boolean(globals?.$router))
 
-const linkComponent = computed(() => (hasRouter.value ? RouterLink : 'a'))
+const linkComponent = computed(() =>
+  props.route && hasRouter.value ? RouterLink : 'a',
+)
 const linkAttrs = computed(() =>
-  hasRouter.value
-    ? { to: props.to }
-    : { href: typeof props.to === 'string' ? props.to : undefined },
+  props.route
+    ? hasRouter.value
+      ? { to: props.route }
+      : { href: typeof props.route === 'string' ? props.route : undefined }
+    : { href: props.href },
 )
 
 const resolvedRoute = computed(() =>
-  props.to && globals?.$router ? globals.$router.resolve(props.to) : null,
+  props.route && globals?.$router ? globals.$router.resolve(props.route) : null,
 )
 
 // Is this item's target the exact current route? Drives scroll-vs-navigate and

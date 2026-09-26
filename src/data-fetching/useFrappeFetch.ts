@@ -45,6 +45,29 @@ export type { DispatchStamp } from './writeGate'
 
 const dispatchStamps = new WeakMap<Response, DispatchStamp>()
 
+// Dispatch order again, a step earlier. `writeGate.next` numbers a request
+// when its fetch runs; this numbers it at the top of `execute`, before the
+// hook chain awaits anything, because `useCall.submit` has to tell a request
+// minted after it assigned its params from one that was already on its way.
+// A request reads the url and the payload at that same point, so the number
+// says exactly which params the request carries.
+let dispatchSeq = 0
+const requestSeqs = new WeakMap<object, number>()
+
+/** The last dispatch number handed out. Read it synchronously. */
+export function currentDispatchSeq(): number {
+  return dispatchSeq
+}
+
+/**
+ * The dispatch number of the request built on `options`. `useFetch` makes one
+ * `options` object per `execute` and every hook in the chain is handed that
+ * same object, so it names the request.
+ */
+export function getRequestDispatchSeq(options: object): number | undefined {
+  return requestSeqs.get(options)
+}
+
 /**
  * The stamp put on a Response by the wrapped fetch below. The single source
  * for both halves of the write-gate rule: the dispatch version and whether
@@ -75,6 +98,11 @@ export const useFrappeFetch = createFetch({
       })
     },
     beforeFetch({ options }) {
+      // First hook in the chain, so this runs before `execute` awaits
+      // anything. A per-call `beforeFetch` is chained after it and reads the
+      // number back off `options`.
+      dispatchSeq += 1
+      requestSeqs.set(options, dispatchSeq)
       options.headers = setHeaders(options.headers || {})
       return { options }
     },

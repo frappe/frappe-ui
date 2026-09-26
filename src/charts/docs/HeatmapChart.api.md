@@ -3,6 +3,7 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
+  import ExposedTable from '@/components/Docs/ExposedTable.vue'
 
   const propsData = [
   {
@@ -31,7 +32,7 @@
   },
   {
     name: 'error',
-    description: 'Puts the chart in its error state and prints this message under it. A\nchart that fails to draw sets its own; this is for a failed request.',
+    description: 'Puts the chart in its error state and prints this message under it. Data\nthe chart cannot draw shows the empty state, not this one.',
     required: false,
     type: 'string | null'
   },
@@ -84,7 +85,7 @@
     type: 'HeatmapAxisOptions'
   },
   {
-    name: 'showValues',
+    name: 'showDataLabels',
     description: 'Prints each cell\'s value inside it. A label that would collide with its\nneighbour is dropped, so a grid too fine to carry numbers shows none.',
     required: false,
     type: 'boolean'
@@ -131,9 +132,14 @@
     type: 'any'
   },
   {
+    name: 'title-suffix',
+    description: 'A mark right after the title, on the same line. The title truncates\naround it and it keeps its width. It renders in the title\'s font size, so\ncontent sized in `em` is smaller on a NumberCard than on a chart.',
+    type: 'any'
+  },
+  {
     name: 'tooltip',
-    description: 'Replaces the tooltip body. `items` holds the hovered cell alone.',
-    type: '{ label?: string | undefined; items: ChartTooltipItem[]; }'
+    description: 'Replaces the tooltip body. `items` holds the hovered cell alone, and\n`rows` the row behind it, so a body can read a column the grid never drew.',
+    type: 'ChartTooltipSlotProps'
   }
 ]
 
@@ -142,6 +148,14 @@
     name: 'select',
     description: 'A cell was selected, by click or by Enter on the keyboard cursor. Carries\nboth its categories and the row behind it.',
     type: '[event: HeatmapCellEvent]'
+  }
+]
+
+  const exposedData = [
+  {
+    name: 'chart',
+    description: 'The echarts instance, once the plot has a size to initialise into.',
+    type: 'EChartsType | undefined'
   }
 ]
 </script>
@@ -153,3 +167,5 @@
 <SlotsTable :data="slotsData"/>
 
 <EmitsTable :data="emitsData"/>
+
+<ExposedTable :data="exposedData"/>

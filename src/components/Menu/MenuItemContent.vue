@@ -18,7 +18,7 @@ const props = withDefaults(
     close: () => void
     reserveIconSpace?: boolean
     trailing?: 'none' | 'submenu' | 'switch'
-    slotFns?: Record<string, ((props?: any) => any) | undefined>
+    slotFns?: import('./types').MenuSlots
   }>(),
   {
     reserveIconSpace: false,
@@ -26,7 +26,7 @@ const props = withDefaults(
   },
 )
 
-const itemSlotName = computed(() => {
+const itemSlotName = computed<`item-${string}` | undefined>(() => {
   return props.item.slot ? `item-${props.item.slot}` : undefined
 })
 
@@ -167,7 +167,7 @@ function handleSwitchChange(value: boolean) {
         :content="itemSlotsLabelContent"
       />
       <div v-else class="min-w-0">
-        <div :class="['truncate', getMenuTextColor(item)]">
+        <div :class="['truncate leading-tighter', getMenuTextColor(item)]">
           {{ item.label }}
         </div>
         <div v-if="item.description" class="truncate text-p-sm text-ink-gray-5">

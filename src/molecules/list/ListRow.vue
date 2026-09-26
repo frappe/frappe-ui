@@ -2,7 +2,7 @@
   <!-- `custom` so this row's single click handler decides between toggle and
        navigate — with RouterLink's own handler in play, selection could not
        reliably preventDefault before it navigates. -->
-  <RouterLink v-if="to" :to="to" custom v-slot="{ href, navigate }">
+  <RouterLink v-if="route" :to="route" custom v-slot="{ href, navigate }">
     <ListRowBase
       tag="a"
       :href="href"
@@ -12,6 +12,9 @@
       <slot />
     </ListRowBase>
   </RouterLink>
+  <ListRowBase v-else-if="href" tag="a" :href="href" :value="value" @click="onClick">
+    <slot />
+  </ListRowBase>
   <ListRowBase
     v-else
     :tag="isInteractive() ? 'button' : 'div'"

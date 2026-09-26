@@ -36,22 +36,25 @@ describe('Popover', () => {
       cy.get('[data-slot="content"]').should('not.exist')
     })
 
-    it('exposes reactive open state to the #trigger slot', () => {
+    it('exposes reactive open state and setOpen to the #trigger slot', () => {
       // The #trigger click is auto-wired by reka, so the slot must NOT bind its
       // own onClick (that would double-toggle). It can still read `open` to
       // reflect state — e.g. flip a label or a chevron.
+      let setOpen: ((value: boolean) => void) | undefined
       cy.mount(Popover, {
         slots: {
-          trigger: ({ open }: { open: boolean }) =>
-            h(Button, { 'data-cy': 'trigger' }, () =>
-              open ? 'Close' : 'Open',
-            ),
+          trigger: (props) => {
+            setOpen = props.setOpen
+            return h(Button, { 'data-cy': 'trigger' }, () =>
+              props.open ? 'Close' : 'Open',
+            )
+          },
           default: () => h('div', { 'data-cy': 'content' }, 'content'),
         },
       })
 
       cy.get('[data-cy="trigger"]').should('have.text', 'Open')
-      cy.get('[data-cy="trigger"]').click()
+      cy.then(() => setOpen?.(true))
       cy.get('[data-slot="content"]').should('exist')
       cy.get('[data-cy="trigger"]').should('have.text', 'Close')
     })
@@ -90,7 +93,9 @@ describe('Popover', () => {
       cy.mount(Popover, { props: { bare: true }, slots: NewSlots })
 
       cy.get('[data-cy="trigger"]').click()
-      cy.get('[data-slot="content"]').find('[data-cy="content"]').should('exist')
+      cy.get('[data-slot="content"]')
+        .find('[data-cy="content"]')
+        .should('exist')
       cy.get('[data-slot="content-body"]').should('not.exist')
     })
 
@@ -98,7 +103,9 @@ describe('Popover', () => {
       cy.mount(Popover, { props: { arrow: true }, slots: NewSlots })
 
       cy.get('[data-cy="trigger"]').click()
-      cy.get('[data-slot="content"]').find('[data-slot="arrow"]').should('exist')
+      cy.get('[data-slot="content"]')
+        .find('[data-slot="arrow"]')
+        .should('exist')
     })
 
     it('wires aria-haspopup and aria-expanded on the trigger', () => {
@@ -164,6 +171,41 @@ describe('Popover', () => {
       cy.get('body').type('{esc}')
       cy.get('@onUpdateOpen').should('have.been.calledWith', false)
       cy.get('@onClose').should('have.been.called')
+    })
+
+    it('does not emit open when a controlled parent declines the request', () => {
+      // A consumer that binds `:open` and honours `update:open` only on the way
+      // down (the calendar's event pills delay opening so a double click can
+      // edit instead) leaves the popover shut. `open` must stay unemitted: a
+      // listener registered there would never see the `close` that never comes.
+      const Harness = defineComponent({
+        setup() {
+          const open = ref(false)
+          return () =>
+            h(
+              Popover,
+              {
+                open: open.value,
+                // Declines every request to open; still closes on the way down.
+                'onUpdate:open': (value: boolean) =>
+                  !value && (open.value = false),
+                onOpen: cy.spy().as('onOpen'),
+                onClose: cy.spy().as('onClose'),
+              },
+              {
+                trigger: () => h(Button, { 'data-cy': 'trigger' }, () => 'T'),
+                default: () => h('div', { 'data-cy': 'content' }, 'controlled'),
+              },
+            )
+        },
+      })
+
+      cy.mount(Harness)
+
+      cy.get('[data-cy="trigger"]').click()
+      cy.get('[data-slot="content"]').should('not.exist')
+      cy.get('@onOpen').should('not.have.been.called')
+      cy.get('@onClose').should('not.have.been.called')
     })
 
     it('closes on Escape', () => {
@@ -267,6 +309,49 @@ describe('Popover', () => {
       })
     })
 
+    describe('trigger="manual"', () => {
+      it('does not open on a trigger click', () => {
+        cy.mount(Popover, { slots: NewSlots, props: { trigger: 'manual' } })
+
+        cy.get('[data-cy="trigger"]').click()
+        cy.get('[data-slot="content"]').should('not.exist')
+      })
+
+      it('stays open when the trigger is clicked while open', () => {
+        const Harness = defineComponent({
+          setup() {
+            const open = ref(true)
+            return () =>
+              h(
+                Popover,
+                {
+                  trigger: 'manual',
+                  open: open.value,
+                  'onUpdate:open': (value: boolean) => (open.value = value),
+                },
+                {
+                  trigger: () => h(Button, { 'data-cy': 'trigger' }, () => 'T'),
+                  default: () => h('div', { 'data-cy': 'content' }, 'manual'),
+                },
+              )
+          },
+        })
+
+        cy.mount(Harness)
+        cy.get('[data-slot="content"]').should('exist')
+        cy.get('[data-cy="trigger"]').click()
+        cy.get('[data-slot="content"]').should('exist')
+      })
+    })
+
+    it('leaves focus on the trigger when autoFocus is false', () => {
+      cy.mount(Popover, { slots: NewSlots, props: { autoFocus: false } })
+
+      cy.get('[data-cy="trigger"]').click()
+      cy.get('[data-slot="content"]').should('exist')
+      cy.focused().should('have.attr', 'data-cy', 'trigger')
+    })
+
     it('exposes open() and close() methods', () => {
       const popoverRef = ref()
       const Harness = defineComponent({
@@ -289,6 +374,73 @@ describe('Popover', () => {
       cy.get('[data-slot="content"]').should('exist')
       cy.then(() => popoverRef.value.close())
       cy.get('[data-slot="content"]').should('not.exist')
+    })
+
+    it('exposes contentEl, null while closed', () => {
+      const popoverRef = ref()
+      const Harness = defineComponent({
+        setup() {
+          return () =>
+            h(
+              Popover,
+              { ref: (el: unknown) => (popoverRef.value = el) },
+              {
+                trigger: () => h(Button, { 'data-cy': 'trigger' }, () => 'T'),
+                default: () => h('div', { 'data-cy': 'content' }, 'exposed'),
+              },
+            )
+        },
+      })
+
+      cy.mount(Harness)
+      cy.then(() => expect(popoverRef.value.contentEl).to.equal(null))
+      cy.get('[data-cy="trigger"]').click()
+      cy.get('[data-slot="content"]').should('exist')
+      cy.get('[data-slot="content"]').then(($content) => {
+        expect(popoverRef.value.contentEl).to.equal($content[0])
+      })
+    })
+
+    it('positions the content against `reference` in click mode', () => {
+      const referenceEl = ref<HTMLElement | null>(null)
+      const Harness = defineComponent({
+        setup() {
+          return () =>
+            h('div', [
+              h('div', {
+                ref: (el: unknown) => (referenceEl.value = el as HTMLElement),
+                'data-cy': 'reference',
+                style:
+                  'position: absolute; top: 120px; left: 200px; width: 140px; height: 24px',
+              }),
+              h(
+                Popover,
+                { reference: referenceEl.value ?? undefined },
+                {
+                  trigger: () => h(Button, { 'data-cy': 'trigger' }, () => 'T'),
+                  default: () => h('div', { 'data-cy': 'content' }, 'anchored'),
+                },
+              ),
+            ])
+        },
+      })
+
+      cy.mount(Harness)
+      cy.get('[data-cy="trigger"]').click()
+      cy.get('[data-slot="content"]').should('exist')
+
+      cy.get('[data-cy="reference"]').then(($reference) => {
+        const reference = $reference[0].getBoundingClientRect()
+        cy.get('[data-cy="trigger"]').then(($trigger) => {
+          const trigger = $trigger[0].getBoundingClientRect()
+          cy.get('[data-slot="content"]').then(($content) => {
+            const content = $content[0].getBoundingClientRect()
+            expect(content.left).to.be.closeTo(reference.left, 2)
+            expect(content.top).to.be.closeTo(reference.bottom + 4, 2)
+            expect(Math.abs(content.left - trigger.left)).to.be.greaterThan(2)
+          })
+        })
+      })
     })
   })
 })

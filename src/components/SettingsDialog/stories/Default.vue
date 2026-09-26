@@ -14,6 +14,10 @@ import ProfilePanel from './panels/ProfilePanel.vue'
 import PreferencesPanel from './panels/PreferencesPanel.vue'
 import NotificationsPanel from './panels/NotificationsPanel.vue'
 import UsersPanel from './panels/UsersPanel.vue'
+import GeneralPanel from './panels/GeneralPanel.vue'
+import IntegrationsPanel from './panels/IntegrationsPanel.vue'
+import PlanPanel from './panels/PlanPanel.vue'
+import InvoicesPanel from './panels/InvoicesPanel.vue'
 
 const open = ref(false)
 
@@ -44,13 +48,42 @@ const groups = [
     ],
   },
   {
-    label: 'Administration',
+    label: 'Workspace',
     tabs: [
+      {
+        label: 'General',
+        value: 'general',
+        icon: 'lucide-building-2',
+        component: markRaw(GeneralPanel),
+      },
       {
         label: 'Users',
         value: 'users',
         icon: 'lucide-users',
         component: markRaw(UsersPanel),
+      },
+      {
+        label: 'Integrations',
+        value: 'integrations',
+        icon: 'lucide-blocks',
+        component: markRaw(IntegrationsPanel),
+      },
+    ],
+  },
+  {
+    label: 'Billing',
+    tabs: [
+      {
+        label: 'Plan',
+        value: 'plan',
+        icon: 'lucide-credit-card',
+        component: markRaw(PlanPanel),
+      },
+      {
+        label: 'Invoices',
+        value: 'invoices',
+        icon: 'lucide-receipt',
+        component: markRaw(InvoicesPanel),
       },
     ],
   },

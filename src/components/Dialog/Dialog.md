@@ -1,74 +1,98 @@
 # Dialog
 
-A flexible overlay for showing messages, forms, or actions. Keeps focus on content while allowing clear, user-friendly interactions.
-
-## Playground
+A window over the page for a message, a form or a decision. To ask a quick
+question from code without placing a `<Dialog>` in the template, use the
+`dialog.*` functions.
 
 <ComponentPlayground name="Dialog" />
 
-## Share
+## Examples
 
-A typical real-world dialog — rich `#default` body, an action-row `#actions`
-slot that mixes a left-side status with a right-side CTA, and `Dropdown`s
-nested inside the body for inline role changes.
+### Share a document
+
+A rich body in `#default` with `Dropdown`s inside it, and an `#actions` row
+with a status on the left and the main button on the right.
 
 <ComponentPreview name="Dialog-Share" />
 
-## Multi-step wizard
+### New project setup
 
-One `<Dialog>` instance, four steps. The body content swaps with internal
-state while the dialog only animates in once; the `title`, `dismissible`
-flag, and primary CTA all react to the current step.
+One dialog, three steps. The body, `title`, `dismissible` and the main button
+change with the step, while the dialog itself opens only once.
 
 <ComponentPreview name="Dialog-Wizard" />
 
-## Full canvas (`bare`)
+### Command palette
 
-`bare: true` strips all auto-chrome — no padded card, no auto-header, no
-auto-actions. Pair it with `Dialog.Title` for an accessible heading when
-you don't want visual chrome. A command palette is the canonical reason
-to reach for it.
+`bare` removes the padded card, the header and the action row, so the content
+draws its own layout.
 
 <ComponentPreview name="Dialog-CommandPalette" />
 
-## Imperative API
+### Rename and delete from a list
 
-The `dialog.*` helpers cover the confirm-family surface — `confirm` and
-the `danger` preset — without mounting a `<Dialog>` yourself. In real apps
-`<Dialogs />` is mounted by `FrappeUIProvider`, the same component that
-hosts the toast viewport, so no extra setup is needed.
+`dialog.prompt` asks for the new name and checks it. `dialog.danger` confirms
+the delete. Each button shows a spinner until its `onConfirm` finishes.
 
-Pass an `actions` array to `dialog.confirm` (or `dialog.danger`) when a
-flow needs more than the default confirm + cancel pair. Each action accepts
-full `Button` props and its own awaited `onClick`; the clicked button shows
-a loading spinner while its handler is pending and every other button is
-disabled until it settles. Throwing from `onClick` surfaces inline via the
-shared error region.
+<ComponentPreview name="Dialog-ProjectActions" />
 
-`dialog.danger` is a one-line preset for irreversible actions. It forces
-`theme: 'red'`, defaults the icon to a warning triangle, and defaults
-`confirmLabel` to `'Delete'`. Everything `confirm` accepts (including
-`actions[]`) is forwarded through.
+## Behavior
 
-<ComponentPreview name="Dialog-Imperative" />
+### Header
 
-## Prompt
+The header renders when there is a `title` or a `#title` slot. `message` is
+the short paragraph under it, and screen readers read it out when the dialog
+opens. Anything longer than a sentence belongs in `#default`, which replaces
+`message`.
 
-`dialog.prompt` collects structured input through a `fields[]` array. Each
-field renders through `FormControl`, so any `FormControl` `type` works —
-including `text`, `select`, `checkbox`, and `combobox`. For combobox fields,
-`allowCreate` passes the typed query through as the value when nothing in
-the list matches — handy for category-style fields where users can add new
-entries inline.
+`icon` takes a `lucide-*` class name or a component. `theme` colors the badge
+behind it: `amber`, `blue`, `red` or `green`, and gray when unset. A `theme`
+without an `icon` shows no badge.
 
-Each field can also declare a `validate` function. It runs after the
-built-in `required` check, in parallel across all fields, and returns a
-non-empty string to mark the field invalid (shown inline below it) or
-`null` for valid. The second argument is a snapshot of every field's
-current value, so validators can reference siblings. The submit button keeps
-its loading state while async validators settle.
+```vue
+<Dialog title="Delete project" icon="lucide-alert-triangle" theme="red" />
+```
 
-<ComponentPreview name="Dialog-Prompt" />
+### Parts for a bare dialog
 
+`Dialog.Title`, `Dialog.Description` and `Dialog.Close` are the parts the
+header and action row are built from. Use them inside `#default` when you draw
+your own layout. A `bare` dialog has no header, so it needs `Dialog.Title` for
+its accessible name.
+
+```vue
+<Dialog v-model:open="open" bare>
+  <div class="p-6">
+    <Dialog.Title class="text-2xl-semibold">Pick a workspace</Dialog.Title>
+    <Dialog.Description>This is where new pages go.</Dialog.Description>
+    <Dialog.Close as-child><Button label="Not now" /></Dialog.Close>
+  </div>
+</Dialog>
+```
+
+### Opening a dialog from code
+
+`dialog.confirm`, `dialog.danger` and `dialog.prompt` open a dialog and return
+right away. They need `<Dialogs />` somewhere in the app, which
+`FrappeUIProvider` already mounts.
+
+- **`dialog.confirm`** shows a message with a confirm and a cancel button.
+  Pass `actions` for more than two buttons. Each action takes `Button` props
+  and its own `onClick`. While one `onClick` runs, its button shows a spinner
+  and the others are disabled. An error thrown from it shows inside the
+  dialog.
+- **`dialog.danger`** is `dialog.confirm` for actions that cannot be undone.
+  It sets `theme: 'red'`, a warning icon and a "Delete" button label, and
+  accepts everything `confirm` does.
+- **`dialog.prompt`** asks for input through `fields`. Each field renders
+  through `FormControl`, so any `FormControl` `type` works. A field's
+  `validate` function runs after the `required` check and returns an error
+  message, or `null` when the value is fine. Its second argument holds every
+  field's value, so one field can check another.
+
+### Space above the dialog
+
+`paddingTop` sets the space above the dialog. It takes a number of pixels or a
+CSS length: `:padding-top="80"` or `padding-top="20vh"`.
 
 <!-- @include: ./Dialog.api.md -->

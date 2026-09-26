@@ -17,6 +17,8 @@
 export interface BaseSuggestionItem {
   /** Optional precomputed display string (e.g. `New tag: "foo"`). */
   display?: string
+  /** The label a mention or tag item shows and stores. */
+  label?: string
   title?: string
   name?: string
   /**

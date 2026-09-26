@@ -1,6 +1,8 @@
 import type { Component } from 'vue'
+import type { InputSize, InputVariant } from '../../composables/inputTypes'
 import type { InputLabelingProps } from '../../composables/useInputLabeling'
 import type { PopoverAlign, PopoverSide } from '../shared/selection/types'
+import type { PortalTarget } from '../../composables/usePortalTarget'
 
 export type { PopoverAlign, PopoverSide }
 
@@ -27,10 +29,10 @@ export type SelectNormalizedOption = Exclude<SelectOption, string>
 
 export interface SelectProps extends InputLabelingProps {
   /** Size of the select input. */
-  size?: 'sm' | 'md' | 'lg' | 'xl'
+  size?: InputSize
 
   /** Visual style of the select input. */
-  variant?: 'subtle' | 'outline' | 'ghost'
+  variant?: InputVariant
 
   /** Placeholder text displayed when no option is selected. */
   placeholder?: string
@@ -38,8 +40,8 @@ export interface SelectProps extends InputLabelingProps {
   /** If true, disables the select input. */
   disabled?: boolean
 
-  /** The currently selected value. */
-  modelValue?: SelectOptionValue
+  /** The currently selected value. `null` when nothing is selected. */
+  modelValue?: SelectOptionValue | null
 
   /** Controls the visibility of the select menu. */
   open?: boolean
@@ -66,7 +68,7 @@ export interface SelectProps extends InputLabelingProps {
   offset?: number
 
   /** Teleport target for the popover content. Unset, an embedding host's target is used, else `body`. */
-  portalTo?: string | HTMLElement
+  portalTo?: PortalTarget
 }
 
 /**
@@ -88,11 +90,13 @@ export interface SelectSlotProps {
   /** Currently selected option, if any. */
   selectedOption: SelectNormalizedOption | null
 
-  /** Clears the current selection (sets the model to `undefined`). */
+  /** Clears the current selection (sets the model to `null`). */
   clear: () => void
 
   /** Sets the menu open state. */
   setOpen: (value: boolean) => void
+  /** Closes the menu. Equivalent to `setOpen(false)`. */
+  close: () => void
 }
 
 export type SelectTriggerSlotProps = SelectSlotProps
@@ -174,10 +178,16 @@ interface SelectItemSlotsByName {
 
 export interface SelectSlots extends SelectFixedSlots, SelectItemSlotsByName {}
 
+/**
+ * The events this interface names for a wrapper to reuse. `update:modelValue`
+ * is not here: `defineModel` declares it, and the generated payload carries
+ * `undefined` because the model prop is optional. Declaring it again published
+ * one event twice with two payload types, so a wrapper that re-bound
+ * `@update:model-value` failed to compile. `ComboboxEmits` and
+ * `MultiSelectEmits` dropped their model events for the same reason. The
+ * runtime event is unchanged: the component emits a value or `null`.
+ */
 export interface SelectEmits {
-  /** Fired when the selected value changes. */
-  'update:modelValue': [value: SelectOptionValue | undefined]
-
   /** Fired when the open state changes. */
   'update:open': [value: boolean]
 }

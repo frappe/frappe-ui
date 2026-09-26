@@ -3,4 +3,5 @@ export type {
   HoverCardProps,
   HoverCardSlotProps,
   HoverCardExposed,
+  HoverCardEmits,
 } from './types'

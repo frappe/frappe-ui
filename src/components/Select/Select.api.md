@@ -3,20 +3,21 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
+  import ExposedTable from '@/components/Docs/ExposedTable.vue'
 
   const propsData = [
   {
     name: 'size',
     description: 'Size of the select input.',
     required: false,
-    type: '"sm" | "md" | "lg" | "xl"',
+    type: 'InputSize',
     default: '"sm"'
   },
   {
     name: 'variant',
     description: 'Visual style of the select input.',
     required: false,
-    type: '"subtle" | "outline" | "ghost"',
+    type: 'InputVariant',
     default: '"subtle"'
   },
   {
@@ -34,9 +35,9 @@
   },
   {
     name: 'modelValue',
-    description: 'The currently selected value.',
+    description: 'The currently selected value. `null` when nothing is selected.',
     required: false,
-    type: 'SelectOptionValue'
+    type: 'SelectOptionValue | null'
   },
   {
     name: 'open',
@@ -81,7 +82,7 @@
     name: 'portalTo',
     description: 'Teleport target for the popover content. Unset, an embedding host\'s target is used, else `body`.',
     required: false,
-    type: 'string | HTMLElement'
+    type: 'PortalTarget'
   },
   {
     name: 'label',
@@ -97,9 +98,9 @@
   },
   {
     name: 'error',
-    description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. May be either a string\nor an `Error` object whose `messages?: string[]` is rendered as stacked\nlines (with `Error.message` as the fallback).',
+    description: 'Error message rendered below the input. When set, the control receives\n`aria-invalid="true"` and `data-state="invalid"`. Takes a string, an\narray of strings, or an `Error` whose `messages` are rendered as stacked\nlines (with `Error.message` as the fallback). This is the same value\n`ErrorMessage.message` takes. An empty array and an empty string both\nmean no error.',
     required: false,
-    type: 'string | FrappeUIError'
+    type: 'ErrorMessageValue'
   },
   {
     name: 'required',
@@ -182,7 +183,20 @@
   {
     name: 'update:modelValue',
     description: 'Fired when the model value changes.',
-    type: '[value: SelectOptionValue | undefined]'
+    type: '[value: SelectOptionValue | null | undefined]'
+  }
+]
+
+  const exposedData = [
+  {
+    name: 'clear',
+    description: 'Clears the current selection. It leaves the search query alone.',
+    type: '() => void'
+  },
+  {
+    name: 'focus',
+    description: 'Moves focus to the component\'s interactive element.',
+    type: '(options?: FocusOptions) => void'
   }
 ]
 </script>
@@ -194,3 +208,5 @@
 <SlotsTable :data="slotsData"/>
 
 <EmitsTable :data="emitsData"/>
+
+<ExposedTable :data="exposedData"/>

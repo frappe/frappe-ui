@@ -1,15 +1,16 @@
-import { type HoverCardContentProps, type HoverCardPortalProps } from 'reka-ui'
+import type { PopoverAlign, PopoverSide } from '../Popover/types'
+import type { PortalTarget } from '../../composables/usePortalTarget'
 
 export interface HoverCardProps {
   /**
    * Side of the trigger the card is placed on.
    */
-  side?: HoverCardContentProps['side']
+  side?: PopoverSide
 
   /**
    * Alignment of the card relative to the trigger.
    */
-  align?: HoverCardContentProps['align']
+  align?: PopoverAlign
 
   /**
    * Distance in pixels between the card and the trigger.
@@ -19,7 +20,7 @@ export interface HoverCardProps {
   /**
    * Where the card is teleported to in the DOM. Unset, an embedding host's target is used, else `body`.
    */
-  portalTo?: HoverCardPortalProps['to']
+  portalTo?: PortalTarget
 
   /**
    * Padding (in pixels) kept between the card and the viewport edges when
@@ -28,14 +29,12 @@ export interface HoverCardProps {
   collisionPadding?: number
 
   /**
-   * Delay (in seconds) from when the pointer enters the trigger until the card
-   * opens. Matches the Tooltip convention of using seconds.
+   * Delay in milliseconds before the card opens. Default: `300`.
    */
   hoverDelay?: number
 
   /**
-   * Delay (in seconds) from when the pointer leaves the trigger or card until
-   * the card closes.
+   * Delay in milliseconds before the card closes. Default: `300`.
    */
   leaveDelay?: number
 
@@ -44,12 +43,24 @@ export interface HoverCardProps {
    * surface.
    */
   arrow?: boolean
+
+  /** Controls the visibility of the hover card. */
+  open?: boolean
 }
 
 /** Slot props passed to the `#trigger` slot. */
 export interface HoverCardSlotProps {
   /** Whether the card is currently open. */
   open: boolean
+  /** Sets the card open state. */
+  setOpen: (value: boolean) => void
+  /** Closes the card. */
+  close: () => void
+}
+
+export interface HoverCardEmits {
+  /** Fired when the card open state changes. */
+  'update:open': [open: boolean]
 }
 
 /** Methods available on a `<HoverCard>` template ref. */

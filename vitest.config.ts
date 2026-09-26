@@ -12,7 +12,9 @@ export default mergeConfig(
       // GitHub Action scripts, run by `bun test` in a separate CI job — not
       // valid vitest specs (they import from 'bun:test', which vitest can't
       // resolve).
-      exclude: [...configDefaults.exclude, '.github/**'],
+      //
+      // packages/* are separate npm packages with their own test runner.
+      exclude: [...configDefaults.exclude, '.github/**', 'packages/**'],
       coverage: {
         provider: 'v8',
         reporter: ['text', 'json', 'html', 'lcov'],
@@ -22,6 +24,7 @@ export default mergeConfig(
           'src/**/*.cy.ts',
           'src/**/*.spec.ts',
           'src/**/*.test.ts',
+          'src/**/test-helpers.ts',
           'src/**/*.story.vue',
           'src/**/stories/**',
           'src/**/types.ts',

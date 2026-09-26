@@ -5,12 +5,16 @@
  */
 
 import type { InputLabelingProps } from '../../composables/useInputLabeling'
-import type { InputSize } from '../../composables/inputTypes'
+import type { InputSize, InputVariant } from '../../composables/inputTypes'
 
 export type PopoverSide = 'top' | 'right' | 'bottom' | 'left'
 export type PopoverAlign = 'start' | 'center' | 'end'
 
-export type Variant = 'outline' | 'subtle'
+/**
+ * The shared input variants, under the picker's own name. It is an alias, not
+ * a copy: a TimePicker-only scale would need a TimePicker-only renderer.
+ */
+export type Variant = InputVariant
 
 export interface TimePickerProps extends InputLabelingProps {
   /** Controlled value, canonical `HH:mm` (or `HH:mm:ss`). */
@@ -72,12 +76,14 @@ export interface TimePickerProps extends InputLabelingProps {
   max?: string
 }
 
+/**
+ * `open` and `close` are gone: `update:open` carries the same two events with
+ * the state in the payload. `input-invalid` and `invalid-change` are gone too
+ * — typed text that does not parse reverts to the last valid value, which the
+ * user sees, and nothing listened to either event (INP-Q3).
+ */
 export type TimePickerEmits = {
   (e: 'update:modelValue', value: string): void
   (e: 'update:open', value: boolean): void
   (e: 'change', value: string): void
-  (e: 'input-invalid', input: string): void
-  (e: 'invalid-change', invalid: boolean): void
-  (e: 'open'): void
-  (e: 'close'): void
 }

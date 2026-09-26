@@ -135,6 +135,9 @@ function getStoryPath(
 ) {
   const moleculeName =
     componentName.charAt(0).toLowerCase() + componentName.slice(1)
+  // A multi-word molecule folder is kebab-case (`code-editor`), while the
+  // preview names it in Pascal case (`CodeEditor-Basic`) to match the component.
+  const kebabName = moleculeName.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase()
   const candidates: string[] = []
   for (const root of roots) {
     candidates.push(
@@ -142,6 +145,9 @@ function getStoryPath(
     )
     candidates.push(
       resolve(root, moleculeName, 'stories', `${storyFileName}.vue`),
+    )
+    candidates.push(
+      resolve(root, kebabName, 'stories', `${storyFileName}.vue`),
     )
   }
   return candidates.find((candidate) => existsSync(candidate)) ?? candidates[0]

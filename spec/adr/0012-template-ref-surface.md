@@ -84,9 +84,14 @@ have justified as cleanly.
 
 ### The additive half is bounded, not exempt
 
-- `focus(options?)` goes on everything you can type in or tab to.
+- `focus(options?)` goes on everything you can type in or tab to. It is declared
+  once, as `InputExposed`, which every other input contract extends
+  (`TextInputExposed`, `SelectionExposed`, `DurationExposed`, `PickerExposed`).
+  A generic form types its control refs as `InputExposed` and calls `focus()`
+  with no type guard (INP-Q5). `FormControl` forwards it to whichever control
+  its `type` resolved to.
 - `open` / `close` go on trigger-owning overlays only. Popover and HoverCard keep theirs;
-  the three date pickers and `TimePicker` gain both.
+  the three date pickers and `TimePicker` gain both, as `PickerExposed`.
 - `clear()` stays on `Select`, `Combobox` and `MultiSelect` and goes nowhere new.
 - `DropdownExposed` — exported, promising a `close()` that `Dropdown.vue` never defines — is
   **deleted**, not implemented. Implementing it would add an unproven pair of methods to
@@ -109,5 +114,16 @@ Anything else waits for a real request and arrives in a minor release.
   changelog line.
 - **Each sweep does its own family's work.** This ADR sets the contract; the `defineExpose`
   edits happen inside the sweep that owns each component, as at-bar item 8.
+- **Where `focus()` lands is part of the contract, not an implementation
+  detail.** A roving-tabstop control focuses the element `Tab` reaches, not its
+  container: `Slider` focuses the thumb, `RadioGroup` focuses the selected
+  option (the first enabled one when there is no selection), and `Rating`
+  focuses the selected star (the first star when the value is empty), except in
+  half-star mode where the whole control is one slider.
+- **`ScrollArea.viewportElement` earns its place twice over.** `DesktopShell`
+  reads it to provide and register its scroll region, which is the rule's own
+  test: parent script needs it and no other surface reaches. It is also why
+  `ScrollBar` is not exported (SHELL-Q6) — the scrollbar is drawn by
+  `ScrollArea`, and the only thing outside ever needed was the element.
 - **A sixth verb, or a third element role, still needs an ADR.** That limit is what stops
   this surface drifting back into four names for one idea.

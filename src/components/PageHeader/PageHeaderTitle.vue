@@ -5,10 +5,9 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{
-  /** Title text. Overridden by the default slot. */
-  title?: string
-}>()
+import type { PageHeaderTitleProps } from './types'
+
+defineProps<PageHeaderTitleProps>()
 
 defineSlots<{
   /** Overrides `title` with custom markup. */

@@ -16,7 +16,8 @@
         <h3> inside it strips the heading from the accessibility tree.
       -->
       <h3
-        class="h-4 text-sm text-ink-gray-5 transition-all duration-300 ease-in-out"
+        :id="headingId"
+        class="h-4 text-sm leading-tighter text-ink-gray-5 transition-all duration-300 ease-in-out"
         :class="
           isSidebarCollapsed
             ? 'w-0 overflow-hidden opacity-0'
@@ -25,7 +26,6 @@
       >
         <button
           v-if="collapsible"
-          :id="triggerId"
           type="button"
           class="flex items-center gap-1 rounded-4 focus-visible:ring-0 focus-visible:focus-ring"
           :aria-expanded="!isSectionCollapsed"
@@ -64,15 +64,20 @@
         resolve to a real element at all times, including the instant
         aria-expanded flips to "false" — an id that only exists while
         expanded breaks the reference exactly when it's read.
+
+        role="group", not a <nav>: Sidebar is already the navigation landmark,
+        and a landmark inside a landmark buys nothing. The group takes its
+        name from the <h3>, so a non-collapsible section is named too.
       -->
-      <nav
+      <div
         v-show="!isSectionCollapsed"
         :id="bodyId"
-        :aria-labelledby="collapsible && label ? triggerId : undefined"
+        role="group"
+        :aria-labelledby="label ? headingId : undefined"
         class="flex flex-col gap-0.5"
       >
         <slot />
-      </nav>
+      </div>
     </transition>
   </div>
 </template>
@@ -109,6 +114,8 @@ defineEmits<{
 /** v-model. Whether the section is collapsed. Bind it to own the state (start a section collapsed, persist the choice); left unbound the section manages it internally, starting expanded. */
 const isSectionCollapsed = defineModel<boolean>('collapsed', { default: false })
 
-const triggerId = useId()
+// The heading carries the id, not the trigger button: a non-collapsible
+// section has no button, and the group still has to be named.
+const headingId = useId()
 const bodyId = useId()
 </script>

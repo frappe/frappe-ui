@@ -51,7 +51,7 @@ const money = (value: number) =>
       :data="revenue"
       x="quarter"
       y="amount"
-      series="plan"
+      split-by="plan"
       :max-series="5"
       stacked="normalized"
       :y-axis="{ title: 'Share of new revenue', format: money }"

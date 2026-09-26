@@ -8,8 +8,8 @@ import {
   Dropdown,
   PageHeader,
   PageHeaderTitle,
-  Rail,
-  RailItem,
+  SidebarRail,
+  SidebarRailItem,
   ScrollArea,
   Select,
   SettingsBody,
@@ -504,9 +504,9 @@ const spaceActions = [
   <div class="h-screen w-full bg-surface-base text-ink-gray-9">
     <DesktopShell>
       <template #rail>
-        <Rail class="border-r">
-          <!-- Home is a bespoke button, not a RailItem: the Frappe logo fills
-               the whole cell and carries no tooltip of its own. -->
+        <SidebarRail class="border-r">
+          <!-- Home is a bespoke button, not a SidebarRailItem: the Frappe
+               logo fills the whole cell and carries no tooltip of its own. -->
           <button
             type="button"
             class="flex size-7 items-center justify-center rounded-[7px] transition hover:opacity-90 focus-visible:ring-0 focus-visible:focus-ring"
@@ -516,7 +516,7 @@ const spaceActions = [
           </button>
 
           <div class="flex w-full flex-1 flex-col items-center gap-3 pt-3">
-            <RailItem
+            <SidebarRailItem
               v-for="c in communities"
               :key="c.id"
               :label="c.name"
@@ -532,14 +532,14 @@ const spaceActions = [
                 shape="square"
                 class="size-7"
               />
-            </RailItem>
+            </SidebarRailItem>
           </div>
 
           <!-- Bottom cluster: extra gap keeps the utility items and account
                avatar from crowding each other at the foot of the rail. -->
           <div class="flex flex-col items-center gap-2.5">
-            <RailItem label="Search" variant="ghost" icon="lucide-search" />
-            <RailItem
+            <SidebarRailItem label="Search" variant="ghost" icon="lucide-search" />
+            <SidebarRailItem
               label="Settings"
               variant="ghost"
               icon="lucide-settings"
@@ -566,7 +566,7 @@ const spaceActions = [
               </template>
             </Dropdown>
           </div>
-        </Rail>
+        </SidebarRail>
       </template>
 
       <template #sidebar>
@@ -594,7 +594,7 @@ const spaceActions = [
           <!-- The app owns the scroll region: ScrollArea keeps the thin,
                auto-hiding overlay scrollbar. -->
           <ScrollArea class="min-h-0 flex-1" viewport-class="px-2 pt-0.5 pb-10">
-            <nav class="space-y-0.5">
+            <div class="space-y-0.5">
               <SidebarItem>
                 <template #prefix>
                   <span class="lucide-home size-4" aria-hidden="true" />
@@ -607,7 +607,7 @@ const spaceActions = [
                 </template>
                 <span class="flex-1 truncate text-sm">Search</span>
               </SidebarItem>
-            </nav>
+            </div>
 
             <div class="mt-4 flex h-7 items-center justify-between">
               <SidebarLabel>Spaces</SidebarLabel>
@@ -621,7 +621,7 @@ const spaceActions = [
               </div>
             </div>
 
-            <nav class="mt-0.5 space-y-0.5">
+            <div class="mt-0.5 space-y-0.5">
               <SidebarItem
                 v-for="space in spaces"
                 :key="space.name"
@@ -641,7 +641,7 @@ const spaceActions = [
                   </span>
                 </template>
               </SidebarItem>
-            </nav>
+            </div>
           </ScrollArea>
         </Sidebar>
       </template>

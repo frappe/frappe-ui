@@ -7,7 +7,7 @@ import {
   ComboboxViewport,
 } from 'reka-ui'
 import ItemListRow from '../ItemListRow/ItemListRow.vue'
-import { LoadingIndicator } from '../LoadingIndicator'
+import { Spinner } from '../Spinner'
 import OptionIcon from '../shared/selection/OptionIcon.vue'
 import { createItemSlotRender } from '../shared/selection/createItemSlotRender'
 import { useEmptyValueMapping } from '../shared/selection/useEmptyValueMapping'
@@ -112,7 +112,7 @@ function handleSelect(item: NormalizedItem, event: Event) {
       data-slot="loading"
       class="flex items-center gap-2 px-2 py-1.5 text-base text-ink-gray-5"
     >
-      <LoadingIndicator class="size-4" />
+      <Spinner class="size-4" />
       <span>Loading...</span>
     </div>
 
@@ -140,7 +140,7 @@ function handleSelect(item: NormalizedItem, event: Event) {
             <ComboboxLabel
               v-if="group.group && !group.hideLabel"
               data-slot="group-label"
-              class="flex h-7 items-center px-2 text-sm-medium text-ink-gray-4"
+              class="flex h-7 items-center px-2 text-sm-medium leading-tighter text-ink-gray-4"
             >
               <component
                 :is="ItemSlotRender"
@@ -245,7 +245,7 @@ function handleSelect(item: NormalizedItem, event: Event) {
                   />
 
                   <div v-else class="min-w-0">
-                    <div class="truncate">{{ item.label }}</div>
+                    <div class="truncate leading-tighter">{{ item.label }}</div>
                     <div
                       v-if="item.description"
                       class="truncate text-p-sm text-ink-gray-5"

@@ -7,9 +7,9 @@
   const listProps = [
   {
     name: 'columns',
-    description: 'Grid track sizes, written to the `--list-columns` CSS var shared by the\nheader and every row. Defaults to the feed template\n`[\'auto\', \'minmax(0,1fr)\', \'auto\']` (leading media, content, trailing).\nTable-style lists must pass deterministic track sizes — `auto` tracks\nsize independently per row.',
+    description: 'Grid track sizes shared by the header and every row. Defaults to the feed\ntemplate `[\'auto\', \'minmax(0,1fr)\', \'auto\']` (leading media, content,\ntrailing). Table-style lists must pass deterministic track sizes — `auto`\ntracks size independently per row, so independent row grids can\'t agree.\n\nPass an array for one template at every width, or an object keyed by\nbreakpoint for a template that changes with the viewport:\n`{ base: [\'minmax(0,1fr)\', \'80px\'], md: [\'minmax(0,2fr)\', \'140px\', \'100px\'] }`.\n`base` is required, each breakpoint replaces the whole template, and an\nomitted breakpoint keeps the one below it. Breakpoints are the consuming\napp\'s own Tailwind `screens`, resolved in CSS — so `md` here and `md:hidden`\non a cell switch at the same width. A key that is not one of those screens\nis ignored: its template never applies, and a dev-mode warning names it.\nChanging the track count never hides a cell: pair it with matching\nvisibility classes on the header and the rows.',
     required: false,
-    type: 'string[]'
+    type: 'ListColumns'
   },
   {
     name: 'divider',
@@ -25,7 +25,7 @@
   },
   {
     name: 'rowHeight',
-    description: 'Fixed row height in px (sets `--list-row-height`). Required for\nvirtualization; without it rows size to their content. Responsive\nheights are non-virtual — set them with classes on the rows instead.',
+    description: 'Fixed row height in px. Required for virtualization; without it rows size\nto their content. Responsive heights are non-virtual — set them with\nheight classes on the rows instead.',
     required: false,
     type: 'number'
   },
@@ -67,10 +67,16 @@
 
   const listRowProps = [
   {
-    name: 'to',
-    description: 'Renders the row as a RouterLink. Without `to`, a row with a click\nlistener renders as a button; otherwise a plain div.',
+    name: 'route',
+    description: 'Renders the row as a RouterLink. Without `route` or `href`, a row with a click\nlistener renders as a button; otherwise a plain div.',
     required: false,
     type: 'string | kt | Tt'
+  },
+  {
+    name: 'href',
+    description: 'External URL. Used when `route` is absent; renders a native same-tab anchor.',
+    required: false,
+    type: 'string'
   },
   {
     name: 'value',
@@ -155,7 +161,7 @@
     type: '{ direction: "asc" | "desc" | null; }'
   },
   {
-    name: 'suffix',
+    name: 'sort-indicator',
     description: 'Sort glyph. Optional — the cell renders a built-in arrow from `direction`\nby default. Provide this to override (e.g. a custom lucide span). The cell\nowns the reveal: an inactive column\'s glyph shows on hover.',
     type: '{ direction: "asc" | "desc" | null; }'
   }
@@ -184,24 +190,30 @@
   },
   {
     name: 'virtual',
-    description: 'Window the rows (vueuse useVirtualList) so only rows near the viewport\nmount. `itemHeight` defaults to the List\'s `rowHeight`; the scroll\ncontainer is the nearest scrollable ancestor.',
+    description: 'Window the rows so only rows near the viewport mount. Height comes from\nthe parent List\'s `rowHeight`; the scroll container is the nearest\nscrollable ancestor.',
     required: false,
-    type: 'boolean | ListVirtualOptions'
+    type: 'boolean'
+  },
+  {
+    name: 'overscan',
+    description: 'Rows rendered beyond the visible window on each side. Default: `6`.',
+    required: false,
+    type: 'number'
   }
 ]
 
   const listRowsSlots = [
   {
     name: 'default',
-    description: 'One render per item — `{ item, index, value }`, where `value` is the row\'s resolved identity.',
-    type: '{ item: T; index: number; value: string; }'
+    description: 'One render per item. `active` and `selected` are independent row states.',
+    type: '{ item: T; index: number; value: string; selected: boolean; active: boolean; }'
   }
 ]
 
   const listGroupProps = [
   {
     name: 'label',
-    description: 'Section label shown in the group header. Overridden by the #header slot.',
+    description: 'Section label shown in the group header. Overridden by the #label slot.',
     required: false,
     type: 'string'
   },
@@ -220,8 +232,8 @@
     type: 'any'
   },
   {
-    name: 'header',
-    description: 'Replaces the header content (the label).',
+    name: 'label',
+    description: 'Replaces the group label.',
     type: 'any'
   }
 ]
