@@ -96,9 +96,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref, useSlots, watch } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { BLUR_OPACITY } from './axisChartCommon'
 import { formatPercent, formatValue } from './format'
+import { useReactiveSlots } from '../composables/useReactiveSlots'
 import { pruneHiddenSeries } from './hiddenSeries'
 import { buildProportionSegments } from './proportionSegments'
 import { useChartTokens } from './tokens'
@@ -165,7 +166,10 @@ const SEGMENT_GAP = 3
 const size = computed(() => props.size ?? 'sm')
 const thickness = computed(() => THICKNESS[size.value])
 
-const slots = useSlots()
+// `useSlots()` hands back an object Vue mutates in place and never tracks, so a
+// computed over it would cache whichever slots were filled at mount and leave
+// the bar padded for a header a parent has since taken away (CONTEXT.md).
+const slots = useReactiveSlots()
 /** Whether `ChartContainer` is drawing a header row this bar has to clear. */
 const hasHeader = computed(() =>
   Boolean(props.title || props.subtitle || slots.actions),
@@ -311,8 +315,10 @@ function toggleSegment(name: string) {
   // Refuse to hide the last segment the bar is drawing — an empty bar reads as
   // a failure to load. Counted against what is drawn rather than against what
   // is unhidden: a segment worth nothing has a legend entry but no block, so
-  // it is not the one still holding the bar up.
-  if (visibleSegments.value.length <= 1) return
+  // it is neither the one holding the bar up nor able to empty it, and its own
+  // entry stays pressable however little is left on the track.
+  const drawn = visibleSegments.value.some((segment) => segment.name === name)
+  if (drawn && visibleSegments.value.length <= 1) return
   hiddenSegments.value = [...hidden, name]
 }
 

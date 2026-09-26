@@ -204,6 +204,49 @@ describe('ProportionBar', () => {
     )
   })
 
+  it('still lets a zero-valued entry toggle when one segment is drawn', () => {
+    // Hiding a part with no block cannot empty the bar, so the guard that
+    // protects the last drawn segment must not block it.
+    mountBar({
+      data: [
+        { part: 'Used', amount: 10 },
+        { part: 'Free', amount: 0 },
+      ],
+    })
+
+    segments().should('have.length', 1)
+    cy.get('[aria-label="Hide Free"]').click()
+    cy.get('[aria-label="Show Free"]').should('exist')
+    segments().should('have.length', 1)
+  })
+
+  it('follows the header spacing when a parent adds the actions slot', () => {
+    const withActions = ref(false)
+    cy.mount(
+      defineComponent({
+        setup() {
+          return () =>
+            h('div', { style: 'width: 480px; padding: 24px' }, [
+              h(
+                ProportionBar,
+                { data, category: 'part', value: 'amount' },
+                withActions.value
+                  ? { actions: () => h('button', 'Export') }
+                  : {},
+              ),
+            ])
+        },
+      }),
+    )
+
+    const pad = () => cy.get('[data-slot="chart-plot"] > div > div')
+    pad().should('have.css', 'padding-top', '0px')
+    cy.then(() => (withActions.value = true))
+    pad().should('have.css', 'padding-top', '8px')
+    cy.then(() => (withActions.value = false))
+    pad().should('have.css', 'padding-top', '0px')
+  })
+
   it('drives the legend from a bound hiddenSegments', () => {
     const hidden = ref(['Storage'])
     cy.mount(
