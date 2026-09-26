@@ -23,6 +23,11 @@ export interface TagEmits {
   dismiss: []
 }
 
+export interface TagExposed {
+  /** Moves focus to the tag. Does nothing on a non-interactive tag. */
+  focus: (options?: FocusOptions) => void
+}
+
 export interface TagSlots {
   /** Content shown before the tag label */
   prefix?: () => any

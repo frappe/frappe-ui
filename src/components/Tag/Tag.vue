@@ -1,10 +1,14 @@
 <template>
-  <button
-    type="button"
+  <component
+    :is="interactive ? 'button' : 'span'"
+    ref="rootRef"
+    :type="interactive ? 'button' : undefined"
     class="inline-flex shrink-0 select-none items-center whitespace-nowrap leading-tighter transition-colors disabled:cursor-not-allowed disabled:opacity-50"
     :class="classes"
-    :disabled="props.disabled"
+    :disabled="interactive ? props.disabled : undefined"
+    :aria-disabled="!interactive && props.disabled ? 'true' : undefined"
     :aria-keyshortcuts="props.dismissible ? 'Delete Backspace' : undefined"
+    :aria-describedby="props.dismissible ? hintId : undefined"
     data-slot="tag"
     :data-variant="variant"
     :data-size="size"
@@ -37,23 +41,19 @@
         aria-hidden="true"
         @click.stop="dismiss"
       >
-        <!-- espresso `icon/line/small-close`: the × is part of the tag's
-             chrome, not a customization point, so it carries the Figma glyph
-             exactly instead of lucide's thinner, larger `x`. -->
-        <svg class="size-3" viewBox="0 0 12 12" fill="currentColor">
-          <path
-            d="M8.45801 2.83399C8.65322 2.63878 8.96977 2.63889 9.16504 2.83399C9.3603 3.02925 9.3603 3.34576 9.16504 3.54102L6.70703 5.99903L9.16602 8.45801C9.36107 8.65319 9.36096 8.9698 9.16602 9.16504C8.9708 9.36027 8.65426 9.36019 8.45899 9.16504L6 6.70606L3.54102 9.16504C3.34576 9.3603 3.02925 9.3603 2.83399 9.16504C2.63889 8.96977 2.63878 8.65322 2.83399 8.45801L5.29297 5.99903L2.83496 3.54102C2.6397 3.34576 2.6397 3.02925 2.83496 2.83399C3.03025 2.63901 3.34683 2.63882 3.542 2.83399L6 5.292L8.45801 2.83399Z"
-          />
-        </svg>
+        <span class="lucide-x size-3" />
       </span>
     </span>
-  </button>
+    <span v-if="props.dismissible" :id="hintId" class="sr-only">
+      Press Delete to remove
+    </span>
+  </component>
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, ref, useAttrs, useId } from 'vue'
 import { resolvePropValue } from '../../utils/resolvePropValue'
-import type { TagEmits, TagProps, TagSlots } from './types'
+import type { TagEmits, TagExposed, TagProps, TagSlots } from './types'
 
 const props = withDefaults(defineProps<TagProps>(), {
   theme: 'gray',
@@ -66,6 +66,20 @@ const props = withDefaults(defineProps<TagProps>(), {
 const emit = defineEmits<TagEmits>()
 
 defineSlots<TagSlots>()
+
+const attrs = useAttrs()
+const rootRef = ref<HTMLElement | null>(null)
+const hintId = useId()
+
+// A tag with nothing to do (no click listener, not dismissible) renders as a
+// plain span: no tab stop, no button role and no hover or pressed states, so
+// a static label is not announced as a button that does nothing.
+const interactive = computed(() => props.dismissible || !!attrs.onClick)
+
+defineExpose<TagExposed>({
+  /** Moves focus to the tag. Does nothing on a non-interactive tag. */
+  focus: (options?: FocusOptions) => rootRef.value?.focus(options),
+})
 
 // Every value below is the espresso 2.0 `tag` component's variable binding,
 // one Figma variable to one frappe-ui token. Tailwind's JIT needs literal
@@ -266,8 +280,10 @@ const classes = computed(() => {
     themeClasses[theme.value][variant.value]
   return [
     sizeClasses[size.value],
-    props.disabled
-      ? (look.disabled ?? look.rest)
+    props.disabled || !interactive.value
+      ? props.disabled
+        ? (look.disabled ?? look.rest)
+        : look.rest
       : [
           look.rest,
           look.states,

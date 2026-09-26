@@ -1,6 +1,9 @@
 <script setup lang="ts">
-import { Tag } from 'frappe-ui'
+import { ref } from 'vue'
+import { Button, Tag } from 'frappe-ui'
 import type { Knob } from 'frappe-ui/vitepress'
+
+const dismissed = ref(false)
 
 const knobs: Knob[] = [
   { name: 'label', type: 'text', default: 'Discover' },
@@ -73,12 +76,21 @@ function buildCode(v: Record<string, any>) {
 <template>
   <PlaygroundFrame :knobs="knobs" :code="buildCode">
     <template #preview="{ values }">
+      <Button
+        v-if="dismissed"
+        variant="ghost"
+        size="sm"
+        label="Bring the tag back"
+        @click="dismissed = false"
+      />
       <Tag
+        v-else
         :theme="values.theme"
         :variant="values.variant"
         :size="values.size"
         :dismissible="values.dismissible"
         :disabled="values.disabled"
+        @dismiss="dismissed = true"
       >
         <template v-if="values.prefix" #prefix>
           <span class="lucide-hash" />

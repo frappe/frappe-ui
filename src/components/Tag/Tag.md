@@ -1,8 +1,8 @@
 # Tag
 
-A small interactive label, such as an applied filter, a selected value or a
-label on a record. Unlike [Badge](/docs/components/badge), a tag is a button: it
-has hover, pressed and focus states, and it can be dismissed.
+A small label, such as an applied filter, a selected value or a label on a
+record. Unlike [Badge](/docs/components/badge), a tag can be a button: with a
+`@click` listener or `dismissible`, it has hover, pressed and focus states.
 
 <ComponentPlayground name="Tag" />
 
@@ -28,12 +28,23 @@ Every `variant` in every `theme`.
 
 ## Behavior
 
+### Static or interactive
+
+A tag with no `@click` listener that is not `dismissible` renders as a plain
+`<span>`: no tab stop, no button role, no hover or pressed states. Add either
+one and it renders as a `<button>`.
+
 ### Dismissing
 
 `dismissible` shows a × after the label. Clicking the ×, or pressing Delete or
 Backspace while the tag has focus, emits `dismiss`. The tag does not remove
 itself; the parent does. A click on the × does not also fire a `click` on the
 tag, so the rest of the tag can do something else, such as open the filter.
+Screen readers hear "Press Delete to remove" as the tag's description.
+
+When the parent removes a tag dismissed from the keyboard, focus falls back to
+the page. Call `focus()` on a neighbouring tag's ref, so a keyboard user can
+keep working through a row of filters.
 
 ### Label and slots
 
