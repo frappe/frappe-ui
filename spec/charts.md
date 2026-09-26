@@ -97,8 +97,8 @@ inside its own card.
 ## The template ref
 
 Every echarts-backed chart hands back one member, the echarts instance, as
-`chart`. `FunnelChart` and `NumberCard` draw no echarts plot and hand back
-nothing.
+`chart`. `FunnelChart`, `NumberCard` and `ProportionBar` draw no echarts plot
+and hand back nothing.
 
 It is the imperative half of the escape hatch `echartOptions` opens for options.
 Reach for it when an app needs an echarts call that no option key expresses — an
@@ -134,3 +134,16 @@ one component has the part:
 `ChartLegend` emits behavior names per P1:
 `change` when an entry flips a series' visibility, `highlight` when the
 highlighted series changes (`null` clears it) — not `toggle` or `hover`.
+
+The list of marks a legend has switched off is named for the mark the component
+draws, not for one word across the family: `hiddenSeries` on the axis charts and
+`ScatterChart`, `hiddenSegments` on `ProportionBar`. It reads as a second
+spelling of one idea, and convention 4 would refuse it — but the two are not one
+idea. A series is a column, or a value of the `series` column, and a caller
+names it in `y` or `seriesConfig`. A `ProportionBar` has neither: its parts come
+out of `category` / `value` rows, one row per part, exactly as a ring's slices
+do. Calling those series would be the borrowed word, and the component says
+*segment* everywhere else — `maxSegments`, `ProportionSegment`,
+`ProportionSegmentEvent`. A chart that draws a third kind of mark names its own,
+and `DonutChart` keeps its slices' visibility internal, so nothing is settled
+for it here.
