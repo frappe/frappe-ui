@@ -1263,8 +1263,8 @@ export type ChartStateSlots = {
   empty?: () => unknown
 }
 
-/** Controls at the top right of the card, e.g. a period Select or a Dropdown. */
 export type ChartActionsSlot = {
+  /** Controls at the top right of the card, e.g. a period Select or a Dropdown. */
   actions?: () => unknown
 }
 

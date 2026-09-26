@@ -110,6 +110,47 @@ describe('ProportionBar', () => {
     tooltip().should('contain.text', 'Storage')
   })
 
+  // at-bar item 3.4 — P12. The segments are the plot's only controls, so the
+  // tab order, the focus ring and Enter/Space are the component's keyboard
+  // contract.
+  it('puts every drawn segment in the tab order, in reading order', () => {
+    mountBar()
+    segments().each(($el) => {
+      expect($el.prop('tagName')).to.equal('BUTTON')
+      expect($el.attr('tabindex')).to.not.equal('-1')
+    })
+
+    cy.get('body').tab?.()
+    segments().first().focus().should('be.focused')
+  })
+
+  it('shows a focus ring on keyboard focus', () => {
+    mountBar()
+    segments()
+      .first()
+      .focus()
+      .should(($el) => {
+        const style = window.getComputedStyle($el[0])
+        const ring = `${style.boxShadow} ${style.outlineWidth} ${style.outlineStyle}`
+        expect(ring).to.not.match(/^none 0px none$/)
+      })
+  })
+
+  it('answers Enter and Space on the focused segment with select', () => {
+    const onSelect = cy.spy().as('keySelect')
+    mountBar({ onSelect })
+
+    segments().eq(1).focus().type('{enter}')
+    cy.get('@keySelect').should('have.been.calledWithMatch', {
+      name: 'Storage',
+    })
+
+    segments().eq(2).focus().type(' ')
+    cy.get('@keySelect').should('have.been.calledWithMatch', {
+      name: 'Bandwidth',
+    })
+  })
+
   it('emits select with the row behind the segment', () => {
     const onSelect = cy.spy().as('select')
     mountBar({ onSelect })
@@ -330,6 +371,24 @@ describe('ProportionBar', () => {
       'contain.text',
       'nothing billed yet',
     )
+  })
+
+  it('renders the actions slot in the header', () => {
+    mountBar(
+      { title: 'Support queue' },
+      { actions: () => h('button', 'Export') },
+    )
+    cy.get('[data-slot="chart-header"]').should('contain.text', 'Export')
+  })
+
+  it('renders the title-suffix slot beside the title', () => {
+    mountBar(
+      { title: 'Support queue' },
+      { 'title-suffix': () => h('span', 'beta') },
+    )
+    cy.get('[data-slot="chart-header"]')
+      .should('contain.text', 'Support queue')
+      .and('contain.text', 'beta')
   })
 
   it('replaces the tooltip body through the slot', () => {
