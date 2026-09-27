@@ -32,6 +32,10 @@ shows below the label, and one option is `disabled`.
 
 <ComponentPreview name="Radio-SettingsList" />
 
+## Usage Guidelines
+
+<ComponentPreview name="Radio-Guidelines" hide-code />
+
 ## Behavior
 
 ### Inside a group
