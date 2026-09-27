@@ -39,6 +39,10 @@ An emoji in `#prefix` and a count as the label.
 
 <ComponentPreview name="Badge-Reactions" />
 
+## Usage Guidelines
+
+<ComponentPreview name="Badge-Guidelines" hide-code />
+
 ## Behavior
 
 ### Label and slots

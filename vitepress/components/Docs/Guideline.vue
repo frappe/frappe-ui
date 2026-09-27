@@ -26,19 +26,24 @@ withDefaults(
     <div
       class="play-card flex min-h-[240px] items-center justify-center rounded-[14px] bg-surface-base p-8"
     >
-      <!-- Compact examples: do on the left, don't on the right. -->
+      <!-- Compact examples: do on the left, don't on the right. A guideline
+           with only a "do" example centers it. -->
       <div
         v-if="layout === 'split'"
-        class="flex w-full max-w-[420px] items-start justify-between"
+        class="flex w-full max-w-[420px] items-start"
+        :class="$slots.dont ? 'justify-between' : 'justify-center'"
       >
-        <div class="flex flex-col items-start gap-4">
+        <div
+          class="flex flex-col gap-4"
+          :class="$slots.dont ? 'items-start' : 'items-center'"
+        >
           <div class="flex min-h-10 items-center">
             <slot name="do" />
           </div>
           <SuccessSolidIcon class="size-6 shrink-0 text-ink-green-5" />
         </div>
 
-        <div class="flex flex-col items-start gap-4">
+        <div v-if="$slots.dont" class="flex flex-col items-start gap-4">
           <div class="flex min-h-10 items-center">
             <slot name="dont" />
           </div>
