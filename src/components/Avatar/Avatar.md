@@ -40,6 +40,10 @@ A `size-*` class sets a size beyond the largest `size` step.
 
 <ComponentPreview name="Avatar-ProfileHeader" />
 
+## Usage Guidelines
+
+<ComponentPreview name="Avatar-Guidelines" hide-code />
+
 ## Behavior
 
 ### Fallback

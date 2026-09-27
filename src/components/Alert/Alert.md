@@ -41,6 +41,10 @@ formatted text.
 
 <ComponentPreview name="Alert-ImportProgress" />
 
+## Usage Guidelines
+
+<ComponentPreview name="Alert-Guidelines" hide-code />
+
 ## Behavior
 
 ### Layout

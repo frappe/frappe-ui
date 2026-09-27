@@ -7,6 +7,9 @@ interface ComponentPreviewProps {
   wide?: boolean
   // For demos that draw their own card chrome.
   selfLayout?: boolean
+  // Drop the "Show code" toggle: same card shell, illustrative content only
+  // (usage guidelines, do/don't) rather than a copy-paste snippet.
+  hideCode?: boolean
 }
 
 const props = defineProps<ComponentPreviewProps>()
@@ -21,7 +24,16 @@ const isEditorDemo = computed(() => props.name?.startsWith('Editor'))
 
 <template>
   <div class="my-4" :class="{ 'preview-wide': wide }">
-    <div class="flex flex-col gap-1.5 rounded-[20px] bg-surface-gray-1 p-1.5">
+    <!-- Illustrative content (usage guidelines) draws its own shells, so it
+         renders bare — no card, no code toggle. -->
+    <div v-if="hideCode" :class="isEditorDemo ? '' : 'not-prose'">
+      <slot />
+    </div>
+
+    <div
+      v-else
+      class="flex flex-col gap-1.5 rounded-[20px] bg-surface-gray-1 p-1.5"
+    >
       <!-- `vp-raw` stops VitePress from taking over link clicks in a demo.
            Without it, a `<router-link>` (Tabs route mode, Breadcrumbs) would
            send the docs site to the demo's URL instead of the in-memory
