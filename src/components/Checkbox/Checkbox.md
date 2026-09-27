@@ -35,6 +35,10 @@ is `disabled`, so it always stays checked.
 
 <ComponentPreview name="Checkbox-SettingRow" />
 
+## Usage Guidelines
+
+<ComponentPreview name="Checkbox-Guidelines" hide-code />
+
 ## Behavior
 
 ### Value
