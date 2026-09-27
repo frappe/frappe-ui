@@ -21,6 +21,10 @@ comments.
 
 <ComponentPreview name="Divider-OlderComments" />
 
+## Usage Guidelines
+
+<ComponentPreview name="Divider-Guidelines" hide-code />
+
 ## Behavior
 
 ### Action
