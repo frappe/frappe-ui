@@ -11,7 +11,7 @@ interface ComponentPreviewProps {
 
 const props = defineProps<ComponentPreviewProps>()
 
-const expanded = ref(false)
+const showCode = ref(false)
 
 // Tailwind Typography cannot re-enable prose inside `.not-prose`, which every
 // preview uses to shield itself from the article. Editor demos render their own
@@ -21,9 +21,7 @@ const isEditorDemo = computed(() => props.name?.startsWith('Editor'))
 
 <template>
   <div class="my-4" :class="{ 'preview-wide': wide }">
-    <div
-      class="rounded-7 overflow-hidden border border-outline-gray-1 divide-y divide-outline-gray-1"
-    >
+    <div class="flex flex-col gap-1.5 rounded-[20px] bg-surface-gray-1 p-1.5">
       <!-- `vp-raw` stops VitePress from taking over link clicks in a demo.
            Without it, a `<router-link>` (Tabs route mode, Breadcrumbs) would
            send the docs site to the demo's URL instead of the in-memory
@@ -31,9 +29,8 @@ const isEditorDemo = computed(() => props.name?.startsWith('Editor'))
       <div
         data-demo-preview
         :class="[
-          'vp-raw',
+          'play-card vp-raw rounded-[14px] bg-surface-base overflow-x-auto scrollbar min-h-[200px]',
           isEditorDemo ? '' : 'not-prose',
-          'bg-surface-base overflow-x-auto scrollbar min-h-[200px]',
           selfLayout
             ? 'p-4'
             : 'p-4 sm:p-8 flex flex-wrap gap-3 items-center justify-center',
@@ -42,27 +39,28 @@ const isEditorDemo = computed(() => props.name?.startsWith('Editor'))
         <slot />
       </div>
 
-      <div class="component-preview-code not-prose relative">
+      <!-- Show code toggle + the full code, revealed on demand. -->
+      <div class="flex flex-col items-start">
+        <Button
+          variant="ghost"
+          :aria-expanded="showCode"
+          @click="showCode = !showCode"
+        >
+          <template #prefix>
+            <span
+              class="lucide-chevron-right size-4 transition-transform"
+              :class="{ 'rotate-90': showCode }"
+              aria-hidden="true"
+            />
+          </template>
+          {{ showCode ? 'Hide code' : 'Show code' }}
+        </Button>
+
         <div
-          :class="[
-            expanded
-              ? ''
-              : 'max-h-[80px] sm:max-h-[96px] overflow-hidden [&_.shiki]:!max-h-none [&_.shiki]:!overflow-hidden [&_.copy]:hidden',
-          ]"
+          v-if="showCode"
+          class="component-preview-code not-prose relative w-full"
         >
           <slot name="code" />
-        </div>
-
-        <div
-          v-if="!expanded"
-          class="pointer-events-none absolute inset-0 bg-gradient-to-t from-surface-gray-1 via-surface-gray-1/70 dark:from-surface-base dark:via-surface-base/70 to-transparent"
-        />
-
-        <div
-          v-if="!expanded"
-          class="absolute inset-0 flex items-center justify-center"
-        >
-          <Button variant="outline" @click="expanded = true">View Code</Button>
         </div>
       </div>
     </div>

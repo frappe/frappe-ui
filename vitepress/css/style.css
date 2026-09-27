@@ -115,6 +115,21 @@ code {
   color: var(--shiki-dark, inherit);
 }
 
+/* Elevated card used by the playground and example previews: a soft drop
+   shadow instead of a hard border. The transparent border keeps the box size
+   steady when dark mode swaps in a faint outline, since shadows read as nothing
+   on the dark surface. */
+.play-card {
+  border: 1px solid transparent;
+  box-shadow:
+    0px 1px 3px 0px rgba(0, 0, 0, 0.14),
+    0px 0px 1px 0px rgba(0, 0, 0, 0.14);
+}
+[data-theme='dark'] .play-card {
+  border-color: var(--outline-gray-1);
+  box-shadow: none;
+}
+
 /* scrollbar */
 :root {
   --scrollbar-size: 4px;
@@ -224,6 +239,40 @@ code {
    open Examples and Behavior with an h3, which then touches its heading. */
 .prose h2 + h3 {
   margin-top: 1.25em;
+}
+
+/* Compact the section headings and body copy onto the design system's named
+   text styles: section titles (h2) at text/lg/semibold, sub-headings (h3) at
+   text/base/semibold, and paragraphs in the 14px paragraph family. The margins
+   set the page rhythm: 40px from the header to the first block, 46px before
+   each section (h2), and 32px between examples (before each h3). Margins
+   collapse with the preceding block, so these are the resulting gaps. */
+.prose h2 {
+  @apply text-lg-semibold;
+  position: relative;
+  /* 46px above the divider + 46px below it, with the line centered between. */
+  margin-top: 92px;
+}
+/* A subtle divider centered in the gap above each section heading. */
+.prose h2::before {
+  content: '';
+  position: absolute;
+  top: -46px;
+  left: 50%;
+  width: 40%;
+  height: 1px;
+  transform: translateX(-50%);
+  background-color: var(--outline-gray-2);
+}
+.prose h3 {
+  @apply text-base-semibold;
+  margin-top: 32px;
+}
+.prose p {
+  @apply text-p-base;
+}
+.prose h1 + p {
+  margin-bottom: 40px;
 }
 
 /* Numbered steps for install guides: wrap the steps in <div class="steps">

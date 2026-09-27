@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, reactive, ref, shallowRef, watchEffect } from 'vue'
-import { Select, Switch, TabButtons, TextInput } from 'frappe-ui'
+import { Button, Select, Switch, TabButtons, TextInput } from 'frappe-ui'
 
 export type KnobOption = { label: string; value: string }
 type VisibleWhen = (values: Record<string, any>) => boolean
@@ -43,7 +43,7 @@ const props = withDefaults(
     previewMinHeight?: string
   }>(),
   {
-    previewMinHeight: '200px',
+    previewMinHeight: '260px',
   },
 )
 
@@ -61,10 +61,17 @@ const switchKnobs = props.knobs.filter((k) => k.type === 'switch') as Extract<
   { type: 'switch' }
 >[]
 
-// The knob column is narrow. Tab buttons whose labels run past about 24
-// characters would overflow it, so those knobs render as a Select.
-const fitsAsTabs = (options: KnobOption[]) =>
-  options.reduce((n, o) => n + o.label.length, 0) <= 24
+// The control column is only about 136px wide. Tab pills don't shrink below
+// their label, so a group wider than that overflows the card instead of
+// fitting. Estimate the rendered width (≈7px per character plus pill padding
+// and gaps) and fall back to a Select past it, matching the design's compact
+// dropdowns for anything longer than a short two- or three-way choice.
+const fitsAsTabs = (options: KnobOption[]) => {
+  if (options.length > 3) return false
+  const pills = options.reduce((w, o) => w + o.label.length * 7 + 16, 0)
+  const gaps = 4 + (options.length - 1) * 4
+  return pills + gaps <= 132
+}
 
 function setNumber(name: string, raw: string) {
   const n = raw === '' ? null : Number(raw)
@@ -72,6 +79,8 @@ function setNumber(name: string, raw: string) {
 }
 
 const generatedCode = computed(() => props.code(values))
+
+const showCode = ref(false)
 
 const highlighter = shallowRef<any>(null)
 let highlighterPromise: Promise<any> | null = null
@@ -93,6 +102,7 @@ function ensureHighlighter() {
 const highlightedCode = ref<string | null>(null)
 watchEffect(() => {
   if (typeof window === 'undefined') return
+  if (!showCode.value) return
   ensureHighlighter()
   const h = highlighter.value
   if (!h) {
@@ -121,60 +131,63 @@ function onCopy() {
 
 <template>
   <div class="not-prose">
-    <div
-      class="overflow-hidden rounded-7 border border-outline-gray-1 divide-y divide-outline-gray-1"
-    >
-      <div
-        class="grid divide-y divide-outline-gray-1 lg:grid-cols-[minmax(0,1fr)_17rem] lg:divide-x lg:divide-y-0"
-      >
+    <div class="flex flex-col gap-1.5 rounded-[20px] bg-surface-gray-1 p-1.5">
+      <div class="flex flex-col gap-1.5 lg:flex-row lg:items-stretch">
+        <!-- Preview card -->
         <div
-          class="flex min-w-0 items-center justify-center overflow-auto bg-surface-base p-8 dot-grid"
+          class="play-card flex min-w-0 flex-1 items-center justify-center overflow-auto rounded-[14px] bg-surface-base p-8 scrollbar"
           :style="{ minHeight: previewMinHeight }"
         >
           <slot name="preview" :values="values" />
         </div>
 
-        <!-- Knobs stacked in a column beside the preview, label above control. -->
-        <div class="flex flex-col gap-4 bg-surface-base p-4">
+        <!-- Controls card: label on the left, control on the right. -->
+        <div
+          class="play-card flex flex-col gap-2 rounded-[14px] bg-surface-base p-3 lg:w-64"
+        >
           <div
             v-for="knob in rowKnobs"
             :key="knob.name"
-            class="flex flex-col gap-1.5"
+            class="flex items-center justify-between gap-3"
           >
             <span class="knob-label">{{ knob.name }}</span>
-            <TextInput
-              v-if="knob.type === 'text'"
-              v-model="values[knob.name]"
-              :aria-label="knob.name"
-              variant="outline"
-            />
-            <TextInput
-              v-else-if="knob.type === 'number'"
-              type="number"
-              :model-value="values[knob.name] ?? ''"
-              :aria-label="knob.name"
-              :min="knob.min"
-              :max="knob.max"
-              :step="knob.step"
-              variant="outline"
-              @update:model-value="setNumber(knob.name, $event)"
-            />
-            <TabButtons
-              v-else-if="knob.type === 'tabs' && fitsAsTabs(knob.options)"
-              v-model="values[knob.name]"
-              :options="knob.options"
-            />
-            <Select
-              v-else-if="knob.type === 'tabs'"
-              v-model="values[knob.name]"
-              :aria-label="knob.name"
-              :options="knob.options"
-              variant="outline"
-            />
+            <div class="w-[136px] shrink-0">
+              <TextInput
+                v-if="knob.type === 'text'"
+                v-model="values[knob.name]"
+                :aria-label="knob.name"
+                :placeholder="knob.name"
+                size="sm"
+              />
+              <TextInput
+                v-else-if="knob.type === 'number'"
+                type="number"
+                :model-value="values[knob.name] ?? ''"
+                :aria-label="knob.name"
+                :min="knob.min"
+                :max="knob.max"
+                :step="knob.step"
+                size="sm"
+                @update:model-value="setNumber(knob.name, $event)"
+              />
+              <TabButtons
+                v-else-if="knob.type === 'tabs' && fitsAsTabs(knob.options)"
+                v-model="values[knob.name]"
+                :options="knob.options"
+              />
+              <Select
+                v-else-if="knob.type === 'tabs'"
+                v-model="values[knob.name]"
+                :aria-label="knob.name"
+                :options="knob.options"
+                size="sm"
+              />
+            </div>
           </div>
+
           <div
             v-if="switchKnobs.length"
-            class="flex flex-col gap-2.5 border-t border-outline-gray-1 pt-4"
+            class="flex flex-col gap-2 border-t border-outline-gray-1 pt-2"
           >
             <!-- A <label> forwards clicks on the name to the switch inside it. -->
             <label
@@ -195,16 +208,44 @@ function onCopy() {
         </div>
       </div>
 
-      <div class="component-preview-code relative">
-        <div v-if="highlightedCode" v-html="highlightedCode" />
-        <pre v-else class="shiki"><code>{{ generatedCode }}</code></pre>
-        <button
-          type="button"
-          class="copy"
-          :class="{ copied }"
-          :title="copied ? 'Copied' : 'Copy Code'"
-          @click="onCopy"
-        />
+      <!-- Show code toggle (with an inline copy button once open) + panel -->
+      <div class="flex flex-col">
+        <div class="flex items-center justify-between">
+          <Button
+            variant="ghost"
+            :aria-expanded="showCode"
+            @click="showCode = !showCode"
+          >
+            <template #prefix>
+              <span
+                class="lucide-chevron-right size-4 transition-transform"
+                :class="{ 'rotate-90': showCode }"
+                aria-hidden="true"
+              />
+            </template>
+            {{ showCode ? 'Hide code' : 'Show code' }}
+          </Button>
+
+          <Button
+            v-if="showCode"
+            variant="ghost"
+            :aria-label="copied ? 'Copied' : 'Copy code'"
+            @click="onCopy"
+          >
+            <template #icon>
+              <span
+                class="size-4"
+                :class="copied ? 'lucide-check' : 'lucide-clipboard'"
+                aria-hidden="true"
+              />
+            </template>
+          </Button>
+        </div>
+
+        <div v-if="showCode" class="component-preview-code relative">
+          <div v-if="highlightedCode" v-html="highlightedCode" />
+          <pre v-else class="shiki"><code>{{ generatedCode }}</code></pre>
+        </div>
       </div>
     </div>
   </div>
@@ -212,22 +253,8 @@ function onCopy() {
 
 <style scoped>
 .knob-label {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 13px;
-  color: var(--p-color-ink-gray-6, #7c7c7c);
-}
-.dot-grid {
-  /* Black dots vanish on the dark surface, so flip to light ones — the docs
-     stamp `data-theme` on <html> (see useColorScheme). */
-  --dot-color: rgba(0, 0, 0, 0.08);
-  background-image: radial-gradient(
-    circle,
-    var(--dot-color) 1px,
-    transparent 1px
-  );
-  background-size: 14px 14px;
-}
-[data-theme='dark'] .dot-grid {
-  --dot-color: rgba(255, 255, 255, 0.09);
+  font-size: 14px;
+  text-transform: capitalize;
+  color: var(--p-color-ink-gray-6, #525252);
 }
 </style>
