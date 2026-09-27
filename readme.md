@@ -4,9 +4,9 @@
 
 # Frappe UI
 
-**Vue 3 components, design tokens and data composables for Frappe apps**
+**The all-in-one toolkit for modern frontends. High-quality components, app recipes and AI-ready docs.**
 
-<a href="https://www.npmjs.com/package/frappe-ui"><img alt="npm version" src="https://img.shields.io/npm/v/frappe-ui.svg?style=flat" /></a>
+<a href="https://www.npmjs.com/package/frappe-ui"><img alt="npm version" src="https://img.shields.io/npm/v/frappe-ui/rc.svg?style=flat" /></a>
 <a href="https://www.npmjs.com/package/frappe-ui"><img alt="npm downloads" src="https://img.shields.io/npm/dm/frappe-ui.svg?style=flat" /></a>
 <a href="./license.md"><img alt="MIT license" src="https://img.shields.io/npm/l/frappe-ui.svg?style=flat" /></a>
 
