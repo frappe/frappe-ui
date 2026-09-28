@@ -4,9 +4,10 @@
 // padded 8 with 16px corners — a 28px head row, 6px in: the stage glyph in
 // the stage's own colour · 8px · the 14 regular gray-700 stage, and on the
 // right the ⋯ and + glyphs · 10px · the 268 × 172 cards, 10px apart. The
-// column under a card in the air takes the file's wash, gray-50 fading to
-// the board by its foot. The board is wider than the stage, so it scrolls
-// sideways as a board does.
+// column under the pointer — hovered, or with a card in the air over it —
+// takes the file's wash, gray-50 at the head fading to the board by its
+// foot. The board is wider than the stage, so it scrolls sideways as a
+// board does.
 //
 // The cards move: pick one up and carry it to another stage, or above or
 // below its neighbours. While it is in the air a slot its own height opens
@@ -49,10 +50,19 @@ const over = ref<{ column: number; index: number } | null>(null)
 
 function lift(e: DragEvent, card: Card, column: number) {
   dragging.value = { id: card.id, from: column }
-  if (e.dataTransfer) {
-    e.dataTransfer.effectAllowed = 'move'
-    e.dataTransfer.setData('text/plain', card.id)
-  }
+  if (!e.dataTransfer) return
+  e.dataTransfer.effectAllowed = 'move'
+  e.dataTransfer.setData('text/plain', card.id)
+  // the card in the air rides tilted under a deeper shadow, as the
+  // reference carries it: a copy, drawn that way, is the drag image
+  const el = e.currentTarget as HTMLElement
+  const ghost = el.cloneNode(true) as HTMLElement
+  const r = el.getBoundingClientRect()
+  ghost.classList.add('kanban-ghost')
+  ghost.style.width = `${r.width}px`
+  document.body.appendChild(ghost)
+  e.dataTransfer.setDragImage(ghost, e.clientX - r.left, e.clientY - r.top)
+  requestAnimationFrame(() => ghost.remove())
 }
 
 // Where in the column the pointer is: above a card's middle means before
@@ -126,8 +136,8 @@ const laid = computed(() =>
       <section
         v-for="(stage, ci) in columns"
         :key="stage.name"
-        class="flex w-[284px] shrink-0 flex-col gap-2.5 rounded-7 p-2 transition-colors"
-        :class="over?.column === ci && 'kanban-column-over'"
+        class="kanban-column relative isolate flex w-[284px] shrink-0 flex-col gap-2.5 rounded-7 p-2"
+        :class="over?.column === ci && 'is-over'"
         role="listitem"
         :aria-label="stage.name"
       >
@@ -183,14 +193,37 @@ const laid = computed(() =>
 </template>
 
 <style>
-/* the file's wash on the column a card is carried over: gray-50 at the
-   head, the board's own colour by the foot */
-.kanban-column-over {
+/* The file's wash on the column under the pointer: gray-50 at the head,
+   the board's own colour by the foot. A gradient cannot fade in, so it sits
+   on a layer beneath the cards whose opacity does. */
+.kanban-column::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
   background: linear-gradient(
     to bottom,
     var(--surface-gray-1),
     var(--surface-base)
   );
+  opacity: 0;
+  transition: opacity 150ms ease-out;
+}
+.kanban-column:hover::before,
+.kanban-column.is-over::before {
+  opacity: 1;
+}
+/* the card in the air: tilted a touch, under the lg shadow */
+.kanban-ghost {
+  position: fixed;
+  top: -1000px;
+  left: -1000px;
+  transform: rotate(-2deg);
+  opacity: 1 !important;
+}
+.kanban-ghost article {
+  @apply shadow-lg;
 }
 .kanban-glyph {
   @apply flex size-4 items-center justify-center rounded-2 transition-colors hover:text-ink-gray-9;
