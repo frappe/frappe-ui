@@ -10,7 +10,7 @@ import {
   watch,
   type Component,
 } from 'vue'
-import { Button, Popover, useColorScheme } from '../../src'
+import { Button, Popover, Tooltip, useColorScheme } from '../../src'
 import ControlSelect from '../controls/ControlSelect.vue'
 import ControlToggle from '../controls/ControlToggle.vue'
 import { headerTypes, subheaderTypes } from '../espresso-header/variants'
@@ -493,16 +493,17 @@ const outlineTitle = computed(
                 aria-hidden="true"
                 class="absolute -left-2.5 top-0 h-7 w-[3.5px] rounded-r-[3px] bg-surface-gray-6"
               />
-              <button
-                type="button"
-                class="tray-app"
-                aria-label="Frappe"
-                title="Frappe"
-                :aria-current="app === 'default' ? 'page' : undefined"
-                @click="app = 'default'"
-              >
-                <img :src="appLogo" alt="" class="size-7" />
-              </button>
+              <Tooltip text="Frappe" side="right">
+                <button
+                  type="button"
+                  class="tray-app"
+                  aria-label="Frappe"
+                  :aria-current="app === 'default' ? 'page' : undefined"
+                  @click="app = 'default'"
+                >
+                  <img :src="appLogo" alt="" class="size-7" />
+                </button>
+              </Tooltip>
             </span>
             <span class="w-7 border-t border-outline-gray-1" />
             <span v-for="a in TRAY_APPS" :key="a.logo" class="relative">
@@ -511,16 +512,17 @@ const outlineTitle = computed(
                 aria-hidden="true"
                 class="absolute -left-2.5 top-0 h-7 w-[3.5px] rounded-r-[3px] bg-surface-gray-6"
               />
-              <button
-                type="button"
-                class="tray-app"
-                :aria-label="a.label"
-                :title="a.label"
-                :aria-current="app === a.scenario ? 'page' : undefined"
-                @click="app = a.scenario"
-              >
-                <EIcon :name="`logo-${a.logo}`" class="size-7" />
-              </button>
+              <Tooltip :text="a.label" side="right">
+                <button
+                  type="button"
+                  class="tray-app"
+                  :aria-label="a.label"
+                  :aria-current="app === a.scenario ? 'page' : undefined"
+                  @click="app = a.scenario"
+                >
+                  <EIcon :name="`logo-${a.logo}`" class="size-7" />
+                </button>
+              </Tooltip>
             </span>
             <!-- under the apps: this playground's own components -->
             <span class="relative">
@@ -529,16 +531,17 @@ const outlineTitle = computed(
                 aria-hidden="true"
                 class="absolute -left-2.5 top-0 h-7 w-[3.5px] rounded-r-[3px] bg-surface-gray-6"
               />
-              <button
-                type="button"
-                class="tray-app"
-                aria-label="Frappe UI"
-                title="Frappe UI"
-                :aria-current="app === 'components' ? 'page' : undefined"
-                @click="app = 'components'"
-              >
-                <img :src="appLogo" alt="" class="size-7" />
-              </button>
+              <Tooltip text="Frappe UI" side="right">
+                <button
+                  type="button"
+                  class="tray-app"
+                  aria-label="Frappe UI"
+                  :aria-current="app === 'components' ? 'page' : undefined"
+                  @click="app = 'components'"
+                >
+                  <img :src="appLogo" alt="" class="size-7" />
+                </button>
+              </Tooltip>
             </span>
           </span>
 
@@ -572,10 +575,14 @@ const outlineTitle = computed(
              28px logo (Figma's collapsed header slot). -->
         <Popover side="bottom" align="start" :offset="6" bare>
           <template #trigger>
+            <!-- a Tooltip cannot share this trigger: nested as-child, the
+                 popover no longer opens. The empty cell names itself with a
+                 plain title instead. -->
             <button
               type="button"
               :class="cellClass"
               :aria-label="patternCollapsed ? 'Preview control' : undefined"
+              :title="patternCollapsed ? 'Preview control' : undefined"
             >
               <!-- with the tray on, the logo is the tray's: the file's
                    collapsed header slot is empty (34359:136305), and the
@@ -680,29 +687,36 @@ const outlineTitle = computed(
                raised elevation-2 row with the sm shadow (white in light,
                #242424 in dark, where that shadow carries the file's inner
                highlight), the rest take a gray-2 fill on hover. -->
-          <button
+          <Tooltip
             v-for="p in pages"
             :key="p.id"
-            type="button"
-            class="flex h-7 shrink-0 items-center rounded-4 transition-colors"
-            :class="[
-              patternCollapsed ? 'w-7 justify-center' : 'gap-2 px-2 text-start',
-              p.id === page
-                ? 'bg-surface-elevation-2 text-ink-gray-8 shadow-sm'
-                : 'text-ink-gray-6 hover:bg-surface-gray-2 hover:text-ink-gray-8',
-            ]"
-            :aria-current="p.id === page ? 'page' : undefined"
-            :aria-label="patternCollapsed ? p.label : undefined"
-            :title="patternCollapsed ? p.label : undefined"
-            @click="page = p.id"
+            :text="p.label"
+            side="right"
+            :disabled="!patternCollapsed"
           >
-            <span class="nav-icon size-4 shrink-0" v-html="NAV_ICONS[p.id]" />
-            <span
-              v-if="!patternCollapsed"
-              class="min-w-0 flex-1 truncate text-base"
-              >{{ p.label }}</span
+            <button
+              type="button"
+              class="flex h-7 shrink-0 items-center rounded-4 transition-colors"
+              :class="[
+                patternCollapsed
+                  ? 'w-7 justify-center'
+                  : 'gap-2 px-2 text-start',
+                p.id === page
+                  ? 'bg-surface-elevation-2 text-ink-gray-8 shadow-sm'
+                  : 'text-ink-gray-6 hover:bg-surface-gray-2 hover:text-ink-gray-8',
+              ]"
+              :aria-current="p.id === page ? 'page' : undefined"
+              :aria-label="patternCollapsed ? p.label : undefined"
+              @click="page = p.id"
             >
-          </button>
+              <span class="nav-icon size-4 shrink-0" v-html="NAV_ICONS[p.id]" />
+              <span
+                v-if="!patternCollapsed"
+                class="min-w-0 flex-1 truncate text-base"
+                >{{ p.label }}</span
+              >
+            </button>
+          </Tooltip>
         </div>
 
         <!-- an app's foot. Most apps end in a single Collapse row
@@ -721,22 +735,30 @@ const outlineTitle = computed(
                like an active row, storage, what's new and help, then the
                expand, 4px apart -->
           <template v-if="appScenario.id === 'default' && patternCollapsed">
-            <button
-              type="button"
-              class="sb-action sb-action-raised"
-              aria-label="Getting started"
-            >
-              <EIcon name="status" class="size-4" />
-            </button>
-            <button type="button" class="sb-action" aria-label="Storage">
-              <span class="nav-icon size-4" v-html="sbCloud" />
-            </button>
-            <button type="button" class="sb-action" aria-label="What's new">
-              <span class="nav-icon size-4" v-html="sbZap" />
-            </button>
-            <button type="button" class="sb-action" aria-label="Help">
-              <span class="nav-icon size-4" v-html="sbHelp" />
-            </button>
+            <Tooltip text="Getting started" side="right">
+              <button
+                type="button"
+                class="sb-action sb-action-raised"
+                aria-label="Getting started"
+              >
+                <EIcon name="status" class="size-4" />
+              </button>
+            </Tooltip>
+            <Tooltip text="Storage" side="right">
+              <button type="button" class="sb-action" aria-label="Storage">
+                <span class="nav-icon size-4" v-html="sbCloud" />
+              </button>
+            </Tooltip>
+            <Tooltip text="What's new" side="right">
+              <button type="button" class="sb-action" aria-label="What's new">
+                <span class="nav-icon size-4" v-html="sbZap" />
+              </button>
+            </Tooltip>
+            <Tooltip text="Help" side="right">
+              <button type="button" class="sb-action" aria-label="Help">
+                <span class="nav-icon size-4" v-html="sbHelp" />
+              </button>
+            </Tooltip>
           </template>
           <template v-if="appScenario.id === 'mail'">
             <div
@@ -763,14 +785,19 @@ const outlineTitle = computed(
                4px over the 12/19 step count, 12px over a 28px subtle
                button. On the rail it is the status glyph alone. -->
           <template v-else-if="appScenario.id === 'crm'">
-            <button
+            <Tooltip
               v-if="patternCollapsed"
-              type="button"
-              class="sb-action sb-action-raised"
-              aria-label="Getting started"
+              text="Getting started"
+              side="right"
             >
-              <EIcon name="status" class="size-4" />
-            </button>
+              <button
+                type="button"
+                class="sb-action sb-action-raised"
+                aria-label="Getting started"
+              >
+                <EIcon name="status" class="size-4" />
+              </button>
+            </Tooltip>
             <div v-else class="gap-1" :class="alertCardClass">
               <p class="flex items-center gap-1.5">
                 <EIcon name="status" class="size-4 shrink-0 text-ink-gray-8" />
@@ -802,32 +829,38 @@ const outlineTitle = computed(
               patternCollapsed ? 'flex-col gap-1' : 'w-full justify-between'
             "
           >
-            <button
-              v-if="patternCollapsed"
-              type="button"
-              class="sb-action"
-              aria-label="Calendar"
-            >
-              <EIcon name="calender" class="size-4" />
-            </button>
+            <Tooltip v-if="patternCollapsed" text="Calendar" side="right">
+              <button type="button" class="sb-action" aria-label="Calendar">
+                <EIcon name="calender" class="size-4" />
+              </button>
+            </Tooltip>
             <span class="flex gap-1" :class="patternCollapsed && 'flex-col'">
-              <button type="button" class="sb-action" aria-label="What's new">
-                <span class="nav-icon size-4" v-html="sbZap" />
-              </button>
-              <button type="button" class="sb-action" aria-label="Help">
-                <span class="nav-icon size-4" v-html="sbHelp" />
-              </button>
+              <Tooltip text="What's new" side="right">
+                <button type="button" class="sb-action" aria-label="What's new">
+                  <span class="nav-icon size-4" v-html="sbZap" />
+                </button>
+              </Tooltip>
+              <Tooltip text="Help" side="right">
+                <button type="button" class="sb-action" aria-label="Help">
+                  <span class="nav-icon size-4" v-html="sbHelp" />
+                </button>
+              </Tooltip>
             </span>
-            <button
-              type="button"
-              class="sb-action"
-              :aria-label="
-                patternCollapsed ? 'Expand sidebar' : 'Collapse sidebar'
-              "
-              @click="patternCollapsed = !patternCollapsed"
+            <Tooltip
+              :text="patternCollapsed ? 'Expand sidebar' : 'Collapse sidebar'"
+              side="right"
             >
-              <span class="nav-icon size-4" v-html="sbSidebarToggle" />
-            </button>
+              <button
+                type="button"
+                class="sb-action"
+                :aria-label="
+                  patternCollapsed ? 'Expand sidebar' : 'Collapse sidebar'
+                "
+                @click="patternCollapsed = !patternCollapsed"
+              >
+                <span class="nav-icon size-4" v-html="sbSidebarToggle" />
+              </button>
+            </Tooltip>
           </div>
           <button
             v-else
@@ -856,23 +889,31 @@ const outlineTitle = computed(
           v-else-if="patternCollapsed"
           class="mt-auto flex flex-col items-center gap-1 pt-4"
         >
-          <button type="button" class="sb-action" aria-label="Storage">
-            <span class="nav-icon size-4" v-html="sbCloud" />
-          </button>
-          <button type="button" class="sb-action" aria-label="What's new">
-            <span class="nav-icon size-4" v-html="sbZap" />
-          </button>
-          <button type="button" class="sb-action" aria-label="Help">
-            <span class="nav-icon size-4" v-html="sbHelp" />
-          </button>
-          <button
-            type="button"
-            class="sb-action"
-            aria-label="Expand sidebar"
-            @click="patternCollapsed = false"
-          >
-            <span class="nav-icon size-4" v-html="sbSidebarToggle" />
-          </button>
+          <Tooltip text="Storage" side="right">
+            <button type="button" class="sb-action" aria-label="Storage">
+              <span class="nav-icon size-4" v-html="sbCloud" />
+            </button>
+          </Tooltip>
+          <Tooltip text="What's new" side="right">
+            <button type="button" class="sb-action" aria-label="What's new">
+              <span class="nav-icon size-4" v-html="sbZap" />
+            </button>
+          </Tooltip>
+          <Tooltip text="Help" side="right">
+            <button type="button" class="sb-action" aria-label="Help">
+              <span class="nav-icon size-4" v-html="sbHelp" />
+            </button>
+          </Tooltip>
+          <Tooltip text="Expand sidebar" side="right">
+            <button
+              type="button"
+              class="sb-action"
+              aria-label="Expand sidebar"
+              @click="patternCollapsed = false"
+            >
+              <span class="nav-icon size-4" v-html="sbSidebarToggle" />
+            </button>
+          </Tooltip>
         </div>
 
         <!-- this playground's foot: what storage is used and the quick
@@ -895,24 +936,30 @@ const outlineTitle = computed(
 
           <div class="flex items-center justify-between">
             <span class="flex gap-1">
-              <button type="button" class="sb-action" aria-label="What's new">
-                <span class="nav-icon size-4" v-html="sbZap" />
-              </button>
-              <button type="button" class="sb-action" aria-label="Help">
-                <span class="nav-icon size-4" v-html="sbHelp" />
-              </button>
+              <Tooltip text="What's new" side="right">
+                <button type="button" class="sb-action" aria-label="What's new">
+                  <span class="nav-icon size-4" v-html="sbZap" />
+                </button>
+              </Tooltip>
+              <Tooltip text="Help" side="right">
+                <button type="button" class="sb-action" aria-label="Help">
+                  <span class="nav-icon size-4" v-html="sbHelp" />
+                </button>
+              </Tooltip>
             </span>
             <!-- the file's sidebar-collapse glyph, so it collapses to the
                  rail rather than hiding the sidebar outright; the rail's own
                  button brings it back -->
-            <button
-              type="button"
-              class="sb-action"
-              aria-label="Collapse sidebar"
-              @click="patternCollapsed = true"
-            >
-              <span class="nav-icon size-4" v-html="sbSidebarToggle" />
-            </button>
+            <Tooltip text="Collapse sidebar" side="right">
+              <button
+                type="button"
+                class="sb-action"
+                aria-label="Collapse sidebar"
+                @click="patternCollapsed = true"
+              >
+                <span class="nav-icon size-4" v-html="sbSidebarToggle" />
+              </button>
+            </Tooltip>
           </div>
         </div>
       </div>

@@ -56,55 +56,58 @@
          neighbour (`--row-hit-gap`, 1px for the 2px menu gap), so moving
          down a list never lands between rows: the cursor and the hover
          fill don't blink off at every row boundary. -->
-    <button
-      type="button"
-      :data-state="row.active ? 'active' : 'inactive'"
-      :aria-label="collapsed ? row.label : undefined"
-      :aria-current="row.active ? 'page' : undefined"
-      @click="row.onClick?.()"
-      class="relative flex h-7 min-w-0 items-center rounded-4 text-left outline-none transition-colors before:absolute before:inset-x-0 before:bottom-[calc(-1*var(--row-hit-gap,1px))] before:top-[calc(-1*var(--row-hit-gap,1px))] before:content-[''] focus-visible:bg-surface-gray-1 focus-visible:shadow-[0_0_0_2px_var(--outline-gray-3)]"
-      :class="[
-        collapsed ? 'justify-start p-1.5' : 'flex-1 gap-2 px-2 py-1.5',
-        row.active
-          ? 'bg-surface-elevation-2 text-ink-gray-8 shadow-sm'
-          : row.white
-            ? 'bg-surface-elevation-1 text-ink-gray-6'
-            : row.hovered
-              ? 'bg-surface-gray-2 text-ink-gray-6'
-              : 'text-ink-gray-6 hover:bg-surface-gray-2',
-      ]"
-      :style="collapsed ? { width: `${row.width ?? 28}px` } : undefined"
-    >
-      <span
-        v-if="(row.chevron || row.prefix) && !collapsed"
-        class="flex shrink-0 items-center gap-0.5"
+    <!-- on the rail, the label rides beside the icon as a tooltip -->
+    <Tooltip :text="row.label ?? ''" side="right" :disabled="!collapsed">
+      <button
+        type="button"
+        :data-state="row.active ? 'active' : 'inactive'"
+        :aria-label="collapsed ? row.label : undefined"
+        :aria-current="row.active ? 'page' : undefined"
+        @click="row.onClick?.()"
+        class="relative flex h-7 min-w-0 items-center rounded-4 text-left outline-none transition-colors before:absolute before:inset-x-0 before:bottom-[calc(-1*var(--row-hit-gap,1px))] before:top-[calc(-1*var(--row-hit-gap,1px))] before:content-[''] focus-visible:bg-surface-gray-1 focus-visible:shadow-[0_0_0_2px_var(--outline-gray-3)]"
+        :class="[
+          collapsed ? 'justify-start p-1.5' : 'flex-1 gap-2 px-2 py-1.5',
+          row.active
+            ? 'bg-surface-elevation-2 text-ink-gray-8 shadow-sm'
+            : row.white
+              ? 'bg-surface-elevation-1 text-ink-gray-6'
+              : row.hovered
+                ? 'bg-surface-gray-2 text-ink-gray-6'
+                : 'text-ink-gray-6 hover:bg-surface-gray-2',
+        ]"
+        :style="collapsed ? { width: `${row.width ?? 28}px` } : undefined"
       >
-        <EIcon v-if="row.chevron" :name="row.chevron" class="size-4" />
-        <RowPrefixView v-if="row.prefix" :prefix="row.prefix" :row="row" />
-      </span>
-      <RowPrefixView v-else-if="row.prefix" :prefix="row.prefix" :row="row" />
-
-      <span
-        v-if="!collapsed && row.label"
-        class="flex min-w-0 flex-1 items-baseline gap-1"
-      >
-        <span class="min-w-0 flex-1 truncate text-base">{{ row.label }}</span>
-        <span v-if="row.hint" class="shrink-0 text-xs text-ink-gray-5">
-          {{ row.hint }}
+        <span
+          v-if="(row.chevron || row.prefix) && !collapsed"
+          class="flex shrink-0 items-center gap-0.5"
+        >
+          <EIcon v-if="row.chevron" :name="row.chevron" class="size-4" />
+          <RowPrefixView v-if="row.prefix" :prefix="row.prefix" :row="row" />
         </span>
-      </span>
-      <EIcon
-        v-if="!collapsed && row.suffixIcon"
-        :name="row.suffixIcon"
-        class="size-4 text-ink-gray-7"
-      />
-    </button>
+        <RowPrefixView v-else-if="row.prefix" :prefix="row.prefix" :row="row" />
+
+        <span
+          v-if="!collapsed && row.label"
+          class="flex min-w-0 flex-1 items-baseline gap-1"
+        >
+          <span class="min-w-0 flex-1 truncate text-base">{{ row.label }}</span>
+          <span v-if="row.hint" class="shrink-0 text-xs text-ink-gray-5">
+            {{ row.hint }}
+          </span>
+        </span>
+        <EIcon
+          v-if="!collapsed && row.suffixIcon"
+          :name="row.suffixIcon"
+          class="size-4 text-ink-gray-7"
+        />
+      </button>
+    </Tooltip>
   </div>
 </template>
 
 <script setup lang="ts">
 import { defineComponent, h, type PropType } from 'vue'
-import { Avatar } from '../../src'
+import { Avatar, Tooltip } from '../../src'
 import EIcon from './EIcon.vue'
 import type { ItemRow, Row, RowPrefix } from './types'
 
