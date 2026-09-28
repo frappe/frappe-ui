@@ -28,12 +28,13 @@ withDefaults(
     <div
       class="play-card flex min-h-[240px] items-center justify-center rounded-[14px] bg-surface-base p-8"
     >
-      <!-- Compact examples: do on the left, don't on the right. A guideline
-           with only a "do" example centers it. -->
+      <!-- Compact examples: do on the left, don't on the right, with a fixed
+           gap between them so wider content (a menu, a combobox panel) never
+           ends up flush against its pair. A guideline with only a "do"
+           example centers it. -->
       <div
         v-if="layout === 'split'"
-        class="flex w-full max-w-[420px] items-start"
-        :class="$slots.dont ? 'justify-between' : 'justify-center'"
+        class="flex items-start justify-center gap-10"
       >
         <div
           class="flex flex-col gap-4"
@@ -62,7 +63,7 @@ withDefaults(
       <!-- Wide examples: do above, don't below. The mark sits beside the
            example, and the rows are left-aligned inside a centered block so
            the do and don't examples line up with each other. -->
-      <div v-else class="mx-auto flex w-fit flex-col gap-5">
+      <div v-else class="mx-auto flex w-fit flex-col gap-8">
         <div class="flex items-center gap-3">
           <SuccessSolidIcon
             v-if="mark"
