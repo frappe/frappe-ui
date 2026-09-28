@@ -430,13 +430,15 @@ watch(page, () => setTimeout(scanSections, 260))
 onUnmounted(() => observer?.disconnect())
 
 // The file's alert card (31304:58510), which the trial card and CRM's
-// Getting started both are: elevation-1 under a hairline of 7% black (5.5%
-// white in dark), 12px radius, and the file's `shadow/light/xs` — kept in
-// dark too, as the file does. The stroke sits inside the file's 12px
-// padding, so 11px plus the hairline keeps the box at 204 wide with 180
-// inside.
+// Getting started both are: elevation-1, 12px radius, p 12, and the file's
+// `shadow/light/xs`. The file also lists a 7% black hairline inside the
+// edge, but its own raster shows that stroke folded into the shadow's
+// ring: edge for edge, the xs shadow alone lands on Figma's pixels, and a
+// drawn 1px hairline on top reads nearly twice as heavy. Dark keeps the
+// file's 5.5% white hairline, since black shadows vanish there; it sits
+// inside the 12px, so 11px plus the line keeps the box the same.
 const alertCardClass =
-  'flex flex-col rounded-6 border border-[rgba(0,0,0,0.07)] bg-surface-elevation-1 p-[11px] shadow-xs dark:border-[rgba(255,255,255,0.055)]'
+  'flex flex-col rounded-6 bg-surface-elevation-1 p-3 shadow-xs dark:border dark:border-[rgba(255,255,255,0.055)] dark:p-[11px]'
 
 // what the outline is a list of, per page
 const OUTLINE_TITLES: Record<string, string> = {
