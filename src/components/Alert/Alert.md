@@ -7,10 +7,12 @@ short message that goes away on its own, use [`toast`](./toast) instead.
 
 ## Examples
 
-### Confirmations
+### Notices
 
-Plain messages with only a × button. `dismissible` shows the button, and the
-parent removes the alert on `@dismiss`.
+Plain messages with only a × button, for information worth reading once.
+`dismissible` shows the button, and the parent removes the alert on
+`@dismiss`. To confirm a finished action, like saving, use a
+[`toast`](./toast) instead.
 
 <ComponentPreview name="Alert-DismissibleRows" />
 
@@ -44,6 +46,16 @@ formatted text.
 ## Usage Guidelines
 
 <ComponentPreview name="Alert-Guidelines" hide-code />
+
+<div class="guideline-text">
+
+- Do state the reason for the alert and what to do next in one short sentence.
+- Do add an action button when there's an obvious next step.
+- Don't use an alert to confirm a finished action, like saving. Use a toast.
+  Use an alert for an ongoing issue, like a failed payment.
+- Don't make an alert dismissible while the problem it reports still exists.
+
+</div>
 
 ## Behavior
 

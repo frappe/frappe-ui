@@ -124,7 +124,14 @@ code {
 }
 [data-theme='dark'] .play-card {
   border-color: var(--outline-gray-1);
-  box-shadow: none;
+}
+
+/* Plain-text copy of a component's usage guidelines. The guideline cards
+   already show these rules on screen, so the list is hidden here, but it stays
+   in the source Markdown and in "Copy page" so LLMs and text tools get the
+   rules too. */
+.guideline-text {
+  display: none;
 }
 
 /* scrollbar */
