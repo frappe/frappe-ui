@@ -23,6 +23,10 @@ password.
 
 <ComponentPreview name="Password-NewPassword" />
 
+## Usage Guidelines
+
+<ComponentPreview name="Password-Guidelines" hide-code />
+
 ## Behavior
 
 ### Show and hide
