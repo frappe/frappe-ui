@@ -34,25 +34,13 @@ import { Spinner, Button } from 'frappe-ui'
 
     <!-- 2. Keep the label while loading -->
     <Guideline
-      caption="Keep the label while a button loads — don't collapse it to an icon."
+      caption="Keep the label while a button loads. Don't collapse it to an icon."
     >
       <template #do>
         <Button variant="solid" :loading="true">Saving</Button>
       </template>
       <template #dont>
         <Button variant="solid" :loading="true" />
-      </template>
-    </Guideline>
-
-    <!-- 3. Concise loading labels -->
-    <Guideline caption="Keep the loading label concise and easy to read.">
-      <template #do>
-        <Button variant="solid" :loading="true">Saving</Button>
-      </template>
-      <template #dont>
-        <Button variant="solid" :loading="true">
-          Please wait while the backup is in progress
-        </Button>
       </template>
     </Guideline>
   </div>

@@ -20,7 +20,6 @@ const chips = ref<string[]>(['bug', 'p0'])
 const count = ref<string[]>(['bug', 'p0'])
 const collapse = ref<string[]>(['bug', 'feature', 'docs', 'frontend', 'p0'])
 const wrap = ref<string[]>(['bug', 'feature', 'docs', 'frontend', 'p0'])
-const search = ref<string[]>(['bug'])
 
 function removeChip(v: string | number) {
   chips.value = chips.value.filter((x) => x !== v)
@@ -30,9 +29,6 @@ function removeCollapse(v: string | number) {
 }
 function removeWrap(v: string | number) {
   wrap.value = wrap.value.filter((x) => x !== v)
-}
-function removeSearch(v: string | number) {
-  search.value = search.value.filter((x) => x !== v)
 }
 
 const triggerClass =
@@ -177,59 +173,6 @@ const triggerClass =
                     </span>
                   </template>
                 </Badge>
-              </div>
-              <span
-                :class="[
-                  'lucide-chevron-down size-4 shrink-0 text-ink-gray-4 transition-transform',
-                  open && 'rotate-180',
-                ]"
-              />
-            </button>
-          </template>
-        </MultiSelect>
-      </template>
-    </Guideline>
-
-    <!-- 3. Open behavior: search a long list, highlight what's picked
-         (do-only; it's the real component, open it to see both). -->
-    <Guideline
-      caption="For a long list, open the field to search instead of scrolling. Picked options stay highlighted and checked."
-    >
-      <template #do>
-        <MultiSelect v-model="search" :options="options">
-          <template #trigger="{ open, selectedOptions, setOpen }">
-            <button
-              type="button"
-              :data-state="open ? 'open' : 'closed'"
-              :class="triggerClass"
-              @click="setOpen(!open)"
-            >
-              <div class="flex min-w-0 flex-1 flex-wrap items-center gap-1">
-                <Badge
-                  v-for="o in selectedOptions"
-                  :key="o.value"
-                  theme="gray"
-                  size="md"
-                >
-                  {{ o.label }}
-                  <template #suffix>
-                    <span
-                      role="button"
-                      tabindex="-1"
-                      class="-mr-0.5 inline-flex cursor-pointer items-center justify-center rounded-1 p-0.5 opacity-70 hover:opacity-100"
-                      @click.stop="removeSearch(o.value)"
-                      @pointerdown.stop
-                    >
-                      <span class="lucide-x size-3" />
-                    </span>
-                  </template>
-                </Badge>
-                <span
-                  v-if="!selectedOptions.length"
-                  class="px-1 text-base text-ink-gray-4"
-                >
-                  Add labels…
-                </span>
               </div>
               <span
                 :class="[

@@ -1,12 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Password, TextInput } from 'frappe-ui'
+import { Password } from 'frappe-ui'
 
 // One model per field so revealing or editing one doesn't affect the others.
 const tooShort = ref('secret1')
 const noMessage = ref('secret1')
-const withEye = ref('sk8board!2')
-const withoutEye = ref('sk8board!2')
 const withRules = ref('Password123!')
 const vague = ref('Password123!')
 </script>
@@ -35,32 +33,7 @@ const vague = ref('Password123!')
       </template>
     </Guideline>
 
-    <!-- 2. Include the eye toggle. The "do" is the real Password (eye built
-         in); the "don't" is a bare password TextInput with no way to reveal. -->
-    <Guideline
-      layout="stack"
-      caption="Always include an eye icon so users can toggle password visibility."
-    >
-      <template #do>
-        <Password
-          v-model="withEye"
-          class="w-72"
-          autocomplete="new-password"
-        />
-      </template>
-      <template #dont>
-        <TextInput
-          v-model="withoutEye"
-          type="password"
-          variant="subtle"
-          size="sm"
-          class="w-72"
-          autocomplete="new-password"
-        />
-      </template>
-    </Guideline>
-
-    <!-- 3. Show concrete requirements, not vague guidance -->
+    <!-- 2. Show concrete requirements, not vague guidance -->
     <Guideline
       layout="stack"
       caption="Show password requirements so users know exactly what makes a valid password."

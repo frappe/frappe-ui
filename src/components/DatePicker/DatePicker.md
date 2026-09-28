@@ -31,10 +31,6 @@ the range into "Depart" and "Return" fields over one calendar.
 
 <ComponentPreview name="DatePicker-Range" />
 
-## Usage Guidelines
-
-<ComponentPreview name="DatePicker-Guidelines" hide-code />
-
 ## Behavior
 
 ### Values

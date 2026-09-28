@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { TextInput, Textarea, Select } from 'frappe-ui'
+import { TextInput, Select } from 'frappe-ui'
 </script>
 
 <template>
@@ -17,17 +17,7 @@ import { TextInput, Textarea, Select } from 'frappe-ui'
       </template>
     </Guideline>
 
-    <!-- 2. Textarea for multi-line -->
-    <Guideline caption="Use a textarea for multi-line text.">
-      <template #do>
-        <Textarea placeholder="Write a bio" class="w-56" :rows="3" />
-      </template>
-      <template #dont>
-        <TextInput placeholder="Write a bio" class="w-56" />
-      </template>
-    </Guideline>
-
-    <!-- 3. Match the input type and placeholder (do-only) -->
+    <!-- 2. Match the input type and placeholder (do-only) -->
     <Guideline
       layout="stack"
       caption="Match the input type and placeholder to the information."
@@ -49,7 +39,7 @@ import { TextInput, Textarea, Select } from 'frappe-ui'
       </template>
     </Guideline>
 
-    <!-- 4. Size each field to its content (do-only) -->
+    <!-- 3. Size each field to its content (do-only) -->
     <Guideline
       layout="stack"
       caption="Size each field to the length of the content it holds."

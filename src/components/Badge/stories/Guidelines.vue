@@ -39,17 +39,7 @@ const ring = { boxShadow: '0 0 0 2px var(--surface-base)' }
       </template>
     </Guideline>
 
-    <!-- 2. Short, scannable labels -->
-    <Guideline caption="Keep it short and easy to read.">
-      <template #do>
-        <Badge theme="amber">Awaiting Response</Badge>
-      </template>
-      <template #dont>
-        <Badge theme="amber">Waiting for customer response</Badge>
-      </template>
-    </Guideline>
-
-    <!-- 3. Badges are static, not controls -->
+    <!-- 2. Badges are static, not controls -->
     <Guideline caption="Badges are not interactive.">
       <template #do>
         <Badge theme="gray">
@@ -67,29 +57,6 @@ const ring = { boxShadow: '0 0 0 2px var(--surface-base)' }
           May 16, Friday
           <template #suffix>
             <span class="lucide-arrow-right" aria-hidden="true" />
-          </template>
-        </Badge>
-      </template>
-    </Guideline>
-
-    <!-- 4. One accent is enough -->
-    <Guideline caption="Don't decorate too much.">
-      <template #do>
-        <Badge theme="green">
-          <template #prefix>
-            <span class="lucide-check" aria-hidden="true" />
-          </template>
-          Completed
-        </Badge>
-      </template>
-      <template #dont>
-        <Badge theme="green">
-          <template #prefix>
-            <span class="size-1.5 rounded-full bg-current" aria-hidden="true" />
-          </template>
-          Completed
-          <template #suffix>
-            <span class="lucide-check" aria-hidden="true" />
           </template>
         </Badge>
       </template>

@@ -51,34 +51,7 @@ import { Button } from 'frappe-ui'
       </template>
     </Guideline>
 
-    <!-- 3. Icons that match the purpose -->
-    <Guideline
-      layout="stack"
-      caption="Use icons that match the button's purpose."
-    >
-      <template #do>
-        <div class="flex items-center gap-2">
-          <Button variant="subtle" icon-left="lucide-globe">Publish</Button>
-          <Button variant="subtle" icon-left="lucide-plus">Create</Button>
-          <Button variant="subtle" icon-left="lucide-send">Send</Button>
-          <Button variant="subtle" theme="red" icon-left="lucide-trash-2">
-            Delete
-          </Button>
-        </div>
-      </template>
-      <template #dont>
-        <div class="flex items-center gap-2">
-          <Button variant="subtle" icon-left="lucide-trash-2">Publish</Button>
-          <Button variant="subtle" icon-left="lucide-x">Create</Button>
-          <Button variant="subtle" icon-left="lucide-plus">Send</Button>
-          <Button variant="subtle" theme="red" icon-left="lucide-send">
-            Delete
-          </Button>
-        </div>
-      </template>
-    </Guideline>
-
-    <!-- 4. Consistent sizes in a group -->
+    <!-- 3. Consistent sizes in a group -->
     <Guideline
       layout="stack"
       caption="Keep button sizes consistent within a group."
