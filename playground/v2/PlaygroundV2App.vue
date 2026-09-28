@@ -450,7 +450,6 @@ const OUTLINE_TITLES: Record<string, string> = {
   list: 'List types',
   popover: 'Popover types',
   cards: 'Card types',
-  notification: 'Notification types',
 }
 const outlineTitle = computed(
   () => OUTLINE_TITLES[page.value] ?? 'On this page',
