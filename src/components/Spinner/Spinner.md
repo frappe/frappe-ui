@@ -28,6 +28,10 @@ label while it loads.
 
 <ComponentPreview name="Spinner-InContext" />
 
+## Usage Guidelines
+
+<ComponentPreview name="Spinner-Guidelines" hide-code />
+
 ## Behavior
 
 ### Size
