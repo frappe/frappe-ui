@@ -19,6 +19,7 @@ import PopoverPage from './popover/PopoverPage.vue'
 import CardsPage from './cards/CardsPage.vue'
 import ToastPage from './toast/ToastPage.vue'
 import NotificationPage from './notification/NotificationPage.vue'
+import KanbanPage from './kanban/KanbanPage.vue'
 // Figma 35185:59381 — the app's own mark, in place of the Frappe logo
 import appLogo from './assets/app-logo.svg'
 import EIcon from '../espresso-sidebar/EIcon.vue'
@@ -47,6 +48,7 @@ import navNotification from './assets/nav/notification.svg?raw'
 import navPopover from './assets/nav/popover.svg?raw'
 import navSidebarHeader from './assets/nav/sidebar-header.svg?raw'
 import navToast from './assets/nav/toast.svg?raw'
+import navKanban from './assets/nav/kanban.svg?raw'
 import ApplicableCouponsModal from './modals/ApplicableCouponsModal.vue'
 import CallDetailsModal from './modals/CallDetailsModal.vue'
 import DeleteProjectModal from './modals/DeleteProjectModal.vue'
@@ -153,6 +155,7 @@ const pages = [
   'Cards',
   'Toast',
   'Notification',
+  'Kanban card',
 ].map((label) => ({ id: label.toLowerCase().replace(/\W+/g, '-'), label }))
 
 // The app tray down the far left, as a Frappe app shows it: this playground
@@ -191,6 +194,7 @@ const NAV_ICONS: Record<string, string> = {
   cards: navCards,
   toast: navToast,
   notification: navNotification,
+  'kanban-card': navKanban,
 }
 
 // Drives `<html data-theme>`, so every token on the page — and in the
@@ -451,6 +455,7 @@ const OUTLINE_TITLES: Record<string, string> = {
   list: 'List types',
   popover: 'Popover types',
   cards: 'Card types',
+  'kanban-card': 'Kanban',
 }
 const outlineTitle = computed(
   () => OUTLINE_TITLES[page.value] ?? 'On this page',
@@ -1021,6 +1026,7 @@ const outlineTitle = computed(
               <CardsPage v-else-if="page === 'cards'" />
               <ToastPage v-else-if="page === 'toast'" />
               <NotificationPage v-else-if="page === 'notification'" />
+              <KanbanPage v-else-if="page === 'kanban-card'" />
 
               <div
                 v-else
