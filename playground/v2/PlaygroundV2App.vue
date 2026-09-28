@@ -716,6 +716,43 @@ const outlineTitle = computed(
             </div>
             <UpcomingEvents v-else />
           </template>
+          <!-- CRM (31304:43455): the file's alert card above the Collapse
+               row — p 12, r12, on elevation-1 with its hairline and sm
+               shadow; a 16px status glyph · 6px · the 13/15 medium title,
+               4px over the 12/19 step count, 12px over a 28px subtle
+               button. The file's stroke sits inside its 12px, so 11px of
+               padding plus the hairline keeps the card 204 × 103. On the
+               rail it is the status glyph alone. -->
+          <template v-else-if="appScenario.id === 'crm'">
+            <button
+              v-if="patternCollapsed"
+              type="button"
+              class="sb-action"
+              aria-label="Getting started"
+            >
+              <EIcon name="status" class="size-4" />
+            </button>
+            <div
+              v-else
+              class="flex flex-col gap-1 rounded-6 border border-outline-elevation-1 bg-surface-elevation-1 p-[11px] shadow-sm"
+            >
+              <p class="flex items-center gap-1.5">
+                <EIcon name="status" class="size-4 shrink-0 text-ink-gray-8" />
+                <span class="text-sm-medium leading-[15px] text-ink-gray-8"
+                  >Getting started</span
+                >
+              </p>
+              <div class="flex flex-col gap-3">
+                <p class="text-xs leading-[19px] text-ink-gray-6">0/9 steps</p>
+                <button
+                  type="button"
+                  class="h-7 rounded-4 bg-surface-gray-2 text-base text-ink-gray-7 transition-colors hover:bg-surface-gray-3"
+                >
+                  Start now
+                </button>
+              </div>
+            </div>
+          </template>
           <MiniCalendar
             v-else-if="appScenario.id === 'calendar' && !patternCollapsed"
           />
