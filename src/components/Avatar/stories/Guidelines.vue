@@ -10,6 +10,10 @@ const faces = {
   mia: avatarFor('mia@example.com'),
 }
 
+// Card 1: the same person shown twice, with their name underneath.
+const personCell = 'flex flex-col items-center gap-2'
+const personName = 'text-sm text-ink-gray-5'
+
 // A ring in the page color cuts each stacked avatar out of the one under it.
 const cutout = { boxShadow: '0 0 0 2px var(--surface-base)' }
 // The "don't" side shows the mistake: a visible ring around a standalone avatar.
@@ -18,18 +22,27 @@ const standaloneRing = { boxShadow: '0 0 0 2px var(--surface-gray-3)' }
 
 <template>
   <div class="flex flex-col gap-8">
-    <!-- 1. Consistent color per person -->
+    <!-- 1. Consistent color per person. Each pair is the same person shown
+         twice, labeled with their name so it reads as one comparison. -->
     <Guideline caption="Use the same color for a person across apps.">
       <template #do>
-        <div class="flex items-center gap-10">
-          <Avatar label="Nabin" theme="gray" size="2xl" />
-          <Avatar label="Nabin" theme="gray" size="2xl" />
+        <div class="flex items-start gap-5">
+          <div v-for="i in 2" :key="i" :class="personCell">
+            <Avatar label="Nabin" theme="violet" size="2xl" />
+            <span :class="personName">Nabin Hait</span>
+          </div>
         </div>
       </template>
       <template #dont>
-        <div class="flex items-center gap-10">
-          <Avatar label="Nabin" theme="gray" size="2xl" />
-          <Avatar label="Nabin" theme="green" size="2xl" />
+        <div class="flex items-start gap-5">
+          <div v-for="i in 2" :key="i" :class="personCell">
+            <Avatar
+              label="Nabin"
+              :theme="i === 1 ? 'violet' : 'green'"
+              size="2xl"
+            />
+            <span :class="personName">Nabin Hait</span>
+          </div>
         </div>
       </template>
     </Guideline>

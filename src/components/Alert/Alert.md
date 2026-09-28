@@ -49,10 +49,9 @@ formatted text.
 
 <div class="guideline-text">
 
-- Do state the reason for the alert and what to do next in one short sentence.
-- Do add an action button when there's an obvious next step.
-- Don't use an alert to confirm a finished action, like saving. Use a toast.
-  Use an alert for an ongoing issue, like a failed payment.
+- State the reason for the alert and what to do next in a short sentence.
+- Include a direct action button when there's an obvious next step.
+- Use a toast to confirm a finished action, like saving. Use an alert for an ongoing issue, like a failed payment.
 - Don't make an alert dismissible while the problem it reports still exists.
 
 </div>

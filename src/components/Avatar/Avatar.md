@@ -44,6 +44,14 @@ A `size-*` class sets a size beyond the largest `size` step.
 
 <ComponentPreview name="Avatar-Guidelines" hide-code />
 
+<div class="guideline-text">
+
+- Use the same color for a person across apps.
+- Use the squared variant to represent an organisation or workspace.
+- Don't add a ring border to a standalone avatar.
+
+</div>
+
 ## Behavior
 
 ### Fallback
