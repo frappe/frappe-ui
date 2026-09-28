@@ -214,7 +214,7 @@ const laid = computed(() =>
 .kanban-column.is-over::before {
   opacity: 1;
 }
-/* the card in the air: tilted a touch, under the lg shadow */
+/* the card in the air: tilted a touch, under the md shadow */
 .kanban-ghost {
   position: fixed;
   top: -1000px;
@@ -223,7 +223,7 @@ const laid = computed(() =>
   opacity: 1 !important;
 }
 .kanban-ghost article {
-  @apply shadow-lg;
+  @apply shadow-md;
 }
 .kanban-glyph {
   @apply flex size-4 items-center justify-center rounded-2 transition-colors hover:text-ink-gray-9;
