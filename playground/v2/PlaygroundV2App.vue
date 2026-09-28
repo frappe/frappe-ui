@@ -274,9 +274,9 @@ onMounted(() => {
 // underneath the breadcrumb.
 const patternCollapsed = ref(false)
 const patternTray = ref(true)
-// Off until the preview control asks for them: the stage opens with no bar
-// above it, on any page.
-const showHeader = ref(false)
+// The header is on from the start; the subheader waits for the preview
+// control. Off, nothing sits above the stage, on any page.
+const showHeader = ref(true)
 const headerType = ref(headerTypes[0].value)
 const showSubheader = ref(false)
 const subheaderType = ref(subheaderTypes[0].value)
