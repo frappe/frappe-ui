@@ -19,6 +19,10 @@ buttons beside it. A click anywhere on the row toggles the switch.
 
 <ComponentPreview name="Switch-Toolbar" />
 
+## Usage Guidelines
+
+<ComponentPreview name="Switch-Guidelines" hide-code />
+
 ## Behavior
 
 ### Icon
