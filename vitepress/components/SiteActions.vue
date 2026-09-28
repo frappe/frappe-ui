@@ -31,7 +31,7 @@ const themeIcon = computed(
     <Button
       v-if="githubUrl"
       variant="ghost"
-      :link="githubUrl"
+      :href="githubUrl"
       aria-label="GitHub repository"
     >
       <template #icon>
