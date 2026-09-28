@@ -114,9 +114,15 @@ const tabModel = computed({
   set: (id) => jumpTo(String(id)),
 })
 
+// Once the body has scrolled, a short fade at its top edge lets the emoji
+// slip under the search bar instead of being cut off by it.
+const scrolled = ref(false)
+
 // The active tab is the last section whose top has scrolled past.
 function onScroll() {
-  if (jumping || !body.value || results.value) return
+  if (!body.value) return
+  scrolled.value = body.value.scrollTop > 0
+  if (jumping || results.value) return
   const top = body.value.scrollTop + 16
   let current = sections.value[0]?.id ?? 'smileys'
   for (const s of sections.value) {
@@ -131,6 +137,7 @@ onMounted(async () => {
   await nextTick()
   const el = sectionEl('smileys')
   if (body.value && el) body.value.scrollTop = el.offsetTop - 8
+  scrolled.value = (body.value?.scrollTop ?? 0) > 0
   active.value = 'smileys'
 })
 </script>
@@ -175,6 +182,16 @@ onMounted(async () => {
       class="espresso-emoji-body relative h-[224px] overflow-y-auto p-2"
       @scroll.passive="onScroll"
     >
+      <!-- the fade: 16px stuck to the top edge, taking no room in the flow
+           (its margins cancel its height and the body's top padding). It
+           sticks 8px above the content box, i.e. at the body's own edge —
+           the scroller's padding is inside the sticky rectangle. -->
+      <div
+        class="espresso-emoji-fade pointer-events-none sticky -top-2 z-10 -mx-2 -mb-2 -mt-2 h-4 transition-opacity duration-150"
+        :class="scrolled ? 'opacity-100' : 'opacity-0'"
+        aria-hidden="true"
+      />
+
       <!-- search results -->
       <template v-if="results">
         <div v-if="results.length" class="espresso-emoji-grid">
@@ -239,5 +256,12 @@ onMounted(async () => {
 }
 .espresso-emoji-body {
   scrollbar-width: thin;
+}
+.espresso-emoji-fade {
+  background: linear-gradient(
+    to bottom,
+    var(--surface-elevation-2),
+    transparent
+  );
 }
 </style>
