@@ -4,7 +4,7 @@
 //   tabs    a 34px row (pt 4 · pb 2) of 26 × 28 icon tabs, 4px apart, px 6,
 //           ruled beneath; the active one underlined in gray-900. They are
 //           frappe-ui's underline tabs, so the underline slides between them
-//   search  p 6, subtle sm input with a grid suffix
+//   search  p 6, subtle sm input
 //   body    p 8, 224px tall, scrolling: a section per tab, 28px emoji
 //           buttons 9 across and 2px apart under a 12px gray-500 label
 // Tabs jump to their section and follow the scroll; search looks through
@@ -170,11 +170,7 @@ onMounted(async () => {
     </div>
 
     <div class="p-1.5">
-      <TextInput v-model="query" size="sm" placeholder="Search by keyword">
-        <template #suffix>
-          <span class="lucide-layout-grid size-4 text-ink-gray-5" />
-        </template>
-      </TextInput>
+      <TextInput v-model="query" size="sm" placeholder="Search by keyword" />
     </div>
 
     <div
