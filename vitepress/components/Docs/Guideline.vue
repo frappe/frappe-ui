@@ -40,30 +40,31 @@ withDefaults(
           <div class="flex min-h-10 items-center">
             <slot name="do" />
           </div>
-          <SuccessSolidIcon class="size-6 shrink-0 text-ink-green-5" />
+          <SuccessSolidIcon class="size-5 shrink-0 text-ink-green-5" />
         </div>
 
         <div v-if="$slots.dont" class="flex flex-col items-start gap-4">
           <div class="flex min-h-10 items-center">
             <slot name="dont" />
           </div>
-          <CloseCircleSolidIcon class="size-6 shrink-0 text-ink-red-5" />
+          <CloseCircleSolidIcon class="size-5 shrink-0 text-ink-red-5" />
         </div>
       </div>
 
-      <!-- Wide examples: do above, don't below, mark to the left. The offset
-           lines the mark's centre up with the example's title row. -->
-      <div v-else class="mx-auto flex w-full max-w-[480px] flex-col gap-6">
-        <div class="flex items-start gap-3">
-          <SuccessSolidIcon class="mt-2 size-6 shrink-0 text-ink-green-5" />
-          <div class="min-w-0 flex-1">
+      <!-- Wide examples: do above, don't below. The mark sits next to the
+           example and the whole pair is centered, so the mark stays close to
+           its story (marks needn't line up across rows). -->
+      <div v-else class="mx-auto flex w-full max-w-[560px] flex-col gap-5">
+        <div class="flex items-center justify-center gap-3">
+          <SuccessSolidIcon class="size-5 shrink-0 text-ink-green-5" />
+          <div class="min-w-0">
             <slot name="do" />
           </div>
         </div>
 
-        <div class="flex items-start gap-3">
-          <CloseCircleSolidIcon class="mt-2 size-6 shrink-0 text-ink-red-5" />
-          <div class="min-w-0 flex-1">
+        <div class="flex items-center justify-center gap-3">
+          <CloseCircleSolidIcon class="size-5 shrink-0 text-ink-red-5" />
+          <div class="min-w-0">
             <slot name="dont" />
           </div>
         </div>
