@@ -334,11 +334,13 @@ const subheaderOptions = subheaderTypes.map(({ value, label }) => ({
 }))
 
 // the header cell, full width or as the 28px logo on the rail
+// Collapsed, the cell is the file's 28 × 41 header slot (34359:136305):
+// the logo under 6px and over 7px, 14px above the menu.
 const cellClass = computed(() => [
-  'flex h-8 shrink-0 items-center rounded-4 transition-colors hover:bg-surface-gray-2 data-[state=open]:bg-surface-gray-2',
+  'flex shrink-0 items-center rounded-4 transition-colors hover:bg-surface-gray-2 data-[state=open]:bg-surface-gray-2',
   patternCollapsed.value
-    ? 'w-7 justify-center self-center'
-    : 'w-full gap-2 py-0.5 pl-2 pr-1',
+    ? 'h-[41px] w-7 justify-center self-center pb-[7px] pt-1.5'
+    : 'h-8 w-full gap-2 py-0.5 pl-2 pr-1',
 ])
 
 const current = computed(() => pages.find((p) => p.id === page.value)!)
@@ -559,7 +561,8 @@ const outlineTitle = computed(
       </div>
 
       <div
-        class="v2-scroll flex h-full shrink-0 flex-col gap-2 overflow-y-auto p-2 pb-2.5 transition-[width] duration-300 ease-out"
+        class="v2-scroll flex h-full shrink-0 flex-col overflow-y-auto p-2 pb-2.5 transition-[width] duration-300 ease-out"
+        :class="patternCollapsed ? 'gap-3.5' : 'gap-2'"
         :style="{ width: patternCollapsed ? '44px' : '220px' }"
       >
         <!-- header cell (204 × 32, pl 8 · py 2): the workspace, and what
@@ -707,13 +710,34 @@ const outlineTitle = computed(
              those stack under the calendar's own icon. -->
         <div
           v-if="appScenario"
-          class="mt-auto flex flex-col gap-2 pt-4"
-          :class="patternCollapsed && 'items-center'"
+          class="mt-auto flex flex-col pt-4"
+          :class="patternCollapsed ? 'items-center gap-1' : 'gap-2'"
         >
+          <!-- Default (34359:136305), on the rail: the status cell raised
+               like an active row, storage, what's new and help, then the
+               expand, 4px apart -->
+          <template v-if="appScenario.id === 'default' && patternCollapsed">
+            <button
+              type="button"
+              class="sb-action sb-action-raised"
+              aria-label="Getting started"
+            >
+              <EIcon name="status" class="size-4" />
+            </button>
+            <button type="button" class="sb-action" aria-label="Storage">
+              <span class="nav-icon size-4" v-html="sbCloud" />
+            </button>
+            <button type="button" class="sb-action" aria-label="What's new">
+              <span class="nav-icon size-4" v-html="sbZap" />
+            </button>
+            <button type="button" class="sb-action" aria-label="Help">
+              <span class="nav-icon size-4" v-html="sbHelp" />
+            </button>
+          </template>
           <template v-if="appScenario.id === 'mail'">
             <div
               v-if="patternCollapsed"
-              class="flex flex-col gap-1.5 [--row-hit-gap:3px]"
+              class="flex flex-col gap-1 [--row-hit-gap:2px]"
             >
               <SidebarRow
                 v-for="event in mailEvents"
@@ -738,7 +762,7 @@ const outlineTitle = computed(
             <button
               v-if="patternCollapsed"
               type="button"
-              class="sb-action"
+              class="sb-action sb-action-raised"
               aria-label="Getting started"
             >
               <EIcon name="status" class="size-4" />
@@ -828,6 +852,9 @@ const outlineTitle = computed(
           v-else-if="patternCollapsed"
           class="mt-auto flex flex-col items-center gap-1 pt-4"
         >
+          <button type="button" class="sb-action" aria-label="Storage">
+            <span class="nav-icon size-4" v-html="sbCloud" />
+          </button>
           <button type="button" class="sb-action" aria-label="What's new">
             <span class="nav-icon size-4" v-html="sbZap" />
           </button>
@@ -1104,6 +1131,10 @@ const outlineTitle = computed(
 /* the quick actions at the foot of the sidebar */
 .sb-action {
   @apply flex size-7 items-center justify-center rounded-4 text-ink-gray-6 transition-colors hover:bg-surface-gray-2 hover:text-ink-gray-8;
+}
+/* a card folded onto the rail sits raised, as an active row does */
+.sb-action-raised {
+  @apply bg-surface-elevation-2 shadow-sm hover:bg-surface-elevation-2;
 }
 
 /* an app in the tray: every logo at full strength, the app in front marked

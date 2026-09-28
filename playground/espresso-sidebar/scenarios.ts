@@ -72,8 +72,7 @@ export const scenarios: Scenario[] = [
           item('Settings', 'settings'),
         ],
       },
-      listItems(),
-      listItems(),
+      // the list groups fold away on the rail (34359:136305)
     ],
   },
   {
