@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Switch, RadioGroup, Radio } from 'frappe-ui'
+import { Switch, RadioGroup, Radio, Divider } from 'frappe-ui'
 
 const stock = ['Disable', 'Allow alternative', 'Maintain stock']
 const delivery = ['Home delivery', 'Store pickup', 'Locker pickup']
@@ -19,7 +19,7 @@ const annot =
         <div class="flex flex-col items-center py-4">
           <!-- top annotation -->
           <span :class="annot">Not a touch target</span>
-          <div class="h-7 w-px bg-outline-gray-3" />
+          <Divider orientation="vertical" class="h-7" />
 
           <!-- the settings cell -->
           <div
@@ -39,11 +39,11 @@ const annot =
           <!-- bottom annotations: label (not a target) and switch (target) -->
           <div class="relative h-16 w-[460px]">
             <div class="absolute left-9 flex flex-col items-center">
-              <div class="h-7 w-px bg-outline-gray-3" />
+              <Divider orientation="vertical" class="h-7" />
               <span :class="[annot, 'mt-1']">Not a touch target</span>
             </div>
             <div class="absolute right-7 flex flex-col items-center">
-              <div class="h-7 w-px bg-outline-gray-3" />
+              <Divider orientation="vertical" class="h-7" />
               <span :class="[annot, 'mt-1']">Touch target</span>
             </div>
           </div>
@@ -69,7 +69,7 @@ const annot =
         </div>
       </template>
       <template #dont>
-        <div class="flex flex-col gap-3">
+        <div class="flex w-64 flex-col gap-3">
           <div v-for="s in stock" :key="s" class="flex items-center gap-2">
             <span class="text-base text-ink-gray-8">{{ s }}</span>
             <Switch :model-value="false" />
