@@ -16,7 +16,6 @@
 // Import commands.js using ES2015 syntax:
 import './commands'
 import './setup'
-import '@cypress/code-coverage/support'
 
 import { mount } from 'cypress/vue'
 
@@ -36,3 +35,17 @@ Cypress.Commands.add('mount', mount)
 
 // Example use:
 // cy.mount(MyComponent)
+
+// With COVERAGE=true, vite-plugin-istanbul instruments src/ into
+// window.__coverage__. All tests in a spec share one window, so the counters
+// cover the whole spec. Save them once, after the last test.
+after(() => {
+  const { __coverage__: coverage } = window as { __coverage__?: object }
+  if (coverage) {
+    cy.task(
+      'saveCoverage',
+      { spec: Cypress.spec.relative, coverage },
+      { log: false },
+    )
+  }
+})

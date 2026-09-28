@@ -105,7 +105,7 @@ Two things are:
 - **Prose and examples.** The text around the table, and the playground and story code, has
   to describe what the component actually does now.
 
-Table freshness is CI's job, not the sweeper's. The **API Tables** job in
+Table freshness is CI's job, not the sweeper's. The **API Tables** step of the **Checks** job in
 `.github/workflows/tests.yml` runs `yarn docs:check` (`propsgen.ts --check`) on every pull
 request and on pushes to `main`. It compares each committed `.api.md` against a fresh run,
 row by row, keyed by name — row order is not compared — and fails the build on any
