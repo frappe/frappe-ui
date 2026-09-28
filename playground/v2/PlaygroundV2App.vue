@@ -335,7 +335,8 @@ const subheaderOptions = subheaderTypes.map(({ value, label }) => ({
 
 // the header cell, full width or as the 28px logo on the rail
 // Collapsed, the cell is the file's 28 × 41 header slot (34359:136305):
-// the logo under 6px and over 7px, 14px above the menu.
+// 14px above the menu, empty while the tray carries the logo, the logo
+// under 6px and over 7px otherwise.
 const cellClass = computed(() => [
   'flex shrink-0 items-center rounded-4 transition-colors hover:bg-surface-gray-2 data-[state=open]:bg-surface-gray-2',
   patternCollapsed.value
@@ -576,13 +577,16 @@ const outlineTitle = computed(
               :class="cellClass"
               :aria-label="patternCollapsed ? 'Preview control' : undefined"
             >
+              <!-- with the tray on, the logo is the tray's: the file's
+                   collapsed header slot is empty (34359:136305), and the
+                   cell is the control's trigger alone -->
               <img
-                v-if="patternCollapsed"
+                v-if="patternCollapsed && !patternTray"
                 :src="appLogo"
                 alt=""
                 class="size-7 shrink-0"
               />
-              <template v-else>
+              <template v-else-if="!patternCollapsed">
                 <span
                   class="min-w-0 flex-1 truncate text-start text-base-medium text-ink-gray-9"
                 >
