@@ -136,7 +136,7 @@
           <div v-else-if="scenario.id === 'mail'" class="flex flex-col gap-2">
             <div class="flex flex-col gap-1.5 [--row-hit-gap:3px]">
               <SidebarRow
-                v-for="event in events"
+                v-for="event in mailEvents"
                 :key="event.color"
                 :row="{
                   type: 'item',
@@ -388,32 +388,7 @@
 
           <!-- Footer: Mail -->
           <div v-else-if="scenario.id === 'mail'" class="flex flex-col gap-2">
-            <div class="flex flex-col gap-1.5 [--row-hit-gap:3px]">
-              <SidebarRow
-                :row="{ type: 'section', label: 'Upcoming events', hint: '3' }"
-              />
-              <!-- Figma draws the first card in its hover state; here every
-                   card rests flat and lifts with that shadow on hover. -->
-              <button
-                v-for="event in events"
-                :key="event.color"
-                type="button"
-                class="flex w-full items-center gap-1.5 rounded-4 bg-surface-elevation-1 p-2 text-left outline-none transition-shadow hover:shadow-sm focus-visible:focus-ring"
-              >
-                <span
-                  class="h-[33px] w-0.5 shrink-0 rounded-4"
-                  :style="{ backgroundColor: event.color }"
-                />
-                <div class="flex min-w-0 flex-1 flex-col gap-1">
-                  <span class="text-xs-medium text-ink-gray-5">{{
-                    event.time
-                  }}</span>
-                  <span class="truncate text-sm-medium text-ink-gray-7">
-                    {{ event.title }}
-                  </span>
-                </div>
-              </button>
-            </div>
+            <UpcomingEvents />
             <CollapseButton @click="collapsed = true" />
           </div>
 
@@ -422,68 +397,7 @@
             v-else-if="scenario.id === 'calendar'"
             class="flex flex-col gap-2"
           >
-            <div class="flex h-[200px] flex-col gap-1.5 p-2">
-              <div class="flex h-6 items-center justify-between">
-                <Button
-                  variant="ghost"
-                  size="xs"
-                  class="!gap-0.5 !rounded-4 !text-sm-medium !text-ink-gray-7"
-                >
-                  June 2023
-                </Button>
-                <div class="flex">
-                  <Button
-                    v-for="icon in pickerIcons"
-                    :key="icon.name"
-                    variant="ghost"
-                    size="xs"
-                    class="!w-[22px] !rounded-4"
-                    :aria-label="icon.label"
-                  >
-                    <template #icon>
-                      <EIcon
-                        :name="icon.name"
-                        class="size-3.5 text-ink-gray-7"
-                      />
-                    </template>
-                  </Button>
-                </div>
-              </div>
-              <div class="flex flex-1 flex-col gap-0.5">
-                <div class="flex h-6 items-center justify-between">
-                  <span
-                    v-for="(day, i) in weekDays"
-                    :key="i"
-                    class="grid size-6 place-items-center text-xs text-ink-gray-4"
-                  >
-                    {{ day }}
-                  </span>
-                </div>
-                <div class="flex cursor-pointer flex-col gap-0.5">
-                  <div
-                    v-for="(week, w) in weeks"
-                    :key="w"
-                    class="flex h-6 items-center justify-between"
-                  >
-                    <button
-                      v-for="date in week"
-                      :key="date.key"
-                      type="button"
-                      class="grid size-6 place-items-center rounded-2 text-xs"
-                      :class="
-                        date.selected
-                          ? 'bg-surface-gray-9 text-ink-base'
-                          : date.muted
-                            ? 'text-ink-gray-4'
-                            : 'text-ink-gray-7'
-                      "
-                    >
-                      {{ date.day }}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <MiniCalendar />
             <div class="flex h-7 items-center justify-between">
               <div class="flex cursor-pointer items-center gap-2">
                 <Button variant="ghost" size="sm" aria-label="Shortcuts">
@@ -522,10 +436,12 @@
 import { computed, defineComponent, h, ref } from 'vue'
 import { Button, Dropdown, Progress, Sidebar, SidebarCard } from '../../src'
 import EIcon from './EIcon.vue'
+import MiniCalendar from './MiniCalendar.vue'
 import SidebarMenu from './SidebarMenu.vue'
 import SidebarRow from './SidebarRow.vue'
+import UpcomingEvents from './UpcomingEvents.vue'
 import railAvatar from './avatars/avatar-lg-status.png'
-import { scenarios, type ScenarioId } from './scenarios'
+import { mailEvents, scenarios, type ScenarioId } from './scenarios'
 import type { ItemRow, Row } from './types'
 
 const props = defineProps<{
@@ -659,38 +575,6 @@ const cardButtonClass = '!text-ink-gray-7'
 
 // 54px of the 204px track.
 const storagePercent = (54 / 204) * 100
-
-const events = [
-  { time: '10:00 - 11:30AM', title: 'Branding changes', color: '#077ddf' },
-  { time: '2:00 - 4:30PM', title: 'Website design meeting', color: '#d35a09' },
-  {
-    time: '4:00 - 4:30PM',
-    title: 'Feedback loops within the design process',
-    color: '#bb6f0c',
-  },
-]
-
-const pickerIcons = [
-  { name: 'small-left-chevron-14', label: 'Previous month' },
-  { name: 'tomorrow-14', label: 'Today' },
-  { name: 'small-right-chevron-14', label: 'Next month' },
-]
-
-const weekDays = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
-
-// June 2023, Monday-first, with the 9th selected.
-const weeks = (() => {
-  const cells = [
-    ...[29, 30, 31].map((day) => ({ day, muted: true })),
-    ...Array.from({ length: 30 }, (_, i) => ({ day: i + 1, muted: false })),
-    ...[1, 2].map((day) => ({ day, muted: true })),
-  ].map((c, i) => ({
-    ...c,
-    key: i,
-    selected: !c.muted && c.day === 9,
-  }))
-  return Array.from({ length: 5 }, (_, w) => cells.slice(w * 7, w * 7 + 7))
-})()
 
 const CollapseButton = defineComponent({
   emits: ['click'],

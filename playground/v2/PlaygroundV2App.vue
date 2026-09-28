@@ -27,9 +27,15 @@ import ToastPage from './toast/ToastPage.vue'
 // Figma 35185:59381 — the app's own mark, in place of the Frappe logo
 import appLogo from './assets/app-logo.svg'
 import EIcon from '../espresso-sidebar/EIcon.vue'
+import MiniCalendar from '../espresso-sidebar/MiniCalendar.vue'
 import SidebarMenu from '../espresso-sidebar/SidebarMenu.vue'
 import SidebarRow from '../espresso-sidebar/SidebarRow.vue'
-import { scenarios, type ScenarioId } from '../espresso-sidebar/scenarios'
+import UpcomingEvents from '../espresso-sidebar/UpcomingEvents.vue'
+import {
+  mailEvents,
+  scenarios,
+  type ScenarioId,
+} from '../espresso-sidebar/scenarios'
 import trayAvatar from '../espresso-sidebar/avatars/avatar-lg-status.png'
 // the sidebar's own icons, exported from the file
 import sbAlert from './assets/sidebar/alert-circle.svg?raw'
@@ -785,14 +791,77 @@ const crumbs = computed(() => [
           </button>
         </div>
 
-        <!-- an app's foot is a single Collapse row (35167:69809), which on
-             the rail is the button that opens it again -->
+        <!-- an app's foot. Most apps end in a single Collapse row
+             (35167:69809), which on the rail is the button that opens the
+             sidebar again. Mail (31304:62143) puts its upcoming events above
+             that row — on the rail, each event is its colour bar. Calendar
+             (31304:79302) ends in the month, then a row with what's new ·
+             help on the left and the collapse on the right; on the rail
+             those stack under the calendar's own icon. -->
         <div
           v-if="appScenario"
-          class="mt-auto pt-4"
-          :class="patternCollapsed && 'flex justify-center'"
+          class="mt-auto flex flex-col gap-2 pt-4"
+          :class="patternCollapsed && 'items-center'"
         >
+          <template v-if="appScenario.id === 'mail'">
+            <div
+              v-if="patternCollapsed"
+              class="flex flex-col gap-1.5 [--row-hit-gap:3px]"
+            >
+              <SidebarRow
+                v-for="event in mailEvents"
+                :key="event.title"
+                :row="{
+                  type: 'item',
+                  label: event.title,
+                  prefix: { marker: event.color },
+                  white: true,
+                }"
+                collapsed
+              />
+            </div>
+            <UpcomingEvents v-else />
+          </template>
+          <MiniCalendar
+            v-else-if="appScenario.id === 'calendar' && !patternCollapsed"
+          />
+
+          <div
+            v-if="appScenario.id === 'calendar'"
+            class="flex items-center"
+            :class="
+              patternCollapsed ? 'flex-col gap-1' : 'w-full justify-between'
+            "
+          >
+            <button
+              v-if="patternCollapsed"
+              type="button"
+              class="sb-action"
+              aria-label="Calendar"
+            >
+              <EIcon name="calender" class="size-4" />
+            </button>
+            <span class="flex gap-1" :class="patternCollapsed && 'flex-col'">
+              <button type="button" class="sb-action" aria-label="What's new">
+                <span class="nav-icon size-4" v-html="sbZap" />
+              </button>
+              <button type="button" class="sb-action" aria-label="Help">
+                <span class="nav-icon size-4" v-html="sbHelp" />
+              </button>
+            </span>
+            <button
+              type="button"
+              class="sb-action"
+              :aria-label="
+                patternCollapsed ? 'Expand sidebar' : 'Collapse sidebar'
+              "
+              @click="patternCollapsed = !patternCollapsed"
+            >
+              <span class="nav-icon size-4" v-html="sbSidebarToggle" />
+            </button>
+          </div>
           <button
+            v-else
             type="button"
             class="flex h-7 items-center rounded-4 text-ink-gray-7 transition-colors hover:bg-surface-gray-2"
             :class="

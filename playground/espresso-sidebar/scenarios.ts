@@ -335,3 +335,31 @@ for (const r of calendar.collapsedRows!) {
     checkboxIndex++
   }
 }
+
+// Mail's foot (31304:62143): the day's next events. Each bar is a surface
+// token, so it shifts with the theme like the file's variable-bound fills —
+// blue-7 · orange-7 · amber-8 are the pairs the file resolves to.
+export interface MailEvent {
+  time: string
+  title: string
+  /** CSS colour of the 2px bar; a token, so both themes come from it. */
+  color: string
+}
+
+export const mailEvents: MailEvent[] = [
+  {
+    time: '10:00 - 11:30AM',
+    title: 'Branding changes',
+    color: 'var(--surface-blue-7)',
+  },
+  {
+    time: '2:00 - 4:30PM',
+    title: 'Website design meeting',
+    color: 'var(--surface-orange-7)',
+  },
+  {
+    time: '4:00 - 4:30PM',
+    title: 'Feedback loops within the design process',
+    color: 'var(--surface-amber-8)',
+  },
+]
