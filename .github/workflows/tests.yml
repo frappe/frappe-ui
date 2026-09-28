@@ -14,6 +14,10 @@ jobs:
   checks:
     runs-on: ubuntu-latest
     name: Checks
+    # coverage-report reads this, so a failure in another check does not
+    # drop the Vitest coverage.
+    outputs:
+      vitest: ${{ steps.vitest.outcome }}
     steps:
       - uses: actions/checkout@v4
 
@@ -32,6 +36,7 @@ jobs:
       # Each check after this one runs even when an earlier one fails, so one
       # failure does not hide the others.
       - name: Run vitest with coverage
+        id: vitest
         run: yarn test:coverage
 
       - name: Upload Vitest coverage
@@ -150,7 +155,7 @@ jobs:
 
   coverage-report:
     needs: [checks, component-test]
-    if: always() && (needs.checks.result == 'success' || needs.component-test.result == 'success')
+    if: always() && (needs.checks.outputs.vitest == 'success' || needs.component-test.result == 'success')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
