@@ -152,7 +152,9 @@ const front = computed(() => shown.value[0])
 // and fanning out are one transition. Fanned: each below the last, 12px
 // apart, at its own size. Folded: the front card as it is, the rest behind
 // it at its size, each a step lower and a touch smaller, and past PEEK
-// hidden.
+// hidden. They shrink from their bottom edge, so the step below the front
+// card stays a full step whatever the card's height — scaled from the top,
+// a tall card's shrink would swallow it.
 function slotStyle(item: Shown, i: number) {
   if (fanned.value) {
     let y = 0
@@ -274,7 +276,7 @@ onUnmounted(() => shown.value.forEach((s) => clearTimeout(s.timer)))
         :style="{ zIndex: 100 - i }"
       >
         <div
-          class="v2-notif-slot origin-top"
+          class="v2-notif-slot origin-bottom"
           :class="{ 'is-behind': !fanned && i > 0 }"
           :style="slotStyle(item, i)"
           @click="tapped = !fanned"
