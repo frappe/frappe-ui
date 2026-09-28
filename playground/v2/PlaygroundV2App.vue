@@ -18,6 +18,7 @@ import ListPage from './list/ListPage.vue'
 import PopoverPage from './popover/PopoverPage.vue'
 import CardsPage from './cards/CardsPage.vue'
 import ToastPage from './toast/ToastPage.vue'
+import NotificationPage from './notification/NotificationPage.vue'
 // Figma 35185:59381 — the app's own mark, in place of the Frappe logo
 import appLogo from './assets/app-logo.svg'
 import EIcon from '../espresso-sidebar/EIcon.vue'
@@ -43,6 +44,7 @@ import navChevron from './assets/nav/chevron.svg?raw'
 import navCards from './assets/nav/cards.svg?raw'
 import navList from './assets/nav/list.svg?raw'
 import navModal from './assets/nav/modal.svg?raw'
+import navNotification from './assets/nav/notification.svg?raw'
 import navPopover from './assets/nav/popover.svg?raw'
 import navSidebarHeader from './assets/nav/sidebar-header.svg?raw'
 import navToast from './assets/nav/toast.svg?raw'
@@ -151,6 +153,7 @@ const pages = [
   'Popover',
   'Cards',
   'Toast',
+  'Notification',
 ].map((label) => ({ id: label.toLowerCase().replace(/\W+/g, '-'), label }))
 
 // The app tray down the far left, as a Frappe app shows it: this playground
@@ -188,6 +191,7 @@ const NAV_ICONS: Record<string, string> = {
   popover: navPopover,
   cards: navCards,
   toast: navToast,
+  notification: navNotification,
 }
 
 // Drives `<html data-theme>`, so every token on the page — and in the
@@ -446,6 +450,7 @@ const OUTLINE_TITLES: Record<string, string> = {
   list: 'List types',
   popover: 'Popover types',
   cards: 'Card types',
+  notification: 'Notification types',
 }
 const outlineTitle = computed(
   () => OUTLINE_TITLES[page.value] ?? 'On this page',
@@ -963,6 +968,7 @@ const outlineTitle = computed(
               <PopoverPage v-else-if="page === 'popover'" />
               <CardsPage v-else-if="page === 'cards'" />
               <ToastPage v-else-if="page === 'toast'" />
+              <NotificationPage v-else-if="page === 'notification'" />
 
               <div
                 v-else
