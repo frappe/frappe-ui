@@ -455,7 +455,6 @@ const OUTLINE_TITLES: Record<string, string> = {
   list: 'List types',
   popover: 'Popover types',
   cards: 'Card types',
-  'kanban-card': 'Kanban',
 }
 const outlineTitle = computed(
   () => OUTLINE_TITLES[page.value] ?? 'On this page',
