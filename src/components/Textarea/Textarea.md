@@ -21,6 +21,10 @@ place.
 
 <ComponentPreview name="Textarea-Bio" />
 
+## Usage Guidelines
+
+<ComponentPreview name="Textarea-Guidelines" hide-code />
+
 ## Behavior
 
 ### Label, description and error
