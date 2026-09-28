@@ -429,6 +429,15 @@ onMounted(() => nextTick(scanSections))
 watch(page, () => setTimeout(scanSections, 260))
 onUnmounted(() => observer?.disconnect())
 
+// The file's alert card (31304:58510), which the trial card and CRM's
+// Getting started both are: elevation-1 under a hairline of 7% black (5.5%
+// white in dark, where the file keeps the same shadows), 12px radius, and
+// three shadow layers — 0 0.5 3 at 6%, 0 0 1 at 27%, an inner white 0 0.25
+// 1.5 at 8%. The stroke sits inside the file's 12px padding, so 11px plus
+// the hairline keeps the box at 204 wide with 180 inside.
+const alertCardClass =
+  'flex flex-col rounded-6 border border-[rgba(0,0,0,0.07)] bg-surface-elevation-1 p-[11px] shadow-[0_0.5px_3px_rgba(0,0,0,0.06),0_0_1px_rgba(0,0,0,0.27),inset_0_0.25px_1.5px_rgba(255,255,255,0.08)] dark:border-[rgba(255,255,255,0.055)]'
+
 // what the outline is a list of, per page
 const OUTLINE_TITLES: Record<string, string> = {
   modal: 'Modal sizes',
@@ -720,9 +729,7 @@ const outlineTitle = computed(
                row — p 12, r12, on elevation-1 with its hairline and sm
                shadow; a 16px status glyph · 6px · the 13/15 medium title,
                4px over the 12/19 step count, 12px over a 28px subtle
-               button. The file's stroke sits inside its 12px, so 11px of
-               padding plus the hairline keeps the card 204 × 103. On the
-               rail it is the status glyph alone. -->
+               button. On the rail it is the status glyph alone. -->
           <template v-else-if="appScenario.id === 'crm'">
             <button
               v-if="patternCollapsed"
@@ -732,10 +739,7 @@ const outlineTitle = computed(
             >
               <EIcon name="status" class="size-4" />
             </button>
-            <div
-              v-else
-              class="flex flex-col gap-1 rounded-6 border border-outline-elevation-1 bg-surface-elevation-1 p-[11px] shadow-sm"
-            >
+            <div v-else class="gap-1" :class="alertCardClass">
               <p class="flex items-center gap-1.5">
                 <EIcon name="status" class="size-4 shrink-0 text-ink-gray-8" />
                 <span class="text-sm-medium leading-[15px] text-ink-gray-8"
@@ -743,7 +747,9 @@ const outlineTitle = computed(
                 >
               </p>
               <div class="flex flex-col gap-3">
-                <p class="text-xs leading-[19px] text-ink-gray-6">0/9 steps</p>
+                <p class="text-xs leading-[19.2px] text-ink-gray-6">
+                  0/9 steps
+                </p>
                 <button
                   type="button"
                   class="h-7 rounded-4 bg-surface-gray-2 text-base text-ink-gray-7 transition-colors hover:bg-surface-gray-3"
@@ -837,15 +843,13 @@ const outlineTitle = computed(
         <!-- this playground's foot: the trial card, what storage is used,
              and the quick actions — 11px apart, pinned to the bottom -->
         <div v-else class="mt-auto flex flex-col gap-[11px] pt-4">
-          <div
-            class="flex flex-col gap-3.5 rounded-6 border border-outline-elevation-1 bg-surface-elevation-1 p-3 shadow-sm"
-          >
+          <div class="gap-3.5" :class="alertCardClass">
             <p class="flex items-start gap-1.5">
               <span
-                class="nav-icon size-4 shrink-0 text-ink-gray-9"
+                class="nav-icon size-4 shrink-0 text-ink-gray-8"
                 v-html="sbAlert"
               />
-              <span class="text-sm-medium text-ink-gray-9"
+              <span class="text-sm-medium leading-[15px] text-ink-gray-8"
                 >Your trial ends soon!</span
               >
             </p>
