@@ -33,7 +33,6 @@ import {
 } from '../espresso-sidebar/scenarios'
 import trayAvatar from '../espresso-sidebar/avatars/avatar-lg-status.png'
 // the sidebar's own icons, exported from the file
-import sbAlert from './assets/sidebar/alert-circle.svg?raw'
 import sbCloud from './assets/sidebar/cloud.svg?raw'
 import sbHelp from './assets/sidebar/help.svg?raw'
 import sbSettings from './assets/sidebar/settings.svg?raw'
@@ -433,8 +432,7 @@ onMounted(() => nextTick(scanSections))
 watch(page, () => setTimeout(scanSections, 260))
 onUnmounted(() => observer?.disconnect())
 
-// The file's alert card (31304:58510), which the trial card and CRM's
-// Getting started both are: elevation-1, 12px radius, p 12, and the file's
+// The file's alert card (31304:58510), which CRM's Getting started is: elevation-1, 12px radius, p 12, and the file's
 // `shadow/light/xs`. The file also lists a 7% black hairline inside the
 // edge, but its own raster shows that stroke folded into the shadow's
 // ring: edge for edge, the xs shadow alone lands on Figma's pixels, and a
@@ -846,32 +844,9 @@ const outlineTitle = computed(
           </button>
         </div>
 
-        <!-- this playground's foot: the trial card, what storage is used,
-             and the quick actions — 11px apart, pinned to the bottom -->
+        <!-- this playground's foot: what storage is used and the quick
+             actions — 11px apart, pinned to the bottom -->
         <div v-else class="mt-auto flex flex-col gap-[11px] pt-4">
-          <div class="gap-3.5" :class="alertCardClass">
-            <p class="flex items-start gap-1.5">
-              <span
-                class="nav-icon size-4 shrink-0 text-ink-gray-8"
-                v-html="sbAlert"
-              />
-              <span class="text-sm-medium leading-[15px] text-ink-gray-8"
-                >Your trial ends soon!</span
-              >
-            </p>
-            <div class="flex flex-col gap-3">
-              <p class="text-xs text-ink-gray-6">
-                Upgrade to keep enjoying features.
-              </p>
-              <button
-                type="button"
-                class="h-7 rounded-4 bg-surface-gray-2 text-base text-ink-gray-7 transition-colors hover:bg-surface-gray-3"
-              >
-                Update now
-              </button>
-            </div>
-          </div>
-
           <div class="flex flex-col gap-2">
             <span class="h-1 overflow-hidden rounded-full bg-surface-gray-3">
               <span
