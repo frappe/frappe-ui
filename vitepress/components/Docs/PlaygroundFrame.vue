@@ -80,7 +80,8 @@ function setNumber(name: string, raw: string) {
 
 const generatedCode = computed(() => props.code(values))
 
-const showCode = ref(false)
+// The playground opens with its code visible; the toggle still hides it.
+const showCode = ref(true)
 
 const highlighter = shallowRef<any>(null)
 let highlighterPromise: Promise<any> | null = null
@@ -132,26 +133,29 @@ function onCopy() {
 <template>
   <div class="not-prose">
     <div class="flex flex-col gap-1.5 rounded-[20px] bg-surface-gray-1 p-1.5">
-      <div class="flex flex-col gap-1.5 lg:flex-row lg:items-stretch">
-        <!-- Preview card -->
+      <!-- Preview and controls share one card, split by a subtle divider. -->
+      <div
+        class="play-card flex flex-col overflow-hidden rounded-[14px] bg-surface-base lg:flex-row lg:items-stretch"
+      >
+        <!-- Preview -->
         <div
-          class="play-card flex min-w-0 flex-1 items-center justify-center overflow-auto rounded-[14px] bg-surface-base p-8 scrollbar"
+          class="flex min-w-0 flex-1 items-center justify-center overflow-auto p-8 scrollbar"
           :style="{ minHeight: previewMinHeight }"
         >
           <slot name="preview" :values="values" />
         </div>
 
-        <!-- Controls card: label on the left, control on the right. -->
+        <!-- Controls: prop name on top, input below. -->
         <div
-          class="play-card flex flex-col gap-2 rounded-[14px] bg-surface-base p-3 lg:w-64"
+          class="flex flex-col gap-4 border-t border-outline-gray-1 p-3 lg:w-64 lg:border-l lg:border-t-0"
         >
           <div
             v-for="knob in rowKnobs"
             :key="knob.name"
-            class="flex items-center justify-between gap-3"
+            class="flex flex-col gap-1.5"
           >
             <span class="knob-label">{{ knob.name }}</span>
-            <div class="w-[136px] shrink-0">
+            <div class="w-full">
               <TextInput
                 v-if="knob.type === 'text'"
                 v-model="values[knob.name]"
@@ -174,12 +178,14 @@ function onCopy() {
                 v-else-if="knob.type === 'tabs' && fitsAsTabs(knob.options)"
                 v-model="values[knob.name]"
                 :options="knob.options"
+                class="w-full [&_button]:flex-1"
               />
               <Select
                 v-else-if="knob.type === 'tabs'"
                 v-model="values[knob.name]"
                 :aria-label="knob.name"
                 :options="knob.options"
+                class="w-full"
                 size="sm"
               />
             </div>
@@ -253,8 +259,10 @@ function onCopy() {
 
 <style scoped>
 .knob-label {
-  font-size: 14px;
-  text-transform: capitalize;
+  /* These are the component's props, so render them as prop names: monospace
+     and lowercase, not title-cased form labels. */
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
   color: var(--p-color-ink-gray-6, #525252);
 }
 </style>

@@ -88,7 +88,7 @@ withDefaults(
 
     <p
       v-if="caption || $slots.caption"
-      class="px-2 py-1.5 text-center text-base text-ink-gray-7"
+      class="mx-auto max-w-md text-balance px-2 py-1.5 text-center text-base text-ink-gray-7"
     >
       <slot name="caption">{{ caption }}</slot>
     </p>
