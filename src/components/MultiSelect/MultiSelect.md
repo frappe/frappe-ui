@@ -48,6 +48,10 @@ the default "2 selected".
 
 <ComponentPreview name="MultiSelect-Footer" />
 
+## Usage Guidelines
+
+<ComponentPreview name="MultiSelect-Guidelines" hide-code />
+
 ## Behavior
 
 ### Options
