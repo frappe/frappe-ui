@@ -3,11 +3,15 @@
 // type=list, size=sm, variant=outline, 31286:71010): 268 × 168, 16px
 // radius, the raised card surface behind a 1px outline-gray-1 hairline.
 // A 44px header (py 12 · px 14, ruled beneath) of the 20px org logo with
-// 5px corners · 8px · the 14/600 gray-800 name; then py 12 · px 16 rows
+// 5px corners · 8px · the 14 medium gray-800 name (the kanban screen's
+// weight; the card component's own is semibold); then py 12 · px 16 rows
 // 12px apart — a 16px gray-600 icon · 8px · the 14 gray-600 value — for the
-// date, the email, the people (a 16px avatar group, 2px overlap, each
-// ringed in the card's colour) and the phone. The icons are the file's own.
+// date, the email, the people (frappe-ui avatars, 16px, overlapping 2px,
+// each ringed in the card's colour) and the phone. The icons and the
+// photos are the file's own. The hairline sits inside the file's box, so
+// the paddings are a pixel short of its 14 and 16 and land on its x.
 import '../cards/listCard.css'
+import { Avatar } from '../../../src'
 import calendarIcon from '../assets/cards/icons/calendar.svg?raw'
 import callIcon from '../assets/cards/icons/call.svg?raw'
 import emailIcon from '../assets/cards/icons/email.svg?raw'
@@ -24,7 +28,11 @@ const logos = import.meta.glob<string>('../assets/kanban/logo-*.png', {
   eager: true,
 })
 const logo = (file: string) => logos[`../assets/kanban/${file}`]
-const AVATARS = [av1, av2, av3]
+const PEOPLE = [
+  { image: av1, label: 'Owner' },
+  { image: av2, label: 'Sales' },
+  { image: av3, label: 'Support' },
+]
 </script>
 
 <template>
@@ -33,7 +41,7 @@ const AVATARS = [av1, av2, av3]
     :aria-label="deal.org"
   >
     <header
-      class="-mt-px flex h-11 items-center gap-2 border-b border-outline-gray-1 px-3.5 py-3 dark:border-outline-gray-2"
+      class="-mt-px flex h-11 items-center gap-2 border-b border-outline-gray-1 px-[13px] py-3 dark:border-outline-gray-2"
     >
       <img
         :src="logo(deal.logo)"
@@ -41,12 +49,12 @@ const AVATARS = [av1, av2, av3]
         class="size-5 shrink-0 rounded-[5px] object-cover"
       />
       <p
-        class="flex h-4 min-w-0 items-center truncate text-base-semibold text-ink-gray-8"
+        class="flex h-4 min-w-0 items-center truncate text-base-medium text-ink-gray-8"
       >
         {{ deal.org }}
       </p>
     </header>
-    <div class="flex flex-col gap-3 px-4 py-3">
+    <div class="flex flex-col gap-3 px-[15px] py-3">
       <div class="flex h-4 items-center gap-2">
         <span class="size-4 shrink-0 text-ink-gray-6" v-html="calendarIcon" />
         <p class="min-w-0 truncate text-base leading-4 text-ink-gray-6">
@@ -62,12 +70,14 @@ const AVATARS = [av1, av2, av3]
       <div class="flex h-4 items-center gap-2">
         <span class="size-4 shrink-0 text-ink-gray-6" v-html="userIcon" />
         <span class="flex" :aria-label="deal.agent" role="img">
-          <img
-            v-for="(a, j) in AVATARS"
+          <Avatar
+            v-for="(person, j) in PEOPLE"
             :key="j"
-            :src="a"
-            alt=""
-            class="size-4 rounded-full shadow-[0_0_0_2px_var(--card-surface)]"
+            :image="person.image"
+            :label="person.label"
+            size="xs"
+            shape="circle"
+            class="ring-2 ring-[--card-surface]"
             :class="j > 0 ? '-ml-0.5' : ''"
           />
         </span>
