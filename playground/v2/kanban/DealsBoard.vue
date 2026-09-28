@@ -3,8 +3,8 @@
 // deals-board view, 11527:137169): five 284px columns side by side, each
 // padded 8 with 16px corners — a 28px head row, 6px in: the stage glyph in
 // the stage's own colour · 8px · the 14 regular gray-700 stage, and on the
-// right the ⋯ and + glyphs · 10px · the 268 × 172 cards, 10px apart. The
-// column under the pointer — hovered, or with a card in the air over it —
+// right the ⋯ and + glyphs · 10px · the 268 × 172 cards, 10px apart,
+// scrolling inside the column's fixed 850px. The column under the pointer — hovered, or with a card in the air over it —
 // takes the file's wash, gray-50 at the head fading to the board by its
 // foot. The board is wider than the stage, so it scrolls sideways as a
 // board does.
@@ -136,7 +136,7 @@ const laid = computed(() =>
       <section
         v-for="(stage, ci) in columns"
         :key="stage.name"
-        class="kanban-column relative isolate flex w-[284px] shrink-0 flex-col gap-2.5 rounded-7 p-2"
+        class="kanban-column relative isolate flex h-[850px] w-[284px] shrink-0 flex-col gap-2.5 rounded-7 p-2"
         :class="over?.column === ci && 'is-over'"
         role="listitem"
         :aria-label="stage.name"
@@ -157,10 +157,10 @@ const laid = computed(() =>
             </button>
           </span>
         </header>
-        <!-- the list takes the drop across its whole height, an empty stage
-             included -->
+        <!-- the list scrolls inside the column's 850px, and takes the drop
+             across its whole height, an empty stage included -->
         <div
-          class="flex min-h-[168px] flex-1 flex-col gap-2.5"
+          class="v2-scroll flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto"
           @dragover="hover($event, ci)"
           @dragleave="leave"
           @drop="drop($event, ci)"

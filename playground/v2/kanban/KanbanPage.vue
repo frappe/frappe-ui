@@ -5,7 +5,8 @@ import DealsBoard from './DealsBoard.vue'
 </script>
 
 <template>
-  <div class="v2-scroll h-full overflow-y-auto px-5 py-20">
+  <!-- 20px around the 850px columns keeps the board inside the stage -->
+  <div class="v2-scroll h-full overflow-y-auto p-5">
     <DealsBoard />
   </div>
 </template>
