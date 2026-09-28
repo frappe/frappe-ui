@@ -21,6 +21,7 @@
 //       12px "80% off" · "This course includes:" (16/500) and five 16/400 rows
 //       30px apart · a full-width solid "Buy now" (32px)
 import { Badge, Button } from '../../../src'
+import './listCard.css'
 import alertIcon from '../assets/cards/icons/alert-circle.svg?raw'
 import bookIcon from '../assets/cards/icons/book.svg?raw'
 import calendarIcon from '../assets/cards/icons/calendar.svg?raw'
@@ -75,7 +76,7 @@ const xlRows = [
     <!-- sm -->
     <article class="espresso-list-card h-[168px] w-[268px] rounded-7">
       <header
-        class="flex h-11 items-center gap-2 border-b border-outline-gray-1 px-3.5 py-3 dark:border-outline-gray-2"
+        class="-mt-px flex h-11 items-center gap-2 border-b border-outline-gray-1 px-3.5 py-3 dark:border-outline-gray-2"
       >
         <img :src="logo" alt="" class="size-5 shrink-0 rounded-[5px]" />
         <p
@@ -262,16 +263,4 @@ const xlRows = [
   </div>
 </template>
 
-<style>
-/* Same shell as the default cards: a raised surface behind a hairline, one
-   step lower in dark. `--card-surface` follows it, so the avatar group in
-   the sm card punches the card's own colour. */
-.espresso-list-card {
-  --card-surface: var(--surface-elevation-2);
-  background-color: var(--card-surface);
-  @apply flex flex-col overflow-hidden border border-outline-gray-1;
-}
-[data-theme='dark'] .espresso-list-card {
-  --card-surface: var(--surface-elevation-1);
-}
-</style>
+<style></style>

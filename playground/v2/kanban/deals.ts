@@ -5,8 +5,8 @@ export interface Deal {
   org: string
   date: string
   email: string
-  /** the deal owner's initial, on a 16px gray disc */
   initial: string
+  /** the deal's owner, named for the people row */
   agent: string
   phone: string
   /** file name under assets/kanban */

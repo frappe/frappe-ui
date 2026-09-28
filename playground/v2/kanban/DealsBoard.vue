@@ -1,9 +1,10 @@
 <script setup lang="ts">
-// The board (deals-kanban, 31739:28633): five 268px columns side by side,
-// each padded 8 — a 16px head row (the stages glyph · 8px · the 14 medium
+// The board (deals-kanban, 31739:28633): five columns side by side, each
+// padded 8 — a 16px head row (the stages glyph · 8px · the 14 medium
 // gray-700 stage, and on the right the ⋯ and + glyphs 8px apart) · 14px ·
-// the cards, 10px apart. The board is wider than the stage, so it scrolls
-// sideways as a board does.
+// the cards, 10px apart. The cards are the file's list card at its own
+// 268px, so a column is 284 wide. The board is wider than the stage, so it
+// scrolls sideways as a board does.
 import EIcon from '../../espresso-sidebar/EIcon.vue'
 import DealCard from './DealCard.vue'
 import { STAGES } from './deals'
@@ -15,7 +16,7 @@ import { STAGES } from './deals'
       <section
         v-for="stage in STAGES"
         :key="stage.name"
-        class="flex w-[268px] shrink-0 flex-col gap-3.5 p-2"
+        class="flex w-[284px] shrink-0 flex-col gap-3.5 p-2"
         role="listitem"
         :aria-label="stage.name"
       >
