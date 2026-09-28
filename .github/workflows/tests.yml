@@ -60,6 +60,12 @@ jobs:
         if: ${{ !cancelled() }}
         run: yarn docs:check
 
+      # Catches errors that only show up in a production bundle, in files the
+      # specs never load.
+      - name: Build the library
+        if: ${{ !cancelled() }}
+        run: yarn build
+
       # The oldest Node the package supports
       - name: Setup Node.js for create-frappe-ui
         if: ${{ !cancelled() }}
