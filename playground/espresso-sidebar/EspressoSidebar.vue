@@ -570,7 +570,7 @@ const expandRow: ItemRow = {
 // black shadows vanish on a dark surface, so dark mode keeps the card's own
 // border and lifts it onto the first elevation.
 const cardClass =
-  '!border-0 !bg-surface-elevation-1 shadow-[inset_0_0.25px_1.5px_0_rgba(255,255,255,0.08),0_0_1px_0_rgba(0,0,0,0.27),0_0.5px_3px_0_rgba(0,0,0,0.06)] dark:!border dark:shadow-none'
+  '!border-0 !bg-surface-elevation-1 shadow-xs dark:!border dark:shadow-none'
 const cardButtonClass = '!text-ink-gray-7'
 
 // 54px of the 204px track.

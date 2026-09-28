@@ -431,12 +431,12 @@ onUnmounted(() => observer?.disconnect())
 
 // The file's alert card (31304:58510), which the trial card and CRM's
 // Getting started both are: elevation-1 under a hairline of 7% black (5.5%
-// white in dark, where the file keeps the same shadows), 12px radius, and
-// three shadow layers — 0 0.5 3 at 6%, 0 0 1 at 27%, an inner white 0 0.25
-// 1.5 at 8%. The stroke sits inside the file's 12px padding, so 11px plus
-// the hairline keeps the box at 204 wide with 180 inside.
+// white in dark), 12px radius, and the file's `shadow/light/xs` — kept in
+// dark too, as the file does. The stroke sits inside the file's 12px
+// padding, so 11px plus the hairline keeps the box at 204 wide with 180
+// inside.
 const alertCardClass =
-  'flex flex-col rounded-6 border border-[rgba(0,0,0,0.07)] bg-surface-elevation-1 p-[11px] shadow-[0_0.5px_3px_rgba(0,0,0,0.06),0_0_1px_rgba(0,0,0,0.27),inset_0_0.25px_1.5px_rgba(255,255,255,0.08)] dark:border-[rgba(255,255,255,0.055)]'
+  'flex flex-col rounded-6 border border-[rgba(0,0,0,0.07)] bg-surface-elevation-1 p-[11px] shadow-xs dark:border-[rgba(255,255,255,0.055)]'
 
 // what the outline is a list of, per page
 const OUTLINE_TITLES: Record<string, string> = {
