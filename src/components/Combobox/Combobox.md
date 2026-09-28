@@ -58,6 +58,10 @@ goes back to the trigger, inside the dialog.
 
 <ComponentPreview name="Combobox-InDialog" layout="stacked" />
 
+## Usage Guidelines
+
+<ComponentPreview name="Combobox-Guidelines" hide-code />
+
 ## Behavior
 
 ### Options
