@@ -158,9 +158,12 @@ const laid = computed(() =>
           </span>
         </header>
         <!-- the list scrolls inside the column's 850px, and takes the drop
-             across its whole height, an empty stage included -->
+             across its whole height, an empty stage included. A scrolling
+             box clips at its edges, so it reaches into the column's padding
+             and pads itself back — the cards sit where they did, and their
+             shadows have room on every side. -->
         <div
-          class="v2-scroll flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto"
+          class="v2-scroll -mx-2 -my-1 flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto px-2 py-1"
           @dragover="hover($event, ci)"
           @dragleave="leave"
           @drop="drop($event, ci)"
