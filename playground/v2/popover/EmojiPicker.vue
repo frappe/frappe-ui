@@ -2,14 +2,15 @@
 // Figma: espresso-2.0 › Popover › picker › grid sm (30867:37577). A 284px
 // emoji picker, 12px radius, lg shadow:
 //   tabs    a 34px row (pt 4 · pb 2) of 26 × 28 icon tabs, 4px apart, px 6,
-//           ruled beneath; the active one underlined in gray-900
+//           ruled beneath; the active one underlined in gray-900. They are
+//           frappe-ui's underline tabs, so the underline slides between them
 //   search  p 6, subtle sm input with a grid suffix
 //   body    p 8, 224px tall, scrolling: a section per tab, 28px emoji
 //           buttons 9 across and 2px apart under a 12px gray-500 label
 // Tabs jump to their section and follow the scroll; search looks through
 // every emoji by name. Picked emoji go to Recent (kept in this browser).
 import { computed, nextTick, onMounted, ref } from 'vue'
-import { TextInput } from '../../../src'
+import { TabList, Tabs, TabTrigger, TextInput } from '../../../src'
 import { SEARCHABLE, SECTIONS, type Emoji } from './emojiData'
 
 const emit = defineEmits<{ pick: [emoji: string] }>()
@@ -29,15 +30,24 @@ function loadRecent(): Emoji[] {
 }
 
 function remember(e: Emoji) {
-  recent.value = [e, ...recent.value.filter((r) => r.char !== e.char)].slice(0, 18)
+  recent.value = [e, ...recent.value.filter((r) => r.char !== e.char)].slice(
+    0,
+    18,
+  )
   try {
-    localStorage.setItem(RECENT_KEY, JSON.stringify(recent.value.map((r) => r.char)))
+    localStorage.setItem(
+      RECENT_KEY,
+      JSON.stringify(recent.value.map((r) => r.char)),
+    )
   } catch {
     // storage unavailable: Recent lasts for this visit only
   }
 }
 
-const TABS = [{ id: 'recent', label: 'Recent', icon: 'lucide-clock' }, ...SECTIONS]
+const TABS = [
+  { id: 'recent', label: 'Recent', icon: 'lucide-clock' },
+  ...SECTIONS,
+]
 
 const sections = computed(() => [
   ...(recent.value.length
@@ -68,7 +78,9 @@ const active = ref('smileys')
 let jumping = false
 
 function sectionEl(id: string) {
-  return body.value?.querySelector<HTMLElement>(`[data-section="${id}"]`) ?? null
+  return (
+    body.value?.querySelector<HTMLElement>(`[data-section="${id}"]`) ?? null
+  )
 }
 
 async function jumpTo(id: string) {
@@ -79,10 +91,28 @@ async function jumpTo(id: string) {
   }
   const el = sectionEl(id)
   if (!body.value) return
+  // The scroll follows the tab, not the other way round, until the smooth
+  // scroll has ended — a fixed timer let a long trip hand the tab back to
+  // the section it was passing, and the underline doubled back with it.
   jumping = true
+  const done = () => {
+    jumping = false
+    clearTimeout(fallback)
+  }
+  body.value.addEventListener('scrollend', done, { once: true })
+  // scrollend is not everywhere yet; a timer closes the gap
+  const fallback = setTimeout(done, 1200)
   body.value.scrollTo({ top: el ? el.offsetTop - 8 : 0, behavior: 'smooth' })
-  setTimeout(() => (jumping = false), 400)
 }
+
+// What the tab list selects: the active section. It stays selected while
+// search results are up — frappe-ui's Tabs never leave nothing selected, so
+// an empty model would fall back to Recent and jump there — and picking a
+// tab clears the search and goes to its section.
+const tabModel = computed({
+  get: () => active.value,
+  set: (id) => jumpTo(String(id)),
+})
 
 // The active tab is the last section whose top has scrolled past.
 function onScroll() {
@@ -112,30 +142,24 @@ onMounted(async () => {
     aria-label="Emoji picker"
   >
     <div class="pb-0.5 pt-1">
-      <div
-        class="flex h-7 items-center gap-1 border-b border-outline-gray-1 px-1.5 dark:border-outline-gray-2"
-        role="tablist"
-        aria-label="Emoji categories"
-      >
-        <button
-          v-for="t in TABS"
-          :key="t.id"
-          type="button"
-          role="tab"
-          :aria-selected="!results && active === t.id"
-          :aria-label="t.label"
-          :title="t.label"
-          class="-mb-px flex h-7 w-[26px] items-center justify-center border-b transition-colors"
-          :class="
-            !results && active === t.id
-              ? 'border-current text-ink-gray-9'
-              : 'border-transparent text-ink-gray-6 hover:text-ink-gray-8'
-          "
-          @click="jumpTo(t.id)"
+      <!-- the library's underline tabs; only the gap and side padding are
+           the picker's own, so nine 26px tabs fit its 284px -->
+      <Tabs v-model="tabModel">
+        <TabList
+          variant="underline"
+          size="sm"
+          class="h-7 !gap-1 px-1.5"
+          aria-label="Emoji categories"
         >
-          <span :class="t.icon" class="size-4" />
-        </button>
-      </div>
+          <TabTrigger
+            v-for="t in TABS"
+            :key="t.id"
+            :value="t.id"
+            :label="t.label"
+            :icon="t.icon"
+          />
+        </TabList>
+      </Tabs>
     </div>
 
     <div class="p-1.5">
@@ -167,7 +191,9 @@ onMounted(async () => {
             {{ e.char }}
           </button>
         </div>
-        <p v-else class="py-8 text-center text-base text-ink-gray-5">No emoji found</p>
+        <p v-else class="py-8 text-center text-base text-ink-gray-5">
+          No emoji found
+        </p>
       </template>
 
       <!-- sections -->
