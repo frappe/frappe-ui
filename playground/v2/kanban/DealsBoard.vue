@@ -13,7 +13,7 @@
 // below its neighbours. While it is in the air a plain gray-100 slot its
 // own size opens where it would land, the card it left dims, and dropping
 // it there moves it; dropping anywhere else puts it back.
-import { computed, ref } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import EIcon from '../../espresso-sidebar/EIcon.vue'
 import DealCard from './DealCard.vue'
 import { STAGES, type Deal } from './deals'
@@ -109,6 +109,31 @@ function settle() {
   over.value = null
 }
 
+// ---- the lists' edges: where there is more to scroll, the cards fade out
+// under the head or into the foot rather than being cut flat
+const lists = new Map<number, HTMLElement>()
+const fades = ref(columns.value.map(() => ({ top: false, bottom: false })))
+
+function bindList(ci: number, el: unknown) {
+  if (el instanceof HTMLElement) lists.set(ci, el)
+  else lists.delete(ci)
+}
+
+function measureFade(ci: number) {
+  const el = lists.get(ci)
+  if (!el) return
+  const top = el.scrollTop > 0
+  const bottom = el.scrollTop + el.clientHeight < el.scrollHeight - 1
+  const f = fades.value[ci]
+  if (f.top !== top || f.bottom !== bottom) fades.value[ci] = { top, bottom }
+}
+
+function measureFades() {
+  columns.value.forEach((_, ci) => measureFade(ci))
+}
+
+onMounted(() => nextTick(measureFades))
+
 // each column's cards with the open slot in place, as the list draws them
 const laid = computed(() =>
   columns.value.map((col, ci) => {
@@ -128,6 +153,7 @@ const laid = computed(() =>
     return rows
   }),
 )
+watch(laid, () => nextTick(measureFades), { flush: 'post' })
 </script>
 
 <template>
@@ -163,7 +189,13 @@ const laid = computed(() =>
              and pads itself back — the cards sit where they did, and their
              shadows have room on every side. -->
         <div
-          class="v2-scroll -mx-2 -my-1 flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto px-2 py-1"
+          :ref="(el) => bindList(ci, el)"
+          class="kanban-list v2-scroll -mx-2 -my-1 flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto px-2 py-1"
+          :style="{
+            '--fade-top': fades[ci].top ? '24px' : '0px',
+            '--fade-bottom': fades[ci].bottom ? '24px' : '0px',
+          }"
+          @scroll.passive="measureFade(ci)"
           @dragover="hover($event, ci)"
           @dragleave="leave"
           @drop="drop($event, ci)"
@@ -196,6 +228,25 @@ const laid = computed(() =>
 </template>
 
 <style>
+/* Where a list has more above or below, its edge fades over 24px instead
+   of cutting the cards flat. A mask, so the fade needs no colour of its
+   own and works over the column's wash. */
+.kanban-list {
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 var(--fade-top, 0px),
+    #000 calc(100% - var(--fade-bottom, 0px)),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 var(--fade-top, 0px),
+    #000 calc(100% - var(--fade-bottom, 0px)),
+    transparent 100%
+  );
+}
 /* The file's wash on the column under the pointer: gray-50 at the head,
    the board's own colour by the foot. A gradient cannot fade in, so it sits
    on a layer beneath the cards whose opacity does. */
