@@ -10,13 +10,7 @@ import {
   watch,
   type Component,
 } from 'vue'
-import {
-  Breadcrumbs,
-  Button,
-  Dropdown,
-  Popover,
-  useColorScheme,
-} from '../../src'
+import { Breadcrumbs, Button, Popover, useColorScheme } from '../../src'
 import ControlSelect from '../controls/ControlSelect.vue'
 import ControlToggle from '../controls/ControlToggle.vue'
 import { headerTypes, subheaderTypes } from '../espresso-header/variants'
@@ -430,76 +424,6 @@ onMounted(() => nextTick(scanSections))
 watch(page, () => setTimeout(scanSections, 260))
 onUnmounted(() => observer?.disconnect())
 
-// The header cell's menu, as Frappe apps have it: switch app, docs, about,
-// cloud, settings — and the controls this playground needs, so the cell is
-// where everything is driven from.
-const appLogoIcon = (logo: string) => () =>
-  h(EIcon, { name: `logo-${logo}`, class: 'size-4' })
-
-const currentMark = {
-  suffix: () =>
-    h('span', {
-      class: 'lucide-check size-4 text-ink-gray-7',
-      'aria-label': 'Current app',
-    }),
-}
-
-const appMenu = computed(() => [
-  {
-    group: 'App',
-    hideLabel: true,
-    options: [
-      {
-        label: 'Apps',
-        icon: 'lucide-layout-grid',
-        submenu: [
-          {
-            label: 'Frappe UI',
-            icon: () => h('img', { src: appLogo, class: 'size-4' }),
-            slots: app.value === 'components' ? currentMark : undefined,
-            onClick: () => (app.value = 'components'),
-          },
-          ...TRAY_APPS.map((a) => ({
-            label: a.label,
-            icon: appLogoIcon(a.logo),
-            slots: app.value === a.scenario ? currentMark : undefined,
-            onClick: () => (app.value = a.scenario),
-          })),
-        ],
-      },
-      { label: 'Frappe Docs', icon: 'lucide-book-open' },
-      { label: 'About', icon: 'lucide-info' },
-      { label: 'Login to Frappe Cloud', icon: 'lucide-cloud' },
-      { label: 'Settings', icon: 'lucide-settings' },
-    ],
-  },
-  {
-    group: 'Preview',
-    hideLabel: true,
-    options: [
-      {
-        label: 'Sidebar',
-        icon: 'lucide-panel-left',
-        switch: true,
-        switchValue: sidebarOpen.value,
-        onClick: (on: boolean) => (sidebarOpen.value = on),
-      },
-      {
-        label: 'Dark mode',
-        icon: 'lucide-moon',
-        switch: true,
-        switchValue: darkMode.value,
-        onClick: () => toggleTheme(),
-      },
-    ],
-  },
-  {
-    group: 'Account',
-    hideLabel: true,
-    options: [{ label: 'Log out', icon: 'lucide-log-out' }],
-  },
-])
-
 // what the outline is a list of, per page
 const OUTLINE_TITLES: Record<string, string> = {
   modal: 'Modal sizes',
@@ -626,17 +550,10 @@ const crumbs = computed(() => [
         :style="{ width: patternCollapsed ? '44px' : '220px' }"
       >
         <!-- header cell (204 × 32, pl 8 · py 2): the workspace, and what
-             everything is driven from. On the Sidebar & Header page it opens
-             the preview control, which drives this sidebar; on every other
-             page it opens the app menu. Collapsed, the cell is the 28px
-             logo (Figma's collapsed header slot). -->
-        <Popover
-          v-if="page === 'sidebar-header'"
-          side="bottom"
-          align="start"
-          :offset="6"
-          bare
-        >
+             everything is driven from — on every page it opens the preview
+             control, which drives this sidebar. Collapsed, the cell is the
+             28px logo (Figma's collapsed header slot). -->
+        <Popover side="bottom" align="start" :offset="6" bare>
           <template #trigger>
             <button
               type="button"
@@ -687,54 +604,34 @@ const crumbs = computed(() => [
               label="App navigation"
               :disabled="inSettings"
             />
-            <ControlToggle
-              v-model="showHeader"
-              label="Header"
-              :disabled="inSettings"
-            />
-            <ControlSelect
-              v-if="showHeader"
-              v-model="headerType"
-              label="Header type"
-              :options="headerOptions"
-            />
-            <ControlToggle
-              v-model="showSubheader"
-              label="Subheader"
-              :disabled="inSettings"
-            />
-            <ControlSelect
-              v-if="showSubheader"
-              v-model="subheaderType"
-              label="Subheader type"
-              :options="subheaderOptions"
-            />
+            <!-- the header bars are the Sidebar & Header page's own -->
+            <template v-if="page === 'sidebar-header'">
+              <ControlToggle
+                v-model="showHeader"
+                label="Header"
+                :disabled="inSettings"
+              />
+              <ControlSelect
+                v-if="showHeader"
+                v-model="headerType"
+                label="Header type"
+                :options="headerOptions"
+              />
+              <ControlToggle
+                v-model="showSubheader"
+                label="Subheader"
+                :disabled="inSettings"
+              />
+              <ControlSelect
+                v-if="showSubheader"
+                v-model="subheaderType"
+                label="Subheader type"
+                :options="subheaderOptions"
+              />
+            </template>
             <ControlToggle v-model="darkMode" label="Dark mode" />
           </div>
         </Popover>
-        <Dropdown v-else :options="appMenu" match-trigger-width :offset="6">
-          <button type="button" :class="cellClass">
-            <img
-              v-if="patternCollapsed"
-              :src="appLogo"
-              alt=""
-              class="size-7 shrink-0"
-            />
-            <template v-else>
-              <span
-                class="min-w-0 flex-1 truncate text-start text-base-medium text-ink-gray-9"
-              >
-                {{ appTitle }}
-              </span>
-              <span
-                class="flex size-6 shrink-0 items-center justify-center text-ink-gray-7"
-                aria-hidden="true"
-              >
-                <span class="size-3.5" v-html="navChevron" />
-              </span>
-            </template>
-          </button>
-        </Dropdown>
 
         <!-- an app's own menu, drawn from the same rows the Espresso
              sidebar demo uses -->
