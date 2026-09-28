@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Switch, RadioGroup, Radio, Divider } from 'frappe-ui'
+import { Switch, RadioGroup, Radio } from 'frappe-ui'
 
 const stock = ['Disable', 'Allow alternative', 'Maintain stock']
 const delivery = ['Home delivery', 'Store pickup', 'Locker pickup']
@@ -13,13 +13,14 @@ const annot =
   <div class="flex flex-col gap-8">
     <!-- 1. In a cell, only the switch is interactive (do-only) -->
     <Guideline
+      :mark="false"
       caption="Only the switch will be touch target when it's used in a cell."
     >
       <template #do>
         <div class="flex flex-col items-center py-4">
           <!-- top annotation -->
           <span :class="annot">Not a touch target</span>
-          <Divider orientation="vertical" class="h-7" />
+          <div class="h-7 border-l border-outline-gray-3" />
 
           <!-- the settings cell -->
           <div
@@ -39,11 +40,11 @@ const annot =
           <!-- bottom annotations: label (not a target) and switch (target) -->
           <div class="relative h-16 w-[460px]">
             <div class="absolute left-9 flex flex-col items-center">
-              <Divider orientation="vertical" class="h-7" />
+              <div class="h-7 border-l border-outline-gray-3" />
               <span :class="[annot, 'mt-1']">Not a touch target</span>
             </div>
             <div class="absolute right-7 flex flex-col items-center">
-              <Divider orientation="vertical" class="h-7" />
+              <div class="h-7 border-l border-outline-gray-3" />
               <span :class="[annot, 'mt-1']">Touch target</span>
             </div>
           </div>

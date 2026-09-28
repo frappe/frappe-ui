@@ -16,8 +16,10 @@ withDefaults(
     // avatars); 'stack' places them one above the other with the mark on the
     // left (wide content like alerts).
     layout?: 'split' | 'stack'
+    // Set false for a single annotated example that isn't a do/don't.
+    mark?: boolean
   }>(),
-  { layout: 'split' },
+  { layout: 'split', mark: true },
 )
 </script>
 
@@ -40,33 +42,42 @@ withDefaults(
           <div class="flex min-h-10 items-center">
             <slot name="do" />
           </div>
-          <SuccessSolidIcon class="size-5 shrink-0 text-ink-green-5" />
+          <SuccessSolidIcon
+            v-if="mark"
+            class="size-5 shrink-0 text-ink-green-5"
+          />
         </div>
 
         <div v-if="$slots.dont" class="flex flex-col items-start gap-4">
           <div class="flex min-h-10 items-center">
             <slot name="dont" />
           </div>
-          <CloseCircleSolidIcon class="size-5 shrink-0 text-ink-red-5" />
+          <CloseCircleSolidIcon
+            v-if="mark"
+            class="size-5 shrink-0 text-ink-red-5"
+          />
         </div>
       </div>
 
-      <!-- Wide examples: do above, don't below. The mark sits next to the
-           example and the whole pair is centered, so the mark stays close to
-           its story (marks needn't line up across rows). -->
-      <div v-else class="mx-auto flex w-full max-w-[560px] flex-col gap-5">
-        <div class="flex items-center justify-center gap-3">
-          <SuccessSolidIcon class="size-5 shrink-0 text-ink-green-5" />
+      <!-- Wide examples: do above, don't below. The mark sits beside the
+           example, and the rows are left-aligned inside a centered block so
+           the do and don't examples line up with each other. -->
+      <div v-else class="mx-auto flex w-fit flex-col gap-5">
+        <div class="flex items-center gap-3">
+          <SuccessSolidIcon
+            v-if="mark"
+            class="size-5 shrink-0 text-ink-green-5"
+          />
           <div class="min-w-0">
             <slot name="do" />
           </div>
         </div>
 
-        <div
-          v-if="$slots.dont"
-          class="flex items-center justify-center gap-3"
-        >
-          <CloseCircleSolidIcon class="size-5 shrink-0 text-ink-red-5" />
+        <div v-if="$slots.dont" class="flex items-center gap-3">
+          <CloseCircleSolidIcon
+            v-if="mark"
+            class="size-5 shrink-0 text-ink-red-5"
+          />
           <div class="min-w-0">
             <slot name="dont" />
           </div>
