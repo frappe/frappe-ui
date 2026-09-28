@@ -1,10 +1,12 @@
 <script setup lang="ts">
-// The board (deals-kanban, 31739:28633): five columns side by side, each
-// padded 8 — a 16px head row (the stages glyph · 8px · the 14 medium
-// gray-700 stage, and on the right the ⋯ and + glyphs 8px apart) · 14px ·
-// the cards, 10px apart. The cards are the file's list card at its own
-// 268px, so a column is 284 wide. The board is wider than the stage, so it
-// scrolls sideways as a board does.
+// The board, as the Frappe CRM deals board draws it (Frappe-CRM ›
+// deals-board view, 11527:137169): five 284px columns side by side, each
+// padded 8 with 16px corners — a 28px head row, 6px in: the stage glyph in
+// the stage's own colour · 8px · the 14 regular gray-700 stage, and on the
+// right the ⋯ and + glyphs · 10px · the 268 × 172 cards, 10px apart. The
+// column under a card in the air takes the file's wash, gray-50 fading to
+// the board by its foot. The board is wider than the stage, so it scrolls
+// sideways as a board does.
 //
 // The cards move: pick one up and carry it to another stage, or above or
 // below its neighbours. While it is in the air a slot its own height opens
@@ -14,17 +16,30 @@ import { computed, ref } from 'vue'
 import EIcon from '../../espresso-sidebar/EIcon.vue'
 import DealCard from './DealCard.vue'
 import { STAGES, type Deal } from './deals'
+import av1 from '../assets/cards/lc-av-1.png'
+import av2 from '../assets/cards/lc-av-2.png'
+import av3 from '../assets/cards/lc-av-3.png'
 
-type Card = Deal & { id: string }
+// the first deal of each stage carries its owner's photo; the rest show
+// the owner's initial, as the reference mixes them
+const PHOTOS = [av1, av2, av3]
+
+type Card = Deal & { id: string; photo?: string }
 interface Column {
   name: string
+  tone: string
   cards: Card[]
 }
 
 const columns = ref<Column[]>(
   STAGES.map((s, i) => ({
     name: s.name,
-    cards: s.deals.map((d, j) => ({ ...d, id: `${i}-${j}` })),
+    tone: s.tone,
+    cards: s.deals.map((d, j) => ({
+      ...d,
+      id: `${i}-${j}`,
+      photo: j === 0 ? PHOTOS[i % PHOTOS.length] : undefined,
+    })),
   })),
 )
 
@@ -111,14 +126,15 @@ const laid = computed(() =>
       <section
         v-for="(stage, ci) in columns"
         :key="stage.name"
-        class="flex w-[284px] shrink-0 flex-col gap-3.5 p-2"
+        class="flex w-[284px] shrink-0 flex-col gap-2.5 rounded-7 p-2 transition-colors"
+        :class="over?.column === ci && 'kanban-column-over'"
         role="listitem"
         :aria-label="stage.name"
       >
-        <header class="flex h-4 items-center gap-2">
-          <EIcon name="stages" class="size-4 shrink-0" />
+        <header class="flex h-7 items-center gap-2 pl-1.5">
+          <EIcon name="stage" class="size-4 shrink-0" :class="stage.tone" />
           <h3
-            class="min-w-0 flex-1 truncate text-base-medium leading-4 text-ink-gray-7"
+            class="min-w-0 flex-1 truncate text-base leading-4 text-ink-gray-7"
           >
             {{ stage.name }}
           </h3>
@@ -152,7 +168,7 @@ const laid = computed(() =>
               @dragstart="lift($event, row.card, ci)"
               @dragend="settle"
             >
-              <DealCard :deal="row.card" />
+              <DealCard :deal="row.card" :photo="row.card.photo" />
             </div>
             <div
               v-else
@@ -167,6 +183,15 @@ const laid = computed(() =>
 </template>
 
 <style>
+/* the file's wash on the column a card is carried over: gray-50 at the
+   head, the board's own colour by the foot */
+.kanban-column-over {
+  background: linear-gradient(
+    to bottom,
+    var(--surface-gray-1),
+    var(--surface-base)
+  );
+}
 .kanban-glyph {
   @apply flex size-4 items-center justify-center rounded-2 transition-colors hover:text-ink-gray-9;
 }

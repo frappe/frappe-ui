@@ -15,12 +15,15 @@ export interface Deal {
 
 export interface Stage {
   name: string
+  /** the stage glyph's colour, as the CRM board tints each stage */
+  tone: string
   deals: Deal[]
 }
 
 export const STAGES: Stage[] = [
   {
     name: 'Qualification',
+    tone: 'text-ink-gray-4',
     deals: [
       {
         org: 'Gumroad',
@@ -53,6 +56,7 @@ export const STAGES: Stage[] = [
   },
   {
     name: 'Demo',
+    tone: 'text-ink-blue-5',
     deals: [
       {
         org: 'Figma',
@@ -103,6 +107,7 @@ export const STAGES: Stage[] = [
   },
   {
     name: 'Proposal',
+    tone: 'text-ink-amber-5',
     deals: [
       {
         org: 'Miro',
@@ -126,6 +131,7 @@ export const STAGES: Stage[] = [
   },
   {
     name: 'Negotiation',
+    tone: 'text-ink-pink-5',
     deals: [
       {
         org: 'Telegram',
@@ -185,6 +191,7 @@ export const STAGES: Stage[] = [
   },
   {
     name: 'Read to close',
+    tone: 'text-ink-violet-5',
     deals: [
       {
         org: 'Stripe',
