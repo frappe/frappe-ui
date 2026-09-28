@@ -21,6 +21,10 @@ The `#prefix` slot shows an icon or an avatar before each label. The slot reads
 
 <ComponentPreview name="Breadcrumbs-PersonPath" />
 
+## Usage Guidelines
+
+<ComponentPreview name="Breadcrumbs-Guidelines" hide-code />
+
 ## Behavior
 
 ### Item shape
