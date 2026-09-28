@@ -10,7 +10,7 @@ import {
   watch,
   type Component,
 } from 'vue'
-import { Breadcrumbs, Button, Popover, useColorScheme } from '../../src'
+import { Button, Popover, useColorScheme } from '../../src'
 import ControlSelect from '../controls/ControlSelect.vue'
 import ControlToggle from '../controls/ControlToggle.vue'
 import { headerTypes, subheaderTypes } from '../espresso-header/variants'
@@ -274,9 +274,11 @@ onMounted(() => {
 // underneath the breadcrumb.
 const patternCollapsed = ref(false)
 const patternTray = ref(true)
-const showHeader = ref(true)
+// Off until the preview control asks for them: the stage opens with no bar
+// above it, on any page.
+const showHeader = ref(false)
 const headerType = ref(headerTypes[0].value)
-const showSubheader = ref(true)
+const showSubheader = ref(false)
 const subheaderType = ref(subheaderTypes[0].value)
 
 const headerComponent = computed(
@@ -434,11 +436,6 @@ const OUTLINE_TITLES: Record<string, string> = {
 const outlineTitle = computed(
   () => OUTLINE_TITLES[page.value] ?? 'On this page',
 )
-
-const crumbs = computed(() => [
-  { label: 'Espresso 2.0' },
-  { label: current.value.label },
-])
 </script>
 
 <template>
@@ -604,31 +601,28 @@ const crumbs = computed(() => [
               label="App navigation"
               :disabled="inSettings"
             />
-            <!-- the header bars are the Sidebar & Header page's own -->
-            <template v-if="page === 'sidebar-header'">
-              <ControlToggle
-                v-model="showHeader"
-                label="Header"
-                :disabled="inSettings"
-              />
-              <ControlSelect
-                v-if="showHeader"
-                v-model="headerType"
-                label="Header type"
-                :options="headerOptions"
-              />
-              <ControlToggle
-                v-model="showSubheader"
-                label="Subheader"
-                :disabled="inSettings"
-              />
-              <ControlSelect
-                v-if="showSubheader"
-                v-model="subheaderType"
-                label="Subheader type"
-                :options="subheaderOptions"
-              />
-            </template>
+            <ControlToggle
+              v-model="showHeader"
+              label="Header"
+              :disabled="inSettings"
+            />
+            <ControlSelect
+              v-if="showHeader"
+              v-model="headerType"
+              label="Header type"
+              :options="headerOptions"
+            />
+            <ControlToggle
+              v-model="showSubheader"
+              label="Subheader"
+              :disabled="inSettings"
+            />
+            <ControlSelect
+              v-if="showSubheader"
+              v-model="subheaderType"
+              label="Subheader type"
+              :options="subheaderOptions"
+            />
             <ControlToggle v-model="darkMode" label="Dark mode" />
           </div>
         </Popover>
@@ -869,12 +863,14 @@ const crumbs = computed(() => [
     </div>
 
     <main class="relative flex min-w-0 flex-1 flex-col">
-      <!-- header: the breadcrumb on the left, 48 tall and ruled beneath -->
-      <header
-        class="flex h-12 shrink-0 items-center border-b border-outline-gray-1 py-2.5 pl-3 pr-5"
-      >
-        <Breadcrumbs :items="crumbs" />
-      </header>
+      <!-- the header bars, above whichever page is open — only when the
+           preview control turns them on; off, nothing sits above the stage -->
+      <component :is="headerComponent" v-if="showHeader" :key="headerType" />
+      <component
+        :is="subheaderComponent"
+        v-if="showSubheader"
+        :key="subheaderType"
+      />
 
       <div class="flex min-h-0 flex-1">
         <section class="v2-stage relative min-w-0 flex-1 overflow-hidden">
@@ -911,25 +907,11 @@ const crumbs = computed(() => [
                 </section>
               </div>
 
-              <!-- The sidebar pattern is the shell's own sidebar, so this
-                   page is just the header bars it sits beside; the preview
-                   control in the sidebar's header cell drives both. -->
-              <div
-                v-else-if="page === 'sidebar-header'"
-                class="flex h-full flex-col"
-              >
-                <component
-                  :is="headerComponent"
-                  v-if="showHeader"
-                  :key="headerType"
-                />
-                <component
-                  :is="subheaderComponent"
-                  v-if="showSubheader"
-                  :key="subheaderType"
-                />
-                <div class="min-h-0 flex-1" />
-              </div>
+              <!-- The sidebar pattern is the shell's own sidebar and the
+                   header bars sit above every page, so this page is the
+                   empty stage they frame; the preview control in the
+                   sidebar's header cell drives all of it. -->
+              <div v-else-if="page === 'sidebar-header'" class="h-full" />
 
               <ListPage v-else-if="page === 'list'" />
               <PopoverPage v-else-if="page === 'popover'" />
