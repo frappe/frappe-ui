@@ -46,6 +46,10 @@ Two actions that share the width of a card, each with `class="flex-1"`.
 
 <ComponentPreview name='Button-LiveClassCard' />
 
+## Usage Guidelines
+
+<ComponentPreview name="Button-Guidelines" hide-code />
+
 ## Behavior
 
 ### Pressed state
