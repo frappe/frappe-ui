@@ -1,11 +1,16 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { DatePicker, ErrorMessage } from 'frappe-ui'
 
+// Same date in both examples so only the separators differ.
+const withSeparators = ref('2026-02-03')
+const noSeparators = ref('2026-02-03')
+
 // The invalid-date example needs the trigger to show raw, uncommitted text
-// ("31 / 02 / 2026" is not a real calendar date, so it has no `YYYY-MM-DD`
+// ("2026-02-31" is not a real calendar date, so it has no `YYYY-MM-DD`
 // modelValue DatePicker could hold) with a red border. No component today
-// colors a border on `error` — see the Behavior section above, `error` only
-// renders the message below — so the border color here is a plain
+// colors a border on `error` (see the Behavior section above; `error` only
+// renders the message below), so the border color here is a plain
 // `border-outline-red-5` override on a static trigger, reproducing
 // DatePicker's real trigger markup (TextInput, with the same `#prefix`
 // calendar-icon convention used throughout this page). The message itself is
@@ -25,7 +30,7 @@ const triggerClass =
         <div class="flex flex-col gap-1.5">
           <div :class="triggerClass">
             <span class="lucide-calendar size-4 text-ink-gray-5" />
-            <span>31 / 02 / 2026</span>
+            <span>2026-02-31</span>
           </div>
           <ErrorMessage message="February 2026 doesn't have 31 days." />
         </div>
@@ -33,26 +38,27 @@ const triggerClass =
       <template #dont>
         <div :class="triggerClass">
           <span class="lucide-calendar size-4 text-ink-gray-5" />
-          <span>31 / 02 / 2026</span>
+          <span>2026-02-31</span>
         </div>
       </template>
     </Guideline>
 
-    <!-- 2. Separators make the date order unambiguous (real component: both
-         sides are just placeholder text, no value entered). -->
+    <!-- 2. Separators make the date order readable. Both sides are the real
+         DatePicker showing the same date; the "don't" drops the separators
+         with the real `format` prop (the canonical value is YYYY-MM-DD). -->
     <Guideline
       layout="stack"
-      caption="Use separators in the date format to make the order clear and unambiguous."
+      caption="Use separators in the date format to keep it readable and unambiguous."
     >
       <template #do>
-        <DatePicker class="w-56" placeholder="dd / mm / yyyy">
+        <DatePicker v-model="withSeparators" class="w-56">
           <template #prefix>
             <span class="lucide-calendar size-4 text-ink-gray-5" />
           </template>
         </DatePicker>
       </template>
       <template #dont>
-        <DatePicker class="w-56" placeholder="03 02 2026">
+        <DatePicker v-model="noSeparators" format="YYYYMMDD" class="w-56">
           <template #prefix>
             <span class="lucide-calendar size-4 text-ink-gray-5" />
           </template>
