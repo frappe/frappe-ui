@@ -34,6 +34,10 @@ The `#icon` slot draws a different emoji at each position. The slot's `index`,
 
 <ComponentPreview name="Rating-CustomSlot" />
 
+## Usage Guidelines
+
+<ComponentPreview name="Rating-Guidelines" hide-code />
+
 ## Behavior
 
 ### Value
