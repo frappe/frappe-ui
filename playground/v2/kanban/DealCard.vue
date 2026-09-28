@@ -1,7 +1,9 @@
 <script setup lang="ts">
 // One deal, as the Frappe CRM board draws it (Frappe-CRM › deals-board view,
-// 11527:137169): 268 × 172 on white under the sm shadow, 16px corners, no
-// hairline. A 44px head (py 12 · px 14) ruled beneath by a 1px gray-100
+// 11527:137169): 268 × 172 on white, 16px corners, no hairline, under the
+// CRM file's own sm shadow — 0 1 3 and a 0 0 1 ring, both at 14%. The
+// library's sm ring is 20% with an inner highlight, which collects under
+// the card's foot as a line. A 44px head (py 12 · px 14) ruled beneath by a 1px gray-100
 // line inside it — the 20px org logo with 5px corners · 8px · the 14 medium
 // gray-700 name. Then, at px 16, four 16px rows 14px apart — a 16px gray-600
 // glyph · 8px · the 14 gray-600 value — for the date, the email, the owner
@@ -26,7 +28,7 @@ const logo = (file: string) => logos[`../assets/kanban/${file}`]
 
 <template>
   <article
-    class="flex w-[268px] flex-col gap-2.5 rounded-7 bg-surface-elevation-1 pb-3 shadow-sm"
+    class="flex w-[268px] flex-col gap-2.5 rounded-7 bg-surface-elevation-1 pb-3 shadow-[0_1px_3px_rgba(0,0,0,0.14),0_0_1px_rgba(0,0,0,0.14)]"
     :aria-label="deal.org"
   >
     <header
