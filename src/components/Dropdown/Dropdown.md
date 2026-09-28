@@ -49,6 +49,10 @@ submenus for apps and theme. `selected` marks the current app and theme.
 
 <ComponentPreview name="Dropdown-UserMenu" />
 
+## Usage Guidelines
+
+<ComponentPreview name="Dropdown-Guidelines" hide-code />
+
 ## Behavior
 
 ### Options
