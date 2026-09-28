@@ -18,8 +18,11 @@ withDefaults(
     layout?: 'split' | 'stack'
     // Set false for a single annotated example that isn't a do/don't.
     mark?: boolean
+    // In 'stack' layout, place the mark centered below the example instead of
+    // to its left. Useful for wide examples where a side mark looks stranded.
+    markBelow?: boolean
   }>(),
-  { layout: 'split', mark: true },
+  { layout: 'split', mark: true, markBelow: false },
 )
 </script>
 
@@ -64,20 +67,29 @@ withDefaults(
            example, and the rows are left-aligned inside a centered block so
            the do and don't examples line up with each other. -->
       <div v-else class="mx-auto flex w-fit flex-col gap-8">
-        <div class="flex items-center gap-3">
+        <div
+          class="flex gap-3"
+          :class="markBelow ? 'flex-col items-center' : 'items-center'"
+        >
           <SuccessSolidIcon
             v-if="mark"
             class="size-5 shrink-0 text-ink-green-5"
+            :class="markBelow && 'order-last'"
           />
           <div class="min-w-0">
             <slot name="do" />
           </div>
         </div>
 
-        <div v-if="$slots.dont" class="flex items-center gap-3">
+        <div
+          v-if="$slots.dont"
+          class="flex gap-3"
+          :class="markBelow ? 'flex-col items-center' : 'items-center'"
+        >
           <CloseCircleSolidIcon
             v-if="mark"
             class="size-5 shrink-0 text-ink-red-5"
+            :class="markBelow && 'order-last'"
           />
           <div class="min-w-0">
             <slot name="dont" />
