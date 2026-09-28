@@ -136,7 +136,14 @@ jobs:
       # only coverage-final.json, so skip the HTML report.
       - name: Write Cypress coverage report
         if: ${{ !cancelled() }}
-        run: npx nyc report --reporter=json
+        run: |
+          # No files means the specs saved no coverage, for example because
+          # instrumentation broke. Fail here, not with a silent 0% later.
+          if [ -z "$(ls -A .nyc_output/cypress 2>/dev/null)" ]; then
+            echo "::error::The Cypress specs saved no coverage"
+            exit 1
+          fi
+          npx nyc report --reporter=json
 
       - name: Upload Cypress screenshots if tests fail
         if: failure()
