@@ -20,7 +20,13 @@ const workspaces: { name: string; members: number; theme: AvatarTheme }[] = [
       type="button"
       class="flex items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-surface-gray-2"
     >
-      <Avatar :label="w.name" :theme="w.theme" shape="square" size="xl" />
+      <Avatar
+        decorative
+        :label="w.name"
+        :theme="w.theme"
+        shape="square"
+        size="xl"
+      />
       <span class="flex flex-1 flex-col">
         <span class="text-base font-medium text-ink-gray-8">{{ w.name }}</span>
         <span class="text-sm text-ink-gray-5">{{ w.members }} members</span>
@@ -37,7 +43,7 @@ const workspaces: { name: string; members: number; theme: AvatarTheme }[] = [
       class="flex items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-surface-gray-2"
     >
       <!-- The default slot replaces the initial, here with an icon. -->
-      <Avatar shape="square" size="xl">
+      <Avatar decorative shape="square" size="xl">
         <span class="lucide-plus size-full" aria-hidden="true" />
       </Avatar>
       <span class="text-base text-ink-gray-8">New workspace</span>

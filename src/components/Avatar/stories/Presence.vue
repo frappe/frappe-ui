@@ -31,7 +31,7 @@ const members = [
       :key="m.name"
       class="flex items-center gap-2 rounded px-2 py-1.5 hover:bg-surface-gray-2"
     >
-      <Avatar :image="m.image" :label="m.name" size="lg">
+      <Avatar decorative :image="m.image" :label="m.name" size="lg">
         <template #indicator>
           <span class="block size-full rounded-full" :class="dot[m.status]" />
         </template>

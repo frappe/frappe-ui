@@ -63,6 +63,22 @@ and the class takes over from its breakpoint up.
 
 ## Accessibility
 
-The image uses `label` as its alt text.
+Screen readers announce the avatar by `label`: the photo uses it as alt text,
+and the initial is labelled with the full name, so `label="Jane Cooper"` reads
+as "Jane Cooper", not "J".
+
+When the name is already visible next to the avatar, as in a comment or a
+member list, set `decorative`. It hides the avatar from screen readers so the
+name isn't read twice. Leave it off for an avatar on its own, like an assignee
+in a stack.
+
+```vue
+<!-- the name is shown beside it -->
+<Avatar decorative :label="user.name" :image="user.image" />
+<span>{{ user.name }}</span>
+
+<!-- the avatar stands alone -->
+<Avatar :label="user.name" :image="user.image" />
+```
 
 <!-- @include: ./Avatar.api.md -->

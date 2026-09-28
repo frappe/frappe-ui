@@ -30,7 +30,13 @@ const comments = [
 <template>
   <div class="flex w-full max-w-md flex-col gap-4">
     <div v-for="c in comments" :key="c.author" class="flex gap-2.5">
-      <Avatar :image="c.image" :label="c.author" :theme="c.theme" size="lg" />
+      <Avatar
+        decorative
+        :image="c.image"
+        :label="c.author"
+        :theme="c.theme"
+        size="lg"
+      />
       <div class="flex flex-col gap-1">
         <div class="flex items-baseline gap-1.5">
           <span class="text-base font-medium text-ink-gray-9">{{
