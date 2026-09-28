@@ -10,9 +10,9 @@
 // board does.
 //
 // The cards move: pick one up and carry it to another stage, or above or
-// below its neighbours. While it is in the air a slot its own height opens
-// where it would land, the card it left dims, and dropping it there moves
-// it; dropping anywhere else puts it back.
+// below its neighbours. While it is in the air a plain gray-100 slot its
+// own size opens where it would land, the card it left dims, and dropping
+// it there moves it; dropping anywhere else puts it back.
 import { computed, ref } from 'vue'
 import EIcon from '../../espresso-sidebar/EIcon.vue'
 import DealCard from './DealCard.vue'
@@ -182,7 +182,7 @@ const laid = computed(() =>
             </div>
             <div
               v-else
-              class="h-[168px] w-[268px] rounded-7 border border-dashed border-outline-gray-3 bg-surface-gray-2"
+              class="h-[172px] w-[268px] rounded-7 bg-surface-gray-2"
               aria-hidden="true"
             />
           </template>
@@ -214,7 +214,7 @@ const laid = computed(() =>
 .kanban-column.is-over::before {
   opacity: 1;
 }
-/* the card in the air: tilted a touch, under the lg shadow */
+/* the card in the air: tilted a touch, under the xl shadow */
 .kanban-ghost {
   position: fixed;
   top: -1000px;
@@ -223,7 +223,7 @@ const laid = computed(() =>
   opacity: 1 !important;
 }
 .kanban-ghost article {
-  @apply shadow-lg;
+  @apply shadow-xl;
 }
 .kanban-glyph {
   @apply flex size-4 items-center justify-center rounded-2 transition-colors hover:text-ink-gray-9;
