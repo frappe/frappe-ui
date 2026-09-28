@@ -35,6 +35,10 @@ The `#label` slot replaces the label text and the required marker. It receives
 
 <ComponentPreview name="TextInput-Slots" />
 
+## Usage Guidelines
+
+<ComponentPreview name="TextInput-Guidelines" hide-code />
+
 ## Behavior
 
 ### Label, description and error
