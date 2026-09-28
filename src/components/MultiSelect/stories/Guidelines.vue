@@ -191,9 +191,9 @@ const triggerClass =
     </Guideline>
 
     <!-- 3. Open behavior: search a long list, highlight what's picked
-         (do-only; it's the real component — open it to see both). -->
+         (do-only; it's the real component, open it to see both). -->
     <Guideline
-      caption="For a long list, open the field to search instead of scrolling — picked options stay highlighted and checked."
+      caption="For a long list, open the field to search instead of scrolling. Picked options stay highlighted and checked."
     >
       <template #do>
         <MultiSelect v-model="search" :options="options">
