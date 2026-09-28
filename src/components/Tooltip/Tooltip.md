@@ -34,6 +34,10 @@ button.
 
 <ComponentPreview name="Tooltip-Examples" />
 
+## Usage Guidelines
+
+<ComponentPreview name="Tooltip-Guidelines" hide-code />
+
 ## Behavior
 
 ### Trigger and content
