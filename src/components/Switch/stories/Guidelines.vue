@@ -18,13 +18,13 @@ const annot =
     >
       <template #do>
         <div class="flex flex-col items-center py-4">
-          <!-- top annotation -->
+          <!-- top annotation; the line dips onto the cell -->
           <span :class="annot">Not a touch target</span>
-          <div class="h-7 border-l border-outline-gray-3" />
+          <div class="relative z-10 -mb-2 h-9 border-l border-outline-gray-1" />
 
           <!-- the settings cell -->
           <div
-            class="flex w-[420px] items-center justify-between gap-4 rounded-2 bg-surface-gray-2 p-3"
+            class="flex w-[420px] items-center justify-between gap-4 rounded-6 bg-surface-gray-1 p-3"
           >
             <div>
               <p class="text-base font-medium text-ink-gray-8">
@@ -38,13 +38,13 @@ const annot =
           </div>
 
           <!-- bottom annotations: label (not a target) and switch (target) -->
-          <div class="relative h-16 w-[460px]">
+          <div class="relative z-10 -mt-2 h-[68px] w-[460px]">
             <div class="absolute left-9 flex flex-col items-center">
-              <div class="h-7 border-l border-outline-gray-3" />
+              <div class="h-9 border-l border-outline-gray-1" />
               <span :class="[annot, 'mt-1']">Not a touch target</span>
             </div>
             <div class="absolute right-7 flex flex-col items-center">
-              <div class="h-7 border-l border-outline-gray-3" />
+              <div class="h-9 border-l border-outline-gray-1" />
               <span :class="[annot, 'mt-1']">Touch target</span>
             </div>
           </div>
