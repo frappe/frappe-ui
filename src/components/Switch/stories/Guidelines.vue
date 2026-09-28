@@ -37,13 +37,16 @@ const annot =
             <Switch :model-value="true" />
           </div>
 
-          <!-- bottom annotations: label (not a target) and switch (target) -->
-          <div class="relative z-10 -mt-2 h-[68px] w-[460px]">
+          <!-- bottom annotations: label (not a target) and switch (target),
+               aligned to the cell so each line sits under what it points at -->
+          <div class="relative z-10 -mt-2 h-[68px] w-[420px]">
             <div class="absolute left-9 flex flex-col items-center">
               <div class="h-9 border-l border-outline-gray-1" />
               <span :class="[annot, 'mt-1']">Not a touch target</span>
             </div>
-            <div class="absolute right-7 flex flex-col items-center">
+            <div
+              class="absolute left-[395px] flex -translate-x-1/2 flex-col items-center"
+            >
               <div class="h-9 border-l border-outline-gray-1" />
               <span :class="[annot, 'mt-1']">Touch target</span>
             </div>
