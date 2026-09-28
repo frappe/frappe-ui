@@ -27,6 +27,10 @@ a shift cannot end before it starts.
 
 <ComponentPreview name="TimePicker-Range" />
 
+## Usage Guidelines
+
+<ComponentPreview name="TimePicker-Guidelines" hide-code />
+
 ## Behavior
 
 ### Value
