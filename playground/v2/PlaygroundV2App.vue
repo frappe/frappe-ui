@@ -274,12 +274,15 @@ onMounted(() => {
 // underneath the breadcrumb.
 const patternCollapsed = ref(false)
 const patternTray = ref(true)
-// The header is on from the start; the subheader waits for the preview
-// control. Off, nothing sits above the stage, on any page.
+// The header is on from the start on every page. The subheader is the
+// Sidebar & Header page's default and waits for the preview control
+// elsewhere: each page arrives with its own default, and the control takes
+// it from there. Off, nothing sits above the stage.
 const showHeader = ref(true)
 const headerType = ref(headerTypes[0].value)
-const showSubheader = ref(false)
+const showSubheader = ref(page.value === 'sidebar-header')
 const subheaderType = ref(subheaderTypes[0].value)
+watch(page, (p) => (showSubheader.value = p === 'sidebar-header'))
 
 const headerComponent = computed(
   () => headerTypes.find((v) => v.value === headerType.value)!.component,
