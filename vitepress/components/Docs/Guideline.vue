@@ -62,7 +62,10 @@ withDefaults(
           </div>
         </div>
 
-        <div class="flex items-center justify-center gap-3">
+        <div
+          v-if="$slots.dont"
+          class="flex items-center justify-center gap-3"
+        >
           <CloseCircleSolidIcon class="size-5 shrink-0 text-ink-red-5" />
           <div class="min-w-0">
             <slot name="dont" />
