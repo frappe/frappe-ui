@@ -30,7 +30,7 @@ const logo = (file: string) => logos[`../assets/kanban/${file}`]
     :aria-label="deal.org"
   >
     <header
-      class="flex h-11 items-center gap-2 border-b border-outline-gray-1 px-3.5 dark:border-outline-gray-2"
+      class="flex h-11 items-center gap-2 border-b border-outline-gray-1 px-3.5"
     >
       <img
         :src="logo(deal.logo)"
