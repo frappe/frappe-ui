@@ -12,7 +12,11 @@
 import { computed, ref } from 'vue'
 import { Button, TextInput } from '../../../src'
 
-const emit = defineEmits<{ embed: [url: string]; upload: [file: File]; close: [] }>()
+const emit = defineEmits<{
+  embed: [url: string]
+  upload: [file: File]
+  close: []
+}>()
 
 type Tab = 'link' | 'upload' | 'library'
 const TABS: { value: Tab; label: string }[] = [
@@ -125,13 +129,25 @@ function addCompact() {
             {{ t.label }}
           </button>
         </div>
-        <Button variant="ghost" size="xs" label="Close" class="mb-1.5" @click="emit('close')">
-          <template #icon><span class="lucide-x size-3.5 text-ink-gray-7" /></template>
+        <Button
+          variant="ghost"
+          size="xs"
+          label="Close"
+          class="mb-1.5"
+          @click="emit('close')"
+        >
+          <template #icon
+            ><span class="lucide-x size-3.5 text-ink-gray-7"
+          /></template>
         </Button>
       </div>
 
       <!-- embed link -->
-      <form v-if="tab === 'link'" class="flex flex-col gap-4 px-4" @submit.prevent="embedLink">
+      <form
+        v-if="tab === 'link'"
+        class="flex flex-col gap-4 px-4"
+        @submit.prevent="embedLink"
+      >
         <div class="flex flex-col gap-1.5">
           <TextInput
             v-model="link"
@@ -144,12 +160,20 @@ function addCompact() {
         </div>
         <div class="flex flex-col gap-2">
           <!-- the file sets the label regular (420); Button md is medium -->
-          <Button type="submit" variant="solid" size="md" class="w-full !text-base">
-            <template v-if="justEmbedded" #prefix><span class="lucide-check size-4" /></template>
+          <Button
+            type="submit"
+            variant="solid"
+            size="md"
+            class="w-full !text-base"
+          >
+            <template v-if="justEmbedded" #prefix
+              ><span class="lucide-check size-4"
+            /></template>
             {{ justEmbedded ? 'Embedded' : 'Embed link' }}
           </Button>
           <p class="text-center text-p-sm text-ink-gray-6">
-            Works with links of PDFs, Google Drive, Google Maps, Codepen, Figma, Notion etc.
+            Works with links of PDFs, Google Drive, Google Maps, Codepen, Figma,
+            Notion etc.
           </p>
         </div>
       </form>
@@ -174,7 +198,9 @@ function addCompact() {
             {{ uploaded ?? 'Choose a file or drop it here' }}
           </span>
           <span class="text-sm text-ink-gray-5">
-            {{ uploaded ? 'Ready to embed' : 'Images, videos and PDFs up to 25MB' }}
+            {{
+              uploaded ? 'Ready to embed' : 'Images, videos and PDFs up to 25MB'
+            }}
           </span>
         </button>
         <input
@@ -197,7 +223,11 @@ function addCompact() {
           >
             <span class="lucide-link size-4 shrink-0 text-ink-gray-6" />
             <span class="shrink-0 text-base text-ink-gray-8">{{ e.host }}</span>
-            <span class="truncate text-sm text-ink-gray-5">{{ e.url }}</span>
+            <!-- min-w-0, or the row refuses to shrink below the URL's own
+                 width and a long link runs past the card's edge -->
+            <span class="min-w-0 flex-1 truncate text-sm text-ink-gray-5">{{
+              e.url
+            }}</span>
           </a>
         </li>
         <li v-if="!library.length" class="px-2 py-3 text-base text-ink-gray-5">
