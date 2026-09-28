@@ -30,6 +30,10 @@ scrolls.
 
 <ComponentPreview name="Select-Footer" layout="stacked" />
 
+## Usage Guidelines
+
+<ComponentPreview name="Select-Guidelines" hide-code />
+
 ## Behavior
 
 ### Options
