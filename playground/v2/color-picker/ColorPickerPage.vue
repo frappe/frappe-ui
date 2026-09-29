@@ -26,7 +26,7 @@ function onChange(v: string, m: Mode) {
 
 <template>
   <div
-    class="flex h-full flex-wrap items-center justify-center gap-10 px-5 py-10"
+    class="flex h-full flex-wrap items-start justify-center gap-10 px-5 py-10"
   >
     <!-- the controller -->
     <div
