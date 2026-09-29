@@ -27,6 +27,13 @@ password.
 
 <ComponentPreview name="Password-Guidelines" hide-code />
 
+<div class="guideline-text">
+
+- Always pair the error state with a message telling the user what's wrong and how to fix it.
+- Show password requirements so users know exactly what makes a valid password.
+
+</div>
+
 ## Behavior
 
 ### Show and hide
