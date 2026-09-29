@@ -304,7 +304,8 @@ const swatches = ref([
   'E2E2E2',
   'EDEDED',
 ])
-const MAX_SAVED = 9
+// twenty at most, ten to a line; past that the oldest gives way
+const MAX_SAVED = 20
 function save() {
   if (swatches.value.includes(hex.value)) return
   swatches.value = [...swatches.value, hex.value].slice(-MAX_SAVED)
@@ -736,7 +737,7 @@ const rowsAtFoot = computed(
             @click="save"
           />
         </div>
-        <div class="flex h-3.5 items-center gap-2.5 px-2">
+        <div class="flex flex-wrap items-center gap-x-2.5 gap-y-2 px-[5px]">
           <button
             v-for="c in swatches"
             :key="c"
