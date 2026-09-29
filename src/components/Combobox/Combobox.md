@@ -62,6 +62,12 @@ goes back to the trigger, inside the dialog.
 
 <ComponentPreview name="Combobox-Guidelines" hide-code />
 
+<div class="guideline-text">
+
+- Add a clear button to an optional field, so people can undo a pick.
+
+</div>
+
 ## Behavior
 
 ### Options
@@ -147,7 +153,24 @@ same as `setOpen(false)`. `#suffix` replaces the chevron.
 
 To add a clear button, put it in `#suffix` or `#trigger`. Use `@click.stop`
 so the click does not toggle the popover, and `@pointerdown.stop` so the
-trigger does not take the press.
+trigger does not take the press. The button holds only an icon, so give it an
+`aria-label`.
+
+```vue
+<Combobox v-model="timezone" :options="timezones">
+  <template #suffix="{ clear }">
+    <button
+      v-if="timezone"
+      type="button"
+      aria-label="Clear"
+      @click.stop="clear"
+      @pointerdown.stop
+    >
+      <span class="lucide-x size-4" aria-hidden="true" />
+    </button>
+  </template>
+</Combobox>
+```
 
 ### Label, description and error
 
