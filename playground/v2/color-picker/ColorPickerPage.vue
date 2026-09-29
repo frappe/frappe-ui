@@ -30,7 +30,7 @@ function onChange(v: string, m: Mode) {
   >
     <!-- the controller -->
     <div
-      class="flex w-[360px] flex-col gap-4 rounded-6 border border-outline-gray-1 bg-surface-elevation-2 p-4 dark:border-outline-gray-2 dark:bg-surface-elevation-1"
+      class="flex w-[362px] flex-col gap-4 rounded-6 border border-outline-gray-1 bg-surface-elevation-2 p-4 dark:border-outline-gray-2 dark:bg-surface-elevation-1"
     >
       <div class="flex flex-col gap-1">
         <p class="text-lg-medium text-ink-gray-8">Colour picker</p>
@@ -48,21 +48,25 @@ function onChange(v: string, m: Mode) {
         <Switch v-model="saved" size="sm" label="Saved" />
       </div>
 
-      <div class="flex items-center gap-3">
-        <span
-          class="size-7 shrink-0 rounded-4 border border-outline-gray-2"
+      <!-- the value: a 330 × 60 preview, and the CSS under it -->
+      <div class="flex flex-col gap-2">
+        <div
+          class="h-[60px] w-[330px] rounded-4 border border-outline-gray-2"
           :style="{
-            background: value ? `${layer(value)}, ${CHECKER}` : CHECKER,
+            background: value
+              ? `${layer(value)}${mode === 'image' ? ' center / cover' : ''}, ${CHECKER}`
+              : CHECKER,
           }"
-          :class="mode === 'image' && 'bg-cover bg-center'"
           aria-hidden="true"
         />
-        <code class="min-w-0 flex-1 truncate text-p-sm text-ink-gray-6">
-          {{ value || 'No image yet' }}
-        </code>
-        <Button variant="subtle" size="sm" @click="picker?.loadSample()">
-          Sample photo
-        </Button>
+        <div class="flex items-center gap-3">
+          <code class="min-w-0 flex-1 truncate text-p-sm text-ink-gray-6">
+            {{ value || 'No image yet' }}
+          </code>
+          <Button variant="subtle" size="sm" @click="picker?.loadSample()">
+            Sample photo
+          </Button>
+        </div>
       </div>
     </div>
 
