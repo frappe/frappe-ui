@@ -4,13 +4,17 @@ import { Checkbox, RadioGroup, Radio, Switch } from 'frappe-ui'
 
 <template>
   <div class="flex flex-col gap-8">
-    <!-- 1. Action-verb labels -->
-    <Guideline caption="Use a clear action verb for checkbox labels.">
+    <!-- 1. Say what the checkbox turns on. A bare "Enabled" leaves people
+         guessing what it enables. -->
+    <Guideline
+      layout="stack"
+      caption="Label a checkbox with what it turns on, like “Email me when I'm mentioned”, not “Enabled”."
+    >
       <template #do>
-        <Checkbox :model-value="false" label="Enable" />
+        <Checkbox :model-value="true" label="Email me when I'm mentioned" />
       </template>
       <template #dont>
-        <Checkbox :model-value="false" label="Enabled" />
+        <Checkbox :model-value="true" label="Enabled" />
       </template>
     </Guideline>
 

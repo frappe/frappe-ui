@@ -39,6 +39,14 @@ is `disabled`, so it always stays checked.
 
 <ComponentPreview name="Checkbox-Guidelines" hide-code />
 
+<div class="guideline-text">
+
+- Label a checkbox with what it turns on, like “Email me when I'm mentioned”, not “Enabled”.
+- Don't use a checkbox when only one option can be selected. Use a radio instead.
+- If the setting takes effect immediately, use a switch instead.
+
+</div>
+
 ## Behavior
 
 ### Value
