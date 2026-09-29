@@ -41,7 +41,7 @@ The `#icon` slot draws a different emoji at each position. The slot's `index`,
 <div class="guideline-text">
 
 - Use a half-filled icon to accurately reflect values that fall between whole numbers.
-- Use the same icon consistently for the same concept across the product.
+- Show the count with an average, like “4.5 (128 reviews)”. A lone 5.0 from one review misleads.
 - Visually distinguish read-only ratings from interactive ones so users don't try to edit them.
 
 </div>
