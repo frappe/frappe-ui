@@ -34,6 +34,12 @@ scrolls.
 
 <ComponentPreview name="Select-Guidelines" hide-code />
 
+<div class="guideline-text">
+
+- Use a select for a value saved in a form; use a dropdown to trigger a UI action.
+
+</div>
+
 ## Behavior
 
 ### Options
