@@ -29,7 +29,7 @@ const comments = [
 
 <template>
   <div class="flex w-full max-w-md flex-col gap-4">
-    <div v-for="c in comments" :key="c.author" class="flex gap-2.5">
+    <div v-for="c in comments" :key="c.author" class="flex gap-3">
       <Avatar
         decorative
         :image="c.image"
@@ -38,7 +38,8 @@ const comments = [
         size="lg"
       />
       <div class="flex flex-col gap-1">
-        <div class="flex items-baseline gap-1.5">
+        <!-- As tall as the avatar, so the name sits level with it. -->
+        <div class="flex h-7 items-center gap-1.5">
           <span class="text-base font-medium text-ink-gray-9">{{
             c.author
           }}</span>

@@ -6,7 +6,7 @@ const avatarFor = (seed: string) => `https://i.pravatar.cc/80?u=${seed}`
 const people = {
   jane: { label: 'Jane Cooper', image: avatarFor('jane@example.com') },
   rahul: { label: 'Rahul Mehta', image: avatarFor('rahul@example.com') },
-  sara: { label: 'Sara Khan', image: '' },
+  sara: { label: 'Sara Khan', image: '', theme: 'violet' as const },
   leo: { label: 'Leo Park', image: avatarFor('leo@example.com') },
   mia: { label: 'Mia Wong', image: avatarFor('mia@example.com') },
 }
@@ -46,12 +46,13 @@ const cutout = { boxShadow: '0 0 0 2px var(--surface-base)' }
           :key="person.label"
           :image="person.image"
           :label="person.label"
+          :theme="'theme' in person ? person.theme : undefined"
           size="lg"
           :style="cutout"
         />
         <span
           v-if="task.assignees.length > shown"
-          class="grid size-7 place-items-center rounded-full bg-surface-gray-2 text-xs font-medium text-ink-gray-6"
+          class="grid size-7 place-items-center rounded-full bg-surface-gray-3 text-xs font-medium text-ink-gray-7"
           :style="cutout"
         >
           +{{ task.assignees.length - shown }}
