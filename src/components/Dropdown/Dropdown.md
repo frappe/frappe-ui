@@ -56,7 +56,7 @@ submenus for apps and theme. `selected` marks the current app and theme.
 
 <div class="guideline-text">
 
-- Keep the list easy to scan by grouping relevant items.
+- Put destructive actions like Delete last, in their own group, in red.
 
 </div>
 
