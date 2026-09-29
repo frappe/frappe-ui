@@ -95,7 +95,7 @@ const stop = (at: number, hex: string, alpha = 100): Stop => ({
   hsv: rgbToHsv(parseHex(hex)!),
   alpha,
 })
-const stops = ref<Stop[]>([stop(0, '545454'), stop(100, '212121')])
+const stops = ref<Stop[]>([stop(0, 'AD56BA'), stop(100, 'BA0022')])
 const selectedStop = ref(stops.value[0].id)
 const current = computed(() =>
   mode.value === 'gradient'
