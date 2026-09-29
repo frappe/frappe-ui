@@ -4,23 +4,23 @@ import { TextInput, Select } from 'frappe-ui'
 
 <template>
   <div class="flex flex-col gap-8">
-    <!-- 1. Always give a placeholder -->
-    <Guideline caption="Always include a placeholder to give context.">
+    <!-- 1. A placeholder vanishes once people type, so it can't stand in
+         for the label. Use it for an example of the expected value. -->
+    <Guideline
+      caption="Use the placeholder for an example value, not as the field's label."
+    >
       <template #do>
-        <div class="flex w-56 flex-col gap-2">
-          <TextInput placeholder="jane@example.com" />
-          <TextInput placeholder="Enter your name" />
-        </div>
+        <TextInput class="w-56" label="Email" placeholder="jane@example.com" />
       </template>
       <template #dont>
-        <TextInput class="w-56" />
+        <TextInput class="w-56" placeholder="Email" />
       </template>
     </Guideline>
 
     <!-- 2. Match the input type and placeholder (do-only) -->
     <Guideline
       layout="stack"
-      caption="Match the input type and placeholder to the information."
+      caption="Set the input type to match the value, like email or tel, so phones show the right keyboard."
     >
       <template #do>
         <div class="flex w-72 flex-col gap-3">

@@ -39,6 +39,14 @@ The `#label` slot replaces the label text and the required marker. It receives
 
 <ComponentPreview name="TextInput-Guidelines" hide-code />
 
+<div class="guideline-text">
+
+- Use the placeholder for an example value, not as the field's label.
+- Set the input type to match the value, like email or tel, so phones show the right keyboard.
+- Size each field to the length of the content it holds.
+
+</div>
+
 ## Behavior
 
 ### Label, description and error
