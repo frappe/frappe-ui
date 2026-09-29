@@ -29,9 +29,9 @@ password.
 
 <div class="guideline-text">
 
-- Always pair the error state with a message telling the user what's wrong and how to fix it.
-- Show password requirements so users know exactly what makes a valid password.
-- Don't add a “Confirm password” field. The show toggle already lets people check for typos.
+- Label each password field. A placeholder disappears once people type.
+- Ask for a longer password, not a mix of uppercase, numbers and symbols. Those rules lead to guessable ones like “Password1!”.
+- Use Password for any secret, like an API token, not only for passwords.
 
 </div>
 
@@ -72,6 +72,16 @@ above the error.
 description or error shows, and the field box otherwise. Every other attribute
 and listener goes on the `<input>`, including `name`, `autocomplete` and
 `@blur`.
+
+Give every password field an `autocomplete` value: `current-password` where
+people enter the password they have, and `new-password` where they choose
+one. Without it, a password manager can't tell the fields apart. It may fill
+the saved password into a new-password field, and it won't suggest a strong
+one.
+
+Don't cap the length with `maxlength`. A long passphrase, or the 64-character
+password a password manager generates, gets cut off without a warning, and the
+saved password no longer matches.
 
 ## Accessibility
 
