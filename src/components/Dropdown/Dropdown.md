@@ -1,7 +1,8 @@
 # Dropdown
 
 A menu of actions that opens from a button. To open a menu on right-click, use
-[ContextMenu](./contextmenu) instead.
+[ContextMenu](./contextmenu) instead. To pick a value from a long list people
+need to search, use [Combobox](./combobox).
 
 <ComponentPlayground name="Dropdown" />
 
@@ -52,6 +53,12 @@ submenus for apps and theme. `selected` marks the current app and theme.
 ## Usage Guidelines
 
 <ComponentPreview name="Dropdown-Guidelines" hide-code />
+
+<div class="guideline-text">
+
+- Keep the list easy to scan by grouping relevant items.
+
+</div>
 
 ## Behavior
 
