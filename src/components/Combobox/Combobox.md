@@ -64,7 +64,7 @@ goes back to the trigger, inside the dialog.
 
 <div class="guideline-text">
 
-- Add a clear button to an optional field, so people can undo a pick.
+- Add a clear button when empty means something, like a filter that shows everything.
 
 </div>
 
