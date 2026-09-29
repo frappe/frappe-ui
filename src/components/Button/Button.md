@@ -56,7 +56,7 @@ Two actions that share the width of a card, each with `class="flex-1"`.
 - Don't mix more than two button variants in one group.
 - Use one solid button per group, for the main action.
 - Label a button with what it does, like “Delete project”, not “OK”.
-- Don't disable Save to signal invalid input. Keep it enabled and show what's wrong on click.
+- Don't disable a submit button to signal invalid input. Keep it enabled and show what's wrong on click.
 
 </div>
 

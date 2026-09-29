@@ -2,35 +2,36 @@
 import { ref } from 'vue'
 import { Button, TextInput } from 'frappe-ui'
 
-// A small form, the same width on both sides.
-const form = 'flex w-72 flex-col gap-3'
+// The invite card: a heading, then the field and its button on one row.
+const inviteRow = 'flex w-80 flex-col gap-2'
+const inviteHeading = 'text-sm font-medium text-ink-gray-7'
 
-// Card 5 is live, so people can feel the difference. "Do": Save always
-// works, and a bad email says what's wrong on click. "Don't": Save stays
-// grey until the email is valid, with no hint why.
+// It opens on the same half-typed email on both sides, so the difference
+// shows at a glance: "do" has already said what's wrong (as after a click),
+// "don't" just has a grey button. It stays live: type to try it.
 const isEmail = (value: string) => /^\S+@\S+\.\S+$/.test(value)
+const invalidEmail = 'Enter a valid email address, like jane@example.com.'
+const startEmail = 'jane@exa'
 
-const doEmail = ref('')
-const doError = ref('')
-const doSaved = ref(false)
-function saveDo() {
-  doSaved.value = false
+const doEmail = ref(startEmail)
+const doError = ref(invalidEmail)
+const doSent = ref(false)
+function inviteDo() {
+  doSent.value = false
   if (!isEmail(doEmail.value)) {
-    doError.value = doEmail.value
-      ? 'Enter a valid email address, like jane@example.com.'
-      : 'Email is required.'
+    doError.value = doEmail.value ? invalidEmail : 'Email is required.'
     return
   }
   doError.value = ''
-  doSaved.value = true
+  doSent.value = true
 }
 function editDo(value: string) {
   doEmail.value = value
   doError.value = ''
-  doSaved.value = false
+  doSent.value = false
 }
 
-const dontEmail = ref('')
+const dontEmail = ref(startEmail)
 
 // Card 5: a small confirmation, the same width on both sides.
 const confirm =
@@ -137,42 +138,44 @@ const confirm =
       </template>
     </Guideline>
 
-    <!-- Disabling Save to mean "the form isn't valid yet" leaves people
-         stuck: a grey button doesn't say what's missing. Keep it enabled and
-         show the problem when they click. -->
+    <!-- Disabling a submit button to mean "the input isn't valid yet" leaves
+         people stuck: a grey button doesn't say what's missing. Keep it
+         enabled and show the problem when they click. -->
     <Guideline
       layout="stack"
-      caption="Don't disable Save to signal invalid input. Keep it enabled and show what's wrong on click."
+      caption="Don't disable a submit button to signal invalid input. Keep it enabled and show what's wrong on click."
     >
       <template #do>
-        <div :class="form">
-          <TextInput
-            label="Email"
-            placeholder="jane@example.com"
-            :model-value="doEmail"
-            :error="doError"
-            @update:model-value="editDo"
-          />
-          <div class="flex items-center justify-end gap-3">
-            <span v-if="doSaved" class="text-sm text-ink-green-7">Saved</span>
-            <Button variant="solid" @click="saveDo">Save</Button>
+        <div :class="inviteRow">
+          <p :class="inviteHeading">Invite a teammate</p>
+          <div class="flex items-start gap-2">
+            <TextInput
+              class="flex-1"
+              aria-label="Email"
+              placeholder="jane@example.com"
+              :model-value="doEmail"
+              :error="doError"
+              @update:model-value="editDo"
+            />
+            <Button variant="solid" @click="inviteDo">Invite</Button>
           </div>
+          <p v-if="doSent" class="text-sm text-ink-green-7">Invite sent</p>
         </div>
       </template>
       <template #dont>
-        <div :class="form">
-          <TextInput
-            v-model="dontEmail"
-            label="Email"
-            placeholder="jane@example.com"
-          />
-          <Button
-            variant="solid"
-            class="self-end"
-            :disabled="!isEmail(dontEmail)"
-          >
-            Save
-          </Button>
+        <div :class="inviteRow">
+          <p :class="inviteHeading">Invite a teammate</p>
+          <div class="flex items-start gap-2">
+            <TextInput
+              v-model="dontEmail"
+              class="flex-1"
+              aria-label="Email"
+              placeholder="jane@example.com"
+            />
+            <Button variant="solid" :disabled="!isEmail(dontEmail)">
+              Invite
+            </Button>
+          </div>
         </div>
       </template>
     </Guideline>
