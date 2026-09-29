@@ -198,20 +198,33 @@ const alphaTrack = computed(
 // ---- the fields: each edits a draft, and the colour takes it when it parses.
 // A hex takes as it is typed once it is six long; a number only on Enter or
 // leaving, so a half-typed "10" is not read as ten on the way to a hundred.
+// Enter commits; in a numeric field the arrow keys step the value by one,
+// or ten with Shift, and it takes at once.
 function field(
   source: () => string,
   apply: (text: string, final: boolean) => boolean,
+  numeric = true,
 ) {
   const draft = ref(source())
   watch(source, (v) => (draft.value = v))
+  const commit = () => {
+    if (!apply(draft.value, true)) draft.value = source()
+  }
   return reactive({
     draft,
     input(v: string | number) {
       draft.value = String(v)
       apply(draft.value, false)
     },
-    commit() {
-      if (!apply(draft.value, true)) draft.value = source()
+    commit,
+    key(e: KeyboardEvent) {
+      if (e.key === 'Enter') return commit()
+      if (!numeric || (e.key !== 'ArrowUp' && e.key !== 'ArrowDown')) return
+      e.preventDefault()
+      const n = parseNumber(draft.value)
+      if (n === null) return
+      const step = (e.shiftKey ? 10 : 1) * (e.key === 'ArrowUp' ? 1 : -1)
+      if (apply(String(n + step), true)) draft.value = source()
     },
   })
 }
@@ -226,6 +239,7 @@ const hexField = field(
     setRgb(parsed)
     return true
   },
+  false,
 )
 
 const alphaField = field(
@@ -425,6 +439,7 @@ function stopFieldsFor(st: Stop) {
         st.hsv = rgbToHsv(parsed, st.hsv.h)
         return true
       },
+      false,
     ),
     alpha: field(
       () => `${st.alpha} %`,
@@ -623,7 +638,7 @@ const rowsAtFoot = computed(
                 spellcheck="false"
                 @update:model-value="hexField.input"
                 @blur="hexField.commit"
-                @keydown.enter="hexField.commit"
+                @keydown="hexField.key"
               >
                 <template #prefix>
                   <span
@@ -642,7 +657,7 @@ const rowsAtFoot = computed(
                 inputmode="numeric"
                 @update:model-value="channelFields[i].input"
                 @blur="channelFields[i].commit"
-                @keydown.enter="channelFields[i].commit"
+                @keydown="channelFields[i].key"
               />
               <TextInput
                 v-model="alphaField.draft"
@@ -651,7 +666,7 @@ const rowsAtFoot = computed(
                 inputmode="numeric"
                 @update:model-value="alphaField.input"
                 @blur="alphaField.commit"
-                @keydown.enter="alphaField.commit"
+                @keydown="alphaField.key"
               />
             </div>
           </div>
@@ -672,7 +687,7 @@ const rowsAtFoot = computed(
               inputmode="numeric"
               @update:model-value="fieldsOf(st).at.input"
               @blur="fieldsOf(st).at.commit"
-              @keydown.enter="fieldsOf(st).at.commit"
+              @keydown="fieldsOf(st).at.key"
             >
               <template #suffix>
                 <EIcon name="small-down" class="size-4 text-ink-gray-6" />
@@ -686,7 +701,7 @@ const rowsAtFoot = computed(
                 spellcheck="false"
                 @update:model-value="fieldsOf(st).hex.input"
                 @blur="fieldsOf(st).hex.commit"
-                @keydown.enter="fieldsOf(st).hex.commit"
+                @keydown="fieldsOf(st).hex.key"
               >
                 <template #prefix>
                   <button
@@ -705,7 +720,7 @@ const rowsAtFoot = computed(
                 inputmode="numeric"
                 @update:model-value="fieldsOf(st).alpha.input"
                 @blur="fieldsOf(st).alpha.commit"
-                @keydown.enter="fieldsOf(st).alpha.commit"
+                @keydown="fieldsOf(st).alpha.key"
               />
             </div>
           </div>
