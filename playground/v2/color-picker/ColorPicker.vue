@@ -689,9 +689,6 @@ const rowsAtFoot = computed(
               @blur="fieldsOf(st).at.commit"
               @keydown="fieldsOf(st).at.key"
             >
-              <template #suffix>
-                <EIcon name="small-down" class="size-4 text-ink-gray-6" />
-              </template>
             </TextInput>
             <div class="cp-fields flex min-w-0 flex-1 gap-px">
               <TextInput
@@ -884,10 +881,8 @@ const rowsAtFoot = computed(
   text-align: right;
   padding-inline-start: 6px;
 }
-/* the stop's place reads gray-400 in the file; room for "100%" beside the
-   chevron */
+/* the stop's place: a plain field, its value as the others' */
 .cp-stop-at input {
-  color: var(--ink-gray-4);
-  padding-inline-end: 20px;
+  color: var(--ink-gray-7);
 }
 </style>
