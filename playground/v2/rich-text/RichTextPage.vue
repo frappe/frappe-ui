@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// The Rich text editor page: the file's WYSIWYG editor on the gray-50
+// The Rich text editor page: the file's WYSIWYG editor on the white
 // stage, and a row above it for the states the editor can be in —
 // editable or read-only, the article or an empty document.
 import { ref } from 'vue'
@@ -11,7 +11,7 @@ const empty = ref(false)
 </script>
 
 <template>
-  <div class="v2-scroll h-full overflow-y-auto bg-surface-gray-1">
+  <div class="v2-scroll h-full overflow-y-auto bg-surface-base">
     <div
       class="mx-auto flex w-full max-w-[1280px] flex-col gap-4 px-4 py-6 sm:px-6"
     >
