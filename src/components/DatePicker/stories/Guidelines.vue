@@ -120,11 +120,12 @@ const calendarIcon = 'lucide-calendar size-4 text-ink-gray-5'
       </template>
     </Guideline>
 
-    <!-- 3. The month as a word reads at a glance. `format` only changes
-         what's shown; the value stays YYYY-MM-DD. "Don't" has no format. -->
+    <!-- 3. Every app passes a format: Builder uses MMM D, YYYY, HRMS its
+         own. `format` only changes what's shown; the value stays
+         YYYY-MM-DD. "Don't" has no format. -->
     <Guideline
       layout="stack"
-      caption="Pass a format with the month as a word, like “MMM&nbsp;D,&nbsp;YYYY”. Without one, the field shows the raw value."
+      caption="Always pass a format, like the site's date format or “MMM&nbsp;D,&nbsp;YYYY”. Without one, the field shows the raw 2026&#8209;03&#8209;05."
     >
       <template #do>
         <DatePicker

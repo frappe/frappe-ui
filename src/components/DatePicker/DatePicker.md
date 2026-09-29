@@ -39,7 +39,7 @@ the range into "Depart" and "Return" fields over one calendar.
 
 - Pick a date range with one DateRangePicker, not two date fields.
 - Offer common ranges, like Last 7 days, before a custom range.
-- Pass a format with the month as a word, like “MMM D, YYYY”. Without one, the field shows the raw value.
+- Always pass a format, like the site's date format or “MMM D, YYYY”. Without one, the field shows the raw 2026-03-05.
 
 </div>
 
