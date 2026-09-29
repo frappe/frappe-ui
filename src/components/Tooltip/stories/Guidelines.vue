@@ -9,8 +9,7 @@ import { Button, Tooltip } from 'frappe-ui'
 const bubble =
   'w-fit rounded-4 bg-surface-gray-10 px-2 py-1 text-xs text-ink-base shadow-xl'
 const arrowDown = 'absolute -bottom-1 size-2 rotate-45 bg-surface-gray-10'
-const arrowLeft =
-  'absolute -left-1 size-2 rotate-45 bg-surface-gray-10'
+const arrowLeft = 'absolute -left-1 size-2 rotate-45 bg-surface-gray-10'
 </script>
 
 <template>
@@ -81,7 +80,9 @@ const arrowLeft =
             </div>
             <div class="text-sm font-medium text-ink-gray-8">4d 4h</div>
           </div>
-          <div :class="[bubble, 'absolute left-[86px] top-[26px] max-w-[14rem]']">
+          <div
+            :class="[bubble, 'absolute left-[86px] top-[26px] max-w-[14rem]']"
+          >
             Remaining time to resolve the ticket.
             <div :class="[arrowDown, 'left-4']" />
           </div>
@@ -99,41 +100,63 @@ const arrowLeft =
           <!-- text toolbar -->
           <div class="flex items-center gap-1 rounded-3 bg-surface-gray-2 p-1">
             <Tooltip text="Bold">
-              <Button variant="subtle" icon="lucide-bold" />
+              <Button variant="subtle" icon="lucide-bold" label="Bold" />
             </Tooltip>
             <Tooltip text="Italic">
-              <Button variant="ghost" icon="lucide-italic" />
+              <Button variant="ghost" icon="lucide-italic" label="Italic" />
             </Tooltip>
             <Tooltip text="Underline">
-              <Button variant="ghost" icon="lucide-underline" />
+              <Button
+                variant="ghost"
+                icon="lucide-underline"
+                label="Underline"
+              />
             </Tooltip>
             <Tooltip text="Strikethrough">
-              <Button variant="ghost" icon="lucide-strikethrough" />
+              <Button
+                variant="ghost"
+                icon="lucide-strikethrough"
+                label="Strikethrough"
+              />
             </Tooltip>
           </div>
 
           <!-- icon sidebar -->
-          <div class="flex flex-col items-center gap-1 rounded-3 bg-surface-gray-2 p-1">
+          <div
+            class="flex flex-col items-center gap-1 rounded-3 bg-surface-gray-2 p-1"
+          >
             <Tooltip text="Search" side="right">
-              <Button variant="ghost" icon="lucide-search" />
+              <Button variant="ghost" icon="lucide-search" label="Search" />
             </Tooltip>
             <Tooltip text="Notifications" side="right">
-              <Button variant="ghost" icon="lucide-bell" />
+              <Button
+                variant="ghost"
+                icon="lucide-bell"
+                label="Notifications"
+              />
             </Tooltip>
             <Tooltip text="Tickets" side="right">
-              <Button variant="subtle" icon="lucide-ticket" />
+              <Button variant="subtle" icon="lucide-ticket" label="Tickets" />
             </Tooltip>
             <Tooltip text="Apps" side="right">
-              <Button variant="ghost" icon="lucide-layout-grid" />
+              <Button variant="ghost" icon="lucide-layout-grid" label="Apps" />
             </Tooltip>
             <Tooltip text="Knowledge base" side="right">
-              <Button variant="ghost" icon="lucide-book-open" />
+              <Button
+                variant="ghost"
+                icon="lucide-book-open"
+                label="Knowledge base"
+              />
             </Tooltip>
             <Tooltip text="Reports" side="right">
-              <Button variant="ghost" icon="lucide-bar-chart-3" />
+              <Button
+                variant="ghost"
+                icon="lucide-bar-chart-3"
+                label="Reports"
+              />
             </Tooltip>
             <Tooltip text="Profile" side="right">
-              <Button variant="ghost" icon="lucide-user" />
+              <Button variant="ghost" icon="lucide-user" label="Profile" />
             </Tooltip>
           </div>
         </div>

@@ -13,7 +13,11 @@ const longText =
       caption="Don't use a textarea where the expected input is short."
     >
       <template #do>
-        <Textarea label="Bio" placeholder="Tell us a bit about yourself" class="w-80" />
+        <Textarea
+          label="Bio"
+          placeholder="Tell us a bit about yourself"
+          class="w-80"
+        />
       </template>
       <template #dont>
         <Textarea
@@ -32,17 +36,18 @@ const longText =
       <template #do>
         <div class="flex w-[440px] flex-col gap-3">
           <div class="flex gap-3">
-            <TextInput label="Name" placeholder="Default Policy" class="flex-1" />
+            <TextInput
+              label="Name"
+              placeholder="Default Policy"
+              class="flex-1"
+            />
             <Select
               label="Default priority"
               :options="['High', 'Medium', 'Low']"
               class="flex-1"
             />
           </div>
-          <Textarea
-            label="Description"
-            placeholder="Describe the policy"
-          />
+          <Textarea label="Description" placeholder="Describe the policy" />
         </div>
       </template>
     </Guideline>
@@ -53,15 +58,32 @@ const longText =
       caption="When long-form text needs formatting, use a text editor instead."
     >
       <template #do>
-        <div class="w-[440px] overflow-hidden rounded-2 border border-outline-gray-2">
+        <div
+          class="w-[440px] overflow-hidden rounded-2 border border-outline-gray-2"
+        >
           <div
             class="flex items-center gap-1 border-b border-outline-gray-2 p-1.5"
           >
-            <Button variant="ghost" size="sm" icon="lucide-bold" />
-            <Button variant="ghost" size="sm" icon="lucide-italic" />
-            <Button variant="ghost" size="sm" icon="lucide-underline" />
-            <Button variant="ghost" size="sm" icon="lucide-link" />
-            <Button variant="ghost" size="sm" icon="lucide-list" />
+            <Button variant="ghost" size="sm" icon="lucide-bold" label="Bold" />
+            <Button
+              variant="ghost"
+              size="sm"
+              icon="lucide-italic"
+              label="Italic"
+            />
+            <Button
+              variant="ghost"
+              size="sm"
+              icon="lucide-underline"
+              label="Underline"
+            />
+            <Button variant="ghost" size="sm" icon="lucide-link" label="Link" />
+            <Button
+              variant="ghost"
+              size="sm"
+              icon="lucide-list"
+              label="Bulleted list"
+            />
           </div>
           <p class="p-3 text-base leading-relaxed text-ink-gray-7">
             Modern businesses need software that adapts to their processes. At
