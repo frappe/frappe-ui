@@ -64,6 +64,8 @@ goes back to the trigger, inside the dialog.
 
 <div class="guideline-text">
 
+- Show a record's name, with its ID as a hint, not the ID alone.
+- When any value is valid, like a route or a font, let people use what they type.
 - Add a clear button when empty means something, like a style that falls back to unset.
 
 </div>
@@ -95,6 +97,11 @@ custom row that commits the query therefore turns `Combobox` into a text input
 with suggestions.
 
 ### Server search
+
+Search on the server for any list that grows with the site, such as
+employees, customers or items. Loading every record into `options` makes the
+field slow to open on a large site. HRMS's link fields work this way: they ask
+the server for matches as people type, a moment after they pause.
 
 To load options from a server:
 
