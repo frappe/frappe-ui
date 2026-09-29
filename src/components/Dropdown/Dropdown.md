@@ -57,7 +57,6 @@ submenus for apps and theme. `selected` marks the current app and theme.
 <div class="guideline-text">
 
 - Put destructive actions like Delete last, in their own group, in red.
-- Keep the main action on its own button, with the other actions in a menu beside it.
 - Open a menu from a Button, not a bare icon, so a keyboard can reach it.
 
 </div>

@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { Button, Dropdown } from 'frappe-ui'
 
-// Card 1 is a copy of an open menu. A live Dropdown has to stay open to show this, but its menu portals to
-// <body> and doesn't reserve layout space, so an open one on a static page
-// overlaps the captions. These reproduce Menu's own classes one to one
+// Card 1 is a copy of an open menu. A live Dropdown would have to stay
+// open to show this, but its menu portals to <body> and doesn't reserve
+// layout space, so an open one on a static page overlaps the captions. These reproduce Menu's own classes one to one
 // (`menuClasses` in Menu/utils.ts, ItemListRow's `sm` row) instead of
 // approximating them.
 const panelClass =
@@ -13,19 +13,9 @@ const itemClass =
   'flex min-h-7 items-center gap-2 rounded-4 px-2 py-1.5 text-base text-ink-gray-7'
 const iconClass = 'size-4 shrink-0 text-ink-gray-6'
 
-// Card 2, from Frappe Builder's Publish button: Publish stays one click
-// away, and the rarer ways to publish sit in a menu on the chevron.
 const noop = () => {}
-const otherPublishActions = [
-  { label: 'Publish to staging', icon: 'lucide-flask-conical', onClick: noop },
-  { label: 'Unpublish', icon: 'lucide-cloud-off', onClick: noop },
-]
-const allPublishActions = [
-  { label: 'Publish', icon: 'lucide-globe', onClick: noop },
-  ...otherPublishActions,
-]
 
-// Card 3, from Frappe Builder's style panel, where a bare icon opens each
+// Card 2, from Frappe Builder's style panel, where a bare icon opens each
 // property's menu. A <span> trigger gets no tabindex, role or name, so a
 // keyboard can't reach it and a screen reader can't announce it.
 const propertyActions = [
@@ -102,38 +92,7 @@ const propertyRow = 'flex w-48 items-center gap-1.5 text-sm text-ink-gray-6'
       </template>
     </Guideline>
 
-    <!-- 2. The main action stays one click away; the menu holds the rest.
-         Both sides are live. -->
-    <Guideline
-      layout="stack"
-      caption="Keep the main action on its own button, with the other actions in a menu beside it."
-    >
-      <template #do>
-        <div class="flex gap-px">
-          <Button variant="solid" label="Publish" class="rounded-r-none" />
-          <Dropdown :options="otherPublishActions" align="end">
-            <Button
-              variant="solid"
-              icon="lucide-chevron-down"
-              aria-label="More ways to publish"
-              class="rounded-l-none"
-            />
-          </Dropdown>
-        </div>
-      </template>
-      <template #dont>
-        <Dropdown
-          :options="allPublishActions"
-          :button="{
-            label: 'Publish',
-            variant: 'solid',
-            iconRight: 'lucide-chevron-down',
-          }"
-        />
-      </template>
-    </Guideline>
-
-    <!-- 3. Only a Button trigger can be reached with Tab and is announced
+    <!-- 2. Only a Button trigger can be reached with Tab and is announced
          as a button. Tab through both sides to compare. -->
     <Guideline
       layout="stack"
