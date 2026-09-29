@@ -103,4 +103,19 @@ The input has `role="combobox"`, `aria-haspopup="dialog"` and
 `aria-expanded`, so a screen reader announces that the field opens a panel and
 whether the panel is open.
 
+The calendar is a grid of date buttons, each labelled with the spoken date,
+like "Tuesday, 3 February 2026", in the dayjs locale. One date at a time is in
+the tab order. Inside the calendar:
+
+| Keys                              | Action                                  |
+| --------------------------------- | --------------------------------------- |
+| `ArrowLeft` / `ArrowRight`        | Previous / next day                     |
+| `ArrowUp` / `ArrowDown`           | Same day of the previous / next week    |
+| `Home` / `End`                    | First / last day of the week            |
+| `PageUp` / `PageDown`             | Same day of the previous / next month   |
+| `Shift+PageUp` / `Shift+PageDown` | Same day of the previous / next year    |
+| `Enter` / `Space`                 | Pick the focused date                   |
+
+Dates blocked by `min`, `max` or `isDateUnavailable` are disabled.
+
 <!-- @include: ./DatePicker.api.md -->
