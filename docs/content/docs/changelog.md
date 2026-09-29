@@ -3131,8 +3131,8 @@ action mode the divider still reads as a separator for assistive technologies.
 `Dropdown` of other ways to do it, like Publish with "Publish to staging".
 Builder, Studio, CRM and Suite each built one by hand, with different
 dividers, chevron widths and focus rings, and most left the chevron without a
-name. It takes Button's `label`, `iconLeft`, `variant`, `theme`, `size`,
-`loading` and `disabled`, and Dropdown's `options`. `menuLabel` names the
+name. It takes Button's `label`, `iconLeft`, `variant`, `size`, `loading`
+and `disabled`, and Dropdown's `options`. `menuLabel` names the
 chevron.
 
 **What to do:** nothing. To replace a hand-built split button, see

@@ -38,13 +38,6 @@
     default: '"subtle"'
   },
   {
-    name: 'theme',
-    description: 'Visual color theme of both halves',
-    required: false,
-    type: 'Theme',
-    default: '"gray"'
-  },
-  {
     name: 'size',
     description: 'Controls the size of both halves',
     required: false,

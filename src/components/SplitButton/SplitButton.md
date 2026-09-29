@@ -16,11 +16,12 @@ page's status, and `loading` locks both halves while it saves.
 
 <ComponentPreview name="SplitButton-Publish" />
 
-### Send or schedule
+### Message composer
 
-A mail composer. Send goes now, and a group in the menu schedules it.
+A chat composer. Send goes now, and the chevron schedules the message. Both
+halves stay disabled until there's something to send.
 
-<ComponentPreview name="SplitButton-SendLater" />
+<ComponentPreview name="SplitButton-Composer" />
 
 ### Export formats
 
@@ -34,8 +35,9 @@ button, and the others are in the menu.
 ### Halves
 
 The main action is a `Button` and the chevron is a `Dropdown` trigger. Both take
-`variant`, `theme` and `size`, so they always match. `@click` fires only from
-the main action. The menu's items run their own `onClick`.
+`variant` and `size`, so they always match. There is no `theme`: a split button
+is always gray, and a colored action belongs on a plain `Button`. `@click` fires
+only from the main action. The menu's items run their own `onClick`.
 
 `options` takes the same items and groups as [Dropdown](./dropdown#options),
 including `icon`, `theme`, `condition` and `submenu`. `align` places the menu
@@ -43,9 +45,10 @@ along the chevron, and defaults to `end`.
 
 ### Joining
 
-The inner corners are square. `solid`, `subtle` and `ghost` halves sit 1px
-apart, so the page shows through as a divider. `outline` halves overlap by one
-border, so the seam is one line.
+The inner corners are square, and the halves overlap by a 1px border. `outline`
+shows that border as the seam. The other variants keep it transparent and paint
+the shared edge in the page color, so it reads as a 1px gap. Every variant is
+the same size, so switching variants moves nothing.
 
 ### Loading and disabled
 
@@ -55,9 +58,9 @@ thing, and starting one mid-request would race the first.
 
 ### Styling hooks
 
-The wrapper has `data-slot="root"`, `data-variant`, `data-size` and
-`data-color`. The main action has `data-slot="action"`, and the chevron has the
-Dropdown trigger's `data-slot="trigger"`.
+The wrapper has `data-slot="root"`, `data-variant` and `data-size`. The main
+action has `data-slot="action"`, and the chevron has the Dropdown trigger's
+`data-slot="trigger"`.
 
 ## Accessibility
 

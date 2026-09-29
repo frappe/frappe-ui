@@ -21,15 +21,6 @@ const knobs: Knob[] = [
     ],
   },
   {
-    name: 'theme',
-    type: 'tabs',
-    default: 'gray',
-    options: [
-      { label: 'gray', value: 'gray' },
-      { label: 'blue', value: 'blue' },
-    ],
-  },
-  {
     name: 'size',
     type: 'tabs',
     default: 'sm',
@@ -51,7 +42,6 @@ function buildCode(v: Record<string, any>) {
     `menu-label="${v.menuLabel}"`,
     `variant="${v.variant}"`,
   ]
-  if (v.theme !== 'gray') attrs.push(`theme="${v.theme}"`)
   if (v.size !== 'sm') attrs.push(`size="${v.size}"`)
   if (v.iconLeft) attrs.push('icon-left="lucide-globe"')
   if (v.disabled) attrs.push('disabled')
@@ -68,7 +58,6 @@ function buildCode(v: Record<string, any>) {
         :label="values.label"
         :menu-label="values.menuLabel"
         :variant="values.variant"
-        :theme="values.theme"
         :size="values.size"
         :icon-left="values.iconLeft ? 'lucide-globe' : undefined"
         :disabled="values.disabled"

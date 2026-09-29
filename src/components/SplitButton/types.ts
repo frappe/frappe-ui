@@ -1,5 +1,5 @@
 import type { Component } from 'vue'
-import type { Size, Theme, Variant } from '../Button/types'
+import type { Size, Variant } from '../Button/types'
 import type { DropdownAlign, DropdownOptions } from '../Dropdown/types'
 
 export interface SplitButtonProps {
@@ -17,9 +17,6 @@ export interface SplitButtonProps {
 
   /** Visual style of both halves */
   variant?: Variant
-
-  /** Visual color theme of both halves */
-  theme?: Theme
 
   /** Controls the size of both halves */
   size?: Size

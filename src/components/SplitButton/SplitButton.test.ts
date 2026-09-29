@@ -81,25 +81,27 @@ describe('SplitButton', () => {
     expect(chevron.className).toContain('rounded-l-none')
   })
 
-  it('overlaps outline halves by one border instead of leaving a gap', () => {
-    const { host, chevron } = mount({ variant: 'outline' })
-    const root = host.querySelector('[data-slot="root"]')!
-    expect(root.className).not.toContain('gap-px')
-    expect(chevron.className).toContain('-ml-px')
+  it('joins every variant the same way, so switching moves nothing', () => {
+    for (const variant of ['solid', 'subtle', 'outline']) {
+      const { host, action, chevron } = mount({ variant })
+      const root = host.querySelector('[data-slot="root"]')!
+      expect(root.className).not.toContain('gap-px')
+      expect(chevron.className).toContain('-ml-px')
+      // Outline has its own border; the others get a transparent one.
+      for (const half of [action, chevron]) {
+        expect(half.className).toMatch(/(^|\s)border(\s|$)/)
+      }
+      cleanup?.()
+    }
   })
 
-  it('passes variant, theme and size to both halves and the root', () => {
-    const { host, action, chevron } = mount({
-      variant: 'solid',
-      theme: 'red',
-      size: 'md',
-    })
+  it('passes variant and size to both halves and the root', () => {
+    const { host, action, chevron } = mount({ variant: 'solid', size: 'md' })
     const root = host.querySelector('[data-slot="root"]')!
     expect(root.getAttribute('data-variant')).toBe('solid')
-    expect(root.getAttribute('data-color')).toBe('red')
     expect(root.getAttribute('data-size')).toBe('md')
     for (const half of [action, chevron]) {
-      expect(half.className).toContain('bg-surface-red-7')
+      expect(half.className).toContain('bg-surface-gray-10')
       expect(half.className).toContain('h-8')
     }
   })
