@@ -44,6 +44,7 @@ The `#label` slot replaces the label text and the required marker. It receives
 - Use the placeholder for an example value, not as the field's label.
 - Set the input type to match the value, like email or tel, so phones show the right keyboard.
 - Size each field to the length of the content it holds.
+- Show an error when people leave the field, not while they're still typing.
 
 </div>
 

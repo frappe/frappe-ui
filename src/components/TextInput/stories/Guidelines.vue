@@ -70,5 +70,30 @@ import { TextInput, Select } from 'frappe-ui'
         </div>
       </template>
     </Guideline>
+
+    <!-- 4. Both sides are mid-typing ("jane@exa"). Flagging it as invalid now
+         scolds people for a value they haven't finished. Check on blur. -->
+    <Guideline
+      layout="stack"
+      caption="Show an error when people leave the field, not while they're still typing."
+    >
+      <template #do>
+        <TextInput
+          class="w-64"
+          label="Email"
+          type="email"
+          model-value="jane@exa"
+        />
+      </template>
+      <template #dont>
+        <TextInput
+          class="w-64"
+          label="Email"
+          type="email"
+          model-value="jane@exa"
+          error="Enter a valid email address."
+        />
+      </template>
+    </Guideline>
   </div>
 </template>
