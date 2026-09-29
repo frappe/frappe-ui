@@ -31,6 +31,18 @@ the range into "Depart" and "Return" fields over one calendar.
 
 <ComponentPreview name="DatePicker-Range" />
 
+## Usage Guidelines
+
+<ComponentPreview name="DatePicker-Guidelines" hide-code />
+
+<div class="guideline-text">
+
+- Pick a date range with one DateRangePicker, not two date fields.
+- Offer common ranges, like Last 7 days, before a custom range.
+- Show dates with the month as a word, like “Mar 5, 2026”, so they read the same everywhere.
+
+</div>
+
 ## Behavior
 
 ### Values
