@@ -804,7 +804,8 @@ const rowsAtFoot = computed(
   transform: translate(-50%, -50%);
 }
 /* a stop's handle on the gradient bar: the selected one a touch larger;
-   in its row, the swatch wears a ring */
+   its row's fields sit a shade deeper, the dot itself left as the hex
+   field's, 8px in */
 .cp-stop {
   cursor: grab;
   transition: transform 120ms ease-out;
@@ -820,10 +821,8 @@ const rowsAtFoot = computed(
     0 0 0 0.5px rgb(0 0 0 / 0.16),
     0 0 0 2.5px var(--outline-gray-3);
 }
-.cp-stop-row.is-selected .cp-stop-swatch {
-  box-shadow:
-    0 0 0 1px var(--surface-elevation-2),
-    0 0 0 2.5px var(--outline-gray-4);
+.cp-stop-row.is-selected input {
+  background-color: var(--surface-gray-3);
 }
 .cp-stop-swatch {
   pointer-events: auto;
