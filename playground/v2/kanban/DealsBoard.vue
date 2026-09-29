@@ -11,8 +11,10 @@
 //
 // The cards move: pick one up and carry it to another stage, or above or
 // below its neighbours. While it is in the air a plain gray-100 slot its
-// own size opens where it would land, the card it left dims, and dropping
-// it there moves it; dropping anywhere else puts it back.
+// own size opens where it would land — anywhere over the column, its head
+// included — the card stays where it was, dimmed, and nothing else on the
+// board changes: no wash on the columns, no shuffle. Dropping it on the
+// slot moves it; dropping anywhere else puts it back.
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import EIcon from '../../espresso-sidebar/EIcon.vue'
 import DealCard from './DealCard.vue'
@@ -66,15 +68,14 @@ function lift(e: DragEvent, card: Card, column: number) {
 }
 
 // Where in the column the pointer is: above a card's middle means before
-// it, past the last card's middle means the end.
+// it, past the last card's middle means the end. The card in the air still
+// stands in its place, so the index counts it like any other.
 function hover(e: DragEvent, column: number) {
   if (!dragging.value) return
   e.preventDefault()
   if (e.dataTransfer) e.dataTransfer.dropEffect = 'move'
-  const list = e.currentTarget as HTMLElement
-  const cards = [...list.querySelectorAll<HTMLElement>('[data-card]')].filter(
-    (el) => el.dataset.card !== dragging.value!.id,
-  )
+  const section = e.currentTarget as HTMLElement
+  const cards = [...section.querySelectorAll<HTMLElement>('[data-card]')]
   let index = cards.length
   for (let i = 0; i < cards.length; i++) {
     const r = cards[i].getBoundingClientRect()
@@ -88,9 +89,10 @@ function hover(e: DragEvent, column: number) {
 }
 
 function leave(e: DragEvent) {
-  // leaving for a child of the same list is not leaving the list
-  const list = e.currentTarget as HTMLElement
-  if (e.relatedTarget instanceof Node && list.contains(e.relatedTarget)) return
+  // leaving for a child of the same column is not leaving the column
+  const section = e.currentTarget as HTMLElement
+  if (e.relatedTarget instanceof Node && section.contains(e.relatedTarget))
+    return
   if (over.value) over.value = null
 }
 
@@ -99,8 +101,11 @@ function drop(e: DragEvent, column: number) {
   if (!dragging.value || !over.value) return settle()
   const from = columns.value[dragging.value.from]
   const at = from.cards.findIndex((c) => c.id === dragging.value!.id)
+  let index = over.value.index
+  // within its own column the card counted itself in the index
+  if (column === dragging.value.from && at < index) index -= 1
   const [card] = from.cards.splice(at, 1)
-  columns.value[column].cards.splice(over.value.index, 0, card)
+  columns.value[column].cards.splice(index, 0, card)
   settle()
 }
 
@@ -137,17 +142,8 @@ onMounted(() => nextTick(measureFades))
 // each column's cards with the open slot in place, as the list draws them
 const laid = computed(() =>
   columns.value.map((col, ci) => {
-    const rows: ({ kind: 'card'; card: Card } | { kind: 'slot' })[] = col.cards
-      .filter(
-        (c) =>
-          !(
-            dragging.value &&
-            over.value &&
-            c.id === dragging.value.id &&
-            over.value.column === ci
-          ),
-      )
-      .map((card) => ({ kind: 'card' as const, card }))
+    const rows: ({ kind: 'card'; card: Card } | { kind: 'slot' })[] =
+      col.cards.map((card) => ({ kind: 'card' as const, card }))
     if (over.value?.column === ci)
       rows.splice(over.value.index, 0, { kind: 'slot' })
     return rows
@@ -158,14 +154,23 @@ watch(laid, () => nextTick(measureFades), { flush: 'post' })
 
 <template>
   <div class="v2-scroll w-full overflow-x-auto">
-    <div class="flex w-max" role="list" aria-label="Deals by stage">
+    <div
+      class="flex w-max"
+      :class="dragging && 'is-dragging'"
+      role="list"
+      aria-label="Deals by stage"
+    >
+      <!-- the whole column takes the drop, its head included, so the slot
+           never blinks out while the card crosses the head row -->
       <section
         v-for="(stage, ci) in columns"
         :key="stage.name"
         class="kanban-column relative isolate flex h-[850px] w-[284px] shrink-0 flex-col gap-2.5 rounded-7 p-2"
-        :class="over?.column === ci && 'is-over'"
         role="listitem"
         :aria-label="stage.name"
+        @dragover="hover($event, ci)"
+        @dragleave="leave"
+        @drop="drop($event, ci)"
       >
         <header class="flex h-7 items-center gap-2 pl-1.5">
           <EIcon name="stage" class="size-4 shrink-0" :class="stage.tone" />
@@ -196,9 +201,6 @@ watch(laid, () => nextTick(measureFades), { flush: 'post' })
             '--fade-bottom': fades[ci].bottom ? '24px' : '0px',
           }"
           @scroll.passive="measureFade(ci)"
-          @dragover="hover($event, ci)"
-          @dragleave="leave"
-          @drop="drop($event, ci)"
         >
           <template
             v-for="(row, i) in laid[ci]"
@@ -264,9 +266,12 @@ watch(laid, () => nextTick(measureFades), { flush: 'post' })
   opacity: 0;
   transition: opacity 150ms ease-out;
 }
-.kanban-column:hover::before,
-.kanban-column.is-over::before {
+.kanban-column:hover::before {
   opacity: 1;
+}
+/* with a card in the air, no column washes: only the card shows a state */
+.is-dragging .kanban-column::before {
+  opacity: 0;
 }
 /* the card in the air: tilted a touch, under the md shadow */
 .kanban-ghost {
