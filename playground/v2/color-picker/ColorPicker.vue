@@ -696,7 +696,7 @@ const rowsAtFoot = computed(
             <div class="cp-fields flex min-w-0 flex-1 gap-px">
               <TextInput
                 v-model="fieldsOf(st).hex.draft"
-                class="cp-swatched min-w-0 flex-1"
+                class="min-w-0 flex-1"
                 :aria-label="`Stop ${i + 1} colour`"
                 spellcheck="false"
                 @update:model-value="fieldsOf(st).hex.input"
@@ -704,9 +704,10 @@ const rowsAtFoot = computed(
                 @keydown="fieldsOf(st).hex.key"
               >
                 <template #prefix>
+                  <!-- the same dot as the hex field's -->
                   <button
                     type="button"
-                    class="cp-stop-swatch block size-[22px] rounded-[5.5px]"
+                    class="cp-stop-swatch block size-2.5 rounded-full ring-1 ring-white dark:ring-gray-500"
                     :style="{ background: `${layer(stopCss(st))}, ${CHECKER}` }"
                     :aria-label="`Edit stop ${i + 1}`"
                     @click="selectedStop = st.id"
@@ -821,8 +822,8 @@ const rowsAtFoot = computed(
 }
 .cp-stop-row.is-selected .cp-stop-swatch {
   box-shadow:
-    0 0 0 2px var(--surface-elevation-2),
-    0 0 0 3.5px var(--outline-gray-4);
+    0 0 0 1px var(--surface-elevation-2),
+    0 0 0 2.5px var(--outline-gray-4);
 }
 .cp-stop-swatch {
   pointer-events: auto;
@@ -885,8 +886,5 @@ const rowsAtFoot = computed(
 .cp-stop-at input {
   color: var(--ink-gray-4);
   padding-inline-end: 20px;
-}
-.cp-swatched input {
-  padding-inline-start: 34px;
 }
 </style>
