@@ -1,8 +1,36 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { Button, TextInput } from 'frappe-ui'
 
 // A small form, the same width on both sides.
 const form = 'flex w-72 flex-col gap-3'
+
+// Card 5 is live, so people can feel the difference. "Do": Save always
+// works, and a bad email says what's wrong on click. "Don't": Save stays
+// grey until the email is valid, with no hint why.
+const isEmail = (value: string) => /^\S+@\S+\.\S+$/.test(value)
+
+const doEmail = ref('')
+const doError = ref('')
+const doSaved = ref(false)
+function saveDo() {
+  doSaved.value = false
+  if (!isEmail(doEmail.value)) {
+    doError.value = doEmail.value
+      ? 'Enter a valid email address, like jane@example.com.'
+      : 'Email is required.'
+    return
+  }
+  doError.value = ''
+  doSaved.value = true
+}
+function editDo(value: string) {
+  doEmail.value = value
+  doError.value = ''
+  doSaved.value = false
+}
+
+const dontEmail = ref('')
 
 // Card 5: a small confirmation, the same width on both sides.
 const confirm =
@@ -121,15 +149,30 @@ const confirm =
           <TextInput
             label="Email"
             placeholder="jane@example.com"
-            error="Email is required."
+            :model-value="doEmail"
+            :error="doError"
+            @update:model-value="editDo"
           />
-          <Button variant="solid" class="self-end">Save</Button>
+          <div class="flex items-center justify-end gap-3">
+            <span v-if="doSaved" class="text-sm text-ink-green-7">Saved</span>
+            <Button variant="solid" @click="saveDo">Save</Button>
+          </div>
         </div>
       </template>
       <template #dont>
         <div :class="form">
-          <TextInput label="Email" placeholder="jane@example.com" />
-          <Button variant="solid" class="self-end" disabled>Save</Button>
+          <TextInput
+            v-model="dontEmail"
+            label="Email"
+            placeholder="jane@example.com"
+          />
+          <Button
+            variant="solid"
+            class="self-end"
+            :disabled="!isEmail(dontEmail)"
+          >
+            Save
+          </Button>
         </div>
       </template>
     </Guideline>
