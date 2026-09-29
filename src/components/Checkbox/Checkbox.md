@@ -44,6 +44,7 @@ is `disabled`, so it always stays checked.
 - Label a checkbox with what it turns on, like “Email me when I'm mentioned”, not “Enabled”.
 - Don't use a checkbox when only one option can be selected. Use a radio instead.
 - If the setting takes effect immediately, use a switch instead.
+- Phrase the label positively, like “Email me updates”, not “Don't email me updates”.
 
 </div>
 

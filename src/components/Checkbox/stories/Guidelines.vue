@@ -47,5 +47,20 @@ import { Checkbox, RadioGroup, Radio, Switch } from 'frappe-ui'
         <Checkbox :model-value="true" label="Email notifications" />
       </template>
     </Guideline>
+
+    <!-- 4. A negative label makes the unchecked state a double negative:
+         unchecked "Don't email me updates" means "do email me". Both are
+         unchecked here, so the reader has to work out the second one. -->
+    <Guideline
+      layout="stack"
+      caption="Phrase the label positively, like “Email me updates”, not “Don't email me updates”."
+    >
+      <template #do>
+        <Checkbox :model-value="false" label="Email me product updates" />
+      </template>
+      <template #dont>
+        <Checkbox :model-value="false" label="Don't email me product updates" />
+      </template>
+    </Guideline>
   </div>
 </template>
