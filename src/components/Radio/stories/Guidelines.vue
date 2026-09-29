@@ -49,5 +49,32 @@ const countries = [
         </RadioGroup>
       </template>
     </Guideline>
+
+    <!-- 3. A safe default saves a click (standard shipping). A preselected
+         answer to a consent question decides for people, and many of them
+         never look. Leave those empty. -->
+    <Guideline
+      layout="stack"
+      caption="Preselect a safe default, but never for consent or legal choices."
+    >
+      <template #do>
+        <div class="flex gap-10">
+          <RadioGroup label="Shipping" model-value="standard">
+            <Radio value="standard" label="Standard" />
+            <Radio value="express" label="Express" />
+          </RadioGroup>
+          <RadioGroup label="Share my email with partners?">
+            <Radio value="yes" label="Yes" />
+            <Radio value="no" label="No" />
+          </RadioGroup>
+        </div>
+      </template>
+      <template #dont>
+        <RadioGroup label="Share my email with partners?" model-value="yes">
+          <Radio value="yes" label="Yes" />
+          <Radio value="no" label="No" />
+        </RadioGroup>
+      </template>
+    </Guideline>
   </div>
 </template>
