@@ -24,7 +24,7 @@ export interface SplitButtonProps {
   /** Tooltip shown on the main action */
   tooltip?: string
 
-  /** Shows a spinner on the main action and disables both halves */
+  /** Shows a spinner on the main action and locks the menu, keeping both halves' look */
   loading?: boolean
 
   /** Text shown on the main action while it is loading */

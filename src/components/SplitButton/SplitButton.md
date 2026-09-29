@@ -52,9 +52,12 @@ the same size, so switching variants moves nothing.
 
 ### Loading and disabled
 
-`disabled` disables both halves. `loading` shows a spinner on the main action
-and disables the chevron too, because the menu holds other ways to do the same
-thing, and starting one mid-request would race the first.
+`disabled` disables both halves and turns them gray. `loading` shows a spinner
+on the main action and locks the chevron too, because the menu holds other ways
+to do the same thing, and starting one mid-request would race the first. Like a
+loading `Button`, neither half turns gray while loading: the chevron keeps its
+look, sets `aria-disabled`, and its menu doesn't open. An open menu closes when
+loading starts.
 
 ### Styling hooks
 

@@ -30,26 +30,34 @@
       "
       @click="emit('click', $event)"
     />
-    <Dropdown :options="options" :align="align" :disabled="isMenuDisabled">
+    <Dropdown
+      :open="menuOpen"
+      :options="options"
+      :align="align"
+      :disabled="disabled"
+      @update:open="setMenuOpen"
+    >
       <Button
         icon="lucide-chevron-down"
         :aria-label="menuLabel"
         :variant="variant"
         :size="size"
-        :disabled="isMenuDisabled"
+        :disabled="disabled"
+        :aria-disabled="loading || undefined"
         class="relative -ml-px rounded-l-none hover:z-10 focus-visible:z-10"
-        :class="
+        :class="[
           variant === 'outline'
             ? ''
-            : [transparentBorder, 'border-l-[var(--surface-base)]']
-        "
+            : [transparentBorder, 'border-l-[var(--surface-base)]'],
+          loading && !disabled ? 'pointer-events-none' : '',
+        ]"
       />
     </Dropdown>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, watch } from 'vue'
 import { Button } from '../Button'
 import { Dropdown } from '../Dropdown'
 import type { SplitButtonEmits, SplitButtonProps } from './types'
@@ -65,11 +73,22 @@ const props = withDefaults(defineProps<SplitButtonProps>(), {
 
 const emit = defineEmits<SplitButtonEmits>()
 
-// A busy main action locks the menu too: its actions are other ways to do
-// the same thing, and starting one mid-request would race the first.
 // Outline already draws a 1px border on both halves. The others get a
 // transparent one, so both halves are the same size in every variant.
 const transparentBorder = 'border border-transparent'
 
-const isMenuDisabled = computed(() => props.disabled || props.loading)
+// A busy main action locks the menu too: its actions are other ways to do
+// the same thing, and starting one mid-request would race the first. Like
+// a loading Button, the chevron keeps its look instead of turning gray: it
+// ignores the pointer, reports aria-disabled, and the menu refuses to open.
+const menuOpen = ref(false)
+function setMenuOpen(open: boolean) {
+  menuOpen.value = open && !props.loading
+}
+watch(
+  () => props.loading,
+  (loading) => {
+    if (loading) menuOpen.value = false
+  },
+)
 </script>

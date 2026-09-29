@@ -59,8 +59,12 @@ describe('SplitButton', () => {
         options: [{ label: 'Unpublish', onClick: () => {} }],
       },
     })
-    cy.get('[aria-haspopup=menu]').should('be.disabled')
+    cy.get('[aria-haspopup=menu]')
+      .should('not.be.disabled')
+      .and('have.attr', 'aria-disabled', 'true')
     cy.get('[aria-haspopup=menu]').click({ force: true })
+    cy.get('[role=menu]').should('not.exist')
+    cy.get('[aria-haspopup=menu]').focus().type('{enter}')
     cy.get('[role=menu]').should('not.exist')
   })
 })

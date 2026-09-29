@@ -68,11 +68,19 @@ describe('SplitButton', () => {
     expect(chevron.disabled).toBe(true)
   })
 
-  it('disables both halves while loading, and marks the action busy', () => {
-    const { action, chevron } = mount({ loading: true })
-    expect(action.disabled).toBe(true)
+  it('keeps both halves looking the same while loading, and locks the menu', async () => {
+    const { action, chevron } = mount({ variant: 'solid', loading: true })
     expect(action.getAttribute('aria-busy')).toBe('true')
-    expect(chevron.disabled).toBe(true)
+    // Loading isn't disabled: neither half turns gray.
+    expect(chevron.disabled).toBe(false)
+    expect(chevron.className).toContain('bg-surface-gray-10')
+    expect(chevron.getAttribute('aria-disabled')).toBe('true')
+    chevron.dispatchEvent(
+      new PointerEvent('pointerdown', { bubbles: true, button: 0 }),
+    )
+    chevron.click()
+    await nextTick()
+    expect(chevron.getAttribute('aria-expanded')).toBe('false')
   })
 
   it('squares the inner corners so the halves read as one control', () => {

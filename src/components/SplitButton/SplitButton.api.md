@@ -52,7 +52,7 @@
   },
   {
     name: 'loading',
-    description: 'Shows a spinner on the main action and disables both halves',
+    description: 'Shows a spinner on the main action and locks the menu, keeping both halves\' look',
     required: false,
     type: 'boolean',
     default: 'false'
