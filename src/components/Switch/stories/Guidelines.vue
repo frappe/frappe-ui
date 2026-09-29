@@ -14,7 +14,7 @@ const annot =
     <!-- 1. In a cell, only the switch is interactive (do-only) -->
     <Guideline
       :mark="false"
-      caption="Only the switch will be touch target when it's used in a cell."
+      caption="In a settings cell, make only the switch the touch target, not the whole cell."
     >
       <template #do>
         <div class="flex flex-col items-center py-4">
@@ -58,7 +58,7 @@ const annot =
     <!-- 2. Right-align switches in list rows -->
     <Guideline
       layout="stack"
-      caption="The switches should be aligned to the right when used in list items."
+      caption="Align switches to the right in list items."
     >
       <template #do>
         <div class="flex w-64 flex-col gap-3">
