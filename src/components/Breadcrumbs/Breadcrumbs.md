@@ -93,6 +93,7 @@ each item with its `onClick`, `route` or `href`.
   `<nav aria-label="Breadcrumb">` when it is the page's main breadcrumb trail.
 - The last crumb has `aria-current="page"`, so screen readers announce it as
   the current page.
+- The "…" button that opens hidden pages is labelled "Show hidden pages".
 - The `/` separators are hidden from screen readers.
 
 <!-- @include: ./Breadcrumbs.api.md -->
