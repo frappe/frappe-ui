@@ -29,7 +29,11 @@ import { Checkbox, RadioGroup, Radio, Switch } from 'frappe-ui'
         </RadioGroup>
       </template>
       <template #dont>
-        <div class="flex flex-col gap-2">
+        <!-- Radio rows are 21px on a 27px pitch, checkbox rows 15px. The gap
+             and the 3px above and below make this column the radio group's
+             48px and put each checkbox row's centre on its radio's, so
+             Private and Public line up across the two sides. -->
+        <div class="flex flex-col gap-3 py-[3px]">
           <Checkbox :model-value="false" label="Private" />
           <Checkbox :model-value="true" label="Public" />
         </div>
