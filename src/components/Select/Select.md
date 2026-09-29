@@ -37,6 +37,7 @@ scrolls.
 <div class="guideline-text">
 
 - Use a select for a value saved in a form; use a dropdown to trigger a UI action.
+- Past about 10 options, use a Combobox so people can search.
 
 </div>
 
