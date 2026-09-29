@@ -77,13 +77,14 @@ receives `{ item }`, and they render for every crumb.
 
 When the items do not fit their container and there are more than two, all
 items except the last two move into a menu behind a "…" button. The menu opens
-each item with its `onClick` or `route`. An item with only `href` does nothing
-in that menu, so give it an `onClick` too.
+each item with its `onClick`, `route` or `href`.
 
 ## Accessibility
 
 - Breadcrumbs does not add a landmark. Wrap it in
   `<nav aria-label="Breadcrumb">` when it is the page's main breadcrumb trail.
+- The last crumb has `aria-current="page"`, so screen readers announce it as
+  the current page.
 - The `/` separators are hidden from screen readers.
 
 <!-- @include: ./Breadcrumbs.api.md -->
