@@ -523,7 +523,7 @@ const rowsAtFoot = computed(
         <div
           v-if="mode === 'gradient'"
           ref="bar"
-          class="relative h-10 w-[240px] cursor-copy touch-none rounded-4"
+          class="relative h-[15px] w-[240px] cursor-copy touch-none rounded-4"
           :style="{ background: `${gradientCss}, ${CHECKER}` }"
           role="group"
           aria-label="Gradient stops"
