@@ -34,7 +34,7 @@ label while it loads.
 
 <div class="guideline-text">
 
-- Match the spinner color to the context it sits in.
+- Use a Skeleton, not a spinner, while page content loads.
 - Keep the label while a button loads. Don't collapse it to an icon.
 
 </div>
