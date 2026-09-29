@@ -40,42 +40,12 @@ function onChange(v: string, m: Mode) {
       </div>
 
       <div class="flex flex-col gap-2">
-        <Switch
-          v-model="tabs"
-          size="sm"
-          label="Tabs"
-          description="Solid, gradient and image across the top"
-        />
-        <Switch
-          v-model="hueLabel"
-          size="sm"
-          label="Hue label"
-          description="“Hue” and its degrees over the bar"
-        />
-        <Switch
-          v-model="eyedropper"
-          size="sm"
-          label="Eyedropper"
-          description="A button to pick from the screen"
-        />
-        <Switch
-          v-model="alpha"
-          size="sm"
-          label="Opacity"
-          description="A second bar under the hue"
-        />
-        <Switch
-          v-model="inputs"
-          size="sm"
-          label="Inputs"
-          description="Format select and its fields"
-        />
-        <Switch
-          v-model="saved"
-          size="sm"
-          label="Saved"
-          description="Kept colours, and Add"
-        />
+        <Switch v-model="tabs" size="sm" label="Tabs" />
+        <Switch v-model="hueLabel" size="sm" label="Hue label" />
+        <Switch v-model="eyedropper" size="sm" label="Eyedropper" />
+        <Switch v-model="alpha" size="sm" label="Opacity" />
+        <Switch v-model="inputs" size="sm" label="Inputs" />
+        <Switch v-model="saved" size="sm" label="Saved" />
       </div>
 
       <div class="flex items-center gap-3">
