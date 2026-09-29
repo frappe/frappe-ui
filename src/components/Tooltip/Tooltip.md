@@ -41,9 +41,8 @@ button.
 <div class="guideline-text">
 
 - Use a tooltip for extra context. Don't hide essential information inside it.
-- Place the tooltip so it doesn't cover the information it describes.
 - Use a tooltip for icon-only buttons where nothing else labels them.
-- Keep tooltip content short and scannable, not a wall of text.
+- Don't put links or buttons in a tooltip. It closes as the pointer moves toward them; use a HoverCard.
 
 </div>
 

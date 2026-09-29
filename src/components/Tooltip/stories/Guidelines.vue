@@ -1,15 +1,21 @@
 <script setup lang="ts">
 import { Button, Tooltip } from 'frappe-ui'
 
-// Cards 1, 2 and 4 need two bubbles visible at once to contrast do vs don't,
-// which a live tooltip can't do (hover-only, one at a time, portals to
-// <body>). Their triggers are real fields; the bubbles reuse TooltipBubble's
-// exact styling shown inline. Card 3 has no contrast, so it uses real,
-// interactive Tooltips on real icon-only Buttons.
+// The do/don't cards need two bubbles visible at once, which a live tooltip
+// can't do (hover-only, one at a time, portals to <body>). Their bubbles reuse
+// TooltipBubble's exact styling shown inline. The icon-only card has no
+// contrast, so it uses real, interactive Tooltips on real Buttons.
 const bubble =
   'w-fit rounded-4 bg-surface-gray-10 px-2 py-1 text-xs text-ink-base shadow-xl'
 const arrowDown = 'absolute -bottom-1 size-2 rotate-45 bg-surface-gray-10'
-const arrowLeft = 'absolute -left-1 size-2 rotate-45 bg-surface-gray-10'
+
+// HoverCard's panel shell (PopoverPanel), a person name that opens it, and a
+// link inside it.
+const card =
+  'overflow-hidden rounded-6 bg-surface-elevation-2 shadow-2xl ring-1 ring-black ring-opacity-5'
+const person =
+  'text-base text-ink-gray-8 underline decoration-dotted underline-offset-4'
+const link = 'text-sm font-medium text-ink-gray-8 underline'
 </script>
 
 <template>
@@ -52,45 +58,7 @@ const arrowLeft = 'absolute -left-1 size-2 rotate-45 bg-surface-gray-10'
       </template>
     </Guideline>
 
-    <!-- 2. Don't cover the thing you're describing -->
-    <Guideline
-      layout="stack"
-      caption="Place the tooltip so it doesn't cover the information it describes."
-      mark-below
-    >
-      <template #do>
-        <div class="relative w-64 pt-14">
-          <div :class="[bubble, 'absolute left-[86px] top-2 max-w-[14rem]']">
-            Remaining time to resolve the ticket.
-            <div :class="[arrowDown, 'left-4']" />
-          </div>
-          <div class="rounded-3 bg-surface-gray-2 px-3 py-2">
-            <div class="flex items-center gap-1 text-xs text-ink-gray-6">
-              Resolution due <span class="lucide-info size-3" />
-            </div>
-            <div class="text-sm font-medium text-ink-gray-8">4d 4h</div>
-          </div>
-        </div>
-      </template>
-      <template #dont>
-        <div class="relative w-64">
-          <div class="rounded-3 bg-surface-gray-2 px-3 py-2">
-            <div class="flex items-center gap-1 text-xs text-ink-gray-6">
-              Resolution due <span class="lucide-info size-3" />
-            </div>
-            <div class="text-sm font-medium text-ink-gray-8">4d 4h</div>
-          </div>
-          <div
-            :class="[bubble, 'absolute left-[86px] top-[26px] max-w-[14rem]']"
-          >
-            Remaining time to resolve the ticket.
-            <div :class="[arrowDown, 'left-4']" />
-          </div>
-        </div>
-      </template>
-    </Guideline>
-
-    <!-- 3. Icon-only buttons need a tooltip (do-only, real interactive tips) -->
+    <!-- 2. Icon-only buttons need a tooltip (do-only, real interactive tips) -->
     <Guideline
       :mark="false"
       caption="Use a tooltip for icon-only buttons where nothing else labels them."
@@ -163,34 +131,29 @@ const arrowLeft = 'absolute -left-1 size-2 rotate-45 bg-surface-gray-10'
       </template>
     </Guideline>
 
-    <!-- 4. Keep tooltip content scannable -->
+    <!-- A tooltip closes as soon as the pointer leaves its trigger, so a link
+         inside it disappears on the way there. HoverCard stays open while the
+         pointer moves into it. The "do" panel uses PopoverPanel's shell. -->
     <Guideline
-      layout="stack"
-      caption="Keep tooltip content short and scannable, not a wall of text."
-      mark-below
+      caption="Don't put links or buttons in a tooltip. It closes as the pointer moves toward them; use a HoverCard."
     >
       <template #do>
-        <div class="flex items-center">
-          <span class="flex items-center gap-1 text-sm text-ink-gray-7">
-            Naming series <span class="lucide-info size-3.5 text-ink-gray-5" />
-          </span>
-          <div :class="[bubble, 'relative ml-2']">
-            Controls how document IDs are generated
-            <div :class="[arrowLeft, 'top-1/2 -translate-y-1/2']" />
+        <div class="flex w-56 flex-col items-start gap-2">
+          <span :class="person">Priya Shah</span>
+          <div :class="[card, 'w-56 p-3']">
+            <p class="text-base font-medium text-ink-gray-8">Priya Shah</p>
+            <p class="text-sm text-ink-gray-5">Design lead · Mumbai</p>
+            <p :class="[link, 'mt-2']">View profile</p>
           </div>
         </div>
       </template>
       <template #dont>
-        <div class="flex items-start">
-          <span class="flex items-center gap-1 text-sm text-ink-gray-7">
-            Naming series <span class="lucide-info size-3.5 text-ink-gray-5" />
-          </span>
-          <div :class="[bubble, 'relative ml-2 max-w-[16rem] leading-relaxed']">
-            Naming series controls how document IDs are auto-generated. You can
-            set a prefix, choose whether to reset the counter yearly, and
-            configure padding digits. This affects Sales Invoice, Payment Entry,
-            and more.
-            <div :class="[arrowLeft, 'top-2.5']" />
+        <div class="flex w-56 flex-col items-start gap-2">
+          <span :class="person">Priya Shah</span>
+          <div :class="[bubble, 'relative']">
+            Design lead ·
+            <span class="underline">View profile</span>
+            <div :class="[arrowDown, '-top-1 bottom-auto left-4']" />
           </div>
         </div>
       </template>
