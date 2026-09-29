@@ -10,9 +10,9 @@ no main action, use [Dropdown](./dropdown).
 
 ### Publish a page
 
-The page header in Frappe Builder. Publish is one click, and the chevron offers
-staging and unpublishing. `condition` hides the actions that don't apply to the
-page's status, and `loading` locks both halves while it saves.
+A page header. Publish is one click, and the chevron offers staging and
+unpublishing. `condition` hides the actions that don't apply to the page's
+status, and `loading` locks the menu while the page saves.
 
 <ComponentPreview name="SplitButton-Publish" />
 

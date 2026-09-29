@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue'
 import { Badge, Button, SplitButton } from 'frappe-ui'
 
-// Frappe Builder's page header: Publish is one click, and the rarer ways to
+// A page header: Publish is one click, and the rarer ways to
 // publish sit on the chevron. `condition` hides the ones that don't apply.
 type Status = 'Draft' | 'Staging' | 'Published'
 const status = ref<Status>('Draft')

@@ -3129,11 +3129,10 @@ action mode the divider still reads as a separator for assistive technologies.
 
 `SplitButton` joins a `Button` for the main action to a chevron that opens a
 `Dropdown` of other ways to do it, like Publish with "Publish to staging".
-Builder, Studio, CRM and Suite each built one by hand, with different
-dividers, chevron widths and focus rings, and most left the chevron without a
-name. It takes Button's `label`, `iconLeft`, `variant`, `size`, `loading`
-and `disabled`, and Dropdown's `options`. `menuLabel` names the
-chevron.
+Apps have been building this by hand, each with a different divider, chevron
+width and focus ring, and often without a name on the chevron. It takes
+Button's `label`, `iconLeft`, `variant`, `size`, `loading` and `disabled`, and
+Dropdown's `options`. `menuLabel` names the chevron.
 
 **What to do:** nothing. To replace a hand-built split button, see
 [SplitButton](/docs/components/splitbutton).
