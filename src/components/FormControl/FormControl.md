@@ -28,7 +28,8 @@ their types. This is the main reason to use it over the individual components.
 
 | `type`            | Renders                                                       |
 | ----------------- | ------------------------------------------------------------- |
-| `text` _(default)_, `email`, `password`, `number`, `search`, `tel`, `url`, `file`, `range`, `month`, `week`, `datetime-local` | [`TextInput`](./textinput) with the matching HTML `type`      |
+| `text` _(default)_, `email`, `number`, `search`, `tel`, `url`, `file`, `range`, `month`, `week`, `datetime-local` | [`TextInput`](./textinput) with the matching HTML `type`      |
+| `password`        | [`Password`](./password), with its show/hide toggle. It has no `#suffix`, because the toggle uses that space |
 | `textarea`        | [`Textarea`](./textarea)                                      |
 | `select`          | [`Select`](./select)                                          |
 | `combobox`        | [`Combobox`](./combobox)                                      |
