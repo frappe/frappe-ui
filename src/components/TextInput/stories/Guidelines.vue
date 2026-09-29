@@ -2,11 +2,13 @@
 import { computed, ref } from 'vue'
 import { TextInput, Select } from 'frappe-ui'
 
-// Card 4 is live on both sides.
+// Card 4 is live on both sides. It opens mid-typing ("jane@exa") so the
+// difference shows at a glance: "do" stays calm, "don't" already complains.
 const isEmail = (value: string) => /^\S+@\S+\.\S+$/.test(value)
 const invalid = 'Enter a valid email address.'
+const midTyping = 'jane@exa'
 
-const onBlurEmail = ref('')
+const onBlurEmail = ref(midTyping)
 const onBlurError = ref('')
 function checkOnBlur() {
   onBlurError.value =
@@ -16,7 +18,7 @@ function clearIfFixed(value: string) {
   if (onBlurError.value && isEmail(value)) onBlurError.value = ''
 }
 
-const onTypeEmail = ref('')
+const onTypeEmail = ref(midTyping)
 const onTypeError = computed(() =>
   onTypeEmail.value && !isEmail(onTypeEmail.value) ? invalid : '',
 )
