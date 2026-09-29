@@ -1,5 +1,25 @@
 <script setup lang="ts">
+import { computed, ref } from 'vue'
 import { TextInput, Select } from 'frappe-ui'
+
+// Card 4 is live on both sides.
+const isEmail = (value: string) => /^\S+@\S+\.\S+$/.test(value)
+const invalid = 'Enter a valid email address.'
+
+const onBlurEmail = ref('')
+const onBlurError = ref('')
+function checkOnBlur() {
+  onBlurError.value =
+    onBlurEmail.value && !isEmail(onBlurEmail.value) ? invalid : ''
+}
+function clearIfFixed(value: string) {
+  if (onBlurError.value && isEmail(value)) onBlurError.value = ''
+}
+
+const onTypeEmail = ref('')
+const onTypeError = computed(() =>
+  onTypeEmail.value && !isEmail(onTypeEmail.value) ? invalid : '',
+)
 </script>
 
 <template>
@@ -71,27 +91,34 @@ import { TextInput, Select } from 'frappe-ui'
       </template>
     </Guideline>
 
-    <!-- 4. Both sides are mid-typing ("jane@exa"). Flagging it as invalid now
-         scolds people for a value they haven't finished. Check on blur. -->
+    <!-- 4. Live on both sides: type an email into each. "Do" checks when
+         the field loses focus, and clears the error as soon as the value is
+         fixed. "Don't" checks on every keystroke, so it complains from the
+         first letter. -->
     <Guideline
       layout="stack"
       caption="Show an error when people leave the field, not while they're still typing."
     >
       <template #do>
         <TextInput
+          v-model="onBlurEmail"
           class="w-64"
           label="Email"
           type="email"
-          model-value="jane@exa"
+          placeholder="Type, then press Tab"
+          :error="onBlurError"
+          @blur="checkOnBlur"
+          @update:model-value="clearIfFixed"
         />
       </template>
       <template #dont>
         <TextInput
+          v-model="onTypeEmail"
           class="w-64"
           label="Email"
           type="email"
-          model-value="jane@exa"
-          error="Enter a valid email address."
+          placeholder="Start typing"
+          :error="onTypeError"
         />
       </template>
     </Guideline>
