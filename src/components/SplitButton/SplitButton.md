@@ -1,0 +1,73 @@
+# SplitButton
+
+A button for the main action, joined to a chevron that opens a menu of other
+ways to do it, like Publish with "Publish to staging" beside it. For a menu with
+no main action, use [Dropdown](./dropdown).
+
+<ComponentPlayground name="SplitButton" />
+
+## Examples
+
+### Publish a page
+
+The page header in Frappe Builder. Publish is one click, and the chevron offers
+staging and unpublishing. `condition` hides the actions that don't apply to the
+page's status, and `loading` locks both halves while it saves.
+
+<ComponentPreview name="SplitButton-Publish" />
+
+### Send or schedule
+
+A mail composer. Send goes now, and a group in the menu schedules it.
+
+<ComponentPreview name="SplitButton-SendLater" />
+
+### Export formats
+
+An `outline` SplitButton in a list toolbar. The format most people want is the
+button, and the others are in the menu.
+
+<ComponentPreview name="SplitButton-Export" />
+
+## Behavior
+
+### Halves
+
+The main action is a `Button` and the chevron is a `Dropdown` trigger. Both take
+`variant`, `theme` and `size`, so they always match. `@click` fires only from
+the main action. The menu's items run their own `onClick`.
+
+`options` takes the same items and groups as [Dropdown](./dropdown#options),
+including `icon`, `theme`, `condition` and `submenu`. `align` places the menu
+along the chevron, and defaults to `end`.
+
+### Joining
+
+The inner corners are square. `solid`, `subtle` and `ghost` halves sit 1px
+apart, so the page shows through as a divider. `outline` halves overlap by one
+border, so the seam is one line.
+
+### Loading and disabled
+
+`disabled` disables both halves. `loading` shows a spinner on the main action
+and disables the chevron too, because the menu holds other ways to do the same
+thing, and starting one mid-request would race the first.
+
+### Styling hooks
+
+The wrapper has `data-slot="root"`, `data-variant`, `data-size` and
+`data-color`. The main action has `data-slot="action"`, and the chevron has the
+Dropdown trigger's `data-slot="trigger"`.
+
+## Accessibility
+
+- The halves are two buttons in the tab order: the main action, then the
+  chevron.
+- The chevron is named by `menuLabel`, which defaults to "More options". Name it
+  after what the menu holds, like "More ways to publish" or "Schedule send".
+- The chevron has `aria-haspopup="menu"` and `aria-expanded`. The menu keys are
+  the same as [Dropdown](./dropdown#accessibility), and `Escape` returns focus
+  to the chevron.
+- A loading main action sets `aria-busy="true"`.
+
+<!-- @include: ./SplitButton.api.md -->
