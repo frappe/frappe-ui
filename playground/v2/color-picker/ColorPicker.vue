@@ -105,7 +105,7 @@ const current = computed(() =>
 
 // ---- the colour: hue on the bar, saturation and value on the square. In
 // gradient mode that is the selected stop's; otherwise the solid fill's.
-const solidHsv = ref<HSV>({ h: 0, s: 94, v: 100 })
+const solidHsv = ref<HSV>(rgbToHsv(parseHex('EDEDED')!))
 const solidAlpha = ref(100)
 const hsv = computed<HSV>({
   get: () => current.value?.hsv ?? solidHsv.value,
