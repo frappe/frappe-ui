@@ -44,32 +44,31 @@ withDefaults(
            gap between them so wider content (a menu, a combobox panel) never
            ends up flush against its pair. A guideline with only a "do"
            example centers it. -->
+      <!-- Two rows: the examples, then the marks. Each example is centred
+           against the other in the first row, so their middles line up, and
+           the marks share the second row, so they sit on one line at the
+           same 16px gap from the examples as in the stacked layout. -->
       <div
         v-if="layout === 'split'"
-        class="flex items-start justify-center gap-10"
+        class="grid grid-rows-[auto_auto] items-center gap-x-10 gap-y-4"
+        :class="$slots.dont ? 'justify-items-start' : 'justify-items-center'"
       >
-        <div
-          class="flex flex-col gap-4"
-          :class="$slots.dont ? 'items-start' : 'items-center'"
-        >
-          <div class="flex min-h-10 items-center">
-            <slot name="do" />
-          </div>
-          <SuccessSolidIcon
-            v-if="mark"
-            class="size-5 shrink-0 text-ink-green-5"
-          />
+        <div class="col-start-1 row-start-1 flex items-center">
+          <slot name="do" />
         </div>
-
-        <div v-if="$slots.dont" class="flex flex-col items-start gap-4">
-          <div class="flex min-h-10 items-center">
+        <SuccessSolidIcon
+          v-if="mark"
+          class="col-start-1 row-start-2 size-5 shrink-0 text-ink-green-5"
+        />
+        <template v-if="$slots.dont">
+          <div class="col-start-2 row-start-1 flex items-center">
             <slot name="dont" />
           </div>
           <CloseCircleSolidIcon
             v-if="mark"
-            class="size-5 shrink-0 text-ink-red-5"
+            class="col-start-2 row-start-2 size-5 shrink-0 text-ink-red-5"
           />
-        </div>
+        </template>
       </div>
 
       <!-- Wide examples: do above, don't below. The mark sits beside the
@@ -77,7 +76,7 @@ withDefaults(
            the do and don't examples line up with each other. -->
       <div v-else class="mx-auto flex w-fit flex-col gap-8">
         <div
-          class="flex gap-3"
+          class="flex gap-4"
           :class="markBelow ? 'flex-col items-center' : 'items-center'"
         >
           <SuccessSolidIcon
@@ -92,7 +91,7 @@ withDefaults(
 
         <div
           v-if="$slots.dont"
-          class="flex gap-3"
+          class="flex gap-4"
           :class="markBelow ? 'flex-col items-center' : 'items-center'"
         >
           <CloseCircleSolidIcon
