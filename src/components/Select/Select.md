@@ -80,7 +80,8 @@ Use `v-model:open` when a parent component controls the menu. Inside
 
 By default the menu opens over the trigger, lined up with the selected option.
 Pass `side`, `align` or `offset` to place it next to the trigger instead.
-`portalTo` changes where the menu is teleported in both modes.
+`portalTo` changes where the menu is teleported in both modes. In both, a long
+list scrolls inside the space left on screen.
 
 ### Label, description and error
 
