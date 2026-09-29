@@ -63,6 +63,7 @@ const triggerClass =
                     <span
                       role="button"
                       tabindex="-1"
+                      :aria-label="`Remove ${o.label}`"
                       class="-mr-0.5 inline-flex cursor-pointer items-center justify-center rounded-1 p-0.5 opacity-70 hover:opacity-100"
                       @click.stop="removeChip(o.value)"
                       @pointerdown.stop
@@ -107,7 +108,9 @@ const triggerClass =
               :class="triggerClass"
               @click="setOpen(!open)"
             >
-              <div class="flex min-w-0 flex-1 items-center gap-1 overflow-hidden">
+              <div
+                class="flex min-w-0 flex-1 items-center gap-1 overflow-hidden"
+              >
                 <Badge
                   v-for="o in selectedOptions.slice(0, 2)"
                   :key="o.value"
@@ -119,6 +122,7 @@ const triggerClass =
                     <span
                       role="button"
                       tabindex="-1"
+                      :aria-label="`Remove ${o.label}`"
                       class="-mr-0.5 inline-flex cursor-pointer items-center justify-center rounded-1 p-0.5 opacity-70 hover:opacity-100"
                       @click.stop="removeCollapse(o.value)"
                       @pointerdown.stop
@@ -165,6 +169,7 @@ const triggerClass =
                     <span
                       role="button"
                       tabindex="-1"
+                      :aria-label="`Remove ${o.label}`"
                       class="-mr-0.5 inline-flex cursor-pointer items-center justify-center rounded-1 p-0.5 opacity-70 hover:opacity-100"
                       @click.stop="removeWrap(o.value)"
                       @pointerdown.stop
