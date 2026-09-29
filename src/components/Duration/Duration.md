@@ -21,6 +21,16 @@ settings form.
 
 <ComponentPreview name="Duration-SlaPolicy" />
 
+## Usage Guidelines
+
+<ComponentPreview name="Duration-Guidelines" hide-code />
+
+<div class="guideline-text">
+
+- Use Duration for a length of time, not a number field with the unit in its label.
+
+</div>
+
 ## Behavior
 
 ### What people can type
