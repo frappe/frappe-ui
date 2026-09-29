@@ -9,7 +9,10 @@ const longText =
 // the limit on both sides. "Do" counts down as you go; "don't" says nothing
 // until you're already over.
 const LIMIT = 160
-const start = 'Product designer at Frappe. I write about forms.'
+// Starts close to the limit, so "do" already shows how little room is left
+// while "don't" shows nothing.
+const start =
+  'Product designer at Frappe. I write about forms, error messages and the small details that make software feel calm. Based in Mumbai, often on a bike.'
 const tooLong = (n: number) =>
   n > LIMIT ? `Keep it under ${LIMIT} characters.` : ''
 
