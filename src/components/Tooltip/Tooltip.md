@@ -27,10 +27,11 @@ The `#content` slot shows the button's name and its shortcut.
 
 <ComponentPreview name="Tooltip-FilePreview" />
 
-### Warning on a delete button
+### Full name of a truncated label
 
-`:hover-delay="0"` shows the warning as soon as the pointer reaches the
-button.
+A file name cut short in a narrow column. `:hover-delay="0"` shows the full
+name as soon as the pointer reaches it. The label has `tabindex="0"`, so
+keyboard users can focus it and see the tooltip too.
 
 <ComponentPreview name="Tooltip-Examples" />
 
@@ -41,8 +42,7 @@ button.
 <div class="guideline-text">
 
 - Use a tooltip for extra context. Don't hide essential information inside it.
-- Use a tooltip for icon-only buttons where nothing else labels them.
-- Don't put links or buttons in a tooltip. It closes as the pointer moves toward them; use a HoverCard.
+- Keep tooltip text short, so it's easy to scan.
 
 </div>
 
