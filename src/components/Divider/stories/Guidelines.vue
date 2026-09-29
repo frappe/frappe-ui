@@ -6,12 +6,6 @@ const meetings = [
   { title: 'Design Review', when: 'May 21 · Sarah Lee' },
   { title: 'Standup', when: 'May 22 · Alex Kim' },
 ]
-
-const settings = [
-  { label: 'Email', hint: 'jaya@timeless.co' },
-  { label: 'Password', hint: 'Change your account password' },
-  { label: '2FA', hint: 'Manage two-factor authentication' },
-]
 </script>
 
 <template>
@@ -40,32 +34,6 @@ const settings = [
               <p class="text-sm text-ink-gray-5">{{ m.when }}</p>
             </div>
             <Divider />
-          </template>
-        </div>
-      </template>
-    </Guideline>
-
-    <!-- 2. Let spacing separate when it can -->
-    <Guideline
-      layout="stack"
-      caption="Don't use dividers where spacing alone separates content clearly."
-    >
-      <template #do>
-        <div class="flex w-80 flex-col gap-4">
-          <div v-for="s in settings" :key="s.label">
-            <p class="text-base font-medium text-ink-gray-8">{{ s.label }}</p>
-            <p class="text-sm text-ink-gray-5">{{ s.hint }}</p>
-          </div>
-        </div>
-      </template>
-      <template #dont>
-        <div class="w-80">
-          <template v-for="(s, i) in settings" :key="s.label">
-            <div class="py-2">
-              <p class="text-base font-medium text-ink-gray-8">{{ s.label }}</p>
-              <p class="text-sm text-ink-gray-5">{{ s.hint }}</p>
-            </div>
-            <Divider v-if="i < settings.length - 1" />
           </template>
         </div>
       </template>

@@ -28,7 +28,6 @@ comments.
 <div class="guideline-text">
 
 - Don't add a divider after the last item in a list.
-- Don't use dividers where spacing alone separates content clearly.
 
 </div>
 
