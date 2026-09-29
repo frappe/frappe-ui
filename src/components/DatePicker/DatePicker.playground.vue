@@ -23,6 +23,19 @@ const knobs: Knob[] = [
     options: Object.keys(tags).map((t) => ({ label: t, value: t })),
   },
   { name: 'label', type: 'text', default: 'Due date' },
+  // Without `format` the input shows the raw YYYY-MM-DD value.
+  // DateTimePicker adds the time to the chosen date format.
+  {
+    name: 'format',
+    type: 'tabs',
+    default: 'MMM D, YYYY',
+    options: [
+      { label: 'MMM D, YYYY', value: 'MMM D, YYYY' },
+      { label: 'D MMM YYYY', value: 'D MMM YYYY' },
+      { label: 'ddd, MMM D', value: 'ddd, MMM D' },
+      { label: 'none', value: '' },
+    ],
+  },
   {
     name: 'size',
     type: 'tabs',
@@ -55,10 +68,17 @@ const knobs: Knob[] = [
   },
 ]
 
+function formatFor(v: Record<string, any>) {
+  if (!v.format) return undefined
+  return v.picker === 'datetime' ? `${v.format} h:mm A` : v.format
+}
+
 function buildCode(v: Record<string, any>) {
   const attrs = []
   if (v.label) attrs.push(`label="${v.label}"`)
   attrs.push('placeholder="Pick a date"')
+  const format = formatFor(v)
+  if (format) attrs.push(`format="${format}"`)
   if (v.size !== 'sm') attrs.push(`size="${v.size}"`)
   if (v.variant !== 'subtle') attrs.push(`variant="${v.variant}"`)
   if (v.clearable) attrs.push('clearable')
@@ -79,6 +99,7 @@ function buildCode(v: Record<string, any>) {
           v-model="range"
           :label="values.label || undefined"
           placeholder="Pick a date"
+          :format="formatFor(values)"
           :size="values.size"
           :variant="values.variant"
           :clearable="values.clearable"
@@ -91,6 +112,7 @@ function buildCode(v: Record<string, any>) {
           v-model="dateTime"
           :label="values.label || undefined"
           placeholder="Pick a date"
+          :format="formatFor(values)"
           :size="values.size"
           :variant="values.variant"
           :clearable="values.clearable"
@@ -102,6 +124,7 @@ function buildCode(v: Record<string, any>) {
           v-model="date"
           :label="values.label || undefined"
           placeholder="Pick a date"
+          :format="formatFor(values)"
           :size="values.size"
           :variant="values.variant"
           :clearable="values.clearable"

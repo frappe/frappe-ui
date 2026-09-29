@@ -39,7 +39,7 @@ the range into "Depart" and "Return" fields over one calendar.
 
 - Pick a date range with one DateRangePicker, not two date fields.
 - Offer common ranges, like Last 7 days, before a custom range.
-- Show dates with the month as a word, like “Mar 5, 2026”, so they read the same everywhere.
+- Pass a format with the month as a word, like “MMM D, YYYY”. Without one, the field shows the raw value.
 
 </div>
 
@@ -53,8 +53,10 @@ the range into "Depart" and "Return" fields over one calendar.
 | `DateTimePicker`  | `'YYYY-MM-DD HH:mm:ss'`                   |
 | `DateRangePicker` | `[from, to]` as `'YYYY-MM-DD'`, or `[]`   |
 
-`format` changes only the text shown in the input, not the value. Type a range
-with `DateRangeValue`, exported from `frappe-ui`.
+`format` takes a [dayjs format](https://day.js.org/docs/en/display/format)
+and changes only the text shown in the input, not the value. Without it, the
+input shows the value as is, like `2026-03-05`. Typed text is read with
+`format` first. Type a range with `DateRangeValue`, exported from `frappe-ui`.
 
 ### Limits
 

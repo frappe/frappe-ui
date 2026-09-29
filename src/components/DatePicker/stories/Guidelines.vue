@@ -28,10 +28,10 @@ const range = ref('last_30_days')
 const custom = ref<DateRangeValue>(['2026-02-01', '2026-02-28'])
 const bare = ref<DateRangeValue>([])
 
-// Card 3: 03/05/2026 is March 5 in the US and 3 May in India. Builder shows
-// its ranges as "MMM D, YYYY" so the month can't be misread.
+// Card 3: without `format` the field shows the stored value, 2026-03-05.
+// Builder passes "MMM D, YYYY" so people read a date, not a key.
 const wordMonth = ref('2026-03-05')
-const numericMonth = ref('2026-03-05')
+const rawValue = ref('2026-03-05')
 
 const calendarIcon = 'lucide-calendar size-4 text-ink-gray-5'
 </script>
@@ -120,11 +120,11 @@ const calendarIcon = 'lucide-calendar size-4 text-ink-gray-5'
       </template>
     </Guideline>
 
-    <!-- 3. The month as a word can't be read two ways. `format` only changes
-         what's shown; the value stays YYYY-MM-DD. -->
+    <!-- 3. The month as a word reads at a glance. `format` only changes
+         what's shown; the value stays YYYY-MM-DD. "Don't" has no format. -->
     <Guideline
       layout="stack"
-      caption="Show dates with the month as a word, like “Mar 5, 2026”, so they read the same everywhere."
+      caption="Pass a format with the month as a word, like “MMM&nbsp;D,&nbsp;YYYY”. Without one, the field shows the raw value."
     >
       <template #do>
         <DatePicker
@@ -140,10 +140,9 @@ const calendarIcon = 'lucide-calendar size-4 text-ink-gray-5'
       </template>
       <template #dont>
         <DatePicker
-          v-model="numericMonth"
+          v-model="rawValue"
           class="w-56"
           aria-label="Due date"
-          format="MM/DD/YYYY"
         >
           <template #prefix>
             <span :class="calendarIcon" aria-hidden="true" />
