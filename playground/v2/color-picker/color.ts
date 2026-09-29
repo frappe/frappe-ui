@@ -128,13 +128,6 @@ export function toCss(hsv: HSV, alpha = 100): string {
 
 export type Mode = 'solid' | 'gradient' | 'image'
 
-export interface Stop {
-  /** 0–100, along the bar */
-  at: number
-  hex: string
-  alpha: number
-}
-
 /** the checkerboard under anything translucent — layers for `background` */
 export const CHECKER =
   'linear-gradient(45deg, var(--surface-gray-2) 25%, transparent 25%, transparent 75%, var(--surface-gray-2) 75%) 0 0 / 16px 16px, linear-gradient(45deg, var(--surface-gray-2) 25%, transparent 25%, transparent 75%, var(--surface-gray-2) 75%) 8px 8px / 16px 16px, var(--surface-elevation-2)'

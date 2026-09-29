@@ -15,7 +15,15 @@
 // select. The gradient tab shows a 240 × 40 bar and a row per stop; the
 // image tab a 240 × 200 checkerboard with a solid "Upload image", or the
 // picture itself once one is in.
-import { computed, h, reactive, ref, watch } from 'vue'
+import {
+  computed,
+  effectScope,
+  h,
+  onUnmounted,
+  reactive,
+  ref,
+  watch,
+} from 'vue'
 import { Button, Select, Slider, TabButtons, TextInput } from '../../../src'
 import EIcon from '../../espresso-sidebar/EIcon.vue'
 import {
@@ -34,7 +42,6 @@ import {
   type Format,
   type HSV,
   type Mode,
-  type Stop,
 } from './color'
 import sample from '../assets/color-picker/sample.jpg'
 
@@ -72,10 +79,49 @@ const TABS = [
   { value: 'image', label: 'Image', icon: glyph('image-add') },
 ]
 
-// ---- the colour: hue on the bar, saturation and value on the square
-const hsv = ref<HSV>({ h: 0, s: 94, v: 100 })
-// the state under the props of the same name: the fill's opacity, and the kept colours
-const alphaValue = ref(100)
+// ---- gradient stops: each a colour of its own, along the bar. Left to
+// right, the selected one is what the square and bars edit in that mode.
+interface Stop {
+  id: number
+  /** 0–100, along the bar */
+  at: number
+  hsv: HSV
+  alpha: number
+}
+let stopSeq = 0
+const stop = (at: number, hex: string, alpha = 100): Stop => ({
+  id: ++stopSeq,
+  at,
+  hsv: rgbToHsv(parseHex(hex)!),
+  alpha,
+})
+const stops = ref<Stop[]>([stop(0, '545454'), stop(100, '212121')])
+const selectedStop = ref(stops.value[0].id)
+const current = computed(() =>
+  mode.value === 'gradient'
+    ? (stops.value.find((s) => s.id === selectedStop.value) ?? stops.value[0])
+    : null,
+)
+
+// ---- the colour: hue on the bar, saturation and value on the square. In
+// gradient mode that is the selected stop's; otherwise the solid fill's.
+const solidHsv = ref<HSV>({ h: 0, s: 94, v: 100 })
+const solidAlpha = ref(100)
+const hsv = computed<HSV>({
+  get: () => current.value?.hsv ?? solidHsv.value,
+  set: (v) => {
+    if (current.value) current.value.hsv = v
+    else solidHsv.value = v
+  },
+})
+// under the prop of the same name: the fill's opacity
+const alphaValue = computed<number>({
+  get: () => current.value?.alpha ?? solidAlpha.value,
+  set: (a) => {
+    if (current.value) current.value.alpha = a
+    else solidAlpha.value = a
+  },
+})
 const format = ref<Format>('hex')
 
 const rgb = computed(() => hsvToRgb(hsv.value))
@@ -266,52 +312,139 @@ async function dropper() {
   }
 }
 
-// ---- gradient: two stops, left to right
-const stops = ref<Stop[]>([
-  { at: 0, hex: '545454', alpha: 100 },
-  { at: 100, hex: '212121', alpha: 100 },
-])
-const stopCss = (s: Stop) => {
-  const parsed = parseHex(s.hex)
-  return parsed ? toCss(rgbToHsv(parsed), s.alpha) : `#${s.hex}`
-}
+// ---- the gradient bar: stops in order along it, the selected one the
+// square edits. Drag a handle to move its stop, click the bar to add one
+// in the colour the bar has there, and Delete — or a drag well off the bar
+// — removes it, down to two.
+const stopCss = (st: Stop) => toCss(st.hsv, st.alpha)
+const ordered = computed(() => [...stops.value].sort((a, b) => a.at - b.at))
 const gradientCss = computed(
   () =>
-    `linear-gradient(90deg, ${stops.value
-      .map((s) => `${stopCss(s)} ${s.at}%`)
+    `linear-gradient(90deg, ${ordered.value
+      .map((st) => `${stopCss(st)} ${Math.round(st.at)}%`)
       .join(', ')})`,
 )
-const stopFields = stops.value.map((_, i) => ({
-  at: field(
-    () => `${stops.value[i].at}%`,
-    (text, final) => {
-      const n = parseNumber(text)
-      if (!final || n === null) return false
-      stops.value[i].at = clamp(n, 0, 100)
-      return true
-    },
-  ),
-  hex: field(
-    () => stops.value[i].hex,
-    (text, final) => {
-      const bare = text.trim().replace(/^#/, '')
-      if (!final && bare.length !== 6) return false
-      const parsed = parseHex(bare)
-      if (!parsed) return false
-      stops.value[i].hex = rgbToHex(parsed)
-      return true
-    },
-  ),
-  alpha: field(
-    () => `${stops.value[i].alpha} %`,
-    (text, final) => {
-      const n = parseNumber(text)
-      if (!final || n === null) return false
-      stops.value[i].alpha = clamp(n, 0, 100)
-      return true
-    },
-  ),
-}))
+const MIN_STOPS = 2
+
+const bar = ref<HTMLElement | null>(null)
+function barAt(e: PointerEvent) {
+  const r = bar.value?.getBoundingClientRect()
+  if (!r) return 0
+  return clamp((e.clientX - r.left) / r.width, 0, 1) * 100
+}
+// the colour the bar shows at a point: the two stops around it, mixed
+function colourAt(at: number): { hsv: HSV; alpha: number } {
+  const list = ordered.value
+  const after = list.findIndex((st) => st.at >= at)
+  if (after <= 0) {
+    const st = list[after < 0 ? list.length - 1 : 0]
+    return { hsv: { ...st.hsv }, alpha: st.alpha }
+  }
+  const a = list[after - 1]
+  const b = list[after]
+  const t = b.at === a.at ? 0 : (at - a.at) / (b.at - a.at)
+  const ra = hsvToRgb(a.hsv)
+  const rb = hsvToRgb(b.hsv)
+  const mix = (x: number, y: number) => Math.round(x + (y - x) * t)
+  return {
+    hsv: rgbToHsv({
+      r: mix(ra.r, rb.r),
+      g: mix(ra.g, rb.g),
+      b: mix(ra.b, rb.b),
+    }),
+    alpha: mix(a.alpha, b.alpha),
+  }
+}
+function addStop(e: PointerEvent) {
+  const at = barAt(e)
+  const c = colourAt(at)
+  const st: Stop = { id: ++stopSeq, at, hsv: c.hsv, alpha: c.alpha }
+  stops.value.push(st)
+  selectedStop.value = st.id
+}
+function removeStop(id: number) {
+  if (stops.value.length <= MIN_STOPS) return
+  stops.value = stops.value.filter((st) => st.id !== id)
+  if (selectedStop.value === id) selectedStop.value = ordered.value[0].id
+}
+// how far off the bar a handle has to be dragged to let go of its stop
+const DROP_OFF = 48
+let handleOff = false
+function handleDown(e: PointerEvent, st: Stop) {
+  selectedStop.value = st.id
+  const el = e.currentTarget as HTMLElement
+  el.setPointerCapture(e.pointerId)
+  el.focus()
+  handleOff = false
+}
+function handleMove(e: PointerEvent, st: Stop) {
+  if (!(e.buttons & 1)) return
+  st.at = barAt(e)
+  const r = bar.value?.getBoundingClientRect()
+  handleOff =
+    !!r && (e.clientY < r.top - DROP_OFF || e.clientY > r.bottom + DROP_OFF)
+}
+function handleUp(st: Stop) {
+  if (handleOff) removeStop(st.id)
+  handleOff = false
+}
+function handleKey(e: KeyboardEvent, st: Stop) {
+  const step = e.shiftKey ? 10 : 1
+  if (e.key === 'ArrowLeft') st.at = clamp(Math.round(st.at) - step, 0, 100)
+  else if (e.key === 'ArrowRight')
+    st.at = clamp(Math.round(st.at) + step, 0, 100)
+  else if (e.key === 'Delete' || e.key === 'Backspace') removeStop(st.id)
+  else return
+  e.preventDefault()
+}
+// a handle's centre runs 7px in from each end, as the square's thumb does
+const handleLeft = (st: Stop) => `calc(${st.at}% + ${7 - 0.14 * st.at}px)`
+
+// each stop's fields, made when its row first shows and kept by its id
+const stopFieldMap = new Map<number, ReturnType<typeof stopFieldsFor>>()
+const fieldScope = effectScope()
+onUnmounted(() => fieldScope.stop())
+function stopFieldsFor(st: Stop) {
+  return {
+    at: field(
+      () => `${Math.round(st.at)}%`,
+      (text, final) => {
+        const n = parseNumber(text)
+        if (!final || n === null) return false
+        st.at = clamp(n, 0, 100)
+        return true
+      },
+    ),
+    hex: field(
+      () => rgbToHex(hsvToRgb(st.hsv)),
+      (text, final) => {
+        const bare = text.trim().replace(/^#/, '')
+        if (!final && bare.length !== 6) return false
+        const parsed = parseHex(bare)
+        if (!parsed) return false
+        st.hsv = rgbToHsv(parsed, st.hsv.h)
+        return true
+      },
+    ),
+    alpha: field(
+      () => `${st.alpha} %`,
+      (text, final) => {
+        const n = parseNumber(text)
+        if (!final || n === null) return false
+        st.alpha = clamp(n, 0, 100)
+        return true
+      },
+    ),
+  }
+}
+function fieldsOf(st: Stop) {
+  let f = stopFieldMap.get(st.id)
+  if (!f) {
+    f = fieldScope.run(() => stopFieldsFor(st))!
+    stopFieldMap.set(st.id, f)
+  }
+  return f
+}
 
 // ---- image: a file from the disk, dropped or chosen
 const image = ref<string | null>(null)
@@ -368,9 +501,35 @@ const rowsAtFoot = computed(
       aria-label="Fill type"
     />
 
-    <!-- solid -->
-    <template v-if="mode === 'solid'">
+    <!-- solid, and gradient: the square and bars edit the fill, or the
+         selected stop -->
+    <template v-if="mode !== 'image'">
       <div class="flex flex-col gap-2.5">
+        <div
+          v-if="mode === 'gradient'"
+          ref="bar"
+          class="relative h-10 w-[240px] cursor-copy touch-none rounded-4"
+          :style="{ background: `${gradientCss}, ${CHECKER}` }"
+          role="group"
+          aria-label="Gradient stops"
+          @pointerdown.self="addStop"
+        >
+          <button
+            v-for="st in ordered"
+            :key="st.id"
+            type="button"
+            class="cp-thumb cp-stop absolute top-1/2 focus:outline-none"
+            :class="st.id === selectedStop && 'is-selected'"
+            :style="{ left: handleLeft(st), background: stopCss(st) }"
+            :aria-label="`Stop at ${Math.round(st.at)}%`"
+            :aria-pressed="st.id === selectedStop"
+            @pointerdown="handleDown($event, st)"
+            @pointermove="handleMove($event, st)"
+            @pointerup="handleUp(st)"
+            @keydown="handleKey($event, st)"
+          />
+        </div>
+
         <div class="flex flex-col">
           <div
             ref="square"
@@ -401,7 +560,9 @@ const rowsAtFoot = computed(
 
           <div
             class="flex items-center gap-2"
-            :class="hueLabel ? (inputs ? 'pb-3.5' : '') : 'py-2'"
+            :class="
+              hueLabel ? (inputs && mode === 'solid' ? 'pb-3.5' : '') : 'py-2'
+            "
           >
             <Button
               v-if="eyedropper"
@@ -440,7 +601,10 @@ const rowsAtFoot = computed(
             </div>
           </div>
 
-          <div v-if="inputs" class="flex h-7 items-center gap-1.5">
+          <div
+            v-if="inputs && mode === 'solid'"
+            class="flex h-7 items-center gap-1.5"
+          >
             <Select
               v-model="format"
               :options="FORMATS"
@@ -492,9 +656,63 @@ const rowsAtFoot = computed(
             </div>
           </div>
         </div>
+
+        <div v-if="mode === 'gradient'" class="flex flex-col gap-2">
+          <div
+            v-for="(st, i) in ordered"
+            :key="st.id"
+            class="cp-stop-row flex h-7 items-center gap-1.5"
+            :class="st.id === selectedStop && 'is-selected'"
+            @focusin="selectedStop = st.id"
+          >
+            <TextInput
+              v-model="fieldsOf(st).at.draft"
+              class="cp-stop-at w-[66px] shrink-0"
+              :aria-label="`Stop ${i + 1} position`"
+              inputmode="numeric"
+              @update:model-value="fieldsOf(st).at.input"
+              @blur="fieldsOf(st).at.commit"
+              @keydown.enter="fieldsOf(st).at.commit"
+            >
+              <template #suffix>
+                <EIcon name="small-down" class="size-4 text-ink-gray-6" />
+              </template>
+            </TextInput>
+            <div class="cp-fields flex min-w-0 flex-1 gap-px">
+              <TextInput
+                v-model="fieldsOf(st).hex.draft"
+                class="cp-swatched min-w-0 flex-1"
+                :aria-label="`Stop ${i + 1} colour`"
+                spellcheck="false"
+                @update:model-value="fieldsOf(st).hex.input"
+                @blur="fieldsOf(st).hex.commit"
+                @keydown.enter="fieldsOf(st).hex.commit"
+              >
+                <template #prefix>
+                  <button
+                    type="button"
+                    class="cp-stop-swatch block size-[22px] rounded-[5.5px]"
+                    :style="{ background: `${layer(stopCss(st))}, ${CHECKER}` }"
+                    :aria-label="`Edit stop ${i + 1}`"
+                    @click="selectedStop = st.id"
+                  />
+                </template>
+              </TextInput>
+              <TextInput
+                v-model="fieldsOf(st).alpha.draft"
+                class="cp-right w-[57px] shrink-0"
+                :aria-label="`Stop ${i + 1} opacity`"
+                inputmode="numeric"
+                @update:model-value="fieldsOf(st).alpha.input"
+                @blur="fieldsOf(st).alpha.commit"
+                @keydown.enter="fieldsOf(st).alpha.commit"
+              />
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div v-if="saved" class="flex flex-col gap-2">
+      <div v-if="saved && mode === 'solid'" class="flex flex-col gap-2">
         <div class="flex h-7 items-center justify-between">
           <span class="text-base leading-4 text-ink-gray-7">Saved</span>
           <Button
@@ -519,64 +737,6 @@ const rowsAtFoot = computed(
         </div>
       </div>
     </template>
-
-    <!-- gradient -->
-    <div v-else-if="mode === 'gradient'" class="flex flex-col gap-2.5">
-      <div
-        class="h-10 w-[240px] rounded-4"
-        :style="{ background: `${gradientCss}, ${CHECKER}` }"
-        role="img"
-        aria-label="Gradient preview"
-      />
-      <div class="flex flex-col gap-2">
-        <div
-          v-for="(stop, i) in stops"
-          :key="i"
-          class="flex h-7 items-center gap-1.5"
-        >
-          <TextInput
-            v-model="stopFields[i].at.draft"
-            class="cp-stop-at w-[66px] shrink-0"
-            :aria-label="`Stop ${i + 1} position`"
-            inputmode="numeric"
-            @update:model-value="stopFields[i].at.input"
-            @blur="stopFields[i].at.commit"
-            @keydown.enter="stopFields[i].at.commit"
-          >
-            <template #suffix>
-              <EIcon name="small-down" class="size-4 text-ink-gray-6" />
-            </template>
-          </TextInput>
-          <div class="cp-fields flex min-w-0 flex-1 gap-px">
-            <TextInput
-              v-model="stopFields[i].hex.draft"
-              class="cp-swatched min-w-0 flex-1"
-              :aria-label="`Stop ${i + 1} colour`"
-              spellcheck="false"
-              @update:model-value="stopFields[i].hex.input"
-              @blur="stopFields[i].hex.commit"
-              @keydown.enter="stopFields[i].hex.commit"
-            >
-              <template #prefix>
-                <span
-                  class="block size-[22px] rounded-[5.5px]"
-                  :style="{ background: `${layer(stopCss(stop))}, ${CHECKER}` }"
-                />
-              </template>
-            </TextInput>
-            <TextInput
-              v-model="stopFields[i].alpha.draft"
-              class="cp-right w-[57px] shrink-0"
-              :aria-label="`Stop ${i + 1} opacity`"
-              inputmode="numeric"
-              @update:model-value="stopFields[i].alpha.input"
-              @blur="stopFields[i].alpha.commit"
-              @keydown.enter="stopFields[i].alpha.commit"
-            />
-          </div>
-        </div>
-      </div>
-    </div>
 
     <!-- image -->
     <div
@@ -626,6 +786,31 @@ const rowsAtFoot = computed(
 }
 .cp-thumb {
   transform: translate(-50%, -50%);
+}
+/* a stop's handle on the gradient bar: the selected one a touch larger;
+   in its row, the swatch wears a ring */
+.cp-stop {
+  cursor: grab;
+  transition: transform 120ms ease-out;
+}
+.cp-stop:active {
+  cursor: grabbing;
+}
+.cp-stop.is-selected {
+  transform: translate(-50%, -50%) scale(1.25);
+}
+.cp-stop:focus-visible {
+  box-shadow:
+    0 0 0 0.5px rgb(0 0 0 / 0.16),
+    0 0 0 2.5px var(--outline-gray-3);
+}
+.cp-stop-row.is-selected .cp-stop-swatch {
+  box-shadow:
+    0 0 0 2px var(--surface-elevation-2),
+    0 0 0 3.5px var(--outline-gray-4);
+}
+.cp-stop-swatch {
+  pointer-events: auto;
 }
 /* The bars are the library's Slider under the file's look: a 15px track
    carrying the hue run, or the colour over a checkerboard, no range fill,
