@@ -54,9 +54,9 @@ Two actions that share the width of a card, each with `class="flex-1"`.
 
 - Use sentence case for button labels, not title case.
 - Don't mix more than two button variants in one group.
-- Keep button sizes consistent within a group.
 - Use one solid button per group, for the main action.
 - Label a button with what it does, like “Delete project”, not “OK”.
+- Don't disable Save to signal invalid input. Keep it enabled and show what's wrong on click.
 
 </div>
 

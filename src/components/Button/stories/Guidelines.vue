@@ -1,5 +1,8 @@
 <script setup lang="ts">
-import { Button } from 'frappe-ui'
+import { Button, TextInput } from 'frappe-ui'
+
+// A small form, the same width on both sides.
+const form = 'flex w-72 flex-col gap-3'
 
 // Card 5: a small confirmation, the same width on both sides.
 const confirm =
@@ -55,50 +58,7 @@ const confirm =
       </template>
     </Guideline>
 
-    <!-- 3. Consistent sizes in a group -->
-    <Guideline
-      layout="stack"
-      caption="Keep button sizes consistent within a group."
-    >
-      <template #do>
-        <div class="flex items-center gap-1">
-          <Button variant="ghost" size="sm" icon="lucide-bold" label="Bold" />
-          <Button
-            variant="ghost"
-            size="sm"
-            icon="lucide-italic"
-            label="Italic"
-          />
-          <Button
-            variant="ghost"
-            size="sm"
-            icon="lucide-underline"
-            label="Underline"
-          />
-          <Button variant="ghost" size="sm" icon="lucide-link" label="Link" />
-        </div>
-      </template>
-      <template #dont>
-        <div class="flex items-center gap-1">
-          <Button variant="ghost" size="sm" icon="lucide-bold" label="Bold" />
-          <Button
-            variant="ghost"
-            size="lg"
-            icon="lucide-italic"
-            label="Italic"
-          />
-          <Button
-            variant="ghost"
-            size="sm"
-            icon="lucide-underline"
-            label="Underline"
-          />
-          <Button variant="ghost" size="md" icon="lucide-link" label="Link" />
-        </div>
-      </template>
-    </Guideline>
-
-    <!-- 4. One solid button marks the main action -->
+    <!-- 3. One solid button marks the main action -->
     <Guideline
       layout="stack"
       caption="Use one solid button per group, for the main action."
@@ -119,7 +79,7 @@ const confirm =
       </template>
     </Guideline>
 
-    <!-- 5. Say what the button does. Shown in a confirmation, where a vague
+    <!-- 4. Say what the button does. Shown in a confirmation, where a vague
          "OK" makes people reread the question. -->
     <Guideline
       layout="stack"
@@ -145,6 +105,31 @@ const confirm =
             <Button>Cancel</Button>
             <Button variant="solid" theme="red">OK</Button>
           </div>
+        </div>
+      </template>
+    </Guideline>
+
+    <!-- Disabling Save to mean "the form isn't valid yet" leaves people
+         stuck: a grey button doesn't say what's missing. Keep it enabled and
+         show the problem when they click. -->
+    <Guideline
+      layout="stack"
+      caption="Don't disable Save to signal invalid input. Keep it enabled and show what's wrong on click."
+    >
+      <template #do>
+        <div :class="form">
+          <TextInput
+            label="Email"
+            placeholder="jane@example.com"
+            error="Email is required."
+          />
+          <Button variant="solid" class="self-end">Save</Button>
+        </div>
+      </template>
+      <template #dont>
+        <div :class="form">
+          <TextInput label="Email" placeholder="jane@example.com" />
+          <Button variant="solid" class="self-end" disabled>Save</Button>
         </div>
       </template>
     </Guideline>
