@@ -35,8 +35,9 @@ The eye icon toggles the field between hidden and plain text. `Cmd+I` on macOS
 and `Ctrl+I` elsewhere do the same while the field has focus. A tooltip on the
 icon names the action and the shortcut.
 
-The icon is hidden while the value contains `*`, such as a masked
-`********` value from the server.
+The icon is hidden while the value is only asterisks, such as a masked
+`********` value from the server. A `*` inside a real password does not hide
+it.
 
 ### Slots
 
@@ -70,8 +71,8 @@ and listener goes on the `<input>`, including `name`, `autocomplete` and
 | ------------------ | ------------------------- |
 | `Cmd+I` / `Ctrl+I` | Show or hide the password |
 
-- The eye icon is not a button and cannot be reached with `Tab`. Keyboard
-  users toggle with the shortcut above.
+- The eye icon is a button named "Show password" or "Hide password", and can
+  be reached with `Tab`. The shortcut above also works from the field.
 - The `<label>` is linked to the `<input>`, so screen readers announce it as
   the field's name.
 - The description and the error are linked with `aria-describedby`.
