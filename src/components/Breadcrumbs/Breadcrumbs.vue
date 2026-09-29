@@ -16,11 +16,13 @@
     <div
       class="flex min-w-0 items-center text-ellipsis whitespace-nowrap leading-tighter"
     >
-      <template v-for="(item, i) in crumbs" :key="item.label">
+      <!-- Keyed by position: two crumbs can share a label. -->
+      <template v-for="(item, i) in crumbs" :key="i">
         <router-link
           v-if="item.route"
           :to="item.route"
           @click="item.onClick?.($event)"
+          :aria-current="i == crumbs.length - 1 ? 'page' : undefined"
           class="flex items-center rounded-4 px-0.5 py-1 text-lg-medium leading-tighter"
           :class="[
             i == crumbs.length - 1
@@ -41,6 +43,7 @@
           v-else-if="item.href"
           :href="item.href"
           @click="onLinkClick(item, $event)"
+          :aria-current="i == crumbs.length - 1 ? 'page' : undefined"
           class="flex items-center rounded-4 px-0.5 py-1 text-lg-medium leading-tighter"
           :class="[
             i == crumbs.length - 1
@@ -60,6 +63,7 @@
         <button
           v-else
           @click="item.onClick?.($event)"
+          :aria-current="i == crumbs.length - 1 ? 'page' : undefined"
           class="flex items-center rounded-4 px-0.5 py-1 text-lg-medium leading-tighter"
           :class="[
             i == crumbs.length - 1
@@ -132,6 +136,9 @@ const dropdownItems = computed(() => {
       }
       if (item.route) {
         router.push(item.route)
+      } else if (item.href && !item.onClick) {
+        // A menu row isn't a link, so follow an href-only crumb ourselves.
+        window.location.assign(item.href)
       }
     }
     return {
