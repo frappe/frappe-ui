@@ -38,6 +38,14 @@ The `#icon` slot draws a different emoji at each position. The slot's `index`,
 
 <ComponentPreview name="Rating-Guidelines" hide-code />
 
+<div class="guideline-text">
+
+- Use a half-filled icon to accurately reflect values that fall between whole numbers.
+- Use the same icon consistently for the same concept across the product.
+- Visually distinguish read-only ratings from interactive ones so users don't try to edit them.
+
+</div>
+
 ## Behavior
 
 ### Value
