@@ -38,6 +38,15 @@ button.
 
 <ComponentPreview name="Tooltip-Guidelines" hide-code />
 
+<div class="guideline-text">
+
+- Use a tooltip for extra context. Don't hide essential information inside it.
+- Place the tooltip so it doesn't cover the information it describes.
+- Use a tooltip for icon-only buttons where nothing else labels them.
+- Keep tooltip content short and scannable, not a wall of text.
+
+</div>
+
 ## Behavior
 
 ### Trigger and content
@@ -80,5 +89,15 @@ label applies only in some states.
 The tooltip opens when its trigger gets keyboard focus and closes on
 <kbd>Escape</kbd>. It has the `tooltip` role, and screen readers read it as the
 trigger's description.
+
+A description is not a name. An icon-only button wrapped in `Tooltip` is still
+announced as just "button" unless it has a `label`. On a `Button`, use its own
+`tooltip` prop instead: with no `label`, the tooltip text also becomes the
+button's name.
+
+```vue
+<!-- named "Bold", with a hover tooltip -->
+<Button icon="lucide-bold" tooltip="Bold" />
+```
 
 <!-- @include: ./Tooltip.api.md -->
