@@ -633,7 +633,7 @@ const rowsAtFoot = computed(
               <TextInput
                 v-if="format === 'hex'"
                 v-model="hexField.draft"
-                class="min-w-0 flex-1"
+                class="cp-dotted min-w-0 flex-1"
                 aria-label="Hex"
                 spellcheck="false"
                 @update:model-value="hexField.input"
@@ -696,7 +696,7 @@ const rowsAtFoot = computed(
             <div class="cp-fields flex min-w-0 flex-1 gap-px">
               <TextInput
                 v-model="fieldsOf(st).hex.draft"
-                class="min-w-0 flex-1"
+                class="cp-dotted min-w-0 flex-1"
                 :aria-label="`Stop ${i + 1} colour`"
                 spellcheck="false"
                 @update:model-value="fieldsOf(st).hex.input"
@@ -871,6 +871,10 @@ const rowsAtFoot = computed(
   border-end-end-radius: 8px;
 }
 /* three digits in a 36px field: the file pads 6, which clips a 255 */
+/* a hex behind its dot: 8px in, the 10px dot, 8px, the text */
+.cp-dotted input {
+  padding-inline-start: 26px;
+}
 .cp-narrow input {
   padding-inline: 4px;
   text-align: center;
