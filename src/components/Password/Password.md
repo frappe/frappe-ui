@@ -31,6 +31,7 @@ password.
 
 - Always pair the error state with a message telling the user what's wrong and how to fix it.
 - Show password requirements so users know exactly what makes a valid password.
+- Don't add a “Confirm password” field. The show toggle already lets people check for typos.
 
 </div>
 
