@@ -48,6 +48,9 @@ spinner or a parent.
 
 ## Accessibility
 
-The spinner has `role="status"` and the label "Loading".
+The spinner has `role="status"` and announces `label`, "Loading" by default.
+Pass a translated string in a translated app, or say what's loading, like
+`label="Syncing"`. When visible text next to the spinner already says it, pass
+`label=""` to hide the spinner from screen readers so it isn't read twice.
 
 <!-- @include: ./Spinner.api.md -->
