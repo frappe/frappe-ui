@@ -21,6 +21,7 @@ import ToastPage from './toast/ToastPage.vue'
 import NotificationPage from './notification/NotificationPage.vue'
 import KanbanPage from './kanban/KanbanPage.vue'
 import ColorPickerPage from './color-picker/ColorPickerPage.vue'
+import RichTextPage from './rich-text/RichTextPage.vue'
 // Figma 35185:59381 — the app's own mark, in place of the Frappe logo
 import appLogo from './assets/app-logo.svg'
 import EIcon from '../espresso-sidebar/EIcon.vue'
@@ -51,6 +52,7 @@ import navSidebarHeader from './assets/nav/sidebar-header.svg?raw'
 import navToast from './assets/nav/toast.svg?raw'
 import navKanban from './assets/nav/kanban.svg?raw'
 import navColorPicker from './assets/nav/color-picker.svg?raw'
+import navRichText from './assets/nav/richtext.svg?raw'
 import ApplicableCouponsModal from './modals/ApplicableCouponsModal.vue'
 import CallDetailsModal from './modals/CallDetailsModal.vue'
 import DeleteProjectModal from './modals/DeleteProjectModal.vue'
@@ -159,6 +161,7 @@ const pages = [
   'Notification',
   'Kanban card',
   'Color picker',
+  'Rich text editor',
 ].map((label) => ({ id: label.toLowerCase().replace(/\W+/g, '-'), label }))
 
 // The app tray down the far left, as a Frappe app shows it: this playground
@@ -199,6 +202,7 @@ const NAV_ICONS: Record<string, string> = {
   notification: navNotification,
   'kanban-card': navKanban,
   'color-picker': navColorPicker,
+  'rich-text-editor': navRichText,
 }
 
 // Drives `<html data-theme>`, so every token on the page — and in the
@@ -1031,6 +1035,7 @@ const outlineTitle = computed(
               <NotificationPage v-else-if="page === 'notification'" />
               <KanbanPage v-else-if="page === 'kanban-card'" />
               <ColorPickerPage v-else-if="page === 'color-picker'" />
+              <RichTextPage v-else-if="page === 'rich-text-editor'" />
 
               <div
                 v-else
