@@ -10,7 +10,7 @@ const testFile = {
 describe('FileUploader', () => {
   it('renders the default trigger button', () => {
     cy.mount(FileUploader)
-    cy.get('button').should('contain.text', 'Upload File')
+    cy.get('button').should('contain.text', 'Upload file')
     cy.get('input[type=file]').should('exist').and('have.class', 'hidden')
   })
 
