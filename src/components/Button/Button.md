@@ -90,8 +90,10 @@ button type and defaults to `button`.
 
 ## Accessibility
 
-- An icon-only button needs a `label`. The label is not shown. It becomes the
-  button's `aria-label`.
+- An icon-only button needs a name. Its `label` is not shown, and becomes the
+  button's `aria-label`. Without a `label`, the `tooltip` text is used. With
+  neither, the button logs a warning in development, since screen readers would
+  announce it as just "button".
 - A loading button sets `aria-busy="true"`.
 
 <!-- @include: ./Button.api.md -->
