@@ -38,7 +38,7 @@ place.
 ### Label, description and error
 
 `label` renders above the field and `description` below it. `error` renders
-below the field and hides `description`. It takes a string, an array of strings
+below the field and hides `description`, and turns the field's border red. It takes a string, an array of strings
 (one line each), or an `Error`, the same values as
 [ErrorMessage](./errormessage). An empty string or an empty array means no
 error. `required` adds a red asterisk to the label and sets `required` on the
