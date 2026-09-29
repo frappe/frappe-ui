@@ -1,7 +1,8 @@
 <script setup lang="ts">
 // An expand/collapse block: the chevron turns and the content folds, as the
 // file's product list does. The summary and the content are both editable;
-// the chevron alone toggles.
+// the chevron alone toggles. A grip stands to its left on hover — the
+// node's drag handle, so the block can be carried up or down the document.
 import { NodeViewContent, NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3'
 
 const props = defineProps(nodeViewProps)
@@ -18,6 +19,15 @@ function toggle() {
     :class="node.attrs.open && 'is-open'"
     data-type="details"
   >
+    <span
+      class="rte-drag"
+      data-drag-handle
+      contenteditable="false"
+      aria-label="Drag to move"
+      title="Drag to move"
+    >
+      <span class="lucide-grip-vertical size-4" aria-hidden="true" />
+    </span>
     <button
       type="button"
       class="rte-details-toggle"

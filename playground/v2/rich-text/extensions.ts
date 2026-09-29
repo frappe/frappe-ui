@@ -28,6 +28,8 @@ declare module '@tiptap/core' {
     }
     rteDetails: {
       insertDetails: () => ReturnType
+      /** carry the block the cursor is in one place up or down */
+      moveDetails: (dir: -1 | 1) => ReturnType
     }
     rteComment: {
       setComment: (id: string) => ReturnType
@@ -243,8 +245,41 @@ export const Details = Node.create({
   addNodeView() {
     return VueNodeViewRenderer(DetailsNodeView)
   },
+  // Alt+↑ / Alt+↓ move the block, as the grip does with the pointer
+  addKeyboardShortcuts() {
+    return {
+      'Alt-ArrowUp': () => this.editor.commands.moveDetails(-1),
+      'Alt-ArrowDown': () => this.editor.commands.moveDetails(1),
+    }
+  },
   addCommands() {
     return {
+      moveDetails:
+        (dir) =>
+        ({ state, tr, dispatch }) => {
+          const { $from } = state.selection
+          let depth = $from.depth
+          while (depth > 0 && $from.node(depth).type.name !== this.name) depth--
+          if (depth === 0) return false
+          const node = $from.node(depth)
+          const pos = $from.before(depth)
+          const parent = $from.node(depth - 1)
+          const index = $from.index(depth - 1)
+          const other = dir < 0 ? index - 1 : index + 1
+          if (other < 0 || other >= parent.childCount) return false
+          const sibling = parent.child(other)
+          if (!dispatch) return true
+          const offset = $from.pos - pos
+          // lift the block out, then set it down past its neighbour
+          tr.delete(pos, pos + node.nodeSize)
+          const at = dir < 0 ? pos - sibling.nodeSize : pos + sibling.nodeSize
+          tr.insert(at, node)
+          tr.setSelection(
+            state.selection.constructor.near(tr.doc.resolve(at + offset)),
+          )
+          tr.scrollIntoView()
+          return true
+        },
       insertDetails:
         () =>
         ({ commands }) =>

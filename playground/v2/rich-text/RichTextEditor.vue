@@ -411,6 +411,38 @@ function resolve() {
 .rte-details.is-open .rte-details-toggle {
   transform: rotate(90deg);
 }
+/* the grip: in the margin to the block's left, shown while the pointer is
+   on the block, and the handle that drags it */
+.rte-drag {
+  position: absolute;
+  left: -24px;
+  top: 4px;
+  display: flex;
+  width: 16px;
+  height: 16px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  color: var(--ink-gray-5);
+  opacity: 0;
+  cursor: grab;
+  transition: opacity 120ms ease-out;
+}
+.rte-details:hover > .rte-drag,
+.rte-drag:focus-visible {
+  opacity: 1;
+}
+.rte-drag:hover {
+  background: var(--surface-gray-2);
+  color: var(--ink-gray-7);
+}
+.rte-drag:active {
+  cursor: grabbing;
+}
+.rte-details.ProseMirror-selectednode {
+  border-radius: 6px;
+  box-shadow: 0 0 0 2px var(--outline-gray-2);
+}
 .rte-details summary {
   list-style: none;
   font-weight: 500;
