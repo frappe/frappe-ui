@@ -2,7 +2,7 @@
   <div class="flex min-w-0 items-center" ref="crumbsRef">
     <template v-if="overflowedX && items.length > 2">
       <Dropdown class="h-7" :options="dropdownItems">
-        <Button variant="ghost">
+        <Button variant="ghost" label="Show hidden pages">
           <template #icon>
             <span class="lucide-ellipsis size-4 text-ink-gray-5" />
           </template>
