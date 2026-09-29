@@ -25,6 +25,14 @@ The `#prefix` slot shows an icon or an avatar before each label. The slot reads
 
 <ComponentPreview name="Breadcrumbs-Guidelines" hide-code />
 
+<div class="guideline-text">
+
+- Show a record's title in the trail, not its ID.
+- Always maintain a consistent position so it's easy to navigate between pages.
+- Put view switching, like list, kanban and saved views, in a menu on the last crumb.
+
+</div>
+
 ## Behavior
 
 ### Item shape

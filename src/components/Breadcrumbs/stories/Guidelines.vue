@@ -1,94 +1,111 @@
 <script setup lang="ts">
 import { Breadcrumbs } from 'frappe-ui'
+import GuidelinePage from './GuidelinePage.vue'
+
+// Card 3's view menu, drawn open under the last crumb. A live Dropdown can't
+// stay open inside a static card, so it mirrors Menu's classes.
+const menuItem =
+  'flex h-7 items-center rounded-4 px-2 text-base text-ink-gray-7'
 </script>
 
 <template>
   <div class="flex flex-col gap-8">
-    <!-- 1. Collapse into a "…" menu once the trail holds more than five
-         links, rather than wrapping or shrinking every crumb. Real
-         Breadcrumbs in a narrow box, so the overflow behavior is genuine. -->
+    <!-- 1. Frappe records often have generated IDs as their name. Label the
+         crumb with the record's title instead. -->
     <Guideline
-      :mark="false"
-      caption="Enable collapse in the middle for breadcrumb trails with more than 5 links."
+      layout="stack"
+      caption="Show a record's title in the trail, not its ID."
     >
       <template #do>
-        <div class="w-72">
+        <div class="w-80">
           <Breadcrumbs
-            :items="[
-              { label: 'Workspace' },
-              { label: 'Projects' },
-              { label: 'Website redesign' },
-              { label: 'Marketing' },
-              { label: 'Assets' },
-              { label: 'Homepage banner' },
-            ]"
+            :items="[{ label: 'Deals' }, { label: 'Acme Corp renewal' }]"
+          />
+        </div>
+      </template>
+      <template #dont>
+        <div class="w-80">
+          <Breadcrumbs
+            :items="[{ label: 'Deals' }, { label: 'CRM-DEAL-2026-00042' }]"
           />
         </div>
       </template>
     </Guideline>
 
-    <!-- 2. Breadcrumbs can share the header with other page controls. The
-         open dropdown can't be shown with the live component frozen open, so
-         it's mocked with markup that mirrors Menu. -->
+    <!-- 2. Keep the breadcrumb in the same spot in the layout across pages.
+         Drawn at page scale and cropped by the card, so it reads as a page. -->
     <Guideline
-      :mark="false"
-      caption="Allow switching between views in the current page wherever necessary."
+      layout="bleed"
+      caption="Always maintain a consistent position so it's easy to navigate between pages."
     >
       <template #do>
-        <div class="flex flex-col items-start gap-1.5">
-          <div class="flex items-center text-lg-medium leading-tighter">
-            <span class="text-ink-gray-5">CRM</span>
-            <span class="mx-0.5 text-base text-ink-gray-4" aria-hidden="true"
-              >/</span
+        <GuidelinePage>
+          <template #header>
+            <Breadcrumbs
+              :items="[{ label: 'Helpdesk' }, { label: 'Tickets' }]"
+            />
+          </template>
+        </GuidelinePage>
+      </template>
+    </Guideline>
+
+    <!-- 3. View switching lives in a menu on the last crumb. The chevron is
+         the real Breadcrumbs `#suffix` slot, the way an app would build it. -->
+    <Guideline
+      layout="bleed"
+      caption="Put view switching, like list, kanban and saved views, in a menu on the last crumb."
+    >
+      <template #do>
+        <GuidelinePage>
+          <template #header>
+            <Breadcrumbs
+              :items="[
+                { label: 'Helpdesk' },
+                { label: 'Tickets', views: true },
+              ]"
             >
-            <span class="text-ink-gray-9">Leads</span>
-          </div>
-          <div
-            class="w-48 divide-y divide-outline-elevation-2 rounded-6 bg-surface-elevation-2 p-1.5 shadow-2xl ring-1 ring-black ring-opacity-5"
-          >
-            <div class="flex flex-col pb-1.5">
-              <div
-                class="flex h-7 items-center justify-between rounded-4 bg-surface-gray-3 px-2 text-base text-ink-gray-8"
-              >
-                List view
-                <span class="lucide-check size-4" aria-hidden="true" />
+              <template #suffix="{ item }">
+                <span
+                  v-if="item.views"
+                  class="lucide-chevron-down ml-1 size-4 text-ink-gray-5"
+                  aria-hidden="true"
+                />
+              </template>
+            </Breadcrumbs>
+          </template>
+          <template #overlay>
+            <div
+              class="absolute left-[92px] top-12 z-10 w-52 divide-y divide-outline-elevation-2 rounded-6 bg-surface-elevation-2 p-1.5 shadow-2xl ring-1 ring-black ring-opacity-5"
+            >
+              <div class="flex flex-col pb-1.5">
+                <div
+                  :class="[
+                    menuItem,
+                    'justify-between bg-surface-gray-3 text-ink-gray-8',
+                  ]"
+                >
+                  List view
+                  <span class="lucide-check size-4" aria-hidden="true" />
+                </div>
+                <div :class="menuItem">Kanban view</div>
+                <div :class="menuItem">Group by</div>
               </div>
-              <div
-                class="flex h-7 items-center rounded-4 px-2 text-base text-ink-gray-7"
-              >
-                Kanban view
-              </div>
-              <div
-                class="flex h-7 items-center rounded-4 px-2 text-base text-ink-gray-7"
-              >
-                Group by
-              </div>
-            </div>
-            <div class="flex flex-col pt-1.5">
-              <p
-                class="flex h-7 items-center px-2 text-sm font-medium text-ink-gray-4"
-              >
-                Saved views
-              </p>
-              <div
-                class="flex h-7 items-center rounded-4 px-2 text-base text-ink-gray-7"
-              >
-                My open leads
-              </div>
-              <div
-                class="flex h-7 items-center rounded-4 px-2 text-base text-ink-gray-7"
-              >
-                Qualified leads
-              </div>
-              <div
-                class="flex h-7 items-center gap-1.5 rounded-4 px-2 text-base text-ink-gray-7"
-              >
-                <span class="lucide-plus size-4" aria-hidden="true" />
-                Create view
+              <div class="flex flex-col pt-1.5">
+                <p
+                  class="flex h-7 items-center px-2 text-sm font-medium text-ink-gray-4"
+                >
+                  Saved views
+                </p>
+                <div :class="menuItem">My open tickets</div>
+                <div :class="menuItem">Urgent tickets</div>
+                <div :class="[menuItem, 'gap-1.5']">
+                  <span class="lucide-plus size-4" aria-hidden="true" />
+                  Create view
+                </div>
               </div>
             </div>
-          </div>
-        </div>
+          </template>
+        </GuidelinePage>
       </template>
     </Guideline>
   </div>

@@ -14,8 +14,10 @@ withDefaults(
     caption?: string
     // 'split' sets the do/don't examples side by side (compact content like
     // avatars); 'stack' places them one above the other with the mark on the
-    // left (wide content like alerts).
-    layout?: 'split' | 'stack'
+    // left (wide content like alerts). 'bleed' shows a single page-scale
+    // mockup (the "do" slot) that runs off the card's right and bottom edges,
+    // cropped like a screenshot, so it reads as a real page.
+    layout?: 'split' | 'stack' | 'bleed'
     // Set false for a single annotated example that isn't a do/don't.
     mark?: boolean
     // In 'stack' layout, place the mark centered below the example instead of
@@ -29,6 +31,13 @@ withDefaults(
 <template>
   <div class="flex flex-col gap-1.5 rounded-[20px] bg-surface-gray-1 p-1.5">
     <div
+      v-if="layout === 'bleed'"
+      class="play-card h-[380px] overflow-hidden rounded-[14px] bg-surface-base pl-16 pt-12"
+    >
+      <slot name="do" />
+    </div>
+    <div
+      v-else
       class="play-card flex min-h-[240px] items-center justify-center rounded-[14px] bg-surface-base p-8"
     >
       <!-- Compact examples: do on the left, don't on the right, with a fixed
