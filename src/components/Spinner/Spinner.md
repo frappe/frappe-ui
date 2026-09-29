@@ -32,6 +32,13 @@ label while it loads.
 
 <ComponentPreview name="Spinner-Guidelines" hide-code />
 
+<div class="guideline-text">
+
+- Match the spinner color to the context it sits in.
+- Keep the label while a button loads. Don't collapse it to an icon.
+
+</div>
+
 ## Behavior
 
 ### Size
