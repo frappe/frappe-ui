@@ -36,6 +36,13 @@ shows below the label, and one option is `disabled`.
 
 <ComponentPreview name="Radio-Guidelines" hide-code />
 
+<div class="guideline-text">
+
+- For enabling or disabling a single setting, use a switch instead.
+- When there are many options, use a Select instead of a long radio list.
+
+</div>
+
 ## Behavior
 
 ### Inside a group
