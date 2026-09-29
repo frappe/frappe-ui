@@ -1,29 +1,31 @@
 <script setup lang="ts">
 // Site-wide controls shared by the marketing Navbar and the docs Header: the
-// GitHub link (when themeConfig names a repo) and the color scheme picker.
+// GitHub link (when themeConfig names a repo) and the color scheme toggle.
 import { computed } from 'vue'
 import { useData } from 'vitepress'
-import { Button, Select, useColorScheme } from 'frappe-ui'
-import type { ColorScheme } from 'frappe-ui'
+import { Button, useColorScheme } from 'frappe-ui'
 
 const { theme } = useData()
 const githubUrl = computed(() => theme.value.githubUrl ?? '')
 
-// A picker rather than a light/dark toggle: `system` is the default scheme, and
-// a two-state toggle gives no way back to it once the reader has picked a side.
-const { colorScheme, setColorScheme } = useColorScheme()
+// One click flips what's on screen. When the new scheme is the one the OS
+// already prefers, it goes back to `system` instead, so the page follows the
+// OS again. That keeps a way back to `system` without a menu: on a dark-mode
+// OS, dark → light → system.
+const { resolvedColorScheme, setColorScheme } = useColorScheme()
 
-const themeOptions = [
-  { label: 'Light', value: 'light', icon: 'lucide-sun' },
-  { label: 'Dark', value: 'dark', icon: 'lucide-moon-star' },
-  { label: 'System', value: 'system', icon: 'lucide-monitor' },
-]
-
-const themeIcon = computed(
-  () =>
-    themeOptions.find((option) => option.value === colorScheme.value)?.icon ??
-    'lucide-monitor',
+const nextScheme = computed(() =>
+  resolvedColorScheme.value === 'dark' ? 'light' : 'dark',
 )
+const toggleLabel = computed(() => `Switch to ${nextScheme.value} theme`)
+
+function toggleTheme() {
+  const next = nextScheme.value
+  const osPrefers = window.matchMedia('(prefers-color-scheme: dark)').matches
+    ? 'dark'
+    : 'light'
+  setColorScheme(next === osPrefers ? 'system' : next)
+}
 </script>
 
 <template>
@@ -47,22 +49,12 @@ const themeIcon = computed(
       </template>
     </Button>
 
-    <Select
-      :model-value="colorScheme"
-      :options="themeOptions"
+    <Button
       variant="ghost"
-      size="sm"
-      aria-label="Theme"
-      side="bottom"
-      align="end"
-      class="!h-7 !w-7 !min-h-7 !px-0 !rounded-4 justify-center"
-      @update:model-value="
-        (value) => value && setColorScheme(value as ColorScheme)
-      "
-    >
-      <template #trigger>
-        <span :class="themeIcon" class="size-4" aria-hidden="true" />
-      </template>
-    </Select>
+      :icon="resolvedColorScheme === 'dark' ? 'lucide-moon-star' : 'lucide-sun'"
+      :label="toggleLabel"
+      :tooltip="toggleLabel"
+      @click="toggleTheme"
+    />
   </div>
 </template>
