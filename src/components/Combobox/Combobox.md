@@ -100,7 +100,7 @@ with suggestions.
 
 Search on the server for any list that grows with the site, such as
 employees, customers or items. Loading every record into `options` makes the
-field slow to open on a large site. HRMS's link fields work this way: they ask
+field slow to open on a large site. A link field usually works this way: it asks
 the server for matches as people type, a moment after they pause.
 
 To load options from a server:
