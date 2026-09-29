@@ -54,9 +54,15 @@ const onTypeError = computed(() =>
           <TextInput
             label="Phone number"
             type="tel"
-            placeholder="+91-1111-111-111"
+            placeholder="+91 98765 43210"
           />
-          <TextInput label="Website" type="url" placeholder="example.com" />
+          <!-- A url field only accepts a full address, so the example
+               includes the scheme. -->
+          <TextInput
+            label="Website"
+            type="url"
+            placeholder="https://example.com"
+          />
         </div>
       </template>
     </Guideline>
@@ -83,11 +89,7 @@ const onTypeError = computed(() =>
               :options="['INR', 'USD', 'EUR']"
               class="w-24"
             />
-            <TextInput
-              label="Course price"
-              placeholder="999.00"
-              class="flex-1"
-            />
+            <TextInput label="Course price" placeholder="999.00" class="w-32" />
           </div>
         </div>
       </template>
