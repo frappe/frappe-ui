@@ -1,58 +1,37 @@
 <script setup lang="ts">
-import { Textarea, TextInput, Select, Button } from 'frappe-ui'
+import { Textarea, Button } from 'frappe-ui'
 
 const longText =
   'Modern businesses need software that adapts to their processes instead of forcing teams to change the way they work. At Frappe, we believe that business software should be flexible, transparent, and accessible to organizations of all sizes.'
+
+// Card 1: a bio with a 160-character limit, partly written.
+const LIMIT = 160
+const bio = 'Product designer at Frappe. I write about forms.'
 </script>
 
 <template>
   <div class="flex flex-col gap-8">
-    <!-- 1. Not for short input -->
+    <!-- 1. With a limit, show how much room is left as people type, so they
+         can trim as they go instead of meeting an error at submit. Same
+         pattern as the Bio example: `description` counts down. -->
     <Guideline
       layout="stack"
-      caption="Don't use a textarea where the expected input is short."
+      caption="Show the character count before people hit a limit, not only once they pass it."
     >
       <template #do>
         <Textarea
           label="Bio"
-          placeholder="Tell us a bit about yourself"
+          :model-value="bio"
+          :description="`${LIMIT - bio.length} characters left`"
           class="w-80"
         />
       </template>
       <template #dont>
-        <Textarea
-          label="Email"
-          placeholder="johndoe@example.com"
-          class="w-80"
-        />
+        <Textarea label="Bio" :model-value="bio" class="w-80" />
       </template>
     </Guideline>
 
-    <!-- 2. Textarea spans the full row (do-only) -->
-    <Guideline
-      layout="stack"
-      caption="In a group of fields, let the textarea span the full row."
-    >
-      <template #do>
-        <div class="flex w-[440px] flex-col gap-3">
-          <div class="flex gap-3">
-            <TextInput
-              label="Name"
-              placeholder="Default Policy"
-              class="flex-1"
-            />
-            <Select
-              label="Default priority"
-              :options="['High', 'Medium', 'Low']"
-              class="flex-1"
-            />
-          </div>
-          <Textarea label="Description" placeholder="Describe the policy" />
-        </div>
-      </template>
-    </Guideline>
-
-    <!-- 3. Use an editor for formatted text -->
+    <!-- 2. Use an editor for formatted text -->
     <Guideline
       layout="stack"
       caption="When long-form text needs formatting, like bold or lists, use the Editor instead."

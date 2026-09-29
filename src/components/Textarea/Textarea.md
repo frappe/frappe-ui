@@ -28,8 +28,7 @@ place.
 
 <div class="guideline-text">
 
-- Don't use a textarea where the expected input is short.
-- In a group of fields, let the textarea span the full row.
+- Show the character count before people hit a limit, not only once they pass it.
 - When long-form text needs formatting, like bold or lists, use the Editor instead.
 
 </div>
