@@ -55,7 +55,7 @@ const longText =
     <!-- 3. Use an editor for formatted text -->
     <Guideline
       layout="stack"
-      caption="When long-form text needs formatting, use a text editor instead."
+      caption="When long-form text needs formatting, like bold or lists, use the Editor instead."
     >
       <template #do>
         <div

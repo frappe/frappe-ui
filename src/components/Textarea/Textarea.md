@@ -1,7 +1,8 @@
 # Textarea
 
 A multi-line field for longer text, such as comments, notes and descriptions.
-For a single line, use [TextInput](./textinput).
+For a single line, use [TextInput](./textinput). For formatted text, use
+[Editor](../molecules/editor) from `frappe-ui/editor`.
 
 <ComponentPlayground name="Textarea" />
 
@@ -24,6 +25,14 @@ place.
 ## Usage Guidelines
 
 <ComponentPreview name="Textarea-Guidelines" hide-code />
+
+<div class="guideline-text">
+
+- Don't use a textarea where the expected input is short.
+- In a group of fields, let the textarea span the full row.
+- When long-form text needs formatting, like bold or lists, use the Editor instead.
+
+</div>
 
 ## Behavior
 
