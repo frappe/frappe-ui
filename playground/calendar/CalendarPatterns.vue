@@ -386,6 +386,8 @@ function noAgendaDrag(e: DragEvent) {
 
 onMounted(() => {
   calendarEl.value?.addEventListener('dragstart', noAgendaDrag, true)
+  // Capture: a scroll does not bubble, but it can be heard on the way down.
+  calendarEl.value?.addEventListener('scroll', onAnyScroll, true)
   attach(calendarEl.value)
   month.attach(calendarEl.value)
   carried.attach(calendarEl.value)
@@ -394,6 +396,7 @@ onMounted(() => {
 })
 onUnmounted(() => {
   calendarEl.value?.removeEventListener('dragstart', noAgendaDrag, true)
+  calendarEl.value?.removeEventListener('scroll', onAnyScroll, true)
   detach(calendarEl.value)
   month.detach(calendarEl.value)
   carried.detach(calendarEl.value)
@@ -469,6 +472,33 @@ function parkAgenda() {
     requestAnimationFrame(() => requestAnimationFrame(park))
     setTimeout(park, 160)
   })
+}
+
+/**
+ * Which week labels are stuck to the top of the list, for the fade under
+ * them. A label is stuck while its top is on the list's top edge and it
+ * has not yet been pushed out by the end of its week. Read on every scroll
+ * of the list — a dozen rects, nothing more — since CSS has no way to say
+ * "while sticky is holding".
+ */
+function markStuck(list: HTMLElement) {
+  const top = list.getBoundingClientRect().top
+  for (const label of list.querySelectorAll<HTMLElement>(
+    '.calendar-week-label',
+  )) {
+    const r = label.getBoundingClientRect()
+    const stuck = r.top <= top + 0.5 && r.bottom > top
+    if (stuck) label.setAttribute('data-stuck', '')
+    else label.removeAttribute('data-stuck')
+  }
+}
+function onAnyScroll(e: Event) {
+  const list = e.target
+  if (
+    list instanceof HTMLElement &&
+    list.matches('.overflow-y-auto.bg-surface-base')
+  )
+    markStuck(list)
 }
 
 /** Today: the component's own, and in the Agenda the week it lands in. */
@@ -1300,6 +1330,22 @@ function dayBand(label: string) {
 :deep(.calendar-week-label:hover) {
   background-color: var(--surface-base) !important;
   color: var(--ink-gray-6) !important;
+}
+/*
+  While it is stuck, the rows going under it fade out rather than being cut
+  off: 16px of the list's ground thinning to nothing, hung under the label.
+  Only while stuck — at rest the card sits right under the label, and the
+  same fade would wash its top edge. `data-stuck` is set from the scroll.
+*/
+:deep(.calendar-week-label[data-stuck])::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  height: 16px;
+  background: linear-gradient(to bottom, var(--surface-base), transparent);
+  pointer-events: none;
 }
 :deep(.calendar-week-label)::after {
   content: '';
