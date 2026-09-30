@@ -41,6 +41,8 @@ const extensions = [
     tag: { items: tags },
     // the attachment node comes from ./extensions, drawn as the file's row
     attachment: false,
+    // and the link mark, raising the file's card in place of the popup
+    link: false,
   }),
   ...playgroundExtensions,
 ]

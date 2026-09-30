@@ -7,8 +7,12 @@
 import { Mark, Node, mergeAttributes } from '@tiptap/core'
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
 import { FontFamily, FontSize, LineHeight } from '@tiptap/extension-text-style'
-import { Attachment as KitAttachment } from '../../../src/molecules/editor'
+import {
+  Attachment as KitAttachment,
+  Link as KitLink,
+} from '../../../src/molecules/editor'
 import AttachmentNodeView from './AttachmentNodeView.vue'
+import { buildOpenRteLinkEditor } from './rteLinkPopup'
 import AudioNodeView from './AudioNodeView.vue'
 import DetailsNodeView from './DetailsNodeView.vue'
 
@@ -165,6 +169,18 @@ export const Attachment = KitAttachment.extend({
         return !!target.closest?.('a, button')
       },
     })
+  },
+})
+
+// ---- link: the kit's mark and its plugins, with the file's card
+// (31823:54797) in place of the library's popup. `openLinkEditor` is what
+// the Link buttons and ⌘K run, so overriding the one command covers all.
+export const Link = KitLink.extend({
+  addCommands() {
+    return {
+      ...this.parent?.(),
+      openLinkEditor: buildOpenRteLinkEditor(this.type),
+    }
   },
 })
 
@@ -390,6 +406,7 @@ export const playgroundExtensions = [
   LineHeight,
   Subscript,
   Superscript,
+  Link,
   Attachment,
   Audio,
   Callout,
