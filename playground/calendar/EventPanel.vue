@@ -521,14 +521,8 @@ const tabField = [
   'w-full',
   '[&_[role=tablist]]:!flex',
   '[&_[role=tablist]]:!w-full',
-  // 2 either side and 1 between, rather than the kit's 1 and 2: the fields
-  // are 207 wide, and with those numbers two pills are 101 each and three
-  // are 67 each — whole pixels, on whole-pixel offsets, so the sliding pill
-  // (which works in integers) lands exactly on its trigger and ends 2 short
-  // of the track at either end, in either row. The kit's own numbers put
-  // "Free" 1 from the edge and "Private" 3, which read as two paddings.
-  '[&_[role=tablist]]:!px-0.5',
-  '[&_[role=tablist]]:!gap-px',
+  // The track's own padding and gap, untouched: the kit's numbers are the
+  // field's. What changes is only that the pills share the width.
   '[&_[role=tab]]:!flex-1',
   // A pill's word in the middle of its pill. The trigger is a flex box that
   // leaves its content at the start; with every pill the same width that
