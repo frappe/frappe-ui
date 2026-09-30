@@ -7,6 +7,8 @@
 import { Mark, Node, mergeAttributes } from '@tiptap/core'
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
 import { FontFamily, FontSize, LineHeight } from '@tiptap/extension-text-style'
+import { Attachment as KitAttachment } from '../../../src/molecules/editor'
+import AttachmentNodeView from './AttachmentNodeView.vue'
 import AudioNodeView from './AudioNodeView.vue'
 import DetailsNodeView from './DetailsNodeView.vue'
 
@@ -120,6 +122,20 @@ export const Audio = Node.create({
         ({ commands }) =>
           commands.insertContent({ type: this.name, attrs: options }),
     }
+  },
+})
+
+// ---- attachment: the kit's node — its schema, upload and drop pipeline —
+// drawn as the file's row (31457:33634) instead of the kit's chip. The kit
+// is configured without its own copy, so this one stands in.
+export const Attachment = KitAttachment.extend({
+  addNodeView() {
+    return VueNodeViewRenderer(AttachmentNodeView, {
+      // the row is a link and carries its close; a press on either is the
+      // row's, not ProseMirror's, which would otherwise select the node
+      stopEvent: ({ event }) =>
+        !!(event.target as HTMLElement).closest?.('a, button'),
+    })
   },
 })
 
@@ -345,6 +361,7 @@ export const playgroundExtensions = [
   LineHeight,
   Subscript,
   Superscript,
+  Attachment,
   Audio,
   Callout,
   Column,

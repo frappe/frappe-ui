@@ -49,6 +49,8 @@ const extensions = [
   RichTextKit.configure({
     mention: { items: people },
     tag: { items: tags },
+    // the attachment node comes from ./extensions, drawn as the file's row
+    attachment: false,
   }),
   ...playgroundExtensions,
 ]
@@ -451,8 +453,32 @@ function resolve() {
   transition: opacity 120ms ease-out;
 }
 .rte-details:hover > .rte-drag,
+.rte-attachment:hover > .rte-drag,
 .rte-drag:focus-visible {
   opacity: 1;
+}
+/* the attachment row (31457:33634): its grip on the row's own 28px, the
+   close shown while the pointer is on the row, and rows stacked close */
+.rte-attachment > .rte-drag {
+  top: 6px;
+}
+/* the row is a link, but not one of the document's underlined ones */
+.rte-doc .rte-attachment > a {
+  border-bottom: 0;
+}
+.rte-attachment .rte-attachment-close {
+  opacity: 0;
+  transition: opacity 120ms ease-out;
+}
+.rte-attachment:hover .rte-attachment-close,
+.rte-attachment:focus-within .rte-attachment-close {
+  opacity: 1;
+}
+.rte-attachment.ProseMirror-selectednode > a {
+  box-shadow: 0 0 0 2px var(--outline-gray-2);
+}
+.rte-doc p:has(> .rte-attachment) + p:has(> .rte-attachment) {
+  margin-top: 0;
 }
 .rte-drag:hover {
   background: var(--surface-gray-2);
