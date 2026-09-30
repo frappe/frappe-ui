@@ -582,7 +582,7 @@ function dayBand(label: string) {
             control is `sm`, which is the 28 the file draws.
           -->
               <div
-                class="mb-4 mt-3.5 flex h-8 shrink-0 items-center gap-8 px-5"
+                class="mb-4 mt-3.5 flex h-8 shrink-0 items-center gap-8 pl-[14px] pr-5"
               >
                 <!--
               The label is the way into the month. frappe-ui's DatePicker
@@ -668,7 +668,7 @@ function dayBand(label: string) {
           -->
               <div
                 v-if="activeView === 'Day'"
-                class="flex h-8 shrink-0 items-center gap-1 border-b border-outline-gray-1 px-[13px] text-base text-ink-gray-6"
+                class="flex h-8 shrink-0 items-center gap-1 border-b border-outline-gray-1 pl-[14px] pr-[13px] text-base text-ink-gray-6"
               >
                 <template
                   v-for="band in [dayBand(currentMonthYear)]"
@@ -844,6 +844,25 @@ function dayBand(label: string) {
 </template>
 
 <style scoped>
+/*
+  The hours turned round to read against the rule.
+
+  `.calendar-column ::before` in the library's stylesheet hangs each hour off
+  the first day column at `left: -45px`, so they all begin on one line and end
+  wherever their own width lands — "1 pm" stops 7px short of "12 pm". A gutter
+  is read against the rule beside it, so the labels are pinned by their right
+  edge instead, 16px clear of that rule. `right: calc(100% + 16px)` is that
+  edge: 100% of the cell puts it at the cell's left, and the 16 is the air.
+
+  Here rather than as a class, because the target is a pseudo-element of a
+  descendant and the property being unset is `left`. "All day" gets the same
+  edge from `calendarClasses`, where it is an ordinary flex child.
+*/
+:deep(.calendar-column ::before) {
+  left: auto;
+  right: calc(100% + 16px);
+}
+
 /*
   The month cell's overflow, as the file draws it (a day with more on it than
   it can hold shows two and then "1 more").
