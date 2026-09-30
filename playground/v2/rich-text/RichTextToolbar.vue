@@ -434,7 +434,7 @@ function indent() {
 
 <template>
   <div
-    class="rte-toolbar flex h-9 items-center gap-0 overflow-x-auto border-b border-outline-gray-1 p-1"
+    class="rte-toolbar flex h-9 items-center gap-0 overflow-x-auto overflow-y-hidden border-b border-outline-gray-1 px-1"
     role="toolbar"
     aria-label="Formatting"
   >
