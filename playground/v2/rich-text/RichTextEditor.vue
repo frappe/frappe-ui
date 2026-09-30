@@ -499,8 +499,14 @@ function resolve() {
 .rte-attachment:focus-within .rte-attachment-close {
   opacity: 1;
 }
+/* a selected row is its button on the same gray-100 ground as under the
+   pointer — the same width and corners — not the block's wider halo */
+.rte-doc .rte-attachment.ProseMirror-selectednode {
+  background-color: transparent;
+  box-shadow: none;
+}
 .rte-attachment.ProseMirror-selectednode > a {
-  box-shadow: 0 0 0 2px var(--outline-gray-2);
+  background-color: var(--surface-gray-2);
 }
 .rte-doc .rte-attachment {
   margin: 8px 0;
