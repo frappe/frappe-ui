@@ -546,8 +546,9 @@ function namesOf(e: CalendarEvent): string[] {
 /**
  * The day's label, as "Thu 1 Oct": the weekday cut to three letters so every
  * day's label is close to the same width, where "Wednesday 30 Sep" ran twice
- * the length of "Friday 2 Oct". Today keeps its name and gains its weekday
- * after it — "Today · Wed 30 Sep" — so no day loses the word it is called by.
+ * the length of "Friday 2 Oct". Today keeps its name in the weekday's place
+ * — "Today 30 Sep" — the same two words wide as every other day, which is
+ * what lets the gutter close in to the label.
  *
  * The label is drawn by the component and not slotted, so it is rewritten
  * in place: the two spans are found under each day and their text replaced,
@@ -580,7 +581,7 @@ function relabelDays(root: HTMLElement, on: boolean) {
     const weekday = dayNames[when.getDay()]
     const wants: [HTMLElement, string][] = [
       [name, today ? 'Today' : weekday],
-      [date, `${today ? `${weekday} ` : ''}${d} ${monthNames[when.getMonth()]}`],
+      [date, `${d} ${monthNames[when.getMonth()]}`],
     ]
     for (const [el, want] of wants) {
       if ((el.textContent ?? '').trim() === want) continue
@@ -1051,6 +1052,26 @@ function dayBand(label: string) {
 }
 :deep(.agenda-v2 .calendar-row:hover .agenda-lasts) {
   visibility: visible;
+}
+
+/*
+  The gutter closes in on its label. The component keeps 168 for a spelled-out
+  weekday; "Today 30 Sep" is the widest label this list draws, at 88, and 112
+  leaves it 8 of air inside its padding. The rows start 56 sooner.
+*/
+:deep(.agenda-v2 .calendar-day-header) {
+  width: 112px !important;
+}
+
+/*
+  The week's range at the label's own size, regular where the label is
+  medium: "Oct 4 – 10" is half of what the heading says, not a footnote to it.
+*/
+:deep(.agenda-v2 .calendar-week-label > span) {
+  font-size: inherit !important;
+  line-height: inherit !important;
+  font-weight: 400 !important;
+  color: var(--ink-gray-5) !important;
 }
 
 /*
