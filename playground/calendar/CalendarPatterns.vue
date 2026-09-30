@@ -1326,6 +1326,11 @@ function dayBand(label: string) {
   background-color: var(--surface-base);
   margin-bottom: 0 !important;
   padding-bottom: 12px !important;
+  /* Square, not the component's rounded-3: the label's ground is what
+     covers the card's left border going under it, and rounded corners left
+     the border showing in the two notches at its top-left and bottom-left.
+     The radius was for a hover fill this label no longer has. */
+  border-radius: 0 !important;
 }
 :deep(.calendar-week-label:hover) {
   background-color: var(--surface-base) !important;
