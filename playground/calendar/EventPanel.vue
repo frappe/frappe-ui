@@ -507,8 +507,22 @@ const flush = '-ml-2 w-[calc(100%+0.5rem)]'
  * halves and three are three thirds. The subtle variant draws the track,
  * which is what makes that width visible.
  */
-const tabField =
-  'w-full [&_[role=tablist]]:!flex [&_[role=tablist]]:!w-full [&_[role=tab]]:!flex-1'
+const tabField = [
+  'w-full',
+  '[&_[role=tablist]]:!flex',
+  '[&_[role=tablist]]:!w-full',
+  // 1.5 either side rather than the kit's 1: the fields are 207 wide, and
+  // 207 less 2 splits into neither halves nor thirds. Less 3 is 204, which
+  // does both — so every pill is a whole number of pixels and the sliding
+  // one never rounds up past the track's edge, which is what was clipping
+  // "Free" on the right.
+  '[&_[role=tablist]]:!px-[1.5px]',
+  '[&_[role=tab]]:!flex-1',
+  // A pill's word in the middle of its pill. The trigger is a flex box that
+  // leaves its content at the start; with every pill the same width that
+  // read as four words hung off four left edges.
+  '[&_[role=tab]]:!justify-center',
+].join(' ')
 
 /**
  * A ghost field that cannot be typed in should still be a ghost field.
@@ -861,7 +875,16 @@ function todayIso() {
               >
                 Add tags
               </span>
-              <span v-else class="flex min-w-0 flex-wrap items-center gap-1">
+              <!-- `-ml-[5px]`: this field pads 3 above and below its chips
+                   and 8 at the side, so the first chip sat 5 further from
+                   the left edge than from the top. Pulled back to the same
+                   3 — measured 4/4/4 with the border — while the placeholder
+                   keeps its 8, on the line of every other field. The people
+                   field below pads 4, so its chips come back by 4. -->
+              <span
+                v-else
+                class="-ml-[5px] flex min-w-0 flex-wrap items-center gap-1"
+              >
                 <span
                   v-for="option in selectedOptions"
                   :key="option.value"
@@ -1071,7 +1094,9 @@ function todayIso() {
             >
               Add attendee
             </span>
-            <span v-else class="flex min-w-0 flex-wrap items-center gap-1">
+            <!-- `-ml-1`, as the tags above: 4 from the left edge, the same as
+                 from the top. -->
+            <span v-else class="-ml-1 flex min-w-0 flex-wrap items-center gap-1">
               <span
                 v-for="option in selectedOptions"
                 :key="option.value"

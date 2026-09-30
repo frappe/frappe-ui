@@ -311,11 +311,18 @@ const patternTray = ref(true)
 // Sidebar & Header page's default and waits for the preview control
 // elsewhere: each page arrives with its own default, and the control takes
 // it from there. Off, nothing sits above the stage.
-const showHeader = ref(true)
+// …except over the Calendar, which draws its own 48px header — title,
+// faces, Share, New — as its file does (node 35208:100256). Two headers
+// stacked read as the app's and then the page's; the page's is the one that
+// belongs to it.
+const showHeader = ref(page.value !== 'calendar')
 const headerType = ref(headerTypes[0].value)
 const showSubheader = ref(page.value === 'sidebar-header')
 const subheaderType = ref(subheaderTypes[0].value)
-watch(page, (p) => (showSubheader.value = p === 'sidebar-header'))
+watch(page, (p) => {
+  showSubheader.value = p === 'sidebar-header'
+  showHeader.value = p !== 'calendar'
+})
 
 const headerComponent = computed(
   () => headerTypes.find((v) => v.value === headerType.value)!.component,

@@ -318,9 +318,13 @@ export const grid = {
  * where the grids take it from the calendar the event belongs to.
  */
 export const espressoAgenda = [
-  // The 20 either side the sub-header and the grid both keep, and the same
-  // again at the foot so a scroll does not end on a card's border.
-  '[&_.overflow-y-auto.bg-surface-base]:!px-5',
+  // 14 on the left — the line the page's title, the month label and the
+  // Day band all start on — and the 20 the sub-header's controls keep on the
+  // right; 20 again at the foot so a scroll does not end on a card's border.
+  // The list sat on the 20 the month label used to, and when the label moved
+  // to the title's 14 the table stayed 6px behind it.
+  '[&_.overflow-y-auto.bg-surface-base]:!pl-[14px]',
+  '[&_.overflow-y-auto.bg-surface-base]:!pr-5',
   '[&_.overflow-y-auto.bg-surface-base]:!pb-5',
 
   // An event reads as the card it is in the grids: the same 8px corner…
