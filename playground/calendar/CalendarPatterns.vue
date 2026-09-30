@@ -1278,9 +1278,27 @@ function dayBand(label: string) {
   padding-left: 4px !important;
   padding-right: 0 !important;
   font-weight: 500 !important;
+
+  /*
+    …and it stays at the top of the list while its week is in view. Sticky
+    within the block that holds the label and its card, so it gives way the
+    moment the card's last row has gone by and the next week's label takes
+    the top. The list's own ground behind it, the full width, so the rows
+    passing under it are covered rather than seen through the words; and
+    the 6 it kept under it as margin is padding now, for the same reason —
+    a margin is a gap the rows would show in.
+  */
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  width: 100%;
+  background-color: var(--surface-base);
+  margin-bottom: 0 !important;
+  padding-bottom: 12px !important;
 }
 :deep(.calendar-week-label:hover) {
-  background-color: transparent !important;
+  background-color: var(--surface-base) !important;
   color: var(--ink-gray-6) !important;
 }
 :deep(.calendar-week-label)::after {
