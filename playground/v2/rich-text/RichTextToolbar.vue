@@ -9,7 +9,15 @@
 // control a 16px glyph; pressed and open ones sit on gray-100. Everything
 // runs the library's editor commands; the pickers (colour, table size,
 // link) are the library's own.
-import { computed, h, ref, watch, type Component } from 'vue'
+import {
+  computed,
+  h,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  watch,
+  type Component,
+} from 'vue'
 import {
   Button,
   Dialog,
@@ -430,6 +438,34 @@ function indent() {
   if (!chain().sinkListItem('listItem').run())
     chain().sinkListItem('taskItem').run()
 }
+
+// ---- where focus goes once a menu closes
+// reka hands focus back to the trigger when a menu, popover or dialog
+// closes, and after a pick made with the pointer that leaves a focus ring
+// on the control while the writer's attention is in the document. So focus
+// that lands on a control the pointer did not press goes on to the editor;
+// a keyboard pick keeps the trigger, where the ring belongs.
+let pointerLast = false
+let pressed: EventTarget | null = null
+const notePointer = (e: PointerEvent) => {
+  pointerLast = true
+  pressed = e.target
+}
+const noteKey = () => (pointerLast = false)
+onMounted(() => {
+  window.addEventListener('pointerdown', notePointer, true)
+  window.addEventListener('keydown', noteKey, true)
+})
+onBeforeUnmount(() => {
+  window.removeEventListener('pointerdown', notePointer, true)
+  window.removeEventListener('keydown', noteKey, true)
+})
+function onFocusIn(e: FocusEvent) {
+  if (!pointerLast) return
+  const control = e.target as HTMLElement
+  if (pressed instanceof Node && control.contains(pressed)) return
+  editor.value?.commands.focus()
+}
 </script>
 
 <template>
@@ -437,6 +473,7 @@ function indent() {
     class="rte-toolbar flex h-9 items-center gap-0 overflow-x-auto overflow-y-hidden border-b border-outline-gray-1 px-1"
     role="toolbar"
     aria-label="Formatting"
+    @focusin="onFocusIn"
   >
     <!-- + insert -->
     <Dropdown :options="insertOptions" side="bottom" align="start">
