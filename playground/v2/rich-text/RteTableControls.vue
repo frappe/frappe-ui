@@ -3,13 +3,15 @@
 // over the document on a fixed layer so nothing is clipped by the table's
 // scrolling card:
 //
-// - a row grip (10×20) at the left edge of the row under the pointer and a
-//   column grip (20×10) at the top edge of its column, each a gray-500 pill
-//   with white dots; pressed, they select the row or column and open its
-//   menu — Colour, Border options (a row) or Table Header (the first row),
-//   Insert, Duplicate, Clear content, Delete;
-// - a cell grip at the right edge of the selected cell or run of cells —
-//   Colour, and for a run, Merge cells and Delete content;
+// - handles on the caret's row and column (32925:95940): a 12×1 gray-500
+//   pill on a 2px white rule, at the left edge of the row and the top edge
+//   of the column; a selected cell (32925:96501) adds one at its right
+//   edge. Hovered, a handle grows into the file's grip — a 10×20 (or
+//   20×10) gray-500 pill with white dots — and opens its menu
+//   (32926:97034, 97642, 98372): Colour, Border options (a row) or Table
+//   Header (the first row), Insert, Duplicate, Clear content, Delete for
+//   a row or column; Colour, and for a run of cells Merge cells and Delete
+//   content, for a cell;
 // - two 16px strips, 8px off the table's right and bottom edges, that add
 //   a column or a row at the end;
 //
@@ -20,7 +22,7 @@
 // modal: a modal menu marks every block around the editor's live regions
 // aria-hidden, which ProseMirror reads back as a change to the document
 // and rebuilds the table under the grips.
-import { computed, h, ref, shallowRef, watch } from 'vue'
+import { computed, h, nextTick, ref, shallowRef, watch } from 'vue'
 import type { Node as PMNode, ResolvedPos } from '@tiptap/pm/model'
 import { TextSelection } from '@tiptap/pm/state'
 import {
@@ -48,17 +50,19 @@ const box = (r: DOMRect): Box => ({
   height: r.height,
 })
 
-// ---- what the controls follow: DOM handles, re-measured on demand
+// ---- what the controls follow: the caret's cell, held as a document
+// position and resolved to the DOM on each measure — a selection change
+// redraws the cells it decorates, so an element held across it goes stale
 const layer = ref<HTMLElement | null>(null)
 const menuHost = ref<HTMLElement | null>(null)
 const wrapperEl = shallowRef<HTMLElement | null>(null)
-const caretCellEl = shallowRef<HTMLElement | null>(null)
-const rowEl = shallowRef<HTMLElement | null>(null)
-const colCellEl = shallowRef<HTMLElement | null>(null)
+const anchorPos = ref<number | null>(null)
 const rowIndex = ref(-1)
 const colIndex = ref(-1)
 const cellCount = ref(0)
 const cellMerged = ref(false)
+/** what the selection is: the caret's cell, a run of cells, a row, a column */
+const selKind = ref<'caret' | 'cells' | 'row' | 'col' | null>(null)
 
 const tableBox = ref<Box | null>(null)
 const rowBox = ref<Box | null>(null)
@@ -117,28 +121,35 @@ function rowNodeAt(c: Ctx, row: number): { node: PMNode; pos: number } {
 
 // ---- measuring
 function measure() {
+  const ed = editor.value
+  let cellEl: HTMLElement | null = null
+  if (anchorPos.value !== null && ed && !ed.isDestroyed) {
+    try {
+      cellEl = cellDom(ed.view, anchorPos.value)
+    } catch {
+      cellEl = null
+    }
+  }
+  if (cellEl)
+    wrapperEl.value =
+      cellEl.closest<HTMLElement>('.tableWrapper') ?? cellEl.closest('table')
   const w = wrapperEl.value
   if (!w || !w.isConnected) {
     clearAll()
     return
   }
   tableBox.value = box(w.getBoundingClientRect())
-  const r = rowEl.value
-  rowBox.value = r && r.isConnected ? box(r.getBoundingClientRect()) : null
-  if (!rowBox.value) rowEl.value = null
-  const cc = colCellEl.value
-  if (cc && cc.isConnected) {
-    const cr = cc.getBoundingClientRect()
+  const r = cellEl?.closest('tr')
+  rowBox.value = r ? box(r.getBoundingClientRect()) : null
+  if (cellEl) {
+    const cr = cellEl.getBoundingClientRect()
     colBox.value = {
       left: cr.left,
       top: tableBox.value.top,
       width: cr.width,
       height: tableBox.value.height,
     }
-  } else {
-    colBox.value = null
-    colCellEl.value = null
-  }
+  } else colBox.value = null
   const selected = w.querySelectorAll<HTMLElement>('.selectedCell')
   if (selected.length) {
     let left = Infinity
@@ -153,21 +164,20 @@ function measure() {
       bottom = Math.max(bottom, b.bottom)
     })
     cellBox.value = { left, top, width: right - left, height: bottom - top }
-  } else if (caretCellEl.value?.isConnected) {
-    cellBox.value = box(caretCellEl.value.getBoundingClientRect())
+  } else if (cellEl && selKind.value === 'caret') {
+    cellBox.value = box(cellEl.getBoundingClientRect())
   } else {
     cellBox.value = null
   }
 }
 function clearAll() {
   wrapperEl.value = null
-  caretCellEl.value = null
-  rowEl.value = null
-  colCellEl.value = null
+  anchorPos.value = null
   tableBox.value = null
   rowBox.value = null
   colBox.value = null
   cellBox.value = null
+  selKind.value = null
 }
 
 // ---- the selection: a row, a column, a run of cells, or the caret's cell
@@ -184,9 +194,10 @@ function syncSelection() {
   if (!isInTable(ed.state)) {
     // the caret left the table: the controls stay while the pointer hovers
     if (!hovering) clearAll()
-    caretCellEl.value = null
+    anchorPos.value = null
     cellBox.value = null
     cellCount.value = 0
+    selKind.value = null
     return
   }
   const $cell = cellAround(selection.$from)
@@ -201,28 +212,25 @@ function syncSelection() {
         : dom.querySelector('table')
       : null
   const wrapper = tableDom?.closest<HTMLElement>('.tableWrapper') ?? tableDom
-  if (wrapper && wrapper !== wrapperEl.value) {
-    wrapperEl.value = wrapper
-    rowEl.value = null
-    colCellEl.value = null
-  }
+  if (wrapper) wrapperEl.value = wrapper
+  // the handles sit on the caret's row and column
   const rect = c.map.findCell($cell.pos - c.start)
+  anchorPos.value = $cell.pos
+  rowIndex.value = rect.top
+  colIndex.value = rect.left
   const cells = asCellSelection(selection)
   if (cells) {
     let n = 0
     cells.forEachCell(() => n++)
     cellCount.value = n
-    if (cells.isRowSelection() && !hovering) {
-      rowIndex.value = rect.top
-      rowEl.value = cellDom(view, $cell.pos)?.closest('tr') ?? null
-    } else if (cells.isColSelection() && !hovering) {
-      colIndex.value = rect.left
-      colCellEl.value = cellDom(view, $cell.pos)
-    }
-    caretCellEl.value = null
+    selKind.value = cells.isRowSelection()
+      ? 'row'
+      : cells.isColSelection()
+        ? 'col'
+        : 'cells'
   } else {
     cellCount.value = 1
-    caretCellEl.value = cellDom(view, $cell.pos)
+    selKind.value = 'caret'
   }
   const cell = $cell.nodeAfter
   cellMerged.value =
@@ -244,7 +252,8 @@ function cellDom(view: TiptapEditor['view'], pos: number): HTMLElement | null {
   return dom instanceof HTMLElement ? dom : null
 }
 
-// ---- hovering: the grips follow the cell under the pointer
+// ---- hovering: the strips come up for the table under the pointer; the
+// handles follow the selection, not the pointer
 let hovering = false
 function onMove(e: MouseEvent) {
   const ed = editor.value
@@ -254,7 +263,12 @@ function onMove(e: MouseEvent) {
   if (layer.value?.contains(target)) return
   const cell = target.closest<HTMLElement>('.rte-doc td, .rte-doc th')
   if (cell) {
-    hoverCell(ed, cell)
+    hovering = true
+    if (!wrapperEl.value) {
+      wrapperEl.value =
+        cell.closest<HTMLElement>('.tableWrapper') ?? cell.closest('table')
+      measure()
+    }
     return
   }
   const t = tableBox.value
@@ -267,27 +281,38 @@ function onMove(e: MouseEvent) {
   if (near) return
   hovering = false
   if (!isInTable(ed.state)) clearAll()
-  else syncSelection()
 }
-function hoverCell(ed: TiptapEditor, cell: HTMLElement) {
-  let $cell: ResolvedPos | null
-  try {
-    $cell = cellAround(ed.state.doc.resolve(ed.view.posAtDOM(cell, 0)))
-  } catch {
-    return
-  }
-  if (!$cell) return
-  const c = ctxAt(ed, $cell)
-  if (!c) return
-  hovering = true
-  const rect = c.map.findCell($cell.pos - c.start)
-  wrapperEl.value =
-    cell.closest<HTMLElement>('.tableWrapper') ?? cell.closest('table')
-  rowEl.value = cell.closest('tr')
-  rowIndex.value = rect.top
-  colCellEl.value = cell
-  colIndex.value = rect.left
-  measure()
+
+// ---- a hovered handle grows into its grip and, after a beat, opens its
+// menu; a press opens it at once (the Dropdown opens on pointerdown)
+let hoverTimer = 0
+function armOpen(kind: 'row' | 'col' | 'cell') {
+  disarm()
+  hoverTimer = window.setTimeout(() => {
+    hoverTimer = 0
+    if (menuOpen.value) return
+    // the menu first, then the row or column it acts on: a selection
+    // dispatched while the menu is opening closes it again
+    if (kind === 'row') rowOpen.value = true
+    else if (kind === 'col') colOpen.value = true
+    else cellOpen.value = true
+    void nextTick(() => {
+      if (kind === 'row') selectRow(rowIndex.value)
+      else if (kind === 'col') selectCol(colIndex.value)
+    })
+  }, 180)
+}
+function disarm() {
+  if (hoverTimer) window.clearTimeout(hoverTimer)
+  hoverTimer = 0
+}
+function pressRow() {
+  disarm()
+  selectRow(rowIndex.value)
+}
+function pressCol() {
+  disarm()
+  selectCol(colIndex.value)
 }
 
 // ---- actions
@@ -713,9 +738,9 @@ const px = (n: number) => `${n}px`
       class="rte-tc pointer-events-none fixed inset-0 z-[60]"
       aria-hidden="false"
     >
-      <!-- the row grip -->
+      <!-- the row handle, at the left edge of the caret's row -->
       <Dropdown
-        v-if="rowBox && tableBox"
+        v-if="rowBox && tableBox && selKind !== 'col'"
         v-model:open="rowOpen"
         :options="rowOptions"
         side="bottom"
@@ -727,25 +752,28 @@ const px = (n: number) => `${n}px`
         <template #trigger>
           <button
             type="button"
-            class="rte-tc-grip is-row"
+            class="rte-tc-handle is-row"
             :class="rowOpen && 'is-open'"
             :style="{
-              left: px(tableBox.left - 4),
+              left: px(tableBox.left - 5),
               top: px(rowBox.top + rowBox.height / 2 - 10),
             }"
             aria-label="Row options"
             title="Row options"
-            @pointerdown="selectRow(rowIndex)"
+            @pointerenter="armOpen('row')"
+            @pointerleave="disarm"
+            @pointerdown="pressRow"
             @keydown.enter="selectRow(rowIndex)"
           >
-            <RteIcon name="dot-vertical" class="size-4" />
+            <span class="rte-tc-pill" aria-hidden="true" />
+            <RteIcon name="dot-vertical" class="rte-tc-dots size-4" />
           </button>
         </template>
       </Dropdown>
 
-      <!-- the column grip -->
+      <!-- the column handle, at the top edge of the caret's column -->
       <Dropdown
-        v-if="colBox"
+        v-if="colBox && selKind !== 'row'"
         v-model:open="colOpen"
         :options="colOptions"
         side="bottom"
@@ -757,25 +785,28 @@ const px = (n: number) => `${n}px`
         <template #trigger>
           <button
             type="button"
-            class="rte-tc-grip is-col"
+            class="rte-tc-handle is-col"
             :class="colOpen && 'is-open'"
             :style="{
               left: px(colBox.left + colBox.width / 2 - 10),
-              top: px(colBox.top - 4),
+              top: px(colBox.top - 5),
             }"
             aria-label="Column options"
             title="Column options"
-            @pointerdown="selectCol(colIndex)"
+            @pointerenter="armOpen('col')"
+            @pointerleave="disarm"
+            @pointerdown="pressCol"
             @keydown.enter="selectCol(colIndex)"
           >
-            <RteIcon name="dot-horizontal" class="size-4" />
+            <span class="rte-tc-pill" aria-hidden="true" />
+            <RteIcon name="dot-horizontal" class="rte-tc-dots size-4" />
           </button>
         </template>
       </Dropdown>
 
-      <!-- the cell grip, at the right edge of the selected cell or run -->
+      <!-- the cell handle, at the right edge of the selected cell or run -->
       <Dropdown
-        v-if="cellBox && cellCount > 0"
+        v-if="cellBox && selKind === 'cells'"
         v-model:open="cellOpen"
         :options="cellOptions"
         side="right"
@@ -787,16 +818,20 @@ const px = (n: number) => `${n}px`
         <template #trigger>
           <button
             type="button"
-            class="rte-tc-grip is-row"
+            class="rte-tc-handle is-row"
             :class="cellOpen && 'is-open'"
             :style="{
-              left: px(cellBox.left + cellBox.width - 6),
+              left: px(cellBox.left + cellBox.width - 5),
               top: px(cellBox.top + cellBox.height / 2 - 10),
             }"
             aria-label="Cell options"
             title="Cell options"
+            @pointerenter="armOpen('cell')"
+            @pointerleave="disarm"
+            @pointerdown="disarm"
           >
-            <RteIcon name="dot-vertical" class="size-4" />
+            <span class="rte-tc-pill" aria-hidden="true" />
+            <RteIcon name="dot-vertical" class="rte-tc-dots size-4" />
           </button>
         </template>
       </Dropdown>
@@ -842,25 +877,51 @@ const px = (n: number) => `${n}px`
 </template>
 
 <style>
-/* a grip: a gray-500 pill on a gray-200 rule, 4px corners, under the sm
-   shadow, its dots white and overflowing the pill as the file's 16px glyph
-   does */
-.rte-tc-grip {
-  @apply pointer-events-auto fixed flex items-center justify-center rounded-[4px] border border-outline-gray-2 text-white shadow-sm transition-colors;
-  background-color: var(--ink-gray-5);
+/* a handle: a 12×1 gray-500 pill on a 2px white rule, 4px corners, on
+   the edge (32925:96501). Hovered or open it is the file's grip: 10×20
+   (20×10 for a column), gray-500 on a gray-200 rule, 4px corners, under
+   the sm shadow, its dots white and overflowing as the 16px glyph does */
+.rte-tc-handle {
+  @apply pointer-events-auto fixed flex items-center justify-center rounded-[4px] border border-transparent text-white transition-colors;
   overflow: visible;
 }
-.rte-tc-grip.is-row {
+.rte-tc-handle.is-row {
   width: 10px;
   height: 20px;
 }
-.rte-tc-grip.is-col {
+.rte-tc-handle.is-col {
   width: 20px;
   height: 10px;
 }
-.rte-tc-grip:hover,
-.rte-tc-grip.is-open {
-  background-color: var(--ink-gray-6);
+.rte-tc-pill {
+  display: block;
+  border-radius: 4px;
+  background-color: var(--ink-gray-5);
+  box-shadow: 0 0 0 2px var(--surface-elevation-2);
+}
+.rte-tc-handle.is-row .rte-tc-pill {
+  width: 1px;
+  height: 12px;
+}
+.rte-tc-handle.is-col .rte-tc-pill {
+  width: 12px;
+  height: 1px;
+}
+.rte-tc-dots {
+  display: none;
+}
+.rte-tc-handle:hover,
+.rte-tc-handle.is-open {
+  @apply border-outline-gray-2 shadow-sm;
+  background-color: var(--ink-gray-5);
+}
+.rte-tc-handle:hover .rte-tc-pill,
+.rte-tc-handle.is-open .rte-tc-pill {
+  display: none;
+}
+.rte-tc-handle:hover .rte-tc-dots,
+.rte-tc-handle.is-open .rte-tc-dots {
+  display: inline-flex;
 }
 /* a strip: gray-50 on a gray-100 rule, 4px corners, the plus gray-400 */
 .rte-tc-strip {
