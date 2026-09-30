@@ -417,6 +417,19 @@ function pickColor(e: MouseEvent) {
       trigger: e.currentTarget as HTMLElement,
     })
 }
+// The library's colour picker is a floating panel it mounts and takes down
+// on its own, with no word to its trigger; the chevron follows the panel's
+// presence in the page instead.
+const colorOpen = ref(false)
+let panelWatch: MutationObserver | undefined
+const COLOR_PANEL = '[data-slot="font-color-panel"]'
+function watchColorPanel() {
+  panelWatch = new MutationObserver(() => {
+    const open = !!document.querySelector(COLOR_PANEL)
+    if (open !== colorOpen.value) colorOpen.value = open
+  })
+  panelWatch.observe(document.body, { childList: true, subtree: true })
+}
 function pickTable(e: MouseEvent) {
   if (editor.value)
     InsertTable.action(editor.value, {
@@ -455,10 +468,12 @@ const noteKey = () => (pointerLast = false)
 onMounted(() => {
   window.addEventListener('pointerdown', notePointer, true)
   window.addEventListener('keydown', noteKey, true)
+  watchColorPanel()
 })
 onBeforeUnmount(() => {
   window.removeEventListener('pointerdown', notePointer, true)
   window.removeEventListener('keydown', noteKey, true)
+  panelWatch?.disconnect()
 })
 function onFocusIn(e: FocusEvent) {
   if (!pointerLast) return
@@ -565,16 +580,20 @@ function onFocusIn(e: FocusEvent) {
       </button>
     </Tooltip>
 
-    <!-- text colour -->
+    <!-- text colour: the file (30534:59617) draws its A in a 24px outlined
+         box — the swatch — with the chevron beside it, up while the picker
+         is open -->
     <Tooltip text="Text colour">
       <button
         type="button"
         class="rte-select rte-select-tight"
+        :class="colorOpen && 'is-open'"
         aria-label="Text colour"
+        :aria-expanded="colorOpen"
         @click="pickColor"
       >
         <RteIcon name="text" class="size-3.5" />
-        <RteIcon name="small-down" class="size-4" />
+        <RteIcon :name="colorOpen ? 'small-up' : 'small-down'" class="size-4" />
       </button>
     </Tooltip>
 
@@ -874,12 +893,19 @@ function onFocusIn(e: FocusEvent) {
 .rte-select.is-open {
   @apply bg-surface-gray-3;
 }
-/* the colour select is tighter: 2px around its 24px glyph box */
-.rte-select-tight {
-  @apply gap-0.5 px-0.5;
+/* the colour select is tighter: 2px around its 24px glyph box, which is
+   the file's outline button — ruled in outline-gray-2, darker under the
+   pointer — while the frame around it takes no fill of its own */
+.rte-select-tight,
+.rte-select-tight.is-open {
+  @apply gap-0.5 bg-transparent px-0.5 hover:bg-transparent;
 }
 .rte-select-tight > :first-child {
-  @apply flex size-6 items-center justify-center rounded-4;
+  @apply flex size-6 items-center justify-center rounded-4 border border-outline-gray-2 transition-colors;
+}
+.rte-select-tight:hover > :first-child,
+.rte-select-tight.is-open > :first-child {
+  @apply border-outline-gray-3;
 }
 /* the size stepper's − and +: 24px on gray-100 */
 .rte-step {
