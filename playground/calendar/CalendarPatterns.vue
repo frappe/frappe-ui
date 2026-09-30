@@ -528,10 +528,9 @@ function lasts(e: CalendarEvent, date: Date): string {
   return h && m ? `${h}h ${m}m` : h ? `${h}h` : `${m}m`
 }
 
-/** What the row says after the title: the event's own note, then the library's. */
-function noteOf(e: CalendarEvent, theirs: string): string {
-  const own = (e as { description?: string }).description?.trim()
-  return [own, theirs].filter(Boolean).join(' · ')
+/** The event's own note, read after the title. */
+function noteOf(e: CalendarEvent): string {
+  return (e as { description?: string }).description?.trim() ?? ''
 }
 
 /** Who is on it, by name, for the faces at the end of the row. */
@@ -860,9 +859,17 @@ function dayBand(label: string) {
                 <DotIcon class="agenda-dot shrink-0 [color:var(--border)]" />
               </span>
             </template>
+            <!--
+              The note, then whatever the library adds — "Day 1/3", a venue —
+              as two spans, so a long note gives way and the hint never does:
+              the hint is the shorter and the more useful of the two.
+            -->
             <template #event-description="{ calendarEvent, description }">
-              <template v-if="agendaFlat && noteOf(calendarEvent, description)">
-                {{ noteOf(calendarEvent, description) }}
+              <template v-if="agendaFlat && (noteOf(calendarEvent) || description)">
+                <span v-if="noteOf(calendarEvent)" class="min-w-0 truncate">
+                  {{ noteOf(calendarEvent) }}
+                </span>
+                <span v-if="description" class="shrink-0">{{ description }}</span>
               </template>
             </template>
             <template #event-participant="{ calendarEvent }">
@@ -1052,6 +1059,27 @@ function dayBand(label: string) {
 }
 :deep(.agenda-v2 .calendar-row:hover .agenda-lasts) {
   visibility: visible;
+}
+
+/*
+  How far a line may run. The title and its note stop 880 from where the
+  time starts, whatever the window; past that a note is a paragraph read
+  along a row, and it is cut with an ellipsis instead. The faces keep the
+  row's end — they are pushed there rather than following the text.
+
+  The note and the hint after it are two spans in the description's box:
+  the note gives way, the hint ("Day 1/3") is never cut.
+*/
+:deep(.agenda-v2 .calendar-row > div > span:has(.calendar-row-title)) {
+  max-width: 880px;
+}
+:deep(.agenda-v2 .calendar-row-participant) {
+  margin-left: auto;
+}
+:deep(.agenda-v2 .calendar-row-description) {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
 }
 
 /*
