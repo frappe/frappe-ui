@@ -130,9 +130,9 @@ welcome()</code></pre>
 <p></p>
 <iframe src="https://www.youtube.com/embed/aqz-KE-bpKQ" title="Big Buck Bunny"></iframe>
 <p></p>
-<p><a data-attachment href="#" data-file-name="Default ticket type" data-file-size="12288" data-mime-type="text/plain">Default ticket type</a></p>
-<p><a data-attachment href="#" data-file-name="Supply_update.doc" data-file-size="49152" data-mime-type="application/msword">Supply_update.doc</a></p>
-<p><a data-attachment href="#" data-file-name="Frappe logos.zip" data-file-size="2202009" data-mime-type="application/zip">Frappe logos.zip</a></p>
+<a data-attachment href="#" data-file-name="Default ticket type" data-file-size="12288" data-mime-type="text/plain">Default ticket type</a>
+<a data-attachment href="#" data-file-name="Supply_update.doc" data-file-size="49152" data-mime-type="application/msword">Supply_update.doc</a>
+<a data-attachment href="#" data-file-name="Frappe logos.zip" data-file-size="2202009" data-mime-type="application/zip">Frappe logos.zip</a>
 <hr>
 <h2>Empowering Developers and Businesses</h2>
 <p>One of Frappe’s unique strengths is its ability to serve both technical and non-technical users. Developers benefit from a modern technology stack, extensive customization capabilities, and a framework that accelerates application development. Business users benefit from intuitive interfaces, configurable workflows, and software that aligns closely with their operational needs.</p>

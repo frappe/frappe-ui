@@ -41,8 +41,8 @@ function onClick(e: MouseEvent) {
 
 <template>
   <NodeViewWrapper
-    as="span"
-    class="rte-attachment relative inline-flex max-w-full align-middle"
+    as="div"
+    class="rte-attachment relative flex"
     data-type="attachment"
   >
     <span

@@ -477,8 +477,11 @@ function resolve() {
 .rte-attachment.ProseMirror-selectednode > a {
   box-shadow: 0 0 0 2px var(--outline-gray-2);
 }
-.rte-doc p:has(> .rte-attachment) + p:has(> .rte-attachment) {
-  margin-top: 0;
+.rte-doc .rte-attachment {
+  margin: 8px 0;
+}
+.rte-doc .rte-attachment + .rte-attachment {
+  margin-top: -8px;
 }
 .rte-drag:hover {
   background: var(--surface-gray-2);

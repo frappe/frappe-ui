@@ -128,13 +128,42 @@ export const Audio = Node.create({
 // ---- attachment: the kit's node — its schema, upload and drop pipeline —
 // drawn as the file's row (31457:33634) instead of the kit's chip. The kit
 // is configured without its own copy, so this one stands in.
+//
+// A row, not a chip: the kit's node is inline, so a dragged chip could land
+// in the middle of a sentence. Here it is a block, and its grip carries it
+// between blocks the way the expand block's does.
 export const Attachment = KitAttachment.extend({
+  inline: false,
+  group: 'block',
   addNodeView() {
+    // tiptap's own stopEvent knows the grip, but keeps a press to itself
+    // only when the target is a <button>-like element — the row is an <a>,
+    // and a press on it would go to ProseMirror, which selects the node.
+    // This one keeps the row's presses and reproduces the grip handshake:
+    // the press on the grip goes to ProseMirror, which then owns the drag.
+    let dragging = false
     return VueNodeViewRenderer(AttachmentNodeView, {
-      // the row is a link and carries its close; a press on either is the
-      // row's, not ProseMirror's, which would otherwise select the node
-      stopEvent: ({ event }) =>
-        !!(event.target as HTMLElement).closest?.('a, button'),
+      stopEvent: ({ event }) => {
+        const target = event.target as HTMLElement
+        const { type } = event
+        if (type === 'mousedown' && target.closest?.('[data-drag-handle]')) {
+          dragging = true
+          const done = () => (dragging = false)
+          document.addEventListener('dragend', done, { once: true })
+          document.addEventListener('drop', done, { once: true })
+          document.addEventListener('mouseup', done, { once: true })
+          return false
+        }
+        if (type.startsWith('drag') || type === 'drop') {
+          // a drag that did not begin on the grip — the link's own native
+          // drag — is no drag of the row: without this the browser would
+          // carry the URL, and a drop would paste it as text
+          if (type === 'dragstart' && !dragging) event.preventDefault()
+          return false
+        }
+        if (dragging) return false
+        return !!target.closest?.('a, button')
+      },
     })
   },
 })
