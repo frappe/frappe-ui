@@ -29,13 +29,13 @@ import {
 import type { DropdownOptions } from '../../../src/components/Dropdown/types'
 import { useResolvedEditor } from '../../../src/molecules/editor/editor-context'
 import {
-  FontColor,
   FontHighlight,
   InsertLink,
   InsertTable,
 } from '../../../src/molecules/editor/menu'
 import type { TiptapEditor } from '../../../src/molecules/editor'
 import RteIcon from './RteIcon.vue'
+import RteColorPanel from './RteColorPanel.vue'
 import EmojiPicker from '../popover/EmojiPicker.vue'
 
 const emit = defineEmits<{
@@ -410,26 +410,6 @@ const marks = [
 ]
 const isActive = (name: string) => live((ed) => ed.isActive(name), false)
 
-function pickColor(e: MouseEvent) {
-  if (editor.value)
-    FontColor.action(editor.value, {
-      event: e,
-      trigger: e.currentTarget as HTMLElement,
-    })
-}
-// The library's colour picker is a floating panel it mounts and takes down
-// on its own, with no word to its trigger; the chevron follows the panel's
-// presence in the page instead.
-const colorOpen = ref(false)
-let panelWatch: MutationObserver | undefined
-const COLOR_PANEL = '[data-slot="font-color-panel"]'
-function watchColorPanel() {
-  panelWatch = new MutationObserver(() => {
-    const open = !!document.querySelector(COLOR_PANEL)
-    if (open !== colorOpen.value) colorOpen.value = open
-  })
-  panelWatch.observe(document.body, { childList: true, subtree: true })
-}
 function pickTable(e: MouseEvent) {
   if (editor.value)
     InsertTable.action(editor.value, {
@@ -468,12 +448,10 @@ const noteKey = () => (pointerLast = false)
 onMounted(() => {
   window.addEventListener('pointerdown', notePointer, true)
   window.addEventListener('keydown', noteKey, true)
-  watchColorPanel()
 })
 onBeforeUnmount(() => {
   window.removeEventListener('pointerdown', notePointer, true)
   window.removeEventListener('keydown', noteKey, true)
-  panelWatch?.disconnect()
 })
 function onFocusIn(e: FocusEvent) {
   if (!pointerLast) return
@@ -583,22 +561,30 @@ function onFocusIn(e: FocusEvent) {
     <!-- text colour: the file (30534:59617) draws its A in a 24px outlined
          box — the swatch — with the chevron beside it, up while the picker
          is open -->
-    <Tooltip text="Text colour">
-      <button
-        type="button"
-        class="rte-select rte-select-tight"
-        :class="colorOpen && 'is-open'"
-        aria-label="Text colour"
-        :aria-expanded="colorOpen"
-        @click="pickColor"
-      >
-        <!-- the 24px box, and in it the file's 14px glyph (31845:35001) -->
-        <span>
-          <RteIcon name="text" class="size-3.5" />
-        </span>
-        <RteIcon :name="colorOpen ? 'small-up' : 'small-down'" class="size-4" />
-      </button>
-    </Tooltip>
+    <!-- the picker is the playground's own card (31845:36005) on the
+         library's Popover. A Tooltip cannot share the trigger — nested
+         as-child, the popover no longer opens — so the button names itself
+         with a plain title. -->
+    <Popover side="bottom" align="start" :offset="6" bare>
+      <template #trigger="{ open }">
+        <button
+          type="button"
+          class="rte-select rte-select-tight"
+          :class="open && 'is-open'"
+          aria-label="Text colour"
+          title="Text colour"
+        >
+          <!-- the 24px box, and in it the file's 14px glyph (31845:35001) -->
+          <span>
+            <RteIcon name="text" class="size-3.5" />
+          </span>
+          <RteIcon :name="open ? 'small-up' : 'small-down'" class="size-4" />
+        </button>
+      </template>
+      <template #default="{ close }">
+        <RteColorPanel v-if="editor" :editor="editor" @pick="close" />
+      </template>
+    </Popover>
 
     <span class="rte-divider" aria-hidden="true" />
 
