@@ -8,10 +8,11 @@
 // document drawn to the file's type scale.
 //
 // Comments: the toolbar's comment button lays the amber run on the
-// selection and opens the thread beside it, as the file shows; a card of
-// its own, on the raised surface under the lg shadow.
+// selection and opens the thread beside it — the file's comment card
+// (31815:34334): 300px on a 12px radius under the xl shadow, a 32px
+// header ruled beneath, a reply per 24px avatar, and the reply field.
 import { computed, nextTick, ref, watch } from 'vue'
-import { Avatar, Button, TextInput } from '../../../src'
+import { Avatar, TextInput } from '../../../src'
 import {
   Editor,
   EditorContent,
@@ -21,8 +22,12 @@ import {
 } from '../../../src/molecules/editor'
 import RichTextToolbar from './RichTextToolbar.vue'
 import RteBubbleMenu from './RteBubbleMenu.vue'
+import RteIcon from './RteIcon.vue'
 import { playgroundExtensions } from './extensions'
 import { article, people, tags } from './content'
+import team1 from '../assets/rte/team-1.jpg'
+import team2 from '../assets/rte/team-2.jpg'
+import team3 from '../assets/rte/team-3.jpg'
 
 const props = withDefaults(
   defineProps<{ editable?: boolean; empty?: boolean }>(),
@@ -56,6 +61,7 @@ const uploadFunction = async (file: File) => ({
 // ---- comments: a thread per amber run, shown beside the selection
 interface Reply {
   who: string
+  image?: string
   when: string
   text: string
 }
@@ -69,11 +75,13 @@ const threads = ref<Thread[]>([
     replies: [
       {
         who: 'James Fenimore',
+        image: team1,
         when: '4d ago',
         text: 'Okay cool, shall i finalise this design then?',
       },
       {
         who: 'Bray Bill',
+        image: team2,
         when: '6h ago',
         text: 'No major issues. Let’s get feedback from the dev team once.',
       },
@@ -117,7 +125,7 @@ function send() {
   const t = current.value
   const text = reply.value.trim()
   if (!t || !text) return
-  t.replies.push({ who: 'You', when: 'now', text })
+  t.replies.push({ who: 'You', image: team3, when: 'now', text })
   reply.value = ''
 }
 function resolve() {
@@ -167,62 +175,117 @@ function resolve() {
       </template>
     </Editor>
 
-    <!-- the thread beside the run -->
+    <!-- the thread beside the run: the file's comment card -->
     <div
       v-if="current"
-      class="absolute right-6 z-20 flex w-[300px] flex-col gap-3.5 rounded-6 bg-surface-elevation-2 pb-2.5 shadow-lg"
+      class="rte-thread absolute right-6 z-20 flex w-[300px] flex-col gap-3.5 rounded-6 bg-surface-elevation-2 pb-2.5 shadow-xl"
       :style="{ top: `${Math.max(48, threadTop - 8)}px` }"
+      role="dialog"
+      aria-label="Comment thread"
     >
-      <div class="flex h-9 items-center gap-1 pl-4 pr-2 pt-2">
-        <span class="flex-1 text-base-medium text-ink-gray-8">Comment</span>
-        <Button variant="ghost" size="sm" icon="lucide-ellipsis" label="More" />
-        <Button
-          variant="ghost"
-          size="sm"
-          icon="lucide-circle-check"
-          label="Resolve"
-          @click="resolve"
-        />
-        <Button
-          variant="ghost"
-          size="sm"
-          icon="lucide-x"
-          label="Close"
-          @click="openThread = null"
-        />
-      </div>
-      <div v-for="(r, i) in current.replies" :key="i" class="flex gap-2.5 px-4">
-        <Avatar :label="r.who" size="md" shape="circle" class="shrink-0" />
-        <div class="flex min-w-0 flex-1 flex-col gap-1">
-          <p class="flex items-baseline gap-2">
-            <span class="text-base-medium text-ink-gray-8">{{ r.who }}</span>
-            <span class="text-sm text-ink-gray-5">{{ r.when }}</span>
-          </p>
-          <p class="text-p-base text-ink-gray-7">{{ r.text }}</p>
-        </div>
-      </div>
-      <p v-if="!current.replies.length" class="px-4 text-p-sm text-ink-gray-5">
-        Start the thread.
-      </p>
-      <form class="flex items-center gap-2.5 px-4" @submit.prevent="send">
-        <Avatar label="You" size="md" shape="circle" class="shrink-0" />
-        <TextInput
-          v-model="reply"
-          class="min-w-0 flex-1"
-          placeholder="Reply"
-          aria-label="Reply"
+      <!-- 32px: 10 in, the title, three 24px controls, 4 out; ruled beneath -->
+      <div class="rte-thread-head flex h-8 items-center py-1 pl-2.5 pr-1">
+        <span class="flex-1 text-base-medium leading-4 text-ink-gray-5"
+          >Comment</span
         >
-          <template #suffix>
+        <button
+          type="button"
+          class="rte-thread-btn"
+          aria-label="More"
+          title="More"
+        >
+          <RteIcon name="dot-horizontal" class="size-3.5" />
+        </button>
+        <button
+          type="button"
+          class="rte-thread-btn"
+          aria-label="Resolve"
+          title="Resolve"
+          @click="resolve"
+        >
+          <RteIcon name="check-circle" class="size-3.5" />
+        </button>
+        <button
+          type="button"
+          class="rte-thread-btn"
+          aria-label="Close"
+          title="Close"
+          @click="openThread = null"
+        >
+          <RteIcon name="close" class="size-3.5" />
+        </button>
+      </div>
+
+      <div class="flex flex-col gap-2.5 px-2.5">
+        <div class="flex flex-col gap-3.5">
+          <!-- a reply: the avatar, 8, name · when over the text, 8, more -->
+          <div
+            v-for="(r, i) in current.replies"
+            :key="i"
+            class="flex items-start gap-2"
+          >
+            <Avatar
+              :label="r.who"
+              :image="r.image"
+              size="md"
+              shape="circle"
+              class="shrink-0"
+            />
+            <div class="flex min-w-0 flex-1 flex-col gap-1">
+              <p class="flex items-baseline gap-1">
+                <span
+                  class="truncate text-base-medium leading-4 text-ink-gray-7"
+                  >{{ r.who }}</span
+                >
+                <span class="shrink-0 text-sm leading-[15px] text-ink-gray-5"
+                  >· {{ r.when }}</span
+                >
+              </p>
+              <p class="text-p-base text-ink-gray-6">{{ r.text }}</p>
+            </div>
             <button
-              type="submit"
-              class="flex size-5 items-center justify-center text-ink-gray-6"
-              aria-label="Send"
+              type="button"
+              class="flex size-4 shrink-0 items-center justify-center text-ink-gray-5"
+              aria-label="More"
+              title="More"
             >
-              <span class="lucide-arrow-up size-4" />
+              <RteIcon name="dot-horizontal" class="size-4" />
             </button>
-          </template>
-        </TextInput>
-      </form>
+          </div>
+          <p v-if="!current.replies.length" class="text-p-base text-ink-gray-5">
+            Start the thread.
+          </p>
+        </div>
+
+        <!-- the reply field: 24px avatar, 8, the library's subtle input -->
+        <form class="flex items-center gap-2" @submit.prevent="send">
+          <Avatar
+            label="You"
+            :image="team3"
+            size="md"
+            shape="circle"
+            class="shrink-0"
+          />
+          <TextInput
+            v-model="reply"
+            size="sm"
+            variant="subtle"
+            class="min-w-0 flex-1"
+            placeholder="Reply"
+            aria-label="Reply"
+          >
+            <template #suffix>
+              <button
+                type="submit"
+                class="flex size-4 items-center justify-center text-ink-gray-7"
+                aria-label="Send"
+              >
+                <RteIcon name="arrow-up" class="size-4" />
+              </button>
+            </template>
+          </TextInput>
+        </form>
+      </div>
     </div>
   </div>
 </template>
@@ -497,6 +560,15 @@ function resolve() {
 .rte-doc sub {
   font-size: 0.75em;
   line-height: 0;
+}
+
+/* the thread card: the header's rule is drawn inside its 32px, as the
+   file's inside stroke is, and its controls are 24px on an 8px radius */
+.rte-thread-head {
+  box-shadow: inset 0 -1px 0 var(--outline-gray-1);
+}
+.rte-thread-btn {
+  @apply flex size-6 shrink-0 items-center justify-center rounded-4 text-ink-gray-5 transition-colors hover:bg-surface-gray-2 hover:text-ink-gray-7;
 }
 
 /* a comment's run: amber beneath, as the file marks it */
