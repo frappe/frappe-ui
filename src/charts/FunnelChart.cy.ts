@@ -95,6 +95,18 @@ describe('FunnelChart', () => {
       .and('contain.text', 'Won')
   })
 
+  // A caller that reshapes its rows names the value key itself, so the key
+  // says nothing to the reader.
+  it('labels the tooltip value with its stage, not the value key', () => {
+    mountChart()
+    cy.get('[aria-label="Won, 20"]').trigger('mouseenter')
+    cy.get('[data-slot="chart-tooltip"]').should(($tooltip) => {
+      const text = $tooltip.text().replace(/\s+/g, '')
+      expect(text).not.to.contain('Deals')
+      expect(text).to.match(/^Won20of/)
+    })
+  })
+
   it('reads both conversion rates in the tooltip, against the first stage and the one before', () => {
     mountChart()
     cy.get('[aria-label="Won, 20"]').trigger('mouseenter')
