@@ -24,7 +24,9 @@ const layer = ref<HTMLElement | null>(null)
 const target = shallowRef<HTMLElement | null>(null)
 const left = ref(0)
 const top = ref(0)
-const dragging = ref(false)
+// not reactive: a re-render of the grip while it is the source of a drag
+// makes the browser end the drag, so a drag leaves the grip's DOM alone
+let dragging = false
 
 /** how far left of the document the grip still answers the pointer */
 const GUTTER = 72
@@ -101,6 +103,7 @@ function posOf(view: View, el: HTMLElement): number | null {
 }
 
 function place() {
+  if (dragging) return
   const el = target.value
   if (!el || !el.isConnected) {
     hide()
@@ -123,7 +126,7 @@ function hide() {
 }
 
 function onMove(e: MouseEvent) {
-  if (dragging.value) return
+  if (dragging) return
   const ed = editor.value
   if (!ed || ed.isDestroyed || !ed.isEditable) {
     hide()
@@ -166,12 +169,15 @@ function onDragStart(e: DragEvent) {
   e.dataTransfer.setData('text/html', el.outerHTML)
   e.dataTransfer.setData('text/plain', el.textContent ?? '')
   e.dataTransfer.setDragImage(el, 0, 0)
-  dragging.value = true
+  dragging = true
+  // the grip goes out of sight, by hand: see `dragging`
+  ;(e.currentTarget as HTMLElement | null)?.classList.add('is-dragging')
   ed.view.dom.classList.add('rte-dragging')
 }
-function onDragEnd() {
+function onDragEnd(e: DragEvent) {
   const ed = editor.value
-  dragging.value = false
+  dragging = false
+  ;(e.currentTarget as HTMLElement | null)?.classList.remove('is-dragging')
   hide()
   if (!ed || ed.isDestroyed) return
   ed.view.dom.classList.remove('rte-dragging')
@@ -213,7 +219,9 @@ const px = (n: number) => `${n}px`
 <template>
   <Teleport to="body">
     <div ref="layer" class="rte-bh pointer-events-none fixed inset-0 z-[55]">
-      <Tooltip v-if="target && !dragging" text="Drag to move" side="bottom">
+      <!-- the grip stays mounted through a drag, hidden: the browser ends
+           a drag whose source leaves the document -->
+      <Tooltip v-if="target" text="Drag to move" side="bottom">
         <button
           type="button"
           class="rte-bh-handle"
@@ -240,5 +248,10 @@ const px = (n: number) => `${n}px`
 }
 .rte-bh-handle:active {
   cursor: grabbing;
+}
+/* out of sight, not out of the way: the browser ends a drag whose source
+   stops taking pointer events */
+.rte-bh-handle.is-dragging {
+  opacity: 0;
 }
 </style>
