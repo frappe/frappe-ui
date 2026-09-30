@@ -491,6 +491,7 @@ function resolve() {
   border-bottom: 0;
 }
 .rte-attachment .rte-attachment-close {
+  margin-left: auto;
   opacity: 0;
   transition: opacity 120ms ease-out;
 }

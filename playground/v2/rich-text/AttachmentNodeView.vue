@@ -1,10 +1,11 @@
 <script setup lang="ts">
 // Figma: espresso-2.0 › 31457:33634. An attachment is a row: the library's
-// 28px ghost Button with the file glyph before the name and, while the
-// pointer is on it, a small close after — 8px in, 8px between, on an 8px
-// radius. The row is the link to the file; the close takes the row out of
-// the document. A grip stands to its left on hover, the handle that drags
-// it. In a read-only document the close and the grip stay away.
+// 28px ghost Button across the column, as the file's rows fill their
+// frame, with the file glyph before the name and, while the pointer is on
+// it, a small close at its end — 8px in, 8px between, on an 8px radius.
+// The row is the link to the file; the close takes the row out of the
+// document. Its grip is the document's (RteBlockHandle). In a read-only
+// document the close stays away.
 import { computed, h, toRaw, type Component } from 'vue'
 import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3'
 import { Button } from '../../../src'
@@ -48,7 +49,7 @@ function onClick(e: MouseEvent) {
     <Button
       variant="ghost"
       size="sm"
-      class="max-w-full"
+      class="w-full justify-start"
       :label="fileName"
       :icon-left="fileIcon"
       :icon-right="editable ? closeIcon : undefined"
