@@ -680,7 +680,7 @@ function dayBand(label: string) {
         <div
           ref="calendarEl"
           class="flex min-w-0 flex-1 flex-col"
-          :class="{ 'agenda-v2': agendaFlat }"
+          :class="{ 'agenda-v2': agendaFlat, 'is-landing': heldLanding }"
         >
           <Calendar
             :events="events"
@@ -1066,11 +1066,40 @@ function dayBand(label: string) {
   composables. The transition goes first: the component's own `all 0.1s`
   would fade the pill out and in around the copy, which is the flicker.
 */
-:deep(.event[data-landing]) {
+:deep(.event[data-landing]),
+:deep(div:has(> .event[data-landing])) {
   transition: none !important;
 }
 :deep(.event[data-landing='']) {
   opacity: 0 !important;
+}
+/*
+  …and the box the pill sits in, above: it is the box the component moves
+  — top, left, right, transform — and it carries the same 100ms. Read on
+  the first frame after a drop, a box still on its way gave the copy a
+  place between the two, and the pill then appeared a step from it.
+
+  While a card is landing, the pills it lands among settle at the flight's
+  own pace. Dropped onto another card, the component lays the two out
+  side by side on the spot: the one already there shifts, narrows, and
+  gains a cut where the newcomer overlaps it — over its own 100ms, while
+  the card is still 180ms from arriving. Held to the flight's clock and
+  curve, the two movements read as one; the cuts fade in over the same.
+*/
+:deep(.is-landing [data-date-attr] div:has(> .event:not([data-landing]))) {
+  transition:
+    top 180ms ease-out,
+    left 180ms ease-out,
+    right 180ms ease-out,
+    height 180ms ease-out !important;
+}
+:deep(.is-landing [data-date-attr] .pointer-events-none.absolute.inset-0 > .bg-surface-base) {
+  animation: espresso-ring-in 180ms ease-out;
+}
+@keyframes espresso-ring-in {
+  from {
+    opacity: 0;
+  }
 }
 
 /*
