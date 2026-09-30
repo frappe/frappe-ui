@@ -869,7 +869,9 @@ function dayBand(label: string) {
                 <span v-if="noteOf(calendarEvent)" class="min-w-0 truncate">
                   {{ noteOf(calendarEvent) }}
                 </span>
-                <span v-if="description" class="shrink-0">{{ description }}</span>
+                <span v-if="description" class="shrink-0">
+                  <template v-if="noteOf(calendarEvent)">· </template>{{ description }}
+                </span>
               </template>
             </template>
             <template #event-participant="{ calendarEvent }">
@@ -1068,7 +1070,8 @@ function dayBand(label: string) {
   row's end — they are pushed there rather than following the text.
 
   The note and the hint after it are two spans in the description's box:
-  the note gives way, the hint ("Day 1/3") is never cut.
+  the note gives way, the hint ("· Day 1/3", with the dot the library
+  would have put between them) is never cut.
 */
 :deep(.agenda-v2 .calendar-row > div > span:has(.calendar-row-title)) {
   max-width: 880px;
