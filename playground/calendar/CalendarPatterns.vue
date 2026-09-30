@@ -872,10 +872,10 @@ function dayBand(label: string) {
                 <!-- The dot between them is drawn, not typed: Inter's middle
                      dot is a speck at this size, and a glyph with a space on
                      one side and the box's gap on the other sat off-centre.
-                     A 3px disc in the text's own ink, the box's 8 on each side. -->
+                     A 2px disc in the text's own ink — 3 read as a bullet — the box's 8 on each side. -->
                 <span
                   v-if="noteOf(calendarEvent) && description"
-                  class="size-[3px] shrink-0 self-center rounded-full bg-current"
+                  class="size-0.5 shrink-0 self-center rounded-full bg-current"
                 />
                 <span v-if="description" class="shrink-0">{{ description }}</span>
               </template>
