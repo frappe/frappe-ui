@@ -8,6 +8,8 @@
  * on the left turns them off.
  */
 import type { CalendarEvent } from '../../experimental/Calendar'
+import type { AvatarTheme } from '../../src/components/Avatar/types'
+import { faceFor } from '../components/patterns/designAssets'
 
 export type CalendarSource = {
   id: string
@@ -63,14 +65,34 @@ export const colourValue = (name: string) =>
  * address — `participant` is the addresses joined by ", ", which is what the
  * panel writes when it saves.
  */
-export const people = [
-  { label: 'Faris Ansari', value: 'faris@timeless.co' },
-  { label: 'Rubini Raman', value: 'rubini@timeless.co' },
-  { label: 'Gowtham Sivakumar', value: 'gowtham@timeless.co' },
-  { label: 'Shariq Ansari', value: 'shariq@timeless.co' },
-  { label: 'Sally Potter', value: 'sally@timeless.co' },
-  { label: 'Emily Taylor', value: 'emily@timeless.co' },
+export const people: Person[] = [
+  { label: 'Faris Ansari', value: 'faris@timeless.co', photo: true },
+  { label: 'Rubini Raman', value: 'rubini@timeless.co', theme: 'violet' },
+  { label: 'Gowtham Sivakumar', value: 'gowtham@timeless.co', photo: true },
+  { label: 'Shariq Ansari', value: 'shariq@timeless.co', photo: true },
+  { label: 'Sally Potter', value: 'sally@timeless.co', photo: true },
+  { label: 'Emily Taylor', value: 'emily@timeless.co', theme: 'blue' },
 ]
+
+export type Person = {
+  label: string
+  value: string
+  /** Has a photo; the rest show an initial on a colour, as frappe-ui's Avatar does. */
+  photo?: boolean
+  theme?: AvatarTheme
+}
+
+/**
+ * How a person is drawn wherever they are: their photo if they have one, and
+ * an initial on their own colour if not — not everyone on a team has put a
+ * picture up, and a row of faces where every one is a photograph reads as a
+ * stock image rather than a team. Someone not on the list gets an initial in
+ * gray.
+ */
+export function portraitOf(name: string): { image?: string; theme: AvatarTheme } {
+  const p = people.find((x) => x.label === name)
+  return { image: p?.photo ? faceFor(name) : undefined, theme: p?.theme ?? 'gray' }
+}
 
 /** The name an address belongs to, or the address itself if it is nobody's. */
 export const nameOf = (address: string) =>

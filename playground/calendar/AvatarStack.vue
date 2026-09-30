@@ -9,15 +9,17 @@
  * the same thing a size down: one group, drawn one way, wherever people are
  * shown together.
  *
- * The group is `max` circles at most. Past that the last stops being a face
- * and says how many are not shown — so a team of twenty reads as three
- * people and a number, not as a row of heads running into whatever is next.
- * `max` exactly still fit, so the count only appears when it would stand for
- * more than the one face it replaces.
+ * Three faces at most. Past three, a fourth disc says how many more there
+ * are — so four people are three faces and "1", and a team of twenty is
+ * three faces and "17", not a row of heads running into whatever is next.
+ *
+ * A face is a photo where the person has one and an initial on their colour
+ * where they have not; `portraitOf` decides, so the header and the rows
+ * agree on who looks like what.
  */
 import { computed } from 'vue'
 import { Avatar } from '../../src'
-import { faceFor } from '../components/patterns/designAssets'
+import { portraitOf } from './sampleCalendars'
 
 const props = withDefaults(
   defineProps<{
@@ -26,14 +28,10 @@ const props = withDefaults(
     size?: 'md' | 'sm'
     max?: number
   }>(),
-  { size: 'md', max: 4 },
+  { size: 'md', max: 3 },
 )
 
-const faces = computed(() =>
-  props.names.length > props.max
-    ? props.names.slice(0, props.max - 1)
-    : props.names,
-)
+const faces = computed(() => props.names.slice(0, props.max))
 const more = computed(() => props.names.length - faces.value.length)
 </script>
 
@@ -44,7 +42,8 @@ const more = computed(() => props.names.length - faces.value.length)
       :key="name"
       :size="size"
       :label="name"
-      :image="faceFor(name)"
+      :image="portraitOf(name).image"
+      :theme="portraitOf(name).theme"
       class="ring-2 ring-[--surface-base]"
       :style="{ zIndex: faces.length + 1 - i }"
     />
