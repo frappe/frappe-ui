@@ -77,10 +77,38 @@ function onLoaded() {
 function onTime() {
   current.value = audio.value?.currentTime ?? 0
 }
-function onEnded() {
-  playing.value = false
+
+// the clip's own `timeupdate` comes only four or so times a second, which
+// walks the knob along in visible steps; while the clip plays, the position
+// is read every frame instead. `timeupdate` stays on for a background tab,
+// where frames stop but the clip does not.
+let frame = 0
+function tick() {
+  const el = audio.value
+  if (!el || el.paused) {
+    frame = 0
+    return
+  }
+  current.value = el.currentTime
+  frame = requestAnimationFrame(tick)
 }
-onBeforeUnmount(() => audio.value?.pause())
+function onPlay() {
+  playing.value = true
+  if (!frame) frame = requestAnimationFrame(tick)
+}
+function onPause() {
+  playing.value = false
+  cancelAnimationFrame(frame)
+  frame = 0
+  onTime()
+}
+function onEnded() {
+  onPause()
+}
+onBeforeUnmount(() => {
+  cancelAnimationFrame(frame)
+  audio.value?.pause()
+})
 
 // 0:15, and 1:02:03 past the hour, as the file's 0:15 / 32:48
 function clock(seconds: number) {
@@ -141,8 +169,8 @@ const moreOptions = computed<DropdownOptions>(() => [
       @loadedmetadata="onLoaded"
       @durationchange="onLoaded"
       @timeupdate="onTime"
-      @play="playing = true"
-      @pause="playing = false"
+      @play="onPlay"
+      @pause="onPause"
       @ended="onEnded"
     />
     <!-- 5px in, not 6: the file's 6px is measured inside the 1px rule -->
