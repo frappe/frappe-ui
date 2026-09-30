@@ -1217,8 +1217,12 @@ function dayBand(label: string) {
   it. A badge repeating that in a word is a second answer to a question the
   row has answered, and the one on a card is the loudest thing in a column
   of quiet ones.
+
+  The badge alone, not the block it sits in: hiding the block that held it
+  took the title and the note with it, for exactly the hour before an
+  event — the one row a reader is most likely looking for.
 */
-:deep(.calendar-row .contents:has(> .rounded-full)) {
+:deep(.calendar-row .contents > .rounded-full) {
   display: none;
 }
 

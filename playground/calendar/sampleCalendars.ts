@@ -197,18 +197,18 @@ type Seed = {
 
 // The week the design draws, including the two that overlap on Wednesday.
 const seeds: Seed[] = [
-  { id: '1', title: 'Product design', source: 'leads', day: 0, from: [10, 0], to: [12, 0], with: 3, about: 'Second pass on the pricing page — tier names, the comparison table and what the free plan is allowed to say' },
-  { id: '2', title: 'Frappe discussion', source: 'deals', day: 2, from: [10, 30], to: [11, 0], with: 2, about: 'What the calendar needs from the library before the next release' },
+  { id: '1', title: 'Product design', source: 'leads', day: 0, from: [10, 0], to: [12, 0], with: 3, about: 'Second pass on the pricing page. Sally has the three tier names from marketing; we need to settle the comparison table, what the free plan is allowed to say, and whether the annual toggle stays above the fold or moves into the cards' },
+  { id: '2', title: 'Frappe discussion', source: 'deals', day: 2, from: [10, 30], to: [11, 0], with: 2, about: 'What the calendar still needs from the library before the release: the agenda slots, gray and red in the colour map, and a week that can start on Monday' },
   { id: '3', title: 'Interview', source: 'deals', day: 2, from: [11, 0], to: [12, 0], with: 2, about: 'Frontend, round two — the take-home walkthrough' },
-  { id: '4', title: 'Weekly review', source: 'qualified', day: 4, from: [10, 30], to: [11, 30], with: 6, about: 'Pipeline by stage, then the three deals that slipped' },
+  { id: '4', title: 'Weekly review', source: 'qualified', day: 4, from: [10, 30], to: [11, 30], with: 6, about: 'Pipeline by stage, then the three deals that slipped out of the quarter — Northwind, Contoso and the Dropbox renewal — and whether any of them come back in November' },
   { id: '5', title: 'Interview', source: 'leads', day: 3, from: [12, 0], to: [13, 0], with: 1 },
-  { id: '6', title: 'DS Meeting', source: 'deals', day: 2, from: [13, 0], to: [14, 0], with: 4, about: 'Tokens and the type scale: settle ink-gray-5 vs 6 for secondary text, and whether text-base moves to 14' },
-  { id: '7', title: 'Product update', source: 'qualified', day: 4, from: [13, 0], to: [14, 0], with: 5, about: 'What shipped this week, in five minutes each' },
+  { id: '6', title: 'DS Meeting', source: 'deals', day: 2, from: [13, 0], to: [14, 0], with: 4, about: 'Tokens and the type scale. Settle ink-gray-5 against 6 for secondary text, whether text-base moves to 14 or stays at 13, and what happens to every table label that assumed the old size. Bring the audit sheet' },
+  { id: '7', title: 'Product update', source: 'qualified', day: 4, from: [13, 0], to: [14, 0], with: 5, about: 'What shipped this week, five minutes each, and the one thing each team is stuck on. Emily is taking notes and the recording goes to the channel afterwards' },
   { id: '8', title: 'Interview', source: 'leads', day: 1, from: [14, 0], to: [15, 0], with: 1, about: 'Backend, round one' },
   { id: '9', title: 'Birthday', source: 'leads', day: 1, from: [15, 0], to: [16, 0], with: 4, about: 'Cake in the kitchen at three' },
-  { id: '10', title: 'Weekly standup', source: 'qualified', day: 4, from: [15, 30], to: [17, 0], with: 5 },
+  { id: '10', title: 'Weekly standup', source: 'qualified', day: 4, from: [15, 30], to: [17, 0], with: 5, about: 'Long one this week: the release, then the support queue' },
   { id: '11', title: 'Take a walk', source: 'deals', day: 0, from: [18, 0], to: [19, 0], with: 1 },
-  { id: '12', title: 'CRM discussion', source: 'leads', day: 3, from: [18, 0], to: [19, 0], with: 3, about: 'The lead scoring proposal — bring the sheet' },
+  { id: '12', title: 'CRM discussion', source: 'leads', day: 3, from: [18, 0], to: [19, 0], with: 3, about: 'The lead scoring proposal — bring the sheet. Faris wants a call on whether website visits count for anything before we show it to sales on Monday' },
   // Wednesday carries five, which is two more than a month cell can hold —
   // so the Month view has a day to draw "3 more" on.
   { id: '13', title: 'Design review', source: 'qualified', day: 2, from: [15, 0], to: [16, 0], with: 2, about: 'Settings modal and the agenda, against the file' },
@@ -272,8 +272,8 @@ type Dated = {
 
 const dated: Dated[] = [
   // ── The month under way ────────────────────────────────────────────────
-  { title: 'Dropbox — discovery call', source: 'leads', month: 0, date: 2, from: [14, 0], to: [15, 0], with: 2, about: 'Their ops lead and two from finance; they are on Salesforce today and want out by March' },
-  { title: 'Onboarding — Northwind', source: 'qualified', month: 0, date: 3, from: [11, 0], to: [12, 30], with: 3, about: 'Import their contacts, set up the two pipelines, walk the team through the inbox' },
+  { title: 'Dropbox — discovery call', source: 'leads', month: 0, date: 2, from: [14, 0], to: [15, 0], with: 2, about: 'Their ops lead and two from finance. They are on Salesforce today, the contract ends in March, and the thing they keep coming back to is whether our import handles their custom objects — have the answer ready before we get on the call' },
+  { title: 'Onboarding — Northwind', source: 'qualified', month: 0, date: 3, from: [11, 0], to: [12, 30], with: 3, about: 'Import their contacts, set up the two pipelines, walk the team through the inbox. They have eleven people joining, so keep the demo account clean and have the invite links ready before we start' },
   { title: 'Interview — backend', source: 'leads', month: 0, date: 9, from: [16, 0], to: [17, 0], with: 2 },
   { title: 'Priya on leave', source: 'away', month: 0, date: 14, days: 3, allDay: true, with: withPeople('Priya Nair'), about: 'Back Thursday; Rubini covers the leads inbox' },
   { title: 'Quarterly forecast', source: 'deals', month: 0, date: 17, from: [13, 0], to: [14, 30], with: 3, about: 'Commit, best case and the gap to target' },
@@ -283,8 +283,8 @@ const dated: Dated[] = [
 
   // ── The month after ───────────────────────────────────────────────────
   { title: 'Lunch with Anil', source: 'personal', month: 1, date: 1, from: [12, 30], to: [13, 30], with: withPeople('Anil Mehta'), about: 'Toit, Indiranagar' },
-  { title: 'Frappe Conference, Mumbai', source: 'deals', month: 1, date: 5, days: 3, allDay: true, with: 4, about: 'Booth on the second floor; Gowtham speaks on day two at four' },
-  { title: 'Roadmap — Q4', source: 'deals', month: 1, date: 12, from: [14, 0], to: [16, 0], with: 5, about: 'Three themes, no more — and what we are saying no to' },
+  { title: 'Frappe Conference, Mumbai', source: 'deals', month: 1, date: 5, days: 3, allDay: true, with: 4, about: 'Booth on the second floor, next to the coffee. Gowtham speaks on day two at four; Nikhil and Aisha run the booth while he is on, and the demo laptop needs the offline build in case the wifi goes' },
+  { title: 'Roadmap — Q4', source: 'deals', month: 1, date: 12, from: [14, 0], to: [16, 0], with: 5, about: 'Three themes, no more — and a written list of what we are saying no to this quarter, so nobody hears it for the first time in a customer call' },
   { title: 'Interview — designer', source: 'leads', month: 1, date: 14, from: [15, 0], to: [16, 0], with: 2, about: 'Portfolio walkthrough, then the settings-modal exercise' },
   { title: 'Raise the invoices', source: 'work', month: 1, date: 15, from: [10, 0], to: [10, 30], type: 'task', with: 1 },
   { title: "Shreya's birthday", source: 'personal', month: 1, date: 19, allDay: true, with: 3 },
@@ -296,11 +296,11 @@ const dated: Dated[] = [
   { title: 'Q4 kickoff', source: 'deals', month: 2, date: 2, from: [10, 0], to: [11, 30], with: 6, about: 'Targets by team, then the hiring plan' },
   { title: 'Dropbox — renewal', source: 'qualified', month: 2, date: 5, from: [11, 0], to: [12, 0], with: 2 },
   { title: 'Diwali', source: 'away', month: 2, date: 8, allDay: true, with: 6, about: 'Office closed; support on rota' },
-  { title: 'Offsite — Goa', source: 'deals', month: 2, date: 9, days: 5, allDay: true, with: 16, about: 'Whole team; flights out Monday morning, back Friday night' },
+  { title: 'Offsite — Goa', source: 'deals', month: 2, date: 9, days: 5, allDay: true, with: 16, about: 'Whole team. Flights out Monday morning, back Friday night; Hannah has the hotel, Diego has the agenda, and Wednesday afternoon is deliberately empty' },
   { title: 'Performance reviews', source: 'work', month: 2, date: 16, from: [14, 0], to: [17, 0], type: 'task', with: 1, about: 'Six write-ups, thirty minutes each' },
   { title: 'Interview — product', source: 'leads', month: 2, date: 18, from: [11, 0], to: [12, 0], with: 2 },
   { title: 'Webinar — CRM for teams', source: 'qualified', month: 2, date: 20, from: [16, 0], to: [17, 0], with: 2, about: 'Forty signed up so far; Shariq runs the demo' },
-  { title: 'Customer advisory board', source: 'qualified', month: 2, date: 24, from: [14, 0], to: [16, 0], with: 4, about: 'Eight customers, the roadmap, and an hour of them talking' },
+  { title: 'Customer advisory board', source: 'qualified', month: 2, date: 24, from: [14, 0], to: [16, 0], with: 4, about: 'Eight customers, the roadmap, and an hour of them talking while we do not. Tom moderates; the rest of us take notes and hold the follow-ups until the next day' },
   { title: 'Anil out', source: 'away', month: 2, date: 26, days: 2, allDay: true, with: withPeople('Anil Mehta') },
   { title: 'Month-end close', source: 'work', month: 2, date: 30, from: [16, 0], to: [17, 30], type: 'task', with: 1 },
 ]
