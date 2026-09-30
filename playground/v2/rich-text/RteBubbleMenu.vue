@@ -99,6 +99,9 @@ const shouldShow: InstanceType<typeof BubbleMenu>['$props']['shouldShow'] = ({
 }) => {
   const { selection } = state
   if (selection.empty || 'node' in selection || !ed.isEditable) return false
+  // nor over a selected row, column or run of cells: those have the
+  // table's own menus (RteTableControls)
+  if ('$anchorCell' in selection) return false
   return state.doc.textBetween(from, to).length > 0
 }
 </script>

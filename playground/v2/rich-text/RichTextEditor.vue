@@ -16,12 +16,12 @@ import { Avatar, TextInput } from '../../../src'
 import {
   Editor,
   EditorContent,
-  EditorTableMenu,
   RichTextKit,
   type TiptapEditor,
 } from '../../../src/molecules/editor'
 import RichTextToolbar from './RichTextToolbar.vue'
 import RteBubbleMenu from './RteBubbleMenu.vue'
+import RteTableControls from './RteTableControls.vue'
 import RteIcon from './RteIcon.vue'
 import { playgroundExtensions } from './extensions'
 import { article, people, tags } from './content'
@@ -48,6 +48,8 @@ const extensions = [
     attachment: false,
     // and the link mark, raising the file's card in place of the popup
     link: false,
+    // and the table stack, its row carrying the file's border option
+    table: false,
   }),
   ...playgroundExtensions,
 ]
@@ -166,7 +168,8 @@ function resolve() {
         <RichTextToolbar v-if="editable" @comment="comment" />
         <!-- the floating bar over a text selection, as the file draws it -->
         <RteBubbleMenu />
-        <EditorTableMenu />
+        <!-- the table's grips, strips and menus (32157:9144) -->
+        <RteTableControls />
         <div class="px-4 py-8 sm:px-8" @click="onEditorClick">
           <EditorContent
             class="rte-doc mx-auto w-full max-w-[700px] [--prose-font-size:15px]"
@@ -560,6 +563,89 @@ function resolve() {
 .rte-doc sub {
   font-size: 0.75em;
   line-height: 0;
+}
+
+/* Tables (32157:9144): a 12px-radius card on a gray-100 hairline, cells
+   ruled right and beneath — never on the outer edge — 6/8 in; the header
+   row 32px of 13/15 gray-500, body rows 40px of 14/21 gray-600 that grow
+   with their lines; a wide table scrolls inside the card on a 4px thumb. */
+.rte-doc.prose-v3 .tableWrapper {
+  border: 1px solid var(--outline-gray-1);
+  border-radius: 12px;
+  margin: 16px 0;
+}
+.rte-doc.prose-v3 .tableWrapper::-webkit-scrollbar {
+  height: 4px;
+}
+.rte-doc.prose-v3 .tableWrapper::-webkit-scrollbar-thumb {
+  background: var(--outline-gray-2);
+  border-radius: 4px;
+}
+.rte-doc.prose-v3 table {
+  margin: 0;
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 14px;
+  line-height: 21px;
+}
+.rte-doc.prose-v3 table td,
+.rte-doc.prose-v3 table th {
+  height: 40px;
+  padding: 6px 8px;
+  border: 0;
+  border-right: 1px solid var(--outline-gray-1);
+  border-bottom: 1px solid var(--outline-gray-1);
+  vertical-align: middle;
+  text-align: left;
+  background: transparent;
+}
+.rte-doc.prose-v3 table tr > :last-child {
+  border-right: 0;
+}
+.rte-doc.prose-v3 table tr:last-child > * {
+  border-bottom: 0;
+}
+.rte-doc.prose-v3 table th {
+  height: 32px;
+  font-weight: 400;
+}
+.rte-doc.prose-v3 table td p {
+  font-size: 14px;
+  line-height: 21px;
+  color: var(--ink-gray-6);
+}
+.rte-doc.prose-v3 table th p {
+  font-size: 13px;
+  line-height: 15px;
+  color: var(--ink-gray-5);
+}
+/* the row's border option: one rule, or none */
+.rte-doc.prose-v3 table tr[data-border] > * {
+  border-right: 0;
+  border-bottom: 0;
+}
+.rte-doc.prose-v3 table tr[data-border='top'] > * {
+  border-top: 1px solid var(--outline-gray-1);
+}
+.rte-doc.prose-v3 table tr[data-border='right'] > * {
+  border-right: 1px solid var(--outline-gray-1);
+}
+.rte-doc.prose-v3 table tr[data-border='bottom'] > * {
+  border-bottom: 1px solid var(--outline-gray-1);
+}
+.rte-doc.prose-v3 table tr[data-border='left'] > * {
+  border-left: 1px solid var(--outline-gray-1);
+}
+/* the selection: a 1px gray-500 line around the cell or the run of cells */
+.rte-doc .selectedCell::after,
+.rte-doc .table-selection-box {
+  border-radius: 0;
+  box-shadow: inset 0 0 0 1px var(--ink-gray-5);
+}
+/* the column resize line is drawn by the controls at the table's height */
+.rte-doc .column-resize-handle {
+  display: none;
 }
 
 /* the thread card: the header's rule is drawn inside its 32px, as the

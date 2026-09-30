@@ -10,6 +10,13 @@ import { FontFamily, FontSize, LineHeight } from '@tiptap/extension-text-style'
 import {
   Attachment as KitAttachment,
   Link as KitLink,
+  Table,
+  TableRow as KitTableRow,
+  TableCell,
+  TableHeader,
+  TableNavigation,
+  TableCellColor,
+  TableSelectionOverlay,
 } from '../../../src/molecules/editor'
 import AttachmentNodeView from './AttachmentNodeView.vue'
 import { buildOpenRteLinkEditor } from './rteLinkPopup'
@@ -400,7 +407,33 @@ export const CommentMark = Mark.create({
   },
 })
 
+// ---- table: the library's table stack, its row carrying the file's border
+// option (32157:9144 › Row selection › Border options): top, right, bottom,
+// left or none, drawn by the page's table CSS off `data-border`; unset, the
+// row keeps the file's grid.
+export type RowBorder = 'top' | 'right' | 'bottom' | 'left' | 'none'
+export const TableRow = KitTableRow.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      border: {
+        default: null as RowBorder | null,
+        parseHTML: (el) => el.getAttribute('data-border'),
+        renderHTML: (attrs) =>
+          attrs.border ? { 'data-border': attrs.border } : {},
+      },
+    }
+  },
+})
+
 export const playgroundExtensions = [
+  Table,
+  TableRow,
+  TableCell,
+  TableHeader,
+  TableNavigation,
+  TableCellColor,
+  TableSelectionOverlay,
   FontFamily,
   FontSize,
   LineHeight,
