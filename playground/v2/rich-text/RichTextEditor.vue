@@ -647,7 +647,7 @@ function resolve() {
   border-radius: 4px;
   box-shadow: 0 0 0 4px var(--surface-gray-2);
 }
-.rte-doc .rte-dragging .ProseMirror-selectednode:not(img):not(video) {
+.rte-doc.rte-dragging .ProseMirror-selectednode:not(img):not(video) {
   opacity: 0.4;
 }
 
