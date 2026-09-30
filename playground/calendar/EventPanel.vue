@@ -5,7 +5,6 @@ import {
   Button,
   DateRangePicker,
   Dropdown,
-  Dialog,
   MultiSelect,
   Select,
   Switch,
@@ -18,6 +17,8 @@ import {
 import { faceFor, logos } from '../components/patterns/designAssets'
 import { colourValue, people } from './sampleCalendars'
 import DateIcon from './icons/DateIcon.vue'
+// The v2 shell's own modal card, so this confirms the way Delete project does.
+import EspressoModal from '../v2/modals/EspressoModal.vue'
 import type { CalendarEvent } from '../../experimental/Calendar'
 
 const props = defineProps<{
@@ -76,6 +77,8 @@ const locked = false
 const tab = ref<string>(props.kind ?? 'Event')
 /** The delete dialog is up. */
 const confirmingDelete = ref(false)
+/** What the delete modal calls the thing: a task or an event. */
+const kind = computed(() => (props.event?.type === 'task' ? 'task' : 'event'))
 watch(
   () => props.kind,
   (k) => (tab.value = k ?? 'Event'),
@@ -1236,24 +1239,49 @@ function todayIso() {
       Deleting asks first. A delete that happens on the click is a delete that
       happens on the slip, and there is no undo on this calendar.
     -->
-    <Dialog
-      v-model="confirmingDelete"
-      size="sm"
-      :title="`Delete this ${(event?.type === 'task' ? 'task' : 'event')}?`"
-      :message="`\u201c${title || 'Untitled'}\u201d will be removed from the calendar. This can\u2019t be undone.`"
-      :actions="[
-        { label: 'Cancel', variant: 'subtle', onClick: ({ close }) => close() },
-        {
-          label: 'Delete',
-          variant: 'solid',
-          theme: 'red',
-          onClick: ({ close }) => {
-            close()
-            $emit('delete', event?.id)
-          },
-        },
-      ]"
-    />
+    <EspressoModal
+      v-model:open="confirmingDelete"
+      :title="`Delete ${kind}`"
+      variant="dialog"
+      shadow="2xl"
+    >
+      <!-- 20px badge: 3px inset, 4px radius, 14px icon — the Delete project
+           modal's own mark. -->
+      <template #prefix>
+        <div
+          class="flex size-5 shrink-0 items-center justify-center rounded-1 bg-surface-red-2"
+        >
+          <span
+            class="lucide-trash-2 size-3.5 text-ink-red-7"
+            aria-hidden="true"
+          />
+        </div>
+      </template>
+
+      <p class="text-p-base text-ink-gray-6">
+        This will permanently remove the {{ kind }}. This action cannot be
+        undone.
+      </p>
+
+      <template #footer="{ close }">
+        <Button variant="subtle" theme="gray" size="sm" @click="close">
+          Cancel
+        </Button>
+        <Button
+          variant="solid"
+          theme="red"
+          size="sm"
+          @click="
+            () => {
+              close()
+              $emit('delete', event?.id)
+            }
+          "
+        >
+          Delete
+        </Button>
+      </template>
+    </EspressoModal>
   </aside>
 </template>
 
