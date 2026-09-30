@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// Figma: espresso-2.0 › WYSIWYG editor (30534:59617): a 1280px card on the
+// Figma: espresso-2.0 › WYSIWYG editor (30534:59617): a 1300px card on the
 // base surface, 16px corners, a gray-100 hairline, the toolbar ruled across
 // its top and the document a 912px column down its middle. The editor is
 // the library's — its kit, bubble and table menus, link and colour pickers,
@@ -162,7 +162,7 @@ function resolve() {
 <template>
   <div
     ref="stage"
-    class="rte relative mx-auto w-full max-w-[1280px] rounded-7 border border-outline-gray-1 bg-surface-base"
+    class="rte relative mx-auto w-full max-w-[1300px] rounded-7 border border-outline-gray-1 bg-surface-base"
     :class="!editable && 'is-readonly'"
   >
     <Editor

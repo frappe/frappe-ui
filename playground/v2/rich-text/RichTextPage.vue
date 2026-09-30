@@ -12,8 +12,9 @@ const empty = ref(false)
 
 <template>
   <div class="v2-scroll h-full overflow-y-auto bg-surface-base">
+    <!-- 1348 = the 1300px card plus the 24px gutter either side -->
     <div
-      class="mx-auto flex w-full max-w-[1280px] flex-col gap-4 px-4 py-6 sm:px-6"
+      class="mx-auto flex w-full max-w-[1348px] flex-col gap-4 px-4 py-6 sm:px-6"
     >
       <div class="flex flex-wrap items-center gap-x-6 gap-y-2">
         <Switch v-model="editable" size="sm" label="Editable" />
