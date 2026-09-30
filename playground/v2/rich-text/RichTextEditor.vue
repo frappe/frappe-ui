@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // Figma: espresso-2.0 › WYSIWYG editor (30534:59617): a 1300px card on the
 // base surface, 16px corners, a gray-100 hairline, the toolbar ruled across
-// its top and the document a 912px column down its middle. The editor is
+// its top and the document a 700px column down its middle. The editor is
 // the library's — its kit, bubble and table menus, link and colour pickers,
 // slash menu, mentions, images, embeds and attachments — with the file's
 // toolbar over it, the blocks it lacks (extensions.ts) added, and the
@@ -179,7 +179,7 @@ function resolve() {
         <EditorTableMenu />
         <div class="px-4 py-8 sm:px-8" @click="onEditorClick">
           <EditorContent
-            class="rte-doc mx-auto w-full max-w-[912px] [--prose-font-size:15px]"
+            class="rte-doc mx-auto w-full max-w-[700px] [--prose-font-size:15px]"
           />
         </div>
       </template>
