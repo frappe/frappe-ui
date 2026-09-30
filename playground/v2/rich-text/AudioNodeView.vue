@@ -17,10 +17,12 @@ const icon =
   (name: string): Component =>
   () =>
     h(RteIcon, { name })
+// a class string written out in full: Tailwind's scanner only generates
+// the glyph for a name it can read in the source
 const lucide =
-  (name: string): Component =>
+  (classes: string): Component =>
   () =>
-    h('span', { class: `lucide-${name} size-4`, 'aria-hidden': 'true' })
+    h('span', { class: classes, 'aria-hidden': 'true' })
 
 const audio = ref<HTMLAudioElement | null>(null)
 const playing = ref(false)
@@ -107,7 +109,7 @@ const moreOptions = computed<DropdownOptions>(() => [
     options: [
       {
         label: 'Download',
-        icon: lucide('download'),
+        icon: lucide('lucide-download size-4'),
         onClick: () => {
           const a = document.createElement('a')
           a.href = props.node.attrs.src
@@ -117,7 +119,7 @@ const moreOptions = computed<DropdownOptions>(() => [
       },
       {
         label: 'Remove',
-        icon: lucide('trash-2'),
+        icon: lucide('lucide-trash-2 size-4'),
         onClick: () => props.deleteNode(),
       },
     ],
@@ -149,7 +151,7 @@ const moreOptions = computed<DropdownOptions>(() => [
       <Button
         variant="ghost"
         size="sm"
-        :icon="playing ? lucide('pause') : icon('play')"
+        :icon="icon(playing ? 'pause' : 'play')"
         :label="playing ? 'Pause' : 'Play'"
         @click="toggle"
       />
@@ -173,7 +175,7 @@ const moreOptions = computed<DropdownOptions>(() => [
       <Button
         variant="ghost"
         size="sm"
-        :icon="muted ? lucide('volume-x') : icon('volume-min')"
+        :icon="icon(muted ? 'volume-off' : 'volume-min')"
         :label="muted ? 'Unmute' : 'Mute'"
         :aria-pressed="muted"
         @click="toggleMute"
