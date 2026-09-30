@@ -643,9 +643,17 @@ function resolve() {
   border-radius: 0;
   box-shadow: inset 0 0 0 1px var(--ink-gray-5);
 }
-/* the column resize line is drawn by the controls at the table's height */
+/* tiptap's column resize handle: a 1px gray-600 line on the edge under
+   the pointer, the cell's height */
 .rte-doc .column-resize-handle {
-  display: none;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: -1px;
+  width: 1px;
+  background-color: var(--ink-gray-6);
+  pointer-events: none;
+  z-index: 1;
 }
 
 /* the thread card: the header's rule is drawn inside its 32px, as the

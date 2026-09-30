@@ -12,9 +12,8 @@
 //   Colour, and for a run, Merge cells and Delete content;
 // - two 16px strips, 8px off the table's right and bottom edges, that add
 //   a column or a row at the end;
-// - a 1px line down a column edge (or along a row edge) under the pointer,
-//   with a 12px plus that inserts there; dragging the column edge resizes
-//   it, tiptap's own behaviour, with the file's line in place of its handle.
+//
+// Dragging a column edge resizes it: tiptap's own behaviour and handle.
 //
 // The menus are the library's Dropdown, portalled into this layer so the
 // file's 220px, 4px-in, 12px-radius card can be applied to them, and not
@@ -65,18 +64,6 @@ const tableBox = ref<Box | null>(null)
 const rowBox = ref<Box | null>(null)
 const colBox = ref<Box | null>(null)
 const cellBox = ref<Box | null>(null)
-
-type Insert = {
-  axis: 'col' | 'row'
-  /** the edge's viewport x (a column) or y (a row) */
-  at: number
-  /** the pointer's other coordinate: where the plus sits */
-  along: number
-  /** insert after this row or column */
-  index: number
-}
-const insert = ref<Insert | null>(null)
-let resizing = false
 
 const rowOpen = ref(false)
 const colOpen = ref(false)
@@ -181,7 +168,6 @@ function clearAll() {
   rowBox.value = null
   colBox.value = null
   cellBox.value = null
-  insert.value = null
 }
 
 // ---- the selection: a row, a column, a run of cells, or the caret's cell
@@ -263,16 +249,12 @@ let hovering = false
 function onMove(e: MouseEvent) {
   const ed = editor.value
   if (!ed || ed.isDestroyed || !ed.isEditable || menuOpen.value) return
-  if (resizing) {
-    if (insert.value) insert.value = { ...insert.value, at: e.clientX }
-    return
-  }
   const target = e.target instanceof Element ? e.target : null
   if (!target) return
   if (layer.value?.contains(target)) return
   const cell = target.closest<HTMLElement>('.rte-doc td, .rte-doc th')
   if (cell) {
-    hoverCell(ed, cell, e)
+    hoverCell(ed, cell)
     return
   }
   const t = tableBox.value
@@ -282,18 +264,12 @@ function onMove(e: MouseEvent) {
     e.clientX <= t.left + t.width + 28 &&
     e.clientY >= t.top - 12 &&
     e.clientY <= t.top + t.height + 28
-  if (near) {
-    insert.value = null
-    return
-  }
+  if (near) return
   hovering = false
   if (!isInTable(ed.state)) clearAll()
-  else {
-    insert.value = null
-    syncSelection()
-  }
+  else syncSelection()
 }
-function hoverCell(ed: TiptapEditor, cell: HTMLElement, e: MouseEvent) {
+function hoverCell(ed: TiptapEditor, cell: HTMLElement) {
   let $cell: ResolvedPos | null
   try {
     $cell = cellAround(ed.state.doc.resolve(ed.view.posAtDOM(cell, 0)))
@@ -311,37 +287,7 @@ function hoverCell(ed: TiptapEditor, cell: HTMLElement, e: MouseEvent) {
   rowIndex.value = rect.top
   colCellEl.value = cell
   colIndex.value = rect.left
-  // an edge under the pointer: a column's, then a row's. The plus sits at
-  // the middle of the line, as the file places it, and off the pointer:
-  // the edge itself stays tiptap's, to drag and resize the column.
-  const cr = cell.getBoundingClientRect()
-  const rr = rowEl.value!.getBoundingClientRect()
-  const tr = wrapperEl.value!.getBoundingClientRect()
-  const midY = tr.top + tr.height / 2
-  const midX = tr.left + tr.width / 2
-  const EDGE = 5
-  let next: Insert | null = null
-  if (rect.right < c.map.width && Math.abs(e.clientX - cr.right) <= EDGE)
-    next = { axis: 'col', at: cr.right, along: midY, index: rect.right - 1 }
-  else if (rect.left > 0 && Math.abs(e.clientX - cr.left) <= EDGE)
-    next = { axis: 'col', at: cr.left, along: midY, index: rect.left - 1 }
-  else if (
-    rect.bottom < c.map.height &&
-    Math.abs(e.clientY - rr.bottom) <= EDGE
-  )
-    next = { axis: 'row', at: rr.bottom, along: midX, index: rect.bottom - 1 }
-  else if (rect.top > 0 && Math.abs(e.clientY - rr.top) <= EDGE)
-    next = { axis: 'row', at: rr.top, along: midX, index: rect.top - 1 }
-  insert.value = next
   measure()
-}
-function onDown(e: MouseEvent) {
-  // a press on a column edge is tiptap's resize: keep the line on the pointer
-  if (insert.value?.axis === 'col' && !layer.value?.contains(e.target as Node))
-    resizing = true
-}
-function onUp() {
-  resizing = false
 }
 
 // ---- actions
@@ -514,20 +460,6 @@ function addRowAtEnd() {
     focusCell(c, cellPos(c, c.map.height - 1, 0))
     c.ed.commands.addRowAfter()
   })
-}
-function insertAtEdge() {
-  const at = insert.value
-  if (!at) return
-  withCtx((c) => {
-    if (at.axis === 'col') {
-      focusCell(c, cellPos(c, 0, at.index))
-      c.ed.commands.addColumnAfter()
-    } else {
-      focusCell(c, cellPos(c, at.index, 0))
-      c.ed.commands.addRowAfter()
-    }
-  })
-  insert.value = null
 }
 
 // ---- the menus
@@ -754,15 +686,11 @@ watch(
     if (!ed) return
     ed.on('transaction', schedule)
     document.addEventListener('mousemove', onMove, true)
-    document.addEventListener('mousedown', onDown, true)
-    document.addEventListener('mouseup', onUp, true)
     document.addEventListener('scroll', schedule, true)
     window.addEventListener('resize', schedule)
     onCleanup(() => {
       ed.off('transaction', schedule)
       document.removeEventListener('mousemove', onMove, true)
-      document.removeEventListener('mousedown', onDown, true)
-      document.removeEventListener('mouseup', onUp, true)
       document.removeEventListener('scroll', schedule, true)
       window.removeEventListener('resize', schedule)
     })
@@ -776,7 +704,6 @@ watch(menuOpen, (open) => {
 })
 
 const px = (n: number) => `${n}px`
-const showStrips = computed(() => !!tableBox.value && !insert.value)
 </script>
 
 <template>
@@ -875,7 +802,7 @@ const showStrips = computed(() => !!tableBox.value && !insert.value)
       </Dropdown>
 
       <!-- the add strips: a column at the right, a row beneath -->
-      <template v-if="showStrips && tableBox">
+      <template v-if="tableBox">
         <button
           type="button"
           class="rte-tc-strip"
@@ -905,44 +832,6 @@ const showStrips = computed(() => !!tableBox.value && !insert.value)
           @click="addRowAtEnd"
         >
           <RteIcon name="add-12" class="size-3" />
-        </button>
-      </template>
-
-      <!-- the edge under the pointer: a line, and a plus that inserts there -->
-      <template v-if="insert && tableBox">
-        <span
-          class="rte-tc-line"
-          :style="
-            insert.axis === 'col'
-              ? {
-                  left: px(insert.at - 0.5),
-                  top: px(tableBox.top),
-                  width: px(1),
-                  height: px(tableBox.height),
-                }
-              : {
-                  left: px(tableBox.left),
-                  top: px(insert.at - 0.5),
-                  width: px(tableBox.width),
-                  height: px(1),
-                }
-          "
-          aria-hidden="true"
-        />
-        <button
-          v-if="!resizing"
-          type="button"
-          class="rte-tc-plus"
-          :style="
-            insert.axis === 'col'
-              ? { left: px(insert.at - 6), top: px(insert.along - 6) }
-              : { left: px(insert.along - 6), top: px(insert.at - 6) }
-          "
-          :aria-label="insert.axis === 'col' ? 'Insert column' : 'Insert row'"
-          :title="insert.axis === 'col' ? 'Insert column' : 'Insert row'"
-          @click="insertAtEdge"
-        >
-          <RteIcon name="add-sm" class="size-3" />
         </button>
       </template>
 
@@ -976,16 +865,6 @@ const showStrips = computed(() => !!tableBox.value && !insert.value)
 /* a strip: gray-50 on a gray-100 rule, 4px corners, the plus gray-400 */
 .rte-tc-strip {
   @apply pointer-events-auto fixed flex items-center justify-center rounded-[4px] border border-outline-gray-1 bg-surface-gray-1 text-ink-gray-4 transition-colors hover:bg-surface-gray-2 hover:text-ink-gray-6;
-}
-/* the line down an edge, and its plus */
-.rte-tc-line {
-  @apply pointer-events-none fixed;
-  background-color: var(--ink-gray-6);
-}
-.rte-tc-plus {
-  @apply pointer-events-auto fixed flex size-3 items-center justify-center rounded-full;
-  background-color: var(--ink-gray-6);
-  color: var(--outline-gray-1);
 }
 /* the menus: the file's 220px card, 4px in on a 12px radius under the xl
    shadow, its rows 28px on an 8px radius with a 16px glyph 6px off the
