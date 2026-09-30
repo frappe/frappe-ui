@@ -14,24 +14,13 @@ import { computed, nextTick, ref, watch } from 'vue'
 import { Avatar, Button, TextInput } from '../../../src'
 import {
   Editor,
-  EditorBubbleMenu,
   EditorContent,
   EditorTableMenu,
   RichTextKit,
-  Bold,
-  Italic,
-  Strike,
-  InsertLink,
-  FontColor,
-  FontHighlight,
-  Separator,
-  AlignLeft,
-  AlignCenter,
-  AlignRight,
-  type EditorMenuOptions,
   type TiptapEditor,
 } from '../../../src/molecules/editor'
 import RichTextToolbar from './RichTextToolbar.vue'
+import RteBubbleMenu from './RteBubbleMenu.vue'
 import { playgroundExtensions } from './extensions'
 import { article, people, tags } from './content'
 
@@ -55,31 +44,6 @@ const extensions = [
   }),
   ...playgroundExtensions,
 ]
-
-const bubble = [
-  Bold,
-  Italic,
-  Strike,
-  FontColor,
-  FontHighlight,
-  InsertLink,
-  Separator,
-  AlignLeft,
-  AlignCenter,
-  AlignRight,
-]
-// The bubble menu formats text, so it comes up for a run of text and not
-// for a selected block — a dropped attachment row, the audio bar, an image
-// — where bold and italic have nothing to act on. The library's default
-// shows it for any selection that is not empty, a block included.
-const bubbleOptions: EditorMenuOptions = {
-  shouldShow: ({ editor, state, from, to }) => {
-    const { selection } = state
-    if (selection.empty || 'node' in selection || !editor.isEditable)
-      return false
-    return state.doc.textBetween(from, to).length > 0
-  },
-}
 
 // files dropped, pasted or picked stay in the page as object URLs
 const uploadFunction = async (file: File) => ({
@@ -190,7 +154,8 @@ function resolve() {
     >
       <template #default>
         <RichTextToolbar v-if="editable" @comment="comment" />
-        <EditorBubbleMenu :items="bubble" :options="bubbleOptions" />
+        <!-- the floating bar over a text selection, as the file draws it -->
+        <RteBubbleMenu />
         <EditorTableMenu />
         <div class="px-4 py-8 sm:px-8" @click="onEditorClick">
           <EditorContent
