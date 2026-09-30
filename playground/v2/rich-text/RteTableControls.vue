@@ -3,11 +3,13 @@
 // over the document on a fixed layer so nothing is clipped by the table's
 // scrolling card:
 //
-// - handles on the caret's row and column (32925:95940): a 12×1 gray-500
-//   pill on a 2px white rule, at the left edge of the row and the top edge
-//   of the column; a selected cell (32925:96501) adds one at its right
-//   edge. Hovered, a handle grows into the file's grip — a 10×20 (or
-//   20×10) gray-500 pill with white dots — and opens its menu
+// - handles on the row and column of the cell under the pointer, or of the
+//   caret's cell (32925:95940): a 12×1 gray-500 pill on a 2px white rule,
+//   at the left edge of the row and the top edge of the column; a selected
+//   cell (32925:96501) adds one at its right edge, and a selected run, row
+//   or column keeps its handles while the pointer roams. Hovered, a handle
+//   grows into the file's grip — a 10×20 (or 20×10) gray-500 pill with
+//   white dots — and opens its menu
 //   (32926:97034, 97642, 98372): Colour, Border options (a row) or Table
 //   Header (the first row), Insert, Duplicate, Clear content, Delete for
 //   a row or column; Colour, and for a run of cells Merge cells and Delete
@@ -180,7 +182,9 @@ function clearAll() {
   selKind.value = null
 }
 
-// ---- the selection: a row, a column, a run of cells, or the caret's cell
+// ---- the selection: a row, a column, a run of cells, or the caret's cell;
+// the cell under the pointer takes over from a caret (or no caret in a
+// table), so the handles sit on the row and column being pointed at
 function syncSelection() {
   const ed = editor.value
   if (!ed || ed.isDestroyed || !ed.isEditable || menuOpen.value) return
@@ -191,7 +195,31 @@ function syncSelection() {
     return
   }
   const { selection } = ed.state
-  if (!isInTable(ed.state)) {
+  const $selCell = isInTable(ed.state) ? cellAround(selection.$from) : null
+  let $cell = $selCell
+  let kind: typeof selKind.value = null
+  let count = 0
+  if ($selCell) {
+    const cells = asCellSelection(selection)
+    if (cells) {
+      cells.forEachCell(() => count++)
+      kind = cells.isRowSelection()
+        ? 'row'
+        : cells.isColSelection()
+          ? 'col'
+          : 'cells'
+    } else {
+      count = 1
+      kind = 'caret'
+    }
+  }
+  // the pointer's cell takes the row and column handles, unless a row or
+  // column is selected; a selected cell or run keeps its own handle
+  if (hoverPos.value !== null && kind !== 'row' && kind !== 'col') {
+    const $hover = cellAt(ed, hoverPos.value)
+    if ($hover) $cell = $hover
+  }
+  if (!$cell) {
     // the caret left the table: the controls stay while the pointer hovers
     if (!hovering) clearAll()
     anchorPos.value = null
@@ -200,8 +228,6 @@ function syncSelection() {
     selKind.value = null
     return
   }
-  const $cell = cellAround(selection.$from)
-  if (!$cell) return
   const c = ctxAt(ed, $cell)
   if (!c) return
   const dom = view.nodeDOM(c.start - 1)
@@ -213,29 +239,27 @@ function syncSelection() {
       : null
   const wrapper = tableDom?.closest<HTMLElement>('.tableWrapper') ?? tableDom
   if (wrapper) wrapperEl.value = wrapper
-  // the handles sit on the caret's row and column
+  // the handles sit on the cell's row and column
   const rect = c.map.findCell($cell.pos - c.start)
   anchorPos.value = $cell.pos
   rowIndex.value = rect.top
   colIndex.value = rect.left
-  const cells = asCellSelection(selection)
-  if (cells) {
-    let n = 0
-    cells.forEachCell(() => n++)
-    cellCount.value = n
-    selKind.value = cells.isRowSelection()
-      ? 'row'
-      : cells.isColSelection()
-        ? 'col'
-        : 'cells'
-  } else {
-    cellCount.value = 1
-    selKind.value = 'caret'
-  }
-  const cell = $cell.nodeAfter
+  cellCount.value = count
+  selKind.value = kind
+  const cell = $selCell?.nodeAfter
   cellMerged.value =
     !!cell && (cell.attrs.colspan > 1 || cell.attrs.rowspan > 1)
   measure()
+}
+/** the position resolved, when it still opens on a cell */
+function cellAt(ed: TiptapEditor, pos: number): ResolvedPos | null {
+  try {
+    const $pos = ed.state.doc.resolve(pos)
+    const role = $pos.nodeAfter?.type.spec.tableRole
+    return role === 'cell' || role === 'header_cell' ? $pos : null
+  } catch {
+    return null
+  }
 }
 // The editor's own cell selections (a shift-click, a drag across cells)
 // come from the table extension's bundled copy of prosemirror-tables, a
@@ -252,9 +276,11 @@ function cellDom(view: TiptapEditor['view'], pos: number): HTMLElement | null {
   return dom instanceof HTMLElement ? dom : null
 }
 
-// ---- hovering: the strips come up for the table under the pointer; the
-// handles follow the selection, not the pointer
+// ---- hovering: the handles and strips follow the cell under the pointer,
+// held as a document position; a selected run, row or column keeps its own
+// handles. Off the table (past the strips) the caret's cell has them back
 let hovering = false
+const hoverPos = ref<number | null>(null)
 function onMove(e: MouseEvent) {
   const ed = editor.value
   if (!ed || ed.isDestroyed || !ed.isEditable || menuOpen.value) return
@@ -264,11 +290,16 @@ function onMove(e: MouseEvent) {
   const cell = target.closest<HTMLElement>('.rte-doc td, .rte-doc th')
   if (cell) {
     hovering = true
-    if (!wrapperEl.value) {
-      wrapperEl.value =
-        cell.closest<HTMLElement>('.tableWrapper') ?? cell.closest('table')
-      measure()
+    let pos: number | null = null
+    try {
+      const $cell = cellAround(ed.state.doc.resolve(ed.view.posAtDOM(cell, 0)))
+      pos = $cell ? $cell.pos : null
+    } catch {
+      pos = null
     }
+    if (pos === null || pos === hoverPos.value) return
+    hoverPos.value = pos
+    syncSelection()
     return
   }
   const t = tableBox.value
@@ -280,7 +311,12 @@ function onMove(e: MouseEvent) {
     e.clientY <= t.top + t.height + 28
   if (near) return
   hovering = false
-  if (!isInTable(ed.state)) clearAll()
+  if (hoverPos.value === null) {
+    if (!isInTable(ed.state)) clearAll()
+    return
+  }
+  hoverPos.value = null
+  syncSelection()
 }
 
 // ---- a hovered handle grows into its grip and, after a beat, opens its
@@ -709,12 +745,22 @@ watch(
   () => editor.value,
   (ed, _old, onCleanup) => {
     if (!ed) return
-    ed.on('transaction', schedule)
+    // the hovered cell rides along with the document it points into
+    const onTransaction = ({
+      transaction,
+    }: {
+      transaction: { mapping: { map: (pos: number) => number } }
+    }) => {
+      if (hoverPos.value !== null)
+        hoverPos.value = transaction.mapping.map(hoverPos.value)
+      schedule()
+    }
+    ed.on('transaction', onTransaction)
     document.addEventListener('mousemove', onMove, true)
     document.addEventListener('scroll', schedule, true)
     window.addEventListener('resize', schedule)
     onCleanup(() => {
-      ed.off('transaction', schedule)
+      ed.off('transaction', onTransaction)
       document.removeEventListener('mousemove', onMove, true)
       document.removeEventListener('scroll', schedule, true)
       window.removeEventListener('resize', schedule)
