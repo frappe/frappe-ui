@@ -107,6 +107,14 @@ const clock = (t?: string) =>
         .toLowerCase()
     : ''
 
+/**
+ * A time as the menu's values spell it, `HH:MM`. The calendar hands an event
+ * back with seconds on its times, and a value with seconds matches none of
+ * the ninety-six the menu offers — so the field showed its placeholder over
+ * an event that plainly had a time.
+ */
+const hhmm = (t?: unknown) => (t ? String(t).slice(0, 5) : '')
+
 const source = computed(() =>
   props.event
     ? {
@@ -132,34 +140,46 @@ watch(source, (s) => (allDay.value = !!s?.allDay), { immediate: true })
 const span = reactive({
   fromDate: '',
   toDate: '',
-  fromTime: '09:00',
-  toTime: '10:00',
+  fromTime: '',
+  toTime: '',
 })
+/**
+ * Seeded from whatever opened the panel, and from nothing when nothing did:
+ * a New pressed in the header has no day or hour in mind, so the rows wait
+ * with their placeholders rather than guessing today at nine. A drag on the
+ * grid or a click on an event brings its own span in.
+ */
 watch(
   source,
   (s) => {
-    span.fromDate = s?.fromDate || todayIso()
-    span.toDate = s?.toDate || s?.fromDate || todayIso()
-    span.fromTime = s?.fromTime || '09:00'
-    span.toTime = s?.toTime || '10:00'
+    span.fromDate = s?.fromDate || ''
+    span.toDate = s?.toDate || s?.fromDate || ''
+    span.fromTime = hhmm(s?.fromTime)
+    span.toTime = hhmm(s?.toTime)
   },
   { immediate: true },
 )
 
-/** Changing either row moves the block drawn on the grid with it. */
+/**
+ * Changing either row moves the block drawn on the grid with it — once there
+ * is a day to draw it on. A panel opened blank has none until the date is
+ * picked, and a draft on no day is nothing the grid can place.
+ */
 function push() {
   touch()
-  emit('update:draft', { ...span, allDay: allDay.value })
+  if (span.fromDate) emit('update:draft', { ...span, allDay: allDay.value })
 }
-watch(allDay, () => emit('update:draft', { ...span, allDay: allDay.value }))
+watch(allDay, () => {
+  if (span.fromDate) emit('update:draft', { ...span, allDay: allDay.value })
+})
 
 const dateLabel = computed(() =>
   span.toDate && span.toDate !== span.fromDate
     ? `${pretty(span.fromDate)} – ${pretty(span.toDate)}`
     : pretty(span.fromDate),
 )
-const fromLabel = computed(() => clock(span.fromTime) || '9:00 am')
-const toLabel = computed(() => clock(span.toTime) || '10:00 am')
+const fromLabel = computed(() => clock(span.fromTime))
+const toLabel = computed(() => clock(span.toTime))
 
 /**
  * Every quarter hour of the day, which is the grid's own step: a drag snaps
@@ -265,7 +285,7 @@ const title = computed({
  */
 const behaviour = reactive<Record<string, string>>({
   Repeat: 'None',
-  Alert: '10 min before',
+  Alert: 'None',
   Occupancy: 'Busy',
   Visibility: 'Default',
 })
@@ -739,7 +759,12 @@ function todayIso() {
               class="flex h-7 w-full items-center gap-2 rounded-4 pl-[9px] pr-2 text-base text-ink-gray-7 transition-colors hover:bg-surface-gray-2 disabled:hover:bg-transparent"
               @click="setOpen(!open)"
             >
-              <span class="truncate">{{ dateLabel }}</span>
+              <!-- Blank until a day is picked, in the placeholder's grey. -->
+              <span
+                class="truncate"
+                :class="!dateLabel && 'text-ink-gray-4'"
+                >{{ dateLabel || 'Pick a date' }}</span
+              >
               <!--
                 The file's own calendar glyph rather than a chevron (node
                 35447:66251): a date field says what it opens by the thing it
@@ -768,6 +793,7 @@ function todayIso() {
             :offset="menuOffset"
             :disabled="locked"
             class="!h-7 min-w-0 flex-1"
+            placeholder="Start"
             aria-label="Start time"
             @update:model-value="setFromTime"
           />
@@ -781,6 +807,7 @@ function todayIso() {
             :offset="menuOffset"
             :disabled="locked"
             class="!h-7 min-w-0 flex-1"
+            placeholder="End"
             aria-label="End time"
             @update:model-value="setToTime"
           />
@@ -846,7 +873,8 @@ function todayIso() {
           <MultiSelect
             v-model="tags"
             :disabled="locked"
-            class="!h-auto !min-h-7 w-full !py-[3px] !pl-2"
+            class="!h-auto !min-h-7 w-full !py-[3px]"
+            :class="tags.length ? '!pl-[3px]' : '!pl-2'"
             size="sm"
             variant="ghost"
             placeholder="Add tags"
@@ -863,16 +891,14 @@ function todayIso() {
               >
                 Add tags
               </span>
-              <!-- `-ml-[5px]`: this field pads 3 above and below its chips
-                   and 8 at the side, so the first chip sat 5 further from
-                   the left edge than from the top. Pulled back to the same
-                   3 — measured 4/4/4 with the border — while the placeholder
-                   keeps its 8, on the line of every other field. The people
-                   field below pads 4, so its chips come back by 4. -->
-              <span
-                v-else
-                class="-ml-[5px] flex min-w-0 flex-wrap items-center gap-1"
-              >
+              <!-- The chips sit 3 from the left edge, as from the top: the
+                   field's own padding drops from 8 to 3 while there are chips
+                   in it (`:class` above), and goes back to 8 for the
+                   placeholder, which stays on the line of every other field.
+                   The padding, not a negative margin on this row: the field
+                   clips its contents, so a row pulled left of the padding lost
+                   its first 4px and its left corners with them. -->
+              <span v-else class="flex min-w-0 flex-wrap items-center gap-1">
                 <span
                   v-for="option in selectedOptions"
                   :key="option.value"
@@ -1065,7 +1091,8 @@ function todayIso() {
           v-model="attendees"
           :disabled="locked"
           @update:model-value="touch"
-          class="h-auto min-h-7 w-full py-1 !pl-2 [&>button]:!w-full [&_[data-slot=item-prefix]>span>div:first-child]:hidden"
+          class="h-auto min-h-7 w-full py-1 [&>button]:!w-full [&_[data-slot=item-prefix]>span>div:first-child]:hidden"
+          :class="attendees.length ? '!pl-1' : '!pl-2'"
           size="sm"
           variant="ghost"
           placeholder="Add attendee"
@@ -1082,9 +1109,9 @@ function todayIso() {
             >
               Add attendee
             </span>
-            <!-- `-ml-1`, as the tags above: 4 from the left edge, the same as
-                 from the top. -->
-            <span v-else class="-ml-1 flex min-w-0 flex-wrap items-center gap-1">
+            <!-- 4 from the left edge, the same as from the top — by the
+                 field's padding, as the tags above, for the same reason. -->
+            <span v-else class="flex min-w-0 flex-wrap items-center gap-1">
               <span
                 v-for="option in selectedOptions"
                 :key="option.value"
