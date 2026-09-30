@@ -592,7 +592,10 @@ function onFocusIn(e: FocusEvent) {
         :aria-expanded="colorOpen"
         @click="pickColor"
       >
-        <RteIcon name="text" class="size-3.5" />
+        <!-- the 24px box, and in it the file's 14px glyph (31845:35001) -->
+        <span>
+          <RteIcon name="text" class="size-3.5" />
+        </span>
         <RteIcon :name="colorOpen ? 'small-up' : 'small-down'" class="size-4" />
       </button>
     </Tooltip>
