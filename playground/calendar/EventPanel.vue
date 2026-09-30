@@ -345,6 +345,12 @@ const orgLogo = computed(
   () => orgOptions.find((o) => o.value === organisation.value)?.logo,
 )
 
+/**
+ * The rows drawn as tabs rather than as a menu. Both are a small closed set
+ * where the answer not chosen is worth seeing; the other two are lists.
+ */
+const asTabs = ['Occupancy', 'Visibility']
+
 const behaviourOptions: Record<string, string[]> = {
   Repeat: ['None', 'Daily', 'Weekly', 'Monthly'],
   Alert: ['None', '10 min before', '30 min before', '1 hour before'],
@@ -482,6 +488,17 @@ const colourOptions = computed(() =>
 const field = '!h-7 w-full'
 
 /**
+ * The tab rows, on the fields' own left edge.
+ *
+ * Every value in this panel starts on one line, and a ghost tab's first label
+ * lands there of its own accord: its 8px of side padding is the same 8 the
+ * ghost menus above it carry, so nothing is pulled back. Measured 1862 for
+ * both. The list's own rule is taken off — these are a control in a row, not
+ * a set of pages — and its gap: the pill is what separates the choices.
+ */
+const tabField = '[&_[role=tablist]]:!border-0 [&_[role=tablist]]:!gap-0'
+
+/**
  * A ghost field that cannot be typed in should still be a ghost field.
  * TextInput and Textarea wash themselves in `surface-gray-1` when disabled —
  * Select does not — so a panel opened to read had two of its rows filled and
@@ -583,8 +600,20 @@ function todayIso() {
       Inset 20, like the header above and the rules below. `!px-5` on
       `TabList` never landed — the padding is on the element it renders
       inside itself, so the class has to reach it from the root.
+
+      `mt-px` puts the rule under these tabs on the calendar's own first rule.
+      The two run at each other across the panel's edge and were a pixel
+      apart — the header above is an even 54 and the calendar's box begins on
+      an odd line — which at that length reads as a step rather than a line.
+
+      `gap-4` where `TabList` ships `gap-6`: 24 is the width of the panel's
+      own margin, so two words that far apart stopped reading as a pair. 16
+      is what the user set.
     -->
-    <Tabs v-model="tab" class="shrink-0 [&_[role=tablist]]:!px-5">
+    <Tabs
+      v-model="tab"
+      class="mt-px shrink-0 [&_[role=tablist]]:!gap-4 [&_[role=tablist]]:!px-5"
+    >
       <TabList>
         <TabTrigger value="Event">Event</TabTrigger>
         <TabTrigger value="Task">Task</TabTrigger>
@@ -866,7 +895,41 @@ function todayIso() {
         <span class="w-[90px] shrink-0 text-base text-ink-gray-6">
           {{ label }}
         </span>
+        <!--
+          Two of these rows are a choice between named states rather than a
+          list to go looking in — free or busy, who can see it — so they are
+          drawn as tabs, where every answer is on screen and the one in force
+          is the one lit. The rest stay menus: a repeat rule and an alert have
+          more answers than a row can hold.
+
+          `variant` on `TabList`, not on `Tabs`: on the parent it only reaches
+          the `tabs` shorthand, and a composed list silently falls back to the
+          underline.
+        -->
+        <Tabs
+          v-if="asTabs.includes(label as string)"
+          :model-value="behaviour[label]"
+          :class="tabField"
+          @update:model-value="
+            (v) => {
+              behaviour[label] = v as string
+              touch()
+            }
+          "
+        >
+          <TabList variant="ghost" size="sm">
+            <TabTrigger
+              v-for="option in options"
+              :key="option"
+              :value="option"
+              :disabled="locked"
+            >
+              {{ option }}
+            </TabTrigger>
+          </TabList>
+        </Tabs>
         <Select
+          v-else
           v-model="(tab === 'Task' ? taskFields : behaviour)[label]"
           :options="options"
           size="sm"
