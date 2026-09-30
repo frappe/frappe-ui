@@ -9,7 +9,7 @@
  */
 import type { CalendarEvent } from '../../experimental/Calendar'
 import type { AvatarTheme } from '../../src/components/Avatar/types'
-import { faceFor } from '../components/patterns/designAssets'
+import { faces } from '../components/patterns/designAssets'
 
 export type CalendarSource = {
   id: string
@@ -66,19 +66,31 @@ export const colourValue = (name: string) =>
  * panel writes when it saves.
  */
 export const people: Person[] = [
-  { label: 'Faris Ansari', value: 'faris@timeless.co', photo: true },
+  { label: 'Faris Ansari', value: 'faris@timeless.co', photo: 0 },
   { label: 'Rubini Raman', value: 'rubini@timeless.co', theme: 'violet' },
-  { label: 'Gowtham Sivakumar', value: 'gowtham@timeless.co', photo: true },
-  { label: 'Shariq Ansari', value: 'shariq@timeless.co', photo: true },
-  { label: 'Sally Potter', value: 'sally@timeless.co', photo: true },
+  { label: 'Gowtham Sivakumar', value: 'gowtham@timeless.co', photo: 1 },
+  { label: 'Shariq Ansari', value: 'shariq@timeless.co', photo: 2 },
+  { label: 'Sally Potter', value: 'sally@timeless.co', photo: 3 },
   { label: 'Emily Taylor', value: 'emily@timeless.co', theme: 'blue' },
+  { label: 'Priya Nair', value: 'priya@timeless.co', theme: 'green' },
+  { label: 'Anil Mehta', value: 'anil@timeless.co', photo: 5 },
+  { label: 'Karthik Iyer', value: 'karthik@timeless.co', theme: 'amber' },
+  { label: 'Meera Joshi', value: 'meera@timeless.co', photo: 7 },
+  { label: 'Tom Whitfield', value: 'tom@timeless.co', theme: 'red' },
+  { label: 'Aisha Khan', value: 'aisha@timeless.co', photo: 9 },
+  { label: 'Diego Alvarez', value: 'diego@timeless.co', theme: 'gray' },
+  { label: 'Hannah Lee', value: 'hannah@timeless.co', theme: 'green' },
+  { label: 'Nikhil Rao', value: 'nikhil@timeless.co', photo: 11 },
+  { label: 'Zoe Martin', value: 'zoe@timeless.co', theme: 'amber' },
 ]
 
 export type Person = {
   label: string
   value: string
-  /** Has a photo; the rest show an initial on a colour, as frappe-ui's Avatar does. */
-  photo?: boolean
+  /** Which of the Members frame's faces is theirs — one each, so no two
+   *  people share a photo; the rest show an initial on a colour, as
+   *  frappe-ui's Avatar does. */
+  photo?: number
   theme?: AvatarTheme
 }
 
@@ -91,14 +103,44 @@ export type Person = {
  */
 export function portraitOf(name: string): { image?: string; theme: AvatarTheme } {
   const p = people.find((x) => x.label === name)
-  return { image: p?.photo ? faceFor(name) : undefined, theme: p?.theme ?? 'gray' }
+  return {
+    image: p?.photo != null ? faces[p.photo] : undefined,
+    theme: p?.theme ?? 'gray',
+  }
 }
 
 /** The name an address belongs to, or the address itself if it is nobody's. */
 export const nameOf = (address: string) =>
   people.find((p) => p.value === address)?.label ?? address
 
-/** The addresses of the named, joined the way the panel joins them. */
+/**
+ * Who is on an event, when the sample does not say: a draw from the team,
+ * seeded by the event so it is the same people every time the page opens
+ * and different people from one event to the next. Most things are one to
+ * three people; a few are the whole room. A number asks for that many and
+ * lets the draw pick who; a string names them outright, as the panel would.
+ */
+function crew(key: string, n?: number | string): string {
+  if (typeof n === 'string') return n
+  let seed = 2166136261
+  for (let i = 0; i < key.length; i++) {
+    seed ^= key.charCodeAt(i)
+    seed = Math.imul(seed, 16777619) >>> 0
+  }
+  const next = () => {
+    seed = (Math.imul(seed ^ (seed >>> 15), 2246822519) + 0x9e3779b9) >>> 0
+    return (seed >>> 8) / 16777216
+  }
+  const order = people
+    .map((p) => ({ p, r: next() }))
+    .sort((a, b) => a.r - b.r)
+    .map((x) => x.p.value)
+  const sizes = [1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 4, 5, 6]
+  const count = n ?? sizes[Math.floor(next() * sizes.length)]
+  return order.slice(0, Math.min(count, order.length)).join(', ')
+}
+
+/** Names, as a sample would rather write them than as addresses. */
 const withPeople = (...names: string[]) =>
   names
     .map((n) => people.find((p) => p.label === n)?.value ?? n)
@@ -147,29 +189,29 @@ type Seed = {
   day: number
   from: [number, number]
   to: [number, number]
-  /** Who is on it — addresses, the way the panel stores them. */
-  with?: string
+  /** Who is on it: how many, and the draw picks who — or the addresses outright. */
+  with?: number | string
   /** A line about it, read after the title in the agenda. */
   about?: string
 }
 
 // The week the design draws, including the two that overlap on Wednesday.
 const seeds: Seed[] = [
-  { id: '1', title: 'Product design', source: 'leads', day: 0, from: [10, 0], to: [12, 0], with: withPeople('Sally Potter', 'Emily Taylor', 'Shariq Ansari'), about: 'Second pass on the pricing page — tier names, the comparison table and what the free plan is allowed to say' },
-  { id: '2', title: 'Frappe discussion', source: 'deals', day: 2, from: [10, 30], to: [11, 0], with: withPeople('Faris Ansari', 'Gowtham Sivakumar'), about: 'What the calendar needs from the library before the next release' },
-  { id: '3', title: 'Interview', source: 'deals', day: 2, from: [11, 0], to: [12, 0], with: withPeople('Faris Ansari', 'Shariq Ansari'), about: 'Frontend, round two — the take-home walkthrough' },
-  { id: '4', title: 'Weekly review', source: 'qualified', day: 4, from: [10, 30], to: [11, 30], with: withPeople('Faris Ansari', 'Rubini Raman', 'Gowtham Sivakumar', 'Shariq Ansari', 'Sally Potter', 'Emily Taylor'), about: 'Pipeline by stage, then the three deals that slipped' },
-  { id: '5', title: 'Interview', source: 'leads', day: 3, from: [12, 0], to: [13, 0], with: withPeople('Faris Ansari') },
-  { id: '6', title: 'DS Meeting', source: 'deals', day: 2, from: [13, 0], to: [14, 0], with: withPeople('Rubini Raman', 'Gowtham Sivakumar', 'Emily Taylor', 'Shariq Ansari'), about: 'Tokens and the type scale: settle ink-gray-5 vs 6 for secondary text, and whether text-base moves to 14' },
-  { id: '7', title: 'Product update', source: 'qualified', day: 4, from: [13, 0], to: [14, 0], with: withPeople('Faris Ansari', 'Rubini Raman', 'Gowtham Sivakumar', 'Shariq Ansari', 'Sally Potter'), about: 'What shipped this week, in five minutes each' },
-  { id: '8', title: 'Interview', source: 'leads', day: 1, from: [14, 0], to: [15, 0], with: withPeople('Faris Ansari'), about: 'Backend, round one' },
-  { id: '9', title: 'Birthday', source: 'leads', day: 1, from: [15, 0], to: [16, 0], with: withPeople('Sally Potter', 'Emily Taylor', 'Shariq Ansari', 'Gowtham Sivakumar'), about: 'Cake in the kitchen at three' },
-  { id: '10', title: 'Weekly standup', source: 'qualified', day: 4, from: [15, 30], to: [17, 0], with: withPeople('Faris Ansari', 'Rubini Raman', 'Gowtham Sivakumar', 'Sally Potter', 'Emily Taylor') },
-  { id: '11', title: 'Take a walk', source: 'deals', day: 0, from: [18, 0], to: [19, 0], with: withPeople('Gowtham Sivakumar') },
-  { id: '12', title: 'CRM discussion', source: 'leads', day: 3, from: [18, 0], to: [19, 0], with: withPeople('Faris Ansari', 'Rubini Raman', 'Shariq Ansari'), about: 'The lead scoring proposal — bring the sheet' },
+  { id: '1', title: 'Product design', source: 'leads', day: 0, from: [10, 0], to: [12, 0], with: 3, about: 'Second pass on the pricing page — tier names, the comparison table and what the free plan is allowed to say' },
+  { id: '2', title: 'Frappe discussion', source: 'deals', day: 2, from: [10, 30], to: [11, 0], with: 2, about: 'What the calendar needs from the library before the next release' },
+  { id: '3', title: 'Interview', source: 'deals', day: 2, from: [11, 0], to: [12, 0], with: 2, about: 'Frontend, round two — the take-home walkthrough' },
+  { id: '4', title: 'Weekly review', source: 'qualified', day: 4, from: [10, 30], to: [11, 30], with: 6, about: 'Pipeline by stage, then the three deals that slipped' },
+  { id: '5', title: 'Interview', source: 'leads', day: 3, from: [12, 0], to: [13, 0], with: 1 },
+  { id: '6', title: 'DS Meeting', source: 'deals', day: 2, from: [13, 0], to: [14, 0], with: 4, about: 'Tokens and the type scale: settle ink-gray-5 vs 6 for secondary text, and whether text-base moves to 14' },
+  { id: '7', title: 'Product update', source: 'qualified', day: 4, from: [13, 0], to: [14, 0], with: 5, about: 'What shipped this week, in five minutes each' },
+  { id: '8', title: 'Interview', source: 'leads', day: 1, from: [14, 0], to: [15, 0], with: 1, about: 'Backend, round one' },
+  { id: '9', title: 'Birthday', source: 'leads', day: 1, from: [15, 0], to: [16, 0], with: 4, about: 'Cake in the kitchen at three' },
+  { id: '10', title: 'Weekly standup', source: 'qualified', day: 4, from: [15, 30], to: [17, 0], with: 5 },
+  { id: '11', title: 'Take a walk', source: 'deals', day: 0, from: [18, 0], to: [19, 0], with: 1 },
+  { id: '12', title: 'CRM discussion', source: 'leads', day: 3, from: [18, 0], to: [19, 0], with: 3, about: 'The lead scoring proposal — bring the sheet' },
   // Wednesday carries five, which is two more than a month cell can hold —
   // so the Month view has a day to draw "3 more" on.
-  { id: '13', title: 'Design review', source: 'qualified', day: 2, from: [15, 0], to: [16, 0], with: withPeople('Sally Potter', 'Emily Taylor'), about: 'Settings modal and the agenda, against the file' },
+  { id: '13', title: 'Design review', source: 'qualified', day: 2, from: [15, 0], to: [16, 0], with: 2, about: 'Settings modal and the agenda, against the file' },
   { id: '14', title: 'Train to Chennai', source: 'leads', day: 2, from: [17, 30], to: [18, 30], with: withPeople('Faris Ansari'), about: 'Vande Bharat, coach C4 — Faris has the tickets' },
 ]
 
@@ -199,17 +241,17 @@ type Standing = {
   from: [number, number]
   to: [number, number]
   type?: string
-  with?: string
+  with?: number | string
   about?: string
 }
 
 const standing: Standing[] = [
-  { title: 'Standup', source: 'qualified', weekday: 1, from: [9, 30], to: [9, 45], with: withPeople('Faris Ansari', 'Rubini Raman', 'Gowtham Sivakumar', 'Shariq Ansari') },
-  { title: 'Pipeline review', source: 'deals', weekday: 1, from: [15, 0], to: [16, 0], with: withPeople('Faris Ansari', 'Rubini Raman', 'Gowtham Sivakumar'), about: 'Every open deal over 5L, by stage' },
-  { title: '1:1 — Priya', source: 'leads', weekday: 2, from: [11, 0], to: [11, 30], with: withPeople('Rubini Raman') },
-  { title: 'Design critique', source: 'deals', weekday: 3, from: [10, 0], to: [11, 0], with: withPeople('Sally Potter', 'Emily Taylor', 'Shariq Ansari'), about: 'Bring one screen; twenty minutes each, and the notes go in the file' },
-  { title: 'Standup', source: 'qualified', weekday: 4, from: [9, 30], to: [9, 45], with: withPeople('Faris Ansari', 'Rubini Raman', 'Gowtham Sivakumar', 'Shariq Ansari') },
-  { title: 'Week in review', source: 'qualified', weekday: 5, from: [16, 0], to: [17, 0], with: withPeople('Faris Ansari', 'Rubini Raman', 'Gowtham Sivakumar', 'Shariq Ansari', 'Sally Potter', 'Emily Taylor'), about: 'What landed, what slipped, who is out next week' },
+  { title: 'Standup', source: 'qualified', weekday: 1, from: [9, 30], to: [9, 45], with: 4 },
+  { title: 'Pipeline review', source: 'deals', weekday: 1, from: [15, 0], to: [16, 0], with: 3, about: 'Every open deal over 5L, by stage' },
+  { title: '1:1 — Priya', source: 'leads', weekday: 2, from: [11, 0], to: [11, 30], with: withPeople('Priya Nair') },
+  { title: 'Design critique', source: 'deals', weekday: 3, from: [10, 0], to: [11, 0], with: 3, about: 'Bring one screen; twenty minutes each, and the notes go in the file' },
+  { title: 'Standup', source: 'qualified', weekday: 4, from: [9, 30], to: [9, 45], with: 4 },
+  { title: 'Week in review', source: 'qualified', weekday: 5, from: [16, 0], to: [17, 0], with: 6, about: 'What landed, what slipped, who is out next week' },
 ]
 
 type Dated = {
@@ -224,43 +266,43 @@ type Dated = {
   days?: number
   allDay?: boolean
   type?: string
-  with?: string
+  with?: number | string
   about?: string
 }
 
 const dated: Dated[] = [
   // ── The month under way ────────────────────────────────────────────────
-  { title: 'Dropbox — discovery call', source: 'leads', month: 0, date: 2, from: [14, 0], to: [15, 0], with: withPeople('Faris Ansari', 'Rubini Raman'), about: 'Their ops lead and two from finance; they are on Salesforce today and want out by March' },
-  { title: 'Onboarding — Northwind', source: 'qualified', month: 0, date: 3, from: [11, 0], to: [12, 30], with: withPeople('Gowtham Sivakumar', 'Shariq Ansari', 'Rubini Raman'), about: 'Import their contacts, set up the two pipelines, walk the team through the inbox' },
-  { title: 'Interview — backend', source: 'leads', month: 0, date: 9, from: [16, 0], to: [17, 0], with: withPeople('Faris Ansari', 'Shariq Ansari') },
-  { title: 'Priya on leave', source: 'away', month: 0, date: 14, days: 3, allDay: true, with: withPeople('Rubini Raman'), about: 'Back Thursday; Rubini covers the leads inbox' },
-  { title: 'Quarterly forecast', source: 'deals', month: 0, date: 17, from: [13, 0], to: [14, 30], with: withPeople('Faris Ansari', 'Rubini Raman', 'Gowtham Sivakumar'), about: 'Commit, best case and the gap to target' },
-  { title: 'Renewal — Contoso', source: 'qualified', month: 0, date: 21, from: [10, 0], to: [11, 0], with: withPeople('Faris Ansari', 'Gowtham Sivakumar'), about: 'Three-year term on the table if we hold the seat price' },
+  { title: 'Dropbox — discovery call', source: 'leads', month: 0, date: 2, from: [14, 0], to: [15, 0], with: 2, about: 'Their ops lead and two from finance; they are on Salesforce today and want out by March' },
+  { title: 'Onboarding — Northwind', source: 'qualified', month: 0, date: 3, from: [11, 0], to: [12, 30], with: 3, about: 'Import their contacts, set up the two pipelines, walk the team through the inbox' },
+  { title: 'Interview — backend', source: 'leads', month: 0, date: 9, from: [16, 0], to: [17, 0], with: 2 },
+  { title: 'Priya on leave', source: 'away', month: 0, date: 14, days: 3, allDay: true, with: withPeople('Priya Nair'), about: 'Back Thursday; Rubini covers the leads inbox' },
+  { title: 'Quarterly forecast', source: 'deals', month: 0, date: 17, from: [13, 0], to: [14, 30], with: 3, about: 'Commit, best case and the gap to target' },
+  { title: 'Renewal — Contoso', source: 'qualified', month: 0, date: 21, from: [10, 0], to: [11, 0], with: 2, about: 'Three-year term on the table if we hold the seat price' },
   { title: 'Send the forecast', source: 'work', month: 0, date: 22, from: [9, 0], to: [9, 30], type: 'task', with: withPeople('Faris Ansari'), about: 'To Priya, before standup' },
   { title: 'Team dinner', source: 'personal', month: 0, date: 25, from: [19, 0], to: [21, 0], with: withPeople('Faris Ansari', 'Rubini Raman', 'Gowtham Sivakumar', 'Shariq Ansari', 'Sally Potter', 'Emily Taylor'), about: 'Karavalli, table for eight under Sally' },
 
   // ── The month after ───────────────────────────────────────────────────
-  { title: 'Lunch with Anil', source: 'personal', month: 1, date: 1, from: [12, 30], to: [13, 30], with: withPeople('Sally Potter'), about: 'Toit, Indiranagar' },
-  { title: 'Frappe Conference, Mumbai', source: 'deals', month: 1, date: 5, days: 3, allDay: true, with: withPeople('Faris Ansari', 'Gowtham Sivakumar', 'Shariq Ansari', 'Sally Potter'), about: 'Booth on the second floor; Gowtham speaks on day two at four' },
-  { title: 'Roadmap — Q4', source: 'deals', month: 1, date: 12, from: [14, 0], to: [16, 0], with: withPeople('Faris Ansari', 'Rubini Raman', 'Gowtham Sivakumar', 'Shariq Ansari', 'Sally Potter'), about: 'Three themes, no more — and what we are saying no to' },
-  { title: 'Interview — designer', source: 'leads', month: 1, date: 14, from: [15, 0], to: [16, 0], with: withPeople('Sally Potter', 'Emily Taylor'), about: 'Portfolio walkthrough, then the settings-modal exercise' },
-  { title: 'Raise the invoices', source: 'work', month: 1, date: 15, from: [10, 0], to: [10, 30], type: 'task', with: withPeople('Rubini Raman') },
-  { title: "Shreya's birthday", source: 'personal', month: 1, date: 19, allDay: true, with: withPeople('Sally Potter', 'Emily Taylor', 'Gowtham Sivakumar') },
-  { title: 'Customer visits — Bengaluru', source: 'leads', month: 1, date: 20, days: 4, allDay: true, with: withPeople('Faris Ansari', 'Gowtham Sivakumar'), about: 'Northwind on Tuesday, Contoso Wednesday, the rest as they confirm' },
+  { title: 'Lunch with Anil', source: 'personal', month: 1, date: 1, from: [12, 30], to: [13, 30], with: withPeople('Anil Mehta'), about: 'Toit, Indiranagar' },
+  { title: 'Frappe Conference, Mumbai', source: 'deals', month: 1, date: 5, days: 3, allDay: true, with: 4, about: 'Booth on the second floor; Gowtham speaks on day two at four' },
+  { title: 'Roadmap — Q4', source: 'deals', month: 1, date: 12, from: [14, 0], to: [16, 0], with: 5, about: 'Three themes, no more — and what we are saying no to' },
+  { title: 'Interview — designer', source: 'leads', month: 1, date: 14, from: [15, 0], to: [16, 0], with: 2, about: 'Portfolio walkthrough, then the settings-modal exercise' },
+  { title: 'Raise the invoices', source: 'work', month: 1, date: 15, from: [10, 0], to: [10, 30], type: 'task', with: 1 },
+  { title: "Shreya's birthday", source: 'personal', month: 1, date: 19, allDay: true, with: 3 },
+  { title: 'Customer visits — Bengaluru', source: 'leads', month: 1, date: 20, days: 4, allDay: true, with: 2, about: 'Northwind on Tuesday, Contoso Wednesday, the rest as they confirm' },
   { title: 'Board pack due', source: 'work', month: 1, date: 26, from: [17, 0], to: [18, 0], type: 'task', with: withPeople('Rubini Raman'), about: 'Numbers from Rubini by Monday, narrative by Wednesday' },
-  { title: 'Month-end close', source: 'work', month: 1, date: 30, from: [16, 0], to: [17, 30], type: 'task', with: withPeople('Rubini Raman') },
+  { title: 'Month-end close', source: 'work', month: 1, date: 30, from: [16, 0], to: [17, 30], type: 'task', with: 1 },
 
   // ── And the one after that ────────────────────────────────────────────
-  { title: 'Q4 kickoff', source: 'deals', month: 2, date: 2, from: [10, 0], to: [11, 30], with: withPeople('Faris Ansari', 'Rubini Raman', 'Gowtham Sivakumar', 'Shariq Ansari', 'Sally Potter', 'Emily Taylor'), about: 'Targets by team, then the hiring plan' },
-  { title: 'Dropbox — renewal', source: 'qualified', month: 2, date: 5, from: [11, 0], to: [12, 0], with: withPeople('Faris Ansari', 'Rubini Raman') },
-  { title: 'Diwali', source: 'away', month: 2, date: 8, allDay: true, with: withPeople('Faris Ansari', 'Rubini Raman', 'Gowtham Sivakumar', 'Shariq Ansari', 'Sally Potter', 'Emily Taylor'), about: 'Office closed; support on rota' },
-  { title: 'Offsite — Goa', source: 'deals', month: 2, date: 9, days: 5, allDay: true, with: withPeople('Faris Ansari', 'Rubini Raman', 'Gowtham Sivakumar', 'Shariq Ansari', 'Sally Potter', 'Emily Taylor'), about: 'Whole team; flights out Monday morning, back Friday night' },
-  { title: 'Performance reviews', source: 'work', month: 2, date: 16, from: [14, 0], to: [17, 0], type: 'task', with: withPeople('Faris Ansari'), about: 'Six write-ups, thirty minutes each' },
-  { title: 'Interview — product', source: 'leads', month: 2, date: 18, from: [11, 0], to: [12, 0], with: withPeople('Sally Potter', 'Emily Taylor') },
-  { title: 'Webinar — CRM for teams', source: 'qualified', month: 2, date: 20, from: [16, 0], to: [17, 0], with: withPeople('Shariq Ansari', 'Gowtham Sivakumar'), about: 'Forty signed up so far; Shariq runs the demo' },
-  { title: 'Customer advisory board', source: 'qualified', month: 2, date: 24, from: [14, 0], to: [16, 0], with: withPeople('Faris Ansari', 'Rubini Raman', 'Gowtham Sivakumar', 'Shariq Ansari'), about: 'Eight customers, the roadmap, and an hour of them talking' },
-  { title: 'Anil out', source: 'away', month: 2, date: 26, days: 2, allDay: true, with: withPeople('Gowtham Sivakumar') },
-  { title: 'Month-end close', source: 'work', month: 2, date: 30, from: [16, 0], to: [17, 30], type: 'task', with: withPeople('Rubini Raman') },
+  { title: 'Q4 kickoff', source: 'deals', month: 2, date: 2, from: [10, 0], to: [11, 30], with: 6, about: 'Targets by team, then the hiring plan' },
+  { title: 'Dropbox — renewal', source: 'qualified', month: 2, date: 5, from: [11, 0], to: [12, 0], with: 2 },
+  { title: 'Diwali', source: 'away', month: 2, date: 8, allDay: true, with: 6, about: 'Office closed; support on rota' },
+  { title: 'Offsite — Goa', source: 'deals', month: 2, date: 9, days: 5, allDay: true, with: 16, about: 'Whole team; flights out Monday morning, back Friday night' },
+  { title: 'Performance reviews', source: 'work', month: 2, date: 16, from: [14, 0], to: [17, 0], type: 'task', with: 1, about: 'Six write-ups, thirty minutes each' },
+  { title: 'Interview — product', source: 'leads', month: 2, date: 18, from: [11, 0], to: [12, 0], with: 2 },
+  { title: 'Webinar — CRM for teams', source: 'qualified', month: 2, date: 20, from: [16, 0], to: [17, 0], with: 2, about: 'Forty signed up so far; Shariq runs the demo' },
+  { title: 'Customer advisory board', source: 'qualified', month: 2, date: 24, from: [14, 0], to: [16, 0], with: 4, about: 'Eight customers, the roadmap, and an hour of them talking' },
+  { title: 'Anil out', source: 'away', month: 2, date: 26, days: 2, allDay: true, with: withPeople('Anil Mehta') },
+  { title: 'Month-end close', source: 'work', month: 2, date: 30, from: [16, 0], to: [17, 30], type: 'task', with: 1 },
 ]
 
 /** The first of the month under way, which the three-month span starts at. */
@@ -307,7 +349,7 @@ function standingEvents(): CalendarEvent[] {
         toDate: day(to),
         fromTime: clock(from),
         toTime: clock(to),
-        participant: s.with,
+        participant: crew(`${s.title} ${day(from)}`, s.with),
         description: s.about,
       } as CalendarEvent & { source: string })
     }
@@ -337,7 +379,10 @@ function datedEvents(): CalendarEvent[] {
       fromTime: e.allDay ? undefined : clock(from),
       toTime: e.allDay ? undefined : clock(to),
       isFullDay: !!e.allDay,
-      participant: e.with,
+      participant: crew(
+        `${e.title} ${day(first)}`,
+        e.type === 'task' ? (e.with ?? 1) : e.with,
+      ),
       description: e.about,
     } as CalendarEvent & { source: string }
   })
@@ -357,7 +402,7 @@ export function eventsFor(visible: CalendarSource[]): CalendarEvent[] {
       toDate: day(to),
       fromTime: clock(from),
       toTime: clock(to),
-      participant: s.with,
+      participant: crew(`${s.id} ${s.title}`, s.with),
       description: s.about,
     } as CalendarEvent & { source: string }
   })
