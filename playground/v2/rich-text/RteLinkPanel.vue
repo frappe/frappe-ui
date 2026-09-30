@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // Figma: espresso-2.0 › embed-link (31823:54797, 31823:54816). A 36px card
 // on a 12px radius, 4px in, under the xl shadow: the library's subtle
-// input at 28px — the link glyph, 8, the address — and a 28px ghost
+// input at 28px — the globe, 8, the address — and a 28px ghost
 // button beside it. Over a link the address is read and the button is
 // the pencil; editing, the address is live and the button unlinks. A new
 // link opens straight into editing with no button: Enter sets it, Escape
@@ -125,7 +125,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown, true))
         @keydown.enter.prevent="submit"
       >
         <template #prefix>
-          <RteIcon name="link" class="size-4 text-ink-gray-7" />
+          <RteIcon name="globe" class="size-4 text-ink-gray-7" />
         </template>
       </TextInput>
     </div>
