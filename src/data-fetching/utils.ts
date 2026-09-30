@@ -6,10 +6,20 @@ export function makeGetParams(params: Record<string, any>) {
   for (let key in params) {
     let value = params[key]
     if (value != null && !isEmptyObject(value)) {
-      url.append(key, value)
+      // A query string holds only strings, and `append` would turn an object
+      // into `[object Object]` and an array into `a,b`. Frappe reads a
+      // structured GET arg (`filters`, `fields`) as JSON, so send it as JSON.
+      url.append(key, isStructured(value) ? JSON.stringify(value) : value)
     }
   }
   return url.toString()
+}
+
+function isStructured(value: unknown) {
+  if (Array.isArray(value)) return true
+  if (typeof value !== 'object' || value === null) return false
+  const proto = Object.getPrototypeOf(value)
+  return proto === Object.prototype || proto === null
 }
 
 export function isEmptyObject(obj: any) {
