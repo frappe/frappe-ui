@@ -9,9 +9,12 @@
  * the same thing a size down: one group, drawn one way, wherever people are
  * shown together.
  *
- * Three faces at most. Past three, a fourth disc says how many more there
- * are — so four people are three faces and "1", and a team of twenty is
- * three faces and "17", not a row of heads running into whatever is next.
+ * `max` faces fit as they are. Past `max`, the group keeps `keep` of them
+ * and a last disc says how many more there are. The header keeps three of
+ * a crowd (four people are three faces and "1"); an agenda row keeps one
+ * (three people are one face and "2"), since a row's group is read for
+ * "who, roughly" rather than counted, and three discs a line was a third
+ * column of faces down the card.
  *
  * A face is a photo where the person has one and an initial on their colour
  * where they have not; `portraitOf` decides, so the header and the rows
@@ -26,12 +29,19 @@ const props = withDefaults(
     names: string[]
     /** md is the header's 24px; sm the 20px a 32px row can hold. */
     size?: 'md' | 'sm'
+    /** How many fit before the group starts counting. */
     max?: number
+    /** How many faces stay once it does; `max` if not said. */
+    keep?: number
   }>(),
   { size: 'md', max: 3 },
 )
 
-const faces = computed(() => props.names.slice(0, props.max))
+const faces = computed(() =>
+  props.names.length > props.max
+    ? props.names.slice(0, props.keep ?? props.max)
+    : props.names,
+)
 const more = computed(() => props.names.length - faces.value.length)
 </script>
 

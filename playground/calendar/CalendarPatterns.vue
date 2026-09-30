@@ -367,7 +367,25 @@ const heldCard = computed(
 const heldLanding = computed(
   () => carried.landing.value || monthSlot.landing.value,
 )
+/**
+ * Nothing in the agenda is picked up.
+ *
+ * A row is not draggable, but the faces on it are — an image is, by
+ * default — and a drag that starts on one bubbles out of the row as a
+ * `dragstart` on an `.event`, which is exactly what the card-in-hand
+ * listens for. So a face pulled across the list put a whole card in the
+ * hand. Caught first, on capture, and stopped there: the list is read, not
+ * rearranged.
+ */
+function noAgendaDrag(e: DragEvent) {
+  if (!(e.target instanceof Element)) return
+  if (!e.target.closest('.calendar-row')) return
+  e.preventDefault()
+  e.stopImmediatePropagation()
+}
+
 onMounted(() => {
+  calendarEl.value?.addEventListener('dragstart', noAgendaDrag, true)
   attach(calendarEl.value)
   month.attach(calendarEl.value)
   carried.attach(calendarEl.value)
@@ -375,6 +393,7 @@ onMounted(() => {
   monthEdges.attach(calendarEl.value)
 })
 onUnmounted(() => {
+  calendarEl.value?.removeEventListener('dragstart', noAgendaDrag, true)
   detach(calendarEl.value)
   month.detach(calendarEl.value)
   carried.detach(calendarEl.value)
@@ -885,6 +904,8 @@ function dayBand(label: string) {
                 v-if="agendaFlat && namesOf(calendarEvent).length"
                 :names="namesOf(calendarEvent)"
                 size="sm"
+                :max="2"
+                :keep="1"
               />
             </template>
           </Calendar>
