@@ -484,33 +484,8 @@ function resolve() {
 .rte-details.is-open .rte-details-toggle {
   transform: rotate(90deg);
 }
-/* the grip: in the margin to the block's left, shown while the pointer is
-   on the block, and the handle that drags it */
-.rte-drag {
-  position: absolute;
-  left: -24px;
-  top: 4px;
-  display: flex;
-  width: 16px;
-  height: 16px;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px;
-  color: var(--ink-gray-5);
-  opacity: 0;
-  cursor: grab;
-  transition: opacity 120ms ease-out;
-}
-.rte-details:hover > .rte-drag,
-.rte-attachment:hover > .rte-drag,
-.rte-drag:focus-visible {
-  opacity: 1;
-}
-/* the attachment row (31457:33634): its grip on the row's own 28px, the
-   close shown while the pointer is on the row, and rows stacked close */
-.rte-attachment > .rte-drag {
-  top: 6px;
-}
+/* the attachment row (31457:33634): the close shown while the pointer is
+   on the row, and rows stacked close */
 /* the row is a link, but not one of the document's underlined ones */
 .rte-doc .rte-attachment > a {
   border-bottom: 0;
@@ -531,13 +506,6 @@ function resolve() {
 }
 .rte-doc .rte-attachment + .rte-attachment {
   margin-top: -8px;
-}
-.rte-drag:hover {
-  background: var(--surface-gray-2);
-  color: var(--ink-gray-7);
-}
-.rte-drag:active {
-  cursor: grabbing;
 }
 .rte-details.ProseMirror-selectednode {
   border-radius: 6px;

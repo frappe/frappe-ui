@@ -45,16 +45,6 @@ function onClick(e: MouseEvent) {
     class="rte-attachment relative flex"
     data-type="attachment"
   >
-    <span
-      v-if="editable"
-      class="rte-drag"
-      data-drag-handle
-      contenteditable="false"
-      aria-label="Drag to move"
-      title="Drag to move"
-    >
-      <span class="lucide-grip-vertical size-4" aria-hidden="true" />
-    </span>
     <Button
       variant="ghost"
       size="sm"
