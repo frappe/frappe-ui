@@ -22,6 +22,12 @@ import NotificationPage from './notification/NotificationPage.vue'
 import KanbanPage from './kanban/KanbanPage.vue'
 import ColorPickerPage from './color-picker/ColorPickerPage.vue'
 import RichTextPage from './rich-text/RichTextPage.vue'
+// the pattern pages, built in a separate checkout and merged in: each
+// draws its own page and its own "On this page" rail
+import SettingsModalPatterns from './SettingsModalPatterns.vue'
+import TablePatterns from '../components/TablePatterns.vue'
+import ActivityPatterns from '../activity/ActivityPatterns.vue'
+import CalendarPatterns from '../calendar/CalendarPatterns.vue'
 // Figma 35185:59381 — the app's own mark, in place of the Frappe logo
 import appLogo from './assets/app-logo.svg'
 import EIcon from '../espresso-sidebar/EIcon.vue'
@@ -53,6 +59,10 @@ import navToast from './assets/nav/toast.svg?raw'
 import navKanban from './assets/nav/kanban.svg?raw'
 import navColorPicker from './assets/nav/color-picker.svg?raw'
 import navRichText from './assets/nav/richtext.svg?raw'
+import navSettingsModal from './assets/nav/settings-modal.svg?raw'
+import navTable from './assets/nav/table.svg?raw'
+import navActivity from './assets/nav/activity.svg?raw'
+import navCalendar from './assets/nav/calendar.svg?raw'
 import ApplicableCouponsModal from './modals/ApplicableCouponsModal.vue'
 import CallDetailsModal from './modals/CallDetailsModal.vue'
 import DeleteProjectModal from './modals/DeleteProjectModal.vue'
@@ -162,6 +172,10 @@ const pages = [
   'Kanban card',
   'Color picker',
   'Rich text editor',
+  'Settings modal',
+  'Table',
+  'Activity',
+  'Calendar',
 ].map((label) => ({ id: label.toLowerCase().replace(/\W+/g, '-'), label }))
 
 // The app tray down the far left, as a Frappe app shows it: this playground
@@ -203,6 +217,10 @@ const NAV_ICONS: Record<string, string> = {
   'kanban-card': navKanban,
   'color-picker': navColorPicker,
   'rich-text-editor': navRichText,
+  'settings-modal': navSettingsModal,
+  table: navTable,
+  activity: navActivity,
+  calendar: navCalendar,
 }
 
 // Drives `<html data-theme>`, so every token on the page — and in the
@@ -1036,6 +1054,30 @@ const outlineTitle = computed(
               <KanbanPage v-else-if="page === 'kanban-card'" />
               <ColorPickerPage v-else-if="page === 'color-picker'" />
               <RichTextPage v-else-if="page === 'rich-text-editor'" />
+
+              <!-- the pattern pages scroll as a document does, so each gets
+                   the stage's scroller; its rail finds that scroller and
+                   follows it. The calendar fills the stage and scrolls its
+                   own grid. -->
+              <div
+                v-else-if="page === 'settings-modal'"
+                class="v2-scroll h-full overflow-y-auto"
+              >
+                <SettingsModalPatterns />
+              </div>
+              <div
+                v-else-if="page === 'table'"
+                class="v2-scroll h-full overflow-y-auto"
+              >
+                <TablePatterns />
+              </div>
+              <div
+                v-else-if="page === 'activity'"
+                class="v2-scroll h-full overflow-y-auto"
+              >
+                <ActivityPatterns />
+              </div>
+              <CalendarPatterns v-else-if="page === 'calendar'" />
 
               <div
                 v-else
