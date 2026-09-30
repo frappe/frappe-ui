@@ -10,10 +10,11 @@
 //   or column keeps its handles while the pointer roams. Hovered, a handle
 //   grows into the file's grip — a 10×20 (or 20×10) gray-500 pill with
 //   white dots — and opens its menu
-//   (32926:97034, 97642, 98372): Colour, Border options (a row) or Table
-//   Header (the first row), Insert, Duplicate, Clear content, Delete for
-//   a row or column; Colour, and for a run of cells Merge cells and Delete
-//   content, for a cell;
+//   (32926:97034, 97642, 98372): Table Header (the first row), Colour,
+//   Insert, Duplicate, Clear content, Delete for a row or column; Colour,
+//   and for a run of cells Merge cells and Delete content, for a cell. The
+//   file's Border options submenu is set aside for now (it lived here up
+//   to 7a35865b3f; the row's border attribute and rules stay);
 // - two 16px strips, 8px off the table's right and bottom edges, that add
 //   a column or a row at the end;
 //
@@ -39,7 +40,6 @@ import { useResolvedEditor } from '../../../src/molecules/editor/editor-context'
 import type { TiptapEditor } from '../../../src/molecules/editor'
 import { PALETTE_COLORS } from '../../../src/molecules/editor/extensions/shared/color-palette'
 import RteIcon from './RteIcon.vue'
-import type { RowBorder } from './extensions'
 
 const editor = useResolvedEditor(() => undefined)
 const icon = (name: string) => () => h(RteIcon, { name })
@@ -437,13 +437,6 @@ const rowActions = {
       selectRow(rowIndex.value)
       c.ed.commands.setCellBackground(name)
     }),
-  border: (border: RowBorder | null) =>
-    withCtx((c) => {
-      const { node, pos } = rowNodeAt(c, rowIndex.value)
-      c.ed.view.dispatch(
-        c.ed.state.tr.setNodeMarkup(pos, undefined, { ...node.attrs, border }),
-      )
-    }),
   toggleHeader: () =>
     withCtx((c) => {
       focusCell(c, cellPos(c, 0, 0))
@@ -525,7 +518,7 @@ function addRowAtEnd() {
 
 // ---- the menus
 // the document is not reactive: a tick per transaction lets the menus read
-// the row's header and border state fresh
+// the row's header state fresh
 const version = ref(0)
 const isHeaderRow = computed(() => {
   void version.value
@@ -536,13 +529,6 @@ const isHeaderRow = computed(() => {
   for (let i = 0; i < first.childCount; i++)
     if (first.child(i).type.name !== 'tableHeader') return false
   return true
-})
-const currentBorder = computed<RowBorder | null>(() => {
-  void version.value
-  const ed = editor.value
-  const c = ed && ctxOf(ed)
-  if (!c || rowIndex.value < 0 || rowIndex.value >= c.map.height) return null
-  return (c.table.child(rowIndex.value).attrs.border as RowBorder) ?? null
 })
 
 // the palette's names are the token hues, but for indigo, which has no
@@ -604,13 +590,6 @@ function colourItem(apply: (name: string | null) => void): MenuOptions[number] {
     ],
   }
 }
-const BORDERS: Array<[RowBorder, string, string]> = [
-  ['top', 'Top Border', 'border-top'],
-  ['right', 'Right Border', 'border-right'],
-  ['bottom', 'Bottom Border', 'border-bottom'],
-  ['left', 'Left Border', 'border-left'],
-  ['none', 'No Border', 'border-none'],
-]
 const rowOptions = computed<MenuOptions>(() => [
   ...(rowIndex.value === 0
     ? [
@@ -624,28 +603,6 @@ const rowOptions = computed<MenuOptions>(() => [
       ]
     : []),
   colourItem(rowActions.colour),
-  ...(rowIndex.value === 0
-    ? []
-    : [
-        {
-          label: 'Border options',
-          icon: icon('border-none'),
-          submenu: BORDERS.map(([value, label, glyph]) => ({
-            label,
-            icon: icon(glyph),
-            selected: currentBorder.value === value,
-            // the file ticks the row's current option
-            slots: {
-              suffix: ({ selected }) =>
-                selected
-                  ? h(RteIcon, { name: 'check', class: 'size-4' })
-                  : null,
-            },
-            onClick: () =>
-              rowActions.border(currentBorder.value === value ? null : value),
-          })),
-        },
-      ]),
   {
     label: 'Insert above',
     icon: icon('arrow-up'),
