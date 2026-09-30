@@ -141,6 +141,7 @@ function measure() {
     return
   }
   tableBox.value = box(w.getBoundingClientRect())
+  roundSelectionBox(w)
   const r = cellEl?.closest('tr')
   rowBox.value = r ? box(r.getBoundingClientRect()) : null
   if (cellEl) {
@@ -171,6 +172,25 @@ function measure() {
   } else {
     cellBox.value = null
   }
+}
+// the run's selection box is drawn square by the library; where it reaches
+// a corner of the card it takes the card's inner 11px radius, or the card
+// clips the corner off it
+function roundSelectionBox(w: HTMLElement) {
+  const ring = w.querySelector<HTMLElement>('.table-selection-box')
+  const t = w.querySelector('table')?.getBoundingClientRect()
+  if (!ring || !t) return
+  const b = ring.getBoundingClientRect()
+  const at = (x: number, y: number) => Math.abs(x - y) <= 1.5
+  const radius = (corner: boolean) => (corner ? '11px' : '0px')
+  const top = at(b.top, t.top)
+  const bottom = at(b.bottom, t.bottom)
+  const left = at(b.left, t.left)
+  const right = at(b.right, t.right)
+  ring.style.borderTopLeftRadius = radius(top && left)
+  ring.style.borderTopRightRadius = radius(top && right)
+  ring.style.borderBottomLeftRadius = radius(bottom && left)
+  ring.style.borderBottomRightRadius = radius(bottom && right)
 }
 function clearAll() {
   wrapperEl.value = null

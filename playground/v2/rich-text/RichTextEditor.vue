@@ -637,11 +637,31 @@ function resolve() {
 .rte-doc.prose-v3 table tr[data-border='left'] > * {
   border-left: 1px solid var(--outline-gray-1);
 }
-/* the selection: a 1px gray-500 line around the cell or the run of cells */
+/* the selection: a 1px gray-500 line around the cell or the run of cells;
+   at the card's corners it turns on the card's inner 11px radius, or the
+   card would clip its square corner (the run's box is rounded from
+   RteTableControls, which knows which corners it reaches) */
 .rte-doc .selectedCell::after,
 .rte-doc .table-selection-box {
   border-radius: 0;
   box-shadow: inset 0 0 0 1px var(--ink-gray-5);
+}
+/* the library's ring reaches 1px outside the cell, which the card clips
+   on its outer columns and rows; the file's line lies inside the cell */
+.rte-doc .selectedCell::after {
+  inset: 0;
+}
+.rte-doc.prose-v3 table tr:first-child > :first-child.selectedCell::after {
+  border-top-left-radius: 11px;
+}
+.rte-doc.prose-v3 table tr:first-child > :last-child.selectedCell::after {
+  border-top-right-radius: 11px;
+}
+.rte-doc.prose-v3 table tr:last-child > :first-child.selectedCell::after {
+  border-bottom-left-radius: 11px;
+}
+.rte-doc.prose-v3 table tr:last-child > :last-child.selectedCell::after {
+  border-bottom-right-radius: 11px;
 }
 /* tiptap's column resize handle: a 1px gray-600 line on the edge under
    the pointer, the cell's height */
