@@ -1305,7 +1305,9 @@ function dayBand(label: string) {
 */
 :deep(.calendar-week-label) {
   margin-left: 0 !important;
-  padding-left: 4px !important;
+  /* 0, not the component's 8 or the 4 it had here: the word starts on the
+     card's edge, the month label's line and the title's. */
+  padding-left: 0 !important;
   padding-right: 0 !important;
   font-weight: 500 !important;
 

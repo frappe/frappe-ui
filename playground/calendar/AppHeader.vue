@@ -8,6 +8,10 @@ import AvatarStack from './AvatarStack.vue'
  *   48 tall · 12 left, 20 right, 10 top and bottom · a 1px outline-gray-1
  *   rule along the bottom · left slot and right slot pushed apart
  *
+ * 18 on the left here rather than the file's 12: the breadcrumb keeps 2 of
+ * its own before the word, and the page under this header is set 20 in on
+ * both sides — the title starts on the body's line, not 6 short of it.
+ *
  * 48 is the whole height and the contents are 28, which is what the 10/10
  * leaves — so every control in here is a `sm` one (`h-7`). Nothing may make
  * this taller.
@@ -47,7 +51,7 @@ const people = [
 
 <template>
   <header
-    class="flex h-12 shrink-0 items-center justify-between border-b border-outline-gray-1 py-2.5 pl-3 pr-5"
+    class="flex h-12 shrink-0 items-center justify-between border-b border-outline-gray-1 py-2.5 pl-[18px] pr-5"
   >
     <!-- The left slot: a breadcrumb, its last crumb the active one. -->
     <Breadcrumbs :items="[{ label: 'Calendar' }]" />
