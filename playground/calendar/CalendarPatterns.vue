@@ -242,7 +242,9 @@ function saveEvent(payload: CalendarEvent) {
     created.value = [...created.value, { ...next }]
     hidden.value = [...hidden.value, id]
   }
-  panel.value = null
+  // The panel stays: this runs on every change now, not on a Save that ends
+  // the editing, and a panel that shut on the first keystroke would be no
+  // panel at all. Close is the X.
 }
 
 /**

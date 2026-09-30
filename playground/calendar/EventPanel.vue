@@ -5,6 +5,7 @@ import {
   Button,
   DateRangePicker,
   Dropdown,
+  Dialog,
   MultiSelect,
   Select,
   Switch,
@@ -59,30 +60,22 @@ const emit = defineEmits<{
 const creating = computed(() => !props.event)
 
 /**
- * An event opened from the grid is read first and changed second. The fields
- * are the same either way — what changes is whether they take a hand — so
- * Edit unlocks them rather than swapping the panel for another one.
+ * An event opened from the grid is live the moment it opens. There is no
+ * Edit to press and no Save to remember: every field takes a hand, and each
+ * change goes straight to the calendar, the way Notion Calendar does it. A
+ * panel closed is a panel whose changes are already kept.
  *
- * `dirty` is what Save waits on: a panel opened to read and closed again has
- * nothing to save, and a button that can be pressed to no effect is a button
- * that has to be explained.
+ * Every field runs through `touch`, so nothing can be changed unnoticed —
+ * and, on an event that exists, nothing can be changed without being saved.
  */
-const editing = ref(false)
-const dirty = ref(false)
-watch(
-  () => props.event,
-  () => {
-    editing.value = false
-    dirty.value = false
-  },
-)
-/** Every field runs through here, so nothing can be changed unnoticed. */
 const touch = () => {
-  if (editing.value) dirty.value = true
+  if (!creating.value) save()
 }
-/** Read-only until Edit is pressed — a made event, not being changed. */
-const locked = computed(() => !creating.value && !editing.value)
+/** Nothing is read-only any more; the name stays so the bindings read. */
+const locked = false
 const tab = ref<string>(props.kind ?? 'Event')
+/** The delete dialog is up. */
+const confirmingDelete = ref(false)
 watch(
   () => props.kind,
   (k) => (tab.value = k ?? 'Event'),
@@ -511,12 +504,14 @@ const tabField = [
   'w-full',
   '[&_[role=tablist]]:!flex',
   '[&_[role=tablist]]:!w-full',
-  // 1.5 either side rather than the kit's 1: the fields are 207 wide, and
-  // 207 less 2 splits into neither halves nor thirds. Less 3 is 204, which
-  // does both — so every pill is a whole number of pixels and the sliding
-  // one never rounds up past the track's edge, which is what was clipping
-  // "Free" on the right.
-  '[&_[role=tablist]]:!px-[1.5px]',
+  // 2 either side and 1 between, rather than the kit's 1 and 2: the fields
+  // are 207 wide, and with those numbers two pills are 101 each and three
+  // are 67 each — whole pixels, on whole-pixel offsets, so the sliding pill
+  // (which works in integers) lands exactly on its trigger and ends 2 short
+  // of the track at either end, in either row. The kit's own numbers put
+  // "Free" 1 from the edge and "Private" 3, which read as two paddings.
+  '[&_[role=tablist]]:!px-0.5',
+  '[&_[role=tablist]]:!gap-px',
   '[&_[role=tab]]:!flex-1',
   // A pill's word in the middle of its pill. The trigger is a flex box that
   // leaves its content at the start; with every pill the same width that
@@ -596,21 +591,14 @@ function todayIso() {
       <h2 class="mr-2 min-w-0 flex-1 truncate text-lg-medium text-ink-gray-7">
         {{ creating ? `New ${tab}` : 'Event detail' }}
       </h2>
-      <Button
-        v-if="!creating && !editing"
-        size="sm"
-        variant="ghost"
-        icon="lucide-pencil"
-        aria-label="Edit event"
-        @click="editing = true"
-      />
+      <!-- No pencil: the fields below are already live. -->
       <Button
         v-if="!creating"
         size="sm"
         variant="ghost"
         icon="lucide-trash-2"
         aria-label="Delete event"
-        @click="$emit('delete', event?.id)"
+        @click="confirmingDelete = true"
       />
       <Button
         size="sm"
@@ -1207,23 +1195,44 @@ function todayIso() {
     </div>
 
     <!--
-      The file's footer: one solid button, full width, always in view. Making
-      and changing are the same panel, so it is the same button — "Create" on
-      a new one, "Save changes" on one being edited, and nothing at all on one
-      only being read.
+      The file's footer: one solid button, full width, always in view — on a
+      new one only. An event that exists saves itself as it is changed, so it
+      has nothing to press.
     -->
     <div
-      v-if="creating || editing"
+      v-if="creating"
       class="mt-auto shrink-0 border-t border-outline-gray-1 p-5"
     >
       <Button
         variant="solid"
         class="w-full"
-        :disabled="editing && !dirty"
-        :label="creating ? `Create ${tab.toLowerCase()}` : 'Save changes'"
-        @click="creating ? submit() : save()"
+        :label="`Create ${tab.toLowerCase()}`"
+        @click="submit()"
       />
     </div>
+
+    <!--
+      Deleting asks first. A delete that happens on the click is a delete that
+      happens on the slip, and there is no undo on this calendar.
+    -->
+    <Dialog
+      v-model="confirmingDelete"
+      size="sm"
+      :title="`Delete this ${(event?.type === 'task' ? 'task' : 'event')}?`"
+      :message="`\u201c${title || 'Untitled'}\u201d will be removed from the calendar. This can\u2019t be undone.`"
+      :actions="[
+        { label: 'Cancel', variant: 'subtle', onClick: ({ close }) => close() },
+        {
+          label: 'Delete',
+          variant: 'solid',
+          theme: 'red',
+          onClick: ({ close }) => {
+            close()
+            $emit('delete', event?.id)
+          },
+        },
+      ]"
+    />
   </aside>
 </template>
 
