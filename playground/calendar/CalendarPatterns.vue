@@ -769,7 +769,7 @@ function dayBand(label: string) {
             control is `sm`, which is the 28 the file draws.
           -->
               <div
-                class="mb-4 mt-3.5 flex h-8 shrink-0 items-center gap-8 pl-[14px] pr-5"
+                class="mb-4 mt-3.5 flex h-8 shrink-0 items-center gap-8 pl-5 pr-5"
               >
                 <!--
               The label is the way into the month. frappe-ui's DatePicker
@@ -855,7 +855,7 @@ function dayBand(label: string) {
           -->
               <div
                 v-if="activeView === 'Day'"
-                class="flex h-8 shrink-0 items-center gap-1 border-b border-outline-gray-1 pl-[14px] pr-[13px] text-base text-ink-gray-6"
+                class="flex h-8 shrink-0 items-center gap-1 border-b border-outline-gray-1 pl-5 pr-[13px] text-base text-ink-gray-6"
               >
                 <template
                   v-for="band in [dayBand(currentMonthYear)]"
