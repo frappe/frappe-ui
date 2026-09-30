@@ -121,10 +121,9 @@
         :dir="dir"
       >
         <template #default="slotProps">
+          <!-- The value item carries the stage's name, so a header would print
+               it twice. -->
           <slot name="tooltip" v-bind="slotProps">
-            <div class="mb-2 text-p-sm text-ink-gray-5">
-              {{ slotProps.label }}
-            </div>
             <div class="flex flex-col gap-1.5 text-p-sm">
               <div
                 v-for="item in slotProps.items.filter(
@@ -170,7 +169,7 @@
 
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue'
-import { formatLabel, formatPercent, formatValue } from './format'
+import { formatPercent, formatValue } from './format'
 import { buildFunnelStages, funnelShapes } from './funnelGeometry'
 import { useTooltipDismiss } from './core/useTooltipDismiss'
 import { paletteColors, useChartTokens } from './tokens'
@@ -290,7 +289,9 @@ function readStage(stage: FunnelStage) {
   tooltip.items = [
     {
       name: String(stage.index),
-      label: formatLabel(props.value),
+      // `value` is a row key, often one the caller named when reshaping its
+      // rows, so it says nothing to the reader.
+      label: stage.label,
       color: colors.value[stage.index],
       value: stage.value,
       formattedValue: formatMeasure(stage.value),
