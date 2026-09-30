@@ -12,6 +12,7 @@ import {
 } from './format'
 import { CHART_FONT_FAMILY } from './measureText'
 import { paletteColors, type ChartTokens } from './tokens'
+import type { AxisChartFormatters } from './seriesData'
 import { mergeDeep } from './utils'
 import type {
   AxisChartBaseConfig,
@@ -29,6 +30,8 @@ export type AxisChartOptionContext = {
   hiddenSeries?: string[]
   /** Plot width in pixels, once measured. Unset leaves pixel sizes to echarts. */
   width?: number
+  /** What a data label prints in when its series has no `format` of its own. */
+  format?: AxisChartFormatters
 }
 
 export const AXIS_LABEL_FONT_SIZE = 11
