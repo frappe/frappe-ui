@@ -1062,6 +1062,18 @@ function dayBand(label: string) {
 
 <style scoped>
 /*
+  A pill held out of sight while its copy lands — see `hold` in the drag
+  composables. The transition goes first: the component's own `all 0.1s`
+  would fade the pill out and in around the copy, which is the flicker.
+*/
+:deep(.event[data-landing]) {
+  transition: none !important;
+}
+:deep(.event[data-landing='']) {
+  opacity: 0 !important;
+}
+
+/*
   Agenda V2's line.
 
   The bar down the row's lead edge and the range beside it go; the lead the

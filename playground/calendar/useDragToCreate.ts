@@ -368,6 +368,34 @@ export function useMonthDragToCreate(
 }
 
 /**
+ * The pill a copy is standing in for, held out of sight.
+ *
+ * By an attribute and a rule rather than an inline `opacity: 0`: the
+ * component writes `transition: all 0.1s` on a pill at rest, so an opacity
+ * set inline faded over 100ms instead of vanishing — the real pill sat
+ * half-there under the copy as it set off, and faded back up as the copy
+ * went, which read as a flicker on every landing. The rule (in the page's
+ * style) turns the transition off while the mark is on, and hides the pill.
+ *
+ * Letting go is two steps, since a property that changes in the same breath
+ * as its transition comes back animates under the new transition: first the
+ * mark is set to `done`, which keeps the transition off and lets the opacity
+ * snap; a frame later it comes off, and the transition returns to a pill
+ * that has nothing left to animate.
+ */
+const HELD = 'data-landing'
+function hold(el: HTMLElement) {
+  el.setAttribute(HELD, '')
+}
+function release(root: ParentNode, ...more: HTMLElement[]) {
+  const els = [...root.querySelectorAll<HTMLElement>(`[${HELD}]`), ...more]
+  for (const el of els) el.setAttribute(HELD, 'done')
+  requestAnimationFrame(() => {
+    for (const el of els) el.removeAttribute(HELD)
+  })
+}
+
+/**
  * The three parts of a card being moved in Week or Day view.
  *
  * The same picture the month view gets, built by hand because the time grid
@@ -503,6 +531,10 @@ export function useDragShadow(root: Ref<HTMLElement | null>) {
    * animate: the browser compares against a style that had no transition.
    */
   const LANDING = 180
+  // …and a frame over it before the swap, so the copy has surely arrived
+  // before the pill takes its place. Swapped on the clock's own tick, the
+  // copy could go a frame before it stopped, and the pill appeared a step
+  // from where the eye had left the card.
 
   function onUp() {
     window.removeEventListener('pointermove', onFirstMove)
@@ -520,15 +552,55 @@ export function useDragShadow(root: Ref<HTMLElement | null>) {
       return
     }
     landing.value = true
-    held.style.opacity = '0'
-    requestAnimationFrame(() => {
-      if (carrying.value) carrying.value = { ...carrying.value, rect: to }
-      setTimeout(() => {
-        carrying.value = null
-        landing.value = false
-        held.style.opacity = ''
-      }, LANDING)
-    })
+    const name = held.textContent?.trim() ?? ''
+    hold(held)
+
+    // The pill that lands is looked for again on every frame rather than
+    // taken to be the one let go of: the week keys a pill on its day, so a
+    // move across days takes the old pill out and puts a new one in, and
+    // the one held out of sight was the one that had just gone.
+    let started = 0
+    const step = () => {
+      const landed = landedIn(name, to)
+      if (landed) hold(landed)
+      if (!started) {
+        // The clock starts here rather than at the drop, and the card is
+        // sent to where the pill actually is rather than where the slot
+        // said: the component settles overlaps on the drop, and a pill can
+        // land a column's width from where it was snapped.
+        started = performance.now()
+        const dest = landed ? rectOf(landed) : to
+        if (carrying.value) carrying.value = { ...carrying.value, rect: dest }
+        requestAnimationFrame(step)
+        return
+      }
+      if (performance.now() - started < LANDING + 16) {
+        requestAnimationFrame(step)
+        return
+      }
+      carrying.value = null
+      landing.value = false
+      release(root.value ?? document, held)
+    }
+    requestAnimationFrame(step)
+  }
+
+  /** The pill of that name nearest where the drop was going. */
+  function landedIn(name: string, near: DragBand): HTMLElement | null {
+    const box = root.value
+    if (!box) return null
+    let best: HTMLElement | null = null
+    let closest = Infinity
+    for (const el of box.querySelectorAll<HTMLElement>('.event')) {
+      if ((el.textContent?.trim() ?? '') !== name) continue
+      const r = el.getBoundingClientRect()
+      const off = Math.abs(r.top - near.top) + Math.abs(r.left - near.left)
+      if (off < closest) {
+        closest = off
+        best = el
+      }
+    }
+    return best
   }
 
   function attach(el: HTMLElement | null) {
@@ -706,7 +778,7 @@ export function useMonthDragSkeleton(root: Ref<HTMLElement | null>) {
     let started = 0
     const step = () => {
       const landed = landedAt(cx, cy, hint)
-      if (landed) landed.style.opacity = '0'
+      if (landed) hold(landed)
       if (!started) {
         // The clock starts here rather than at the drop: a frame that comes
         // late would otherwise spend the whole landing before the card has
@@ -718,16 +790,13 @@ export function useMonthDragSkeleton(root: Ref<HTMLElement | null>) {
         requestAnimationFrame(step)
         return
       }
-      if (performance.now() - started < LANDING) {
+      if (performance.now() - started < LANDING + 16) {
         requestAnimationFrame(step)
         return
       }
-      for (const el of document.querySelectorAll<HTMLElement>(
-        '[data-week-row] .event',
-      ))
-        if (el.style.opacity === '0') el.style.opacity = ''
       carrying.value = null
       landing.value = false
+      release(root.value ?? document)
     }
     requestAnimationFrame(step)
   }
