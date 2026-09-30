@@ -17,10 +17,13 @@ const props = defineProps(nodeViewProps)
 const editor = toRaw(props.editor)
 const editable = useNodeViewEditable(editor)
 
+// made once, not per render: a glyph remade under the pointer swallows the click
 const icon =
   (name: string, cls?: string): Component =>
   () =>
     h(RteIcon, { name, class: cls })
+const fileIcon = icon('file')
+const closeIcon = icon('small-close', 'rte-attachment-close')
 
 const fileName = computed(() => props.node.attrs.fileName || 'Attachment')
 const href = computed(() => props.node.attrs.src || undefined)
@@ -57,10 +60,8 @@ function onClick(e: MouseEvent) {
       size="sm"
       class="max-w-full"
       :label="fileName"
-      :icon-left="icon('file')"
-      :icon-right="
-        editable ? icon('small-close', 'rte-attachment-close') : undefined
-      "
+      :icon-left="fileIcon"
+      :icon-right="editable ? closeIcon : undefined"
       :href="href"
       :download="fileName"
       contenteditable="false"

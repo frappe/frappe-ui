@@ -13,16 +13,28 @@ import RteIcon from './RteIcon.vue'
 
 const props = defineProps(nodeViewProps)
 
+// Each glyph is made once. A component built inside the template would be a
+// new one on every render, and while the clip plays the bar renders every
+// frame: the glyph would be torn down and remade under the pointer, and a
+// press that begins on one glyph and ends on its replacement is no click at
+// all — the pause button would not answer.
 const icon =
   (name: string): Component =>
   () =>
     h(RteIcon, { name })
+const playIcon = icon('play')
+const pauseIcon = icon('pause')
+const volumeIcon = icon('volume-min')
+const mutedIcon = icon('volume-off')
+const moreIcon = icon('dot-horizontal')
 // a class string written out in full: Tailwind's scanner only generates
 // the glyph for a name it can read in the source
 const lucide =
   (classes: string): Component =>
   () =>
     h('span', { class: classes, 'aria-hidden': 'true' })
+const downloadIcon = lucide('lucide-download size-4')
+const removeIcon = lucide('lucide-trash-2 size-4')
 
 const audio = ref<HTMLAudioElement | null>(null)
 const playing = ref(false)
@@ -137,7 +149,7 @@ const moreOptions = computed<DropdownOptions>(() => [
     options: [
       {
         label: 'Download',
-        icon: lucide('lucide-download size-4'),
+        icon: downloadIcon,
         onClick: () => {
           const a = document.createElement('a')
           a.href = props.node.attrs.src
@@ -147,7 +159,7 @@ const moreOptions = computed<DropdownOptions>(() => [
       },
       {
         label: 'Remove',
-        icon: lucide('lucide-trash-2 size-4'),
+        icon: removeIcon,
         onClick: () => props.deleteNode(),
       },
     ],
@@ -179,7 +191,7 @@ const moreOptions = computed<DropdownOptions>(() => [
       <Button
         variant="ghost"
         size="sm"
-        :icon="icon(playing ? 'pause' : 'play')"
+        :icon="playing ? pauseIcon : playIcon"
         :label="playing ? 'Pause' : 'Play'"
         @click="toggle"
       />
@@ -203,7 +215,7 @@ const moreOptions = computed<DropdownOptions>(() => [
       <Button
         variant="ghost"
         size="sm"
-        :icon="icon(muted ? 'volume-off' : 'volume-min')"
+        :icon="muted ? mutedIcon : volumeIcon"
         :label="muted ? 'Unmute' : 'Mute'"
         :aria-pressed="muted"
         @click="toggleMute"
@@ -215,7 +227,7 @@ const moreOptions = computed<DropdownOptions>(() => [
           <Button
             variant="ghost"
             size="sm"
-            :icon="icon('dot-horizontal')"
+            :icon="moreIcon"
             label="More"
             :class="open && 'bg-surface-gray-3'"
           />
