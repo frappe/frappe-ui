@@ -7,6 +7,7 @@
 import { Mark, Node, mergeAttributes } from '@tiptap/core'
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
 import { FontFamily, FontSize, LineHeight } from '@tiptap/extension-text-style'
+import AudioNodeView from './AudioNodeView.vue'
 import DetailsNodeView from './DetailsNodeView.vue'
 
 declare module '@tiptap/core' {
@@ -77,7 +78,8 @@ export const Superscript = Mark.create({
   },
 })
 
-// ---- audio: a block with the browser's player, as the file's 0:15 / 32:48 bar
+// ---- audio: a block with the file's player — play, a slider, 0:15 / 32:48,
+// volume and ⋯ — over a hidden <audio>; it serialises as <audio src title>
 export const Audio = Node.create({
   name: 'audio',
   group: 'block',
@@ -98,14 +100,19 @@ export const Audio = Node.create({
       }),
     },
   ],
-  renderHTML: ({ HTMLAttributes }) => [
-    'audio',
-    mergeAttributes(HTMLAttributes, {
-      controls: 'controls',
-      preload: 'metadata',
-      class: 'rte-audio',
-    }),
-  ],
+  renderHTML: ({ HTMLAttributes }) => ['audio', HTMLAttributes],
+  addNodeView() {
+    return VueNodeViewRenderer(AudioNodeView, {
+      // tiptap keeps a press to itself only when the target is the <button>
+      // element; a press on the glyph inside it would go to ProseMirror,
+      // which selects the node and takes focus — and a menu that just opened
+      // closes again. Anything inside a control is the player's alone.
+      stopEvent: ({ event }) =>
+        !!(event.target as HTMLElement).closest?.(
+          'button, [role="slider"], [role="menu"]',
+        ),
+    })
+  },
   addCommands() {
     return {
       setAudio:

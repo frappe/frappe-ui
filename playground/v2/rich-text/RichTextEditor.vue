@@ -306,17 +306,39 @@ function resolve() {
   color: var(--ink-gray-8);
 }
 
-/* an audio bar: the browser's player on the file's 40px bar */
-.rte-audio {
-  display: block;
-  width: 100%;
-  height: 40px;
+/* the audio player (31403:45371): a 42px bar, and its slider drawn to the
+   file's 2px track, 14px knob on a soft shadow, the range in gray-900 */
+.rte-doc .rte-player {
   margin: 8px 0;
-  border-radius: 8px;
 }
-.rte-audio.ProseMirror-selectednode {
+.rte-player.ProseMirror-selectednode {
   outline: 2px solid var(--outline-gray-2);
   outline-offset: 2px;
+}
+.rte-player-slider {
+  height: 14px;
+}
+.rte-player-slider > :first-child {
+  height: 2px;
+  border-radius: 16px;
+  background-color: var(--surface-gray-3);
+}
+.rte-player-slider > :first-child > * {
+  background-color: var(--ink-gray-8);
+}
+.rte-player-slider [role='slider'] {
+  width: 14px;
+  height: 14px;
+  box-shadow:
+    0 2px 5px rgba(0, 0, 0, 0.14),
+    0 0 1.5px rgba(0, 0, 0, 0.16),
+    inset 0 0.25px 1.5px rgba(255, 255, 255, 0.16);
+}
+.rte-player-slider [role='slider']:hover {
+  box-shadow:
+    0 0 0 6px rgba(82, 82, 82, 0.12),
+    0 2px 5px rgba(0, 0, 0, 0.14),
+    0 0 1.5px rgba(0, 0, 0, 0.16);
 }
 
 /* a callout: gray-50, 12px in, the emoji leading its first line */
