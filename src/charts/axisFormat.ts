@@ -1,5 +1,10 @@
 import type { AxisChartFormatters } from './seriesData'
-import type { AxisChartBaseConfig, EchartOptionsOverride } from './types'
+import type {
+  AxisChartBaseConfig,
+  AxisChartSeriesConfig,
+  ChartValueFormatter,
+  EchartOptionsOverride,
+} from './types'
 import { mergeDeep } from './utils'
 
 /**
@@ -47,4 +52,19 @@ function withFormatter(
     { axisLabel: { formatter: (value: any) => format(value) } },
     echartOptions,
   )
+}
+
+/**
+ * How a series prints its values. Without its own format, a series reads in the
+ * units of the axis it is actually drawn against, so `y2` series never fall back
+ * to the primary formatter — except on a horizontal chart, which has no second
+ * axis to put them on.
+ */
+export function seriesFormatter(
+  series: AxisChartSeriesConfig,
+  format: AxisChartFormatters,
+  horizontal: boolean,
+): ChartValueFormatter | undefined {
+  const secondary = series.axis === 'y2' && !horizontal
+  return series.format ?? (secondary ? format.y2 : format.y)
 }

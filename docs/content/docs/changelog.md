@@ -3567,9 +3567,16 @@ captions.
 
 `SeriesStyle.format` prints one series' values in the tooltip and in its data
 labels. Use it for a series whose unit differs from the others on its axis,
-such as a margin in percent next to revenue in currency. Without it, the
-tooltip uses the axis' `format` and a label prints a compact number, as before.
-The axis ticks keep the axis' `format`.
+such as a margin in percent next to revenue in currency. Without it, both use
+the axis' `format`. The axis ticks keep the axis' `format`.
+
+#### Data labels print in their axis' `format` (fix)
+
+A data label ignored its axis' `format` and printed a compact number, so a line
+on a percent `y2Axis` labelled its points `0.3` while its ticks and tooltip read
+`30%`. A label now prints in the `format` of the axis its series is drawn
+against, as the tooltip does. A chart with no axis `format` still labels
+compactly.
 
 #### Line and area data labels show without data points
 
