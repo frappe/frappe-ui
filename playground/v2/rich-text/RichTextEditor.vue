@@ -22,6 +22,7 @@ import {
 import RichTextToolbar from './RichTextToolbar.vue'
 import RteBubbleMenu from './RteBubbleMenu.vue'
 import RteTableControls from './RteTableControls.vue'
+import RteBlockHandle from './RteBlockHandle.vue'
 import RteIcon from './RteIcon.vue'
 import { playgroundExtensions } from './extensions'
 import { article, people, tags } from './content'
@@ -170,6 +171,8 @@ function resolve() {
         <RteBubbleMenu />
         <!-- the table's grips, strips and menus (32157:9144) -->
         <RteTableControls />
+        <!-- every block's grip in the margin, as Notion draws it -->
+        <RteBlockHandle />
         <div class="px-4 py-8 sm:px-8" @click="onEditorClick">
           <EditorContent
             class="rte-doc mx-auto w-full max-w-[700px] [--prose-font-size:15px]"
@@ -637,6 +640,17 @@ function resolve() {
 .rte-doc.prose-v3 table tr[data-border='left'] > * {
   border-left: 1px solid var(--outline-gray-1);
 }
+/* a block picked up by its grip, or selected by a click on it: a gray-100
+   ground 4px past its edges; images and video keep the library's outline */
+.rte-doc .ProseMirror-selectednode:not(img):not(video) {
+  background-color: var(--surface-gray-2);
+  border-radius: 4px;
+  box-shadow: 0 0 0 4px var(--surface-gray-2);
+}
+.rte-doc .rte-dragging .ProseMirror-selectednode:not(img):not(video) {
+  opacity: 0.4;
+}
+
 /* the selection: a 1px gray-500 line around the cell or the run of cells;
    at the card's corners it turns on the card's inner 11px radius, or the
    card would clip its square corner (the run's box is rounded from
