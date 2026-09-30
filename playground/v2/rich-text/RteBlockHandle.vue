@@ -6,10 +6,12 @@
 // the columns — and inside a list the item under the pointer has its own,
 // down to the innermost list.
 //
-// The grip lives outside the editor, so ProseMirror's own dragstart never
-// runs for it: the press selects the block, the drag hands ProseMirror the
-// block as what is being moved, and ProseMirror's drop puts it where the
-// drop cursor showed. A click selects the block.
+// The drag is drawn here, as Notion draws it: the browser's snapshot is
+// replaced by a translucent copy of the block that follows the pointer at
+// the offset it was picked up, a line marks the edge of the block the
+// pointer is over — above it in its top half, below it in its bottom — and
+// the drop puts the block at that edge, wherever over the document or its
+// margins the pointer lets go. A click selects the block.
 import { ref, shallowRef, watch } from 'vue'
 import { NodeSelection } from '@tiptap/pm/state'
 import { Tooltip } from '../../../src'
@@ -45,10 +47,17 @@ const spans = (el: Element, y: number) => {
 }
 
 /** the block under the pointer: a top-level block, or a list's item */
-function blockAt(view: View, x: number, y: number): HTMLElement | null {
+function blockAt(
+  view: View,
+  x: number,
+  y: number,
+  loose = false,
+): HTMLElement | null {
   const dom = view.dom as HTMLElement
   const d = dom.getBoundingClientRect()
-  if (x < d.left - GUTTER || x > d.right || y < d.top || y > d.bottom)
+  // a drop answers from anywhere across the page's width
+  const span = loose ? window.innerWidth : GUTTER
+  if (x < d.left - span || x > d.right + span || y < d.top || y > d.bottom)
     return null
   // the block the pointer is on, or the nearest one when it is in the gap
   // between blocks — a rule is a pixel tall
@@ -154,6 +163,18 @@ function selectBlock(): NodeSelection | null {
   return sel
 }
 
+// ---- the drag: the block picked up, the copy that follows the pointer,
+// the line at the edge it would land on
+let source: { el: HTMLElement; pos: number } | null = null
+let grab = { dx: 0, dy: 0 }
+let ghost: HTMLElement | null = null
+let line: HTMLElement | null = null
+let landing: { pos: number; before: boolean } | null = null
+// the browser's own snapshot is replaced by nothing: the copy is drawn here
+const blank = new Image()
+blank.src =
+  'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
+
 function onDragStart(e: DragEvent) {
   const ed = editor.value
   const el = target.value
@@ -162,30 +183,137 @@ function onDragStart(e: DragEvent) {
     e.preventDefault()
     return
   }
-  // what ProseMirror's drop reads: the block, and that it moves
+  const r = el.getBoundingClientRect()
+  source = { el, pos: sel.from }
+  grab = { dx: e.clientX - r.left, dy: e.clientY - r.top }
+  // what ProseMirror would read, should a drop ever reach it: the block,
+  // and that it moves
   ed.view.dragging = { slice: sel.content(), move: true }
-  e.dataTransfer.effectAllowed = 'copyMove'
+  e.dataTransfer.effectAllowed = 'move'
   e.dataTransfer.clearData()
   e.dataTransfer.setData('text/html', el.outerHTML)
   e.dataTransfer.setData('text/plain', el.textContent ?? '')
-  e.dataTransfer.setDragImage(el, 0, 0)
+  e.dataTransfer.setDragImage(blank, 0, 0)
   dragging = true
   // the grip goes out of sight, by hand: see `dragging`
   ;(e.currentTarget as HTMLElement | null)?.classList.add('is-dragging')
   ed.view.dom.classList.add('rte-dragging')
+  document.body.classList.add('rte-block-drag')
+  // the copy: the block as drawn, at the document's type, half seen
+  ghost = document.createElement('div')
+  ghost.className = 'rte-bh-ghost'
+  ghost.style.width = `${r.width}px`
+  const doc = document.createElement('div')
+  doc.className = ed.view.dom.className
+    .replace(/\bProseMirror-\S+/g, '')
+    .replace('rte-dragging', '')
+  const copy = el.cloneNode(true) as HTMLElement
+  copy.classList.remove('ProseMirror-selectednode')
+  doc.appendChild(copy)
+  ghost.appendChild(doc)
+  document.body.appendChild(ghost)
+  moveGhost(e.clientX, e.clientY)
+  line = document.createElement('div')
+  line.className = 'rte-bh-line'
+  line.hidden = true
+  document.body.appendChild(line)
+  document.addEventListener('dragover', onDragOver, true)
+  document.addEventListener('dragenter', onDragOver, true)
+  document.addEventListener('drop', onDrop, true)
 }
-function onDragEnd(e: DragEvent) {
+function moveGhost(x: number, y: number) {
+  if (ghost)
+    ghost.style.transform = `translate(${x - grab.dx}px, ${y - grab.dy}px)`
+}
+/** the edge the pointer is over: a block's top in its upper half, else its bottom */
+function landingAt(x: number, y: number) {
+  const ed = editor.value
+  if (!ed || ed.isDestroyed || !source) return null
+  const el = blockAt(ed.view, x, y, true)
+  if (!el || el === source.el || source.el.contains(el)) return null
+  const pos = posOf(ed.view, el)
+  if (pos === null) return null
+  const r = el.getBoundingClientRect()
+  return { el, pos, before: y < r.top + r.height / 2, box: r }
+}
+function onDragOver(e: DragEvent) {
+  if (!dragging) return
+  moveGhost(e.clientX, e.clientY)
+  const at = landingAt(e.clientX, e.clientY)
+  if (!at) {
+    landing = null
+    if (line) line.hidden = true
+    return
+  }
+  // the drop is ours, wherever the pointer is
+  e.preventDefault()
+  e.stopPropagation()
+  if (e.dataTransfer) e.dataTransfer.dropEffect = 'move'
+  landing = { pos: at.pos, before: at.before }
+  if (line) {
+    line.hidden = false
+    line.style.left = `${at.box.left}px`
+    line.style.width = `${at.box.width}px`
+    line.style.top = `${at.before ? at.box.top - 3 : at.box.bottom}px`
+  }
+}
+function onDrop(e: DragEvent) {
+  if (!dragging) return
+  e.preventDefault()
+  e.stopPropagation()
+  const ed = editor.value
+  const at = landingAt(e.clientX, e.clientY) ?? landing
+  const from = source
+  finishDrag()
+  if (!ed || ed.isDestroyed || !at || !from) return
+  const { state } = ed.view
+  const node = state.doc.nodeAt(from.pos)
+  const beside = state.doc.nodeAt(at.pos)
+  if (!node || !beside) return
+  const edge = at.before ? at.pos : at.pos + beside.nodeSize
+  // the block is already there
+  if (edge === from.pos || edge === from.pos + node.nodeSize) return
+  const tr = state.tr.delete(from.pos, from.pos + node.nodeSize)
+  const to = tr.mapping.map(edge, at.before ? -1 : 1)
+  // insert fits the block to its new place: an item dropped among
+  // paragraphs is wrapped in a list, a paragraph among items in an item
+  tr.insert(to, node)
+  // the block, wherever the fit put it, stays selected
+  let moved: number | null = null
+  tr.doc.nodesBetween(
+    Math.max(0, to - 2),
+    Math.min(tr.doc.content.size, to + node.nodeSize + 2),
+    (n, pos) => {
+      if (moved === null && n.type === node.type && n.eq(node)) moved = pos
+      return moved === null
+    },
+  )
+  if (moved !== null) tr.setSelection(NodeSelection.create(tr.doc, moved))
+  ed.view.dispatch(tr.scrollIntoView())
+  ed.view.focus()
+}
+function finishDrag() {
   const ed = editor.value
   dragging = false
+  source = null
+  landing = null
+  ghost?.remove()
+  ghost = null
+  line?.remove()
+  line = null
+  document.removeEventListener('dragover', onDragOver, true)
+  document.removeEventListener('dragenter', onDragOver, true)
+  document.removeEventListener('drop', onDrop, true)
+  document.body.classList.remove('rte-block-drag')
+  if (ed && !ed.isDestroyed) {
+    ed.view.dom.classList.remove('rte-dragging')
+    ed.view.dragging = null
+  }
+}
+function onDragEnd(e: DragEvent) {
   ;(e.currentTarget as HTMLElement | null)?.classList.remove('is-dragging')
+  finishDrag()
   hide()
-  if (!ed || ed.isDestroyed) return
-  ed.view.dom.classList.remove('rte-dragging')
-  // as ProseMirror does after its own drags: the drop has read it by now
-  const held = ed.view.dragging
-  window.setTimeout(() => {
-    if (!ed.isDestroyed && ed.view.dragging === held) ed.view.dragging = null
-  }, 50)
 }
 function onClick() {
   const ed = editor.value
@@ -253,5 +381,28 @@ const px = (n: number) => `${n}px`
    stops taking pointer events */
 .rte-bh-handle.is-dragging {
   opacity: 0;
+}
+/* the copy that follows the pointer: the block at half strength, and the
+   line at the edge it would land on, 3px of gray-900 across the block */
+.rte-bh-ghost {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 70;
+  pointer-events: none;
+  opacity: 0.5;
+  will-change: transform;
+}
+.rte-bh-line {
+  position: fixed;
+  z-index: 65;
+  height: 3px;
+  border-radius: 9999px;
+  pointer-events: none;
+  background-color: var(--surface-gray-10, #383838);
+}
+/* the library's drop cursor stands down while the grip's line is up */
+body.rte-block-drag .editor-drop-cursor {
+  display: none !important;
 }
 </style>
