@@ -28,6 +28,7 @@ import {
   AlignLeft,
   AlignCenter,
   AlignRight,
+  type EditorMenuOptions,
   type TiptapEditor,
 } from '../../../src/molecules/editor'
 import RichTextToolbar from './RichTextToolbar.vue'
@@ -67,6 +68,18 @@ const bubble = [
   AlignCenter,
   AlignRight,
 ]
+// The bubble menu formats text, so it comes up for a run of text and not
+// for a selected block — a dropped attachment row, the audio bar, an image
+// — where bold and italic have nothing to act on. The library's default
+// shows it for any selection that is not empty, a block included.
+const bubbleOptions: EditorMenuOptions = {
+  shouldShow: ({ editor, state, from, to }) => {
+    const { selection } = state
+    if (selection.empty || 'node' in selection || !editor.isEditable)
+      return false
+    return state.doc.textBetween(from, to).length > 0
+  },
+}
 
 // files dropped, pasted or picked stay in the page as object URLs
 const uploadFunction = async (file: File) => ({
@@ -177,7 +190,7 @@ function resolve() {
     >
       <template #default>
         <RichTextToolbar v-if="editable" @comment="comment" />
-        <EditorBubbleMenu :items="bubble" />
+        <EditorBubbleMenu :items="bubble" :options="bubbleOptions" />
         <EditorTableMenu />
         <div class="px-4 py-8 sm:px-8" @click="onEditorClick">
           <EditorContent
