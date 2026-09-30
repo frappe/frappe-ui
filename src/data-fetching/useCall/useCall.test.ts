@@ -141,6 +141,35 @@ describe('useCall', () => {
     expect(call.data).toEqual({ value: 'test' })
   })
 
+  it('sends object and array GET params as JSON the server can parse', async () => {
+    server.use(
+      http.get(url('/api/v2/method/get_count'), ({ request }) => {
+        const query = new URL(request.url).searchParams
+        return HttpResponse.json({
+          data: {
+            filters: JSON.parse(query.get('filters')!),
+            fields: JSON.parse(query.get('fields')!),
+          },
+        })
+      }),
+    )
+
+    const call = useCall({
+      url: url('/api/v2/method/get_count'),
+      params: { filters: { status: 'Open' }, fields: ['name', 'title'] },
+      immediate: false,
+    })
+
+    call.fetch()
+    await call.promise
+
+    expect(call.error).toBe(null)
+    expect(call.data).toEqual({
+      filters: { status: 'Open' },
+      fields: ['name', 'title'],
+    })
+  })
+
   it('refetches automatically when a reactive param changes (refetch: true)', async () => {
     const dynamicValue = ref('first')
     const call = useCall<{ value: string }, { value: string }>({
