@@ -57,6 +57,31 @@ function inkHex(name: string) {
 export const colourValue = (name: string) =>
   DERIVED.has(name) ? inkHex(name) : name
 
+/**
+ * The people on this team, as the panel's People and Assignee fields list
+ * them: a face is looked up by the name, and what an event stores is the
+ * address — `participant` is the addresses joined by ", ", which is what the
+ * panel writes when it saves.
+ */
+export const people = [
+  { label: 'Faris Ansari', value: 'faris@timeless.co' },
+  { label: 'Rubini Raman', value: 'rubini@timeless.co' },
+  { label: 'Gowtham Sivakumar', value: 'gowtham@timeless.co' },
+  { label: 'Shariq Ansari', value: 'shariq@timeless.co' },
+  { label: 'Sally Potter', value: 'sally@timeless.co' },
+  { label: 'Emily Taylor', value: 'emily@timeless.co' },
+]
+
+/** The name an address belongs to, or the address itself if it is nobody's. */
+export const nameOf = (address: string) =>
+  people.find((p) => p.value === address)?.label ?? address
+
+/** The addresses of the named, joined the way the panel joins them. */
+const withPeople = (...names: string[]) =>
+  names
+    .map((n) => people.find((p) => p.label === n)?.value ?? n)
+    .join(', ')
+
 export const sources: CalendarSource[] = [
   { id: 'leads', label: 'My leads', color: 'amber', visible: true },
   { id: 'deals', label: 'My Deals flow', color: 'violet', visible: true },
@@ -100,26 +125,30 @@ type Seed = {
   day: number
   from: [number, number]
   to: [number, number]
+  /** Who is on it — addresses, the way the panel stores them. */
+  with?: string
+  /** A line about it, read after the title in the agenda. */
+  about?: string
 }
 
 // The week the design draws, including the two that overlap on Wednesday.
 const seeds: Seed[] = [
-  { id: '1', title: 'Product design', source: 'leads', day: 0, from: [10, 0], to: [12, 0] },
-  { id: '2', title: 'Frappe discussion', source: 'deals', day: 2, from: [10, 30], to: [11, 0] },
-  { id: '3', title: 'Interview', source: 'deals', day: 2, from: [11, 0], to: [12, 0] },
-  { id: '4', title: 'Weekly review', source: 'qualified', day: 4, from: [10, 30], to: [11, 30] },
+  { id: '1', title: 'Product design', source: 'leads', day: 0, from: [10, 0], to: [12, 0], with: withPeople('Sally Potter', 'Emily Taylor', 'Shariq Ansari'), about: 'Pricing page, second pass' },
+  { id: '2', title: 'Frappe discussion', source: 'deals', day: 2, from: [10, 30], to: [11, 0], with: withPeople('Faris Ansari', 'Gowtham Sivakumar') },
+  { id: '3', title: 'Interview', source: 'deals', day: 2, from: [11, 0], to: [12, 0], about: 'Frontend, round two' },
+  { id: '4', title: 'Weekly review', source: 'qualified', day: 4, from: [10, 30], to: [11, 30], with: withPeople('Faris Ansari', 'Rubini Raman', 'Gowtham Sivakumar', 'Shariq Ansari', 'Sally Potter', 'Emily Taylor') },
   { id: '5', title: 'Interview', source: 'leads', day: 3, from: [12, 0], to: [13, 0] },
-  { id: '6', title: 'DS Meeting', source: 'deals', day: 2, from: [13, 0], to: [14, 0] },
+  { id: '6', title: 'DS Meeting', source: 'deals', day: 2, from: [13, 0], to: [14, 0], with: withPeople('Rubini Raman', 'Gowtham Sivakumar', 'Emily Taylor', 'Shariq Ansari'), about: 'Tokens and the type scale' },
   { id: '7', title: 'Product update', source: 'qualified', day: 4, from: [13, 0], to: [14, 0] },
-  { id: '8', title: 'Interview', source: 'leads', day: 1, from: [14, 0], to: [15, 0] },
+  { id: '8', title: 'Interview', source: 'leads', day: 1, from: [14, 0], to: [15, 0], with: withPeople('Faris Ansari'), about: 'Backend, round one' },
   { id: '9', title: 'Birthday', source: 'leads', day: 1, from: [15, 0], to: [16, 0] },
   { id: '10', title: 'Weekly standup', source: 'qualified', day: 4, from: [15, 30], to: [17, 0] },
   { id: '11', title: 'Take a walk', source: 'deals', day: 0, from: [18, 0], to: [19, 0] },
   { id: '12', title: 'CRM discussion', source: 'leads', day: 3, from: [18, 0], to: [19, 0] },
   // Wednesday carries five, which is two more than a month cell can hold —
   // so the Month view has a day to draw "3 more" on.
-  { id: '13', title: 'Design review', source: 'qualified', day: 2, from: [15, 0], to: [16, 0] },
-  { id: '14', title: 'Train to Chennai', source: 'leads', day: 2, from: [17, 30], to: [18, 30] },
+  { id: '13', title: 'Design review', source: 'qualified', day: 2, from: [15, 0], to: [16, 0], with: withPeople('Sally Potter', 'Emily Taylor') },
+  { id: '14', title: 'Train to Chennai', source: 'leads', day: 2, from: [17, 30], to: [18, 30], about: 'Vande Bharat, coach C4' },
 ]
 
 /**
@@ -148,13 +177,15 @@ type Standing = {
   from: [number, number]
   to: [number, number]
   type?: string
+  with?: string
+  about?: string
 }
 
 const standing: Standing[] = [
   { title: 'Standup', source: 'qualified', weekday: 1, from: [9, 30], to: [9, 45] },
-  { title: 'Pipeline review', source: 'deals', weekday: 1, from: [15, 0], to: [16, 0] },
+  { title: 'Pipeline review', source: 'deals', weekday: 1, from: [15, 0], to: [16, 0], with: withPeople('Faris Ansari', 'Rubini Raman', 'Gowtham Sivakumar') },
   { title: '1:1 — Priya', source: 'leads', weekday: 2, from: [11, 0], to: [11, 30] },
-  { title: 'Design critique', source: 'deals', weekday: 3, from: [10, 0], to: [11, 0] },
+  { title: 'Design critique', source: 'deals', weekday: 3, from: [10, 0], to: [11, 0], with: withPeople('Sally Potter', 'Emily Taylor', 'Shariq Ansari'), about: 'Bring one screen' },
   { title: 'Standup', source: 'qualified', weekday: 4, from: [9, 30], to: [9, 45] },
   { title: 'Week in review', source: 'qualified', weekday: 5, from: [16, 0], to: [17, 0] },
 ]
@@ -171,6 +202,8 @@ type Dated = {
   days?: number
   allDay?: boolean
   type?: string
+  with?: string
+  about?: string
 }
 
 const dated: Dated[] = [
@@ -181,18 +214,18 @@ const dated: Dated[] = [
   { title: 'Priya on leave', source: 'away', month: 0, date: 14, days: 3, allDay: true },
   { title: 'Quarterly forecast', source: 'deals', month: 0, date: 17, from: [13, 0], to: [14, 30] },
   { title: 'Renewal — Contoso', source: 'qualified', month: 0, date: 21, from: [10, 0], to: [11, 0] },
-  { title: 'Send the forecast', source: 'work', month: 0, date: 22, from: [9, 0], to: [9, 30], type: 'task' },
+  { title: 'Send the forecast', source: 'work', month: 0, date: 22, from: [9, 0], to: [9, 30], type: 'task', with: withPeople('Faris Ansari'), about: 'To Priya, before standup' },
   { title: 'Team dinner', source: 'personal', month: 0, date: 25, from: [19, 0], to: [21, 0] },
 
   // ── The month after ───────────────────────────────────────────────────
-  { title: 'Lunch with Anil', source: 'personal', month: 1, date: 1, from: [12, 30], to: [13, 30] },
+  { title: 'Lunch with Anil', source: 'personal', month: 1, date: 1, from: [12, 30], to: [13, 30], about: 'Toit, Indiranagar' },
   { title: 'Frappe Conference, Mumbai', source: 'deals', month: 1, date: 5, days: 3, allDay: true },
-  { title: 'Roadmap — Q4', source: 'deals', month: 1, date: 12, from: [14, 0], to: [16, 0] },
+  { title: 'Roadmap — Q4', source: 'deals', month: 1, date: 12, from: [14, 0], to: [16, 0], with: withPeople('Faris Ansari', 'Rubini Raman', 'Gowtham Sivakumar', 'Shariq Ansari', 'Sally Potter') },
   { title: 'Interview — designer', source: 'leads', month: 1, date: 14, from: [15, 0], to: [16, 0] },
   { title: 'Raise the invoices', source: 'work', month: 1, date: 15, from: [10, 0], to: [10, 30], type: 'task' },
   { title: "Shreya's birthday", source: 'personal', month: 1, date: 19, allDay: true },
   { title: 'Customer visits — Bengaluru', source: 'leads', month: 1, date: 20, days: 4, allDay: true },
-  { title: 'Board pack due', source: 'work', month: 1, date: 26, from: [17, 0], to: [18, 0], type: 'task' },
+  { title: 'Board pack due', source: 'work', month: 1, date: 26, from: [17, 0], to: [18, 0], type: 'task', with: withPeople('Rubini Raman') },
   { title: 'Month-end close', source: 'work', month: 1, date: 30, from: [16, 0], to: [17, 30], type: 'task' },
 
   // ── And the one after that ────────────────────────────────────────────
@@ -252,6 +285,8 @@ function standingEvents(): CalendarEvent[] {
         toDate: day(to),
         fromTime: clock(from),
         toTime: clock(to),
+        participant: s.with,
+        description: s.about,
       } as CalendarEvent & { source: string })
     }
   }
@@ -280,6 +315,8 @@ function datedEvents(): CalendarEvent[] {
       fromTime: e.allDay ? undefined : clock(from),
       toTime: e.allDay ? undefined : clock(to),
       isFullDay: !!e.allDay,
+      participant: e.with,
+      description: e.about,
     } as CalendarEvent & { source: string }
   })
 }
@@ -298,6 +335,8 @@ export function eventsFor(visible: CalendarSource[]): CalendarEvent[] {
       toDate: day(to),
       fromTime: clock(from),
       toTime: clock(to),
+      participant: s.with,
+      description: s.about,
     } as CalendarEvent & { source: string }
   })
   return [...week, ...standingEvents(), ...datedEvents()]

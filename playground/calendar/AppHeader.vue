@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { Avatar, Breadcrumbs, Button, Dropdown } from '../../src'
-import { faceFor } from '../components/patterns/designAssets'
+import { Breadcrumbs, Button, Dropdown } from '../../src'
+import AvatarStack from './AvatarStack.vue'
 
 /**
  * The app header, to the file exactly (node 35240:71384, `header new`).
@@ -36,11 +35,7 @@ const newOptions = [
   },
 ]
 
-// Faces at 24px overlapping by 4, the first on top — the file's
-// `avatar-group` (`itemSpacing: -4`, `itemReverseZIndex`), which frappe-ui
-// doesn't ship. Built from Avatar until it does: `-space-x-1` is the 4px, and
-// the z-index runs down the row so each face cuts a clean edge out of the one
-// behind.
+/** Who is on this calendar with you — the faces in the header's group. */
 const people = [
   'Sally Potter',
   'Emily Taylor',
@@ -48,20 +43,6 @@ const people = [
   'Faris Ansari',
   'Gowtham Sivakumar',
 ]
-
-/**
- * The group is four circles at most. Past that the fourth stops being a face
- * and says how many are not shown — so a team of twenty reads as three people
- * and a number, not as a row of heads running into the Share button.
- *
- * Four exactly still fit, so the count only appears when it would stand for
- * more than the one face it replaces.
- */
-const MAX_FACES = 4
-const faces = computed(() =>
-  people.length > MAX_FACES ? people.slice(0, MAX_FACES - 1) : people,
-)
-const more = computed(() => people.length - faces.value.length)
 </script>
 
 <template>
@@ -73,30 +54,7 @@ const more = computed(() => people.length - faces.value.length)
 
     <!-- The right slot: the group, then Share, then New — 8 apart. -->
     <div class="flex items-center gap-2">
-      <div class="flex items-center -space-x-1">
-        <Avatar
-          v-for="(name, i) in faces"
-          :key="name"
-          size="md"
-          :label="name"
-          :image="faceFor(name)"
-          class="ring-2 ring-[--surface-base]"
-          :style="{ zIndex: faces.length + 1 - i }"
-        />
-        <!--
-          The count wears the same 24px disc as the faces so the row keeps one
-          rhythm, but no initial and no colour of its own: it stands for
-          people rather than being one, and a tinted disc among the faces read
-          as one more of them.
-        -->
-        <span
-          v-if="more"
-          class="inline-flex size-6 shrink-0 items-center justify-center rounded-full bg-surface-gray-3 text-xs text-ink-gray-7 ring-2 ring-[--surface-base]"
-          :title="`${more} more`"
-        >
-          {{ more }}
-        </span>
-      </div>
+      <AvatarStack :names="people" />
       <Button size="sm" label="Share" />
 
       <!--

@@ -332,14 +332,23 @@ export const espressoAgenda = [
   // …and the same ink, which is the calendar's own rather than the page's.
   '[&_.calendar-row-title]:![color:var(--border)]',
 
-  // …and no list of who is on it. The row keeps a block for the people an
-  // event is with, and with no faces to put there it falls back to the
-  // string the panel wrote — every address in full, in the calendar's own
-  // colour, which read as a second title rather than as a detail. Who is
-  // coming is what the card opens to say; the line a day is scanned down is
-  // not the place for it.
-  '[&_.calendar-row-participant]:!hidden',
+  // …and nothing where a description would go when there is none. The row
+  // draws the block whenever a slot is offered for it, and this page offers
+  // one; empty, it still took its 8px of gap after the title.
+  '[&_.calendar-row-description:empty]:!hidden',
 ].join(' ')
+
+/**
+ * The first agenda alone: no list of who is on an event.
+ *
+ * The row keeps a block for the people an event is with, and with no faces
+ * to put there it falls back to the string the panel wrote — every address
+ * in full, in the calendar's own colour, which read as a second title rather
+ * than as a detail. Who is coming is what the card opens to say; the line a
+ * day is scanned down is not the place for it. The second agenda fills the
+ * block with faces, so the rule is this one's alone.
+ */
+export const espressoAgendaPlain = '[&_.calendar-row-participant]:!hidden'
 
 /**
  * The agenda again, with the fill held back until the pointer arrives.
@@ -369,6 +378,12 @@ export const espressoAgendaFlat = [
   // quieter again. It is the least of the three things on the line, and in
   // the calendar's colour it was reading as loud as the bar.
   '[&_.calendar-row_.calendar-row-description]:!text-ink-gray-5',
+  // …at the title's own size and weight. Here it is what the event is about
+  // — "Frontend, round two" after "Interview" — and a note read straight on
+  // from the title is set like the title, told apart by ink alone. A step
+  // smaller it read as a caption to the line rather than the rest of it.
+  '[&_.calendar-row_.calendar-row-description]:!text-sm',
+  '[&_.calendar-row_.calendar-row-description]:!leading-5',
 ].join(' ')
 
 export const espressoCardCopy = [

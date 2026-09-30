@@ -11,12 +11,15 @@ import WeekIcon from './icons/WeekIcon.vue'
 import MonthIcon from './icons/MonthIcon.vue'
 import AgendaIcon from './icons/AgendaIcon.vue'
 import TaskIcon from './icons/TaskIcon.vue'
+import DotIcon from './icons/DotIcon.vue'
+import AvatarStack from './AvatarStack.vue'
 import EventPanel from './EventPanel.vue'
-import { sources, eventsFor, colourValue } from './sampleCalendars'
+import { sources, eventsFor, colourValue, nameOf } from './sampleCalendars'
 import type { CalendarSource } from './sampleCalendars'
 import {
   espressoAgenda,
   espressoAgendaFlat,
+  espressoAgendaPlain,
   espressoCalendar,
   espressoCardCopy,
   espressoDatePicker,
@@ -479,6 +482,135 @@ function pickView(v: string, updateActiveView: (view: string) => void) {
   if (v.startsWith('Agenda')) parkAgenda()
 }
 
+// ── Agenda V2's row ──────────────────────────────────────────────────────────
+//
+// The same list, with a different line. The first agenda leads a row with
+// the calendar's bar and a range — "7:30 – 8:30 pm" — set in a column wide
+// enough for the longest of them. This one leads with the hour alone, in
+// railway time and tabular figures so every row's time is the same width,
+// and puts the calendar's colour in a dot before the title. What the range
+// said — how long it runs — the row says under the pointer, in the time's
+// place, so the column never moves.
+//
+// The row is the component's; these are what its three slots are filled
+// with. The day's label is not slotted, so it is rewritten below.
+
+const hhmm = (t?: unknown) => (t ? String(t).slice(0, 5) : '')
+const dayKey = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+const minutesOf = (t: string) => {
+  const [h, m] = t.split(':').map(Number)
+  return (h || 0) * 60 + (m || 0)
+}
+const daysAcross = (from: string, to: string) =>
+  Math.round((new Date(to).getTime() - new Date(from).getTime()) / 864e5) + 1
+
+/** "17:30" — when the row starts; "All day" when it does not start today. */
+function startsAt(e: CalendarEvent, date: Date): string {
+  if (e.isFullDay) return 'All day'
+  const key = dayKey(date)
+  if (e.fromDate && e.fromDate < key) return 'All day'
+  return hhmm(e.segFromTime || e.fromTime) || 'All day'
+}
+
+/** "1h 30m", or "3 days" — how long it runs, in the time's place on hover. */
+function lasts(e: CalendarEvent, date: Date): string {
+  const days =
+    e.fromDate && e.toDate ? daysAcross(e.fromDate, e.toDate) : 1
+  if (days > 1) return `${days} days`
+  if (e.isFullDay) return 'All day'
+  const from = hhmm(e.segFromTime || e.fromTime)
+  const to = hhmm(e.segToTime || e.toTime)
+  if (!from || !to) return startsAt(e, date)
+  const mins = Math.max(0, minutesOf(to) - minutesOf(from))
+  const h = Math.floor(mins / 60)
+  const m = mins % 60
+  return h && m ? `${h}h ${m}m` : h ? `${h}h` : `${m}m`
+}
+
+/** What the row says after the title: the event's own note, then the library's. */
+function noteOf(e: CalendarEvent, theirs: string): string {
+  const own = (e as { description?: string }).description?.trim()
+  return [own, theirs].filter(Boolean).join(' · ')
+}
+
+/** Who is on it, by name, for the faces at the end of the row. */
+function namesOf(e: CalendarEvent): string[] {
+  return String(e.participant || '')
+    .split(',')
+    .map((v) => v.trim())
+    .filter(Boolean)
+    .map(nameOf)
+}
+
+/**
+ * The day's label, as "Thu 1 Oct": the weekday cut to three letters so every
+ * day's label is close to the same width, where "Wednesday 30 Sep" ran twice
+ * the length of "Friday 2 Oct". Today keeps its name and gains its weekday
+ * after it — "Today · Wed 30 Sep" — so no day loses the word it is called by.
+ *
+ * The label is drawn by the component and not slotted, so it is rewritten
+ * in place: the two spans are found under each day and their text replaced,
+ * with what they said kept on the element so the first agenda gets it back.
+ * A MutationObserver re-applies it whenever the list redraws — the component
+ * only touches a text node when its own value changes, so the rewrite holds
+ * until then, and the observer covers the rest. It sets nothing that is
+ * already right, which is what keeps it from answering its own mutations.
+ */
+const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+function relabelDays(root: HTMLElement, on: boolean) {
+  for (const row of root.querySelectorAll<HTMLElement>('[data-strip-date]')) {
+    const spans = row.querySelectorAll<HTMLElement>('.calendar-day-header > span')
+    if (spans.length < 2) continue
+    const [name, date] = [spans[0], spans[1]]
+    if (!on) {
+      for (const el of [name, date]) {
+        if (el.dataset.was == null) continue
+        el.textContent = el.dataset.was
+        delete el.dataset.was
+      }
+      continue
+    }
+    const [y, m, d] = (row.dataset.stripDate ?? '').split('-').map(Number)
+    if (!y || !m || !d) continue
+    const when = new Date(y, m - 1, d)
+    const today = row.hasAttribute('data-today')
+    const weekday = dayNames[when.getDay()]
+    const wants: [HTMLElement, string][] = [
+      [name, today ? 'Today' : weekday],
+      [date, `${today ? `${weekday} ` : ''}${d} ${monthNames[when.getMonth()]}`],
+    ]
+    for (const [el, want] of wants) {
+      if ((el.textContent ?? '').trim() === want) continue
+      if (el.dataset.was == null) el.dataset.was = el.textContent ?? ''
+      el.textContent = want
+    }
+  }
+}
+
+let relabeller: MutationObserver | null = null
+watch(agendaFlat, (on) => {
+  nextTick(() => {
+    const root = calendarEl.value
+    if (!root) return
+    relabelDays(root, on)
+    if (on && !relabeller) {
+      relabeller = new MutationObserver(() => relabelDays(root, true))
+      relabeller.observe(root, {
+        childList: true,
+        subtree: true,
+        characterData: true,
+      })
+    } else if (!on && relabeller) {
+      relabeller.disconnect()
+      relabeller = null
+    }
+  })
+})
+onUnmounted(() => relabeller?.disconnect())
+
 // ── The sub-header's label ───────────────────────────────────────────────────
 //
 // The file names the month and the year, and nothing else — "Aug 2025". The
@@ -526,14 +658,18 @@ function dayBand(label: string) {
       <AppHeader @new="openNewOf" />
 
       <div class="flex min-h-0 flex-1">
-        <div ref="calendarEl" class="flex min-w-0 flex-1 flex-col">
+        <div
+          ref="calendarEl"
+          class="flex min-w-0 flex-1 flex-col"
+          :class="{ 'agenda-v2': agendaFlat }"
+        >
           <Calendar
             :events="events"
             :class="[
               'min-w-0 flex-1',
               espressoCalendar,
               espressoAgenda,
-              agendaFlat && espressoAgendaFlat,
+              agendaFlat ? espressoAgendaFlat : espressoAgendaPlain,
               draftColour === 'gray' && espressoGreyDraft,
             ]"
             :style="{ '--now-top': `${nowLineTop}px` }"
@@ -693,6 +829,48 @@ function dayBand(label: string) {
                 </template>
               </div>
             </template>
+
+            <!--
+              Agenda V2's row, in the three places the component leaves open.
+              Each is filled only for the second agenda; for the first the
+              slot renders nothing and the row falls back to its own.
+
+              The lead goes into the suffix slot — the one place before the
+              title's end that is open — and CSS puts it first on the line.
+            -->
+            <template #event-suffix="{ calendarEvent, date }">
+              <span
+                v-if="agendaFlat"
+                class="agenda-lead flex items-center gap-2 pl-2"
+              >
+                <!-- The time and how long it runs share one cell, so the
+                     swap under the pointer moves nothing. 52 holds "All day",
+                     "17:30" and "1h 30m" alike. -->
+                <span
+                  class="grid w-[52px] shrink-0 text-sm tabular-nums text-ink-gray-6"
+                >
+                  <span class="agenda-when col-start-1 row-start-1">
+                    {{ startsAt(calendarEvent, date) }}
+                  </span>
+                  <span class="agenda-lasts invisible col-start-1 row-start-1">
+                    {{ lasts(calendarEvent, date) }}
+                  </span>
+                </span>
+                <DotIcon class="agenda-dot shrink-0 [color:var(--border)]" />
+              </span>
+            </template>
+            <template #event-description="{ calendarEvent, description }">
+              <template v-if="agendaFlat && noteOf(calendarEvent, description)">
+                {{ noteOf(calendarEvent, description) }}
+              </template>
+            </template>
+            <template #event-participant="{ calendarEvent }">
+              <AvatarStack
+                v-if="agendaFlat && namesOf(calendarEvent).length"
+                :names="namesOf(calendarEvent)"
+                size="sm"
+              />
+            </template>
           </Calendar>
         </div>
 
@@ -846,6 +1024,35 @@ function dayBand(label: string) {
 </template>
 
 <style scoped>
+/*
+  Agenda V2's line.
+
+  The bar down the row's lead edge and the range beside it go; the lead the
+  page fills the suffix slot with takes their place, put first on the line by
+  its order. Under the pointer the time gives way to how long the row runs
+  — the two share a cell, so nothing else on the line moves.
+*/
+:deep(.agenda-v2 .calendar-row .event-border),
+:deep(.agenda-v2 .calendar-row .calendar-row-time) {
+  display: none;
+}
+:deep(.agenda-v2 .calendar-row span:has(> .agenda-lead)) {
+  order: -1;
+}
+/* 16, over the 14 the page gives every glyph on a card for the task mark:
+   the dot is drawn for 16, where its point comes to 7. */
+:deep(.agenda-v2 .calendar-row .agenda-dot) {
+  width: 16px !important;
+  height: 16px !important;
+  margin-top: 0 !important;
+}
+:deep(.agenda-v2 .calendar-row:hover .agenda-when) {
+  visibility: hidden;
+}
+:deep(.agenda-v2 .calendar-row:hover .agenda-lasts) {
+  visibility: visible;
+}
+
 /*
   The month's grid a pixel up, so its first rule meets the panel's tab rule
   the way the week's does. The month draws that rule as the top border of its

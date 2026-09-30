@@ -16,7 +16,7 @@ import {
   Textarea,
 } from '../../src'
 import { faceFor, logos } from '../components/patterns/designAssets'
-import { colourValue } from './sampleCalendars'
+import { colourValue, people } from './sampleCalendars'
 import DateIcon from './icons/DateIcon.vue'
 import type { CalendarEvent } from '../../experimental/Calendar'
 
@@ -387,14 +387,8 @@ const location = ref('')
 const description = ref('')
 const meet = ref('')
 
-const people = [
-  { label: 'Faris Ansari', value: 'faris@timeless.co' },
-  { label: 'Rubini Raman', value: 'rubini@timeless.co' },
-  { label: 'Gowtham Sivakumar', value: 'gowtham@timeless.co' },
-  { label: 'Shariq Ansari', value: 'shariq@timeless.co' },
-  { label: 'Sally Potter', value: 'sally@timeless.co' },
-  { label: 'Emily Taylor', value: 'emily@timeless.co' },
-]
+// `people` comes from the sample data, so the rows and the panel agree on
+// who is who.
 /** The assignee picks from the same list the attendees do. */
 const assigneeOptions = people
 
