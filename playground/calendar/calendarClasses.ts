@@ -142,23 +142,17 @@ export const espressoCalendar = [
   // overlap by one and read as one mark.
   // …and today's line above the hairline, so the pale one does not show as a
   // stripe down the middle of it.
-  // ── The hour gutter reads down one edge ──────────────────────────────────
+  // ── "All day" on the hours' own edge ─────────────────────────────────────
   //
-  // The hours hang off the first day column at a fixed 45px to its left, so
-  // they start on one line and end wherever their own width takes them: "1 pm"
-  // and "12 pm" are 7px apart at the tail. A gutter is read against the rule
-  // beside it, not away from it, so both are turned round to share a right
-  // edge 16px clear of that rule — which is where the single-digit hours,
-  // nearly all of them, already sat.
-  //
-  // "All day" is one more label in the column and joins them: it was centred
-  // across the gutter, which put it a couple of pixels past every hour under
-  // it. `ml-auto` in a flex box is what moves it, the same 16 to the rule.
+  // The hours are already pinned by their right edge, 10 clear of the rule
+  // (the `::before` rules above). "All day" is one more label in that column
+  // and was centred across the gutter instead, which put it 6px short of
+  // every hour under it. `ml-auto` in a flex box is what moves it over.
   '[&_.calendar-all-day-label]:!ml-auto',
-  // 15 and not 16: the rule is a border inside this cell's box, so the label's
-  // margin is measured from inside it, where the hours' 16 is measured from
-  // the line itself. A pixel, and it is the pixel the two edges differ by.
-  '[&_.calendar-all-day-label]:!mr-[15px]',
+  // 9 and not 10: the rule is a border inside this cell's box, so the label's
+  // margin is measured from inside it, where the hours' 10 is measured from
+  // the line itself. Measured 330 for both, in Day and in Week.
+  '[&_.calendar-all-day-label]:!mr-[9px]',
 
   '[&_.current-time]:!z-20',
   '[&_.current-time]:!ml-[2px]',

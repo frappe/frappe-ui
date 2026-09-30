@@ -845,22 +845,15 @@ function dayBand(label: string) {
 
 <style scoped>
 /*
-  The hours turned round to read against the rule.
-
-  `.calendar-column ::before` in the library's stylesheet hangs each hour off
-  the first day column at `left: -45px`, so they all begin on one line and end
-  wherever their own width lands — "1 pm" stops 7px short of "12 pm". A gutter
-  is read against the rule beside it, so the labels are pinned by their right
-  edge instead, 16px clear of that rule. `right: calc(100% + 16px)` is that
-  edge: 100% of the cell puts it at the cell's left, and the 16 is the air.
-
-  Here rather than as a class, because the target is a pseudo-element of a
-  descendant and the property being unset is `left`. "All day" gets the same
-  edge from `calendarClasses`, where it is an ordinary flex child.
+  The month's grid a pixel up, so its first rule meets the panel's tab rule
+  the way the week's does. The month draws that rule as the top border of its
+  scroller, under a 32px header; the week draws it on the 32nd pixel of the
+  strip itself. One pixel between them, and at that length it read as a step.
+  The scroller is the one box in the calendar that both scrolls vertically
+  and holds week rows.
 */
-:deep(.calendar-column ::before) {
-  left: auto;
-  right: calc(100% + 16px);
+:deep(.overflow-y-auto:has([data-week-row])) {
+  margin-top: -1px;
 }
 
 /*

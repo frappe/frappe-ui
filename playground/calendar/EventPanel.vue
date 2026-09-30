@@ -488,15 +488,27 @@ const colourOptions = computed(() =>
 const field = '!h-7 w-full'
 
 /**
- * The tab rows, on the fields' own left edge.
+ * The three fields that stand alone in their sections, on the labels' line.
  *
- * Every value in this panel starts on one line, and a ghost tab's first label
- * lands there of its own accord: its 8px of side padding is the same 8 the
- * ghost menus above it carry, so nothing is pulled back. Measured 1862 for
- * both. The list's own rule is taken off — these are a control in a row, not
- * a set of pages — and its gap: the pill is what separates the choices.
+ * A ghost field carries 8px of its own before its first mark, so the video
+ * and pin glyphs and the description's first letter all began 8 right of
+ * "Link" and "People" above them. The field is pulled back by that 8 and
+ * made 8 wider, so its right edge stays where every other field's is and
+ * only its ink moves. The hover fill follows it out into the margin by the
+ * same 8, which is the fill saying where the field really starts.
  */
-const tabField = '[&_[role=tablist]]:!border-0 [&_[role=tablist]]:!gap-0'
+const flush = '-ml-2 w-[calc(100%+0.5rem)]'
+
+/**
+ * The tab rows, as wide as the fields above them and split evenly.
+ *
+ * The list takes the field's whole width — the same 207 every menu's box has
+ * — and every choice takes an equal share of it, so two answers are two
+ * halves and three are three thirds. The subtle variant draws the track,
+ * which is what makes that width visible.
+ */
+const tabField =
+  'w-full [&_[role=tablist]]:!flex [&_[role=tablist]]:!w-full [&_[role=tab]]:!flex-1'
 
 /**
  * A ghost field that cannot be typed in should still be a ghost field.
@@ -900,7 +912,7 @@ function todayIso() {
           list to go looking in — free or busy, who can see it — so they are
           drawn as tabs, where every answer is on screen and the one in force
           is the one lit. The rest stay menus: a repeat rule and an alert have
-          more answers than a row can hold.
+          more answers than a row can hold. Subtle, as the user set it.
 
           `variant` on `TabList`, not on `Tabs`: on the parent it only reaches
           the `tabs` shorthand, and a composed list silently falls back to the
@@ -917,7 +929,7 @@ function todayIso() {
             }
           "
         >
-          <TabList variant="ghost" size="sm">
+          <TabList variant="subtle" size="sm">
             <TabTrigger
               v-for="option in options"
               :key="option"
@@ -1122,12 +1134,15 @@ function todayIso() {
         placeholder="Add video conference"
         size="sm"
         variant="ghost"
-        class="!h-7 w-full"
+        :class="`!h-7 ${flush}`"
         aria-label="Video conference"
       >
         <template #prefix>
+          <!-- `-ml-px`: Select sets its prefix a pixel further in than
+               TextInput does, and the camera sat 1750 over the pin's 1749.
+               Both on 1749 now, with "Link" and "People" above them. -->
           <span
-            class="lucide-video size-4 shrink-0 text-ink-gray-5"
+            class="lucide-video -ml-px size-4 shrink-0 text-ink-gray-5"
             aria-hidden="true"
           />
         </template>
@@ -1138,7 +1153,7 @@ function todayIso() {
         size="sm"
         variant="ghost"
         :disabled="locked"
-        :class="`!h-7 w-full ${readable}`"
+        :class="`!h-7 ${flush} ${readable}`"
         @update:model-value="touch"
         placeholder="Add location"
       >
@@ -1161,7 +1176,7 @@ function todayIso() {
         :disabled="locked"
         @update:model-value="touch"
         :rows="2"
-        :class="`w-full ${readable}`"
+        :class="`${flush} ${readable}`"
         placeholder="Add description"
       />
     </div>
