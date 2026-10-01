@@ -15,6 +15,12 @@
 // included — the card stays where it was, dimmed, and nothing else on the
 // board changes: no wash on the columns, no shuffle. Dropping it on the
 // slot moves it; dropping anywhere else puts it back.
+//
+// Nothing jumps: the slot fades in where it opens, and whenever it opens,
+// moves or closes the cards it displaces slide to their new places over
+// 220ms; the dropped card settles in with a fade. The slot's place under
+// the pointer is read off the layout, not off cards mid-slide, so it
+// never flickers.
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import EIcon from '../../espresso-sidebar/EIcon.vue'
 import DealCard from './DealCard.vue'
@@ -69,17 +75,21 @@ function lift(e: DragEvent, card: Card, column: number) {
 
 // Where in the column the pointer is: above a card's middle means before
 // it, past the last card's middle means the end. The card in the air still
-// stands in its place, so the index counts it like any other.
+// stands in its place, so the index counts it like any other. The cards'
+// places come from the layout (offsetTop), which a card sliding under a
+// transform has already left: read off the slide, the slot would chase it.
 function hover(e: DragEvent, column: number) {
   if (!dragging.value) return
   e.preventDefault()
   if (e.dataTransfer) e.dataTransfer.dropEffect = 'move'
   const section = e.currentTarget as HTMLElement
+  const list = lists.get(column)
+  const base = section.getBoundingClientRect().top - (list?.scrollTop ?? 0)
   const cards = [...section.querySelectorAll<HTMLElement>('[data-card]')]
   let index = cards.length
   for (let i = 0; i < cards.length; i++) {
-    const r = cards[i].getBoundingClientRect()
-    if (e.clientY < r.top + r.height / 2) {
+    const top = base + cards[i].offsetTop
+    if (e.clientY < top + cards[i].offsetHeight / 2) {
       index = i
       break
     }
@@ -88,12 +98,20 @@ function hover(e: DragEvent, column: number) {
     over.value = { column, index }
 }
 
-function leave(e: DragEvent) {
-  // leaving for a child of the same column is not leaving the column
-  const section = e.currentTarget as HTMLElement
-  if (e.relatedTarget instanceof Node && section.contains(e.relatedTarget))
-    return
-  if (over.value) over.value = null
+// Leaving a column: every element entered inside it fires its own enter
+// and leave, and Chrome's leave often names no element it went to, so
+// the column counts enters against leaves and is left at nought
+const depth = new Map<number, number>()
+function enter(e: DragEvent, column: number) {
+  if (!dragging.value) return
+  e.preventDefault()
+  depth.set(column, (depth.get(column) ?? 0) + 1)
+}
+function leave(column: number) {
+  if (!dragging.value) return
+  const d = Math.max(0, (depth.get(column) ?? 1) - 1)
+  depth.set(column, d)
+  if (d === 0 && over.value?.column === column) over.value = null
 }
 
 function drop(e: DragEvent, column: number) {
@@ -112,6 +130,7 @@ function drop(e: DragEvent, column: number) {
 function settle() {
   dragging.value = null
   over.value = null
+  depth.clear()
 }
 
 // ---- the lists' edges: where there is more to scroll, the cards fade out
@@ -120,7 +139,12 @@ const lists = new Map<number, HTMLElement>()
 const fades = ref(columns.value.map(() => ({ top: false, bottom: false })))
 
 function bindList(ci: number, el: unknown) {
-  if (el instanceof HTMLElement) lists.set(ci, el)
+  // the list is a TransitionGroup: its element is the instance's $el
+  const dom =
+    el && typeof el === 'object' && '$el' in el
+      ? (el as { $el: unknown }).$el
+      : el
+  if (dom instanceof HTMLElement) lists.set(ci, dom)
   else lists.delete(ci)
 }
 
@@ -168,8 +192,9 @@ watch(laid, () => nextTick(measureFades), { flush: 'post' })
         class="kanban-column relative isolate flex h-[850px] w-[284px] shrink-0 flex-col gap-2.5 rounded-7 p-2"
         role="listitem"
         :aria-label="stage.name"
+        @dragenter="enter($event, ci)"
         @dragover="hover($event, ci)"
-        @dragleave="leave"
+        @dragleave="leave(ci)"
         @drop="drop($event, ci)"
       >
         <header class="flex h-7 items-center gap-2 pl-1.5">
@@ -193,8 +218,12 @@ watch(laid, () => nextTick(measureFades), { flush: 'post' })
              box clips at its edges, so it reaches into the column's padding
              and pads itself back — the cards sit where they did, and their
              shadows have room on every side. -->
-        <div
+        <!-- a TransitionGroup: the cards slide to their places when the
+             slot opens, moves or closes, and a card lands with a fade -->
+        <TransitionGroup
           :ref="(el) => bindList(ci, el)"
+          tag="div"
+          name="kanban"
           class="kanban-list v2-scroll -mx-2 -my-1 flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto px-2 py-1"
           :style="{
             '--fade-top': fades[ci].top ? '24px' : '0px',
@@ -202,28 +231,30 @@ watch(laid, () => nextTick(measureFades), { flush: 'post' })
           }"
           @scroll.passive="measureFade(ci)"
         >
-          <template
-            v-for="(row, i) in laid[ci]"
-            :key="row.kind === 'card' ? row.card.id : `slot-${i}`"
+          <div
+            v-for="row in laid[ci]"
+            :key="row.kind === 'card' ? row.card.id : 'slot'"
+            :data-card="row.kind === 'card' ? row.card.id : undefined"
+            :draggable="row.kind === 'card'"
+            :class="
+              row.kind === 'card'
+                ? [
+                    'cursor-grab transition-opacity duration-150 active:cursor-grabbing',
+                    dragging?.id === row.card.id && 'opacity-40',
+                  ]
+                : 'kanban-slot h-[172px] w-[268px] rounded-7 bg-surface-gray-2'
+            "
+            :aria-hidden="row.kind === 'slot' || undefined"
+            @dragstart="row.kind === 'card' && lift($event, row.card, ci)"
+            @dragend="settle"
           >
-            <div
+            <DealCard
               v-if="row.kind === 'card'"
-              :data-card="row.card.id"
-              draggable="true"
-              class="cursor-grab active:cursor-grabbing"
-              :class="dragging?.id === row.card.id && 'opacity-40'"
-              @dragstart="lift($event, row.card, ci)"
-              @dragend="settle"
-            >
-              <DealCard :deal="row.card" :photo="row.card.photo" />
-            </div>
-            <div
-              v-else
-              class="h-[172px] w-[268px] rounded-7 bg-surface-gray-2"
-              aria-hidden="true"
+              :deal="row.card"
+              :photo="row.card.photo"
             />
-          </template>
-        </div>
+          </div>
+        </TransitionGroup>
       </section>
     </div>
   </div>
@@ -272,6 +303,32 @@ watch(laid, () => nextTick(measureFades), { flush: 'post' })
 /* with a card in the air, no column washes: only the card shows a state */
 .is-dragging .kanban-column::before {
   opacity: 0;
+}
+/* the slides: a card or the slot moving to a new place takes 220ms on
+   the file's ease; a card landing, or the slot opening, fades in over
+   it. A row leaving goes at once, so the rows behind it slide, not jump */
+.kanban-move,
+.kanban-enter-active {
+  transition:
+    transform 220ms cubic-bezier(0.2, 0, 0, 1),
+    opacity 220ms cubic-bezier(0.2, 0, 0, 1);
+}
+.kanban-enter-from {
+  opacity: 0;
+}
+.kanban-enter-from[data-card] {
+  transform: scale(0.97);
+}
+.kanban-leave-active {
+  position: absolute;
+  visibility: hidden;
+  transition: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .kanban-move,
+  .kanban-enter-active {
+    transition: none;
+  }
 }
 /* the card in the air: tilted a touch, under the md shadow */
 .kanban-ghost {
