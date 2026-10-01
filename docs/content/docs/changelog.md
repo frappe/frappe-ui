@@ -4,8 +4,8 @@ outline: [2, 4]
 
 # Frappe UI v1 Changelog
 
-This page lists the v1 changes that affect apps. The **Unreleased** section
-lists every change since **v0.1.278**. It records breaking changes,
+This page lists the v1 changes that affect apps. The **1.0.0** section lists
+every change since **v0.1.278**. It records breaking changes,
 deprecations, behavior changes you can see, and migration steps. It does not
 record internal refactors or new tests.
 
@@ -34,7 +34,7 @@ the change reaches your app:
 
 Entries are grouped by area. Inside each area, they keep the order they had in the single list this page used before.
 
-## Unreleased
+## 1.0.0 {#v1-0-0}
 
 - [Packaging and setup](#packaging-and-setup)
 - [Tailwind preset and design tokens](#tailwind-preset-and-design-tokens)

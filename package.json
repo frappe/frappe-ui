@@ -1,6 +1,6 @@
 {
   "name": "frappe-ui",
-  "version": "1.0.0-rc.2",
+  "version": "1.0.0",
   "description": "A set of components and utilities for rapid UI development",
   "engines": {
     "node": ">=20.19.0"

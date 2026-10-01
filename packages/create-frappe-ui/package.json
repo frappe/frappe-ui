@@ -1,6 +1,6 @@
 {
   "name": "create-frappe-ui",
-  "version": "1.0.0-rc.2",
+  "version": "1.0.0",
   "description": "Create a frappe-ui app in one command",
   "keywords": [
     "frappe",
