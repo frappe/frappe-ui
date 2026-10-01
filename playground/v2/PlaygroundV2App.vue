@@ -11,8 +11,8 @@ import {
   type Component,
 } from 'vue'
 import { Button, Popover, Tooltip, useColorScheme } from '../../src'
-import ControlSelect from '../controls/ControlSelect.vue'
-import ControlToggle from '../controls/ControlToggle.vue'
+import PreviewSelectRow from './PreviewSelectRow.vue'
+import PreviewSwitchRow from './PreviewSwitchRow.vue'
 import { headerTypes, subheaderTypes } from '../espresso-header/variants'
 import ListPage from './list/ListPage.vue'
 import PopoverPage from './popover/PopoverPage.vue'
@@ -638,52 +638,70 @@ const outlineTitle = computed(
               </template>
             </button>
           </template>
-          <!-- the layout's own controls, in the shape the floating card
-               used: one row per setting, the pickers lining up -->
+          <!-- the preview control (35537:171483): a 272px card on 16px
+               corners under the xl shadow, 16 in (13 under); the 16/18
+               semibold title, then 16 down, the settings in three sections
+               12 apart, ruled between — a 13/15 gray-500 heading, 12, and
+               28px rows 8 apart: the 14/16 gray-700 setting, and at the
+               end the file's input-select or its 26 × 16 switch -->
           <div
-            class="v2-scroll flex max-h-[calc(100vh-72px)] w-[340px] flex-col gap-2 overflow-y-auto rounded-[20px] border border-outline-gray-1 bg-surface-elevation-2 p-3 shadow-lg"
+            class="v2-scroll flex max-h-[calc(100vh-72px)] w-[272px] flex-col gap-4 overflow-y-auto rounded-7 bg-surface-elevation-2 px-4 pb-[13px] pt-4 shadow-xl"
           >
-            <p class="px-2 pb-1 pt-1 text-xl-semibold text-ink-gray-9">
+            <p class="text-lg-semibold leading-[18.4px] text-ink-gray-9">
               Preview control
             </p>
-            <ControlSelect
-              v-model="appPick"
-              label="App"
-              :options="appOptions"
-            />
-            <ControlToggle
-              v-model="patternCollapsed"
-              label="Collapsed"
-              :disabled="inSettings"
-            />
-            <ControlToggle
-              v-model="patternTray"
-              label="App navigation"
-              :disabled="inSettings"
-            />
-            <ControlToggle
-              v-model="showHeader"
-              label="Header"
-              :disabled="inSettings"
-            />
-            <ControlSelect
-              v-if="showHeader"
-              v-model="headerType"
-              label="Header type"
-              :options="headerOptions"
-            />
-            <ControlToggle
-              v-model="showSubheader"
-              label="Subheader"
-              :disabled="inSettings"
-            />
-            <ControlSelect
-              v-if="showSubheader"
-              v-model="subheaderType"
-              label="Subheader type"
-              :options="subheaderOptions"
-            />
-            <ControlToggle v-model="darkMode" label="Dark mode" />
+            <div class="flex flex-col gap-3">
+              <p class="text-sm leading-[15px] text-ink-gray-5">
+                App & Sidebar
+              </p>
+              <div class="flex flex-col gap-2">
+                <PreviewSelectRow
+                  v-model="appPick"
+                  label="App"
+                  :options="appOptions"
+                />
+                <PreviewSwitchRow
+                  v-model="patternCollapsed"
+                  label="Collapsed"
+                  :disabled="inSettings"
+                />
+                <PreviewSwitchRow
+                  v-model="patternTray"
+                  label="App navigation"
+                  :disabled="inSettings"
+                />
+              </div>
+              <hr class="v2-preview-rule border-outline-gray-1" />
+              <p class="text-sm leading-[15px] text-ink-gray-5">
+                Header & subheader
+              </p>
+              <div class="flex flex-col gap-2">
+                <PreviewSwitchRow
+                  v-model="showHeader"
+                  label="Header"
+                  :disabled="inSettings"
+                />
+                <PreviewSwitchRow
+                  v-model="showSubheader"
+                  label="Subheader"
+                  :disabled="inSettings"
+                />
+                <PreviewSelectRow
+                  v-if="showHeader"
+                  v-model="headerType"
+                  label="Header type"
+                  :options="headerOptions"
+                />
+                <PreviewSelectRow
+                  v-if="showSubheader"
+                  v-model="subheaderType"
+                  label="Subheader type"
+                  :options="subheaderOptions"
+                />
+              </div>
+              <hr class="v2-preview-rule border-outline-gray-1" />
+              <PreviewSwitchRow v-model="darkMode" label="Darkmode" />
+            </div>
           </div>
         </Popover>
 
@@ -1321,5 +1339,10 @@ const outlineTitle = computed(
   .v2-glide-chip {
     transition: none;
   }
+}
+/* the preview control's rules: gray-100 as the file draws them; in dark
+   that token is the card's own elevation, so the next step up shows */
+[data-theme='dark'] .v2-preview-rule {
+  border-color: var(--outline-gray-2);
 }
 </style>
