@@ -52,6 +52,7 @@ import type {
   NormalizedCustomOption,
   NormalizedGroup,
   NormalizedItem,
+  NormalizedSelectableOption,
 } from './utils'
 
 defineOptions({
@@ -306,13 +307,10 @@ const searchSlotProps = computed<ComboboxSearchSlotProps>(() => ({
   focus: focusSearch,
 }))
 
-function commitSelectableOption(value: ComboboxOptionValue) {
-  const option =
-    allSelectableOptions.value.find((item) => item.value === value) ?? null
-
-  model.value = value
+function commitSelectableOption(option: NormalizedSelectableOption) {
+  model.value = option.value
   emit('update:selectedOption', option)
-  query.value = option?.label ?? String(value)
+  query.value = option.label
   hasTypedSinceOpen.value = false
 }
 
@@ -330,7 +328,7 @@ function handleRootModelValueChange(
   )
 
   if (selectableOption) {
-    commitSelectableOption(selectableOption.value)
+    commitSelectableOption(selectableOption)
   }
 }
 
@@ -360,6 +358,17 @@ function handleCustomItemSelect(item: NormalizedCustomOption, event: Event) {
   item.onClick(buildCustomOptionContext(typedQuery.value))
 
   if (!item.keepOpen) open.value = false
+}
+
+// Commit before closing. Reka closes first and sends the value later, and
+// closing resets the query. Options derived from the query can then drop the
+// picked option before the value arrives.
+function handleOptionSelect(item: NormalizedSelectableOption, event: Event) {
+  event.preventDefault()
+  if (item.disabled || props.disabled) return
+
+  commitSelectableOption(item)
+  open.value = false
 }
 
 function handleFocusScopeMountAutoFocus(event: Event) {
@@ -771,6 +780,7 @@ defineSlots<ComboboxSlots>()
                   :slot-fns="slotFns"
                   :all-selectable-options="allSelectableOptions"
                   @select-custom="handleCustomItemSelect"
+                  @select-option="handleOptionSelect"
                 />
 
                 <div v-if="$slots.footer" data-slot="footer">

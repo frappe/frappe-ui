@@ -52,6 +52,7 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   selectCustom: [item: NormalizedCustomOption, event: Event]
+  selectOption: [item: NormalizedSelectableOption, event: Event]
 }>()
 
 const ItemSlotRender = createItemSlotRender('ComboboxItemSlotRender')
@@ -102,6 +103,7 @@ function getItemTextValue(item: NormalizedItem) {
 
 function handleSelect(item: NormalizedItem, event: Event) {
   if (isCustomOption(item)) emit('selectCustom', item, event)
+  else emit('selectOption', item, event)
 }
 </script>
 

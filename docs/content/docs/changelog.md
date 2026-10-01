@@ -1853,6 +1853,14 @@ count changes. That sizing cannot predict custom text, so it is now skipped
 when you provide `#summary`. The trigger then sizes to its content, and you
 control the width.
 
+#### Combobox — a picked option commits when the options follow the query (fix)
+
+When you click an option or press Enter, the Combobox now commits the option
+before the popover closes. Before, closing reset the query first. If your
+options come from the query, as with a server search or a capped list, the
+list could lose the picked option before the value arrived. The Combobox then
+dropped the selection with no error.
+
 ### Dialog, Popover, Tooltip, HoverCard and Toast
 
 #### Toast: the compat shims are removed (breaking, one of them silent)

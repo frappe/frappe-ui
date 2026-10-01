@@ -165,6 +165,46 @@ describe('Combobox', () => {
       cy.contains('[role="option"]', 'Mango').click({ force: true })
       cy.get('@onUpdate').should('not.have.been.called')
     })
+
+    describe('with options derived from the query', () => {
+      // Closing resets the query, and the empty-query list no longer holds
+      // the picked option, as with a server search or a capped list.
+      const mountQueryDrivenOptions = () => {
+        const onUpdate = cy.spy().as('onUpdate')
+        const QueryDrivenOptions = defineComponent({
+          setup() {
+            const query = ref('')
+            return () =>
+              h(Combobox, {
+                options: query.value
+                  ? fruits.filter((fruit) =>
+                      fruit.toLowerCase().includes(query.value.toLowerCase()),
+                    )
+                  : ['Apple'],
+                'onUpdate:query': (value: string) => (query.value = value),
+                'onUpdate:modelValue': onUpdate,
+              })
+          },
+        })
+        cy.mount(QueryDrivenOptions)
+        cy.get('[role="combobox"]').type('man')
+      }
+
+      it('commits a clicked option', () => {
+        mountQueryDrivenOptions()
+        cy.contains('[role="option"]', 'Mango').click()
+
+        cy.get('@onUpdate').should('have.been.calledWith', 'Mango')
+        cy.get('[role="combobox"]').should('have.value', 'Mango')
+      })
+
+      it('commits the highlighted option on Enter', () => {
+        mountQueryDrivenOptions()
+        cy.get('[role="combobox"]').type('{enter}')
+
+        cy.get('@onUpdate').should('have.been.calledWith', 'Mango')
+      })
+    })
   })
 
   describe('query and search', () => {
