@@ -38,6 +38,8 @@ const GAP = 6
 /** how far past a block's edge, into the gap around it, its grip still answers */
 const REACH = 16
 
+/** what carries a block's first line of text */
+const FIRST_LINE = 'p, h1, h2, h3, h4, h5, h6, summary, pre'
 /** what the editor draws at the top level that is not a block */
 const SKIP =
   '.ProseMirror-gapcursor, .ProseMirror-widget, .ProseMirror-separator, br'
@@ -119,11 +121,18 @@ function place() {
     return
   }
   const r = el.getBoundingClientRect()
-  // centred on the block's first line; a block shorter than a line (a
-  // rule) has the grip centred on itself
-  const lineHeight = parseFloat(getComputedStyle(el).lineHeight) || SIZE
-  const line = Math.min(lineHeight, r.height)
-  top.value = r.top + (line - SIZE) / 2
+  // centred on the block's first line of text — an item's, a quote's, a
+  // callout's, a table's first row's, the summary of an expand block —
+  // not on the block's box, which margins and padding push away from the
+  // line; a block shorter than a line (a rule) has the grip centred on
+  // itself
+  const first = el.matches(FIRST_LINE)
+    ? el
+    : (el.querySelector(FIRST_LINE) ?? el)
+  const fr = first.getBoundingClientRect()
+  const lineHeight = parseFloat(getComputedStyle(first).lineHeight) || SIZE
+  const line = Math.min(lineHeight, fr.height)
+  top.value = fr.top + (line - SIZE) / 2
   // an item's grip sits before its marker, at its list's edge
   const edge = el.matches('li')
     ? (el.parentElement?.getBoundingClientRect().left ?? r.left)
