@@ -420,9 +420,20 @@ function scanSections() {
         sections.value.find((s) => onScreen.has(s.id))?.id ??
         activeSection.value
     },
-    { root: scroller, rootMargin: '-45% 0px -45% 0px' },
+    {
+      root: scroller,
+      // the band: the middle of a snapping stage, where one screen fills
+      // the view; the top quarter of a flowing page, a reading line
+      rootMargin: scroller.classList.contains('is-flow')
+        ? '0px 0px -75% 0px'
+        : '-45% 0px -45% 0px',
+    },
   )
   found.forEach((el) => observer!.observe(el))
+  // a flowing page's last screen may be too short to reach the band: at
+  // the foot of the scroll it is the current one
+  scroller.removeEventListener('scroll', markFoot)
+  scroller.addEventListener('scroll', markFoot, { passive: true })
 
   // `?popover=toolbar`, `?card=kpi`, `#toolbar` — open on that screen
   const q = new URLSearchParams(location.search)
@@ -433,6 +444,13 @@ function scanSections() {
     ''
   const target = found.find((el) => el.id === wanted)
   if (target) target.scrollIntoView({ block: 'start' })
+}
+
+function markFoot(e: Event) {
+  const el = e.currentTarget as HTMLElement
+  const last = sections.value[sections.value.length - 1]
+  if (last && el.scrollTop + el.clientHeight >= el.scrollHeight - 2)
+    activeSection.value = last.id
 }
 
 // A mandatory snap container fights a programmatic smooth scroll — Chrome
@@ -446,7 +464,8 @@ function goToSection(id: string) {
   const top =
     target.getBoundingClientRect().top -
     scroller.getBoundingClientRect().top +
-    scroller.scrollTop
+    scroller.scrollTop -
+    (parseFloat(getComputedStyle(target).scrollMarginTop) || 0)
   scroller.style.scrollSnapType = 'none'
   scroller.scrollTo({ top, behavior: 'smooth' })
   activeSection.value = id
@@ -1295,6 +1314,24 @@ const outlineTitle = computed(
 }
 .v2-section {
   @apply flex min-h-full snap-start items-center justify-center px-5 py-20;
+}
+/* the flow variant: no snapping, the screens one column 64 apart under a
+   title, each with its heading, as the Table tab stacks its patterns */
+.v2-sections.is-flow {
+  @apply flex flex-col gap-16 px-6 py-12;
+  scroll-snap-type: none;
+}
+/* the column is a fixed-height flex box: its rows keep their size */
+.v2-sections.is-flow > .v2-flow-head,
+.v2-sections.is-flow > .v2-section {
+  @apply mx-auto w-full max-w-[900px] shrink-0;
+}
+.v2-sections.is-flow > .v2-flow-head {
+  @apply flex flex-col gap-1;
+}
+.v2-sections.is-flow > .v2-section {
+  @apply min-h-0 scroll-mt-12 flex-col items-start justify-start gap-6 px-0 py-0;
+  scroll-snap-align: none;
 }
 @media (prefers-reduced-motion: reduce) {
   .v2-sections {

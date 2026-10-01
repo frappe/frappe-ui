@@ -1,8 +1,9 @@
 <script setup lang="ts">
-// The Popover page: every popover type, one to a screen. The stage scrolls
-// and snaps between them, so a scroll brings the next one up; the outline on
-// the right names them and scrolls to them. (The old "Popover type" dropdown
-// — playground/v2/TypeDropdown.vue — is parked, not deleted.)
+// The Popover page: every popover type stacked down one scrolling column,
+// as the Table tab stacks its patterns — a heading over each, 64 apart —
+// and the outline on the right names them and scrolls to them. (The old
+// "Popover type" dropdown — playground/v2/TypeDropdown.vue — is parked, not
+// deleted.)
 import { nextTick, onMounted, ref, useTemplateRef, watch } from 'vue'
 import DefaultPopovers from './DefaultPopovers.vue'
 import FlyingReactions from './FlyingReactions.vue'
@@ -60,13 +61,20 @@ onMounted(placeModeChip)
 
 <template>
   <div class="relative h-full">
-    <div class="v2-sections" data-sections>
+    <div class="v2-sections is-flow" data-sections>
+      <header class="v2-flow-head">
+        <h1 class="text-4xl-semibold text-ink-gray-9">Popovers</h1>
+        <p class="text-p-base text-ink-gray-6">
+          Every popover type, down the page.
+        </p>
+      </header>
       <section
         id="default"
         class="v2-section"
         data-section
         data-label="Default"
       >
+        <h2 class="text-3xl-semibold text-ink-gray-8">Default</h2>
         <DefaultPopovers />
       </section>
       <section
@@ -75,6 +83,7 @@ onMounted(placeModeChip)
         data-section
         data-label="Picker grid"
       >
+        <h2 class="text-3xl-semibold text-ink-gray-8">Picker grid</h2>
         <PickerPopovers
           layout="grid"
           @react="flying?.launch($event)"
@@ -87,6 +96,7 @@ onMounted(placeModeChip)
         data-section
         data-label="Picker list"
       >
+        <h2 class="text-3xl-semibold text-ink-gray-8">Picker list</h2>
         <PickerPopovers
           layout="list"
           @react="flying?.launch($event)"
@@ -94,6 +104,7 @@ onMounted(placeModeChip)
         />
       </section>
       <section id="form" class="v2-section" data-section data-label="Form">
+        <h2 class="text-3xl-semibold text-ink-gray-8">Form</h2>
         <FormPopovers />
       </section>
       <section
@@ -102,9 +113,11 @@ onMounted(placeModeChip)
         data-section
         data-label="Onboarding"
       >
+        <h2 class="text-3xl-semibold text-ink-gray-8">Onboarding</h2>
         <OnboardingPopover />
       </section>
       <section id="filter" class="v2-section" data-section data-label="Filter">
+        <h2 class="text-3xl-semibold text-ink-gray-8">Filter</h2>
         <FilterPopover />
       </section>
       <section
@@ -113,6 +126,7 @@ onMounted(placeModeChip)
         data-section
         data-label="Notifications"
       >
+        <h2 class="text-3xl-semibold text-ink-gray-8">Notifications</h2>
         <NotificationPopovers />
       </section>
       <section
@@ -121,6 +135,7 @@ onMounted(placeModeChip)
         data-section
         data-label="Comments"
       >
+        <h2 class="text-3xl-semibold text-ink-gray-8">Comments</h2>
         <CommentPopover />
       </section>
       <section
@@ -129,6 +144,7 @@ onMounted(placeModeChip)
         data-section
         data-label="App switcher"
       >
+        <h2 class="text-3xl-semibold text-ink-gray-8">App switcher</h2>
         <AppSwitcherPopovers />
       </section>
       <section
@@ -137,6 +153,7 @@ onMounted(placeModeChip)
         data-section
         data-label="Call dialer"
       >
+        <h2 class="text-3xl-semibold text-ink-gray-8">Call dialer</h2>
         <CallDialer />
       </section>
       <section
@@ -145,6 +162,7 @@ onMounted(placeModeChip)
         data-section
         data-label="Voice record"
       >
+        <h2 class="text-3xl-semibold text-ink-gray-8">Voice record</h2>
         <VoiceRecorder />
       </section>
       <section
@@ -153,6 +171,7 @@ onMounted(placeModeChip)
         data-section
         data-label="Embed link"
       >
+        <h2 class="text-3xl-semibold text-ink-gray-8">Embed link</h2>
         <EmbedPopovers />
       </section>
       <!-- xs over sm, all left-aligned; Card (floating) or Ghost (bare) for both -->
@@ -162,6 +181,7 @@ onMounted(placeModeChip)
         data-section
         data-label="Toolbar"
       >
+        <h2 class="text-3xl-semibold text-ink-gray-8">Toolbar</h2>
         <div class="flex flex-col items-start gap-10">
           <div
             ref="modeRow"
