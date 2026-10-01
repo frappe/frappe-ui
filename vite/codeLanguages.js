@@ -24,19 +24,19 @@
  * honest answer: nothing guards that import.
  *
  * The same job has to be done twice. `resolveId` covers the Rollup graph, which
- * is the production build and every dev request the server transforms. It
- * cannot cover Vite's dependency pre-bundling: that step is esbuild, and it
- * resolves through `vite:resolve` alone, with no user plugin hooks. `frappe-ui`
- * is a bare specifier, so `frappe-ui/code-editor` is pre-bundled, and an absent
+ * is the production build and every dev request the server transforms.
+ * Dependency pre-bundling needs its own plugin registration: an esbuild
+ * adapter for Vite 7, or the same hooks registered with Rolldown for Vite 8.
+ * `frappe-ui/code-editor` is a bare specifier, so it is pre-bundled, and an absent
  * language there does not degrade — esbuild fails the optimize step and the dev
  * server exits:
  *
  *     Error during dependency optimization:
  *     ✘ [ERROR] Could not resolve "@codemirror/lang-json"
  *
- * So the plugin also contributes an esbuild twin through
- * `optimizeDeps.esbuildOptions.plugins`, which does the same resolve-then-stub
- * with esbuild's hooks.
+ * Register the esbuild adapter through `optimizeDeps.esbuildOptions.plugins`
+ * for Vite 7, and the shared hooks through `optimizeDeps.rolldownOptions.plugins`
+ * for Vite 8.
  */
 
 import { dirname, join } from 'node:path'
@@ -109,12 +109,7 @@ export function codeLanguages() {
     return languagesModule
   }
 
-  return {
-    name: 'frappeui-code-languages',
-    // `pre`, so the hook runs before Vite's resolver and can ask for it by
-    // hand. `this.resolve` reports the absence instead of throwing it.
-    enforce: 'pre',
-
+  const hooks = {
     buildStart() {
       languagesModule = null
     },
@@ -138,16 +133,33 @@ export function codeLanguages() {
       if (!id.startsWith(VIRTUAL_PREFIX)) return null
       return stub(id.slice(VIRTUAL_PREFIX.length))
     },
+  }
+
+  return {
+    name: 'frappeui-code-languages',
+    // Check optional languages before Vite reports an unresolved import.
+    enforce: 'pre',
+    ...hooks,
 
     config() {
+      // Reuse the hooks for Rolldown pre-bundling. Vite 8's esbuild adapter
+      // lacks `build.resolve` and `initialOptions.absWorkingDir`.
+      if (this?.meta?.rolldownVersion) {
+        return {
+          optimizeDeps: {
+            rolldownOptions: {
+              plugins: [{ name: 'frappeui-code-languages', ...hooks }],
+            },
+          },
+        }
+      }
       return { optimizeDeps: { esbuildOptions: { plugins: [esbuildTwin()] } } }
     },
   }
 }
 
 /**
- * The pre-bundling half. Same rule, esbuild's hooks: stub a language package
- * that does not resolve, but only for frappe-ui's own `languages` module.
+ * Pre-bundling support for Vite versions that use esbuild.
  */
 function esbuildTwin() {
   return {
