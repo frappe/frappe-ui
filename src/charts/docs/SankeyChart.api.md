@@ -110,7 +110,7 @@
   },
   {
     name: 'actions',
-    description: '',
+    description: 'Controls at the top right of the card, e.g. a period Select or a Dropdown.',
     type: 'any'
   },
   {
