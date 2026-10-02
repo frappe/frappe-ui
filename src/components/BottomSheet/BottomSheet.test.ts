@@ -743,4 +743,27 @@ describe('BottomSheet accessibility wiring', () => {
     expect(described).toEqual([])
     app.unmount()
   })
+
+  it('is named by its title', async () => {
+    const { app, sheet } = await openSheet({ title: 'Move to space' })
+    expect(sheet.getAttribute('aria-label')).toBe('Move to space')
+    app.unmount()
+  })
+
+  // Without a title, a translated app must be able to name the sheet itself
+  // instead of being stuck with the English fallback.
+  it('is named by aria-label when it has no title', async () => {
+    const { app, sheet } = await openSheet({
+      title: undefined,
+      'aria-label': 'Choisir un espace',
+    })
+    expect(sheet.getAttribute('aria-label')).toBe('Choisir un espace')
+    app.unmount()
+  })
+
+  it('falls back to "Bottom sheet" with neither', async () => {
+    const { app, sheet } = await openSheet({ title: undefined })
+    expect(sheet.getAttribute('aria-label')).toBe('Bottom sheet')
+    app.unmount()
+  })
 })
