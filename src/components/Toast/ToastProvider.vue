@@ -12,7 +12,9 @@
           'group py-2.5 flex items-center px-4 bg-surface-gray-9 rounded-5 shadow-xl w-[360px] after:bg-transparent',
         title: 'text-p-base font-medium text-ink-base',
         description: 'text-p-base text-ink-base',
-        icon: 'mr-2 text-ink-base [&_svg]:size-4',
+        // With a description the icon sits on the title line, not the middle of
+        // the toast: to the top, dropped 2px so it centres on the 21px line.
+        icon: 'mr-2 text-ink-base [&_svg]:size-4 group-has-[[data-description]]:self-start group-has-[[data-description]]:mt-0.5',
         closeButton:
           'order-1 ml-auto group-has-[[data-action]]:ml-0 grid place-items-center rounded-1 text-ink-base hover:bg-surface-gray-8 size-5 !transition-colors [&_svg]:size-4',
         actionButton:

@@ -51,6 +51,15 @@ export interface DropdownProps {
 
   /** Teleport target for dropdown portal content. Unset, an embedding host's target is used, else `body`. */
   portalTo?: PortalTarget
+
+  /**
+   * Whether the open menu is modal: the rest of the page is hidden from
+   * assistive tech and pointer events outside it are blocked. Off, the page
+   * stays live around the menu — for a trigger inside editable content such
+   * as a rich text editor's document, where hiding every other block would
+   * read as an edit to the editor. Defaults to `true`.
+   */
+  modal?: boolean
 }
 
 export interface DropdownTriggerSlotProps extends MenuSlotProps {

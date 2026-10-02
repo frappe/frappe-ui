@@ -1,5 +1,5 @@
 <template>
-  <DropdownMenuRoot v-model:open="openModel" v-slot="{ open }">
+  <DropdownMenuRoot v-model:open="openModel" :modal="modal" v-slot="{ open }">
     <DropdownMenuTrigger
       as-child
       data-slot="trigger"
@@ -83,6 +83,7 @@ const props = withDefaults(defineProps<DropdownProps>(), {
   side: 'bottom',
   align: 'start',
   offset: 4,
+  modal: true,
 })
 
 const portalTarget = usePortalTarget(() => props.portalTo)
