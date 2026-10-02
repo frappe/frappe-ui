@@ -1330,10 +1330,13 @@ const outlineTitle = computed(
 .v2-sections.is-flow > .v2-flow-head {
   @apply flex flex-col items-start gap-1 text-left;
 }
-/* each screen centred in the column, its heading over it */
+/* each screen centred in the column, its heading on the column's left */
 .v2-sections.is-flow > .v2-section {
   @apply min-h-0 scroll-mt-12 flex-col items-center justify-start gap-6 px-0 py-0 text-center;
   scroll-snap-align: none;
+}
+.v2-sections.is-flow > .v2-section > h2 {
+  @apply self-start text-left;
 }
 @media (prefers-reduced-motion: reduce) {
   .v2-sections {
