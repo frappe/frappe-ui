@@ -1327,10 +1327,11 @@ const outlineTitle = computed(
   @apply mx-auto w-full max-w-[900px] shrink-0;
 }
 .v2-sections.is-flow > .v2-flow-head {
-  @apply flex flex-col gap-1;
+  @apply flex flex-col items-center gap-1 text-center;
 }
+/* each screen centred in the column, its heading over it */
 .v2-sections.is-flow > .v2-section {
-  @apply min-h-0 scroll-mt-12 flex-col items-start justify-start gap-6 px-0 py-0;
+  @apply min-h-0 scroll-mt-12 flex-col items-center justify-start gap-6 px-0 py-0 text-center;
   scroll-snap-align: none;
 }
 @media (prefers-reduced-motion: reduce) {
