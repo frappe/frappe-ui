@@ -95,4 +95,18 @@ right away. They need `<Dialogs />` somewhere in the app, which
 `paddingTop` sets the space above the dialog. It takes a number of pixels or a
 CSS length: `:padding-top="80"` or `padding-top="20vh"`.
 
+## Accessibility
+
+The dialog is modal. While it is open, focus stays inside it and the page
+behind it is hidden from screen readers. On open, focus moves to the first
+element that can take focus, or to an element marked `autofocus`. On close, it
+returns to the element that opened the dialog.
+
+- `title` is the dialog's accessible name, and `message` its description. A
+  `bare` dialog has neither, so give it a `Dialog.Title` (and a
+  `Dialog.Description` if it has one).
+- The × button in the header is labelled "Close".
+- `Escape` and a click outside close the dialog, unless `dismissible` is
+  `false`.
+
 <!-- @include: ./Dialog.api.md -->

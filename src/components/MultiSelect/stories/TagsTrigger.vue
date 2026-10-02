@@ -8,7 +8,7 @@ type Tag = {
   // Derived from Badge, never hand-written. A copied union is how the
   // deprecated `orange` theme outlived the ADR-0008 sweep: nothing failed when
   // the real union changed. Note `tsconfig.app.json` excludes `stories/**`, so
-  // this does not fail CI today — it fails in the editor, and it fails the
+  // this does not fail CI today; it fails in the editor, and it fails the
   // moment stories join the type-check program.
   theme: BadgeProps['theme']
 }
@@ -53,6 +53,7 @@ function removeTag(value: string | number) {
               <span
                 role="button"
                 tabindex="-1"
+                :aria-label="`Remove ${option.label}`"
                 class="-mr-0.5 inline-flex cursor-pointer items-center justify-center rounded-1 p-0.5 opacity-70 hover:opacity-100"
                 @click.stop="removeTag(option.value)"
                 @pointerdown.stop
