@@ -1326,8 +1326,9 @@ const outlineTitle = computed(
 .v2-sections.is-flow > .v2-section {
   @apply mx-auto w-full max-w-[900px] shrink-0;
 }
+/* the title and its line read from the column's left edge */
 .v2-sections.is-flow > .v2-flow-head {
-  @apply flex flex-col items-center gap-1 text-center;
+  @apply flex flex-col items-start gap-1 text-left;
 }
 /* each screen centred in the column, its heading over it */
 .v2-sections.is-flow > .v2-section {
