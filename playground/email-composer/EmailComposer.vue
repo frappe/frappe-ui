@@ -31,9 +31,9 @@ import { faceFor } from '../components/patterns/designAssets'
  *
  * The recipient fields are frappe-ui's MultiEmailInput — chips, an inline
  * caret and a suggestion menu are what it does — dressed to the file: the
- * chips are Espresso's `tag` (md, subtle — node 35730:62525: 24 tall,
- * radius 6, surface-gray-2, 6 in front and 4 behind, a 16px face, a 13px
- * ink-gray-7 label, a 12px close), and the menu is its `dropdown` (280 wide, radius 10, 4 of padding,
+ * chips are Espresso's `tag` (md, outline — the user's call: 24 tall,
+ * radius 6, a 1px outline-gray-2 line and no fill, 6 in front and 4
+ * behind, a 16px face, a 13px ink-gray-7 label, a 12px close), and the menu is its `dropdown` (280 wide, radius 10, 4 of padding,
  * 49px rows 1 apart with a 32px face, the name over the address, the
  * pointed-at row on surface-gray-2).
  *
@@ -121,7 +121,7 @@ function insertEmoji(emoji: string) {
  * Attachments go with the message, not into it: the paperclip opens the
  * system's dialog and each file picked becomes a chip at the foot of the
  * body, as Gmail lays them — never a block among the words. The chip is the
- * same md tag the recipients wear, with the file glyph where the face goes.
+ * same md outline tag the recipients wear, the file glyph where the face goes.
  */
 const attachments = ref<File[]>([])
 const fileInput = ref<HTMLInputElement | null>(null)
@@ -205,6 +205,9 @@ const root = ref<HTMLElement | null>(null)
       were, rather than sliding down to the middle of two. The glyph's 6 is
       what centres it on that 28px first line.
 
+      Cc and Bcc pressed are the word alone stepping up to ink-gray-7 — no
+      fill (the user's call over the file's surface-gray-4 pill).
+
       11.4 on the right, not the file's 12: the file sets the button's box
       12 in, which leaves the word's ink 0.6 short of the close glyph's in
       the header above. The button keeps its own 8 either side, so the
@@ -271,9 +274,7 @@ const root = ref<HTMLElement | null>(null)
           variant="ghost"
           size="sm"
           label="Cc"
-          :class="
-            showCc ? '!bg-surface-gray-4 !text-ink-gray-7' : '!text-ink-gray-5'
-          "
+          :class="showCc ? '!text-ink-gray-7' : '!text-ink-gray-5'"
           :aria-pressed="showCc"
           @click="showCc = !showCc"
         />
@@ -281,9 +282,7 @@ const root = ref<HTMLElement | null>(null)
           variant="ghost"
           size="sm"
           label="Bcc"
-          :class="
-            showBcc ? '!bg-surface-gray-4 !text-ink-gray-7' : '!text-ink-gray-5'
-          "
+          :class="showBcc ? '!text-ink-gray-7' : '!text-ink-gray-5'"
           :aria-pressed="showBcc"
           @click="showBcc = !showBcc"
         />
@@ -391,7 +390,7 @@ const root = ref<HTMLElement | null>(null)
           v-for="(file, i) in attachments"
           :key="file.name + i"
           data-slot="attachment"
-          class="flex h-6 max-w-full items-center gap-1 rounded-3 bg-surface-gray-2 pl-1.5 pr-1"
+          class="flex h-6 max-w-full items-center gap-1 rounded-3 border border-outline-gray-2 pl-[5px] pr-[3px]"
         >
           <ComposerIcon name="file" class="size-4 text-ink-gray-7" />
           <span class="truncate text-sm text-ink-gray-7">{{ file.name }}</span>
@@ -585,15 +584,17 @@ const root = ref<HTMLElement | null>(null)
   padding: 0;
   color: var(--ink-gray-7);
 }
-/* the tag, md (node 35730:62525): 24 tall, radius 6, 6 in front and 4
-   behind, 4 between its parts, a 16px face */
+/* the tag, md outline (the set's size=md, variant=outline — the user's
+   call over the states node's subtle): 24 tall, radius 6, a 1px
+   outline-gray-2 line and no fill, 6 in front and 4 behind measured from
+   the outer edge, 4 between its parts, a 16px face */
 .composer-field :deep([data-slot='tag']) {
   height: 24px;
   gap: 4px;
-  padding: 0 4px 0 6px;
-  border: 0;
+  padding: 0 3px 0 5px;
+  border: 1px solid var(--outline-gray-2);
   border-radius: var(--radius-3);
-  background: var(--surface-gray-2);
+  background: transparent;
 }
 /* the menu: 280 wide, radius 10, the xl elevation, 4 of padding */
 .email-composer :deep([data-slot='content']) {
