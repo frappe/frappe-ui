@@ -210,7 +210,8 @@ function clearAll() {
 
 // ---- the selection: a row, a column, a run of cells, or the caret's cell;
 // the cell under the pointer takes over from a caret (or no caret in a
-// table), so the handles sit on the row and column being pointed at
+// table), so the handles sit on the row and column being pointed at; a
+// selected cell or run keeps its handles, as Notion's table does
 function syncSelection() {
   const ed = editor.value
   if (!ed || ed.isDestroyed || !ed.isEditable || menuOpen.value) return
@@ -239,9 +240,9 @@ function syncSelection() {
       kind = 'caret'
     }
   }
-  // the pointer's cell takes the row and column handles, unless a row or
-  // column is selected; a selected cell or run keeps its own handle
-  if (hoverPos.value !== null && kind !== 'row' && kind !== 'col') {
+  // the pointer's cell takes the row and column handles from a caret (or
+  // no caret); a selected cell, run, row or column keeps them
+  if (hoverPos.value !== null && (kind === 'caret' || kind === null)) {
     const $hover = cellAt(ed, hoverPos.value)
     if ($hover) $cell = $hover
   }
@@ -879,12 +880,13 @@ const px = (n: number) => `${n}px`
 </template>
 
 <style>
-/* a handle: a 12×1 gray-500 pill on a 2px white rule, 4px corners, on
-   the edge (32925:96501). Hovered or open it is the file's grip: 10×20
-   (20×10 for a column), flat gray-500 — no rule, no shadow — on 4px
-   corners, its dots white and overflowing as the 16px glyph does.
-   The pill is pinned 5px in, so the handle placed 4px (or 6px) off a
-   1px line puts the pill exactly on that line */
+/* a handle: Notion's knob — a 14×3 gray-400 pill in a 2px notch of the
+   ring, centred on the ring's line (the file's 32925:96501 draws it 12×1
+   on the line). Hovered or open it is the file's grip: 10×20 (20×10 for
+   a column), flat gray-500 — no rule, no shadow — on 4px corners, its
+   dots white and overflowing as the 16px glyph does. The pill is pinned
+   so the handle placed 4px (or 6px) off a 1px line centres it on that
+   line */
 .rte-tc-handle {
   @apply pointer-events-auto fixed flex items-center justify-center rounded-[4px] border border-transparent text-white transition-colors;
   overflow: visible;
@@ -901,20 +903,20 @@ const px = (n: number) => `${n}px`
   position: absolute;
   display: block;
   border-radius: 4px;
-  background-color: var(--ink-gray-5);
+  background-color: var(--ink-gray-4);
   box-shadow: 0 0 0 2px var(--surface-elevation-2);
 }
 .rte-tc-handle.is-row .rte-tc-pill {
-  left: 4px;
-  top: 3px;
-  width: 1px;
-  height: 12px;
+  left: 3px;
+  top: 2px;
+  width: 3px;
+  height: 14px;
 }
 .rte-tc-handle.is-col .rte-tc-pill {
-  left: 3px;
-  top: 4px;
-  width: 12px;
-  height: 1px;
+  left: 2px;
+  top: 3px;
+  width: 14px;
+  height: 3px;
 }
 .rte-tc-dots {
   display: none;
