@@ -10,6 +10,7 @@
  * logic — hence the `*-controller.ts` suffix per CONVENTIONS §3.2.
  */
 import type { Editor } from '@tiptap/core'
+import { NodeSelection } from '@tiptap/pm/state'
 import { safeGetPos } from '#molecules/editor/extensions/shared/node-view'
 import type { MediaAlign } from './media-node-view-utils'
 
@@ -71,6 +72,129 @@ export function setMediaAlign(
   align: MediaAlign,
 ): void {
   editor.commands.updateAttributes(isVideo ? 'video' : 'image', { align })
+}
+
+/** Delete the hosted node, whatever it is in the middle of. */
+export function removeMedia(editor: Editor, getPos: GetPos): void {
+  const pos = safeGetPos(getPos)
+  if (pos === null) return
+  const { state } = editor.view
+  const node = state.doc.nodeAt(pos)
+  if (!node) return
+  editor.view.dispatch(state.tr.delete(pos, pos + node.nodeSize))
+}
+
+/**
+ * A copy of the hosted node right after it, selected so it can be captioned
+ * or moved straight away. An inline media gets a paragraph of its own, so
+ * the copy reads as the next block rather than running on in the same line.
+ * The copy is a fresh node: no upload id, no error, the same picture.
+ */
+export function duplicateMedia(editor: Editor, getPos: GetPos): void {
+  const pos = safeGetPos(getPos)
+  if (pos === null) return
+  const { state } = editor.view
+  const node = state.doc.nodeAt(pos)
+  if (!node) return
+  const copy = node.type.create(
+    { ...node.attrs, uploadId: null, error: null },
+    node.content,
+    node.marks,
+  )
+  const tr = state.tr
+  let at: number
+  if (node.isInline) {
+    const paragraph = state.schema.nodes.paragraph
+    if (!paragraph) return
+    const after = state.doc.resolve(pos).after()
+    tr.insert(after, paragraph.create(null, copy))
+    at = after + 1
+  } else {
+    at = pos + node.nodeSize
+    tr.insert(at, copy)
+  }
+  tr.setSelection(NodeSelection.create(tr.doc, at)).scrollIntoView()
+  editor.view.dispatch(tr)
+}
+
+/** The file name a media address ends in, or a plain `image`/`video`. */
+export function mediaFileName(src: string, kind = 'image'): string {
+  try {
+    const last = new URL(src, window.location.href).pathname.split('/').pop()
+    const name = decodeURIComponent(last ?? '')
+    return name || kind
+  } catch {
+    return kind
+  }
+}
+
+/**
+ * Save the media to disk under its own file name. The bytes are fetched so
+ * the save is a download even for a host that would otherwise navigate to
+ * the file; a host that will not hand its bytes to a script gets the
+ * browser's own download, which may open the file instead.
+ */
+export async function downloadMedia(
+  src: string,
+  kind = 'image',
+): Promise<void> {
+  const name = mediaFileName(src, kind)
+  try {
+    const blob = await (await fetch(src)).blob()
+    const url = URL.createObjectURL(blob)
+    clickDownload(url, name)
+    setTimeout(() => URL.revokeObjectURL(url), 10_000)
+  } catch {
+    clickDownload(src, name, true)
+  }
+}
+
+function clickDownload(href: string, name: string, newTab = false): void {
+  const a = document.createElement('a')
+  a.href = href
+  a.download = name
+  a.rel = 'noopener'
+  if (newTab) a.target = '_blank'
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+}
+
+/**
+ * Put the picture on the clipboard as an image — a PNG, the one kind the
+ * clipboard takes — so it pastes into a document or a chat as a picture.
+ * Resolves `true` when it did; when the bytes cannot be read (a host that
+ * will not share them) the address is copied instead and it resolves `false`.
+ */
+export async function copyImageToClipboard(src: string): Promise<boolean> {
+  try {
+    const blob = await (await fetch(src)).blob()
+    const png = blob.type === 'image/png' ? blob : await toPng(blob)
+    await navigator.clipboard.write([new ClipboardItem({ 'image/png': png })])
+    return true
+  } catch {
+    try {
+      await navigator.clipboard.writeText(src)
+    } catch {
+      // nothing to copy with: no clipboard at all
+    }
+    return false
+  }
+}
+
+async function toPng(blob: Blob): Promise<Blob> {
+  const bitmap = await createImageBitmap(blob)
+  const canvas = document.createElement('canvas')
+  canvas.width = bitmap.width
+  canvas.height = bitmap.height
+  canvas.getContext('2d')?.drawImage(bitmap, 0, 0)
+  bitmap.close()
+  return new Promise((resolve, reject) =>
+    canvas.toBlob(
+      (png) => (png ? resolve(png) : reject(new Error('Could not encode'))),
+      'image/png',
+    ),
+  )
 }
 
 export interface CaptionKeydownActions {

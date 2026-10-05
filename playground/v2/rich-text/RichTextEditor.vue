@@ -518,6 +518,10 @@ function resolve() {
 .rte-doc [data-type='columns'][data-media='true'] [data-type='column'] > p {
   margin: 0;
 }
+/* two pictures in one cell — one dropped onto another — stand 8px apart */
+.rte-doc [data-type='columns'][data-media='true'] [data-type='column'] > p + p {
+  margin-top: 8px;
+}
 .rte-doc [data-type='columns'][data-media='true'] .ProseMirror-trailingBreak {
   display: none;
 }

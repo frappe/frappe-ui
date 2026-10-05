@@ -9,9 +9,10 @@
 // picture lands, because the picture takes the slot's place.
 //
 // A press on either raises RteImageSource. What comes back takes the
-// slot's own range, so the picture stands exactly where the slot stood:
-// a file goes through the library's upload — its progress, its error, its
-// try-again — and a link, already read, goes straight in.
+// slot's own place in one step, so there is never a moment with nothing
+// in the cell: a file goes through the library's upload — its progress,
+// its error, its try-again — standing in for the selected slot, and a
+// link, already read, goes straight in over the slot's range.
 import { toRaw } from 'vue'
 import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3'
 import { Popover } from '../../../src'
@@ -32,23 +33,25 @@ function range() {
   return { from: pos, to: pos + props.node.nodeSize }
 }
 
-/** the slot becomes an empty paragraph with the caret in it, ready to fill */
-function clear() {
-  const r = range()
-  if (!r) return null
-  editor.chain().focus().insertContentAt(r, { type: 'paragraph' }).run()
-  editor.commands.setTextSelection(r.from + 1)
-  return r.from
-}
-
 function takeFile(file: File) {
-  if (clear() === null) return
+  const r = range()
+  if (!r) return
+  // the upload replaces the selection, and the selection is the slot —
+  // carried along should the document move. Selected first, on its own:
+  // a file turned away at the door is written back before any chain it
+  // was part of would have been dispatched.
+  editor.chain().focus().setNodeSelection(r.from).run()
   editor.commands.uploadImage(file)
 }
 
 function takeLink(image: { src: string; width: number; height: number }) {
-  if (clear() === null) return
-  editor.commands.setImage(image)
+  const r = range()
+  if (!r) return
+  editor
+    .chain()
+    .focus()
+    .insertContentAt(r, { type: 'image', attrs: image })
+    .run()
 }
 </script>
 

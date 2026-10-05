@@ -33,6 +33,10 @@ import {
   selectMedia as selectMediaCmd,
   setMediaAlign,
   handleCaptionKeydown,
+  removeMedia as removeMediaCmd,
+  duplicateMedia,
+  downloadMedia as downloadMediaFile,
+  copyImageToClipboard,
 } from './media-node-view-controller'
 const props = defineProps(nodeViewProps)
 
@@ -273,26 +277,63 @@ function cancelUpload() {
 }
 
 function removeMedia() {
-  const pos = safeGetPos(() => props.getPos())
-  if (pos === null) return
-  const node = editor.view.state.doc.nodeAt(pos)
-  if (!node) return
-  editor.view.dispatch(editor.view.state.tr.delete(pos, pos + node.nodeSize))
+  removeMediaCmd(editor, () => props.getPos())
 }
 
+function duplicate() {
+  duplicateMedia(editor, () => props.getPos())
+}
+
+/**
+ * The media at a share of the width there is for it: the wrapper is the
+ * block the media stands in, so its width is what "full" means here. The
+ * ratio is kept, as the grip keeps it.
+ */
+function resizeTo(fraction: number) {
+  selectMedia()
+  const host = containerRef.value?.parentElement
+  const available =
+    host?.clientWidth ||
+    mediaRef.value?.offsetWidth ||
+    Number(props.node.attrs.width) ||
+    320
+  const width = Math.max(50, Math.round(available * fraction))
+  const height = Math.round(width * mediaIntrinsicAspect())
+  props.updateAttributes({ width, height })
+}
+
+function openMedia() {
+  const src = props.node.attrs.src as string | null
+  if (src) window.open(src, '_blank', 'noopener')
+}
+
+function copyMedia() {
+  const src = props.node.attrs.src as string | null
+  if (src) void copyImageToClipboard(src)
+}
+
+function downloadMedia() {
+  const src = props.node.attrs.src as string | null
+  if (src) void downloadMediaFile(src, isVideo.value ? 'video' : 'image')
+}
+
+/**
+ * An image's replacement is the image command's to find — with no file in
+ * hand it asks, and a host may have its own way of asking. A video is
+ * picked here, as it always was.
+ */
 async function replaceMedia() {
-  const files = await pickFiles({
-    accept: isVideo.value ? 'video/*' : 'image/*',
-  })
+  if (!isVideo.value) {
+    const pos = safeGetPos(() => props.getPos())
+    if (pos !== null) editor.commands.replaceImage(pos)
+    return
+  }
+  const files = await pickFiles({ accept: 'video/*' })
   const file = files[0]
   if (!file) return
   const pos = safeGetPos(() => props.getPos())
   if (pos === null) return
-  if (isVideo.value) {
-    editor.commands.replaceVideo(pos, file)
-  } else {
-    editor.commands.replaceImage(pos, file)
-  }
+  editor.commands.replaceVideo(pos, file)
 }
 
 function setVideoOptions(options: {
@@ -390,7 +431,13 @@ function setVideoOptions(options: {
           :show-caption="showCaption"
           @toggle-caption="toggleCaptions"
           @set-align="onSetAlign"
+          @resize="resizeTo"
           @replace="replaceMedia"
+          @duplicate="duplicate"
+          @open="openMedia"
+          @copy="copyMedia"
+          @download="downloadMedia"
+          @remove="removeMedia"
           @set-video-options="setVideoOptions"
         />
 

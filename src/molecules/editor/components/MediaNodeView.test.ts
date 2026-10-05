@@ -211,3 +211,125 @@ describe('media node view reuse', () => {
     ctx.app.unmount()
   })
 })
+
+describe('media node view actions menu', () => {
+  async function openMenu(root: HTMLElement) {
+    const trigger = root.querySelector(
+      'button[aria-label="Media options"]',
+    ) as HTMLButtonElement
+    trigger.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))
+    trigger.click()
+    await settle()
+  }
+  function item(label: string): HTMLElement {
+    const items = Array.from(
+      document.body.querySelectorAll<HTMLElement>('[role="menuitem"]'),
+    )
+    const found = items.find((el) => el.textContent?.trim() === label)
+    if (!found) throw new Error(`no menu item "${label}"`)
+    return found
+  }
+  async function pick(label: string) {
+    const el = item(label)
+    el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))
+    el.dispatchEvent(new PointerEvent('pointerup', { bubbles: true }))
+    el.click()
+    await settle()
+  }
+
+  it('lists every action for a selected image', async () => {
+    const ctx = mount(
+      '<p><img src="/files/a.png" width="800" height="400"></p>',
+    )
+    await settle()
+    ctx.getEditor().commands.setNodeSelection(1)
+    await settle()
+    await openMenu(ctx.root)
+
+    const labels = Array.from(
+      document.body.querySelectorAll('[role="menuitem"]'),
+    ).map((el) => el.textContent?.trim())
+    expect(labels).toEqual([
+      'Left',
+      'Center',
+      'Right',
+      'Resize',
+      'Replace image',
+      'Duplicate',
+      'Open link',
+      'Copy image',
+      'Download',
+      'Delete',
+    ])
+    expect(document.body.querySelector('button[role="switch"]')).not.toBeNull()
+    ctx.app.unmount()
+  })
+
+  it('deletes the image and leaves the paragraph', async () => {
+    const ctx = mount(
+      '<p>x</p><p><img src="/files/a.png" width="800" height="400"></p><p>y</p>',
+    )
+    await settle()
+    ctx.getEditor().commands.setNodeSelection(4)
+    await settle()
+    await openMenu(ctx.root)
+    await pick('Delete')
+
+    expect(ctx.getEditor().getHTML()).toBe('<p>x</p><p></p><p>y</p>')
+    ctx.app.unmount()
+  })
+
+  it('duplicates the image into a paragraph of its own, caption and all', async () => {
+    const ctx = mount(
+      '<p><img src="/files/a.png" data-caption="Cat" width="800" height="400"></p><p>y</p>',
+    )
+    await settle()
+    const editor = ctx.getEditor()
+    editor.commands.setNodeSelection(1)
+    await settle()
+    await openMenu(ctx.root)
+    await pick('Duplicate')
+
+    const images: { caption: string | null }[] = []
+    editor.state.doc.descendants((node: any) => {
+      if (node.type.name === 'image')
+        images.push({ caption: node.attrs.caption })
+    })
+    expect(images).toEqual([{ caption: 'Cat' }, { caption: 'Cat' }])
+    expect(editor.getHTML()).toMatch(
+      /^<p><img [^>]*><\/p><p><img [^>]*><\/p><p>y<\/p>$/,
+    )
+    // the copy is the selected one, ready to be captioned or moved
+    expect(editor.state.selection.toJSON()).toMatchObject({
+      type: 'node',
+      anchor: 4,
+    })
+    ctx.app.unmount()
+  })
+
+  it('resizes to a share of the width it has, keeping the ratio', async () => {
+    const ctx = mount(
+      '<p><img src="/files/a.png" width="800" height="400"></p>',
+    )
+    await settle()
+    const editor = ctx.getEditor()
+    const wrapper = ctx.root.querySelector(
+      '[data-node-view-wrapper]',
+    ) as HTMLElement
+    Object.defineProperty(wrapper, 'clientWidth', { value: 700 })
+    editor.commands.setNodeSelection(1)
+    await settle()
+    await openMenu(ctx.root)
+    const resize = item('Resize')
+    resize.dispatchEvent(new PointerEvent('pointermove', { bubbles: true }))
+    resize.dispatchEvent(new PointerEvent('pointerenter', { bubbles: true }))
+    resize.click()
+    await settle()
+    await pick('Medium')
+
+    const node = editor.state.doc.nodeAt(1)
+    expect(node.attrs.width).toBe(350)
+    expect(node.attrs.height).toBe(175)
+    ctx.app.unmount()
+  })
+})

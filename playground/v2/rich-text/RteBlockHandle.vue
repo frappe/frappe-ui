@@ -26,6 +26,8 @@ const layer = ref<HTMLElement | null>(null)
 const target = shallowRef<HTMLElement | null>(null)
 const left = ref(0)
 const top = ref(0)
+/** the grip is on a picture in a row's cell, and drawn as the media's chrome */
+const onMedia = ref(false)
 // not reactive: a re-render of the grip while it is the source of a drag
 // makes the browser end the drag, so a drag leaves the grip's DOM alone
 let dragging = false
@@ -37,12 +39,19 @@ const SIZE = 24
 const GAP = 6
 /** how far past a block's edge, into the gap around it, its grip still answers */
 const REACH = 16
+/** how far in from a cell's corner the grip sits on the picture */
+const CELL_INSET = 6
 
 /** what carries a block's first line of text */
 const FIRST_LINE = 'p, h1, h2, h3, h4, h5, h6, summary, pre'
 /** what the editor draws at the top level that is not a block */
 const SKIP =
   '.ProseMirror-gapcursor, .ProseMirror-widget, .ProseMirror-separator, br'
+/** a row of pictures, whose cells each hold a block of their own */
+const MEDIA_ROW = '[data-type="columns"][data-media="true"]'
+const inCell = (el: Element) =>
+  el.parentElement?.matches('[data-type="column"]') === true &&
+  el.closest(MEDIA_ROW) !== null
 const spans = (el: Element, y: number) => {
   const r = el.getBoundingClientRect()
   return y >= r.top && y < r.bottom
@@ -75,6 +84,24 @@ function blockAt(
     }
   }
   if (!el || nearest > REACH) return null
+  // in a row of pictures each cell's own block — the picture's line, or
+  // the empty slot — has the grip, so one picture moves on its own; the
+  // row itself answers from the gaps between its cells
+  if (el.matches(MEDIA_ROW)) {
+    const cell = [...el.children].find(
+      (c): c is HTMLElement =>
+        c instanceof HTMLElement &&
+        x >= c.getBoundingClientRect().left &&
+        x < c.getBoundingClientRect().right,
+    )
+    const block = cell
+      ? [...cell.children].find(
+          (c): c is HTMLElement =>
+            c instanceof HTMLElement && !c.matches(SKIP) && spans(c, y),
+        )
+      : undefined
+    if (block) el = block
+  }
   while (el.matches('ul, ol')) {
     const item = [...el.children].find(
       (c): c is HTMLElement => c instanceof HTMLElement && spans(c, y),
@@ -121,6 +148,14 @@ function place() {
     return
   }
   const r = el.getBoundingClientRect()
+  onMedia.value = inCell(el)
+  // a cell's block has no margin of its own to stand the grip in: it sits
+  // on the picture, in its top-left corner, drawn as the media's chrome
+  if (onMedia.value) {
+    top.value = r.top + CELL_INSET
+    left.value = r.left + CELL_INSET
+    return
+  }
   // centred on the block's first line of text — an item's, a quote's, a
   // callout's, a table's first row's, the summary of an expand block —
   // not on the block's box, which margins and padding push away from the
@@ -362,6 +397,7 @@ const px = (n: number) => `${n}px`
         <button
           type="button"
           class="rte-bh-handle"
+          :class="onMedia && 'is-on-media'"
           :style="{ left: px(left), top: px(top) }"
           draggable="true"
           aria-label="Drag to move"
@@ -385,6 +421,12 @@ const px = (n: number) => `${n}px`
 }
 .rte-bh-handle:active {
   cursor: grabbing;
+}
+/* on a picture it is the media's own chrome (MEDIA_CHROME_BUTTON): white
+   dots on the 36% black overlay, darker under the pointer, one look in
+   either theme since it sits on the picture and not the page */
+.rte-bh-handle.is-on-media {
+  @apply bg-black-overlay-300 text-white hover:bg-black-overlay-400 hover:text-white active:bg-black-overlay-500;
 }
 /* out of sight, not out of the way: the browser ends a drag whose source
    stops taking pointer events */

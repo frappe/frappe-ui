@@ -5,8 +5,12 @@
 // kit, so everything else — text, lists, links, images, tables, code, colour,
 // highlight, mentions, embeds — stays the library's.
 import { Mark, Node, mergeAttributes } from '@tiptap/core'
-import { TextSelection } from '@tiptap/pm/state'
+import type { Node as PMNode } from '@tiptap/pm/model'
+import { Plugin, PluginKey, TextSelection } from '@tiptap/pm/state'
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
+import { imageEngine } from '../../../src/molecules/editor/extensions/image/image-engine'
+import { resolveUploadOptions } from '../../../src/molecules/editor/extensions/shared/media-upload-engine'
+import { openImageSourcePopup } from './rteImagePopup'
 import { FontFamily, FontSize, LineHeight } from '@tiptap/extension-text-style'
 import {
   Attachment as KitAttachment,
@@ -384,7 +388,116 @@ export const ImageSlot = Node.create({
         () =>
         ({ commands }) =>
           commands.insertContent({ type: this.name }),
+      // and so does Replace on a picture's menu: the card floats beside the
+      // picture, and what it answers takes the picture's place — a file by
+      // the library's upload, a link straight in — with the caption, the
+      // alignment and the cell it stands in kept.
+      replaceImage:
+        (pos: number, file?: File) =>
+        ({ editor }) => {
+          const node = editor.state.doc.nodeAt(pos)
+          if (!node || node.type.name !== 'image') return false
+          if (file) {
+            void imageEngine.uploadReplace(
+              file,
+              editor,
+              pos,
+              resolveUploadOptions({ editor }),
+              node.attrs,
+            )
+            return true
+          }
+          openImageSourcePopup(editor, pos, {
+            file: (at, chosen) => editor.commands.replaceImage(at, chosen),
+            link: (at, image) => {
+              const live = editor.state.doc.nodeAt(at)
+              if (!live || live.type.name !== 'image') return
+              editor.view.dispatch(
+                editor.state.tr.setNodeMarkup(at, undefined, {
+                  ...live.attrs,
+                  ...image,
+                  uploadId: null,
+                  loading: false,
+                  error: null,
+                }),
+              )
+            },
+          })
+          return true
+        },
     }
+  },
+  // A row of pictures keeps every cell either filled or offering: a cell
+  // whose picture goes — deleted from its menu, dragged to another cell,
+  // its upload cancelled — gets its slot back, and a cell a picture lands
+  // in gives its slot up. Said once here, so no way of moving a picture
+  // has to remember it.
+  addProseMirrorPlugins() {
+    const slot = this.type
+    const blankParagraph = (n: PMNode) =>
+      n.type.name === 'paragraph' && n.content.size === 0
+    return [
+      new Plugin({
+        key: new PluginKey('rteImageSlots'),
+        appendTransaction: (transactions, _old, state) => {
+          if (!transactions.some((tr) => tr.docChanged)) return null
+          const edits: { from: number; to: number; slot?: boolean }[] = []
+          state.doc.descendants((row, rowPos) => {
+            if (row.type.name !== 'columns') return true
+            if (!row.attrs.media) return false
+            row.forEach((column, offset) => {
+              // the first position inside the column
+              const start = rowPos + 1 + offset + 1
+              let picture = false
+              column.descendants((n) => {
+                if (n.type.name === 'image') picture = true
+                return !picture
+              })
+              let slots = 0
+              column.forEach((child) => {
+                if (child.type === slot) slots++
+              })
+              if (picture) {
+                column.forEach((child, at) => {
+                  if (child.type === slot)
+                    edits.push({
+                      from: start + at,
+                      to: start + at + child.nodeSize,
+                    })
+                })
+              } else if (slots) {
+                column.forEach((child, at) => {
+                  if (blankParagraph(child))
+                    edits.push({
+                      from: start + at,
+                      to: start + at + child.nodeSize,
+                    })
+                })
+              } else {
+                let blank = true
+                column.forEach((child) => {
+                  if (!blankParagraph(child)) blank = false
+                })
+                if (blank)
+                  edits.push({
+                    from: start,
+                    to: start + column.content.size,
+                    slot: true,
+                  })
+              }
+            })
+            return false
+          })
+          if (!edits.length) return null
+          const tr = state.tr
+          for (const e of edits.sort((a, b) => b.from - a.from)) {
+            if (e.slot) tr.replaceWith(e.from, e.to, slot.create())
+            else tr.delete(e.from, e.to)
+          }
+          return tr
+        },
+      }),
+    ]
   },
 })
 

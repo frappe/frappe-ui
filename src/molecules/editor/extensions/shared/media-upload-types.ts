@@ -25,8 +25,11 @@ declare module '@tiptap/core' {
     mediaUpload: {
       /** Upload and insert already-provided video files (e.g. from a drop). */
       uploadVideoFiles: (files: File[], pos?: number | null) => ReturnType
-      /** Replace an existing image node while keeping its caption/options. */
-      replaceImage: (pos: number, file: File) => ReturnType
+      /**
+       * Replace an existing image node while keeping its caption/options.
+       * Without a file in hand, the file picker asks for one.
+       */
+      replaceImage: (pos: number, file?: File) => ReturnType
       /** Replace an existing video node while keeping its caption/options. */
       replaceVideo: (pos: number, file: File) => ReturnType
       /** Toggle video playback options. */
@@ -102,6 +105,12 @@ export interface MediaUploadConfig {
   accept: RegExp
   /** Whether to keep a base64 preview in `localFileMap` (image: true, video: false). */
   storeBase64: boolean
+  /**
+   * Why a file cannot be taken at all, or `null` when it can. A rejected
+   * file is never staged or previewed: its placeholder carries the message
+   * instead of a broken element, with the usual "choose another" way out.
+   */
+  validate?: (file: File) => string | null
 }
 
 /** Insert vs. replace placement of the loading placeholder node. */

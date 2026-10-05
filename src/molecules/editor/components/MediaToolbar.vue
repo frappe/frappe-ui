@@ -16,7 +16,9 @@ const props = defineProps<{
 /**
  * Media chrome, per the design (espresso-2.0, node 31403-45433): a single
  * `MEDIA_CHROME_BUTTON` 10px in from the top-right corner, with every action
- * in the menu behind it.
+ * in the menu behind it — the caption, the alignment, the size, the file
+ * (replace, duplicate), the bytes (open, copy, download) and, last and in
+ * red, delete.
  *
  * They used to sit in the frame as six buttons sharing one 65%-black pill — a
  * slab of chrome across the top of every selected image, most of it rarely
@@ -25,7 +27,14 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'toggle-caption'): void
   (e: 'set-align', align: MediaAlign): void
+  /** `fraction` of the width the media has to fill */
+  (e: 'resize', fraction: number): void
   (e: 'replace'): void
+  (e: 'duplicate'): void
+  (e: 'open'): void
+  (e: 'copy'): void
+  (e: 'download'): void
+  (e: 'remove'): void
   (
     e: 'set-video-options',
     options: { autoplay?: boolean; loop?: boolean; muted?: boolean },
@@ -44,6 +53,14 @@ const alignOptions: Array<{
   { value: 'right', label: 'Right', icon: 'lucide-align-right' },
 ]
 
+/** the sizes on offer, as a share of the width there is to fill */
+const sizeOptions: Array<{ value: number; label: string }> = [
+  { value: 1, label: 'Full width' },
+  { value: 0.75, label: 'Large' },
+  { value: 0.5, label: 'Medium' },
+  { value: 0.25, label: 'Small' },
+]
+
 const videoOptions = [
   { key: 'autoplay', label: 'Autoplay' },
   { key: 'loop', label: 'Loop' },
@@ -58,6 +75,8 @@ const isVisible = computed(
   () => (props.selected || menuOpen.value) && props.isEditable,
 )
 const isVideo = computed(() => props.mediaType === 'video')
+const isImage = computed(() => props.mediaType === 'image')
+const isEmbed = computed(() => props.mediaType === 'embed')
 
 const replaceLabel = computed(
   () =>
@@ -68,55 +87,118 @@ const replaceLabel = computed(
     })[props.mediaType],
 )
 
-const options = computed<DropdownOptions>(() => [
-  {
-    group: 'caption',
-    hideLabel: true,
-    options: [
-      {
-        label: 'Caption',
-        icon: 'lucide-captions',
-        switch: true,
-        switchValue: props.showCaption,
-        onClick: () => emit('toggle-caption'),
-      },
-    ],
-  },
-  {
-    group: 'Align',
-    options: alignOptions.map((align) => ({
-      label: align.label,
-      icon: align.icon,
-      selected: props.node.attrs.align === align.value,
-      onClick: () => emit('set-align', align.value),
-    })),
-  },
-  ...(isVideo.value
-    ? [
+const options = computed<DropdownOptions>(() => {
+  const groups: DropdownOptions = [
+    {
+      group: 'caption',
+      hideLabel: true,
+      options: [
         {
-          group: 'Playback',
-          options: videoOptions.map((option) => ({
-            label: option.label,
-            switch: true as const,
-            switchValue: Boolean(props.node.attrs[option.key]),
-            onClick: (value: boolean) =>
-              emit('set-video-options', { [option.key]: value }),
+          label: 'Caption',
+          icon: 'lucide-captions',
+          switch: true,
+          switchValue: props.showCaption,
+          onClick: () => emit('toggle-caption'),
+        },
+      ],
+    },
+    {
+      group: 'Align',
+      options: alignOptions.map((align) => ({
+        label: align.label,
+        icon: align.icon,
+        selected: props.node.attrs.align === align.value,
+        onClick: () => emit('set-align', align.value),
+      })),
+    },
+  ]
+  if (!isEmbed.value) {
+    groups.push({
+      group: 'size',
+      hideLabel: true,
+      options: [
+        {
+          label: 'Resize',
+          icon: 'lucide-scaling',
+          submenu: sizeOptions.map((size) => ({
+            label: size.label,
+            onClick: () => emit('resize', size.value),
           })),
         },
-      ]
-    : []),
-  {
+      ],
+    })
+  }
+  if (isVideo.value) {
+    groups.push({
+      group: 'Playback',
+      options: videoOptions.map((option) => ({
+        label: option.label,
+        switch: true as const,
+        switchValue: Boolean(props.node.attrs[option.key]),
+        onClick: (value: boolean) =>
+          emit('set-video-options', { [option.key]: value }),
+      })),
+    })
+  }
+  groups.push({
     group: 'media',
     hideLabel: true,
     options: [
       {
         label: replaceLabel.value,
-        icon: props.mediaType === 'embed' ? 'lucide-link' : 'lucide-refresh-cw',
+        icon: isEmbed.value ? 'lucide-link' : 'lucide-refresh-cw',
         onClick: () => emit('replace'),
       },
+      {
+        label: 'Duplicate',
+        icon: 'lucide-copy-plus',
+        onClick: () => emit('duplicate'),
+      },
     ],
-  },
-])
+  })
+  groups.push({
+    group: 'share',
+    hideLabel: true,
+    options: [
+      {
+        label: 'Open link',
+        icon: 'lucide-external-link',
+        onClick: () => emit('open'),
+      },
+      ...(isImage.value
+        ? [
+            {
+              label: 'Copy image',
+              icon: 'lucide-copy',
+              onClick: () => emit('copy'),
+            },
+          ]
+        : []),
+      ...(isEmbed.value
+        ? []
+        : [
+            {
+              label: 'Download',
+              icon: 'lucide-download',
+              onClick: () => emit('download'),
+            },
+          ]),
+    ],
+  })
+  groups.push({
+    group: 'remove',
+    hideLabel: true,
+    options: [
+      {
+        label: 'Delete',
+        icon: 'lucide-trash-2',
+        theme: 'red',
+        onClick: () => emit('remove'),
+      },
+    ],
+  })
+  return groups
+})
 </script>
 
 <template>
