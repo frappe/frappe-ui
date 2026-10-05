@@ -170,13 +170,38 @@ export function findOverlappingEventsCount(
   events: CalendarEvent[],
   minuteHeight?: number,
 ): CalendarEvent[] {
+  // Where an event starts and ends on the grid rather than on the clock: its
+  // start, and its start plus the height it is actually painted at.
+  const painted = (event: CalendarEvent): [number, number] => {
+    const start = event.startTime || 0
+    const minutes = (event.endTime || 0) - start
+    const end = minuteHeight
+      ? start + paintedEventHeight(minutes, minuteHeight) / minuteHeight
+      : start + minutes
+    return [start, end]
+  }
+  const crosses = (a: [number, number], b: [number, number]) =>
+    a[0] < b[1] && b[0] < a[1]
+
   // A declined event claims no room: the others lay out as if it were not
   // there, and it sits full width beneath them. Grid events all carry the same
   // z-index, so "beneath" is DOM order — the declined go first, before the
-  // events they underlie.
-  const declined: CalendarEvent[] = events
+  // events they underlie. Beneath is still beneath: a pill drawn on a declined
+  // event cuts against it as it would against any other, so each declined
+  // event is laid out first, and every pill whose extent crosses it is over
+  // it. Declined over declined the same, in start order.
+  const declined: CalendarEvent[] = []
+  for (const event of events
     .filter((event) => event.isDeclined)
-    .map((event) => ({ ...event, hallNumber: 0, idx: -1 }))
+    .sort((a, b) => (a.startTime || 0) - (b.startTime || 0))) {
+    const own = painted(event)
+    declined.push({
+      ...event,
+      hallNumber: 0,
+      idx: -1,
+      over: declined.filter((other) => crosses(painted(other), own)),
+    })
+  }
   events = events.filter((event) => !event.isDeclined)
 
   // Sort events based on start time
@@ -198,19 +223,6 @@ export function findOverlappingEventsCount(
     }
   }
 
-  // Where an event starts and ends on the grid rather than on the clock: its
-  // start, and its start plus the height it is actually painted at.
-  const painted = (event: CalendarEvent): [number, number] => {
-    const start = event.startTime || 0
-    const minutes = (event.endTime || 0) - start
-    const end = minuteHeight
-      ? start + paintedEventHeight(minutes, minuteHeight) / minuteHeight
-      : start + minutes
-    return [start, end]
-  }
-  const crosses = (a: [number, number], b: [number, number]) =>
-    a[0] < b[1] && b[0] < a[1]
-
   // flattening halls and events — in order, so that everything beneath a pill
   // is laid out, with its own `over`, by the time the pill looks for it
   const placed: CalendarEvent[][] = []
@@ -218,11 +230,11 @@ export function findOverlappingEventsCount(
     const placedHall: CalendarEvent[] = []
     placed.push(placedHall)
     for (const [eventIdx, event] of hall.entries()) {
-      // Everything drawn beneath this pill: the earlier columns, which run
-      // under it in full, and the event before it in its own.
-      const beneath = placed
-        .slice(0, hallIdx)
-        .flat()
+      // Everything drawn beneath this pill: the declined, the earlier
+      // columns, which run under it in full, and the event before it in its
+      // own.
+      const beneath = declined
+        .concat(placed.slice(0, hallIdx).flat())
         .concat(placedHall.slice(Math.max(eventIdx - 1, 0), eventIdx))
       const own = painted(event)
       placedHall.push({
