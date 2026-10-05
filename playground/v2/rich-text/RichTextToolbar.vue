@@ -35,6 +35,13 @@ import {
 } from '../../../src/molecules/editor/menu'
 import type { TiptapEditor } from '../../../src/molecules/editor'
 import RteIcon from './RteIcon.vue'
+import {
+  BLOCKS,
+  type BlockValue,
+  activeBlockOf,
+  applyBlock,
+  blockLabel,
+} from './rteBlocks'
 import RteColorPanel from './RteColorPanel.vue'
 import EmojiPicker from '../popover/EmojiPicker.vue'
 
@@ -75,59 +82,17 @@ const lucide =
 const chain = () => editor.value!.chain().focus()
 
 // ---- the block style: what the cursor sits in, and the menu to change it
-const BLOCKS = [
-  { value: 'paragraph', label: 'Text', icon: 'paragraph' },
-  { value: 'h1', label: 'Heading 1', icon: 'heading1' },
-  { value: 'h2', label: 'Heading 2', icon: 'heading2' },
-  { value: 'h3', label: 'Heading 3', icon: 'heading3' },
-  { value: 'h4', label: 'Heading 4', icon: 'heading4' },
-  { value: 'h5', label: 'Heading 5', icon: 'heading5' },
-  { value: 'h6', label: 'Heading 6', icon: 'heading6' },
-  { value: 'bulletList', label: 'Bulleted list', icon: 'multiple-list' },
-  { value: 'orderedList', label: 'Numbered list', icon: 'numbered-list' },
-  { value: 'taskList', label: 'To-do list', icon: 'todo' },
-  { value: 'codeBlock', label: 'Code', icon: 'code' },
-  { value: 'blockquote', label: 'Quote', icon: 'quote' },
-  { value: 'columns', label: '3 Coloumn', icon: 'grid-3' },
-] as const
-type BlockValue = (typeof BLOCKS)[number]['value']
-
+// (the list and the commands are rteBlocks', shared with the floating bar)
 const activeBlock = computed<BlockValue>(() =>
-  live((ed) => {
-    for (const l of [1, 2, 3, 4, 5, 6] as const)
-      if (ed.isActive('heading', { level: l })) return `h${l}` as BlockValue
-    if (ed.isActive('codeBlock')) return 'codeBlock'
-    if (ed.isActive('taskList')) return 'taskList'
-    if (ed.isActive('bulletList')) return 'bulletList'
-    if (ed.isActive('orderedList')) return 'orderedList'
-    if (ed.isActive('blockquote')) return 'blockquote'
-    if (ed.isActive('columns')) return 'columns'
-    return 'paragraph'
-  }, 'paragraph'),
+  live((ed) => activeBlockOf(ed), 'paragraph'),
 )
-const activeBlockLabel = computed(
-  () => BLOCKS.find((b) => b.value === activeBlock.value)?.label ?? 'Text',
-)
-function setBlock(value: BlockValue) {
-  const c = chain()
-  if (value === 'paragraph') c.setParagraph().run()
-  else if (value.startsWith('h'))
-    c.toggleHeading({
-      level: Number(value[1]) as 1 | 2 | 3 | 4 | 5 | 6,
-    }).run()
-  else if (value === 'bulletList') c.toggleBulletList().run()
-  else if (value === 'orderedList') c.toggleOrderedList().run()
-  else if (value === 'taskList') c.toggleTaskList().run()
-  else if (value === 'codeBlock') c.toggleCodeBlock().run()
-  else if (value === 'blockquote') c.toggleBlockquote().run()
-  else if (value === 'columns') c.insertColumns(3).run()
-}
+const activeBlockLabel = computed(() => blockLabel(activeBlock.value))
 const blockOptions = computed<DropdownOptions>(() =>
   BLOCKS.map((b) => ({
     label: b.label,
     icon: icon(b.icon),
     selected: activeBlock.value === b.value,
-    onClick: () => setBlock(b.value),
+    onClick: () => applyBlock(chain(), b.value),
   })),
 )
 
