@@ -29,6 +29,7 @@ import TablePatterns from '../components/TablePatterns.vue'
 import ActivityPatterns from '../activity/ActivityPatterns.vue'
 import CalendarPatterns from '../calendar/CalendarPatterns.vue'
 import EmailComposerPage from '../email-composer/EmailComposerPage.vue'
+import TreePage from '../tree/TreePage.vue'
 // Figma 35185:59381 — the app's own mark, in place of the Frappe logo
 import appLogo from './assets/app-logo.svg'
 import EIcon from '../espresso-sidebar/EIcon.vue'
@@ -65,6 +66,7 @@ import navTable from './assets/nav/table.svg?raw'
 import navActivity from './assets/nav/activity.svg?raw'
 import navCalendar from './assets/nav/calendar.svg?raw'
 import navEmailComposer from './assets/nav/email-composer.svg?raw'
+import navTree from './assets/nav/tree.svg?raw'
 import ApplicableCouponsModal from './modals/ApplicableCouponsModal.vue'
 import CallDetailsModal from './modals/CallDetailsModal.vue'
 import DeleteProjectModal from './modals/DeleteProjectModal.vue'
@@ -179,6 +181,7 @@ const pages = [
   'Activity',
   'Calendar',
   'Email composer',
+  'Tree',
 ].map((label) => ({ id: label.toLowerCase().replace(/\W+/g, '-'), label }))
 
 // The app tray down the far left, as a Frappe app shows it: this playground
@@ -225,6 +228,7 @@ const NAV_ICONS: Record<string, string> = {
   activity: navActivity,
   calendar: navCalendar,
   'email-composer': navEmailComposer,
+  tree: navTree,
 }
 
 // Drives `<html data-theme>`, so every token on the page — and in the
@@ -1092,6 +1096,7 @@ const outlineTitle = computed(
               </div>
               <CalendarPatterns v-else-if="page === 'calendar'" />
               <EmailComposerPage v-else-if="page === 'email-composer'" />
+              <TreePage v-else-if="page === 'tree'" />
 
               <div
                 v-else
