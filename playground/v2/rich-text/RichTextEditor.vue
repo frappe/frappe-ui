@@ -24,6 +24,7 @@ import RichTextToolbar from './RichTextToolbar.vue'
 import RteBubbleMenu from './RteBubbleMenu.vue'
 import RteTableControls from './RteTableControls.vue'
 import RteBlockHandle from './RteBlockHandle.vue'
+import RteColumnResizer from './RteColumnResizer.vue'
 import RteIcon from './RteIcon.vue'
 import { playgroundExtensions } from './extensions'
 import { rteSlashCommands } from './rteSlashCommands'
@@ -204,6 +205,9 @@ function resolve() {
         <RteTableControls />
         <!-- every block's grip in the margin, as Notion draws it -->
         <RteBlockHandle />
+        <!-- the bar between two columns, that gives one what it takes
+             from the other -->
+        <RteColumnResizer />
         <div class="px-4 py-8 sm:px-8" @click="onEditorClick">
           <EditorContent
             class="rte-doc mx-auto w-full max-w-[700px] [--prose-font-size:15px]"

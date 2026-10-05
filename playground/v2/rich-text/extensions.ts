@@ -51,6 +51,8 @@ declare module '@tiptap/core' {
        * and a new row of them anywhere else
        */
       setColumns: (count?: number) => ReturnType
+      /** the share of the row each column of the row at `pos` has */
+      setColumnWidths: (pos: number, widths: number[]) => ReturnType
     }
     rteImageSlot: {
       /** lay an empty image slot down, to be filled by file or by link */
@@ -255,6 +257,32 @@ export const Columns = Node.create({
         parseHTML: (el) => Number(el.getAttribute('data-count') ?? 2),
         renderHTML: (attrs) => ({ 'data-count': attrs.count }),
       },
+      // the share of the row each column has, as the bar between two of
+      // them sets it (RteColumnResizer); none means equal shares. Drawn
+      // as the grid's own template, so the row needs no script to keep it.
+      widths: {
+        default: null,
+        parseHTML: (el) => {
+          const raw = el.getAttribute('data-widths')
+          if (!raw) return null
+          const widths = raw.split(',').map(Number)
+          const count = Number(el.getAttribute('data-count') ?? widths.length)
+          return widths.length === count &&
+            widths.every((w) => Number.isFinite(w) && w > 0)
+            ? widths
+            : null
+        },
+        renderHTML: (attrs) => {
+          const widths = attrs.widths as number[] | null
+          if (!widths) return {}
+          return {
+            'data-widths': widths.map((w) => w.toFixed(4)).join(','),
+            style: `grid-template-columns: ${widths
+              .map((w) => `minmax(0, ${w.toFixed(4)}fr)`)
+              .join(' ')}`,
+          }
+        },
+      },
       // a row of pictures is ruled differently from a row of prose: the
       // file sets its cells 16 apart with nothing drawn between them
       media: {
@@ -283,6 +311,20 @@ export const Columns = Node.create({
               content: [{ type: 'paragraph' }],
             })),
           }),
+      setColumnWidths:
+        (pos: number, widths: number[]) =>
+        ({ state, tr, dispatch }) => {
+          const row = state.doc.nodeAt(pos)
+          if (
+            !row ||
+            row.type !== this.type ||
+            widths.length !== row.childCount
+          )
+            return false
+          if (dispatch)
+            tr.setNodeMarkup(pos, undefined, { ...row.attrs, widths })
+          return true
+        },
       setColumns:
         (count = 2) =>
         ({ state, tr, dispatch, commands }) => {
@@ -316,7 +358,11 @@ export const Columns = Node.create({
           }
 
           const from = $from.before(depth)
-          const next = row.type.create({ ...row.attrs, count }, columns)
+          // a re-counted row starts from equal shares again
+          const next = row.type.create(
+            { ...row.attrs, count, widths: null },
+            columns,
+          )
           tr.replaceWith(from, from + row.nodeSize, next)
 
           // the caret stays on its text: untouched in a kept column, and
