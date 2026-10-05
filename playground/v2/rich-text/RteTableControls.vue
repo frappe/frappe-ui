@@ -1702,9 +1702,10 @@ body.rte-tc-dragging .rte-tc-handle {
 .rte-tc-handle.is-open .rte-tc-dots {
   display: block;
 }
-/* a strip: gray-50 on a gray-100 rule, 4px corners, the plus gray-400 */
+/* a strip: white on a gray-100 rule, 4px corners, the plus gray-400; it
+   takes a gray-50 ground only under the pointer */
 .rte-tc-strip {
-  @apply pointer-events-auto fixed flex items-center justify-center rounded-[4px] border border-outline-gray-1 bg-surface-gray-1 text-ink-gray-4 transition-colors hover:bg-surface-gray-2 hover:text-ink-gray-6;
+  @apply pointer-events-auto fixed flex items-center justify-center rounded-[4px] border border-outline-gray-1 bg-surface-base text-ink-gray-4 transition-colors hover:bg-surface-gray-1 hover:text-ink-gray-6;
 }
 /* the menus: the file's 220px card, 4px in on a 12px radius under the xl
    shadow, its rows 28px on an 8px radius with a 16px glyph 6px off the
