@@ -6,6 +6,7 @@ import type { TiptapEditor } from '../../src/molecules/editor'
 import { FontColor, InsertLink } from '../../src/molecules/editor/menu'
 import ComposerIcon from './ComposerIcon.vue'
 import EmojiPicker from '../v2/popover/EmojiPicker.vue'
+import { HoldSelection } from './holdSelection'
 import { MultiEmailInput } from '../../experimental/MultiEmailInput'
 import type { MultiEmailOption } from '../../experimental/MultiEmailInput'
 import { faceFor } from '../components/patterns/designAssets'
@@ -81,7 +82,10 @@ const matches = computed(() => {
   )
 })
 
-const extensions = [RichTextKit.configure({ mention: false, tag: false })]
+const extensions = [
+  RichTextKit.configure({ mention: false, tag: false }),
+  HoldSelection,
+]
 
 /**
  * The toolbar's actions run the editor's own commands. `Editor` is
@@ -105,7 +109,10 @@ function pickColour(e: MouseEvent) {
 }
 function insertLink() {
   const editor = ed()
-  if (editor) InsertLink.action(editor)
+  if (!editor) return
+  // keep the run the link is for in view while the popup's field has focus
+  editor.commands.holdSelection()
+  InsertLink.action(editor)
 }
 function insertEmoji(emoji: string) {
   chain().insertContent(emoji).run()
@@ -374,6 +381,11 @@ const root = ref<HTMLElement | null>(null)
       image (the system's dialog, the picture inline). The bin at the far
       end discards.
     -->
+    <!--
+      The glyph buttons keep their press to themselves (`mousedown.prevent`):
+      the caret and the selection stay in the message, which is what colour,
+      link and emoji act on, and what the link popover anchors to.
+    -->
     <div class="flex h-14 shrink-0 items-center justify-between px-4 pb-4 pt-3">
       <div class="flex items-center gap-1">
         <!--
@@ -415,6 +427,7 @@ const root = ref<HTMLElement | null>(null)
           size="sm"
           class="!text-ink-gray-7"
           label="Text colour"
+          @mousedown.prevent
           @click="pickColour"
         >
           <template #icon>
@@ -426,6 +439,7 @@ const root = ref<HTMLElement | null>(null)
           size="sm"
           class="!text-ink-gray-7"
           label="Attach a file"
+          @mousedown.prevent
           @click="attachFile"
         >
           <template #icon>
@@ -437,6 +451,7 @@ const root = ref<HTMLElement | null>(null)
           size="sm"
           class="!text-ink-gray-7"
           label="Link"
+          @mousedown.prevent
           @click="insertLink"
         >
           <template #icon>
@@ -451,6 +466,7 @@ const root = ref<HTMLElement | null>(null)
               class="!text-ink-gray-7"
               :class="open && '!bg-surface-gray-3'"
               label="Emoji"
+              @mousedown.prevent
             >
               <template #icon>
                 <ComposerIcon name="emoji" class="size-4" />
@@ -476,6 +492,7 @@ const root = ref<HTMLElement | null>(null)
           size="sm"
           class="!text-ink-gray-7"
           label="Image"
+          @mousedown.prevent
           @click="insertImage"
         >
           <template #icon>
@@ -570,5 +587,21 @@ const root = ref<HTMLElement | null>(null)
 }
 .composer-body :deep(.ProseMirror p) {
   margin: 0;
+}
+/* the run a link is being made for, painted while the popup has the focus */
+.composer-body :deep(.composer-held-selection) {
+  background: color-mix(in srgb, Highlight 35%, transparent);
+}
+</style>
+
+<style>
+/*
+  The library's editor popovers — the colour picker here — wear the 2xl
+  elevation. The design draws every popover on the lg shadow, as the
+  popover examples do, so while the composer is up they take that one.
+  Unscoped on purpose: the picker is portaled to the body.
+*/
+body:has(.email-composer) .editor-popover {
+  box-shadow: var(--elevation-lg);
 }
 </style>
