@@ -36,13 +36,21 @@ const META: Record<BlockValue, EditorCommandMeta> = {
   taskList: commandMeta.taskList,
   codeBlock: commandMeta.codeBlock,
   blockquote: commandMeta.blockquote,
-  // the column layout is the playground's own block, so it has no entry in
-  // the library's table; the glyph is the one the + menu gives it
-  columns: {
-    label: 'Columns',
-    icon: 'lucide-columns-3',
+  // the column layouts are the playground's own block, so they have no entry
+  // in the library's table; the glyphs are lucide's own for each count,
+  // spelled out in full because the class is drawn only where Tailwind's
+  // scan finds it written
+  columns2: columnsMeta(2, 'lucide-columns-2'),
+  columns3: columnsMeta(3, 'lucide-columns-3'),
+  columns4: columnsMeta(4, 'lucide-columns-4'),
+}
+
+function columnsMeta(count: 2 | 3 | 4, icon: string): EditorCommandMeta {
+  return {
+    label: `${count} columns`,
+    icon,
     isAvailable: (editor) => !!editor.schema.nodes.columns,
-  },
+  }
 }
 
 /** the section of the menu each block belongs under */
@@ -59,7 +67,9 @@ const GROUP: Record<BlockValue, string> = {
   bulletList: 'Lists',
   orderedList: 'Lists',
   taskList: 'Lists',
-  columns: 'Layout',
+  columns2: 'Layout',
+  columns3: 'Layout',
+  columns4: 'Layout',
 }
 
 const ORDER = ['Text', 'Lists', 'Layout']

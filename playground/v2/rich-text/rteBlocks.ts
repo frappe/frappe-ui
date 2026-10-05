@@ -17,9 +17,26 @@ export const BLOCKS = [
   { value: 'taskList', label: 'To-do list', icon: 'todo' },
   { value: 'codeBlock', label: 'Code', icon: 'code' },
   { value: 'blockquote', label: 'Quote', icon: 'quote' },
-  { value: 'columns', label: '3 Coloumn', icon: 'grid-3' },
+  { value: 'columns2', label: '2 columns', icon: 'grid-2' },
+  { value: 'columns3', label: '3 columns', icon: 'grid-3' },
+  { value: 'columns4', label: '4 columns', icon: 'grid-4' },
 ] as const
 export type BlockValue = (typeof BLOCKS)[number]['value']
+
+/** the column layouts, by how many they lay side by side */
+const COLUMNS: Partial<Record<BlockValue, number>> = {
+  columns2: 2,
+  columns3: 3,
+  columns4: 4,
+}
+
+/** how many columns the row around the selection has — none, if no row */
+function columnsAround(ed: TiptapEditor): number {
+  const { $from } = ed.state.selection
+  for (let d = $from.depth; d > 0; d--)
+    if ($from.node(d).type.name === 'columns') return $from.node(d).childCount
+  return 0
+}
 
 /** the block the selection sits in */
 export function activeBlockOf(ed: TiptapEditor): BlockValue {
@@ -30,7 +47,8 @@ export function activeBlockOf(ed: TiptapEditor): BlockValue {
   if (ed.isActive('bulletList')) return 'bulletList'
   if (ed.isActive('orderedList')) return 'orderedList'
   if (ed.isActive('blockquote')) return 'blockquote'
-  if (ed.isActive('columns')) return 'columns'
+  const columns = columnsAround(ed)
+  if (columns) return `columns${columns}` as BlockValue
   return 'paragraph'
 }
 export const blockLabel = (value: BlockValue) =>
@@ -48,5 +66,6 @@ export function applyBlock(c: ChainedCommands, value: BlockValue) {
   else if (value === 'taskList') c.toggleTaskList().run()
   else if (value === 'codeBlock') c.toggleCodeBlock().run()
   else if (value === 'blockquote') c.toggleBlockquote().run()
-  else if (value === 'columns') c.insertColumns(3).run()
+  // a row the selection is already in is re-counted; elsewhere a row is laid
+  else if (COLUMNS[value]) c.setColumns(COLUMNS[value]).run()
 }

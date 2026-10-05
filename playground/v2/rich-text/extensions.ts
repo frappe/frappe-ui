@@ -5,6 +5,7 @@
 // kit, so everything else — text, lists, links, images, tables, code, colour,
 // highlight, mentions, embeds — stays the library's.
 import { Mark, Node, mergeAttributes } from '@tiptap/core'
+import { TextSelection } from '@tiptap/pm/state'
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
 import { FontFamily, FontSize, LineHeight } from '@tiptap/extension-text-style'
 import {
@@ -40,6 +41,12 @@ declare module '@tiptap/core' {
     }
     rteColumns: {
       insertColumns: (count?: number) => ReturnType
+      /**
+       * `count` columns where the selection is: the row it sits in re-counted
+       * — columns added empty, or the extra ones folded into the last kept —
+       * and a new row of them anywhere else
+       */
+      setColumns: (count?: number) => ReturnType
     }
     rteImageSlot: {
       /** lay an empty image slot down, to be filled by file or by link */
@@ -272,6 +279,59 @@ export const Columns = Node.create({
               content: [{ type: 'paragraph' }],
             })),
           }),
+      setColumns:
+        (count = 2) =>
+        ({ state, tr, dispatch, commands }) => {
+          const { $from } = state.selection
+          let depth = 0
+          for (let d = $from.depth; d > 0; d--)
+            if ($from.node(d).type.name === 'columns') {
+              depth = d
+              break
+            }
+          if (!depth) return commands.insertColumns(count)
+
+          const row = $from.node(depth)
+          if (row.childCount === count) return true
+          if (!dispatch) return true
+
+          const column = state.schema.nodes.column
+          const columns = row.content.content.slice(0, count)
+          if (count > row.childCount) {
+            // grown: the new columns stand empty on the right
+            for (let i = row.childCount; i < count; i++)
+              columns.push(column.createAndFill()!)
+          } else {
+            // shrunk: what the dropped columns held goes to the end of
+            // the last column kept, in order, so nothing is lost
+            const last = columns[count - 1]
+            let content = last.content
+            for (let i = count; i < row.childCount; i++)
+              content = content.append(row.child(i).content)
+            columns[count - 1] = last.copy(content)
+          }
+
+          const from = $from.before(depth)
+          const next = row.type.create({ ...row.attrs, count }, columns)
+          tr.replaceWith(from, from + row.nodeSize, next)
+
+          // the caret stays on its text: untouched in a kept column, and
+          // carried along with the text folded into the last one
+          const index = $from.index(depth)
+          let pos = $from.pos
+          if (index >= count) {
+            // the start of the last kept column's content, plus what came
+            // before this column's text in the fold, plus the caret's offset
+            let start = from + 1
+            for (let i = 0; i < count - 1; i++) start += row.child(i).nodeSize
+            let before = row.child(count - 1).content.size
+            for (let i = count; i < index; i++)
+              before += row.child(i).content.size
+            pos = start + 1 + before + ($from.pos - $from.start(depth + 1))
+          }
+          tr.setSelection(TextSelection.near(tr.doc.resolve(pos)))
+          return true
+        },
     }
   },
 })
