@@ -8,16 +8,22 @@ import team1 from '../assets/rte/team-1.jpg'
 import team2 from '../assets/rte/team-2.jpg'
 import team3 from '../assets/rte/team-3.jpg'
 import audio from '../assets/rte/sample.wav'
+import avatarFaris from '../assets/rte/avatar-faris.png'
+import avatarGowtham from '../assets/rte/avatar-gowtham.png'
+import avatarHarsha from '../assets/rte/avatar-harsha.png'
+import avatarJayaprakash from '../assets/rte/avatar-jayaprakash.png'
+import avatarSandeep from '../assets/rte/avatar-sandeep.png'
+import avatarShruti from '../assets/rte/avatar-shruti.png'
 
-// the people the "@" list offers, each with their picture before the name
-// (32467:13501); the playground has three faces, so they go round
+// the people the "@" list offers, each with the face the file gives them
+// (32467:13501): the espresso-2.0 avatars, exported from the list itself
 export const people = [
-  { value: 'faris', label: 'Faris', image: team1 },
-  { value: 'gowtham', label: 'Gowtham', image: team2 },
-  { value: 'harsha', label: 'Harsha', image: team3 },
-  { value: 'jayaprakash', label: 'Jayaprakash', image: team1 },
-  { value: 'sandeep', label: 'Sandeep', image: team2 },
-  { value: 'shruti', label: 'Shruti', image: team3 },
+  { value: 'faris', label: 'Faris', image: avatarFaris },
+  { value: 'gowtham', label: 'Gowtham', image: avatarGowtham },
+  { value: 'harsha', label: 'Harsha', image: avatarHarsha },
+  { value: 'jayaprakash', label: 'Jayaprakash', image: avatarJayaprakash },
+  { value: 'sandeep', label: 'Sandeep', image: avatarSandeep },
+  { value: 'shruti', label: 'Shruti', image: avatarShruti },
 ]
 
 export const tags = [
