@@ -22,6 +22,11 @@
 //   it; the first rows stay header rows, whichever rows land there;
 // - two 16px strips, 8px off the table's right and bottom edges, that add
 //   a column or a row at the end;
+// - the card is the table's viewport: a table that outgrows it scrolls
+//   inside it, never the page. A fresh table shares the card's width
+//   between its columns; once a column is added or resized every column
+//   holds the width it has, so the new or wider one grows the table past
+//   the card instead of squeezing the others.
 //
 // Dragging a column edge resizes it: tiptap's own behaviour and handle.
 //
@@ -41,6 +46,7 @@ import {
   CellSelection,
   TableMap,
   cellAround,
+  columnResizingPluginKey,
   isInTable,
 } from '@tiptap/pm/tables'
 import { Dropdown } from '../../../src'
@@ -79,6 +85,13 @@ const tableBox = ref<Box | null>(null)
 const rowBox = ref<Box | null>(null)
 const colBox = ref<Box | null>(null)
 const cellBox = ref<Box | null>(null)
+/** the cell handle's edge is within the card's visible span */
+const cellKnobOn = ref(false)
+/** an x within the card, the table's viewport, which clips what it holds */
+function inCard(x: number): boolean {
+  const t = tableBox.value
+  return !!t && x >= t.left && x <= t.left + t.width
+}
 
 const rowOpen = ref(false)
 const colOpen = ref(false)
@@ -152,14 +165,18 @@ function measure() {
   tableBox.value = box(w.getBoundingClientRect())
   const r = cellEl?.closest('tr')
   rowBox.value = r ? box(r.getBoundingClientRect()) : null
+  // a column scrolled out of the card has no handle over the page
   if (cellEl) {
     const cr = cellEl.getBoundingClientRect()
-    colBox.value = {
-      left: cr.left,
-      top: tableBox.value.top,
-      width: cr.width,
-      height: tableBox.value.height,
-    }
+    const mid = cr.left + cr.width / 2
+    colBox.value = inCard(mid)
+      ? {
+          left: cr.left,
+          top: tableBox.value.top,
+          width: cr.width,
+          height: tableBox.value.height,
+        }
+      : null
   } else colBox.value = null
   const selected = w.querySelectorAll<HTMLElement>('.selectedCell')
   if (selected.length) {
@@ -176,10 +193,13 @@ function measure() {
     })
     cellBox.value = { left, top, width: right - left, height: bottom - top }
     fitSelectionBox(w, cellBox.value)
+    cellKnobOn.value = inCard(right)
   } else if (cellEl && selKind.value === 'caret') {
     cellBox.value = box(cellEl.getBoundingClientRect())
+    cellKnobOn.value = inCard(cellBox.value.left + cellBox.value.width)
   } else {
     cellBox.value = null
+    cellKnobOn.value = false
   }
 }
 // the run's selection box is drawn by the library on the cells' outer
@@ -321,6 +341,7 @@ function onMove(e: MouseEvent) {
   const ed = editor.value
   if (!ed || ed.isDestroyed || !ed.isEditable || menuOpen.value) return
   if (press?.active) return
+  holdBeforeResize(ed)
   const target = e.target instanceof Element ? e.target : null
   if (!target) return
   if (layer.value?.contains(target)) return
@@ -556,7 +577,9 @@ function aim() {
   }
   p.to = to
   dropLine.value = lineAt(edges[to])
-  dropOn.value = true
+  // a column's edge scrolled out of the card is no place to show a line;
+  // the card scrolls on as the pointer nears its side
+  dropOn.value = p.kind === 'row' || inCard(edges[to])
 }
 // ---- the ghost: a copy of the row or column, lifted under the pointer
 // and carried along its axis, within the table's reach
@@ -904,30 +927,36 @@ const rowActions = {
 }
 const colActions = {
   insertLeft: () =>
-    withCtx((c) => {
-      focusCell(c, cellPos(c, 0, colIndex.value))
-      c.ed.commands.addColumnBefore()
-    }),
+    withCtx((c) =>
+      withColumnAdded(c, colIndex.value, colIndex.value, () => {
+        focusCell(c, cellPos(c, 0, colIndex.value))
+        c.ed.commands.addColumnBefore()
+      }),
+    ),
   insertRight: () =>
-    withCtx((c) => {
-      focusCell(c, cellPos(c, 0, colIndex.value))
-      c.ed.commands.addColumnAfter()
-    }),
+    withCtx((c) =>
+      withColumnAdded(c, colIndex.value + 1, colIndex.value, () => {
+        focusCell(c, cellPos(c, 0, colIndex.value))
+        c.ed.commands.addColumnAfter()
+      }),
+    ),
   duplicate: () =>
-    withCtx((c) => {
-      const tr = c.ed.state.tr
-      cellsIn(c, 'col', colIndex.value)
-        .sort((a, b) => b - a)
-        .forEach((pos) => {
-          const cell = tr.doc.nodeAt(pos)
-          if (!cell) return
-          tr.insert(
-            pos + cell.nodeSize,
-            cell.type.create(cell.attrs, cell.content),
-          )
-        })
-      c.ed.view.dispatch(tr)
-    }),
+    withCtx((c) =>
+      withColumnAdded(c, colIndex.value + 1, colIndex.value, () => {
+        const tr = c.ed.state.tr
+        cellsIn(c, 'col', colIndex.value)
+          .sort((a, b) => b - a)
+          .forEach((pos) => {
+            const cell = tr.doc.nodeAt(pos)
+            if (!cell) return
+            tr.insert(
+              pos + cell.nodeSize,
+              cell.type.create(cell.attrs, cell.content),
+            )
+          })
+        c.ed.view.dispatch(tr)
+      }),
+    ),
   clear: () => withCtx((c) => clearCells(c, cellsIn(c, 'col', colIndex.value))),
   remove: () =>
     withCtx((c) => {
@@ -963,10 +992,96 @@ const cellActions = {
     }),
 }
 function addColumnAtEnd() {
-  withCtx((c) => {
-    focusCell(c, cellPos(c, 0, c.map.width - 1))
-    c.ed.commands.addColumnAfter()
+  withCtx((c) =>
+    withColumnAdded(c, c.map.width, c.map.width - 1, () => {
+      focusCell(c, cellPos(c, 0, c.map.width - 1))
+      c.ed.commands.addColumnAfter()
+    }),
+  )
+}
+
+// ---- widths. A fresh table shares the card between its columns, and
+// tiptap's resize sets only the dragged column's width, which would have
+// the rest squeezed to fit. So before a column is added or resized every
+// column is told the width it has (its cells' colwidth), the new column
+// takes its neighbour's, and the table — tiptap sizes it to the sum —
+// grows past the card and scrolls inside it
+/** the columns' rendered widths, from tiptap's colgroup */
+function columnWidths(c: Ctx): number[] {
+  const cols = [...(wrapperEl.value?.querySelectorAll('col') ?? [])]
+  if (cols.length === c.map.width)
+    return cols.map((col) => Math.round(col.getBoundingClientRect().width))
+  const widths: number[] = []
+  for (let i = 0; i < c.map.width; i++) {
+    const dom = c.ed.view.nodeDOM(c.start + c.map.map[i])
+    widths.push(
+      dom instanceof HTMLElement
+        ? Math.round(dom.getBoundingClientRect().width)
+        : 100,
+    )
+  }
+  return widths
+}
+/** every cell told its columns' widths */
+function holdWidths(c: Ctx, widths: number[]) {
+  const tr = c.ed.state.tr
+  const seen = new Set<number>()
+  c.map.map.forEach((rel) => {
+    if (seen.has(rel)) return
+    seen.add(rel)
+    const pos = c.start + rel
+    const cell = c.ed.state.doc.nodeAt(pos)
+    if (!cell) return
+    const r = c.map.findCell(rel)
+    const colwidth = widths.slice(r.left, r.right)
+    const had = cell.attrs.colwidth as number[] | null
+    if (
+      had &&
+      had.length === colwidth.length &&
+      had.every((w, k) => w === colwidth[k])
+    )
+      return
+    tr.setNodeMarkup(pos, null, { ...cell.attrs, colwidth })
   })
+  if (tr.docChanged) c.ed.view.dispatch(tr)
+}
+function hasUnsizedColumn(c: Ctx): boolean {
+  let unsized = false
+  c.table.descendants((node) => {
+    if (unsized) return false
+    const name = node.type.name
+    if (name !== 'tableCell' && name !== 'tableHeader') return true
+    if (!node.attrs.colwidth) unsized = true
+    return false
+  })
+  return unsized
+}
+/** `add` puts a column at `at`; it takes column `like`'s width */
+function withColumnAdded(c: Ctx, at: number, like: number, add: () => void) {
+  const widths = columnWidths(c)
+  add()
+  const fresh = ctxOf(c.ed)
+  if (!fresh || fresh.map.width !== widths.length + 1) return
+  const next = widths.slice()
+  next.splice(at, 0, widths[Math.min(Math.max(like, 0), widths.length - 1)])
+  holdWidths(fresh, next)
+}
+// a resize in the offing (tiptap's handle armed under the pointer) on a
+// table with columns still sharing the card: they hold their widths now,
+// before any press, so only the dragged one will change. Not on the press
+// itself: the hold redraws the cells, and a press whose target is gone
+// never reaches tiptap
+function holdBeforeResize(ed: TiptapEditor) {
+  const armed = columnResizingPluginKey.getState(ed.state)?.activeHandle ?? -1
+  if (armed < 0) return
+  let c: Ctx | null = null
+  try {
+    c = ctxAt(ed, ed.state.doc.resolve(armed))
+  } catch {
+    c = null
+  }
+  if (!c || !hasUnsizedColumn(c)) return
+  holdWidths(c, columnWidths(c))
 }
 function addRowAtEnd() {
   withCtx((c) => {
@@ -1325,7 +1440,7 @@ const px = (n: number) => `${n}px`
 
       <!-- the cell handle, at the right edge of the selected cell or run:
            its pill on the ring's right line -->
-      <template v-if="cellBox && selKind === 'cells'">
+      <template v-if="cellBox && cellKnobOn && selKind === 'cells'">
         <Dropdown
           v-model:open="cellOpen"
           :options="cellOptions"

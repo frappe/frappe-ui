@@ -546,7 +546,9 @@ function resolve() {
 /* Tables (32157:9144): a 12px-radius card on a gray-100 hairline, cells
    ruled right and beneath — never on the outer edge — 6/8 in; the header
    row 32px of 13/15 gray-500, body rows 40px of 14/21 gray-600 that grow
-   with their lines; a wide table scrolls inside the card on a 4px thumb. */
+   with their lines. The card is the table's viewport: a table at least
+   its width, and one grown past it (tiptap sizes a table to its columns'
+   widths, inline) scrolls inside it on a 4px thumb, never the page. */
 .rte-doc.prose-v3 .tableWrapper {
   border: 1px solid var(--outline-gray-1);
   border-radius: 12px;
@@ -562,6 +564,7 @@ function resolve() {
 .rte-doc.prose-v3 table {
   margin: 0;
   width: 100%;
+  min-width: 100%;
   border-collapse: separate;
   border-spacing: 0;
   font-size: 14px;
