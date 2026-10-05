@@ -3528,6 +3528,22 @@ none.
 one-off content migration can do that where you know the old `alt` values were
 captions.
 
+#### Editor media no longer gets a size when a document opens (fix)
+
+The media plugin gave `width` and `height` to every image or video that had a
+`src` but no size, after any change to the document. In a collaborative
+document that included the first load, so opening a document with an unsized
+image edited it without the person doing anything. In a plain editor it also
+broke undo: Ctrl+Z only reverted the sizing, and the plugin sized the image
+again.
+
+- The plugin now sizes only the images and videos the person's own edit just
+  added. It leaves stored media, a collaborator's change, a document being
+  loaded with `emitUpdate: false`, and undo and redo alone.
+- Stored images and videos saved without a size stay that way. They display
+  with `width: auto` and take their size from the file once it loads. The only
+  cost is no space reserved while it loads.
+
 ### Code editor
 
 #### Code editor — a new family at `frappe-ui/code-editor` (breaking, loud)
