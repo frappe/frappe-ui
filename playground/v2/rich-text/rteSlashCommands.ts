@@ -36,6 +36,12 @@ const META: Record<BlockValue, EditorCommandMeta> = {
   taskList: commandMeta.taskList,
   codeBlock: commandMeta.codeBlock,
   blockquote: commandMeta.blockquote,
+  // the toggle list is the playground's own block too; the + menu's glyph
+  details: {
+    label: 'Toggle list',
+    icon: 'lucide-chevron-right',
+    isAvailable: (editor) => !!editor.schema.nodes.details,
+  },
   // the column layouts are the playground's own block, so they have no entry
   // in the library's table; the glyphs are lucide's own for each count,
   // spelled out in full because the class is drawn only where Tailwind's
@@ -67,6 +73,7 @@ const GROUP: Record<BlockValue, string> = {
   bulletList: 'Lists',
   orderedList: 'Lists',
   taskList: 'Lists',
+  details: 'Lists',
   columns2: 'Layout',
   columns3: 'Layout',
   columns4: 'Layout',

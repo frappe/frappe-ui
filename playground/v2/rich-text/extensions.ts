@@ -62,6 +62,11 @@ declare module '@tiptap/core' {
     }
     rteDetails: {
       insertDetails: () => ReturnType
+      /**
+       * the block the caret is in made a toggle list, its text the summary
+       * — or, already a toggle's summary, made plain blocks again
+       */
+      setToggleList: () => ReturnType
       /** carry the block the cursor is in one place up or down */
       moveDetails: (dir: -1 | 1) => ReturnType
     }
@@ -643,6 +648,56 @@ export const Details = Node.create({
               },
             ],
           }),
+      // the select's "Toggle list", a block style like a heading is: the
+      // line the caret is in becomes a toggle's summary, open, with an
+      // empty line to fill under it; picked again on a summary, the toggle
+      // comes apart — the summary a paragraph, what it held set down after
+      setToggleList:
+        () =>
+        ({ state, tr, dispatch }) => {
+          const { schema } = state
+          const { $from } = state.selection
+          const summaryType = schema.nodes.detailsSummary
+          const contentType = schema.nodes.detailsContent
+          const paragraph = schema.nodes.paragraph
+
+          // on a summary: unwrap the toggle
+          for (let d = $from.depth; d > 0; d--) {
+            if ($from.node(d).type !== summaryType) continue
+            const details = $from.node(d - 1)
+            const pos = $from.before(d - 1)
+            if (!dispatch) return true
+            const blocks = [
+              paragraph.create(null, details.child(0).content),
+              ...(details.child(1)?.content.content ?? []),
+            ]
+            tr.replaceWith(pos, pos + details.nodeSize, blocks)
+            tr.setSelection(
+              TextSelection.near(
+                tr.doc.resolve(pos + 1 + ($from.pos - $from.start(d))),
+              ),
+            )
+            return true
+          }
+
+          // elsewhere: the caret's text block becomes a toggle's summary
+          const depth = $from.depth
+          const block = $from.node(depth)
+          if (!block.isTextblock) return false
+          if (!dispatch) return true
+          const pos = $from.before(depth)
+          const details = this.type.create({ open: true }, [
+            summaryType.create(null, block.content),
+            contentType.create(null, paragraph.create()),
+          ])
+          tr.replaceWith(pos, pos + block.nodeSize, details)
+          tr.setSelection(
+            TextSelection.near(
+              tr.doc.resolve(pos + 2 + ($from.pos - $from.start(depth))),
+            ),
+          )
+          return true
+        },
     }
   },
 })

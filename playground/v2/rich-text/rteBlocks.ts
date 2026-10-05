@@ -15,6 +15,7 @@ export const BLOCKS = [
   { value: 'bulletList', label: 'Bulleted list', icon: 'multiple-list' },
   { value: 'orderedList', label: 'Numbered list', icon: 'numbered-list' },
   { value: 'taskList', label: 'To-do list', icon: 'todo' },
+  { value: 'details', label: 'Toggle list', icon: 'small-right' },
   { value: 'codeBlock', label: 'Code', icon: 'code' },
   { value: 'blockquote', label: 'Quote', icon: 'quote' },
   { value: 'columns2', label: '2 columns', icon: 'grid-2' },
@@ -47,6 +48,8 @@ export function activeBlockOf(ed: TiptapEditor): BlockValue {
   if (ed.isActive('bulletList')) return 'bulletList'
   if (ed.isActive('orderedList')) return 'orderedList'
   if (ed.isActive('blockquote')) return 'blockquote'
+  // a toggle is its summary line; what it holds below are blocks of their own
+  if (ed.isActive('detailsSummary')) return 'details'
   const columns = columnsAround(ed)
   if (columns) return `columns${columns}` as BlockValue
   return 'paragraph'
@@ -66,6 +69,7 @@ export function applyBlock(c: ChainedCommands, value: BlockValue) {
   else if (value === 'taskList') c.toggleTaskList().run()
   else if (value === 'codeBlock') c.toggleCodeBlock().run()
   else if (value === 'blockquote') c.toggleBlockquote().run()
+  else if (value === 'details') c.setToggleList().run()
   // a row the selection is already in is re-counted; elsewhere a row is laid
   else if (COLUMNS[value]) c.setColumns(COLUMNS[value]).run()
 }
