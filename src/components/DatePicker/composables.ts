@@ -93,6 +93,36 @@ export function useKeepOpen(props: CommonDatePickerProps) {
   return computed(() => props.keepOpen === true)
 }
 
+const NUMERIC_TOKEN = /^(YYYY|YY|MM?|DD?|HH?|hh?|mm?|ss?)$/
+const ISO_DATE = /^\d{4}-\d{1,2}-\d{1,2}/
+
+// Puts the numbers the user typed into the format's own padding and
+// separators, so `5/10/2026` or `05-10-2026` becomes `05/10/2026` for
+// `DD/MM/YYYY`. Null when the format has a non-numeric token or the count of
+// numbers does not match.
+function fitToFormat(raw: string, format: string): string | null {
+  if (/[A-Za-z]/.test(raw)) return null
+  const numbers = raw.match(/\d+/g) ?? []
+  let i = 0
+  let out = ''
+  for (const part of format.match(/[A-Za-z]+|[^A-Za-z]+/g) ?? []) {
+    if (!/[A-Za-z]/.test(part)) {
+      out += part
+      continue
+    }
+    const n = numbers[i++]
+    if (!NUMERIC_TOKEN.test(part) || n === undefined) return null
+    out += part === 'YYYY' ? n : n.padStart(part.length, '0')
+  }
+  return i === numbers.length ? out : null
+}
+
+function isDayFirst(format: string): boolean {
+  const day = format.indexOf('D')
+  const month = format.indexOf('M')
+  return day !== -1 && month !== -1 && day < month
+}
+
 // Coerce arbitrary string input to a Dayjs, respecting an optional explicit format.
 export function useDateCoercion(getFormat: () => string | undefined) {
   return function coerceToDayjs(val?: string | null): Dayjs | null {
@@ -103,6 +133,18 @@ export function useDateCoercion(getFormat: () => string | undefined) {
     if (format) {
       const dStrict = dayjs(raw, format, true)
       if (dStrict.isValid()) return dStrict
+      const fitted = fitToFormat(raw, format)
+      if (fitted) {
+        const dFitted = dayjs(fitted, format, true)
+        if (dFitted.isValid()) return dFitted
+      }
+      // The parses below go through the Date constructor, which reads
+      // `5/10/2026` month-first. Under a day-first format that saves 10 May
+      // for a user who typed 5 October, so reject numeric input instead.
+      // ISO values, which is what the model holds, still read correctly.
+      if (isDayFirst(format) && !/[A-Za-z]/.test(raw) && !ISO_DATE.test(raw)) {
+        return null
+      }
     }
     const dLoose = dayjs(raw)
     if (dLoose.isValid()) return dLoose
