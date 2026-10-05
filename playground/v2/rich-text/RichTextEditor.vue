@@ -664,6 +664,11 @@ function resolve() {
   pointer-events: none;
   z-index: 1;
 }
+/* on the last column it stays inside the cell: 1px past the table is 1px of
+   overflow in the card, and a scrollbar the table has no need of */
+.rte-doc table tr > :last-child > .column-resize-handle {
+  right: 0;
+}
 
 /* the thread card: the header's rule is drawn inside its 32px, as the
    file's inside stroke is, and its controls are 24px on an 8px radius */
