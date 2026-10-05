@@ -22,6 +22,7 @@ const Image = Node.create({
     width: { default: null },
     height: { default: null },
     loading: { default: false },
+    align: { default: null },
   }),
   parseHTML: () => [{ tag: 'img' }],
   renderHTML: ({ HTMLAttributes }) => ['img', HTMLAttributes],
@@ -123,6 +124,56 @@ describe('media dimension back-fill', () => {
     editor.commands.setContent('<img src="/files/set.png">', {
       emitUpdate: true,
     })
+    await settle()
+
+    expect(sizes(editor)).toEqual([[100, 50]])
+  })
+
+  it('leaves a stored image unsized when its attributes change', async () => {
+    const editor = makeEditor('<img src="/files/old.png"><p>x</p>')
+    const image = editor.state.doc.firstChild!
+    editor.view.dispatch(
+      editor.state.tr.setNodeMarkup(0, undefined, {
+        ...image.attrs,
+        align: 'center',
+      }),
+    )
+    editor.view.dispatch(editor.state.tr.setNodeAttribute(0, 'align', 'left'))
+    await settle()
+
+    expect(editor.state.doc.firstChild!.attrs.align).toBe('left')
+    expect(sizes(editor)).toEqual([[null, null]])
+    expect(probeDimensions).not.toHaveBeenCalled()
+  })
+
+  it('sizes a stored image when the person swaps in a different file', async () => {
+    const editor = makeEditor('<img src="/files/old.png"><p>x</p>')
+    editor.view.dispatch(
+      editor.state.tr.setNodeAttribute(0, 'src', '/files/other.png'),
+    )
+    await settle()
+
+    expect(probeDimensions).toHaveBeenCalledWith('/files/other.png')
+    expect(sizes(editor)).toEqual([[100, 50]])
+  })
+
+  it('sizes an image once its upload finishes', async () => {
+    const editor = makeEditor('<p>x</p>')
+    editor.commands.insertContentAt(0, {
+      type: 'image',
+      attrs: { src: 'blob:pending', loading: true },
+    })
+    await settle()
+    expect(probeDimensions).not.toHaveBeenCalled()
+
+    const image = editor.state.doc.firstChild!
+    editor.view.dispatch(
+      editor.state.tr.setNodeMarkup(0, undefined, {
+        ...image.attrs,
+        src: '/files/done.png',
+        loading: false,
+      }),
+    )
     await settle()
 
     expect(sizes(editor)).toEqual([[100, 50]])
