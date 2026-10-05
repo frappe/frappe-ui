@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { Breadcrumbs, Button } from '../../src'
 import EmailComposer from './EmailComposer.vue'
+import ComposerIcon from './ComposerIcon.vue'
 
 /**
  * The Email composer page: a 48px header with the Compose button at its
@@ -24,13 +25,12 @@ const open = ref(false)
       class="flex h-12 shrink-0 items-center justify-between border-b border-outline-gray-1 py-2.5 pl-[18px] pr-5"
     >
       <Breadcrumbs :items="[{ label: 'Mail' }]" />
-      <Button
-        size="sm"
-        variant="solid"
-        icon-left="lucide-square-pen"
-        label="Compose"
-        @click="open = true"
-      />
+      <Button size="sm" variant="solid" label="Compose" @click="open = true">
+        <template #prefix>
+          <ComposerIcon name="edit" class="size-4" />
+        </template>
+        Compose
+      </Button>
     </header>
 
     <!-- the stage: the composer sits in its bottom-right corner, 24 in -->

@@ -1,7 +1,11 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { Avatar, Button, TextInput } from '../../src'
+import { Avatar, Button, Dropdown, Popover, TextInput } from '../../src'
 import { Editor, EditorContent, RichTextKit } from '../../src/molecules/editor'
+import type { TiptapEditor } from '../../src/molecules/editor'
+import { FontColor, InsertLink } from '../../src/molecules/editor/menu'
+import ComposerIcon from './ComposerIcon.vue'
+import EmojiPicker from '../v2/popover/EmojiPicker.vue'
 import { MultiEmailInput } from '../../experimental/MultiEmailInput'
 import type { MultiEmailOption } from '../../experimental/MultiEmailInput'
 import { faceFor } from '../components/patterns/designAssets'
@@ -79,6 +83,43 @@ const matches = computed(() => {
 
 const extensions = [RichTextKit.configure({ mention: false, tag: false })]
 
+/**
+ * The toolbar's actions run the editor's own commands. `Editor` is
+ * renderless and hands its instance out through a template ref; a file
+ * picked for an image or an attachment is kept as it is, as an object URL.
+ */
+const editorRef = ref<{ editor: TiptapEditor | null } | null>(null)
+const ed = () => editorRef.value?.editor ?? null
+const chain = () => ed()!.chain().focus()
+const uploadFunction = async (file: File) => ({
+  file_url: URL.createObjectURL(file),
+  file_name: file.name,
+})
+function pickColour(e: MouseEvent) {
+  const editor = ed()
+  if (editor)
+    FontColor.action(editor, {
+      event: e,
+      trigger: e.currentTarget as HTMLElement,
+    })
+}
+function insertLink() {
+  const editor = ed()
+  if (editor) InsertLink.action(editor)
+}
+function insertEmoji(emoji: string) {
+  chain().insertContent(emoji).run()
+}
+const attachFile = () => chain().selectAndUploadFile().run()
+const insertImage = () => chain().selectAndUploadImage().run()
+
+/** The menu under Send's chevron: the file's one row. */
+const sendOptions = [{ label: 'Schedule send', onClick: () => schedule() }]
+function schedule() {
+  // nothing behind it yet: a scheduled message leaves the way a sent one does
+  send()
+}
+
 /** Pop out: the window takes the whole stage, 24 in on every side. */
 const expanded = ref(false)
 
@@ -121,17 +162,18 @@ const root = ref<HTMLElement | null>(null)
         <Button
           variant="ghost"
           size="xs"
-          icon="lucide-arrow-up-right"
           :label="expanded ? 'Shrink' : 'Pop out'"
           @click="expanded = !expanded"
-        />
-        <Button
-          variant="ghost"
-          size="xs"
-          icon="lucide-x"
-          label="Close"
-          @click="emit('close')"
-        />
+        >
+          <template #icon>
+            <ComposerIcon name="arrow-up-right" class="size-3.5" />
+          </template>
+        </Button>
+        <Button variant="ghost" size="xs" label="Close" @click="emit('close')">
+          <template #icon>
+            <ComposerIcon name="small-close" class="size-3.5" />
+          </template>
+        </Button>
       </div>
     </header>
 
@@ -150,10 +192,7 @@ const root = ref<HTMLElement | null>(null)
       class="flex shrink-0 items-start gap-2 border-b border-outline-gray-1 py-1.5 pl-2 pr-[11.4px]"
     >
       <span class="composer-field flex min-w-0 flex-1 items-start gap-2 pl-2">
-        <span
-          class="lucide-user mt-1.5 size-4 shrink-0 text-ink-gray-7"
-          aria-hidden="true"
-        />
+        <ComposerIcon name="person" class="mt-1.5 size-4 text-ink-gray-7" />
         <MultiEmailInput
           v-model="to"
           class="min-w-0 flex-1"
@@ -183,7 +222,7 @@ const root = ref<HTMLElement | null>(null)
               :aria-label="`Remove ${option?.label ?? value}`"
               @click.stop="removeTag()"
             >
-              <span class="lucide-x size-3" aria-hidden="true" />
+              <ComposerIcon name="small-close" class="size-3" />
             </button>
           </template>
           <template #item-prefix="{ item }">
@@ -240,10 +279,7 @@ const root = ref<HTMLElement | null>(null)
       class="flex shrink-0 items-start gap-2 border-b border-outline-gray-1 px-2 py-1.5"
     >
       <span class="composer-field flex min-w-0 flex-1 items-start gap-2 pl-2">
-        <span
-          class="lucide-users mt-1.5 size-4 shrink-0 text-ink-gray-7"
-          aria-hidden="true"
-        />
+        <ComposerIcon name="people" class="mt-1.5 size-4 text-ink-gray-7" />
         <MultiEmailInput
           :model-value="row[2]"
           class="min-w-0 flex-1"
@@ -274,7 +310,7 @@ const root = ref<HTMLElement | null>(null)
               :aria-label="`Remove ${option?.label ?? value}`"
               @click.stop="removeTag()"
             >
-              <span class="lucide-x size-3" aria-hidden="true" />
+              <ComposerIcon name="small-close" class="size-3" />
             </button>
           </template>
           <template #item-prefix="{ item }">
@@ -309,10 +345,7 @@ const root = ref<HTMLElement | null>(null)
         aria-label="Subject"
       >
         <template #prefix>
-          <span
-            class="lucide-message-circle size-4 text-ink-gray-7"
-            aria-hidden="true"
-          />
+          <ComposerIcon name="subject" class="size-4 text-ink-gray-7" />
         </template>
       </TextInput>
     </div>
@@ -320,50 +353,152 @@ const root = ref<HTMLElement | null>(null)
     <!-- the message -->
     <div class="composer-body min-h-0 flex-1 overflow-y-auto">
       <Editor
+        ref="editorRef"
         v-model="body"
         :extensions="extensions"
+        :upload-function="uploadFunction"
         placeholder="Type a message..."
       >
         <EditorContent class="min-h-full p-4 [--prose-font-size:14px]" />
       </Editor>
     </div>
 
-    <!-- the toolbar -->
+    <!--
+      The toolbar. Send is one solid pill in two parts: the word sends, the
+      chevron beside it opens the file's one-row menu (Schedule send) above
+      the button, and turns up while it is open. Then the file's glyphs,
+      each running the editor's own command: text colour (the library's
+      picker), attach (the system's file dialog, the file as an attachment
+      block), link (the library's link popover on the selection), emoji (the
+      popover example's picker, exactly), Drive and More (nothing yet),
+      image (the system's dialog, the picture inline). The bin at the far
+      end discards.
+    -->
     <div class="flex h-14 shrink-0 items-center justify-between px-4 pb-4 pt-3">
       <div class="flex items-center gap-1">
-        <Button size="sm" variant="solid" label="Send" @click="send">
-          Send
-          <template #suffix>
-            <span class="lucide-chevron-down size-4" aria-hidden="true" />
+        <!--
+          The whole pill is the menu's anchor, so the menu hangs from its
+          left edge as the file draws it; the word itself keeps the press
+          to itself and sends.
+        -->
+        <Dropdown :options="sendOptions" side="top" align="start" :offset="4">
+          <template #trigger="{ open }">
+            <div class="flex items-center">
+              <Button
+                size="sm"
+                variant="solid"
+                label="Send"
+                class="!rounded-r-none !pr-1"
+                @pointerdown.stop
+                @click.stop="send"
+              />
+              <Button
+                size="sm"
+                variant="solid"
+                label="Send options"
+                class="!rounded-l-none !pl-1 !pr-2"
+                :class="open && '!bg-surface-gray-9'"
+              >
+                <template #icon>
+                  <ComposerIcon
+                    :name="open ? 'small-up' : 'small-down'"
+                    class="size-4"
+                  />
+                </template>
+              </Button>
+            </div>
           </template>
-        </Button>
+        </Dropdown>
+
         <Button
-          v-for="tool in [
-            ['lucide-sparkles', 'Write with AI'],
-            ['lucide-baseline', 'Text colour'],
-            ['lucide-paperclip', 'Attach a file'],
-            ['lucide-link', 'Link'],
-            ['lucide-smile', 'Emoji'],
-            ['lucide-folder', 'Insert from Drive'],
-            ['lucide-image', 'Image'],
-            ['lucide-ellipsis-vertical', 'More'],
-          ]"
-          :key="tool[0]"
           variant="ghost"
           size="sm"
           class="!text-ink-gray-7"
-          :icon="tool[0]"
-          :label="tool[1]"
-        />
+          label="Text colour"
+          @click="pickColour"
+        >
+          <template #icon>
+            <ComposerIcon name="text-colour" class="size-4" />
+          </template>
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          class="!text-ink-gray-7"
+          label="Attach a file"
+          @click="attachFile"
+        >
+          <template #icon>
+            <ComposerIcon name="attachment" class="size-4" />
+          </template>
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          class="!text-ink-gray-7"
+          label="Link"
+          @click="insertLink"
+        >
+          <template #icon>
+            <ComposerIcon name="link" class="size-4" />
+          </template>
+        </Button>
+        <Popover side="top" align="start" :offset="6" bare>
+          <template #trigger="{ open }">
+            <Button
+              variant="ghost"
+              size="sm"
+              class="!text-ink-gray-7"
+              :class="open && '!bg-surface-gray-3'"
+              label="Emoji"
+            >
+              <template #icon>
+                <ComposerIcon name="emoji" class="size-4" />
+              </template>
+            </Button>
+          </template>
+          <template #default="{ close }">
+            <EmojiPicker @pick="(e: string) => (insertEmoji(e), close())" />
+          </template>
+        </Popover>
+        <Button
+          variant="ghost"
+          size="sm"
+          class="!text-ink-gray-7"
+          label="Insert from Drive"
+        >
+          <template #icon>
+            <ComposerIcon name="folder" class="size-4" />
+          </template>
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          class="!text-ink-gray-7"
+          label="Image"
+          @click="insertImage"
+        >
+          <template #icon>
+            <ComposerIcon name="image" class="size-4" />
+          </template>
+        </Button>
+        <Button variant="ghost" size="sm" class="!text-ink-gray-7" label="More">
+          <template #icon>
+            <ComposerIcon name="dot-vertical" class="size-4" />
+          </template>
+        </Button>
       </div>
       <Button
         variant="ghost"
         size="sm"
         class="!text-ink-gray-5"
-        icon="lucide-trash-2"
         label="Discard"
         @click="discard"
-      />
+      >
+        <template #icon>
+          <ComposerIcon name="delete" class="size-4" />
+        </template>
+      </Button>
     </div>
   </section>
 </template>
