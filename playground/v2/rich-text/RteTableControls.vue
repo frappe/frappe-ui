@@ -881,8 +881,8 @@ const px = (n: number) => `${n}px`
 <style>
 /* a handle: a 12×1 gray-500 pill on a 2px white rule, 4px corners, on
    the edge (32925:96501). Hovered or open it is the file's grip: 10×20
-   (20×10 for a column), gray-500 on a gray-200 rule, 4px corners, under
-   the sm shadow, its dots white and overflowing as the 16px glyph does.
+   (20×10 for a column), gray-500 with no rule, 4px corners, under the sm
+   shadow, its dots white and overflowing as the 16px glyph does.
    The pill is pinned 5px in, so the handle placed 4px (or 6px) off a
    1px line puts the pill exactly on that line */
 .rte-tc-handle {
@@ -921,7 +921,7 @@ const px = (n: number) => `${n}px`
 }
 .rte-tc-handle:hover,
 .rte-tc-handle.is-open {
-  @apply border-outline-gray-2 shadow-sm;
+  @apply shadow-sm;
   background-color: var(--ink-gray-5);
 }
 .rte-tc-handle:hover .rte-tc-pill,
