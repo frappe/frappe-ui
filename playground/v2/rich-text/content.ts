@@ -95,6 +95,8 @@ welcome()</code></pre>
 <h2>Frappe Team</h2>
 <div data-type="image-group" data-columns="2"><img src="${team1}" alt="Frappeverse talk"><img src="${team2}" alt="What is marketplace?"></div>
 <img src="${team3}" alt="Frappeverse 2023 group photo" data-caption="Image with captions provide context">
+<div data-type="columns" data-count="2" data-media="true"><div data-type="column"><img src="${team2}" alt="Frappeverse stage"></div><div data-type="column"><div data-type="image-slot"></div></div></div>
+<div data-type="image-slot"></div>
 <hr>
 <h2>The Frappe Ecosystem</h2>
 <p><span style="color: var(--prose-color-pink)">The Frappe ecosystem is built around the idea that businesses should own and control their software rather than being locked into rigid proprietary systems. By providing open-source tools and platforms, Frappe enables organizations to customize solutions according to their processes while benefiting from a large community of contributors and partners.</span></p>

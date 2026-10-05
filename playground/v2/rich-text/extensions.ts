@@ -22,6 +22,7 @@ import AttachmentNodeView from './AttachmentNodeView.vue'
 import { buildOpenRteLinkEditor } from './rteLinkPopup'
 import AudioNodeView from './AudioNodeView.vue'
 import DetailsNodeView from './DetailsNodeView.vue'
+import RteImageSlotView from './RteImageSlot.vue'
 
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
@@ -39,6 +40,12 @@ declare module '@tiptap/core' {
     }
     rteColumns: {
       insertColumns: (count?: number) => ReturnType
+    }
+    rteImageSlot: {
+      /** lay an empty image slot down, to be filled by file or by link */
+      insertImageSlot: () => ReturnType
+      /** a row of empty slots, one per column — one column is a bare slot */
+      insertImageColumns: (count?: number) => ReturnType
     }
     rteDetails: {
       insertDetails: () => ReturnType
@@ -237,6 +244,13 @@ export const Columns = Node.create({
         parseHTML: (el) => Number(el.getAttribute('data-count') ?? 2),
         renderHTML: (attrs) => ({ 'data-count': attrs.count }),
       },
+      // a row of pictures is ruled differently from a row of prose: the
+      // file sets its cells 16 apart with nothing drawn between them
+      media: {
+        default: false,
+        parseHTML: (el) => el.getAttribute('data-media') === 'true',
+        renderHTML: (attrs) => (attrs.media ? { 'data-media': 'true' } : {}),
+      },
     }
   },
   parseHTML: () => [{ tag: 'div[data-type="columns"]' }],
@@ -258,6 +272,58 @@ export const Columns = Node.create({
               content: [{ type: 'paragraph' }],
             })),
           }),
+    }
+  },
+})
+
+// ---- the image slot: the empty row the file lays down before a picture
+// exists (32243:108985). It stands in the document until it is filled, and
+// filling it is the one gesture — a file off the disk or a link to one —
+// RteImageSlot's card asks for. A row of slots inside a media columns node
+// is the file's columns-wise upload: every cell takes its own picture, and
+// an untouched cell keeps showing its Add Image.
+export const ImageSlot = Node.create({
+  name: 'imageSlot',
+  group: 'block',
+  atom: true,
+  draggable: true,
+  selectable: true,
+  parseHTML: () => [{ tag: 'div[data-type="image-slot"]' }],
+  renderHTML: ({ HTMLAttributes }) => [
+    'div',
+    mergeAttributes(HTMLAttributes, { 'data-type': 'image-slot' }),
+  ],
+  addNodeView() {
+    return VueNodeViewRenderer(RteImageSlotView)
+  },
+  addCommands() {
+    return {
+      insertImageSlot:
+        () =>
+        ({ commands }) =>
+          commands.insertContent({ type: this.name }),
+      // one slot per column; a single column is no grid at all, so it is
+      // just the slot across the document
+      insertImageColumns:
+        (count = 2) =>
+        ({ commands }) =>
+          count < 2
+            ? commands.insertContent({ type: this.name })
+            : commands.insertContent({
+                type: 'columns',
+                attrs: { count, media: true },
+                content: Array.from({ length: count }, () => ({
+                  type: 'column',
+                  content: [{ type: this.name }],
+                })),
+              }),
+      // the library's picker goes to the disk the moment it is called. The
+      // file asks first, so every way in — /image, the + menu, the toolbar
+      // — lays the slot down and lets the card do the asking.
+      selectAndUploadImage:
+        () =>
+        ({ commands }) =>
+          commands.insertContent({ type: this.name }),
     }
   },
 })
@@ -434,6 +500,7 @@ export const playgroundExtensions = [
   Callout,
   Column,
   Columns,
+  ImageSlot,
   DetailsSummary,
   DetailsContent,
   Details,

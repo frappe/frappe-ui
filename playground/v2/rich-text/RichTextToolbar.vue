@@ -188,10 +188,11 @@ const spacingOptions = computed<DropdownOptions>(() => [
 ])
 
 // ---- media: from the disk through the library's pickers, or by URL
-type UrlKind = 'image' | 'video' | 'audio' | 'file' | 'embed'
+// a picture is the one medium that does not come through here: its slot
+// carries its own card, with the link on a tab of it (RteImageSlot)
+type UrlKind = 'video' | 'audio' | 'file' | 'embed'
 const urlDialog = ref<{ kind: UrlKind; url: string; name: string } | null>(null)
 const URL_TITLES: Record<UrlKind, string> = {
-  image: 'Insert image',
   video: 'Insert video',
   audio: 'Insert audio',
   file: 'Attach file',
@@ -206,8 +207,7 @@ function insertUrl() {
   const url = d.url.trim()
   if (!url) return
   const c = chain()
-  if (d.kind === 'image') c.setImage({ src: url }).run()
-  else if (d.kind === 'video') c.setVideo({ src: url }).run()
+  if (d.kind === 'video') c.setVideo({ src: url }).run()
   else if (d.kind === 'audio') c.setAudio({ src: url }).run()
   else if (d.kind === 'embed') c.insertIframeURL(url).run()
   else
@@ -231,9 +231,24 @@ const mediaOptions = (kind: UrlKind, fromDisk: () => void): DropdownOptions => [
   { label: 'Insert from computer', icon: icon('paragraph'), onClick: fromDisk },
   { label: 'Insert via URL', icon: icon('link'), onClick: () => askUrl(kind) },
 ]
-const imageOptions = mediaOptions('image', () =>
-  chain().selectAndUploadImage().run(),
-)
+// a picture starts as an empty slot in the document, and the slot's own
+// card asks for the file or the link (RteImageSlot). The columns rows lay
+// one slot per column, so a row of pictures is filled cell by cell.
+const imageOptions: DropdownOptions = [
+  {
+    label: 'Add image',
+    icon: icon('image'),
+    onClick: () => chain().insertImageSlot().run(),
+  },
+  {
+    label: 'Image columns',
+    icon: icon('grid-3'),
+    submenu: [1, 2, 3].map((n) => ({
+      label: n === 1 ? '1 column' : `${n} columns`,
+      onClick: () => chain().insertImageColumns(n).run(),
+    })),
+  },
+]
 const videoOptions = mediaOptions('video', () =>
   chain().selectAndUploadVideo().run(),
 )
@@ -250,7 +265,15 @@ const insertOptions = computed<DropdownOptions>(() => [
       {
         label: 'Image',
         icon: icon('image'),
-        onClick: () => chain().selectAndUploadImage().run(),
+        onClick: () => chain().insertImageSlot().run(),
+      },
+      {
+        label: 'Image columns',
+        icon: icon('grid-3'),
+        submenu: [1, 2, 3].map((n) => ({
+          label: n === 1 ? '1 column' : `${n} columns`,
+          onClick: () => chain().insertImageColumns(n).run(),
+        })),
       },
       {
         label: 'Video',

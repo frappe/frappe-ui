@@ -483,6 +483,36 @@ function resolve() {
   }
 }
 
+/* a row of pictures (32243:108985): the file sets its cells 16 apart with
+   no rule between them — 342 + 16 + 342 across the 700 column — and every
+   picture fills the cell it is given without being stretched to it */
+.rte-doc [data-type='columns'][data-media='true'] {
+  gap: 16px;
+}
+.rte-doc [data-type='columns'][data-media='true'] [data-type='column'] {
+  border-left: 0;
+  padding-left: 0;
+}
+/* a cell keeps the shape the file gives it (342 × 170) whatever shape the
+   picture is, so the row stays level: the picture covers the cell rather
+   than being squeezed into it, and an empty cell beside a filled one is
+   the same size */
+.rte-doc [data-type='columns'][data-media='true'] img {
+  width: 100%;
+  aspect-ratio: 342 / 170;
+  object-fit: cover;
+  border-radius: 6px;
+}
+/* the paragraph a picture stands in carries no leading of its own, so the
+   cells of a row keep their tops level, and the break ProseMirror leaves
+   after the picture as a caret target is no line of the cell */
+.rte-doc [data-type='columns'][data-media='true'] [data-type='column'] > p {
+  margin: 0;
+}
+.rte-doc [data-type='columns'][data-media='true'] .ProseMirror-trailingBreak {
+  display: none;
+}
+
 /* expand / collapse: a 16px chevron before the summary, the content
    indented under it and folded away when closed */
 .rte-details {
