@@ -628,6 +628,31 @@ function resolve() {
 .rte-details.is-open [data-type='details-content'] {
   display: block;
 }
+/* an empty toggle says what it is, as Notion's does: "Toggle" where the
+   summary goes, and what the body takes where that goes — in the editor's
+   own placeholder gray, floated as the library floats its placeholder so
+   the line keeps its break, and gone the moment there is text. An empty
+   line is one ProseMirror has left only its break in. Not in read mode. */
+.rte:not(.is-readonly)
+  .rte-details
+  summary:has(> .ProseMirror-trailingBreak:only-child)::before {
+  content: 'Toggle';
+  float: left;
+  height: 0;
+  font-weight: 400;
+  color: var(--ink-gray-4);
+  pointer-events: none;
+}
+.rte:not(.is-readonly)
+  .rte-details
+  [data-type='details-content']
+  > p:only-child:has(> .ProseMirror-trailingBreak:only-child)::before {
+  content: 'Empty toggle. Click or drop blocks inside.';
+  float: left;
+  height: 0;
+  color: var(--ink-gray-4);
+  pointer-events: none;
+}
 
 /* sub- and superscript */
 .rte-doc sup,
