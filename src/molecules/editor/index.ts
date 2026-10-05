@@ -93,6 +93,7 @@ export type {
   SuggestionExtensionOptions,
   SuggestionRange,
   MentionSuggestionItem,
+  MentionInviteHandler,
   TagSuggestionItem,
   StarterKitOptions,
   CommandItem,

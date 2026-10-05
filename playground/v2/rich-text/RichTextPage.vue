@@ -3,7 +3,7 @@
 // stage, and a row above it for the states the editor can be in —
 // editable or read-only, the article or an empty document.
 import { ref } from 'vue'
-import { Switch } from '../../../src'
+import { Switch, ToastProvider } from '../../../src'
 import RichTextEditor from './RichTextEditor.vue'
 
 const editable = ref(true)
@@ -22,5 +22,7 @@ const empty = ref(false)
       </div>
       <RichTextEditor :editable="editable" :empty="empty" />
     </div>
+    <!-- the editor's toasts — an invitation sent from the "@" list -->
+    <ToastProvider />
   </div>
 </template>

@@ -148,3 +148,55 @@ describe('Mention allowedPrefixes', () => {
     expect(mentionActive(editor)).toBe(false)
   })
 })
+
+describe('Mention invite row', () => {
+  afterEach(() => {
+    while (openEditors.length) openEditors.pop()?.destroy()
+  })
+
+  function items(editor: Editor, query: string) {
+    const ext = editor.extensionManager.extensions.find(
+      (e) => e.name === 'mentionSuggestion',
+    )
+    return ext!.options.suggestion.items({ query, editor }) as Array<
+      Record<string, unknown>
+    >
+  }
+
+  it('offers nothing for an unknown name unless an invite handler is set', () => {
+    const editor = makeEditor()
+    expect(items(editor, 'zed')).toEqual([])
+  })
+
+  it('offers to invite an unknown name, and hands the name to the handler', () => {
+    const onInvite = vi.fn()
+    const editor = new Editor({
+      extensions: [
+        Document,
+        Paragraph,
+        Text,
+        MentionExtension.configure({
+          items: [{ value: 'jane', label: 'Jane', image: '/jane.png' }],
+          onInvite,
+        }),
+      ],
+      content: '<p></p>',
+    })
+    openEditors.push(editor)
+
+    expect(items(editor, 'ja')).toEqual([
+      { value: 'jane', label: 'Jane', image: '/jane.png' },
+    ])
+    const offered = items(editor, 'Santos')
+    expect(offered).toEqual([{ label: 'Santos', value: '', invite: true }])
+
+    const ext = editor.extensionManager.extensions.find(
+      (e) => e.name === 'mentionSuggestion',
+    )
+    const range = { from: 1, to: 1 }
+    ext!.options.suggestion.command({ editor, range, props: offered[0] })
+    expect(onInvite).toHaveBeenCalledWith('Santos', { editor, range })
+    // nothing was written in the handler's place
+    expect(editor.getHTML()).toBe('<p></p>')
+  })
+})

@@ -9,13 +9,15 @@ import team2 from '../assets/rte/team-2.jpg'
 import team3 from '../assets/rte/team-3.jpg'
 import audio from '../assets/rte/sample.wav'
 
+// the people the "@" list offers, each with their picture before the name
+// (32467:13501); the playground has three faces, so they go round
 export const people = [
-  { value: 'faris', label: 'Faris' },
-  { value: 'gowtham', label: 'Gowtham' },
-  { value: 'harsha', label: 'Harsha' },
-  { value: 'jayaprakash', label: 'Jayaprakash' },
-  { value: 'sandeep', label: 'Sandeep' },
-  { value: 'shruti', label: 'Shruti' },
+  { value: 'faris', label: 'Faris', image: team1 },
+  { value: 'gowtham', label: 'Gowtham', image: team2 },
+  { value: 'harsha', label: 'Harsha', image: team3 },
+  { value: 'jayaprakash', label: 'Jayaprakash', image: team1 },
+  { value: 'sandeep', label: 'Sandeep', image: team2 },
+  { value: 'shruti', label: 'Shruti', image: team3 },
 ]
 
 export const tags = [

@@ -75,6 +75,7 @@ import { IframeExtension } from './extensions/iframe'
 import {
   MentionExtension,
   type MentionSuggestionItem,
+  type MentionInviteHandler,
 } from './extensions/mention/mention-extension'
 import { TagComposite, type TagSuggestionItem } from './extensions/tag'
 import EmojiExtension from './extensions/emoji/emoji-extension'
@@ -92,7 +93,7 @@ export {
   type SuggestionExtensionOptions,
   type SuggestionRange,
 } from './SuggestionExtension'
-export type { MentionSuggestionItem, TagSuggestionItem }
+export type { MentionSuggestionItem, MentionInviteHandler, TagSuggestionItem }
 
 type StarterKitMember<O> = Partial<O> | false
 

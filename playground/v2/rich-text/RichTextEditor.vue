@@ -12,11 +12,12 @@
 // (31815:34334): 300px on a 12px radius under the xl shadow, a 32px
 // header ruled beneath, a reply per 24px avatar, and the reply field.
 import { computed, nextTick, ref, watch } from 'vue'
-import { Avatar, TextInput } from '../../../src'
+import { Avatar, TextInput, toast } from '../../../src'
 import {
   Editor,
   EditorContent,
   RichTextKit,
+  type MentionInviteHandler,
   type TiptapEditor,
   type UploadFunction,
 } from '../../../src/molecules/editor'
@@ -44,9 +45,27 @@ watch(
   (empty) => (content.value = empty ? '' : article),
 )
 
+// a name nobody has: the "@" list offers to invite it (32467:13501). Here
+// the invitation is a toast, and the name stays in the text as a mention,
+// so the sentence reads as it was meant to once they have joined
+const invite: MentionInviteHandler = (name, { editor, range }) => {
+  editor
+    .chain()
+    .focus()
+    .insertContentAt(range, [
+      {
+        type: 'mention',
+        attrs: { id: name.toLowerCase().replace(/\s+/g, '-'), label: name },
+      },
+      { type: 'text', text: ' ' },
+    ])
+    .run()
+  toast.success(`Invitation sent to ${name}`)
+}
+
 const extensions = [
   RichTextKit.configure({
-    mention: { items: people },
+    mention: { items: people, onInvite: invite },
     tag: { items: tags },
     // the "/" menu offers the blocks the toolbar's Text select offers, from
     // the select's own list and running the select's own command

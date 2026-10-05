@@ -4,6 +4,8 @@ import {
   Node,
   mergeAttributes,
   type CommandProps,
+  type Editor,
+  type Range,
   type RawCommands,
 } from '@tiptap/core'
 import type { Node as ProseMirrorNode } from '@tiptap/pm/model'
@@ -13,7 +15,7 @@ import {
   createSuggestionExtension,
   type BaseSuggestionItem,
 } from '../suggestion/createSuggestionExtension'
-import SuggestionList from '../suggestion/SuggestionList.vue'
+import MentionList from './MentionList.vue'
 import { warnRemoved } from '#utils/warnDeprecated'
 import {
   insertSuggestionNode,
@@ -33,10 +35,28 @@ import './style.css'
 export interface MentionSuggestionItem extends BaseSuggestionItem {
   label: string
   value: string
+  /** The person's picture, shown before the name; initials stand in without one. */
+  image?: string
+  /**
+   * The row that offers to invite the name typed, shown when nobody matches
+   * it. Set by the list itself, never by a caller's items.
+   */
+  invite?: boolean
 }
+
+/**
+ * Called when the name typed matches nobody and the invite row is taken.
+ * `range` is the `@name` run in the document, for the host to replace with
+ * whatever an invitation leaves behind — a mention, a plain name, nothing.
+ */
+export type MentionInviteHandler = (
+  name: string,
+  context: { editor: Editor; range: Range },
+) => void
 
 interface MentionSuggestionOptions {
   mentions: MaybeRefOrGetter<MentionSuggestionItem[]>
+  onInvite: MentionInviteHandler | null
 }
 
 function createMentionNode(nodeView?: Component) {
@@ -150,12 +170,13 @@ const MentionSuggestionExtension =
     name: 'mentionSuggestion',
     char: '@',
     pluginKey: new PluginKey('mentionSuggestion'),
-    listComponent: SuggestionList,
+    listComponent: MentionList,
     allowedPrefixes: ALLOWED_MENTION_PREFIXES,
 
     addOptions() {
       return {
         mentions: [],
+        onInvite: null,
       }
     },
 
@@ -168,10 +189,24 @@ const MentionSuggestionExtension =
 
       // The matched items are passed through as they came in, so the item
       // slot receives the caller's own object, extra fields and all.
-      return filterByQuery(mentions, query, 'label').slice(0, 10)
+      const matched = filterByQuery(mentions, query, 'label').slice(0, 10)
+      if (matched.length) return matched
+      // Nobody of that name: one row offers to invite them, when the host
+      // has somewhere to send an invitation.
+      const name = query.trim()
+      if (!name || !options?.onInvite) return []
+      return [{ label: name, value: '', invite: true }]
     },
 
     command: ({ editor, range, props }) => {
+      if (props.invite) {
+        const options = getSuggestionOptions<MentionSuggestionOptions>(
+          editor,
+          'mentionSuggestion',
+        )
+        options?.onInvite?.(props.label, { editor, range })
+        return
+      }
       insertSuggestionNode(editor, range, 'mention', {
         id: props.value,
         label: props.label,
@@ -190,12 +225,18 @@ const MentionSuggestionExtension =
 export const MentionExtension = Extension.create<{
   items: MaybeRefOrGetter<MentionSuggestionItem[]> | null
   nodeView?: Component
+  /**
+   * Where an invitation goes when the name typed matches nobody. Without
+   * one, the list shows nothing for an unknown name, as it always did.
+   */
+  onInvite?: MentionInviteHandler | null
 }>({
   name: 'mentionExtension',
 
   addOptions() {
     return {
       items: null,
+      onInvite: null,
     }
   },
 
@@ -209,7 +250,10 @@ export const MentionExtension = Extension.create<{
     if (this.options.items == null) return [node]
     return [
       node,
-      MentionSuggestionExtension.configure({ mentions: this.options.items }),
+      MentionSuggestionExtension.configure({
+        mentions: this.options.items,
+        onInvite: this.options.onInvite ?? null,
+      }),
     ]
   },
 
