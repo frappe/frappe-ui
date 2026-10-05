@@ -26,9 +26,9 @@ import { faceFor } from '../components/patterns/designAssets'
  *
  * The recipient fields are frappe-ui's MultiEmailInput — chips, an inline
  * caret and a suggestion menu are what it does — dressed to the file: the
- * chips are Espresso's `tag` (sm, subtle: 20 tall, radius 5, surface-gray-2,
- * 6 in front and 4 behind, a 12px face, a 13px ink-gray-7 label, a 12px
- * close), and the menu is its `dropdown` (280 wide, radius 10, 4 of padding,
+ * chips are Espresso's `tag` (md, subtle — node 35730:62525: 24 tall,
+ * radius 6, surface-gray-2, 6 in front and 4 behind, a 16px face, a 13px
+ * ink-gray-7 label, a 12px close), and the menu is its `dropdown` (280 wide, radius 10, 4 of padding,
  * 49px rows 1 apart with a 32px face, the name over the address, the
  * pointed-at row on surface-gray-2).
  *
@@ -158,7 +158,7 @@ const root = ref<HTMLElement | null>(null)
           <template #tag="{ value, option, removeTag }">
             <Avatar
               size="xs"
-              class="!size-3 shrink-0"
+              class="shrink-0"
               :label="option?.label ?? value"
               :image="option?.avatar"
             />
@@ -249,7 +249,7 @@ const root = ref<HTMLElement | null>(null)
           <template #tag="{ value, option, removeTag }">
             <Avatar
               size="xs"
-              class="!size-3 shrink-0"
+              class="shrink-0"
               :label="option?.label ?? value"
               :image="option?.avatar"
             />
@@ -377,13 +377,14 @@ const root = ref<HTMLElement | null>(null)
   padding: 0;
   color: var(--ink-gray-7);
 }
-/* the tag: 20 tall, radius 5, 6 in front and 4 behind, 4 between its parts */
+/* the tag, md (node 35730:62525): 24 tall, radius 6, 6 in front and 4
+   behind, 4 between its parts, a 16px face */
 .composer-field :deep([data-slot='tag']) {
-  height: 20px;
+  height: 24px;
   gap: 4px;
   padding: 0 4px 0 6px;
   border: 0;
-  border-radius: var(--radius-2);
+  border-radius: var(--radius-3);
   background: var(--surface-gray-2);
 }
 /* the menu: 280 wide, radius 10, the xl elevation, 4 of padding */
