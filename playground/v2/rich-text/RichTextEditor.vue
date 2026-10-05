@@ -329,6 +329,11 @@ function resolve() {
    tables, links, images — is the library's prose-v3. */
 .rte-doc.prose-v3 {
   line-height: 1.6;
+  /* the 700px column again: EditorContent brings prose's own max-w-none,
+     and the two utilities carry the same weight, so which of them wins is
+     the order they happen to land in — the dev server and a production
+     build do not agree on it. Said here, it is not a matter of order. */
+  max-width: 700px;
 }
 .rte-doc.prose-v3 h1 {
   font-size: 28px;
