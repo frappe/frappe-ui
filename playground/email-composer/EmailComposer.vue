@@ -117,7 +117,21 @@ function insertLink() {
 function insertEmoji(emoji: string) {
   chain().insertContent(emoji).run()
 }
-const attachFile = () => chain().selectAndUploadFile().run()
+/**
+ * Attachments go with the message, not into it: the paperclip opens the
+ * system's dialog and each file picked becomes a chip at the foot of the
+ * body, as Gmail lays them — never a block among the words. The chip is the
+ * same md tag the recipients wear, with the file glyph where the face goes.
+ */
+const attachments = ref<File[]>([])
+const fileInput = ref<HTMLInputElement | null>(null)
+const attachFile = () => fileInput.value?.click()
+function takeFiles(e: Event) {
+  const input = e.target as HTMLInputElement
+  attachments.value.push(...Array.from(input.files ?? []))
+  input.value = ''
+}
+const detach = (i: number) => attachments.value.splice(i, 1)
 const insertImage = () => chain().selectAndUploadImage().run()
 
 /** The menu under Send's chevron: the file's one row. */
@@ -138,6 +152,7 @@ function reset() {
   showBcc.value = false
   subject.value = ''
   body.value = ''
+  attachments.value = []
 }
 
 function send() {
@@ -357,8 +372,8 @@ const root = ref<HTMLElement | null>(null)
       </TextInput>
     </div>
 
-    <!-- the message -->
-    <div class="composer-body min-h-0 flex-1 overflow-y-auto">
+    <!-- the message, and under it whatever is attached -->
+    <div class="composer-body flex min-h-0 flex-1 flex-col overflow-y-auto">
       <Editor
         ref="editorRef"
         v-model="body"
@@ -366,8 +381,39 @@ const root = ref<HTMLElement | null>(null)
         :upload-function="uploadFunction"
         placeholder="Type a message..."
       >
-        <EditorContent class="min-h-full p-4 [--prose-font-size:14px]" />
+        <EditorContent class="flex-1 p-4 [--prose-font-size:14px]" />
       </Editor>
+      <div
+        v-if="attachments.length"
+        class="flex shrink-0 flex-wrap items-center gap-1 px-4 pb-4"
+      >
+        <span
+          v-for="(file, i) in attachments"
+          :key="file.name + i"
+          data-slot="attachment"
+          class="flex h-6 max-w-full items-center gap-1 rounded-3 bg-surface-gray-2 pl-1.5 pr-1"
+        >
+          <ComposerIcon name="file" class="size-4 text-ink-gray-7" />
+          <span class="truncate text-sm text-ink-gray-7">{{ file.name }}</span>
+          <button
+            type="button"
+            class="flex size-3 shrink-0 items-center justify-center text-ink-gray-7 hover:text-ink-gray-8"
+            :aria-label="`Remove ${file.name}`"
+            @click="detach(i)"
+          >
+            <ComposerIcon name="small-close" class="size-3" />
+          </button>
+        </span>
+      </div>
+      <input
+        ref="fileInput"
+        type="file"
+        multiple
+        class="hidden"
+        aria-hidden="true"
+        tabindex="-1"
+        @change="takeFiles"
+      />
     </div>
 
     <!--
@@ -375,8 +421,8 @@ const root = ref<HTMLElement | null>(null)
       chevron beside it opens the file's one-row menu (Schedule send) above
       the button, and turns up while it is open. Then the file's glyphs,
       each running the editor's own command: text colour (the library's
-      picker), attach (the system's file dialog, the file as an attachment
-      block), link (the library's link popover on the selection), emoji (the
+      picker), attach (the system's file dialog, the file as a chip under
+      the message), link (the library's link popover on the selection), emoji (the
       popover example's picker, exactly), Drive and More (nothing yet),
       image (the system's dialog, the picture inline). The bin at the far
       end discards.
@@ -580,9 +626,9 @@ const root = ref<HTMLElement | null>(null)
   color: var(--ink-gray-7);
 }
 
-/* the body: 14 on a 21px line, and the whole box takes the caret */
+/* the body: 14 on a 21px line. The editor is a flex child that grows, so
+   the whole box takes the caret and the chips still fit under it. */
 .composer-body :deep(.ProseMirror) {
-  min-height: 100%;
   line-height: 1.5;
 }
 .composer-body :deep(.ProseMirror p) {
