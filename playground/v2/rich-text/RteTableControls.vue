@@ -15,6 +15,11 @@
 //   and for a run of cells Merge cells and Delete content, for a cell. The
 //   file's Border options submenu is set aside for now (it lived here up
 //   to 7a35865b3f; the row's border attribute and rules stay);
+// - a grip dragged (4px off its press) carries its row or column, as
+//   Notion's does: the row or column keeps its ring, a 3px line marks the
+//   edge it will land on — above or below a row, before or after a
+//   column — and the drop moves it there whole, its cells and widths with
+//   it; the first rows stay header rows, whichever rows land there;
 // - two 16px strips, 8px off the table's right and bottom edges, that add
 //   a column or a row at the end;
 //
@@ -26,7 +31,11 @@
 // aria-hidden, which ProseMirror reads back as a change to the document
 // and rebuilds the table under the grips.
 import { computed, h, ref, shallowRef, watch } from 'vue'
-import type { Node as PMNode, ResolvedPos } from '@tiptap/pm/model'
+import {
+  Fragment,
+  type Node as PMNode,
+  type ResolvedPos,
+} from '@tiptap/pm/model'
 import { TextSelection } from '@tiptap/pm/state'
 import {
   CellSelection,
@@ -311,6 +320,7 @@ const hoverPos = ref<number | null>(null)
 function onMove(e: MouseEvent) {
   const ed = editor.value
   if (!ed || ed.isDestroyed || !ed.isEditable || menuOpen.value) return
+  if (press?.active) return
   const target = e.target instanceof Element ? e.target : null
   if (!target) return
   if (layer.value?.contains(target)) return
@@ -346,19 +356,307 @@ function onMove(e: MouseEvent) {
   syncSelection()
 }
 
-// ---- a hovered handle only grows into its grip; a press on the grip
-// selects the row or column and opens its menu (the Dropdown opens on
-// that pointerdown)
-function pressRow() {
-  selectRow(rowIndex.value)
+// ---- a hovered handle only grows into its grip. A press on the grip
+// selects its row or column; released in place it opens the menu, as
+// Notion's does, and carried 4px it drags the row or column instead: a
+// 3px line marks the edge the pointer is nearest — above or below a row,
+// before or after a column — and the release moves it there. The grips
+// are not the menus' triggers (those are the unseen anchors beside them,
+// so the library's open-on-press stays out of the drag); the menus open
+// and close through their models.
+type DragKind = 'row' | 'col'
+type Press = {
+  kind: DragKind | 'cell'
+  index: number
+  x: number
+  y: number
+  lastX: number
+  lastY: number
+  el: HTMLElement
+  pointerId: number
+  wasOpen: boolean
+  active: boolean
+  to: number | null
 }
-function pressCol() {
-  selectCol(colIndex.value)
+let press: Press | null = null
+const dragKind = ref<DragKind | null>(null)
+const dropLine = ref<Box | null>(null)
+const openFor = { row: rowOpen, col: colOpen, cell: cellOpen }
+const DRAG_START = 4
+const SCROLL_EDGE = 40
+
+function onPress(kind: Press['kind'], e: PointerEvent) {
+  if (e.button !== 0 || press) return
+  const index =
+    kind === 'row' ? rowIndex.value : kind === 'col' ? colIndex.value : -1
+  if (kind === 'row') selectRow(index)
+  else if (kind === 'col') selectCol(index)
+  const el = e.currentTarget as HTMLElement
+  press = {
+    kind,
+    index,
+    x: e.clientX,
+    y: e.clientY,
+    lastX: e.clientX,
+    lastY: e.clientY,
+    el,
+    pointerId: e.pointerId,
+    // an open menu closes on this press (it is outside the menu), and a
+    // release in place leaves it closed
+    wasOpen: openFor[kind].value,
+    active: false,
+    to: null,
+  }
+  el.setPointerCapture(e.pointerId)
+  // the press neither focuses the grip nor starts a text selection
+  e.preventDefault()
+}
+function onPressMove(e: PointerEvent) {
+  const p = press
+  if (!p || p.pointerId !== e.pointerId) return
+  p.lastX = e.clientX
+  p.lastY = e.clientY
+  if (!p.active) {
+    if (p.kind === 'cell') return
+    if (Math.hypot(e.clientX - p.x, e.clientY - p.y) < DRAG_START) return
+    if (!canDrag(p.kind, p.index)) return
+    p.active = true
+    dragKind.value = p.kind
+    openFor[p.kind].value = false
+    document.body.classList.add('rte-tc-dragging')
+    document.addEventListener('keydown', onDragKey, true)
+    autoScroll()
+  }
+  aim()
+}
+function onRelease(e: PointerEvent) {
+  const p = press
+  if (!p || p.pointerId !== e.pointerId) return
+  endPress()
+  if (p.active) {
+    if (p.to !== null) moveLine(p.kind as DragKind, p.index, p.to)
+  } else if (!p.wasOpen) {
+    openFor[p.kind].value = true
+  }
+}
+function onPressCancel(e: PointerEvent) {
+  if (press && press.pointerId === e.pointerId) endPress()
+}
+function onDragKey(e: KeyboardEvent) {
+  if (e.key === 'Escape') {
+    e.preventDefault()
+    endPress()
+  }
+}
+function endPress() {
+  const p = press
+  press = null
+  if (!p) return
+  try {
+    p.el.releasePointerCapture(p.pointerId)
+  } catch {
+    // the pointer is already gone
+  }
+  dragKind.value = null
+  dropLine.value = null
+  document.body.classList.remove('rte-tc-dragging')
+  document.removeEventListener('keydown', onDragKey, true)
+  if (scrollRaf) cancelAnimationFrame(scrollRaf)
+  scrollRaf = 0
+}
+function openMenu(kind: Press['kind']) {
+  openFor[kind].value = true
+}
+
+/** the leading rows made of header cells */
+function headerRows(c: Ctx): number {
+  let n = 0
+  for (let i = 0; i < c.table.childCount; i++) {
+    const row = c.table.child(i)
+    let all = row.childCount > 0
+    for (let j = 0; j < row.childCount; j++)
+      if (row.child(j).type.name !== 'tableHeader') all = false
+    if (!all) break
+    n++
+  }
+  return n
+}
+// a row moves whole, so only a cell spanning rows is in its way; a column
+// is cut out of every row, so any merged cell is
+function canDrag(kind: DragKind, index: number): boolean {
+  const ed = editor.value
+  const c = ed && ctxOf(ed)
+  if (!c || index < 0) return false
+  if ((kind === 'row' ? c.map.height : c.map.width) < 2) return false
+  let ok = true
+  c.table.descendants((node) => {
+    if (!ok) return false
+    const name = node.type.name
+    if (name !== 'tableCell' && name !== 'tableHeader') return true
+    if (node.attrs.rowspan > 1 || (kind === 'col' && node.attrs.colspan > 1))
+      ok = false
+    return false
+  })
+  return ok
+}
+/** the edges a row or column can land on, along its axis, in viewport px */
+function edgesOf(w: HTMLElement, kind: DragKind): number[] {
+  if (kind === 'row') {
+    const rows = [...w.querySelectorAll<HTMLElement>('tr')].map((r) =>
+      r.getBoundingClientRect(),
+    )
+    if (!rows.length) return []
+    return [...rows.map((r) => r.top), rows[rows.length - 1].bottom]
+  }
+  const cells = [...(w.querySelector('tr')?.children ?? [])].map((c) =>
+    c.getBoundingClientRect(),
+  )
+  if (!cells.length) return []
+  return [...cells.map((r) => r.left), cells[cells.length - 1].right]
+}
+// the line goes to the edge nearest the pointer, which is the hovered
+// row's top above its middle and its bottom beneath; the dragged line's
+// own edges are no move, and show nothing
+function aim() {
+  const p = press
+  const w = wrapperEl.value
+  const t = tableBox.value
+  if (!p || !p.active || p.kind === 'cell' || !w || !t) return
+  const edges = edgesOf(w, p.kind)
+  if (!edges.length) return
+  const at = p.kind === 'row' ? p.lastY : p.lastX
+  let to = 0
+  let best = Infinity
+  edges.forEach((edge, i) => {
+    const d = Math.abs(edge - at)
+    if (d < best) {
+      best = d
+      to = i
+    }
+  })
+  if (to === p.index || to === p.index + 1) {
+    p.to = null
+    dropLine.value = null
+    return
+  }
+  p.to = to
+  const edge = edges[to]
+  dropLine.value =
+    p.kind === 'row'
+      ? { left: t.left + 1, top: edge - 1.5, width: t.width - 2, height: 3 }
+      : { left: edge - 1.5, top: t.top + 1, width: 3, height: t.height - 2 }
+}
+// near the scroller's edge the page scrolls on, and the line follows
+let scrollRaf = 0
+function scrollParentOf(el: HTMLElement | null): HTMLElement | null {
+  for (let n = el?.parentElement; n; n = n.parentElement) {
+    const o = getComputedStyle(n).overflowY
+    if ((o === 'auto' || o === 'scroll') && n.scrollHeight > n.clientHeight)
+      return n
+  }
+  return (document.scrollingElement as HTMLElement | null) ?? null
+}
+function autoScroll() {
+  scrollRaf = 0
+  const p = press
+  const w = wrapperEl.value
+  if (!p || !p.active || !w) return
+  let moved = false
+  if (p.kind === 'row') {
+    const sp = scrollParentOf(w)
+    if (sp) {
+      const r =
+        sp === document.scrollingElement
+          ? { top: 0, bottom: window.innerHeight }
+          : sp.getBoundingClientRect()
+      let dy = 0
+      if (p.lastY < r.top + SCROLL_EDGE)
+        dy = -Math.ceil((r.top + SCROLL_EDGE - p.lastY) / 4)
+      else if (p.lastY > r.bottom - SCROLL_EDGE)
+        dy = Math.ceil((p.lastY - (r.bottom - SCROLL_EDGE)) / 4)
+      if (dy) {
+        const before = sp.scrollTop
+        sp.scrollTop += dy
+        moved = sp.scrollTop !== before
+      }
+    }
+  } else {
+    const r = w.getBoundingClientRect()
+    let dx = 0
+    if (p.lastX < r.left + SCROLL_EDGE)
+      dx = -Math.ceil((r.left + SCROLL_EDGE - p.lastX) / 4)
+    else if (p.lastX > r.right - SCROLL_EDGE)
+      dx = Math.ceil((p.lastX - (r.right - SCROLL_EDGE)) / 4)
+    if (dx) {
+      const before = w.scrollLeft
+      w.scrollLeft += dx
+      moved = w.scrollLeft !== before
+    }
+  }
+  if (moved) {
+    measure()
+    aim()
+  }
+  scrollRaf = requestAnimationFrame(autoScroll)
+}
+// the move: the table rebuilt with its rows (or every row's cells) in the
+// new order — the nodes themselves, content and widths untouched — and
+// the moved line selected again. The header rows stay the first ones:
+// cells landing there become header cells, cells leaving them plain ones
+function moveLine(kind: DragKind, from: number, to: number) {
+  const ed = editor.value
+  const c = ed && ctxOf(ed)
+  if (!c) return
+  const at = to > from ? to - 1 : to
+  if (at === from) return
+  const { tableCell, tableHeader } = c.ed.schema.nodes
+  const header = headerRows(c)
+  const rows: PMNode[] = []
+  for (let i = 0; i < c.table.childCount; i++) rows.push(c.table.child(i))
+  let next: PMNode[]
+  if (kind === 'row') {
+    const order = rows.slice()
+    const [row] = order.splice(from, 1)
+    order.splice(at, 0, row)
+    next = order.map((row, i) => {
+      const type = i < header ? tableHeader : tableCell
+      const cells: PMNode[] = []
+      row.forEach((cell) =>
+        cells.push(
+          cell.type === type
+            ? cell
+            : type.create(cell.attrs, cell.content, cell.marks),
+        ),
+      )
+      return row.copy(Fragment.from(cells))
+    })
+  } else {
+    next = rows.map((row) => {
+      const cells: PMNode[] = []
+      row.forEach((cell) => cells.push(cell))
+      const [cell] = cells.splice(from, 1)
+      cells.splice(at, 0, cell)
+      return row.copy(Fragment.from(cells))
+    })
+  }
+  const table = c.table.copy(Fragment.from(next))
+  const tr = c.ed.state.tr.replaceWith(
+    c.start - 1,
+    c.start - 1 + c.table.nodeSize,
+    table,
+  )
+  const map = TableMap.get(table)
+  const cell = (row: number, col: number) =>
+    tr.doc.resolve(c.start + map.map[row * map.width + col])
+  tr.setSelection(
+    kind === 'row'
+      ? CellSelection.rowSelection(cell(at, 0), cell(at, map.width - 1))
+      : CellSelection.colSelection(cell(0, at), cell(map.height - 1, at)),
+  )
+  c.ed.view.dispatch(tr)
 }
 
 // ---- actions
-// (the grips select on pointerdown: the Dropdown opens on that press and
-// swallows the click that ends it)
 function focusCell(c: Ctx, pos: number) {
   c.ed.view.dispatch(
     c.ed.state.tr.setSelection(TextSelection.create(c.ed.state.doc, pos + 2)),
@@ -747,97 +1045,161 @@ const px = (n: number) => `${n}px`
       aria-hidden="false"
     >
       <!-- the row handle, at the left edge of the caret's row: its pill on
-           the table's first line (the card's edge is a pixel out) -->
-      <Dropdown
-        v-if="rowBox && tableBox && selKind !== 'col'"
-        v-model:open="rowOpen"
-        :options="rowOptions"
-        side="bottom"
-        align="start"
-        :offset="rowMenuOffset"
-        :modal="false"
-        :portal-to="menuHost ?? undefined"
-      >
-        <template #trigger>
-          <button
-            type="button"
-            class="rte-tc-handle is-row"
-            :class="rowOpen && 'is-open'"
-            :style="{
-              left: px(tableBox.left - 4),
-              top: px(rowBox.top + rowBox.height / 2 - 10),
-            }"
-            aria-label="Row options"
-            title="Row options"
-            @pointerdown="pressRow"
-            @keydown.enter="selectRow(rowIndex)"
-          >
-            <span class="rte-tc-pill" aria-hidden="true" />
-            <span class="rte-tc-dots" aria-hidden="true" />
-          </button>
-        </template>
-      </Dropdown>
+           the table's first line (the card's edge is a pixel out). Its menu
+           anchors to the unseen span in the same place -->
+      <template v-if="rowBox && tableBox && selKind !== 'col'">
+        <Dropdown
+          v-model:open="rowOpen"
+          :options="rowOptions"
+          side="bottom"
+          align="start"
+          :offset="rowMenuOffset"
+          :modal="false"
+          :portal-to="menuHost ?? undefined"
+        >
+          <template #trigger>
+            <span
+              class="rte-tc-anchor"
+              :style="{
+                left: px(tableBox.left - 4),
+                top: px(rowBox.top + rowBox.height / 2 - 10),
+                width: px(10),
+                height: px(20),
+              }"
+              aria-hidden="true"
+            />
+          </template>
+        </Dropdown>
+        <button
+          type="button"
+          class="rte-tc-handle is-row"
+          :class="(rowOpen || dragKind === 'row') && 'is-open'"
+          :style="{
+            left: px(tableBox.left - 4),
+            top: px(rowBox.top + rowBox.height / 2 - 10),
+          }"
+          aria-label="Row options"
+          title="Row options"
+          aria-haspopup="menu"
+          :aria-expanded="rowOpen"
+          @pointerdown="onPress('row', $event)"
+          @pointermove="onPressMove"
+          @pointerup="onRelease"
+          @pointercancel="onPressCancel"
+          @keydown.enter.prevent="openMenu('row')"
+        >
+          <span class="rte-tc-pill" aria-hidden="true" />
+          <span class="rte-tc-dots" aria-hidden="true" />
+        </button>
+      </template>
 
       <!-- the column handle, at the top edge of the caret's column -->
-      <Dropdown
-        v-if="colBox && selKind !== 'row'"
-        v-model:open="colOpen"
-        :options="colOptions"
-        side="bottom"
-        align="start"
-        :offset="4"
-        :modal="false"
-        :portal-to="menuHost ?? undefined"
-      >
-        <template #trigger>
-          <button
-            type="button"
-            class="rte-tc-handle is-col"
-            :class="colOpen && 'is-open'"
-            :style="{
-              left: px(colBox.left + colBox.width / 2 - 10),
-              top: px(colBox.top - 4),
-            }"
-            aria-label="Column options"
-            title="Column options"
-            @pointerdown="pressCol"
-            @keydown.enter="selectCol(colIndex)"
-          >
-            <span class="rte-tc-pill" aria-hidden="true" />
-            <span class="rte-tc-dots" aria-hidden="true" />
-          </button>
-        </template>
-      </Dropdown>
+      <template v-if="colBox && selKind !== 'row'">
+        <Dropdown
+          v-model:open="colOpen"
+          :options="colOptions"
+          side="bottom"
+          align="start"
+          :offset="4"
+          :modal="false"
+          :portal-to="menuHost ?? undefined"
+        >
+          <template #trigger>
+            <span
+              class="rte-tc-anchor"
+              :style="{
+                left: px(colBox.left + colBox.width / 2 - 10),
+                top: px(colBox.top - 4),
+                width: px(20),
+                height: px(10),
+              }"
+              aria-hidden="true"
+            />
+          </template>
+        </Dropdown>
+        <button
+          type="button"
+          class="rte-tc-handle is-col"
+          :class="(colOpen || dragKind === 'col') && 'is-open'"
+          :style="{
+            left: px(colBox.left + colBox.width / 2 - 10),
+            top: px(colBox.top - 4),
+          }"
+          aria-label="Column options"
+          title="Column options"
+          aria-haspopup="menu"
+          :aria-expanded="colOpen"
+          @pointerdown="onPress('col', $event)"
+          @pointermove="onPressMove"
+          @pointerup="onRelease"
+          @pointercancel="onPressCancel"
+          @keydown.enter.prevent="openMenu('col')"
+        >
+          <span class="rte-tc-pill" aria-hidden="true" />
+          <span class="rte-tc-dots" aria-hidden="true" />
+        </button>
+      </template>
 
       <!-- the cell handle, at the right edge of the selected cell or run:
            its pill on the ring's right line -->
-      <Dropdown
-        v-if="cellBox && selKind === 'cells'"
-        v-model:open="cellOpen"
-        :options="cellOptions"
-        side="right"
-        align="start"
-        :offset="4"
-        :modal="false"
-        :portal-to="menuHost ?? undefined"
-      >
-        <template #trigger>
-          <button
-            type="button"
-            class="rte-tc-handle is-row"
-            :class="cellOpen && 'is-open'"
-            :style="{
-              left: px(cellBox.left + cellBox.width - 6),
-              top: px(cellBox.top + cellBox.height / 2 - 10),
-            }"
-            aria-label="Cell options"
-            title="Cell options"
-          >
-            <span class="rte-tc-pill" aria-hidden="true" />
-            <span class="rte-tc-dots" aria-hidden="true" />
-          </button>
-        </template>
-      </Dropdown>
+      <template v-if="cellBox && selKind === 'cells'">
+        <Dropdown
+          v-model:open="cellOpen"
+          :options="cellOptions"
+          side="right"
+          align="start"
+          :offset="4"
+          :modal="false"
+          :portal-to="menuHost ?? undefined"
+        >
+          <template #trigger>
+            <span
+              class="rte-tc-anchor"
+              :style="{
+                left: px(cellBox.left + cellBox.width - 6),
+                top: px(cellBox.top + cellBox.height / 2 - 10),
+                width: px(10),
+                height: px(20),
+              }"
+              aria-hidden="true"
+            />
+          </template>
+        </Dropdown>
+        <button
+          type="button"
+          class="rte-tc-handle is-row is-cell"
+          :class="cellOpen && 'is-open'"
+          :style="{
+            left: px(cellBox.left + cellBox.width - 6),
+            top: px(cellBox.top + cellBox.height / 2 - 10),
+          }"
+          aria-label="Cell options"
+          title="Cell options"
+          aria-haspopup="menu"
+          :aria-expanded="cellOpen"
+          @pointerdown="onPress('cell', $event)"
+          @pointermove="onPressMove"
+          @pointerup="onRelease"
+          @pointercancel="onPressCancel"
+          @keydown.enter.prevent="openMenu('cell')"
+        >
+          <span class="rte-tc-pill" aria-hidden="true" />
+          <span class="rte-tc-dots" aria-hidden="true" />
+        </button>
+      </template>
+
+      <!-- the line a dragged row or column will land on -->
+      <div
+        v-if="dropLine"
+        class="rte-tc-drop"
+        :style="{
+          left: px(dropLine.left),
+          top: px(dropLine.top),
+          width: px(dropLine.width),
+          height: px(dropLine.height),
+        }"
+        aria-hidden="true"
+      />
 
       <!-- the add strips: a column at the right, a row beneath -->
       <template v-if="tableBox">
@@ -890,6 +1252,30 @@ const px = (n: number) => `${n}px`
 .rte-tc-handle {
   @apply pointer-events-auto fixed flex items-center justify-center rounded-[4px] border border-transparent transition-colors;
   overflow: visible;
+  cursor: grab;
+  touch-action: none;
+}
+.rte-tc-handle.is-cell {
+  cursor: pointer;
+}
+/* the menu's anchor: the grip's place, nothing drawn */
+.rte-tc-anchor {
+  position: fixed;
+  pointer-events: none;
+}
+/* a drag: the pointer holds, the page's text stays unselected, and the
+   landing line is the editor's own drop line, 3px rounded gray-900 */
+body.rte-tc-dragging,
+body.rte-tc-dragging .rte-tc-handle {
+  cursor: grabbing;
+  user-select: none;
+}
+.rte-tc-drop {
+  position: fixed;
+  z-index: 65;
+  border-radius: 9999px;
+  pointer-events: none;
+  background-color: var(--surface-gray-10, #383838);
 }
 .rte-tc-handle.is-row {
   width: 10px;
