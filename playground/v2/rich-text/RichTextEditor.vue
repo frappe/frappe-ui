@@ -26,6 +26,7 @@ import RteTableControls from './RteTableControls.vue'
 import RteBlockHandle from './RteBlockHandle.vue'
 import RteIcon from './RteIcon.vue'
 import { playgroundExtensions } from './extensions'
+import { rteSlashCommands } from './rteSlashCommands'
 import { article, people, tags } from './content'
 import team1 from '../assets/rte/team-1.jpg'
 import team2 from '../assets/rte/team-2.jpg'
@@ -46,6 +47,9 @@ const extensions = [
   RichTextKit.configure({
     mention: { items: people },
     tag: { items: tags },
+    // the "/" menu offers the blocks the toolbar's Text select offers, from
+    // the select's own list and running the select's own command
+    slashCommands: { items: rteSlashCommands() },
     // the attachment node comes from ./extensions, drawn as the file's row
     attachment: false,
     // and the link mark, raising the file's card in place of the popup

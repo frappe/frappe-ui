@@ -80,6 +80,7 @@ import { TagComposite, type TagSuggestionItem } from './extensions/tag'
 import EmojiExtension from './extensions/emoji/emoji-extension'
 import {
   SlashCommands,
+  getDefaultSlashCommands,
   type CommandItem,
   type SlashCommandsOptions,
 } from './extensions/slash-commands/slash-commands-extension'
@@ -328,7 +329,7 @@ export const Mention = MentionExtension
 export const Tag = TagComposite
 
 export const Emoji = EmojiExtension
-export { SlashCommands }
+export { SlashCommands, getDefaultSlashCommands }
 export type { CommandItem, SlashCommandsOptions }
 export const Toc = TocNodeExtension
 export const ContentPaste = ContentPasteExtension

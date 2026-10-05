@@ -84,6 +84,7 @@ export {
   Tag,
   Emoji,
   SlashCommands,
+  getDefaultSlashCommands,
   // Clipboard
   ContentPaste,
   StyleClipboard,
