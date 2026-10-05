@@ -25,7 +25,7 @@
 // modal: a modal menu marks every block around the editor's live regions
 // aria-hidden, which ProseMirror reads back as a change to the document
 // and rebuilds the table under the grips.
-import { computed, h, nextTick, ref, shallowRef, watch } from 'vue'
+import { computed, h, ref, shallowRef, watch } from 'vue'
 import type { Node as PMNode, ResolvedPos } from '@tiptap/pm/model'
 import { TextSelection } from '@tiptap/pm/state'
 import {
@@ -345,35 +345,13 @@ function onMove(e: MouseEvent) {
   syncSelection()
 }
 
-// ---- a hovered handle grows into its grip and, after a beat, opens its
-// menu; a press opens it at once (the Dropdown opens on pointerdown)
-let hoverTimer = 0
-function armOpen(kind: 'row' | 'col' | 'cell') {
-  disarm()
-  hoverTimer = window.setTimeout(() => {
-    hoverTimer = 0
-    if (menuOpen.value) return
-    // the menu first, then the row or column it acts on: a selection
-    // dispatched while the menu is opening closes it again
-    if (kind === 'row') rowOpen.value = true
-    else if (kind === 'col') colOpen.value = true
-    else cellOpen.value = true
-    void nextTick(() => {
-      if (kind === 'row') selectRow(rowIndex.value)
-      else if (kind === 'col') selectCol(colIndex.value)
-    })
-  }, 180)
-}
-function disarm() {
-  if (hoverTimer) window.clearTimeout(hoverTimer)
-  hoverTimer = 0
-}
+// ---- a hovered handle only grows into its grip; a press on the grip
+// selects the row or column and opens its menu (the Dropdown opens on
+// that pointerdown)
 function pressRow() {
-  disarm()
   selectRow(rowIndex.value)
 }
 function pressCol() {
-  disarm()
   selectCol(colIndex.value)
 }
 
@@ -790,8 +768,6 @@ const px = (n: number) => `${n}px`
             }"
             aria-label="Row options"
             title="Row options"
-            @pointerenter="armOpen('row')"
-            @pointerleave="disarm"
             @pointerdown="pressRow"
             @keydown.enter="selectRow(rowIndex)"
           >
@@ -823,8 +799,6 @@ const px = (n: number) => `${n}px`
             }"
             aria-label="Column options"
             title="Column options"
-            @pointerenter="armOpen('col')"
-            @pointerleave="disarm"
             @pointerdown="pressCol"
             @keydown.enter="selectCol(colIndex)"
           >
@@ -857,9 +831,6 @@ const px = (n: number) => `${n}px`
             }"
             aria-label="Cell options"
             title="Cell options"
-            @pointerenter="armOpen('cell')"
-            @pointerleave="disarm"
-            @pointerdown="disarm"
           >
             <span class="rte-tc-pill" aria-hidden="true" />
             <RteIcon name="dot-vertical" class="rte-tc-dots size-4" />
