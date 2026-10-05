@@ -94,11 +94,18 @@ const body = ref(props.initial?.body ?? '')
 const query = ref('')
 const matches = computed(() => {
   const q = query.value.trim().toLowerCase()
-  if (!q) return people
+  // nothing typed, nothing offered: the menu only appears for a query
+  if (!q) return []
   return people.filter(
     (p) => p.label.toLowerCase().includes(q) || p.value.includes(q),
   )
 })
+/**
+ * MultiEmailInput opens its menu on focus and again the moment a pick
+ * resets the query. The menu is for what is being typed, so while nothing
+ * is, it is given no rows (above) and kept out of sight (`is-quiet`).
+ */
+const quiet = computed(() => !query.value.trim())
 
 const extensions = [
   RichTextKit.configure({ mention: false, tag: false }),
@@ -230,7 +237,10 @@ const root = ref<HTMLElement | null>(null)
   <section
     ref="root"
     class="email-composer absolute bottom-6 right-6 z-20 flex flex-col overflow-hidden rounded-7 bg-surface-elevation-1 shadow-2xl dark:shadow-[inset_0_0.5px_1.5px_0.5px_#ffffff0f,0_0_14px_10px_#0000001f,0_44px_52px_-4px_#0000006b]"
-    :class="expanded ? 'left-6 top-6' : 'h-[540px] w-[600px]'"
+    :class="[
+      expanded ? 'left-6 top-6' : 'h-[540px] w-[600px]',
+      quiet && 'is-quiet',
+    ]"
     aria-label="New message"
   >
     <!-- the header: the title, then pop out and close -->
@@ -679,6 +689,20 @@ const root = ref<HTMLElement | null>(null)
   background: var(--surface-elevation-2);
   box-shadow: var(--elevation-xl);
 }
+/* nothing typed: no menu, whatever the component thinks (it lays the
+   menu out inline, hence the !important) */
+.email-composer.is-quiet :deep([data-slot='content']) {
+  display: none !important;
+}
+/* only the "Add …" row (node 35740:62909): the menu hugs its label */
+.email-composer
+  :deep(
+    [data-slot='content']:not(:has([data-slot='item']:not([data-create])))
+  ) {
+  width: max-content;
+  min-width: 0;
+  max-width: 280px;
+}
 /* its list scrolls with a scrollbar that can be seen: the component hides
    it with an inline style, hence the !important */
 .email-composer :deep([data-slot='content'] > div) {
@@ -703,6 +727,23 @@ const root = ref<HTMLElement | null>(null)
 }
 .email-composer :deep([data-slot='item'] + [data-slot='item']) {
   margin-top: 1px;
+}
+/* the "Add …" row is the file's one-line item (node 35740:62909): 28 tall,
+   6/8 inside, radius 8, a 16px glyph 6 before 14px text */
+.email-composer :deep([data-slot='item'][data-create]) {
+  min-height: 28px;
+  padding: 6px 8px;
+  border-radius: var(--radius-4);
+}
+.email-composer
+  :deep([data-slot='item'][data-create] [data-slot='item-list-row']) {
+  gap: 6px;
+  line-height: 1.15;
+}
+.email-composer
+  :deep([data-slot='item'][data-create] [data-slot='item-prefix'] > span) {
+  width: 16px;
+  height: 16px;
 }
 .email-composer :deep([data-slot='item'][data-highlighted]) {
   background: var(--surface-gray-2);
