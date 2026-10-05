@@ -719,13 +719,21 @@ function resolve() {
   border-left: 1px solid var(--outline-gray-1);
 }
 /* a block picked up by its grip, or selected by a click on it: a gray-100
-   ground 4px past its edges; images and video keep the library's outline */
-.rte-doc .ProseMirror-selectednode:not(img):not(video) {
+   ground 4px past its edges. A picture or a video keeps the library's ring
+   and pills instead: the selected node there is the media view's wrapper,
+   the one that holds the media box, not the <img> itself */
+.rte-doc
+  .ProseMirror-selectednode:not(img):not(video):not(
+    :has(> [data-video-fullscreen-root])
+  ) {
   background-color: var(--surface-gray-2);
   border-radius: 4px;
   box-shadow: 0 0 0 4px var(--surface-gray-2);
 }
-.rte-doc.rte-dragging .ProseMirror-selectednode:not(img):not(video) {
+.rte-doc.rte-dragging
+  .ProseMirror-selectednode:not(img):not(video):not(
+    :has(> [data-video-fullscreen-root])
+  ) {
   opacity: 0.4;
 }
 
