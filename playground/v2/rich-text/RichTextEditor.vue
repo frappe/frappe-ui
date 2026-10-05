@@ -548,18 +548,34 @@ function resolve() {
    row 32px of 13/15 gray-500, body rows 40px of 14/21 gray-600 that grow
    with their lines. The card is the table's viewport: a table at least
    its width, and one grown past it (tiptap sizes a table to its columns'
-   widths, inline) scrolls inside it on a 4px thumb, never the page. */
+   widths, inline) scrolls inside it, never the page. */
 .rte-doc.prose-v3 .tableWrapper {
   border: 1px solid var(--outline-gray-1);
   border-radius: 12px;
   margin: 16px 0;
 }
+/* the card's scrollbar (32179:58872): a 4px gray-200 pill, 5px up from
+   the card's bottom edge and 8px in from its sides, on no track — the
+   9px bar holds the 5px beneath the thumb as a clear border */
+@supports not selector(::-webkit-scrollbar) {
+  .rte-doc.prose-v3 .tableWrapper {
+    scrollbar-width: thin;
+    scrollbar-color: var(--outline-gray-2) transparent;
+  }
+}
 .rte-doc.prose-v3 .tableWrapper::-webkit-scrollbar {
-  height: 4px;
+  height: 9px;
+}
+.rte-doc.prose-v3 .tableWrapper::-webkit-scrollbar-track {
+  margin: 0 8px;
+  background: transparent;
 }
 .rte-doc.prose-v3 .tableWrapper::-webkit-scrollbar-thumb {
   background: var(--outline-gray-2);
-  border-radius: 4px;
+  background-clip: padding-box;
+  border: 0 solid transparent;
+  border-bottom-width: 5px;
+  border-radius: 2px 2px 7px 7px;
 }
 .rte-doc.prose-v3 table {
   margin: 0;
