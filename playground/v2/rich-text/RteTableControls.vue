@@ -773,7 +773,6 @@ const px = (n: number) => `${n}px`
             @keydown.enter="selectRow(rowIndex)"
           >
             <span class="rte-tc-pill" aria-hidden="true" />
-            <RteIcon name="dot-vertical" class="rte-tc-dots size-4" />
           </button>
         </template>
       </Dropdown>
@@ -804,7 +803,6 @@ const px = (n: number) => `${n}px`
             @keydown.enter="selectCol(colIndex)"
           >
             <span class="rte-tc-pill" aria-hidden="true" />
-            <RteIcon name="dot-horizontal" class="rte-tc-dots size-4" />
           </button>
         </template>
       </Dropdown>
@@ -834,7 +832,6 @@ const px = (n: number) => `${n}px`
             title="Cell options"
           >
             <span class="rte-tc-pill" aria-hidden="true" />
-            <RteIcon name="dot-vertical" class="rte-tc-dots size-4" />
           </button>
         </template>
       </Dropdown>
@@ -880,15 +877,13 @@ const px = (n: number) => `${n}px`
 </template>
 
 <style>
-/* a handle: Notion's knob — a 14×3 gray-400 pill in a 2px notch of the
-   ring, centred on the ring's line (the file's 32925:96501 draws it 12×1
-   on the line). Hovered or open it is the file's grip: 10×20 (20×10 for
-   a column), flat gray-500 — no rule, no shadow — on 4px corners, its
-   dots white and overflowing as the 16px glyph does. The pill is pinned
-   so the handle placed 4px (or 6px) off a 1px line centres it on that
-   line */
+/* a handle: the file's knob (32925:96501) — a 14×3 gray-400 pill in a
+   2px notch of the ring, centred on the ring's line. Hovered or open it
+   is the same knob, grown to 18×5 and gray-600; the 10×20 (20×10 for a
+   column) handle around it is the press target. The pill is pinned so
+   the handle placed 4px (or 6px) off a 1px line centres it on that line */
 .rte-tc-handle {
-  @apply pointer-events-auto fixed flex items-center justify-center rounded-[4px] border border-transparent text-white transition-colors;
+  @apply pointer-events-auto fixed flex items-center justify-center rounded-[4px] border border-transparent;
   overflow: visible;
 }
 .rte-tc-handle.is-row {
@@ -905,6 +900,11 @@ const px = (n: number) => `${n}px`
   border-radius: 4px;
   background-color: var(--ink-gray-4);
   box-shadow: 0 0 0 2px var(--surface-elevation-2);
+  transition:
+    inset 100ms,
+    width 100ms,
+    height 100ms,
+    background-color 100ms;
 }
 .rte-tc-handle.is-row .rte-tc-pill {
   left: 3px;
@@ -918,20 +918,23 @@ const px = (n: number) => `${n}px`
   width: 14px;
   height: 3px;
 }
-.rte-tc-dots {
-  display: none;
-}
-.rte-tc-handle:hover,
-.rte-tc-handle.is-open {
-  background-color: var(--ink-gray-5);
-}
 .rte-tc-handle:hover .rte-tc-pill,
 .rte-tc-handle.is-open .rte-tc-pill {
-  display: none;
+  background-color: var(--ink-gray-6);
 }
-.rte-tc-handle:hover .rte-tc-dots,
-.rte-tc-handle.is-open .rte-tc-dots {
-  display: inline-flex;
+.rte-tc-handle.is-row:hover .rte-tc-pill,
+.rte-tc-handle.is-row.is-open .rte-tc-pill {
+  left: 2px;
+  top: 0;
+  width: 5px;
+  height: 18px;
+}
+.rte-tc-handle.is-col:hover .rte-tc-pill,
+.rte-tc-handle.is-col.is-open .rte-tc-pill {
+  left: 0;
+  top: 2px;
+  width: 18px;
+  height: 5px;
 }
 /* a strip: gray-50 on a gray-100 rule, 4px corners, the plus gray-400 */
 .rte-tc-strip {
