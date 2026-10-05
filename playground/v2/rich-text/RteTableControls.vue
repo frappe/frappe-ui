@@ -380,7 +380,12 @@ type Press = {
 }
 let press: Press | null = null
 const dragKind = ref<DragKind | null>(null)
+// the landing line: where it is, and whether it shows — it keeps its
+// place while hidden, so it glides from the last edge to the next
 const dropLine = ref<Box | null>(null)
+const dropOn = ref(false)
+const stills = () =>
+  window.matchMedia('(prefers-reduced-motion: reduce)').matches
 const openFor = { row: rowOpen, col: colOpen, cell: cellOpen }
 const DRAG_START = 4
 const SCROLL_EDGE = 40
@@ -425,9 +430,11 @@ function onPressMove(e: PointerEvent) {
     openFor[p.kind].value = false
     document.body.classList.add('rte-tc-dragging')
     document.addEventListener('keydown', onDragKey, true)
+    lift(p)
     autoScroll()
   }
   aim()
+  carry(p)
 }
 function onRelease(e: PointerEvent) {
   const p = press
@@ -459,6 +466,8 @@ function endPress() {
   }
   dragKind.value = null
   dropLine.value = null
+  dropOn.value = false
+  drop()
   document.body.classList.remove('rte-tc-dragging')
   document.removeEventListener('keydown', onDragKey, true)
   if (scrollRaf) cancelAnimationFrame(scrollRaf)
@@ -534,17 +543,113 @@ function aim() {
       to = i
     }
   })
-  if (to === p.index || to === p.index + 1) {
-    p.to = null
-    dropLine.value = null
-    return
-  }
-  p.to = to
-  const edge = edges[to]
-  dropLine.value =
+  const lineAt = (edge: number): Box =>
     p.kind === 'row'
       ? { left: t.left + 1, top: edge - 1.5, width: t.width - 2, height: 3 }
       : { left: edge - 1.5, top: t.top + 1, width: 3, height: t.height - 2 }
+  if (to === p.index || to === p.index + 1) {
+    p.to = null
+    dropOn.value = false
+    // not yet shown: it waits on the dragged line's own edge, to set out from
+    if (!dropLine.value) dropLine.value = lineAt(edges[to])
+    return
+  }
+  p.to = to
+  dropLine.value = lineAt(edges[to])
+  dropOn.value = true
+}
+// ---- the ghost: a copy of the row or column, lifted under the pointer
+// and carried along its axis, within the table's reach
+let ghost: HTMLElement | null = null
+let ghostAt = { left: 0, top: 0, size: 0 }
+let grab = 0
+function lift(p: Press) {
+  const ed = editor.value
+  const w = wrapperEl.value
+  const table = w?.querySelector('table')
+  if (!ed || !w || !table || p.kind === 'cell') return
+  drop()
+  const rows = [...w.querySelectorAll<HTMLElement>('tr')]
+  const tb = table.getBoundingClientRect()
+  const host = document.createElement('div')
+  host.className = 'rte-tc-ghost'
+  const doc = document.createElement('div')
+  doc.className = ed.view.dom.className
+    .replace(/\bProseMirror-\S+/g, '')
+    .replace('rte-dragging', '')
+  const copy = document.createElement('table')
+  copy.className = table.className
+  const body = document.createElement('tbody')
+  if (p.kind === 'row') {
+    const src = rows[p.index]
+    if (!src) return
+    const r = src.getBoundingClientRect()
+    const cols = table.querySelector('colgroup')
+    if (cols) copy.appendChild(cols.cloneNode(true))
+    body.appendChild(src.cloneNode(true))
+    copy.style.width = `${tb.width}px`
+    ghostAt = { left: tb.left, top: r.top, size: r.height }
+    grab = p.y - r.top
+  } else {
+    let width = 0
+    rows.forEach((row) => {
+      const cell = row.children[p.index] as HTMLElement | undefined
+      if (!cell) return
+      const r = cell.getBoundingClientRect()
+      width = Math.max(width, r.width)
+      const tr = document.createElement('tr')
+      const td = cell.cloneNode(true) as HTMLElement
+      td.style.height = `${r.height}px`
+      tr.appendChild(td)
+      body.appendChild(tr)
+    })
+    copy.style.width = `${width}px`
+    const first = rows[0]?.children[p.index]?.getBoundingClientRect()
+    ghostAt = { left: first?.left ?? tb.left, top: tb.top, size: width }
+    grab = p.x - ghostAt.left
+  }
+  body
+    .querySelectorAll('.selectedCell')
+    .forEach((el) => el.classList.remove('selectedCell'))
+  copy.appendChild(body)
+  doc.appendChild(copy)
+  host.appendChild(doc)
+  host.style.left = `${ghostAt.left}px`
+  host.style.top = `${ghostAt.top}px`
+  host.style.width = `${p.kind === 'row' ? tb.width : ghostAt.size}px`
+  document.body.appendChild(host)
+  ghost = host
+  carry(p)
+  requestAnimationFrame(() => ghost?.classList.add('is-up'))
+}
+function carry(p: Press) {
+  const t = tableBox.value
+  if (!ghost || !t || p.kind === 'cell') return
+  if (p.kind === 'row') {
+    const top = Math.min(
+      Math.max(p.lastY - grab, t.top + 1),
+      t.top + t.height - 1 - ghostAt.size,
+    )
+    ghost.style.transform = `translate3d(0, ${top - ghostAt.top}px, 0)`
+  } else {
+    const left = Math.min(
+      Math.max(p.lastX - grab, t.left + 1),
+      t.left + t.width - 1 - ghostAt.size,
+    )
+    ghost.style.transform = `translate3d(${left - ghostAt.left}px, 0, 0)`
+  }
+}
+function drop() {
+  const g = ghost
+  ghost = null
+  if (!g) return
+  g.classList.remove('is-up')
+  const gone = () => g.remove()
+  if (stills()) gone()
+  else {
+    g.addEventListener('transitionend', gone, { once: true })
+    window.setTimeout(gone, 200)
+  }
 }
 // near the scroller's edge the page scrolls on, and the line follows
 let scrollRaf = 0
@@ -609,6 +714,8 @@ function moveLine(kind: DragKind, from: number, to: number) {
   if (!c) return
   const at = to > from ? to - 1 : to
   if (at === from) return
+  const w = wrapperEl.value
+  const before = w && !stills() ? placesIn(w) : null
   const { tableCell, tableHeader } = c.ed.schema.nodes
   const header = headerRows(c)
   const rows: PMNode[] = []
@@ -654,6 +761,55 @@ function moveLine(kind: DragKind, from: number, to: number) {
       : CellSelection.colSelection(cell(0, at), cell(map.height - 1, at)),
   )
   c.ed.view.dispatch(tr)
+  if (w && before) settle(w, kind, from, at, before)
+}
+// ---- the settle: after the move every cell slides from where it was to
+// where it is (the kanban's 220ms ease), the moved line's ring arriving
+// as they land. Web Animations, not styles: a style written on a cell is
+// a mutation ProseMirror reads back as an edit, and resets the selection
+const SETTLE = { duration: 220, easing: 'cubic-bezier(0.2, 0, 0, 1)' }
+/** every cell's place, by row and column */
+function placesIn(w: HTMLElement): DOMRect[][] {
+  return [...w.querySelectorAll('tr')].map((row) =>
+    [...row.children].map((cell) => cell.getBoundingClientRect()),
+  )
+}
+function settle(
+  w: HTMLElement,
+  kind: DragKind,
+  from: number,
+  at: number,
+  before: DOMRect[][],
+) {
+  // where each row (or column) of the new order came from
+  const n = kind === 'row' ? before.length : (before[0]?.length ?? 0)
+  const order = [...Array(n).keys()]
+  const [moved] = order.splice(from, 1)
+  order.splice(at, 0, moved)
+  const rows = [...w.querySelectorAll<HTMLElement>('tr')]
+  const moves: [HTMLElement, number][] = []
+  rows.forEach((row, r) => {
+    ;[...row.children].forEach((el, col) => {
+      const was =
+        kind === 'row' ? before[order[r]]?.[col] : before[r]?.[order[col]]
+      if (!was) return
+      const now = el.getBoundingClientRect()
+      const d = kind === 'row' ? was.top - now.top : was.left - now.left
+      if (Math.abs(d) > 0.5) moves.push([el as HTMLElement, d])
+    })
+  })
+  if (!moves.length) return
+  const axis = kind === 'row' ? 'translateY' : 'translateX'
+  moves.forEach(([el, d]) =>
+    el.animate(
+      [{ transform: `${axis}(${d}px)` }, { transform: 'none' }],
+      SETTLE,
+    ),
+  )
+  w.querySelector('.table-selection-box')?.animate(
+    [{ opacity: 0 }, { opacity: 0, offset: 0.6 }, { opacity: 1 }],
+    { duration: 260 },
+  )
 }
 
 // ---- actions
@@ -1190,8 +1346,9 @@ const px = (n: number) => `${n}px`
 
       <!-- the line a dragged row or column will land on -->
       <div
-        v-if="dropLine"
+        v-if="dragKind && dropLine"
         class="rte-tc-drop"
+        :class="dropOn && 'is-on'"
         :style="{
           left: px(dropLine.left),
           top: px(dropLine.top),
@@ -1272,10 +1429,44 @@ body.rte-tc-dragging .rte-tc-handle {
 }
 .rte-tc-drop {
   position: fixed;
-  z-index: 65;
+  z-index: 75;
   border-radius: 9999px;
   pointer-events: none;
   background-color: var(--surface-gray-10, #383838);
+  opacity: 0;
+  transition:
+    top 120ms cubic-bezier(0.2, 0, 0, 1),
+    left 120ms cubic-bezier(0.2, 0, 0, 1),
+    opacity 120ms;
+}
+.rte-tc-drop.is-on {
+  opacity: 1;
+}
+/* the ghost: the row or column lifted, on the card's surface under the
+   lg shadow, fading up as it rises and down as it lands */
+.rte-tc-ghost {
+  @apply shadow-lg;
+  position: fixed;
+  z-index: 70;
+  pointer-events: none;
+  overflow: hidden;
+  border-radius: 6px;
+  background-color: var(--surface-elevation-2);
+  opacity: 0;
+  transition: opacity 140ms;
+  will-change: transform;
+}
+.rte-tc-ghost.is-up {
+  opacity: 0.85;
+}
+.rte-tc-ghost table {
+  margin: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rte-tc-drop,
+  .rte-tc-ghost {
+    transition: none;
+  }
 }
 .rte-tc-handle.is-row {
   width: 10px;
