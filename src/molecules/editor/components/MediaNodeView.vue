@@ -24,6 +24,8 @@ import {
   containerClasses,
   aspectRatioFrom,
   heightOverWidth,
+  SELECTED_MEDIA_RING,
+  SELECTED_IMAGE_RING,
   type MediaAlign,
 } from './media-node-view-utils'
 import {
@@ -167,8 +169,19 @@ const { isResizing, startResize } = useNodeViewResize(editor, {
   containerEl: () => containerRef.value,
   getAspectRatio: () => mediaIntrinsicAspect(),
   getPos: () => props.getPos(),
-  onCommit: ({ width, height }) => props.updateAttributes({ width, height }),
+  onCommit: ({ width, height }) => commitSize(width, height),
 })
+
+/**
+ * The size written, and the media selected again: a node view's attribute
+ * update replaces the node, and ProseMirror maps a node selection off a
+ * replaced node, which would drop the pills and the menu after every
+ * resize — the next drag needing a click first.
+ */
+function commitSize(width: number, height: number) {
+  props.updateAttributes({ width, height })
+  selectMedia()
+}
 
 /** height / width from the stored attrs, falling back to the rendered media. */
 function mediaIntrinsicAspect(): number {
@@ -219,7 +232,7 @@ function resizeBy(delta: number) {
     Number(props.node.attrs.width) || mediaRef.value?.offsetWidth || 320
   const width = Math.max(50, currentWidth + delta)
   const height = Math.round(width * mediaIntrinsicAspect())
-  props.updateAttributes({ width, height })
+  commitSize(width, height)
 }
 
 // Up/Down match what the corner handle now does with a vertical drag; the
@@ -299,7 +312,7 @@ function resizeTo(fraction: number) {
     320
   const width = Math.max(50, Math.round(available * fraction))
   const height = Math.round(width * mediaIntrinsicAspect())
-  props.updateAttributes({ width, height })
+  commitSize(width, height)
 }
 
 function openMedia() {
@@ -357,7 +370,11 @@ function setVideoOptions(options: {
       :class="
         isStandardFullscreen
           ? 'flex items-center justify-center bg-black'
-          : containerClasses(node.attrs, selected)
+          : containerClasses(
+              node.attrs,
+              selected,
+              isVideo ? SELECTED_MEDIA_RING : SELECTED_IMAGE_RING,
+            )
       "
       :style="{ width: node.attrs.width ? `${node.attrs.width}px` : 'auto' }"
       data-video-fullscreen-root
@@ -441,12 +458,11 @@ function setVideoOptions(options: {
           @set-video-options="setVideoOptions"
         />
 
-        <!-- A video's playback bar owns the bottom of the frame, so it keeps
-             the edge pills; everything else gets the corner grip. -->
+        <!-- The design's edge pills, on a picture and a video alike -->
         <MediaResizeHandle
           v-if="selected && isEditable && isUploaded && !isFullscreen"
           label="Resize media"
-          :placement="isVideo ? 'edges' : 'corner'"
+          placement="edges"
           @resize-start="startResizeFromHandle"
           @resize-keydown="onResizeKeydown"
         />

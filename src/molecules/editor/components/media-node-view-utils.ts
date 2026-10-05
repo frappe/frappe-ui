@@ -31,6 +31,14 @@ export const MEDIA_CHROME_BUTTON =
 export const SELECTED_MEDIA_RING =
   'ring-2 ring-outline-gray-3 ring-offset-2 ring-offset-[var(--surface-base)]'
 
+/**
+ * The selection ring around a picture, as the design draws it (espresso-2.0,
+ * node 32243-108985): a 1px ink-gray-6 line 4px outside the picture. `ink-*`
+ * is not in the ring palette, so the token is read by hand.
+ */
+export const SELECTED_IMAGE_RING =
+  'ring-1 ring-[color:var(--ink-gray-6)] ring-offset-4 ring-offset-[var(--surface-base)]'
+
 export interface MediaLayoutAttrs {
   align?: MediaAlign | null
   float?: 'left' | 'right' | null
@@ -42,9 +50,14 @@ export interface MediaLayoutAttrs {
  * Classes for the outer `NodeViewWrapper`. When the node floats, it shrinks to
  * content width and floats left/right; otherwise it gets default block margins.
  */
-export function wrapperClasses(float: 'left' | 'right' | null | undefined): string[] {
+export function wrapperClasses(
+  float: 'left' | 'right' | null | undefined,
+): string[] {
   if (!float) return ['my-2']
-  return ['w-fit m-2', float === 'right' ? 'float-right ml-5' : 'float-left mr-5']
+  return [
+    'w-fit m-2',
+    float === 'right' ? 'float-right ml-5' : 'float-left mr-5',
+  ]
 }
 
 /**
@@ -55,10 +68,11 @@ export function wrapperClasses(float: 'left' | 'right' | null | undefined): stri
 export function containerClasses(
   attrs: MediaLayoutAttrs,
   selected: boolean,
+  ring: string = SELECTED_MEDIA_RING,
 ): Array<string | Record<string, boolean>> {
   const align = attrs.align ?? null
   return [
-    { [SELECTED_MEDIA_RING]: selected },
+    { [ring]: selected },
     align === 'center' || !align ? 'mx-auto' : '',
     align === 'right' ? 'ml-auto mr-0' : '',
     align === 'left' ? 'mr-auto ml-0' : '',

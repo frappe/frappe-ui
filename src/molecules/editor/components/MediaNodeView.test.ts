@@ -330,6 +330,11 @@ describe('media node view actions menu', () => {
     const node = editor.state.doc.nodeAt(1)
     expect(node.attrs.width).toBe(350)
     expect(node.attrs.height).toBe(175)
+    // and stays selected, its pills and menu still up for the next change
+    expect(editor.state.selection.toJSON()).toMatchObject({
+      type: 'node',
+      anchor: 1,
+    })
     ctx.app.unmount()
   })
 })
