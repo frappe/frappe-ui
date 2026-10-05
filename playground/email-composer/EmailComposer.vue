@@ -596,12 +596,15 @@ const root = ref<HTMLElement | null>(null)
 
 <style>
 /*
-  The library's editor popovers — the colour picker here — wear the 2xl
-  elevation. The design draws every popover on the lg shadow, as the
-  popover examples do, so while the composer is up they take that one.
-  Unscoped on purpose: the picker is portaled to the body.
+  The library's editor popovers — the colour picker and the link popup —
+  wear the 2xl elevation inside a 1px outline-gray-2 border. The design
+  draws every popover the way the popover examples do: the lg shadow and
+  no border at all (the shadow's own 1.5px 18% layer is the edge). While
+  the composer is up they take that. Unscoped on purpose: both popups are
+  portaled to the body.
 */
 body:has(.email-composer) .editor-popover {
+  border: 0;
   box-shadow: var(--elevation-lg);
 }
 </style>
