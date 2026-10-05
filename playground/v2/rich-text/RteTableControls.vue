@@ -1189,6 +1189,33 @@ watch(
 watch(menuOpen, (open) => {
   if (!open) schedule()
 })
+// the table's own changes of shape: a column being resized is tiptap
+// writing the columns' widths straight into the DOM, with no transaction
+// until the pointer lets go, so the handles re-measure on the table's
+// mutations and resizes as well (its selection box left out: that is
+// what measure() writes, and would echo)
+watch(wrapperEl, (w, _old, onCleanup) => {
+  if (!w) return
+  const mo = new MutationObserver((records) => {
+    if (
+      records.some(
+        (r) =>
+          !(r.target instanceof Element) ||
+          !r.target.classList.contains('table-selection-box'),
+      )
+    )
+      schedule()
+  })
+  mo.observe(w, { attributes: true, attributeFilter: ['style'], subtree: true })
+  const ro = new ResizeObserver(schedule)
+  ro.observe(w)
+  const table = w.querySelector('table')
+  if (table) ro.observe(table)
+  onCleanup(() => {
+    mo.disconnect()
+    ro.disconnect()
+  })
+})
 
 const px = (n: number) => `${n}px`
 </script>
