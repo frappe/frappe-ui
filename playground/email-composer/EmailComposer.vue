@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, nextTick, ref } from 'vue'
 import { Avatar, Button, Dropdown, Popover, TextInput } from '../../src'
 import { Editor, EditorContent, RichTextKit } from '../../src/molecules/editor'
 import type { TiptapEditor } from '../../src/molecules/editor'
@@ -42,7 +42,25 @@ import { faceFor } from '../components/patterns/designAssets'
  * the field, so here it opens under the field's left edge.
  */
 
-const emit = defineEmits<{ close: [] }>()
+/** Everything a draft holds — what Undo on the discard toast brings back. */
+export interface Draft {
+  to: string[]
+  cc: string[]
+  bcc: string[]
+  subject: string
+  body: string
+  attachments: File[]
+}
+
+const props = defineProps<{
+  /** A discarded draft to open with, when the toast's Undo brings it back. */
+  initial?: Draft | null
+}>()
+const emit = defineEmits<{
+  close: []
+  /** The bin: the draft as it was, for the toast's Undo. */
+  discard: [draft: Draft]
+}>()
 
 /** Who can be written to — the names the file shows, with their faces. */
 const people: MultiEmailOption[] = [
@@ -60,13 +78,13 @@ const people: MultiEmailOption[] = [
   avatar: faceFor(name),
 }))
 
-const to = ref<string[]>([])
-const cc = ref<string[]>([])
-const bcc = ref<string[]>([])
-const showCc = ref(false)
-const showBcc = ref(false)
-const subject = ref('')
-const body = ref('')
+const to = ref<string[]>(props.initial?.to ?? [])
+const cc = ref<string[]>(props.initial?.cc ?? [])
+const bcc = ref<string[]>(props.initial?.bcc ?? [])
+const showCc = ref(cc.value.length > 0)
+const showBcc = ref(bcc.value.length > 0)
+const subject = ref(props.initial?.subject ?? '')
+const body = ref(props.initial?.body ?? '')
 
 /**
  * The suggestions for whichever field is being typed in: the people whose
@@ -123,7 +141,7 @@ function insertEmoji(emoji: string) {
  * body, as Gmail lays them — never a block among the words. The chip is the
  * same md outline tag the recipients wear, the file glyph where the face goes.
  */
-const attachments = ref<File[]>([])
+const attachments = ref<File[]>(props.initial?.attachments ?? [])
 const fileInput = ref<HTMLInputElement | null>(null)
 const attachFile = () => fileInput.value?.click()
 function takeFiles(e: Event) {
@@ -161,8 +179,48 @@ function send() {
 }
 
 function discard() {
+  emit('discard', {
+    to: to.value,
+    cc: cc.value,
+    bcc: bcc.value,
+    subject: subject.value,
+    body: body.value,
+    attachments: attachments.value,
+  })
   reset()
   emit('close')
+}
+
+/**
+ * The suggestion menu hangs from where the typing is. MultiEmailInput
+ * anchors it to the field's left edge; this moves it along to where the
+ * caret's text starts — or, when 280 from there would run past the
+ * window's right edge, ends it at the caret instead, never past the
+ * window's left edge. Set as a margin on the menu through a variable on the
+ * root, where the menu is portaled.
+ */
+const MENU_WIDTH = 280
+const MENU_INSET = 8
+function placeMenu() {
+  const input = document.activeElement as HTMLInputElement | null
+  const control = input?.closest<HTMLElement>('[data-slot=control]')
+  if (!input || !control || !root.value) return
+  const ir = input.getBoundingClientRect()
+  const cr = control.getBoundingClientRect()
+  const wr = root.value.getBoundingClientRect()
+  let left = ir.left
+  if (left + MENU_WIDTH > wr.right - MENU_INSET) {
+    const cx = document.createElement('canvas').getContext('2d')!
+    const cs = getComputedStyle(input)
+    cx.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`
+    const caret = ir.left + cx.measureText(input.value).width
+    left = Math.max(wr.left + MENU_INSET, caret - MENU_WIDTH)
+  }
+  root.value.style.setProperty('--menu-dx', `${left - cr.left}px`)
+}
+function onQuery(q: string) {
+  query.value = q
+  nextTick(placeMenu)
 }
 
 const root = ref<HTMLElement | null>(null)
@@ -188,7 +246,10 @@ const root = ref<HTMLElement | null>(null)
           @click="expanded = !expanded"
         >
           <template #icon>
-            <ComposerIcon name="arrow-up-right" class="size-3.5" />
+            <ComposerIcon
+              :name="expanded ? 'compact' : 'arrow-up-right'"
+              class="size-3.5"
+            />
           </template>
         </Button>
         <Button variant="ghost" size="xs" label="Close" @click="emit('close')">
@@ -227,7 +288,8 @@ const root = ref<HTMLElement | null>(null)
           :options="matches"
           :portal-to="root ?? undefined"
           :offset="0"
-          @update:query="query = $event"
+          @update:query="onQuery"
+          @focus="nextTick(placeMenu)"
         >
           <template #tag="{ value, option, removeTag }">
             <Avatar
@@ -311,7 +373,8 @@ const root = ref<HTMLElement | null>(null)
           :portal-to="root ?? undefined"
           :offset="0"
           @update:model-value="row[3]"
-          @update:query="query = $event"
+          @update:query="onQuery"
+          @focus="nextTick(placeMenu)"
         >
           <template #tag="{ value, option, removeTag }">
             <Avatar
@@ -390,7 +453,7 @@ const root = ref<HTMLElement | null>(null)
           v-for="(file, i) in attachments"
           :key="file.name + i"
           data-slot="attachment"
-          class="flex h-6 max-w-full items-center gap-1 rounded-3 border border-outline-gray-2 pl-[5px] pr-[3px]"
+          class="flex h-6 max-w-full items-center gap-1 rounded-3 border border-outline-gray-2 pl-[5px] pr-[3px] transition-colors hover:border-outline-gray-3"
         >
           <ComposerIcon name="file" class="size-4 text-ink-gray-7" />
           <span class="truncate text-sm text-ink-gray-7">{{ file.name }}</span>
@@ -580,7 +643,12 @@ const root = ref<HTMLElement | null>(null)
   box-shadow: none !important;
 }
 .composer-field :deep([data-slot='input']) {
+  /* sized to what is typed (never narrower than 4rem), so a long address
+     wraps to the next line rather than scrolling inside a fixed box */
+  field-sizing: content;
+  flex: 1 1 auto;
   min-width: 4rem;
+  max-width: 100%;
   padding: 0;
   color: var(--ink-gray-7);
 }
@@ -595,19 +663,37 @@ const root = ref<HTMLElement | null>(null)
   border: 1px solid var(--outline-gray-2);
   border-radius: var(--radius-3);
   background: transparent;
+  transition: border-color 75ms;
 }
-/* the menu: 280 wide, radius 10, the xl elevation, 4 of padding */
+/* pointed at (node 35757:137715): the line steps up to outline-gray-3 */
+.composer-field :deep([data-slot='tag']:hover) {
+  border-color: var(--outline-gray-3);
+}
+/* the menu: 280 wide, radius 10, the xl elevation, 4 of padding, moved
+   along to the caret by `placeMenu` */
 .email-composer :deep([data-slot='content']) {
   width: 280px;
   min-width: 280px;
+  margin-left: var(--menu-dx, 0px);
   border-radius: var(--radius-5);
   background: var(--surface-elevation-2);
   box-shadow: var(--elevation-xl);
 }
-/* a row: 8 of padding, radius 10, 1 to the next, surface-gray-2 under the pointer.
+/* its list scrolls with a scrollbar that can be seen: the component hides
+   it with an inline style, hence the !important */
+.email-composer :deep([data-slot='content'] > div) {
+  scrollbar-width: thin !important;
+  scrollbar-color: var(--outline-gray-3) transparent;
+}
+/* a row: 8 of padding, radius 10, 1 to the next, surface-gray-2 under the
+   pointer, and always 49 tall — the "Add …" row has one line where a person
+   has two, and must not be a different height.
    The row shell inside carries its own 8/6 and a floor of 28; the 8 here is
    the row's whole inset, so those go. */
 .email-composer :deep([data-slot='item']) {
+  display: flex;
+  align-items: center;
+  min-height: 49px;
   padding: 8px;
   border-radius: var(--radius-5);
 }

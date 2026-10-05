@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Breadcrumbs, Button } from '../../src'
+import { Breadcrumbs, Button, ToastProvider, toast } from '../../src'
 import EmailComposer from './EmailComposer.vue'
+import type { Draft } from './EmailComposer.vue'
 import ComposerIcon from './ComposerIcon.vue'
 
 /**
@@ -17,6 +18,28 @@ import ComposerIcon from './ComposerIcon.vue'
  * calendar: the last thing on the right.
  */
 const open = ref(false)
+
+/**
+ * The bin closes the composer and says so in a toast, with Undo: the draft
+ * as it was comes back into a fresh composer. The toasts are the library's,
+ * rendered by its ToastProvider on this page.
+ */
+const draft = ref<Draft | null>(null)
+function discarded(d: Draft) {
+  toast('Draft discarded', {
+    action: {
+      label: 'Undo',
+      onClick: () => {
+        draft.value = d
+        open.value = true
+      },
+    },
+  })
+}
+function closed() {
+  open.value = false
+  draft.value = null
+}
 </script>
 
 <template>
@@ -35,7 +58,13 @@ const open = ref(false)
 
     <!-- the stage: the composer sits in its bottom-right corner, 24 in -->
     <div class="relative min-h-0 flex-1">
-      <EmailComposer v-if="open" @close="open = false" />
+      <EmailComposer
+        v-if="open"
+        :initial="draft"
+        @close="closed"
+        @discard="discarded"
+      />
     </div>
+    <ToastProvider />
   </div>
 </template>
