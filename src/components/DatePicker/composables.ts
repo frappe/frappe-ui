@@ -94,14 +94,17 @@ export function useKeepOpen(props: CommonDatePickerProps) {
 }
 
 const NUMERIC_TOKEN = /^(YYYY|YY|MM?|DD?|HH?|hh?|mm?|ss?)$/
-const ISO_DATE = /^\d{4}-\d{1,2}-\d{1,2}/
+// Year-first is never ambiguous, whatever the separator: the model's ISO value,
+// or a typed `2026/10/05`.
+const YEAR_FIRST = /^\d{4}[-/.]\d{1,2}[-/.]\d{1,2}/
+const NUMBERS_AND_SEPARATORS = /^\d+(?:(?:\s*[-/.:]\s*|\s+)\d+)*$/
 
 // Puts the numbers the user typed into the format's own padding and
 // separators, so `5/10/2026` or `05-10-2026` becomes `05/10/2026` for
-// `DD/MM/YYYY`. Null when the format has a non-numeric token or the count of
-// numbers does not match.
+// `DD/MM/YYYY`. Null when the input holds anything but numbers and plain
+// separators, the format has a non-numeric token, or the counts differ.
 function fitToFormat(raw: string, format: string): string | null {
-  if (/[A-Za-z]/.test(raw)) return null
+  if (!NUMBERS_AND_SEPARATORS.test(raw)) return null
   const numbers = raw.match(/\d+/g) ?? []
   let i = 0
   let out = ''
@@ -141,8 +144,12 @@ export function useDateCoercion(getFormat: () => string | undefined) {
       // The parses below go through the Date constructor, which reads
       // `5/10/2026` month-first. Under a day-first format that saves 10 May
       // for a user who typed 5 October, so reject numeric input instead.
-      // ISO values, which is what the model holds, still read correctly.
-      if (isDayFirst(format) && !/[A-Za-z]/.test(raw) && !ISO_DATE.test(raw)) {
+      // Year-first input, the model's ISO value included, still reads correctly.
+      if (
+        isDayFirst(format) &&
+        !/[A-Za-z]/.test(raw) &&
+        !YEAR_FIRST.test(raw)
+      ) {
         return null
       }
     }

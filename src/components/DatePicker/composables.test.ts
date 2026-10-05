@@ -36,8 +36,15 @@ describe('useDateCoercion', () => {
     expect(parse('DD MMM YYYY', '5/10/2026')).toBe(null)
   })
 
-  it('still reads the ISO value the model holds', () => {
+  it('rejects stray characters instead of fitting the digits around them', () => {
+    expect(parse('DD/MM/YYYY', '5/10/2026!')).toBe(null)
+    expect(parse('DD/MM/YYYY', '5_10_2026')).toBe(null)
+  })
+
+  it('still reads the ISO value the model holds, and other year-first input', () => {
     expect(parse('DD/MM/YYYY', '2026-10-05')).toBe('2026-10-05 00:00')
+    expect(parse('DD/MM/YYYY', '2026/10/05')).toBe('2026-10-05 00:00')
+    expect(parse('DD/MM/YYYY', '2026.10.05')).toBe('2026-10-05 00:00')
     expect(parse('DD/MM/YYYY HH:mm', '2026-10-05 09:05:00')).toBe(
       '2026-10-05 09:05',
     )
