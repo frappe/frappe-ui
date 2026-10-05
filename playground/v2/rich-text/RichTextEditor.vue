@@ -550,13 +550,20 @@ function resolve() {
    its width, and one grown past it (tiptap sizes a table to its columns'
    widths, inline) scrolls inside it, never the page. */
 .rte-doc.prose-v3 .tableWrapper {
+  --rte-sbar: 9px;
   border: 1px solid var(--outline-gray-1);
   border-radius: 12px;
   margin: 16px 0;
+  /* the card never scrolls its rows: it is as tall as they are */
+  overflow-y: hidden;
+  container-type: scroll-state;
 }
-/* the card's scrollbar (32179:58872): a 4px gray-200 pill, 5px up from
-   the card's bottom edge and 8px in from its sides, on no track — the
-   9px bar holds the 5px beneath the thumb as a clear border */
+/* the card's scrollbar (32179:58872): a 4px gray-200 pill 5px up from
+   the card's bottom edge, on no track, the card's inner width — the 9px
+   bar holds the 5px beneath the thumb as a clear border. The file's card
+   is no taller for it (32176:58190 is the 314px of 32176:56166): the bar
+   lies over the last row's foot, so the table gives the bar's height
+   back and the card keeps the rows' height, scrolling or not */
 @supports not selector(::-webkit-scrollbar) {
   .rte-doc.prose-v3 .tableWrapper {
     scrollbar-width: thin;
@@ -564,10 +571,9 @@ function resolve() {
   }
 }
 .rte-doc.prose-v3 .tableWrapper::-webkit-scrollbar {
-  height: 9px;
+  height: var(--rte-sbar);
 }
 .rte-doc.prose-v3 .tableWrapper::-webkit-scrollbar-track {
-  margin: 0 8px;
   background: transparent;
 }
 .rte-doc.prose-v3 .tableWrapper::-webkit-scrollbar-thumb {
@@ -585,6 +591,11 @@ function resolve() {
   border-spacing: 0;
   font-size: 14px;
   line-height: 21px;
+}
+@container scroll-state(scrollable: x) {
+  .rte-doc.prose-v3 table {
+    margin-bottom: calc(-1 * var(--rte-sbar));
+  }
 }
 .rte-doc.prose-v3 table td,
 .rte-doc.prose-v3 table th {
@@ -677,6 +688,12 @@ function resolve() {
 }
 .rte-doc.prose-v3 table tr:last-child > .selectedCell::after {
   bottom: 0;
+}
+/* over a scrolling table it closes above the bar, not under it */
+@container scroll-state(scrollable: x) {
+  .rte-doc.prose-v3 table tr:last-child > .selectedCell::after {
+    bottom: var(--rte-sbar);
+  }
 }
 .rte-doc.prose-v3 table tr:first-child > :first-child.selectedCell::after {
   border-top-left-radius: 11px;

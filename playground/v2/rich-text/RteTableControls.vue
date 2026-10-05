@@ -210,8 +210,9 @@ function measure() {
 // inner 11px radius, or the card clips the corner off it
 function fitSelectionBox(w: HTMLElement, run: Box) {
   const ring = w.querySelector<HTMLElement>('.table-selection-box')
-  const t = w.querySelector('table')?.getBoundingClientRect()
-  if (!ring || !t) return
+  const table = w.querySelector('table')
+  const t = table?.getBoundingClientRect()
+  if (!ring || !table || !t) return
   const at = (x: number, y: number) => Math.abs(x - y) <= 1.5
   const radius = (corner: boolean) => (corner ? '11px' : '0px')
   const top = at(run.top, t.top)
@@ -222,6 +223,13 @@ function fitSelectionBox(w: HTMLElement, run: Box) {
   ring.style.paddingRight = left ? '0px' : '1px'
   ring.style.marginTop = top ? '0px' : '-1px'
   ring.style.paddingBottom = top ? '0px' : '1px'
+  // over a scrolling table the card's bar lies on the last row's foot (the
+  // table gives its height back, in the stylesheet): a run reaching it
+  // closes above the bar, as the cell's own ring does
+  const bar = bottom
+    ? Math.max(0, -parseFloat(getComputedStyle(table).marginBottom))
+    : 0
+  ring.style.height = `${run.height - bar}px`
   ring.style.borderTopLeftRadius = radius(top && left)
   ring.style.borderTopRightRadius = radius(top && right)
   ring.style.borderBottomLeftRadius = radius(bottom && left)
@@ -1006,21 +1014,40 @@ function addColumnAtEnd() {
 // column is told the width it has (its cells' colwidth), the new column
 // takes its neighbour's, and the table — tiptap sizes it to the sum —
 // grows past the card and scrolls inside it
-/** the columns' rendered widths, from tiptap's colgroup */
+/** the columns' rendered widths, from tiptap's colgroup — whole pixels
+ * (a colwidth is an integer) that add up to the table's own width, so
+ * columns sharing the card never round up past it into a scroll */
 function columnWidths(c: Ctx): number[] {
   const cols = [...(wrapperEl.value?.querySelectorAll('col') ?? [])]
+  let raw: number[]
   if (cols.length === c.map.width)
-    return cols.map((col) => Math.round(col.getBoundingClientRect().width))
-  const widths: number[] = []
-  for (let i = 0; i < c.map.width; i++) {
-    const dom = c.ed.view.nodeDOM(c.start + c.map.map[i])
-    widths.push(
-      dom instanceof HTMLElement
-        ? Math.round(dom.getBoundingClientRect().width)
-        : 100,
-    )
+    raw = cols.map((col) => col.getBoundingClientRect().width)
+  else {
+    raw = []
+    for (let i = 0; i < c.map.width; i++) {
+      const dom = c.ed.view.nodeDOM(c.start + c.map.map[i])
+      raw.push(
+        dom instanceof HTMLElement ? dom.getBoundingClientRect().width : 100,
+      )
+    }
   }
-  return widths
+  return wholePixels(raw)
+}
+/** the widths rounded so their sum is the sum's rounding: each takes its
+ * floor, and the pixels left over go to the largest remainders */
+function wholePixels(raw: number[]): number[] {
+  const total = Math.round(raw.reduce((a, b) => a + b, 0))
+  const floors = raw.map((w) => Math.floor(w))
+  let left = total - floors.reduce((a, b) => a + b, 0)
+  const order = raw
+    .map((w, i) => ({ i, rest: w - Math.floor(w) }))
+    .sort((a, b) => b.rest - a.rest)
+  for (const { i } of order) {
+    if (left <= 0) break
+    floors[i] += 1
+    left -= 1
+  }
+  return floors
 }
 /** every cell told its columns' widths */
 function holdWidths(c: Ctx, widths: number[]) {
@@ -1326,9 +1353,18 @@ watch(wrapperEl, (w, _old, onCleanup) => {
   ro.observe(w)
   const table = w.querySelector('table')
   if (table) ro.observe(table)
+  // the card scrolls its columns, never its rows: its bar lies on the last
+  // row's foot, which ProseMirror would scroll a caret there up out of
+  // (an overflow it can still move, hidden or not) — the card stays put
+  const level = () => {
+    if (w.scrollTop) w.scrollTop = 0
+  }
+  level()
+  w.addEventListener('scroll', level)
   onCleanup(() => {
     mo.disconnect()
     ro.disconnect()
+    w.removeEventListener('scroll', level)
   })
 })
 
