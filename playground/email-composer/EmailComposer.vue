@@ -135,13 +135,23 @@ const root = ref<HTMLElement | null>(null)
       </div>
     </header>
 
-    <!-- To -->
+    <!--
+      To. The row holds its top, not its middle: when the chips run to a
+      second line the glyph and Cc/Bcc stay with the first line, where they
+      were, rather than sliding down to the middle of two. The glyph's 6 is
+      what centres it on that 28px first line.
+
+      11.4 on the right, not the file's 12: the file sets the button's box
+      12 in, which leaves the word's ink 0.6 short of the close glyph's in
+      the header above. The button keeps its own 8 either side, so the
+      pressed pill is unchanged; only where it sits moves.
+    -->
     <div
-      class="flex shrink-0 items-center gap-2 border-b border-outline-gray-1 py-1.5 pl-2 pr-3"
+      class="flex shrink-0 items-start gap-2 border-b border-outline-gray-1 py-1.5 pl-2 pr-[11.4px]"
     >
-      <span class="composer-field flex min-w-0 flex-1 items-center gap-2 pl-2">
+      <span class="composer-field flex min-w-0 flex-1 items-start gap-2 pl-2">
         <span
-          class="lucide-user size-4 shrink-0 text-ink-gray-7"
+          class="lucide-user mt-1.5 size-4 shrink-0 text-ink-gray-7"
           aria-hidden="true"
         />
         <MultiEmailInput
@@ -227,11 +237,11 @@ const root = ref<HTMLElement | null>(null)
       ] as const"
       v-show="row[1]"
       :key="row[0]"
-      class="flex shrink-0 items-center gap-2 border-b border-outline-gray-1 px-2 py-1.5"
+      class="flex shrink-0 items-start gap-2 border-b border-outline-gray-1 px-2 py-1.5"
     >
-      <span class="composer-field flex min-w-0 flex-1 items-center gap-2 pl-2">
+      <span class="composer-field flex min-w-0 flex-1 items-start gap-2 pl-2">
         <span
-          class="lucide-users size-4 shrink-0 text-ink-gray-7"
+          class="lucide-users mt-1.5 size-4 shrink-0 text-ink-gray-7"
           aria-hidden="true"
         />
         <MultiEmailInput
