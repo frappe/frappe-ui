@@ -104,6 +104,17 @@ export function createMediaPlugin(
         before.add(node)
       })
 
+      const storedAt = new Map<number, string>()
+      oldState.doc.descendants((node, pos) => {
+        if (node.type.name !== config.nodeName || !node.attrs.src) return
+        if (node.attrs.loading) return
+        const mapped = transactions.reduce(
+          (at, tr) => tr.mapping.map(at, 1),
+          pos,
+        )
+        storedAt.set(mapped, node.attrs.src)
+      })
+
       const pending: number[] = []
       newState.doc.descendants((node, pos) => {
         if (
@@ -111,7 +122,8 @@ export function createMediaPlugin(
           node.type.name === config.nodeName &&
           node.attrs.src &&
           (!node.attrs.width || !node.attrs.height) &&
-          !node.attrs.loading
+          !node.attrs.loading &&
+          storedAt.get(pos) !== node.attrs.src
         ) {
           pending.push(pos)
         }
