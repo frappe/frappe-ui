@@ -773,6 +773,7 @@ const px = (n: number) => `${n}px`
             @keydown.enter="selectRow(rowIndex)"
           >
             <span class="rte-tc-pill" aria-hidden="true" />
+            <span class="rte-tc-dots" aria-hidden="true" />
           </button>
         </template>
       </Dropdown>
@@ -803,6 +804,7 @@ const px = (n: number) => `${n}px`
             @keydown.enter="selectCol(colIndex)"
           >
             <span class="rte-tc-pill" aria-hidden="true" />
+            <span class="rte-tc-dots" aria-hidden="true" />
           </button>
         </template>
       </Dropdown>
@@ -832,6 +834,7 @@ const px = (n: number) => `${n}px`
             title="Cell options"
           >
             <span class="rte-tc-pill" aria-hidden="true" />
+            <span class="rte-tc-dots" aria-hidden="true" />
           </button>
         </template>
       </Dropdown>
@@ -877,13 +880,15 @@ const px = (n: number) => `${n}px`
 </template>
 
 <style>
-/* a handle: the file's knob (32925:96501) — a 14×3 gray-400 pill in a
-   2px notch of the ring, centred on the ring's line. Hovered or open it
-   is the same knob, grown to 18×5 and gray-600; the 10×20 (20×10 for a
-   column) handle around it is the press target. The pill is pinned so
-   the handle placed 4px (or 6px) off a 1px line centres it on that line */
+/* a handle: the file's knob (32925:95940) — a 12×1 gray-500 line in a
+   2px white notch, on the edge's line (the file draws a 3×14 pill under
+   a 2px white stroke, which comes to the same). Hovered or open it is
+   the file's grip (32926:97027): a 10×20 (20×10 for a column) gray-500
+   pill on 4px corners with three 3px white dots 5px apart — drawn flat,
+   without the file's shadows. The pill is pinned so the handle placed
+   4px (or 6px) off a 1px line puts it exactly on that line */
 .rte-tc-handle {
-  @apply pointer-events-auto fixed flex items-center justify-center rounded-[4px] border border-transparent;
+  @apply pointer-events-auto fixed flex items-center justify-center rounded-[4px] border border-transparent transition-colors;
   overflow: visible;
 }
 .rte-tc-handle.is-row {
@@ -898,43 +903,49 @@ const px = (n: number) => `${n}px`
   position: absolute;
   display: block;
   border-radius: 4px;
-  background-color: var(--ink-gray-4);
+  background-color: var(--ink-gray-5);
   box-shadow: 0 0 0 2px var(--surface-elevation-2);
-  transition:
-    inset 100ms,
-    width 100ms,
-    height 100ms,
-    background-color 100ms;
 }
 .rte-tc-handle.is-row .rte-tc-pill {
-  left: 3px;
-  top: 2px;
-  width: 3px;
-  height: 14px;
+  left: 4px;
+  top: 3px;
+  width: 1px;
+  height: 12px;
 }
 .rte-tc-handle.is-col .rte-tc-pill {
-  left: 2px;
-  top: 3px;
-  width: 14px;
-  height: 3px;
+  left: 3px;
+  top: 4px;
+  width: 12px;
+  height: 1px;
+}
+.rte-tc-dots {
+  position: absolute;
+  inset: -1px;
+  display: none;
+}
+.rte-tc-handle.is-row .rte-tc-dots {
+  background-image:
+    radial-gradient(circle at 5px 5px, #fff 1.5px, transparent 1.75px),
+    radial-gradient(circle at 5px 10px, #fff 1.5px, transparent 1.75px),
+    radial-gradient(circle at 5px 15px, #fff 1.5px, transparent 1.75px);
+}
+.rte-tc-handle.is-col .rte-tc-dots {
+  background-image:
+    radial-gradient(circle at 5px 5px, #fff 1.5px, transparent 1.75px),
+    radial-gradient(circle at 10px 5px, #fff 1.5px, transparent 1.75px),
+    radial-gradient(circle at 15px 5px, #fff 1.5px, transparent 1.75px);
+}
+.rte-tc-handle:hover,
+.rte-tc-handle.is-open {
+  background-color: var(--ink-gray-5);
 }
 .rte-tc-handle:hover .rte-tc-pill,
 .rte-tc-handle.is-open .rte-tc-pill {
-  background-color: var(--ink-gray-6);
+  display: none;
 }
-.rte-tc-handle.is-row:hover .rte-tc-pill,
-.rte-tc-handle.is-row.is-open .rte-tc-pill {
-  left: 2px;
-  top: 0;
-  width: 5px;
-  height: 18px;
-}
-.rte-tc-handle.is-col:hover .rte-tc-pill,
-.rte-tc-handle.is-col.is-open .rte-tc-pill {
-  left: 0;
-  top: 2px;
-  width: 18px;
-  height: 5px;
+.rte-tc-handle:hover .rte-tc-dots,
+.rte-tc-handle.is-open .rte-tc-dots {
+  display: block;
 }
 /* a strip: gray-50 on a gray-100 rule, 4px corners, the plus gray-400 */
 .rte-tc-strip {
