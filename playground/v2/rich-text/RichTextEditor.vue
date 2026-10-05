@@ -581,7 +581,10 @@ function resolve() {
   background-clip: padding-box;
   border: 0 solid transparent;
   border-bottom-width: 5px;
-  border-radius: 2px 2px 7px 7px;
+  /* the pill's ends are half circles: the clear border beneath takes 5px
+     off the lower corners' vertical radius, so they start at 7 to end at
+     the 2 the upper ones have */
+  border-radius: 2px / 2px 2px 7px 7px;
 }
 .rte-doc.prose-v3 table {
   margin: 0;
