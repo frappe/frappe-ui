@@ -141,7 +141,6 @@ function measure() {
     return
   }
   tableBox.value = box(w.getBoundingClientRect())
-  roundSelectionBox(w)
   const r = cellEl?.closest('tr')
   rowBox.value = r ? box(r.getBoundingClientRect()) : null
   if (cellEl) {
@@ -167,26 +166,33 @@ function measure() {
       bottom = Math.max(bottom, b.bottom)
     })
     cellBox.value = { left, top, width: right - left, height: bottom - top }
+    fitSelectionBox(w, cellBox.value)
   } else if (cellEl && selKind.value === 'caret') {
     cellBox.value = box(cellEl.getBoundingClientRect())
   } else {
     cellBox.value = null
   }
 }
-// the run's selection box is drawn square by the library; where it reaches
-// a corner of the card it takes the card's inner 11px radius, or the card
-// clips the corner off it
-function roundSelectionBox(w: HTMLElement) {
+// the run's selection box is drawn by the library on the cells' outer
+// edges, which leaves its left and top lines a pixel inside the rules; it
+// moves out onto them, as the cell's own ring does (a margin and a padding,
+// which the library never sets, so its own redraws keep them), stops at the
+// card's edge, and where it reaches a corner of the card takes the card's
+// inner 11px radius, or the card clips the corner off it
+function fitSelectionBox(w: HTMLElement, run: Box) {
   const ring = w.querySelector<HTMLElement>('.table-selection-box')
   const t = w.querySelector('table')?.getBoundingClientRect()
   if (!ring || !t) return
-  const b = ring.getBoundingClientRect()
   const at = (x: number, y: number) => Math.abs(x - y) <= 1.5
   const radius = (corner: boolean) => (corner ? '11px' : '0px')
-  const top = at(b.top, t.top)
-  const bottom = at(b.bottom, t.bottom)
-  const left = at(b.left, t.left)
-  const right = at(b.right, t.right)
+  const top = at(run.top, t.top)
+  const bottom = at(run.top + run.height, t.bottom)
+  const left = at(run.left, t.left)
+  const right = at(run.left + run.width, t.right)
+  ring.style.marginLeft = left ? '0px' : '-1px'
+  ring.style.paddingRight = left ? '0px' : '1px'
+  ring.style.marginTop = top ? '0px' : '-1px'
+  ring.style.paddingBottom = top ? '0px' : '1px'
   ring.style.borderTopLeftRadius = radius(top && left)
   ring.style.borderTopRightRadius = radius(top && right)
   ring.style.borderBottomLeftRadius = radius(bottom && left)
@@ -761,7 +767,8 @@ const px = (n: number) => `${n}px`
       class="rte-tc pointer-events-none fixed inset-0 z-[60]"
       aria-hidden="false"
     >
-      <!-- the row handle, at the left edge of the caret's row -->
+      <!-- the row handle, at the left edge of the caret's row: its pill on
+           the table's first line (the card's edge is a pixel out) -->
       <Dropdown
         v-if="rowBox && tableBox && selKind !== 'col'"
         v-model:open="rowOpen"
@@ -778,7 +785,7 @@ const px = (n: number) => `${n}px`
             class="rte-tc-handle is-row"
             :class="rowOpen && 'is-open'"
             :style="{
-              left: px(tableBox.left - 5),
+              left: px(tableBox.left - 4),
               top: px(rowBox.top + rowBox.height / 2 - 10),
             }"
             aria-label="Row options"
@@ -812,7 +819,7 @@ const px = (n: number) => `${n}px`
             :class="colOpen && 'is-open'"
             :style="{
               left: px(colBox.left + colBox.width / 2 - 10),
-              top: px(colBox.top - 5),
+              top: px(colBox.top - 4),
             }"
             aria-label="Column options"
             title="Column options"
@@ -827,7 +834,8 @@ const px = (n: number) => `${n}px`
         </template>
       </Dropdown>
 
-      <!-- the cell handle, at the right edge of the selected cell or run -->
+      <!-- the cell handle, at the right edge of the selected cell or run:
+           its pill on the ring's right line -->
       <Dropdown
         v-if="cellBox && selKind === 'cells'"
         v-model:open="cellOpen"
@@ -844,7 +852,7 @@ const px = (n: number) => `${n}px`
             class="rte-tc-handle is-row"
             :class="cellOpen && 'is-open'"
             :style="{
-              left: px(cellBox.left + cellBox.width - 5),
+              left: px(cellBox.left + cellBox.width - 6),
               top: px(cellBox.top + cellBox.height / 2 - 10),
             }"
             aria-label="Cell options"
@@ -903,7 +911,9 @@ const px = (n: number) => `${n}px`
 /* a handle: a 12×1 gray-500 pill on a 2px white rule, 4px corners, on
    the edge (32925:96501). Hovered or open it is the file's grip: 10×20
    (20×10 for a column), gray-500 on a gray-200 rule, 4px corners, under
-   the sm shadow, its dots white and overflowing as the 16px glyph does */
+   the sm shadow, its dots white and overflowing as the 16px glyph does.
+   The pill is pinned 5px in, so the handle placed 4px (or 6px) off a
+   1px line puts the pill exactly on that line */
 .rte-tc-handle {
   @apply pointer-events-auto fixed flex items-center justify-center rounded-[4px] border border-transparent text-white transition-colors;
   overflow: visible;
@@ -917,16 +927,21 @@ const px = (n: number) => `${n}px`
   height: 10px;
 }
 .rte-tc-pill {
+  position: absolute;
   display: block;
   border-radius: 4px;
   background-color: var(--ink-gray-5);
   box-shadow: 0 0 0 2px var(--surface-elevation-2);
 }
 .rte-tc-handle.is-row .rte-tc-pill {
+  left: 4px;
+  top: 3px;
   width: 1px;
   height: 12px;
 }
 .rte-tc-handle.is-col .rte-tc-pill {
+  left: 3px;
+  top: 4px;
   width: 12px;
   height: 1px;
 }

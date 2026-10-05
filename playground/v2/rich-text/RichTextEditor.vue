@@ -635,10 +635,29 @@ function resolve() {
   border-radius: 0;
   box-shadow: inset 0 0 0 1px var(--ink-gray-5);
 }
-/* the library's ring reaches 1px outside the cell, which the card clips
-   on its outer columns and rows; the file's line lies inside the cell */
+/* the run's box grows by the margin and padding the controls give it to
+   reach the rules (RteTableControls' fitSelectionBox) */
+.rte-doc .table-selection-box {
+  box-sizing: content-box;
+}
+/* the cell's ring lies on the rules around it: the one to its left and
+   above (the neighbours' own) and its own to the right and beneath. On the
+   card's edge, where there is no rule and the card would clip it, it stays
+   on the cell's own edge */
 .rte-doc .selectedCell::after {
-  inset: 0;
+  inset: -1px;
+}
+.rte-doc.prose-v3 table tr > :first-child.selectedCell::after {
+  left: 0;
+}
+.rte-doc.prose-v3 table tr:first-child > .selectedCell::after {
+  top: 0;
+}
+.rte-doc.prose-v3 table tr > :last-child.selectedCell::after {
+  right: 0;
+}
+.rte-doc.prose-v3 table tr:last-child > .selectedCell::after {
+  bottom: 0;
 }
 .rte-doc.prose-v3 table tr:first-child > :first-child.selectedCell::after {
   border-top-left-radius: 11px;
