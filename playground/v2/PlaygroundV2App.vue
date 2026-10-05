@@ -28,6 +28,7 @@ import SettingsModalPatterns from './SettingsModalPatterns.vue'
 import TablePatterns from '../components/TablePatterns.vue'
 import ActivityPatterns from '../activity/ActivityPatterns.vue'
 import CalendarPatterns from '../calendar/CalendarPatterns.vue'
+import EmailComposerPage from '../email-composer/EmailComposerPage.vue'
 // Figma 35185:59381 — the app's own mark, in place of the Frappe logo
 import appLogo from './assets/app-logo.svg'
 import EIcon from '../espresso-sidebar/EIcon.vue'
@@ -63,6 +64,7 @@ import navSettingsModal from './assets/nav/settings-modal.svg?raw'
 import navTable from './assets/nav/table.svg?raw'
 import navActivity from './assets/nav/activity.svg?raw'
 import navCalendar from './assets/nav/calendar.svg?raw'
+import navEmailComposer from './assets/nav/email-composer.svg?raw'
 import ApplicableCouponsModal from './modals/ApplicableCouponsModal.vue'
 import CallDetailsModal from './modals/CallDetailsModal.vue'
 import DeleteProjectModal from './modals/DeleteProjectModal.vue'
@@ -176,6 +178,7 @@ const pages = [
   'Table',
   'Activity',
   'Calendar',
+  'Email composer',
 ].map((label) => ({ id: label.toLowerCase().replace(/\W+/g, '-'), label }))
 
 // The app tray down the far left, as a Frappe app shows it: this playground
@@ -221,6 +224,7 @@ const NAV_ICONS: Record<string, string> = {
   table: navTable,
   activity: navActivity,
   calendar: navCalendar,
+  'email-composer': navEmailComposer,
 }
 
 // Drives `<html data-theme>`, so every token on the page — and in the
@@ -312,16 +316,18 @@ const patternTray = ref(true)
 // elsewhere: each page arrives with its own default, and the control takes
 // it from there. Off, nothing sits above the stage.
 // …except over the Calendar, which draws its own 48px header — title,
-// faces, Share, New — as its file does (node 35208:100256). Two headers
+// faces, Share, New — as its file does (node 35208:100256), and over the
+// Email composer, whose header carries the Compose button. Two headers
 // stacked read as the app's and then the page's; the page's is the one that
 // belongs to it.
-const showHeader = ref(page.value !== 'calendar')
+const OWN_HEADER = ['calendar', 'email-composer']
+const showHeader = ref(!OWN_HEADER.includes(page.value))
 const headerType = ref(headerTypes[0].value)
 const showSubheader = ref(page.value === 'sidebar-header')
 const subheaderType = ref(subheaderTypes[0].value)
 watch(page, (p) => {
   showSubheader.value = p === 'sidebar-header'
-  showHeader.value = p !== 'calendar'
+  showHeader.value = !OWN_HEADER.includes(p)
 })
 
 const headerComponent = computed(
@@ -1085,6 +1091,7 @@ const outlineTitle = computed(
                 <ActivityPatterns />
               </div>
               <CalendarPatterns v-else-if="page === 'calendar'" />
+              <EmailComposerPage v-else-if="page === 'email-composer'" />
 
               <div
                 v-else
