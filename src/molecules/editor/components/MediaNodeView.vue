@@ -1,13 +1,5 @@
 <script setup lang="ts">
-import {
-  ref,
-  computed,
-  watch,
-  toRaw,
-  nextTick,
-  onMounted,
-  onBeforeUnmount,
-} from 'vue'
+import { ref, computed, watch, toRaw, onMounted, onBeforeUnmount } from 'vue'
 import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3'
 import Button from '#components/Button/Button.vue'
 import { ErrorMessage } from '#components/ErrorMessage'
@@ -308,21 +300,6 @@ function toggleCaptions() {
   }
 }
 
-/**
- * The pencil in the chrome: the caption, open and ready to type in. The
- * design puts it beside the menu, where a caption is otherwise one row down
- * a list and then a click away.
- */
-const captionInput = ref<HTMLInputElement | null>(null)
-async function editCaption() {
-  if (!showCaption.value) {
-    captionToggle.value = true
-    isFreshInsert.value = false
-  }
-  await nextTick()
-  captionInput.value?.focus()
-}
-
 function onCaptionKeydown(event: KeyboardEvent) {
   handleCaptionKeydown(event, {
     onParagraphAfter: () =>
@@ -509,7 +486,6 @@ function setVideoOptions(options: {
           :selected="selected"
           :show-caption="showCaption"
           @toggle-caption="toggleCaptions"
-          @edit-caption="editCaption"
           @set-align="onSetAlign"
           @resize="resizeTo"
           @replace="replaceMedia"
@@ -615,7 +591,6 @@ function setVideoOptions(options: {
         @paste.stop
       >
         <input
-          ref="captionInput"
           v-model="caption"
           draggable="false"
           class="h-7 w-full border-none bg-transparent text-center text-[13px] leading-[1.5] tracking-[0.015em] text-ink-gray-5 placeholder-ink-gray-4 focus:ring-0"

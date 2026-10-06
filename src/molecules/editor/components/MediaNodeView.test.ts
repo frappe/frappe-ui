@@ -305,28 +305,6 @@ describe('media node view actions menu', () => {
     ctx.app.unmount()
   })
 
-  it('the pencil opens the caption and puts the caret in it', async () => {
-    const ctx = mount(
-      '<p><img src="/files/a.png" width="800" height="400"></p>',
-    )
-    await settle()
-    ctx.getEditor().commands.setNodeSelection(1)
-    await settle()
-    expect(captionInputs(ctx.root)).toHaveLength(0)
-
-    const pencil = ctx.root.querySelector(
-      'button[aria-label="Edit caption"]',
-    ) as HTMLButtonElement
-    expect(pencil).not.toBeNull()
-    pencil.click()
-    await settle()
-
-    const input = captionInputs(ctx.root)[0]
-    expect(input).toBeDefined()
-    expect(document.activeElement).toBe(input)
-    ctx.app.unmount()
-  })
-
   it('deletes the image and leaves the paragraph', async () => {
     const ctx = mount(
       '<p>x</p><p><img src="/files/a.png" width="800" height="400"></p><p>y</p>',

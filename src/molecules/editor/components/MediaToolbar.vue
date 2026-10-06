@@ -17,10 +17,10 @@ const props = defineProps<{
 }>()
 
 /**
- * Media chrome, per the design (espresso-2.0, node 31403-45433): two
- * `MEDIA_CHROME_BUTTON`s 10px in from the top-right corner, 6px apart — a
- * pencil that opens the caption for editing, and the menu with every other
- * action behind it.
+ * Media chrome, per the design (espresso-2.0, node 31403-45433): one
+ * `MEDIA_CHROME_BUTTON` 10px in from the top-right corner, with every
+ * action in the menu behind it. The design draws a pencil beside it; it
+ * was asked off, the caption being a row of the menu already.
  *
  * A video's menu is the design's one flat list: Caption (a check beside it
  * while it shows), Replace, Align, Video settings (Autoplay, Loop, Muted,
@@ -33,7 +33,6 @@ const props = defineProps<{
  */
 const emit = defineEmits<{
   (e: 'toggle-caption'): void
-  (e: 'edit-caption'): void
   (e: 'set-align', align: MediaAlign): void
   /** `fraction` of the width the media has to fill */
   (e: 'resize', fraction: number): void
@@ -241,18 +240,9 @@ const options = computed<DropdownOptions>(() => {
 
 <template>
   <div
-    class="absolute top-2.5 right-2.5 z-20 items-center gap-1.5"
+    class="absolute top-2.5 right-2.5 z-20 items-center"
     :class="isVisible ? 'flex' : 'hidden'"
   >
-    <button
-      type="button"
-      :class="MEDIA_CHROME_BUTTON"
-      aria-label="Edit caption"
-      @click.stop="emit('edit-caption')"
-      @pointerdown.stop
-    >
-      <span class="lucide-pencil size-4" aria-hidden="true" />
-    </button>
     <Dropdown v-model:open="menuOpen" :options="options" align="end">
       <template #trigger>
         <button
