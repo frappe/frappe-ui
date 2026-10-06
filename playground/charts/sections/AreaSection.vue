@@ -19,6 +19,21 @@ const area = computed(() => [props.theme.one('area')])
 const areas = computed(() => props.theme.colors('areas', 4))
 const stepped = computed(() => props.theme.colors('stepped', 4))
 
+/**
+ * The wash the file draws under a lone area: its own line colour, flat at
+ * 20%, carried the whole way down to the axis — every "Vector 433" in the
+ * row is the line's Ocean/B-800 at opacity .2, over a 1.5px stroke of the
+ * same (1356:67489, 1356:67428, 1356:67608). The library fades its wash out
+ * towards the axis instead, so that two bands crossing stay legible where
+ * they overlap; a single area has no overlap to resolve, so these cards name
+ * the fill the file drew. The colour is read back from the theme, which means
+ * a flip to dark mode re-reads it like every other colour on the page.
+ */
+const wash = computed(() => ({
+  areaStyle: { color: props.theme.one('area'), opacity: 0.2 },
+  lineStyle: { width: 1.5 },
+}))
+
 const stacked = monthly.map((row, i) => ({
   month: row.month,
   data1: Math.round(row.sales * 0.4),
@@ -61,7 +76,7 @@ const stackConfig = {
       :data="monthly"
       x="month"
       y="sales"
-      :series-config="{ sales: { label: 'Sales' } }"
+      :series-config="{ sales: { label: 'Sales', echartOptions: wash } }"
       :x-axis="yearAxis"
       :y-axis="salesAxis"
       :palette="area"
@@ -74,7 +89,9 @@ const stackConfig = {
       x="month"
       y="sales"
       show-data-labels
-      :series-config="{ sales: { label: 'Sales', format: thousands } }"
+      :series-config="{
+        sales: { label: 'Sales', format: thousands, echartOptions: wash },
+      }"
       :x-axis="yearAxis"
       :y-axis="salesAxis"
       :palette="area"
@@ -113,7 +130,7 @@ const stackConfig = {
       :data="monthly"
       x="month"
       y="sales"
-      :series-config="{ sales: { label: 'Members' } }"
+      :series-config="{ sales: { label: 'Members', echartOptions: wash } }"
       :x-axis="yearAxis"
       :y-axis="{ ...salesAxis, title: 'Sales' }"
       :palette="area"
