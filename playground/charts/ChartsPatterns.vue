@@ -2,8 +2,12 @@
 // Figma: espresso-2.0 › Patterns › Desktop - 20 (35795:203360) — the
 // Charts page. In the stage: the 20px semibold title 33 in from the left
 // and 43 down, then 24 under it a two-column grid of cards 17 apart
-// across and 18 down. Down the right, 48 past the cards and 66 from the
-// top, the "Charts type" rail: a 14px semibold heading, then 19 under it
+// across and 18 down. The file draws the grid 911 wide because its frame
+// is; here it takes the width the rail leaves it, two equal columns of it,
+// one below the rail's breakpoint — a card never carries a width of its
+// own, so every card the page grows from here falls into the same columns.
+// Down the right, 48 past the cards and 66 from the top, the "Charts type"
+// rail: a 14px semibold heading, then 19 under it
 // a hairline list of 14px rows 26 apart, the one in hand carrying a 24px
 // ink-gray-7 segment of the line. 41 under the list, "Theme", and 18
 // under that the file's padded radio group: Ocean, Qualitative,
@@ -75,12 +79,14 @@ const current = computed(() => CHART_TYPES.find((t) => t.id === type.value)!)
 <template>
   <div class="flex min-h-full bg-surface-base">
     <!-- the page: title, then the grid -->
-    <div class="flex min-w-0 flex-1 flex-col pb-12 pl-[33px] pr-6 pt-[43px]">
+    <div
+      class="chart-stage flex min-w-0 flex-1 flex-col pb-12 pl-[33px] pr-[33px] pt-[43px] lg:pr-12"
+    >
       <h1 class="text-3xl-semibold leading-[1.15] text-ink-gray-9">Charts</h1>
       <div
         :key="`${type}-${themeId}`"
         :data-chart-theme="themeId"
-        class="mt-6 grid w-[911px] max-w-full grid-cols-2 gap-x-[17px] gap-y-[18px]"
+        class="chart-grid mt-6"
       >
         <component
           :is="current.section"
@@ -153,6 +159,30 @@ const current = computed(() => CHART_TYPES.find((t) => t.id === type.value)!)
 </template>
 
 <style scoped>
+/* The stage measures itself, so the grid folds on the width it actually has.
+   The window's width is the wrong question here: the playground's own nav
+   takes 300 of it before the page starts, and the rail another 228. */
+.chart-stage {
+  container-type: inline-size;
+  container-name: chart-stage;
+}
+
+/* Every card sits in this grid and carries no width of its own: two equal
+   columns the file's 17 apart, rows 18 apart, and one column when the stage
+   is too narrow to hold two cards worth reading. A card that wants the whole
+   row asks for it with `col-span-full`, which follows the count. */
+.chart-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  column-gap: 17px;
+  row-gap: 18px;
+}
+@container chart-stage (min-width: 700px) {
+  .chart-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 /* the file's radio rows are 2px apart; the group lays its padded rows flush */
 .theme-radios :deep([role='radiogroup']) {
   gap: 2px;

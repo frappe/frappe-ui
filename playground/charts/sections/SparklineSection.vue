@@ -12,7 +12,10 @@ const color = computed(() => props.theme.one('spark'))
 </script>
 
 <template>
-  <div class="col-span-2 grid grid-cols-4 gap-x-[17px] gap-y-[18px]">
+  <!-- the file's nine small cards take the whole row of the page's grid, four
+       across, and drop a column at a time as the stage narrows — measured on
+       the stage, as the page's own grid is -->
+  <div class="spark-grid col-span-full">
     <SparkCard
       title="Spark line"
       value="184"
@@ -89,3 +92,27 @@ const color = computed(() => props.theme.one('spark'))
     />
   </div>
 </template>
+
+<style scoped>
+.spark-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  column-gap: 17px;
+  row-gap: 18px;
+}
+@container chart-stage (min-width: 460px) {
+  .spark-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@container chart-stage (min-width: 700px) {
+  .spark-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@container chart-stage (min-width: 980px) {
+  .spark-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+</style>

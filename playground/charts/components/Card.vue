@@ -12,7 +12,7 @@ import { ChartCard } from '../../../src/charts'
 defineProps<{
   /** the file's small sparkline card: 223×120, 16 in */
   small?: boolean
-  /** a card the width of two, for the heat table */
+  /** a card the width of the row, for the heat table */
   wide?: boolean
   /** a legend of names alone, the share being in the name */
   plainLegend?: boolean
@@ -32,7 +32,7 @@ defineProps<{
     class="chart-page-card"
     :class="[
       small ? 'chart-page-card--small' : wide ? '' : 'aspect-[580/360]',
-      wide && 'col-span-2',
+      wide && 'col-span-full',
       plainLegend && 'chart-page-card--plain-legend',
       noLegend && 'chart-page-card--no-legend',
     ]"
