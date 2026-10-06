@@ -112,9 +112,20 @@ function split(total: number, shares: number[]) {
   return row
 }
 
-/** the file's sparkline readings */
-export const SPARK = [12, 14, 13, 17, 15, 19, 18, 22, 20, 24, 23, 27]
-export const SPARK_DOWN = [27, 24, 25, 21, 22, 19, 20, 16, 17, 14, 15, 12]
+/**
+ * The file's sparkline readings: a run of 26 climbing (or falling) through a
+ * wobble rather than stepping cleanly, which is the texture its small cards
+ * draw — a dozen readings over a 223-wide card reads as a zigzag, not a trend.
+ */
+function spark(from: number, to: number, seed: number, n = 26): number[] {
+  const rand = seeded(seed)
+  return Array.from({ length: n }, (_, i) => {
+    const base = from + ((to - from) * i) / (n - 1)
+    return Math.round((base + (rand() - 0.5) * 3.6) * 10) / 10
+  })
+}
+export const SPARK = spark(12, 27, 7)
+export const SPARK_DOWN = spark(27, 12, 11)
 
 /** a seeded spread, the same on every load */
 function seeded(seed: number) {

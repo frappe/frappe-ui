@@ -18,6 +18,7 @@
 // and is the plot's: the reading under the pointer gets a dot, and the
 // library's tooltip shell carries the file's tooltip body (ChartTip).
 import { computed, ref } from 'vue'
+import { Dropdown } from '../../../src'
 import { ChartTooltip } from '../../../src/charts'
 import type { ChartTooltipItem } from '../../../src/charts/types'
 import ChartTip from './ChartTip.vue'
@@ -121,6 +122,30 @@ const items = computed<ChartTooltipItem[]>(() => {
     },
   ]
 })
+
+// --- the comparison picker ------------------------------------------------
+/**
+ * The chevron after "vs last month" is a picker in the file, so it opens one:
+ * the design system's own dropdown, carrying the periods a reading can be read
+ * against. The card's numbers are the file's mock, so picking a period changes
+ * what the reading is compared with and nothing else.
+ */
+const PERIODS = [
+  'vs last week',
+  'vs last month',
+  'vs last quarter',
+  'vs last year',
+]
+const period = ref(props.caption ?? PERIODS[1])
+const periods = computed(() =>
+  PERIODS.map((label) => ({
+    label,
+    selected: label === period.value,
+    onClick: () => {
+      period.value = label
+    },
+  })),
+)
 
 function track(event: MouseEvent) {
   const el = trendEl.value
@@ -247,14 +272,22 @@ function track(event: MouseEvent) {
             />
             {{ delta }}
           </span>
-          <button
-            type="button"
-            class="flex items-center text-ink-gray-5"
-            :aria-label="`Compare: ${caption}`"
-          >
-            {{ caption }}
-            <span class="lucide-chevron-down size-4" aria-hidden="true" />
-          </button>
+          <Dropdown :options="periods" placement="bottom-start">
+            <template #trigger="{ open }">
+              <button
+                type="button"
+                class="flex items-center rounded-2 text-ink-gray-5 transition-colors hover:text-ink-gray-7"
+                :aria-label="`Compared with: ${period}`"
+              >
+                {{ period }}
+                <span
+                  class="lucide-chevron-down size-4 transition-transform"
+                  :class="open && 'rotate-180'"
+                  aria-hidden="true"
+                />
+              </button>
+            </template>
+          </Dropdown>
         </div>
         <!-- beside the number: the file's "My tickets" line -->
         <svg
@@ -294,14 +327,22 @@ function track(event: MouseEvent) {
           />
           {{ delta }}
         </span>
-        <button
-          type="button"
-          class="flex items-center text-ink-gray-5"
-          :aria-label="`Compare: ${caption}`"
-        >
-          {{ caption }}
-          <span class="lucide-chevron-down size-4" aria-hidden="true" />
-        </button>
+        <Dropdown :options="periods" placement="bottom-start">
+          <template #trigger="{ open }">
+            <button
+              type="button"
+              class="flex items-center rounded-2 text-ink-gray-5 transition-colors hover:text-ink-gray-7"
+              :aria-label="`Compared with: ${period}`"
+            >
+              {{ period }}
+              <span
+                class="lucide-chevron-down size-4 transition-transform"
+                :class="open && 'rotate-180'"
+                aria-hidden="true"
+              />
+            </button>
+          </template>
+        </Dropdown>
       </div>
     </div>
 
