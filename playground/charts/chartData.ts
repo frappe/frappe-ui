@@ -113,19 +113,94 @@ function split(total: number, shares: number[]) {
 }
 
 /**
- * The file's sparkline readings: a run of 26 climbing (or falling) through a
- * wobble rather than stepping cleanly, which is the texture its small cards
- * draw — a dozen readings over a 223-wide card reads as a zigzag, not a trend.
+ * The trends the file's small cards draw, as it draws them: every vertex of
+ * its own vector, as `[where across the card, reading]`. They are read off
+ * those paths rather than generated, because on these cards the trend is the
+ * drawing — the run that climbs, holds, spikes at two thirds and then
+ * flattens is the shape they are read against (Figma 1356:69060, 1356:69133,
+ * 1356:69126). The x of each reading is the file's too: its vertices are not
+ * evenly spaced.
  */
-function spark(from: number, to: number, seed: number, n = 26): number[] {
-  const rand = seeded(seed)
-  return Array.from({ length: n }, (_, i) => {
-    const base = from + ((to - from) * i) / (n - 1)
-    return Math.round((base + (rand() - 0.5) * 3.6) * 10) / 10
-  })
-}
-export const SPARK = spark(12, 27, 7)
-export const SPARK_DOWN = spark(27, 12, 11)
+export type SparkVertex = [at: number, value: number]
+
+/** the rising trend: the area, line and solid cards (1356:69060) */
+export const SPARK_UP: SparkVertex[] = [
+  [0.0, 0.0],
+  [0.0354, 0.0],
+  [0.0571, 3.51],
+  [0.0748, 3.51],
+  [0.1024, 0.0],
+  [0.1457, 10.69],
+  [0.1811, 10.69],
+  [0.1988, 18.96],
+  [0.2146, 12.52],
+  [0.2421, 12.52],
+  [0.2717, 12.52],
+  [0.2992, 17.99],
+  [0.3169, 10.69],
+  [0.3504, 10.69],
+  [0.3957, 10.69],
+  [0.4134, 17.99],
+  [0.4429, 3.51],
+  [0.4744, 9.83],
+  [0.5413, 9.83],
+  [0.5965, 9.83],
+  [0.6063, 12.52],
+  [0.6319, 27.48],
+  [0.6634, 11.66],
+  [0.6969, 3.51],
+  [0.7894, 3.51],
+  [0.9094, 3.51],
+  [1.0, 3.51],
+]
+
+/** the falling trend: the share card and the inset Sales card (1356:69133) */
+export const SPARK_DOWN: SparkVertex[] = [
+  [0.0, 15.19],
+  [0.0268, 15.19],
+  [0.0481, 23.0],
+  [0.0688, 17.5],
+  [0.1025, 17.5],
+  [0.1386, 17.5],
+  [0.1663, 7.01],
+  [0.1934, 12.5],
+  [0.2534, 12.5],
+  [0.2998, 12.5],
+  [0.323, 7.01],
+  [0.3482, 7.01],
+  [0.3714, 0.0],
+  [0.3946, 7.01],
+  [0.4391, 7.01],
+  [0.4584, 9.5],
+  [0.4797, 8.0],
+  [0.5377, 8.0],
+  [0.5551, 7.01],
+  [0.5687, 9.5],
+  [0.5938, 9.5],
+  [0.6209, 0.0],
+  [0.6422, 5.5],
+  [1.0, 5.5],
+]
+
+/** the short line beside the "My tickets" reading (1356:69126) */
+export const SPARK_BESIDE: SparkVertex[] = [
+  [0.0, 0.0],
+  [0.0849, 0.0],
+  [0.1368, 3.51],
+  [0.1792, 3.51],
+  [0.2453, 0.0],
+  [0.3491, 10.69],
+  [0.434, 10.69],
+  [0.4717, 16.05],
+  [0.5142, 12.53],
+  [0.5802, 12.53],
+  [0.6509, 12.53],
+  [0.717, 18.0],
+  [0.7594, 10.69],
+  [0.8255, 0.0],
+  [0.9198, 9.84],
+  [1.0, 9.84],
+]
 
 /** a seeded spread, the same on every load */
 function seeded(seed: number) {

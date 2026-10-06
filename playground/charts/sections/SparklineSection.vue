@@ -4,7 +4,7 @@
 // change and one of the file's trends under, beside or not at all.
 import { computed } from 'vue'
 import SparkCard from '../components/SparkCard.vue'
-import { SPARK, SPARK_DOWN } from '../chartData'
+import { SPARK_BESIDE, SPARK_DOWN, SPARK_UP } from '../chartData'
 import type { ThemeColors } from '../useChartTheme'
 
 const props = defineProps<{ theme: ThemeColors }>()
@@ -21,7 +21,8 @@ const color = computed(() => props.theme.one('spark'))
       value="184"
       delta="+7%"
       caption="vs last month"
-      :data="SPARK"
+      :path="SPARK_UP"
+      :range="[162, 198]"
       variant="area"
       :color="color"
     />
@@ -30,7 +31,8 @@ const color = computed(() => props.theme.one('spark'))
       value="184"
       delta="+7%"
       caption="vs last month"
-      :data="SPARK"
+      :path="SPARK_UP"
+      :range="[162, 198]"
       variant="line"
       :color="color"
     />
@@ -51,7 +53,8 @@ const color = computed(() => props.theme.one('spark'))
       value="184"
       delta="+7%"
       caption="vs last month"
-      :data="SPARK"
+      :path="SPARK_UP"
+      :range="[162, 198]"
       variant="solid"
       :color="color"
     />
@@ -60,7 +63,8 @@ const color = computed(() => props.theme.one('spark'))
       value="87"
       delta="+7%"
       caption="vs last week"
-      :data="SPARK"
+      :path="SPARK_BESIDE"
+      :range="[78, 92]"
       variant="beside"
       :color="color"
     />
@@ -69,7 +73,9 @@ const color = computed(() => props.theme.one('spark'))
       value="38%"
       delta="-4%"
       caption="vs last month"
-      :data="SPARK_DOWN"
+      :path="SPARK_DOWN"
+      :range="[34, 41]"
+      :format="(v: number) => `${Math.round(v)}%`"
       variant="inset"
       :color="color"
     />
@@ -85,7 +91,9 @@ const color = computed(() => props.theme.one('spark'))
     <SparkCard
       title="Sales"
       value="$12,83,456"
-      :data="SPARK"
+      :path="SPARK_DOWN"
+      :range="[1150000, 1283456]"
+      :format="(v: number) => `$${Math.round(v).toLocaleString('en-IN')}`"
       variant="inset"
       :height="106"
       :color="color"

@@ -22,6 +22,7 @@ import { Dropdown } from '../../../src'
 import { ChartTooltip } from '../../../src/charts'
 import type { ChartTooltipItem } from '../../../src/charts/types'
 import ChartTip from './ChartTip.vue'
+import type { SparkVertex } from '../chartData'
 import {
   sparklineAreaPath,
   sparklineBars,
@@ -46,7 +47,19 @@ const props = withDefaults(
     delta?: string
     /** the period the change is read against: "vs last month" */
     caption?: string
+    /** evenly spaced readings: the bars card */
     data?: number[]
+    /** the file's own vertices, each with the x it is drawn at */
+    path?: SparkVertex[]
+    /**
+     * What the trend's low and high read as. The file's vertices are a
+     * drawing, so their numbers are the shape's, not the card's: this maps
+     * them onto the card's own units for the tooltip, which is linear and so
+     * leaves the shape exactly where it was.
+     */
+    range?: [number, number]
+    /** how the tooltip prints a reading */
+    format?: (value: number) => string
     variant?: SparkVariant
     /** the trend's stroke, from the theme */
     color: string
@@ -74,13 +87,37 @@ const box = computed(() =>
 )
 
 const H = 100
-const points = computed(() =>
-  sparklinePoints(props.data, {
+const readings = computed(() => {
+  const raw = props.path ? props.path.map(([, value]) => value) : props.data
+  const range = props.range
+  if (!range || raw.length < 2) return raw
+  const low = Math.min(...raw)
+  const high = Math.max(...raw)
+  if (high === low) return raw.map(() => range[1])
+  return raw.map(
+    (value) =>
+      range[0] + ((value - low) / (high - low)) * (range[1] - range[0]),
+  )
+})
+
+/**
+ * The trend as points in the viewBox. A card drawn from the file's vertices
+ * keeps their x as well as their reading — the file spaces them unevenly, and
+ * evening them out would redraw its trend as a different one.
+ */
+const points = computed(() => {
+  const span = H * (box.value?.span ?? 1)
+  const even = sparklinePoints(readings.value, {
     width: H,
-    height: H * (box.value?.span ?? 1),
+    height: span,
     inset: 4,
-  }),
-)
+  })
+  if (!props.path) return even
+  return even.map((point, i) => ({
+    x: (props.path![i]?.[0] ?? 0) * H,
+    y: point.y,
+  }))
+})
 const linePath = computed(() => sparklineLinePath(points.value))
 const areaPath = computed(() => sparklineAreaPath(points.value, H))
 const bars = computed(() =>
@@ -109,7 +146,7 @@ const marker = computed(() => {
 })
 
 const items = computed<ChartTooltipItem[]>(() => {
-  const value = at.value === null ? null : props.data[at.value]
+  const value = at.value === null ? null : readings.value[at.value]
   if (value === null || value === undefined) return []
   return [
     {
@@ -117,7 +154,9 @@ const items = computed<ChartTooltipItem[]>(() => {
       label: props.title,
       color: props.color,
       value,
-      formattedValue: value.toLocaleString('en-US'),
+      formattedValue: props.format
+        ? props.format(value)
+        : Math.round(value).toLocaleString('en-US'),
       kind: 'series',
     },
   ]
@@ -149,11 +188,20 @@ const periods = computed(() =>
 
 function track(event: MouseEvent) {
   const el = trendEl.value
-  const count = props.data.length
+  const count = readings.value.length
   if (!el || count < 2) return
   const rect = el.getBoundingClientRect()
   const share = (event.clientX - rect.left) / rect.width
-  at.value = Math.min(count - 1, Math.max(0, Math.round(share * (count - 1))))
+  if (props.path) {
+    let nearest = 0
+    props.path.forEach(([x], i) => {
+      if (Math.abs(x - share) < Math.abs(props.path![nearest][0] - share))
+        nearest = i
+    })
+    at.value = nearest
+  } else {
+    at.value = Math.min(count - 1, Math.max(0, Math.round(share * (count - 1))))
+  }
   pointer.value = { x: event.clientX, y: event.clientY }
 }
 </script>
@@ -185,10 +233,14 @@ function track(event: MouseEvent) {
         :viewBox="`0 0 ${H} ${H}`"
         preserveAspectRatio="none"
       >
+        <!-- The file's gradient runs well past the box it fills: it opens at
+             23% of the box's height and would only reach nothing at 179% of
+             it, so the fill still carries about a third of its colour at the
+             card's bottom edge rather than fading out halfway down. -->
         <defs>
-          <linearGradient :id="id" x1="0" y1="0" x2="0" y2="1">
+          <linearGradient :id="id" x1="0" y1="0.23" x2="0" y2="1.79">
             <stop offset="0" :stop-color="color" stop-opacity="1" />
-            <stop offset="0.76" :stop-color="color" stop-opacity="0" />
+            <stop offset="0.764" :stop-color="color" stop-opacity="0" />
           </linearGradient>
         </defs>
         <path
