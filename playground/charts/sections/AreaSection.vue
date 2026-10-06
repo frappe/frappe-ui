@@ -6,11 +6,11 @@
 // stepped areas over a year; and member growth with its subtitle. The
 // hover the file draws — the crosshair, the tooltip, the other series
 // faded — is the library's own.
-import { computed } from 'vue'
+import { computed, ref, shallowRef, watch } from 'vue'
 import { AreaChart } from '../../../src/charts'
 import Card from '../components/Card.vue'
 import ChartTip from '../components/ChartTip.vue'
-import { monthly, year } from '../chartData'
+import { monthly, steppedYear } from '../chartData'
 import { count, monthAxis, salesAxis, thousands, yearAxis } from '../chartAxes'
 import type { ThemeColors } from '../useChartTheme'
 
@@ -62,35 +62,24 @@ const stacked = monthly.map((row, i) => ({
   data4: Math.round(row.sales * 0.1 + (i % 4) * 150),
 }))
 
-const steppedRows = year.map((row, i) => ({
-  month: row.month,
-  data1: Math.round(row.sales * 0.5 + (i % 3) * 400),
-  data2: Math.round(row.sales * 0.4 + (i % 4) * 300),
-  data3: Math.round(row.sales * 0.3 + (i % 2) * 500),
-  data4: Math.round(row.sales * 0.1 + (i % 5) * 200),
-}))
-
 /**
- * Hovering one band takes the other three back to a tenth of themselves
- * (1356:67563: every layer but the one under the pointer drops to opacity
- * .1). `triggerLineEvent` is what makes a band answer the pointer at all —
- * these series draw no points, and without it echarts only listens on the
- * symbols. The hovered band keeps its own wash: the file draws it solid, but
- * the file's layers are hand-cut bands, where a real area runs to the axis,
- * so a solid fill would bury every band underneath it. What reads as hovered
- * is the rest of the plot standing back, as on the bar cards.
+ * The file's hover: the band under the pointer fills right in and the other
+ * three fall back to a tenth of themselves (1356:67563). `triggerLineEvent`
+ * is what makes a band answer the pointer at all — these series draw no
+ * points, and without it echarts has only the symbols to listen on.
  */
-const focus = (color: string, opacity: number) => ({
+const focus = (color: string) => ({
   triggerLineEvent: true,
-  // Naming the band's own colour again under `emphasis` is what keeps it:
-  // left alone, echarts lifts whatever is under the pointer a shade lighter,
-  // and a band that changes colour as you reach it is a band that was never
-  // the colour the legend would have named.
+  // The band under the pointer fills right in — the file draws it at full
+  // opacity against the tenth it leaves the other three (1356:67563). Naming
+  // its colour again is what keeps it its own: left alone, echarts lifts
+  // whatever is hovered a shade lighter, and a band that changes colour as
+  // you reach it was never the colour it was drawn in.
   emphasis: {
     disabled: false,
     focus: 'series',
     lineStyle: { width: 1, color },
-    areaStyle: { color, opacity },
+    areaStyle: { color, opacity: 1 },
   },
   blur: { areaStyle: { opacity: 0.1 }, lineStyle: { opacity: 0.1 } },
 })
@@ -108,7 +97,7 @@ const stepConfig = computed(() => {
       step: 'end',
       lineStyle: { width: 1 },
       areaStyle: { color, opacity },
-      ...focus(color, opacity),
+      ...focus(color),
     },
   })
   return {
@@ -118,6 +107,43 @@ const stepConfig = computed(() => {
     data1: { label: 'Data 1', ...band(colors[3], 0.2) },
   }
 })
+
+/**
+ * Which band the pointer is on. The file's hover reads out one band, not the
+ * column (1356:67563: "Sales 9,902" alone), and echarts knows which series it
+ * is emphasising — so the card listens for that and the tooltip below prints
+ * the matching row. Off the bands, every row prints, which is the reading a
+ * pointer in open space has actually asked for.
+ */
+const steppedChart = ref<any>(null)
+const onBand = shallowRef<string | null>(null)
+
+watch(
+  () => steppedChart.value?.chart,
+  (chart: any) => {
+    if (!chart || chart.isDisposed?.()) return
+    chart.off('mouseover')
+    chart.off('mouseout')
+    chart.off('globalout')
+    chart.on('mouseover', (event: any) => {
+      if (event.componentType === 'series') onBand.value = event.seriesName
+    })
+    // Crossing straight from one band to the next, echarts can report the
+    // leaving before the arriving; clearing only the band that is still
+    // named keeps the tooltip from blinking back to four rows in between.
+    chart.on('mouseout', (event: any) => {
+      if (event.seriesName === onBand.value) onBand.value = null
+    })
+    chart.on('globalout', () => (onBand.value = null))
+  },
+)
+
+/** the hovered band's row, or every row when the pointer is on none */
+function bandRows(items: any[]) {
+  if (!onBand.value) return items
+  const one = items.filter((item) => item.name === onBand.value)
+  return one.length ? one : items
+}
 
 /** the upper three of the stack carry no line of their own */
 const noLine = { echartOptions: { lineStyle: { width: 0 } } }
@@ -204,10 +230,12 @@ const stackConfig = {
   </Card>
   <Card class="area-card--no-legend">
     <AreaChart
+      ref="steppedChart"
       title="Stepped Line"
-      :data="steppedRows"
+      :data="steppedYear"
       x="month"
       :y="['data4', 'data3', 'data2', 'data1']"
+      stacked
       :series-config="stepConfig"
       :x-axis="monthAxis"
       :y-axis="salesAxis"
@@ -217,7 +245,7 @@ const stackConfig = {
       <template #tooltip="tip">
         <ChartTip
           :label="tip.label"
-          :items="tip.items"
+          :items="bandRows(tip.items)"
           :rows="tip.rows"
           :value="count"
         />

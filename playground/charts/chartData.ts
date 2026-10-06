@@ -56,6 +56,29 @@ export const stackYear = year.map((row, i) => ({
   data4: Math.round(row.sales * 0.16 + (i % 5) * 150),
 }))
 
+/**
+ * The stepped card's four bands, read off the file's own step vectors
+ * (Figma 1GDS12ys41lxeG3wQpNq41, 1356:67528 "Vector 458 / 461 / 463 / 466").
+ * The file stacks them — each band sits between its own line and the one
+ * below, not on the axis — so what is written here is each band's own height
+ * and the lines the file draws are their running totals: 1153, 5358, 7778,
+ * 9227 in January, 2410, 8222, 10691, 12765 by December. data4 is the lowest.
+ */
+export const steppedYear = [
+  { month: year[0].month, data4: 1153, data3: 4205, data2: 2420, data1: 1449 },
+  { month: year[1].month, data4: 1605, data3: 2914, data2: 2765, data1: 1544 },
+  { month: year[2].month, data4: 2410, data3: 3738, data2: 2321, data1: 1655 },
+  { month: year[3].month, data4: 1605, data3: 4889, data2: 2271, data1: 1857 },
+  { month: year[4].month, data4: 1605, data3: 4543, data2: 2074, data1: 1902 },
+  { month: year[5].month, data4: 2762, data3: 4078, data2: 1925, data1: 1857 },
+  { month: year[6].month, data4: 1957, data3: 5327, data2: 2518, data1: 1718 },
+  { month: year[7].month, data4: 1253, data3: 4895, data2: 2617, data1: 1857 },
+  { month: year[8].month, data4: 2158, data3: 3447, data2: 2617, data1: 2151 },
+  { month: year[9].month, data4: 2410, data3: 4676, data2: 2716, data1: 1718 },
+  { month: year[10].month, data4: 2410, data3: 5812, data2: 2469, data1: 2074 },
+  { month: year[11].month, data4: 2410, data3: 5812, data2: 2469, data1: 2074 },
+]
+
 /** four series side by side, the file's six groups of four bars */
 export const groupYear = year
   .filter((_, i) => i % 2 === 0)
