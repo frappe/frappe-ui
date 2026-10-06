@@ -90,13 +90,18 @@ export const CHANNELS = [
   'Others',
 ] as const
 
-/** channel revenue per country, USD k: the file's stacked horizontals */
+/**
+ * Channel revenue per country: the file's horizontal cards. The totals are
+ * read off its grouped card, where the longest bar runs to $65k of the $70k
+ * the axis carries — the stacked card beside it draws the same rows as shares,
+ * which the totals do not move.
+ */
 export const channelRevenue = [
-  { country: 'Germany', ...split(68, [0.3, 0.25, 0.2, 0.15, 0.1]) },
-  { country: 'Japan', ...split(52, [0.35, 0.2, 0.2, 0.15, 0.1]) },
-  { country: 'South Africa', ...split(38, [0.25, 0.3, 0.2, 0.15, 0.1]) },
-  { country: 'India', ...split(24, [0.4, 0.2, 0.15, 0.15, 0.1]) },
-  { country: 'France', ...split(60, [0.3, 0.3, 0.15, 0.15, 0.1]) },
+  { country: 'Germany', ...split(218, [0.3, 0.25, 0.2, 0.15, 0.1]) },
+  { country: 'Japan', ...split(166, [0.35, 0.2, 0.2, 0.15, 0.1]) },
+  { country: 'South Africa', ...split(122, [0.25, 0.3, 0.2, 0.15, 0.1]) },
+  { country: 'India', ...split(77, [0.4, 0.2, 0.15, 0.15, 0.1]) },
+  { country: 'France', ...split(192, [0.3, 0.3, 0.15, 0.15, 0.1]) },
 ]
 
 function split(total: number, shares: number[]) {

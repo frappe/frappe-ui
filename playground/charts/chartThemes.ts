@@ -45,6 +45,8 @@ export type ThemeRole =
   | 'scatter'
   /** four scatter groups */
   | 'scatters'
+  /** the five channels of the horizontal cards, dark to light */
+  | 'channels'
   /** a lone bubble series */
   | 'bubble'
   /** four bubble groups */
@@ -95,6 +97,8 @@ const OCEAN: ThemeRoles = {
   steps: [o(900), o(800), o(700), o(600)],
   scatter: [o(700)],
   scatters: [o(900), o(800), o(700), o(400)],
+  // the file's five channels on the horizontal cards: B-900 … B-300
+  channels: [o(900), o(800), o(700), o(400), o(300)],
   bubble: [o(800)],
   bubbles: [o(900), o(800), o(700), o(400)],
   map: [100, 200, 300, 400, 500, 600, 700, 800, 900].map(o),
@@ -123,6 +127,13 @@ const MIST: ThemeRoles = {
   steps: [m('apricot'), m('graphite'), m('meadow'), m('limestone')],
   scatter: [m('apricot')],
   scatters: [m('apricot'), m('dune'), m('rosewood'), m('harboar')],
+  channels: [
+    m('graphite'),
+    m('harboar'),
+    m('rosewood'),
+    m('apricot'),
+    m('dune'),
+  ],
   bubble: [m('harboar')],
   bubbles: [m('harboar'), m('limestone'), m('rosewood'), m('apricot')],
   map: [
@@ -180,6 +191,7 @@ const EARTHY: ThemeRoles = {
   steps: [e('dune'), e('moss'), e('clay'), e('stone')],
   scatter: [e('dune')],
   scatters: [e('clay'), e('olive'), e('dune'), e('stone')],
+  channels: [e('moss'), e('olive'), e('dune'), e('terracotta'), e('wheat')],
   bubble: [e('olive')],
   bubbles: [e('moss'), e('sand'), e('clay'), e('olive')],
   map: [
@@ -231,6 +243,7 @@ const QUALITATIVE: ThemeRoles = {
   steps: [q(3), q(1), q(6), q(7)],
   scatter: [q(1)],
   scatters: [q(1), q(3), q(6), q(8)],
+  channels: [q(1), q(3), q(6), q(8), q(5)],
   bubble: [q(4)],
   bubbles: [q(1), q(3), q(6), q(7)],
   map: [1, 2, 3, 4, 5, 6, 7, 8].map(q),
@@ -259,6 +272,7 @@ const DIVERGING: ThemeRoles = {
   steps: [d(8), d(1), d(7), d(2)],
   scatter: [d(8)],
   scatters: [d(1), d(7), d(9), d(2)],
+  channels: [d(1), d(2), d(3), d(7), d(8)],
   bubble: [d(1)],
   bubbles: [d(1), d(2), d(8), d(3)],
   // the file's Spectral legend: red at the low end, blue at the high

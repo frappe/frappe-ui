@@ -28,7 +28,7 @@ const single = computed(() => [props.theme.one('bar')])
 const stack = computed(() => props.theme.colors('stack', 4))
 const labelled = computed(() => props.theme.colors('stackLabelled', 4))
 const group = computed(() => props.theme.colors('group', 4))
-const channels = computed(() => props.theme.colors('scatters', 5))
+const channels = computed(() => props.theme.colors('channels'))
 const lineOver = computed(() => [
   props.theme.one('bar'),
   props.theme.one('markers'),
@@ -40,6 +40,40 @@ const lineOver = computed(() => [
  * The rule is the file's black at 9%, which on either mode is the hairline the
  * page already draws its outlines in.
  */
+/**
+ * The file's hover on the dual-axis card (1356:66508): the line under the
+ * pointer stays where it is and every bar drops to a tenth — further back
+ * than the fifth the stacked cards use, since a line has to read over them.
+ */
+const dim = {
+  echartOptions: {
+    emphasis: {
+      disabled: false,
+      focus: 'series',
+      itemStyle: { color: 'inherit' },
+    },
+    blur: { itemStyle: { opacity: 0.1 }, lineStyle: { opacity: 0.1 } },
+  },
+}
+/**
+ * The same for the line, which carries no points of its own: on a line series
+ * `itemStyle` is the symbol's, and echarts marks the hovered point with one.
+ * The file marks nothing — the bars standing back is the whole of the hover —
+ * so the symbol stays invisible and the stroke carries the state.
+ */
+const dimLine = {
+  echartOptions: {
+    emphasis: { disabled: false, focus: 'series', itemStyle: { opacity: 0 } },
+    blur: { itemStyle: { opacity: 0.1 }, lineStyle: { opacity: 0.1 } },
+  },
+}
+
+/** the file sets the 100% card's row names flush with the card's own padding */
+const flushNames = { axisLabel: { align: 'left', margin: 72 } }
+
+/** the file turns a category title on its side, down the middle of the axis */
+const sideTitle = { nameLocation: 'middle', nameRotate: 90, nameGap: 80 }
+
 /** the file's group card points with the bars alone — no rule down the slot */
 const noCrosshair = { tooltip: { axisPointer: { type: 'none' } } }
 
@@ -266,7 +300,9 @@ const money = (value: number) =>
       </template>
     </BarChart>
   </Card>
-  <Card>
+  <!-- the file sets this card's category title down the left edge, turned,
+       and its value title under the plot (1356:67110) -->
+  <Card class="bar-card--axis-title-centre">
     <BarChart
       title="Horizontal"
       :data="countries"
@@ -274,8 +310,9 @@ const money = (value: number) =>
       y="income"
       horizontal
       :series-config="{ income: { label: 'Income per Capita', ...slot(43) } }"
-      :x-axis="{ title: 'Top countries' }"
+      :x-axis="{ title: 'Top countries', echartOptions: sideTitle }"
       :y-axis="{ ...incomeAxis, title: 'Income per Capita (USD)' }"
+      axis-title-placement="bottom"
       :palette="single"
       :echart-options="crosshair"
     >
@@ -284,7 +321,8 @@ const money = (value: number) =>
       </template>
     </BarChart>
   </Card>
-  <Card>
+  <!-- the file centres this card's line over the plot (1356:67154) -->
+  <Card class="bar-card--subtitle-centre">
     <BarChart
       title="Horizontal"
       subtitle="Channel Revenue per Country (USD $k)"
@@ -304,16 +342,20 @@ const money = (value: number) =>
       </template>
     </BarChart>
   </Card>
-  <Card>
+  <!-- the file puts this card's legend over the plot, under the title, and
+       names the axis under it instead of under the title (1356:67210) -->
+  <Card class="bar-card--legend-top bar-card--axis-title-centre">
     <BarChart
       title="Horizontal 100% Stacked"
-      subtitle="Channel Contribution"
       :data="channelRevenue"
       x="country"
       :y="[...CHANNELS]"
       horizontal
       stacked="normalized"
       :series-config="Object.fromEntries(CHANNELS.map((c) => [c, slot(40)]))"
+      :x-axis="{ echartOptions: flushNames }"
+      :y-axis="{ title: 'Channel Contribution' }"
+      axis-title-placement="bottom"
       :palette="channels"
       :echart-options="crosshair"
     >
@@ -330,8 +372,8 @@ const money = (value: number) =>
       y="sales"
       y2="orders"
       :series-config="{
-        sales: { label: 'Sales', format: count, ...slot(42, CROWN) },
-        orders: { label: 'Orders', format: count, type: 'line' },
+        sales: { label: 'Sales', format: count, ...slot(42, CROWN), ...dim },
+        orders: { label: 'Orders', format: count, type: 'line', ...dimLine },
       }"
       :x-axis="yearAxis"
       :y-axis="salesAxis"
@@ -382,6 +424,44 @@ const money = (value: number) =>
   height: 7px;
   border-radius: 2px;
 }
+/* The file's own axis chrome on the horizontal cards: the value title under
+   the plot, centred on it rather than pinned to its far end, 11px — and a
+   subtitle centred over the plot rather than set under the title. */
+.bar-card--axis-title-centre
+  :deep([data-slot='chart-plot'] + div:not([data-slot])) {
+  justify-content: center;
+  font-size: 11px;
+}
+.bar-card--subtitle-centre :deep([data-slot='chart-header'] > div:first-child) {
+  width: 100%;
+}
+.bar-card--subtitle-centre :deep([data-slot='chart-header'] > div > div + div) {
+  text-align: center;
+  font-size: 11px;
+}
+
+/* The file hangs this card's legend over the plot, under the title: the
+   container draws it last, so the column is ordered rather than rebuilt —
+   title, legend, plot, axis title. Its labels are the file's 13px here. */
+.bar-card--legend-top :deep([data-slot='chart-header']) {
+  order: 0;
+}
+.bar-card--legend-top :deep([data-slot='chart-legend']) {
+  order: 1;
+  /* the file sets the row 25 under the title and 10 over the plot */
+  margin-top: 13px;
+  margin-bottom: 4px;
+}
+.bar-card--legend-top :deep([data-slot='chart-plot']) {
+  order: 2;
+}
+.bar-card--legend-top :deep([data-slot='chart-plot'] + div:not([data-slot])) {
+  order: 3;
+}
+.bar-card--legend-top :deep([data-slot='chart-legend'] button) {
+  font-size: 13px;
+}
+
 /* A card that names its series in the plot itself needs no legend under it,
    and the plot takes the row back — the file's baseline at 318, where a card
    carrying a legend stops short of it. */
