@@ -26,6 +26,14 @@ const props = defineProps<{
    */
   rows?: Record<string, any>[]
   value?: (value: number) => string
+  /**
+   * The same body with the marks left off, which is how the file writes a
+   * tooltip whose rows are measures rather than series — the scatter cards
+   * name a point's price and units, and neither is a thing to find a swatch
+   * for (1356:67734, 1356:67835: the cell's prefix is simply empty). The box
+   * grows to 160 and the rows close up to 12px with 4 between.
+   */
+  plain?: boolean
 }>()
 
 const many = computed(() => props.items.length > 1)
@@ -39,7 +47,7 @@ function reading(item: ChartTooltipItem) {
 
 <template>
   <div
-    data-tip="figma"
+    :data-tip="plain ? 'measures' : 'figma'"
     :data-rows="many ? 'many' : 'one'"
     class="flex flex-col gap-1"
   >
@@ -50,13 +58,17 @@ function reading(item: ChartTooltipItem) {
     >
       {{ label }}
     </div>
-    <div class="flex flex-col gap-[2px]">
+    <div class="flex flex-col" :class="plain ? 'gap-1' : 'gap-[2px]'">
       <div
         v-for="item in items"
         :key="item.name"
-        class="flex h-4 items-center gap-[2px]"
+        class="flex items-center gap-[2px]"
+        :class="plain ? 'h-3' : 'h-4'"
       >
-        <span class="flex size-4 shrink-0 items-center justify-center">
+        <span
+          v-if="!plain"
+          class="flex size-4 shrink-0 items-center justify-center"
+        >
           <span
             class="block shrink-0"
             :class="

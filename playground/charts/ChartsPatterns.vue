@@ -229,4 +229,11 @@ const current = computed(() => CHART_TYPES.find((t) => t.id === type.value)!)
 [data-slot='chart-tooltip']:has([data-tip='figma'][data-rows='many']) {
   padding: 8px 8px 8px 4px;
 }
+/* The same box around rows that carry no mark — the scatter cards' two
+   measures — which the file draws 160 wide with an even 8 all round
+   (1356:67734, 1356:67835). */
+[data-slot='chart-tooltip']:has([data-tip='measures']) {
+  min-width: 160px;
+  padding: 8px;
+}
 </style>
