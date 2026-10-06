@@ -17,8 +17,11 @@
 // is the file's second tree (node 35800:160601), where every row carries a
 // prefix — a 16px glyph for what the layer is, 4 after the chevron's place
 // and 4 before the label, in the chevron's ink-gray-7 — and a leaf still
-// keeps the chevron's 16, so glyphs and labels line up down a level. The file
-// shows that one at 320 wide with no guides and full-width rows, and gives
+// keeps the chevron's 16. There each level steps in by 20, the width of one
+// place in the row (16 + 4), so a child's chevron stands under its parent's
+// glyph and its glyph under its parent's label — the columns the user asked
+// for (the file's own 24 leaves them 4 apart). The file shows that one at
+// 320 wide with no guides and full-width rows, and gives
 // its first row a hint: a 13px ink-gray-4 note at the row's far end. On the
 // source tree a hint is a file's size; a folder has none.
 //
@@ -210,6 +213,8 @@ const nodes = computed(() =>
 const treeWidth = computed(() =>
   example.value === 'layers' ? '320px' : '280px',
 )
+/** A level's step: the file's 24 on the source tree; one row place, 20, on the layers. */
+const indent = computed(() => (example.value === 'layers' ? 20 : 24))
 watch(example, () => nextTick(() => tree.value?.expandAll()))
 
 function parentOf(
@@ -255,7 +260,7 @@ onMounted(() => tree.value?.expandAll())
       <div
         class="tree-espresso h-[476px] w-[320px]"
         :class="fullWidth && 'is-full-width'"
-        :style="{ '--tree-width': treeWidth }"
+        :style="{ '--tree-width': treeWidth, '--tree-indent': `${indent}px` }"
       >
         <Tree
           ref="tree"
@@ -273,7 +278,7 @@ onMounted(() => tree.value?.expandAll())
             <!-- the indent lives in the row, so the row's box is the full row -->
             <span
               class="flex h-7 min-w-0 flex-1 items-center"
-              :style="{ paddingLeft: `${(level - 1) * 24}px` }"
+              :style="{ paddingLeft: `${(level - 1) * indent}px` }"
             >
               <span
                 class="tree-row-box flex h-7 min-w-0 flex-1 items-center gap-1 rounded-4 px-2"
@@ -375,7 +380,6 @@ onMounted(() => tree.value?.expandAll())
 <style scoped>
 .tree-espresso {
   --tree-row-height: 28px;
-  --tree-indent: 24px;
 }
 /* the tree itself is the file's width inside the constant box */
 .tree-espresso :deep(.frappe-tree) {
@@ -441,7 +445,7 @@ onMounted(() => tree.value?.expandAll())
 
 /*
   The guides, drawn from the tree's left edge: a child at level N keeps its
-  stem (N-2)*24 + 16 in — under the middle of its parent's chevron — and,
+  stem (N-2) steps + 16 in — under the middle of its parent's chevron — and,
   with connectors, an arm 12 long on the row's middle. The arm runs 4 into
   the row's box, and the box paints over it (the file draws the box after
   the guides), so a hovered row covers the arm's end; the full-width fill
@@ -494,30 +498,30 @@ onMounted(() => tree.value?.expandAll())
 }
 .tree-espresso :deep(li[data-level='2']::before),
 .tree-espresso :deep(li[data-level='2']::after) {
-  left: 16px;
+  left: calc(var(--_tree-indent) * 0 + 16px);
 }
 .tree-espresso :deep(li[data-level='3']::before),
 .tree-espresso :deep(li[data-level='3']::after) {
-  left: 40px;
+  left: calc(var(--_tree-indent) * 1 + 16px);
 }
 .tree-espresso :deep(li[data-level='4']::before),
 .tree-espresso :deep(li[data-level='4']::after) {
-  left: 64px;
+  left: calc(var(--_tree-indent) * 2 + 16px);
 }
 .tree-espresso :deep(li[data-level='5']::before),
 .tree-espresso :deep(li[data-level='5']::after) {
-  left: 88px;
+  left: calc(var(--_tree-indent) * 3 + 16px);
 }
 .tree-espresso :deep(li[data-level='6']::before),
 .tree-espresso :deep(li[data-level='6']::after) {
-  left: 112px;
+  left: calc(var(--_tree-indent) * 4 + 16px);
 }
 .tree-espresso :deep(li[data-level='7']::before),
 .tree-espresso :deep(li[data-level='7']::after) {
-  left: 136px;
+  left: calc(var(--_tree-indent) * 5 + 16px);
 }
 .tree-espresso :deep(li[data-level='8']::before),
 .tree-espresso :deep(li[data-level='8']::after) {
-  left: 160px;
+  left: calc(var(--_tree-indent) * 6 + 16px);
 }
 </style>
