@@ -8,7 +8,7 @@
  * focusing the field), and one image's caption could show up under the next
  * one when ProseMirror reused the node view.
  */
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { createApp, h, nextTick, reactive } from 'vue'
 
 let Editor: any
@@ -336,5 +336,92 @@ describe('media node view actions menu', () => {
       anchor: 1,
     })
     ctx.app.unmount()
+  })
+})
+
+describe('video playback switches', () => {
+  async function mountVideo(html: string) {
+    const ctx = mount(html)
+    await settle()
+    const video = ctx.root.querySelector('video') as HTMLVideoElement
+    // a video is a block of its own, so it sits at the top of the document
+    ctx.getEditor().commands.setNodeSelection(0)
+    await settle()
+    return { ...ctx, video }
+  }
+
+  it('keeps an off flag off across a round trip through HTML', async () => {
+    const ctx = await mountVideo('<video src="/files/clip.mp4"></video>')
+    const html: string = ctx.getEditor().getHTML()
+    expect(html).not.toContain('autoplay')
+    expect(html).not.toContain('loop')
+    expect(html).not.toContain('muted')
+    expect(ctx.video.hasAttribute('autoplay')).toBe(false)
+
+    ctx.getEditor().commands.setVideoOptions({ loop: true })
+    await settle()
+    expect(ctx.getEditor().getHTML()).toContain('loop=""')
+    expect(ctx.getEditor().getHTML()).not.toContain('autoplay')
+  })
+
+  it('reads the flags back as booleans', async () => {
+    const ctx = await mountVideo(
+      '<video src="/files/clip.mp4" autoplay muted></video>',
+    )
+    const node = ctx.getEditor().state.doc.nodeAt(0)
+    expect(node.attrs).toMatchObject({
+      autoplay: true,
+      loop: false,
+      muted: true,
+    })
+  })
+
+  it('starts the video when Autoplay goes on, and stops it when off', async () => {
+    const ctx = await mountVideo('<video src="/files/clip.mp4"></video>')
+    let paused = true
+    Object.defineProperty(ctx.video, 'paused', { get: () => paused })
+    const play = vi
+      .spyOn(ctx.video, 'play')
+      .mockImplementation(() => ((paused = false), Promise.resolve()))
+    const pause = vi
+      .spyOn(ctx.video, 'pause')
+      .mockImplementation(() => void (paused = true))
+
+    ctx.getEditor().commands.setVideoOptions({ autoplay: true })
+    await settle()
+    expect(play).toHaveBeenCalledTimes(1)
+
+    ctx.getEditor().commands.setVideoOptions({ autoplay: false })
+    await settle()
+    expect(pause).toHaveBeenCalledTimes(1)
+  })
+
+  it('plays muted when the browser refuses sound', async () => {
+    const ctx = await mountVideo('<video src="/files/clip.mp4"></video>')
+    Object.defineProperty(ctx.video, 'paused', { get: () => true })
+    const play = vi
+      .spyOn(ctx.video, 'play')
+      .mockImplementationOnce(() =>
+        Promise.reject(new DOMException('no gesture', 'NotAllowedError')),
+      )
+      .mockImplementation(() => Promise.resolve())
+
+    ctx.getEditor().commands.setVideoOptions({ autoplay: true })
+    await settle()
+    await new Promise((r) => setTimeout(r, 0))
+    expect(play).toHaveBeenCalledTimes(2)
+    expect(ctx.video.muted).toBe(true)
+  })
+
+  it('starts a video that opens with Autoplay on', async () => {
+    const play = vi
+      .spyOn(HTMLMediaElement.prototype, 'play')
+      .mockImplementation(() => Promise.resolve())
+    try {
+      await mountVideo('<video src="/files/clip.mp4" autoplay></video>')
+      expect(play).toHaveBeenCalled()
+    } finally {
+      play.mockRestore()
+    }
   })
 })

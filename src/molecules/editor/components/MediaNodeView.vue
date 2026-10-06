@@ -164,6 +164,44 @@ watch(nodeKey, () => {
   isFreshInsert.value = Boolean(props.node.attrs.uploadId)
 })
 
+/**
+ * The Autoplay switch starts the footage. The `autoplay` attribute only acts
+ * while a video loads: set on one already loaded it changes nothing, which
+ * left the switch on and the video still. So the view plays the video
+ * itself — when the switch goes on, and when a video opens with it on — and
+ * pauses it when the switch goes off. A browser may refuse sound without a
+ * gesture; the video then plays muted, as autoplaying video always has.
+ */
+function applyAutoplay(on: boolean) {
+  const el = mediaRef.value
+  if (!(el instanceof HTMLVideoElement)) return
+  if (!on) {
+    if (!el.paused) el.pause()
+    return
+  }
+  if (!el.paused) return
+  try {
+    Promise.resolve(el.play())
+      .catch(() => {
+        el.muted = true
+        return el.play()
+      })
+      .catch(() => {})
+  } catch {
+    // jsdom has no playback
+  }
+}
+
+watch(
+  () => Boolean(props.node.attrs.autoplay),
+  (on) => applyAutoplay(on),
+)
+// A video opening with the switch on — the element arrives after the attrs
+watch(mediaRef, (el) => {
+  if (el instanceof HTMLVideoElement && props.node.attrs.autoplay)
+    applyAutoplay(true)
+})
+
 const { isResizing, startResize } = useNodeViewResize(editor, {
   mediaEl: () => mediaRef.value,
   containerEl: () => containerRef.value,
