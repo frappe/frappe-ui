@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, ref } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { Avatar, Button, Dropdown, Popover, TextInput } from '../../src'
 import { Editor, EditorContent, RichTextKit } from '../../src/molecules/editor'
 import type { TiptapEditor } from '../../src/molecules/editor'
@@ -78,6 +78,48 @@ const people: MultiEmailOption[] = [
   avatar: faceFor(name),
 }))
 
+/**
+ * A recipient field shows its chips only while it is being edited. Left
+ * alone with people in it, it folds to one line of their names, comma
+ * separated, as Gmail does — chips three deep would eat the message's room.
+ * A press on the line opens the field again, chips and caret and all.
+ */
+type Field = 'to' | 'cc' | 'bcc'
+const editing = ref<Field | null>(null)
+const fieldRefs: Record<Field, { focus: () => void } | null> = {
+  to: null,
+  cc: null,
+  bcc: null,
+}
+const fieldEls: Record<Field, HTMLElement | null> = {
+  to: null,
+  cc: null,
+  bcc: null,
+}
+const nameOf = (value: string) =>
+  people.find((p) => p.value === value)?.label ?? value
+const folded = (field: Field, values: string[]) =>
+  editing.value !== field && values.length > 0
+function openField(field: Field) {
+  editing.value = field
+  nextTick(() => fieldRefs[field]?.focus())
+}
+/**
+ * Focus leaving the row — not into its own menu, and not in the moment a
+ * pick lands (the menu takes the focus for a beat as it closes) — folds it.
+ */
+let lastPick = 0
+function leaveField(field: Field) {
+  setTimeout(() => {
+    const active = document.activeElement
+    const inside =
+      fieldEls[field]?.contains(active) ||
+      !!active?.closest('[data-slot=content]')
+    if (inside || Date.now() - lastPick < 150) return
+    if (editing.value === field) editing.value = null
+  }, 0)
+}
+
 const to = ref<string[]>(props.initial?.to ?? [])
 const cc = ref<string[]>(props.initial?.cc ?? [])
 const bcc = ref<string[]>(props.initial?.bcc ?? [])
@@ -148,6 +190,8 @@ function insertEmoji(emoji: string) {
  * body, as Gmail lays them — never a block among the words. The chip is the
  * same md outline tag the recipients wear, the file glyph where the face goes.
  */
+watch([to, cc, bcc], () => (lastPick = Date.now()), { deep: true })
+
 const attachments = ref<File[]>(props.initial?.attachments ?? [])
 const fileInput = ref<HTMLInputElement | null>(null)
 const attachFile = () => fileInput.value?.click()
@@ -287,9 +331,27 @@ const root = ref<HTMLElement | null>(null)
     <div
       class="flex shrink-0 items-start gap-2 border-b border-outline-gray-1 py-1.5 pl-2 pr-[11.4px]"
     >
-      <span class="composer-field flex min-w-0 flex-1 items-start gap-2 pl-2">
+      <span
+        :ref="(el) => (fieldEls.to = el as HTMLElement)"
+        class="composer-field flex min-w-0 flex-1 items-start gap-2 pl-2"
+        @focusin="editing = 'to'"
+        @focusout="leaveField('to')"
+      >
         <ComposerIcon name="person" class="mt-1.5 size-4 text-ink-gray-7" />
+        <!-- the line takes no focus of its own: a press that focused it would
+             open the field under the pointer before the click could land -->
+        <button
+          v-if="folded('to', to)"
+          type="button"
+          class="h-7 min-w-0 flex-1 truncate text-left text-base text-ink-gray-7"
+          @mousedown.prevent
+          @click="openField('to')"
+        >
+          {{ to.map(nameOf).join(', ') }}
+        </button>
         <MultiEmailInput
+          v-else
+          :ref="(el) => (fieldRefs.to = el as any)"
           v-model="to"
           class="min-w-0 flex-1"
           size="sm"
@@ -364,25 +426,41 @@ const root = ref<HTMLElement | null>(null)
     <!-- Cc and Bcc: the same row without the buttons -->
     <div
       v-for="row in [
-        ['Cc', showCc, cc, (v: string[]) => (cc = v)],
-        ['Bcc', showBcc, bcc, (v: string[]) => (bcc = v)],
+        ['cc', 'Cc', showCc, cc, (v: string[]) => (cc = v)],
+        ['bcc', 'Bcc', showBcc, bcc, (v: string[]) => (bcc = v)],
       ] as const"
-      v-show="row[1]"
+      v-show="row[2]"
       :key="row[0]"
       class="flex shrink-0 items-start gap-2 border-b border-outline-gray-1 px-2 py-1.5"
     >
-      <span class="composer-field flex min-w-0 flex-1 items-start gap-2 pl-2">
+      <span
+        :ref="(el) => (fieldEls[row[0]] = el as HTMLElement)"
+        class="composer-field flex min-w-0 flex-1 items-start gap-2 pl-2"
+        @focusin="editing = row[0]"
+        @focusout="leaveField(row[0])"
+      >
         <ComposerIcon name="people" class="mt-1.5 size-4 text-ink-gray-7" />
+        <button
+          v-if="folded(row[0], row[3])"
+          type="button"
+          class="h-7 min-w-0 flex-1 truncate text-left text-base text-ink-gray-7"
+          @mousedown.prevent
+          @click="openField(row[0])"
+        >
+          {{ row[3].map(nameOf).join(', ') }}
+        </button>
         <MultiEmailInput
-          :model-value="row[2]"
+          v-else
+          :ref="(el) => (fieldRefs[row[0]] = el as any)"
+          :model-value="row[3]"
           class="min-w-0 flex-1"
           size="sm"
-          :placeholder="row[0]"
-          :aria-label="row[0]"
+          :placeholder="row[1]"
+          :aria-label="row[1]"
           :options="matches"
           :portal-to="root ?? undefined"
           :offset="0"
-          @update:model-value="row[3]"
+          @update:model-value="row[4]"
           @update:query="onQuery"
           @focus="nextTick(placeMenu)"
         >
@@ -507,9 +585,13 @@ const root = ref<HTMLElement | null>(null)
     <div class="flex h-14 shrink-0 items-center justify-between px-4 pb-4 pt-3">
       <div class="flex items-center gap-1">
         <!--
-          The whole pill is the menu's anchor, so the menu hangs from its
-          left edge as the file draws it; the word itself keeps the press
-          to itself and sends.
+          Send (node 35730:62544): two solid buttons laid side by side — the
+          word, 50 wide with 8 either side and the right corners square, and
+          the chevron, 24 wide with 4 either side and the left corners
+          square, parted by a 1px line in the pill's own lighter grey. The
+          pair is the menu's anchor so the menu hangs from the pill's left
+          edge; the word keeps its press to itself and sends, the chevron
+          opens Schedule send and turns up while it is open.
         -->
         <Dropdown :options="sendOptions" side="top" align="start" :offset="4">
           <template #trigger="{ open }">
@@ -518,7 +600,7 @@ const root = ref<HTMLElement | null>(null)
                 size="sm"
                 variant="solid"
                 label="Send"
-                class="!rounded-r-none !pr-1"
+                class="!w-[50px] !rounded-r-none !px-2"
                 @pointerdown.stop
                 @click.stop="send"
               />
@@ -526,12 +608,12 @@ const root = ref<HTMLElement | null>(null)
                 size="sm"
                 variant="solid"
                 label="Send options"
-                class="!rounded-l-none !pl-1 !pr-2"
+                class="send-chevron !w-6 !rounded-l-none !pl-[3px] !pr-1"
                 :class="open && '!bg-surface-gray-9'"
               >
                 <template #icon>
                   <ComposerIcon
-                    :name="open ? 'small-up' : 'small-down'"
+                    :name="open ? 'small-up' : 'send-chevron'"
                     class="size-4"
                   />
                 </template>
@@ -747,6 +829,13 @@ const root = ref<HTMLElement | null>(null)
 }
 .email-composer :deep([data-slot='item'][data-highlighted]) {
   background: var(--surface-gray-2);
+}
+
+/* the line between Send and its chevron: 1px outline-gray-7 (#383838 in
+   the file), inside the chevron's box as the file strokes it; 3 of padding
+   beside it so the glyph still sits 4 in */
+.send-chevron {
+  border-left: 1px solid var(--outline-gray-7);
 }
 
 /* the subject's text is ink-gray-7, as the file fills it */
