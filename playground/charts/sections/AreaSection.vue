@@ -9,8 +9,9 @@
 import { computed } from 'vue'
 import { AreaChart } from '../../../src/charts'
 import Card from '../components/Card.vue'
+import ChartTip from '../components/ChartTip.vue'
 import { monthly, year } from '../chartData'
-import { monthAxis, salesAxis, thousands, yearAxis } from '../chartAxes'
+import { count, monthAxis, salesAxis, thousands, yearAxis } from '../chartAxes'
 import type { ThemeColors } from '../useChartTheme'
 
 const props = defineProps<{ theme: ThemeColors }>()
@@ -29,6 +30,25 @@ const stepped = computed(() => props.theme.colors('stepped', 4))
  * the fill the file drew. The colour is read back from the theme, which means
  * a flip to dark mode re-reads it like every other colour on the page.
  */
+/**
+ * The rule the file drops through the hovered reading: a solid 1px hairline,
+ * black at 9% over the card (1356:67518 "Line 80"). The bar cards draw the
+ * same thing in `outline-gray-2`, which is the token that lands on that grey
+ * and, unlike a black wash, survives a flip to dark mode.
+ */
+const crosshair = computed(() => ({
+  tooltip: {
+    axisPointer: {
+      type: 'line',
+      lineStyle: {
+        color: props.theme.t('outline-gray-2'),
+        width: 1,
+        type: 'solid',
+      },
+    },
+  },
+}))
+
 const wash = computed(() => ({
   areaStyle: { color: props.theme.one('area'), opacity: 0.2 },
   lineStyle: { width: 1.5 },
@@ -80,7 +100,17 @@ const stackConfig = {
       :x-axis="yearAxis"
       :y-axis="salesAxis"
       :palette="area"
-    />
+      :echart-options="crosshair"
+    >
+      <template #tooltip="tip">
+        <ChartTip
+          :label="tip.label"
+          :items="tip.items"
+          :rows="tip.rows"
+          :value="count"
+        />
+      </template>
+    </AreaChart>
   </Card>
   <Card>
     <AreaChart
@@ -95,7 +125,17 @@ const stackConfig = {
       :x-axis="yearAxis"
       :y-axis="salesAxis"
       :palette="area"
-    />
+      :echart-options="crosshair"
+    >
+      <template #tooltip="tip">
+        <ChartTip
+          :label="tip.label"
+          :items="tip.items"
+          :rows="tip.rows"
+          :value="count"
+        />
+      </template>
+    </AreaChart>
   </Card>
   <Card>
     <AreaChart
@@ -109,7 +149,17 @@ const stackConfig = {
       :x-axis="yearAxis"
       :y-axis="salesAxis"
       :palette="areas"
-    />
+      :echart-options="crosshair"
+    >
+      <template #tooltip="tip">
+        <ChartTip
+          :label="tip.label"
+          :items="tip.items"
+          :rows="tip.rows"
+          :value="count"
+        />
+      </template>
+    </AreaChart>
   </Card>
   <Card>
     <AreaChart
@@ -121,7 +171,17 @@ const stackConfig = {
       :x-axis="monthAxis"
       :y-axis="salesAxis"
       :palette="stepped"
-    />
+      :echart-options="crosshair"
+    >
+      <template #tooltip="tip">
+        <ChartTip
+          :label="tip.label"
+          :items="tip.items"
+          :rows="tip.rows"
+          :value="count"
+        />
+      </template>
+    </AreaChart>
   </Card>
   <Card>
     <AreaChart
@@ -134,6 +194,16 @@ const stackConfig = {
       :x-axis="yearAxis"
       :y-axis="{ ...salesAxis, title: 'Sales' }"
       :palette="area"
-    />
+      :echart-options="crosshair"
+    >
+      <template #tooltip="tip">
+        <ChartTip
+          :label="tip.label"
+          :items="tip.items"
+          :rows="tip.rows"
+          :value="count"
+        />
+      </template>
+    </AreaChart>
   </Card>
 </template>
