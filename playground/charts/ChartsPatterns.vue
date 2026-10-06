@@ -91,8 +91,13 @@ const current = computed(() => CHART_TYPES.find((t) => t.id === type.value)!)
       </div>
     </div>
 
-    <!-- the rail: the kinds of chart, then the palette -->
-    <aside class="hidden w-[180px] shrink-0 pt-[66px] lg:block">
+    <!-- the rail: the kinds of chart, then the palette. It stays put while
+         the cards scroll under it, as the other pages' outline does — that
+         one stands outside the stage's scroller; this one is inside it, so
+         it sticks to the top instead. -->
+    <aside
+      class="sticky top-0 hidden h-fit w-[180px] shrink-0 self-start pt-[66px] lg:block"
+    >
       <h2
         id="chart-types"
         class="text-base font-semibold leading-[1.15] tracking-[0.015em] text-ink-gray-9"
