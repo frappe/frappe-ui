@@ -1,6 +1,11 @@
 <script setup lang="ts">
-// The File input page: one file input on the left and its controller on
-// the right — the file's variant properties (node 29788:20146): Variant
+// The File input page: one input on the left and its controller on the
+// right. The controller leads with Input type (the user's call 2026-10-06):
+// File input — the field — or File input area — the drop area, node
+// 35825:65914, with its own Variant, Orientation (how the files under it
+// sit: cards down, or thumbnails across), Error and Disabled.
+//
+// File input:  — the file's variant properties (node 29788:20146): Variant
 // (Subtle / Outline) and the four sizes as tabs, Preview — the file's cell,
 // the preview card with the description (the user's call 2026-10-06: the
 // bigger sizes look wrong without it, so the two go together) — and of the
@@ -13,8 +18,9 @@
 // in (after the card and the 12 gap) and its foot on the box's foot, as in
 // the cell; Preview only adds the card and the description around it.
 import { ref, watch } from 'vue'
-import { Switch, TabButtons } from '../../src'
+import { Select, Switch, TabButtons } from '../../src'
 import FileInput from './FileInput.vue'
+import FileInputArea from './FileInputArea.vue'
 import type { FileInputSize, FileInputVariant } from './FileInput.vue'
 
 // `?variant=subtle&size=lg&error&disabled&preview` opens the page on that
@@ -22,6 +28,19 @@ import type { FileInputSize, FileInputVariant } from './FileInput.vue'
 const q = new URLSearchParams(window.location.search)
 const pick = <T extends string>(key: string, allowed: T[], fallback: T): T =>
   allowed.includes(q.get(key) as T) ? (q.get(key) as T) : fallback
+type InputType = 'field' | 'area'
+const inputType = ref<InputType>(pick('type', ['field', 'area'], 'field'))
+const inputTypes = [
+  { label: 'File input', value: 'field' },
+  { label: 'File input area', value: 'area' },
+]
+const orientation = ref<'vertical' | 'horizontal'>(
+  pick('orientation', ['vertical', 'horizontal'], 'vertical'),
+)
+const orientationTabs = [
+  { label: 'Vertical', value: 'vertical' },
+  { label: 'Horizontal', value: 'horizontal' },
+]
 const variant = ref<FileInputVariant>(
   pick('variant', ['outline', 'subtle'], 'outline'),
 )
@@ -53,7 +72,18 @@ const DESCRIPTION =
 <template>
   <div class="flex h-full items-center justify-center px-5 py-10">
     <div class="flex items-start gap-10">
+      <!-- the area's box: 400 wide, tall enough for the area with four
+           cards under it, so files coming and going move nothing above -->
+      <div v-if="inputType === 'area'" class="h-[500px] w-[400px]">
+        <FileInputArea
+          v-model:error="error"
+          :variant="variant"
+          :orientation="orientation"
+          :disabled="disabled"
+        />
+      </div>
       <div
+        v-else
         class="flex h-[140px] w-[700px] items-end"
         :class="!preview && 'pl-[272px]'"
       >
@@ -75,6 +105,17 @@ const DESCRIPTION =
         </p>
         <div class="flex flex-col gap-2">
           <div class="flex h-7 items-center justify-between">
+            <span class="text-base text-ink-gray-7">Input type</span>
+            <Select
+              v-model="inputType"
+              :options="inputTypes"
+              size="sm"
+              variant="subtle"
+              class="w-[140px]"
+              aria-label="Input type"
+            />
+          </div>
+          <div class="flex h-7 items-center justify-between">
             <span class="text-base text-ink-gray-7">Variant</span>
             <TabButtons
               v-model="variant"
@@ -83,7 +124,22 @@ const DESCRIPTION =
               aria-label="Variant"
             />
           </div>
-          <div class="flex h-7 items-center justify-between">
+          <div
+            v-if="inputType === 'area'"
+            class="flex h-7 items-center justify-between"
+          >
+            <span class="text-base text-ink-gray-7">Orientation</span>
+            <TabButtons
+              v-model="orientation"
+              :options="orientationTabs"
+              size="sm"
+              aria-label="Orientation"
+            />
+          </div>
+          <div
+            v-if="inputType === 'field'"
+            class="flex h-7 items-center justify-between"
+          >
             <span class="text-base text-ink-gray-7">Size</span>
             <TabButtons
               v-model="size"
@@ -92,7 +148,10 @@ const DESCRIPTION =
               aria-label="Size"
             />
           </div>
-          <div class="flex h-7 items-center justify-between">
+          <div
+            v-if="inputType === 'field'"
+            class="flex h-7 items-center justify-between"
+          >
             <span class="text-base text-ink-gray-7">Preview</span>
             <Switch v-model="preview" size="sm" aria-label="Preview" />
           </div>
