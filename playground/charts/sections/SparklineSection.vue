@@ -94,25 +94,14 @@ const color = computed(() => props.theme.one('spark'))
 </template>
 
 <style scoped>
+/* The file's own card: 223 wide, and as many to a row as the stage holds,
+   the way its frame lays them out. Under 223 of stage the card gives way
+   rather than overflow. */
 .spark-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(0, 223px));
+  justify-content: start;
   column-gap: 17px;
   row-gap: 18px;
-}
-@container chart-stage (min-width: 460px) {
-  .spark-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-@container chart-stage (min-width: 700px) {
-  .spark-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-@container chart-stage (min-width: 980px) {
-  .spark-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
 }
 </style>

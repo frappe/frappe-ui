@@ -1,15 +1,26 @@
 <script setup lang="ts">
 // The file's small card (Figma 1GDS12ys41lxeG3wQpNq41, 1356:69060 …
-// 1356:69141): 223×120 with 12 in from the left and 11 from the top, a
-// 14px ink-gray-5 title, the reading in 20px medium ink-gray-8, and a
-// row of the change — an arrow glyph and "+7%" in the file's green-4
-// (frappe-ui's green-7), or an arrow down and "-4%" in its red-3 (red-5) — then "vs last month" in ink-gray-5 with a
-// chevron, the period being a picker. The trend is the library's
-// sparkline geometry drawn as the file draws each one: a 1.5px line over
-// a gradient that fades by three quarters, bleeding off the bottom; the
-// line alone; two-pixel bars with rounded crowns; a solid fill; a 2px
-// line beside the number; or the gradient inset in the card's padding.
-import { computed } from 'vue'
+// 1356:69141): 223×120 on a 12px corner, 12 in from the left and 11 from the
+// top, a 14px ink-gray-5 title, the reading in 20px medium ink-gray-8, and a
+// row of the change — an arrow and "+7%" in the file's green-4 (frappe-ui's
+// green-7), or an arrow down and "-4%" in its red-3 (red-5) — then "vs last
+// month" in ink-gray-5 with a chevron, the period being a picker.
+//
+// The trend is the library's sparkline geometry, laid out as the file lays
+// each one out: a 1.5px line over a gradient that fades by three quarters,
+// both bleeding off the card's edges; the line alone; 2px bars with rounded
+// crowns, inset by the card's padding; a solid fill; a 2px line beside the
+// number; or the gradient inset at the foot of the card. The file draws the
+// line across the top of its box and lets the fill run on to the bottom edge,
+// which is what `span` carries here.
+//
+// The file draws no hover state for these, so the one here is the page's own
+// and is the plot's: the reading under the pointer gets a dot, and the
+// library's tooltip shell carries the file's tooltip body (ChartTip).
+import { computed, ref } from 'vue'
+import { ChartTooltip } from '../../../src/charts'
+import type { ChartTooltipItem } from '../../../src/charts/types'
+import ChartTip from './ChartTip.vue'
 import {
   sparklineAreaPath,
   sparklineBars,
@@ -44,95 +55,163 @@ const props = withDefaults(
   { variant: 'none', height: 120, data: () => [] },
 )
 
-const W = 100
+/**
+ * Each trend's box, read off the file: how tall it is, how far in from the
+ * card's edges it sits, and how much of its height the line itself takes —
+ * the rest is fill, running on to the bottom edge.
+ */
+const BOXES = {
+  area: { h: 42, inset: 0, bottom: 2, span: 0.64 },
+  line: { h: 51, inset: 0, bottom: 2, span: 0.7 },
+  solid: { h: 51, inset: 0, bottom: 0, span: 1 },
+  inset: { h: 32, inset: 12, bottom: 1, span: 0.72 },
+  bars: { h: 38, inset: 12, bottom: 0, span: 1 },
+} as const
+
+const box = computed(() =>
+  props.variant in BOXES ? BOXES[props.variant as keyof typeof BOXES] : null,
+)
+
 const H = 100
 const points = computed(() =>
-  sparklinePoints(props.data, { width: W, height: H, inset: 4 }),
+  sparklinePoints(props.data, {
+    width: H,
+    height: H * (box.value?.span ?? 1),
+    inset: 4,
+  }),
 )
 const linePath = computed(() => sparklineLinePath(points.value))
 const areaPath = computed(() => sparklineAreaPath(points.value, H))
 const bars = computed(() =>
-  sparklineBars(props.data, { width: W, height: H, inset: 0, gapRatio: 0.7 }),
+  sparklineBars(props.data, { width: H, height: H, inset: 0, gapRatio: 0.7 }),
 )
 const negative = computed(() => props.delta?.startsWith('-'))
 /** the file sets the change beside the number over a bleeding trend */
 const inline = computed(() => ['area', 'line', 'solid'].includes(props.variant))
 const id = `spark-${Math.random().toString(36).slice(2, 8)}`
+
+// --- the hover ------------------------------------------------------------
+const trendEl = ref<HTMLElement | null>(null)
+const at = ref<number | null>(null)
+const pointer = ref({ x: 0, y: 0 })
+
+const marker = computed(() => {
+  if (at.value === null) return null
+  if (props.variant === 'bars') {
+    const bar = bars.value[at.value]
+    return bar
+      ? { left: `${bar.x + bar.width / 2}%`, top: `${100 - bar.height}%` }
+      : null
+  }
+  const point = points.value[at.value]
+  return point ? { left: `${point.x}%`, top: `${point.y}%` } : null
+})
+
+const items = computed<ChartTooltipItem[]>(() => {
+  const value = at.value === null ? null : props.data[at.value]
+  if (value === null || value === undefined) return []
+  return [
+    {
+      name: 'value',
+      label: props.title,
+      color: props.color,
+      value,
+      formattedValue: value.toLocaleString('en-US'),
+      kind: 'series',
+    },
+  ]
+})
+
+function track(event: MouseEvent) {
+  const el = trendEl.value
+  const count = props.data.length
+  if (!el || count < 2) return
+  const rect = el.getBoundingClientRect()
+  const share = (event.clientX - rect.left) / rect.width
+  at.value = Math.min(count - 1, Math.max(0, Math.round(share * (count - 1))))
+  pointer.value = { x: event.clientX, y: event.clientY }
+}
 </script>
 
 <template>
   <div
     class="relative overflow-hidden rounded-[12px] border border-outline-gray-1 bg-surface-elevation-2"
     :style="{ height: `${height}px` }"
+    @mousemove="track"
+    @mouseleave="at = null"
   >
-    <!-- the trend, under the words -->
-    <svg
-      v-if="variant === 'area' || variant === 'line' || variant === 'solid'"
-      class="pointer-events-none absolute inset-x-0 bottom-0"
-      :style="{ height: variant === 'line' ? '53px' : '45px' }"
-      :viewBox="`0 0 ${W} ${H}`"
-      preserveAspectRatio="none"
-      aria-hidden="true"
-    >
-      <defs>
-        <linearGradient :id="id" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" :stop-color="color" stop-opacity="1" />
-          <stop offset="0.76" :stop-color="color" stop-opacity="0" />
-        </linearGradient>
-      </defs>
-      <path
-        v-if="variant === 'area'"
-        :d="areaPath"
-        :fill="`url(#${id})`"
-        opacity="0.13"
-      />
-      <path v-if="variant === 'solid'" :d="areaPath" :fill="color" />
-      <path
-        v-if="variant !== 'solid'"
-        :d="linePath"
-        fill="none"
-        :stroke="color"
-        stroke-width="1.5"
-        stroke-linecap="round"
-        vector-effect="non-scaling-stroke"
-      />
-    </svg>
-    <svg
-      v-else-if="variant === 'inset'"
-      class="pointer-events-none absolute inset-x-3 bottom-[1px] h-[33px]"
-      :viewBox="`0 0 ${W} ${H}`"
-      preserveAspectRatio="none"
-      aria-hidden="true"
-    >
-      <defs>
-        <linearGradient :id="id" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" :stop-color="color" stop-opacity="1" />
-          <stop offset="0.76" :stop-color="color" stop-opacity="0" />
-        </linearGradient>
-      </defs>
-      <path :d="areaPath" :fill="`url(#${id})`" opacity="0.13" />
-      <path
-        :d="linePath"
-        fill="none"
-        :stroke="color"
-        stroke-width="1.5"
-        stroke-linecap="round"
-        vector-effect="non-scaling-stroke"
-      />
-    </svg>
+    <!-- The trend, under the words. The box is a div rather than the svg
+         itself: an svg is a replaced element, so left and right alone never
+         stretch it — it takes the width its viewBox' ratio asks for. -->
     <div
-      v-else-if="variant === 'bars'"
-      class="pointer-events-none absolute inset-x-3 bottom-0 h-[38px]"
+      v-if="box && variant !== 'bars'"
+      ref="trendEl"
+      class="pointer-events-none absolute"
+      :style="{
+        left: `${box.inset}px`,
+        right: `${box.inset}px`,
+        bottom: `${box.bottom}px`,
+        height: `${box.h}px`,
+      }"
+      aria-hidden="true"
+    >
+      <svg
+        class="h-full w-full overflow-visible"
+        :viewBox="`0 0 ${H} ${H}`"
+        preserveAspectRatio="none"
+      >
+        <defs>
+          <linearGradient :id="id" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" :stop-color="color" stop-opacity="1" />
+            <stop offset="0.76" :stop-color="color" stop-opacity="0" />
+          </linearGradient>
+        </defs>
+        <path
+          v-if="variant === 'area' || variant === 'inset'"
+          :d="areaPath"
+          :fill="`url(#${id})`"
+          opacity="0.13"
+        />
+        <path v-if="variant === 'solid'" :d="areaPath" :fill="color" />
+        <path
+          v-if="variant !== 'solid'"
+          :d="linePath"
+          fill="none"
+          :stroke="color"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          vector-effect="non-scaling-stroke"
+        />
+      </svg>
+      <span
+        v-if="marker && variant !== 'solid'"
+        class="absolute size-[5px] -translate-x-1/2 -translate-y-1/2 rounded-full"
+        :style="{ ...marker, backgroundColor: color }"
+      />
+    </div>
+
+    <div
+      v-else-if="box"
+      ref="trendEl"
+      class="pointer-events-none absolute"
+      :style="{
+        left: `${box.inset}px`,
+        right: `${box.inset}px`,
+        bottom: `${box.bottom}px`,
+        height: `${box.h}px`,
+      }"
       aria-hidden="true"
     >
       <div
         v-for="(bar, i) in bars"
         :key="i"
-        class="absolute bottom-0 w-[2px] rounded-t-[4px]"
+        class="absolute bottom-0 w-[2px] rounded-t-[4px] transition-opacity"
         :style="{
           left: `${bar.x}%`,
           height: `${bar.height}%`,
           backgroundColor: color,
+          opacity: at === null || at === i ? 1 : 0.4,
         }"
       />
     </div>
@@ -143,68 +222,64 @@ const id = `spark-${Math.random().toString(36).slice(2, 8)}`
       </div>
       <div
         class="flex items-end gap-[7px]"
-        :class="variant === 'beside' ? 'mt-[22px]' : 'mt-2'"
+        :class="variant === 'beside' ? 'mt-[29px]' : 'mt-2'"
       >
-        <template v-if="inline && delta">
-          <div
-            class="text-[20px] font-medium leading-[1.15] tracking-[0.01em] text-ink-gray-8"
-          >
-            {{ value }}
-          </div>
-          <div
-            class="flex items-center gap-1 pb-[2px] text-[13px] leading-[1.15] tracking-[0.02em]"
+        <div
+          class="text-[20px] font-medium leading-[1.15] tracking-[0.01em] text-ink-gray-8"
+        >
+          {{ value }}
+        </div>
+        <!-- the file sets the change beside the number over a bleeding trend -->
+        <div
+          v-if="inline && delta"
+          class="flex items-center gap-1 pb-[2px] text-[13px] leading-[1.15] tracking-[0.02em]"
+        >
+          <span
+            class="flex items-center gap-0.5"
+            :class="negative ? 'text-ink-red-5' : 'text-ink-green-7'"
           >
             <span
-              class="flex items-center gap-0.5"
-              :class="negative ? 'text-ink-red-5' : 'text-ink-green-7'"
-            >
-              <span
-                class="size-4"
-                :class="
-                  negative ? 'lucide-arrow-down-left' : 'lucide-arrow-up-right'
-                "
-                aria-hidden="true"
-              />
-              {{ delta }}
-            </span>
-            <button
-              type="button"
-              class="flex items-center text-ink-gray-5"
-              :aria-label="`Compare: ${caption}`"
-            >
-              {{ caption }}
-              <span class="lucide-chevron-down size-4" aria-hidden="true" />
-            </button>
-          </div>
-        </template>
-        <template v-else>
-          <div
-            class="text-[20px] font-medium leading-[1.15] tracking-[0.01em] text-ink-gray-8"
-          >
-            {{ value }}
-          </div>
-          <!-- beside the number: the file's "My tickets" line -->
-          <svg
-            v-if="variant === 'beside'"
-            class="mb-[2px] ml-auto h-[18px] w-[120px]"
-            :viewBox="`0 0 ${W} ${H}`"
-            preserveAspectRatio="none"
-            aria-hidden="true"
-          >
-            <path
-              :d="linePath"
-              fill="none"
-              :stroke="color"
-              stroke-width="2"
-              stroke-linecap="round"
-              vector-effect="non-scaling-stroke"
+              class="size-4"
+              :class="
+                negative ? 'lucide-arrow-down-left' : 'lucide-arrow-up-right'
+              "
+              aria-hidden="true"
             />
-          </svg>
-        </template>
+            {{ delta }}
+          </span>
+          <button
+            type="button"
+            class="flex items-center text-ink-gray-5"
+            :aria-label="`Compare: ${caption}`"
+          >
+            {{ caption }}
+            <span class="lucide-chevron-down size-4" aria-hidden="true" />
+          </button>
+        </div>
+        <!-- beside the number: the file's "My tickets" line -->
+        <svg
+          v-if="variant === 'beside'"
+          ref="trendEl"
+          class="mb-[2px] ml-auto h-[18px] w-[120px] shrink-0"
+          :viewBox="`0 0 ${H} ${H}`"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        >
+          <path
+            :d="linePath"
+            fill="none"
+            :stroke="color"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            vector-effect="non-scaling-stroke"
+          />
+        </svg>
       </div>
       <div
         v-if="delta && !inline"
-        class="mt-1.5 flex items-center gap-1 text-[13px] leading-[1.15] tracking-[0.02em]"
+        class="flex items-center gap-1 text-[13px] leading-[1.15] tracking-[0.02em]"
+        :class="variant === 'beside' ? 'mt-auto pb-3' : 'mt-1.5'"
       >
         <span
           class="flex items-center gap-0.5"
@@ -229,5 +304,17 @@ const id = `spark-${Math.random().toString(36).slice(2, 8)}`
         </button>
       </div>
     </div>
+
+    <ChartTooltip
+      :open="at !== null && items.length > 0"
+      :x="pointer.x"
+      :y="pointer.y"
+      :items="items"
+      :rows="[]"
+    >
+      <template #default="tip">
+        <ChartTip :items="tip.items" />
+      </template>
+    </ChartTooltip>
   </div>
 </template>
