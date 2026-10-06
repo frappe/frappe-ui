@@ -80,12 +80,6 @@ const labelledStack = {
   echartOptions: { ...slot(35).echartOptions, label: { fontSize: 9 } },
 }
 
-const stackedConfig = {
-  data1: { label: 'Data 1', format: count, ...slot(35) },
-  data2: { label: 'Data 2', format: count, ...slot(35) },
-  data3: { label: 'Data 3', format: count, ...slot(35) },
-  data4: { label: 'Data 4', format: count, ...slot(35) },
-}
 const groupedConfig = {
   data1: { label: 'Data 1', format: count, ...grouped(49, 20) },
   data2: { label: 'Data 2', format: count, ...grouped(49, 20) },
@@ -120,7 +114,9 @@ const money = (value: number) =>
       </template>
     </BarChart>
   </Card>
-  <Card>
+  <!-- every segment prints its own reading, so this one needs no legend to
+       say which series is which — the file draws it without one too -->
+  <Card class="bar-card--no-legend">
     <BarChart
       title="Stacked Bar Chart"
       :data="stackYear"
@@ -137,24 +133,6 @@ const money = (value: number) =>
       :x-axis="monthAxis"
       :y-axis="salesAxis"
       :palette="labelled"
-      :echart-options="crosshair"
-    >
-      <template #tooltip="tip">
-        <ChartTip :label="tip.label" :items="tip.items" />
-      </template>
-    </BarChart>
-  </Card>
-  <Card>
-    <BarChart
-      title="Stacked Bar Chart"
-      :data="stackYear"
-      x="month"
-      :y="['data1', 'data2', 'data3', 'data4']"
-      stacked
-      :series-config="stackedConfig"
-      :x-axis="monthAxis"
-      :y-axis="salesAxis"
-      :palette="stack"
       :echart-options="crosshair"
     >
       <template #tooltip="tip">
@@ -312,6 +290,13 @@ const money = (value: number) =>
   height: 7px;
   border-radius: 2px;
 }
+/* A card that names its series in the plot itself needs no legend under it,
+   and the plot takes the row back — the file's baseline at 318, where a card
+   carrying a legend stops short of it. */
+.bar-card--no-legend :deep([data-slot='chart-legend']) {
+  display: none;
+}
+
 /* only while the series is on: switched off, the library's own paler ink
    says so, and the swatch fades with it */
 :deep(
