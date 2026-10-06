@@ -19,7 +19,8 @@
 // and 4 before the label, in the chevron's ink-gray-7 — and a leaf still
 // keeps the chevron's 16, so glyphs and labels line up down a level. The file
 // shows that one at 320 wide with no guides and full-width rows, and gives
-// its first row a suffix: a 13px ink-gray-4 note at the row's far end.
+// its first row a hint: a 13px ink-gray-4 note at the row's far end. On the
+// source tree a hint is a file's size; a folder has none.
 //
 // The tree is frappe-ui's `Tree`, whose `guides` prop is the file's
 // indentation property one for one. What the file draws differently is set
@@ -56,7 +57,7 @@ const guides = ref<Guides>('connectors')
 const fullWidth = ref(false)
 const draggable = ref(false)
 const disabled = ref(false)
-const suffix = ref(false)
+const hint = ref(false)
 
 type Example = 'default' | 'layers'
 const example = ref<Example>('default')
@@ -125,13 +126,8 @@ const layerNodes = ref<TreeNode[]>([
   },
 ])
 
-/** The row's note: the file's own on a layer; a count or a size on a file. */
-function hintFor(node: TreeNode): string {
-  if (node.hint) return String(node.hint)
-  if (example.value === 'layers') return ''
-  if (node.children) return `${node.children.length} items`
-  return String(node.size ?? '')
-}
+/** The row's hint: the file's own on a layer, a size on a file, else none. */
+const hintFor = (node: TreeNode) => String(node.hint ?? node.size ?? '')
 
 // the file's own words for its three trees: connector, none, line
 const guideOptions = [
@@ -191,7 +187,7 @@ const sourceNodes = ref<TreeNode[]>([
           { key: 'cover', size: '212 KB', label: 'cover.png' },
         ],
       },
-      { key: 'assets-root', size: '—', label: 'assets' },
+      { key: 'assets-root', label: 'assets' },
     ],
   },
 ])
@@ -206,11 +202,13 @@ const sourceNodes = ref<TreeNode[]>([
 const nodes = computed(() =>
   example.value === 'layers' ? layerNodes.value : sourceNodes.value,
 )
-/** The tree's box: the file draws the source tree 280x476, the layers 320x448. */
-const frame = computed(() =>
-  example.value === 'layers'
-    ? { width: '320px', height: '448px' }
-    : { width: '280px', height: '476px' },
+/**
+ * The tree's width: the file draws the source tree 280 wide and the layers
+ * 320. The box around it stays 320x476 — the larger of the two either way —
+ * so neither a fold nor a change of example moves anything.
+ */
+const treeWidth = computed(() =>
+  example.value === 'layers' ? '320px' : '280px',
 )
 watch(example, () => nextTick(() => tree.value?.expandAll()))
 
@@ -245,8 +243,8 @@ onMounted(() => tree.value?.expandAll())
 </script>
 
 <template>
-  <!-- centred on the pair's constant height: the tree's box is always its
-       full 476, so a fold happens inside it and the pair stays put -->
+  <!-- centred on the pair's constant size: the tree's box is always 320x476,
+       so a fold, or the other example, happens inside it and the pair stays put -->
   <div class="flex h-full items-center justify-center px-5 py-10">
     <div class="flex items-start gap-10">
       <!--
@@ -255,9 +253,9 @@ onMounted(() => tree.value?.expandAll())
         this page's scope — the styling below reaches it through the wrap.
       -->
       <div
-        class="tree-espresso"
+        class="tree-espresso h-[476px] w-[320px]"
         :class="fullWidth && 'is-full-width'"
-        :style="frame"
+        :style="{ '--tree-width': treeWidth }"
       >
         <Tree
           ref="tree"
@@ -307,8 +305,8 @@ onMounted(() => tree.value?.expandAll())
                   >{{ node.label }}</span
                 >
                 <span
-                  v-if="suffix"
-                  data-slot="suffix-note"
+                  v-if="hint && hintFor(node)"
+                  data-slot="hint"
                   class="ml-auto shrink-0 pl-2 text-sm text-ink-gray-4"
                   >{{ hintFor(node) }}</span
                 >
@@ -365,8 +363,8 @@ onMounted(() => tree.value?.expandAll())
             <Switch v-model="disabled" size="sm" aria-label="Disabled" />
           </div>
           <div class="flex h-7 items-center justify-between">
-            <span class="text-base text-ink-gray-7">Suffix</span>
-            <Switch v-model="suffix" size="sm" aria-label="Suffix" />
+            <span class="text-base text-ink-gray-7">Hint</span>
+            <Switch v-model="hint" size="sm" aria-label="Hint" />
           </div>
         </div>
       </div>
@@ -379,6 +377,11 @@ onMounted(() => tree.value?.expandAll())
   --tree-row-height: 28px;
   --tree-indent: 24px;
 }
+/* the tree itself is the file's width inside the constant box */
+.tree-espresso :deep(.frappe-tree) {
+  width: var(--tree-width);
+}
+
 /* the row is bare: the box inside it, or the row itself, carries the
    states — hover surface-gray-2, pressed surface-gray-3, focus white in a
    2px outline-gray-3 ring (the item set, node 34717:49031) */
