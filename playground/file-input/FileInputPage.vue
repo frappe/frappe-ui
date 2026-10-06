@@ -12,7 +12,7 @@
 // The field keeps its place whether Preview is on or off: its left edge 272
 // in (after the card and the 12 gap) and its foot on the box's foot, as in
 // the cell; Preview only adds the card and the description around it.
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { Switch, TabButtons } from '../../src'
 import FileInput from './FileInput.vue'
 import type { FileInputSize, FileInputVariant } from './FileInput.vue'
@@ -28,7 +28,10 @@ const variant = ref<FileInputVariant>(
 const size = ref<FileInputSize>(pick('size', ['xs', 'sm', 'md', 'lg'], 'sm'))
 const preview = ref(q.has('preview'))
 const error = ref(q.has('error'))
-const disabled = ref(q.has('disabled'))
+const disabled = ref(q.has('disabled') && !error.value)
+// a disabled field can't be in error: turning one on turns the other off
+watch(error, (on) => on && (disabled.value = false))
+watch(disabled, (on) => on && (error.value = false))
 
 const variantTabs = [
   { label: 'Subtle', value: 'subtle' },

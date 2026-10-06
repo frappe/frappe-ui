@@ -187,7 +187,7 @@ const suffixWidth = ref(0)
 let observer: ResizeObserver | null = null
 onMounted(() => {
   observer = new ResizeObserver(([entry]) => {
-    suffixWidth.value = Math.ceil(entry.contentRect.width)
+    suffixWidth.value = entry.contentRect.width
   })
   if (suffixEl.value) observer.observe(suffixEl.value)
 })
@@ -220,7 +220,7 @@ watch(
       `is-${shown}`,
       preview && 'has-preview',
       disabled && 'is-disabled',
-      error && 'is-error',
+      error && !disabled && 'is-error',
     ]"
     :style="{ '--suffix-w': `${suffixWidth}px` }"
   >
@@ -243,7 +243,7 @@ watch(
         <Button
           size="xs"
           variant="subtle"
-          class="absolute right-[3px] top-[3px]"
+          class="absolute right-1 top-1"
           aria-label="Remove file"
           :disabled="disabled"
           @click="clear"
@@ -361,7 +361,11 @@ watch(
 /* the field's value in the file's ink-gray-7, and room for the suffix */
 .file-input :deep([data-slot='control']) {
   color: var(--ink-gray-7);
-  padding-inline-end: var(--suffix-w);
+  /* the file keeps 14 between the text and Browse; past that the
+     placeholder ends in an ellipsis */
+  /* (13 + the field's 1px border = 14 to Browse's rule) */
+  padding-inline-end: calc(var(--suffix-w) + 13px);
+  text-overflow: ellipsis;
   cursor: pointer;
 }
 .file-input.is-xs :deep([data-slot='control']) {
@@ -387,6 +391,13 @@ watch(
 }
 .file-input.is-subtle :deep([data-slot='control'] ~ div) {
   padding-inline-end: 2px;
+}
+/* …and the text stops 14 before the button, past that inset */
+.file-input.is-subtle :deep([data-slot='control']) {
+  padding-inline-end: calc(var(--suffix-w) + 15px);
+}
+.file-input.is-subtle.is-lg :deep([data-slot='control']) {
+  padding-inline-end: calc(var(--suffix-w) + 17px);
 }
 .file-input.is-subtle.is-lg :deep([data-slot='control'] ~ div) {
   padding-inline-end: 4px;
