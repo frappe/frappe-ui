@@ -1,8 +1,8 @@
 <script setup lang="ts">
 // The file's "Bar charts" row (Figma 1GDS12ys41lxeG3wQpNq41, 1356:66389
-// … 1356:66508), drawn by the library's BarChart: a lone series 14 wide
-// on a 2px crown; four series stacked in 28px columns, labelled inside;
-// the same as shares of 100; six groups of four 10px bars; the
+// … 1356:66508), drawn by the library's BarChart: a lone series on a 2px
+// crown, its bars holding 58% of their slot; four series stacked in wider
+// columns, labelled inside; the same as shares of 100; six groups of four; the
 // horizontals — eleven countries, five channels per country grouped and
 // as shares — and the bars with a line over them on a second axis. The
 // hover variants the file draws beside them are what the library's
@@ -33,25 +33,50 @@ const lineOver = computed(() => [
   props.theme.one('markers'),
 ])
 
-/** the file's 14px bars, 28px stacked columns, 10px grouped bars */
-const width = (px: number) => ({ echartOptions: { barMaxWidth: px } })
+/**
+ * A bar's width, as the file sets it: against its slot, not in pixels. The
+ * file measures 14 wide in a 24 slot on the default card, 28 in 43 on the
+ * stacked ones, 14 in 43.5 at 100%, and 10 with 2 between in a 90 group —
+ * so what carries over is the gap's share of the slot, not the pixels,
+ * which were read on a 580-wide card where ours is 447 and narrower still
+ * on a small screen. Given in pixels the bars close up as the card narrows;
+ * given as a share they keep the file's gaps at any width.
+ */
+const slot = (gap: number) => ({
+  echartOptions: { barCategoryGap: `${gap}%` },
+})
+/** a group of bars: the gap around the group, and the gap between its bars */
+const grouped = (gap: number, between: number) => ({
+  echartOptions: { barCategoryGap: `${gap}%`, barGap: `${between}%` },
+})
+/**
+ * The labelled stack: the same 35% slot, and the file's 9px label inside each
+ * segment where the library's data labels are 11. At 11 a "$4.6k" is as wide
+ * as the column it sits on, so the labels of neighbouring columns meet in the
+ * gap between them; at 9 each one sits inside its own segment, as the file
+ * draws it.
+ */
+const labelledStack = {
+  echartOptions: { ...slot(35).echartOptions, label: { fontSize: 9 } },
+}
+
 const stackedConfig = {
-  data1: { label: 'Data 1', ...width(28) },
-  data2: { label: 'Data 2', ...width(28) },
-  data3: { label: 'Data 3', ...width(28) },
-  data4: { label: 'Data 4', ...width(28) },
+  data1: { label: 'Data 1', ...slot(35) },
+  data2: { label: 'Data 2', ...slot(35) },
+  data3: { label: 'Data 3', ...slot(35) },
+  data4: { label: 'Data 4', ...slot(35) },
 }
 const groupedConfig = {
-  data1: { label: 'Data 1', ...width(10) },
-  data2: { label: 'Data 2', ...width(10) },
-  data3: { label: 'Data 3', ...width(10) },
-  data4: { label: 'Data 4', ...width(10) },
+  data1: { label: 'Data 1', ...grouped(49, 20) },
+  data2: { label: 'Data 2', ...grouped(49, 20) },
+  data3: { label: 'Data 3', ...grouped(49, 20) },
+  data4: { label: 'Data 4', ...grouped(49, 20) },
 }
 const narrowConfig = {
-  data1: { label: 'Data 1', ...width(14) },
-  data2: { label: 'Data 2', ...width(14) },
-  data3: { label: 'Data 3', ...width(14) },
-  data4: { label: 'Data 4', ...width(14) },
+  data1: { label: 'Data 1', ...slot(68) },
+  data2: { label: 'Data 2', ...slot(68) },
+  data3: { label: 'Data 3', ...slot(68) },
+  data4: { label: 'Data 4', ...slot(68) },
 }
 const money = (value: number) =>
   `$${(value / 1000).toFixed(1).replace(/\.0$/, '')}k`
@@ -64,13 +89,13 @@ const money = (value: number) =>
       :data="monthly"
       x="month"
       y="sales"
-      :series-config="{ sales: { label: 'Sales', ...width(14) } }"
+      :series-config="{ sales: { label: 'Sales', ...slot(42) } }"
       :x-axis="yearAxis"
       :y-axis="salesAxis"
       :palette="single"
     />
   </Card>
-  <Card>
+  <Card no-legend>
     <BarChart
       title="Stacked Bar Chart"
       :data="stackYear"
@@ -79,17 +104,17 @@ const money = (value: number) =>
       stacked
       show-data-labels
       :series-config="{
-        data1: { label: 'Data 1', format: money, ...width(28) },
-        data2: { label: 'Data 2', format: money, ...width(28) },
-        data3: { label: 'Data 3', format: money, ...width(28) },
-        data4: { label: 'Data 4', format: money, ...width(28) },
+        data1: { label: 'Data 1', format: money, ...labelledStack },
+        data2: { label: 'Data 2', format: money, ...labelledStack },
+        data3: { label: 'Data 3', format: money, ...labelledStack },
+        data4: { label: 'Data 4', format: money, ...labelledStack },
       }"
       :x-axis="monthAxis"
       :y-axis="salesAxis"
       :palette="labelled"
     />
   </Card>
-  <Card>
+  <Card no-legend>
     <BarChart
       title="Stacked Bar Chart"
       :data="stackYear"
@@ -102,7 +127,7 @@ const money = (value: number) =>
       :palette="stack"
     />
   </Card>
-  <Card>
+  <Card no-legend>
     <BarChart
       title="100% Stacked"
       :data="stackYear"
@@ -114,7 +139,7 @@ const money = (value: number) =>
       :palette="stack"
     />
   </Card>
-  <Card>
+  <Card no-legend>
     <BarChart
       title="Group stack"
       :data="groupYear"
@@ -133,7 +158,7 @@ const money = (value: number) =>
       x="country"
       y="income"
       horizontal
-      :series-config="{ income: { label: 'Income per Capita', ...width(12) } }"
+      :series-config="{ income: { label: 'Income per Capita', ...slot(43) } }"
       :x-axis="{ title: 'Top countries' }"
       :y-axis="{ ...incomeAxis, title: 'Income per Capita (USD)' }"
       :palette="single"
@@ -147,7 +172,9 @@ const money = (value: number) =>
       x="country"
       :y="[...CHANNELS]"
       horizontal
-      :series-config="Object.fromEntries(CHANNELS.map((c) => [c, width(6)]))"
+      :series-config="
+        Object.fromEntries(CHANNELS.map((c) => [c, grouped(30, 33)]))
+      "
       :y-axis="incomeAxis"
       :palette="channels"
     />
@@ -161,11 +188,11 @@ const money = (value: number) =>
       :y="[...CHANNELS]"
       horizontal
       stacked="normalized"
-      :series-config="Object.fromEntries(CHANNELS.map((c) => [c, width(24)]))"
+      :series-config="Object.fromEntries(CHANNELS.map((c) => [c, slot(40)]))"
       :palette="channels"
     />
   </Card>
-  <Card>
+  <Card no-legend>
     <BarChart
       title="Secondary / Dual Axis with Line"
       :data="monthly"
@@ -173,7 +200,7 @@ const money = (value: number) =>
       y="sales"
       y2="orders"
       :series-config="{
-        sales: { label: 'Sales', ...width(14) },
+        sales: { label: 'Sales', ...slot(42) },
         orders: { label: 'Orders', type: 'line' },
       }"
       :x-axis="yearAxis"
