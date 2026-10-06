@@ -28,6 +28,8 @@ import { buildOpenRteLinkEditor } from './rteLinkPopup'
 import AudioNodeView from './AudioNodeView.vue'
 import DetailsNodeView from './DetailsNodeView.vue'
 import RteImageSlotView from './RteImageSlot.vue'
+import RteEmbedSlotView from './RteEmbedSlot.vue'
+import { openEmbedSourcePopup } from './rteEmbedPopup'
 
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
@@ -53,6 +55,10 @@ declare module '@tiptap/core' {
       setColumns: (count?: number) => ReturnType
       /** the share of the row each column of the row at `pos` has */
       setColumnWidths: (pos: number, widths: number[]) => ReturnType
+    }
+    rteEmbedSlot: {
+      /** lay an empty embed slot down, to be filled by link */
+      insertEmbedSlot: () => ReturnType
     }
     rteImageSlot: {
       /** lay an empty image slot down, to be filled by file or by link */
@@ -397,6 +403,44 @@ export const Columns = Node.create({
 // RteImageSlot's card asks for. A row of slots inside a media columns node
 // is the file's columns-wise upload: every cell takes its own picture, and
 // an untouched cell keeps showing its Add Image.
+// The empty embed slot /embed lays down (32354:128378), the picture's
+// slot with the embed's word: it stands until a link fills it. It also
+// answers "Replace" on an embed's menu with the file's own card in place
+// of the library's dialog, laid under the embed (rteEmbedPopup.ts).
+export const EmbedSlot = Node.create({
+  name: 'embedSlot',
+  group: 'block',
+  atom: true,
+  draggable: true,
+  selectable: true,
+  parseHTML: () => [{ tag: 'div[data-type="embed-slot"]' }],
+  renderHTML: ({ HTMLAttributes }) => [
+    'div',
+    mergeAttributes(HTMLAttributes, { 'data-type': 'embed-slot' }),
+  ],
+  addNodeView() {
+    return VueNodeViewRenderer(RteEmbedSlotView)
+  },
+  addCommands() {
+    return {
+      insertEmbedSlot:
+        () =>
+        ({ commands }) =>
+          commands.insertContent({ type: this.name }),
+      replaceIframe:
+        (pos: number) =>
+        ({ editor }) => {
+          const node = editor.state.doc.nodeAt(pos)
+          if (!node || node.type.name !== 'iframe') return false
+          openEmbedSourcePopup(editor, pos, (at, embed) =>
+            editor.commands.updateIframeAt(at, embed.src),
+          )
+          return true
+        },
+    }
+  },
+})
+
 export const ImageSlot = Node.create({
   name: 'imageSlot',
   group: 'block',
@@ -775,6 +819,7 @@ export const playgroundExtensions = [
   Column,
   Columns,
   ImageSlot,
+  EmbedSlot,
   DetailsSummary,
   DetailsContent,
   Details,

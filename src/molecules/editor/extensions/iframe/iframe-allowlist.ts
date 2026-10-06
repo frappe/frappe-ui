@@ -71,7 +71,10 @@ export function allowlistPermitsHosts(
   hosts: readonly string[],
 ): boolean {
   const allowlist = getIframeAllowlist(editor) ?? IFRAME_ALLOWLIST
-  return hosts.some((host) => matchesHostname(host, allowlist))
+  return (
+    allowlist.includes(ANY_HOST) ||
+    hosts.some((host) => matchesHostname(host, allowlist))
+  )
 }
 
 /** Options for {@link validateIframeUrl}. */
@@ -82,10 +85,14 @@ export interface ValidateIframeUrlOptions {
   blocklist?: readonly string[]
 }
 
+/** The one entry that opens an allowlist to every http(s) host. */
+export const ANY_HOST = '*'
+
 /**
  * True iff `url` is an absolute http(s) URL whose hostname is on the allowlist
  * (and not on an optional blocklist). Relative, bare, and unknown-scheme inputs
- * are rejected — there is no `startsWith('/')` escape hatch.
+ * are rejected — there is no `startsWith('/')` escape hatch. An allowlist
+ * holding {@link ANY_HOST} takes every host the blocklist does not refuse.
  */
 export function validateIframeUrl(
   url: string,
@@ -104,5 +111,5 @@ export function validateIframeUrl(
   if (blocklist?.length && matchesHostname(host, blocklist)) return false
 
   const allowlist = options?.allowlist ?? IFRAME_ALLOWLIST
-  return matchesHostname(host, allowlist)
+  return allowlist.includes(ANY_HOST) || matchesHostname(host, allowlist)
 }

@@ -104,7 +104,21 @@ const blockItems = (): CommandItem[] =>
  */
 export function rteSlashCommands(): CommandItem[] {
   const rest = getDefaultSlashCommands().filter(
-    (item) => item.group !== 'Text' && item.group !== 'Lists',
+    (item) =>
+      item.group !== 'Text' &&
+      item.group !== 'Lists' &&
+      item.group !== 'Embeds',
   )
-  return [...blockItems(), ...rest]
+  // the file's embed: a slot across the document that asks for its link
+  // (32354:128378), in place of the library's dialog and its per-platform
+  // shortcuts
+  const embed: CommandItem = {
+    title: 'Embed',
+    icon: 'lucide-code-xml',
+    group: 'Embeds',
+    isAvailable: (editor) => !!editor.schema.nodes.embedSlot,
+    command: ({ editor, range }) =>
+      editor.chain().focus().deleteRange(range).insertEmbedSlot().run(),
+  }
+  return [...blockItems(), ...rest, embed]
 }

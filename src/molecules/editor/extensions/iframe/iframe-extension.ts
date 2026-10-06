@@ -76,10 +76,22 @@ export const IframeExtension = Node.create<IframeOptions>({
           height: attributes.height ? String(attributes.height) : null,
         }),
       },
+      // The shape is kept with the embed, since one laid the width of the
+      // column has no width of its own to take a shape from.
       aspectRatio: {
         default: 9 / 16,
-        parseHTML: () => null,
-        renderHTML: () => ({}),
+        parseHTML: (element) => {
+          const own = Number(element.getAttribute('data-aspect-ratio'))
+          if (Number.isFinite(own) && own > 0) return own
+          const w = parseDimension(element.getAttribute('width'))
+          const h = parseDimension(element.getAttribute('height'))
+          return w && h ? h / w : null
+        },
+        renderHTML: (attributes) => ({
+          'data-aspect-ratio': attributes.aspectRatio
+            ? String(Number(attributes.aspectRatio).toFixed(4))
+            : null,
+        }),
       },
       align: {
         default: 'center',

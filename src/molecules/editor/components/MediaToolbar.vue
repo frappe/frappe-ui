@@ -24,8 +24,10 @@ const props = defineProps<{
  *
  * A video's menu is the design's one flat list: Caption (a check beside it
  * while it shows), Replace, Align, Video settings (Autoplay, Loop, Muted,
- * each with a check while on), Duplicate, Delete. An image keeps its longer
- * list — the size, the bytes (open, copy, download) — grouped as before.
+ * each with a check while on), Duplicate, Delete. An embed's is its own
+ * six: Captions, Replace, Open in Browser, Align, Duplicate, Delete. An
+ * image keeps its longer list — the size, the bytes (open, copy,
+ * download) — grouped as before.
  *
  * They used to sit in the frame as six buttons sharing one 65%-black pill — a
  * slab of chrome across the top of every selected image, most of it rarely
@@ -162,8 +164,37 @@ const videoMenu = (): DropdownOptions => [
   },
 ]
 
+/** The embed's menu (espresso-2.0, 32480-13142): six rows, undivided. */
+const embedMenu = (): DropdownOptions => [
+  {
+    group: 'embed',
+    hideLabel: true,
+    options: [
+      captionItem('Captions'),
+      {
+        label: 'Replace',
+        icon: 'lucide-refresh-cw',
+        onClick: () => emit('replace'),
+      },
+      {
+        label: 'Open in Browser',
+        icon: 'lucide-external-link',
+        onClick: () => emit('open'),
+      },
+      { label: 'Align', icon: 'lucide-align-left', submenu: alignItems() },
+      {
+        label: 'Duplicate',
+        icon: 'lucide-copy-plus',
+        onClick: () => emit('duplicate'),
+      },
+      deleteItem,
+    ],
+  },
+]
+
 const options = computed<DropdownOptions>(() => {
   if (isVideo.value) return videoMenu()
+  if (isEmbed.value) return embedMenu()
   const groups: DropdownOptions = [
     {
       group: 'caption',

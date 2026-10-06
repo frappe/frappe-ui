@@ -21,6 +21,10 @@ import {
   type TiptapEditor,
   type UploadFunction,
 } from '../../../src/molecules/editor'
+import {
+  IFRAME_ALLOWLIST,
+  ANY_HOST,
+} from '../../../src/molecules/editor/extensions/iframe'
 import RichTextToolbar from './RichTextToolbar.vue'
 import RteBubbleMenu from './RteBubbleMenu.vue'
 import RteTableControls from './RteTableControls.vue'
@@ -76,6 +80,8 @@ const extensions = [
     link: false,
     // and the table stack, its row carrying the file's border option
     table: false,
+    // the file embeds a website as readily as a player, so every host
+    iframe: { allowlist: [...IFRAME_ALLOWLIST, ANY_HOST] },
   }),
   ...playgroundExtensions,
 ]

@@ -196,7 +196,7 @@ const URL_TITLES: Record<UrlKind, string> = {
   video: 'Insert video',
   audio: 'Insert audio',
   file: 'Attach file',
-  embed: 'Embed link',
+  embed: 'Insert Link',
 }
 function askUrl(kind: UrlKind) {
   urlDialog.value = { kind, url: '', name: '' }
@@ -847,7 +847,7 @@ function onFocusIn(e: FocusEvent) {
       </template>
       <template #actions>
         <Button variant="solid" class="w-full" @click="insertUrl">
-          {{ urlDialog?.kind === 'embed' ? 'Embed link' : 'Insert' }}
+          {{ urlDialog?.kind === 'embed' ? 'Add link' : 'Insert' }}
         </Button>
       </template>
     </Dialog>
