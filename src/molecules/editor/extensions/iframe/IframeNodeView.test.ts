@@ -153,6 +153,27 @@ describe('embed card, per the design', () => {
     ctx.app.unmount()
   })
 
+  it('wears the pencil beside the dots, and the pencil asks for a new link', async () => {
+    const ctx = await mountEmbed()
+    const chrome = Array.from(
+      ctx.root.querySelectorAll<HTMLButtonElement>('button[aria-label]'),
+    ).map((b) => b.getAttribute('aria-label'))
+    expect(chrome.slice(0, 2)).toEqual(['Change link', 'Media options'])
+    // the pencil is the menu's Replace: the library's own edit dialog,
+    // unless a host answers `replaceIframe` with a card of its own
+    ctx.root
+      .querySelector<HTMLButtonElement>('button[aria-label="Change link"]')!
+      .click()
+    await settle()
+    await new Promise((r) => setTimeout(r, 50))
+    await settle()
+    const dialog = Array.from(
+      document.body.querySelectorAll<HTMLElement>('[role="dialog"]'),
+    ).find((d) => d.textContent?.includes('Edit Embed'))
+    expect(dialog).toBeDefined()
+    ctx.app.unmount()
+  })
+
   it("lists the design's six rows, undivided, and asks before deleting", async () => {
     const ctx = await mountEmbed()
     await openMenu(ctx.root)

@@ -5,6 +5,8 @@
 //   POST /__uploads            the file as the body, its type in
 //                              content-type and its name, URI-encoded, in
 //                              x-file-name → { file_url, file_name }
+//   GET  /__uploads            what has been uploaded, newest first:
+//                              [{ file_url, file_name, type }]
 //   GET  /__uploads/<id>       the file
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import type { Plugin } from 'vite'
@@ -24,6 +26,17 @@ export function playgroundUploads(): Plugin {
       })
     },
   }
+}
+
+/** the store's files, newest first, as the library tab lists them */
+export function listUploads(
+  files: Map<string, Pick<Stored, 'type' | 'name'>>,
+): Array<{ file_url: string; file_name: string; type: string }> {
+  return Array.from(files, ([id, file]) => ({
+    file_url: `${ROUTE}/${id}`,
+    file_name: file.name,
+    type: file.type,
+  })).reverse()
 }
 
 /** handles an upload route, or returns false for anything else */
@@ -50,6 +63,12 @@ export function serveUpload(
       res.setHeader('content-type', 'application/json')
       res.end(JSON.stringify({ file_url: `${ROUTE}/${id}`, file_name: name }))
     })
+    return true
+  }
+  if (req.method === 'GET' && url === ROUTE) {
+    res.setHeader('content-type', 'application/json')
+    res.setHeader('cache-control', 'no-store')
+    res.end(JSON.stringify(listUploads(files)))
     return true
   }
   if (

@@ -4,15 +4,17 @@
 // 10px in, the 16px code glyph and the 14px ink-gray-5 "Embed any link"
 // 10px apart — the picture's slot, with the embed's word and glyph.
 //
-// A press raises RteEmbedSource. The link that comes back, already read,
-// takes the slot's own place in one step, laid the width of the column
-// in its platform's shape.
+// A press raises RteEmbedSource. The link that comes back — pasted,
+// uploaded or picked from the library, and already read — takes the
+// slot's own place in one step, laid the width of the column in its
+// platform's shape.
 import { toRaw } from 'vue'
 import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3'
 import { Popover } from '../../../src'
 import { useNodeViewEditable } from '../../../src/molecules/editor/composables/useNodeViewEditable'
 import { getIframeAllowlist } from '../../../src/molecules/editor/extensions/iframe'
 import RteEmbedSource from './RteEmbedSource.vue'
+import { embedUploader } from './rteEmbedPopup'
 
 const props = defineProps(nodeViewProps)
 
@@ -20,6 +22,7 @@ const props = defineProps(nodeViewProps)
 const editor = toRaw(props.editor)
 const editable = useNodeViewEditable(editor)
 const allowlist = getIframeAllowlist(editor)
+const upload = embedUploader(editor)
 
 /** the slot's own range, or null once it has gone from the document */
 function range() {
@@ -64,6 +67,7 @@ function takeLink(embed: { src: string; aspectRatio: number }) {
       <template #default="{ close }">
         <RteEmbedSource
           :allowlist="allowlist"
+          :upload="upload"
           @link="(e) => (close(), takeLink(e))"
           @close="close()"
         />

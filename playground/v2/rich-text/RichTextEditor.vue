@@ -773,12 +773,13 @@ function resolve() {
   border-left: 1px solid var(--outline-gray-1);
 }
 /* a block picked up by its grip, or selected by a click on it: a gray-100
-   ground 4px past its edges. A picture or a video keeps the library's ring
-   and pills instead: the selected node there is the media view's wrapper,
-   the one that holds the media box, not the <img> itself */
+   ground 4px past its edges. A picture, a video or an embed keeps the
+   library's ring and pills instead: the selected node there is the media
+   view's wrapper, the one that holds the media box, not the <img> itself */
 .rte-doc
   .ProseMirror-selectednode:not(img):not(video):not(
-    :has(> [data-video-fullscreen-root])
+    :has(> [data-video-fullscreen-root]),
+    :has(> [data-embed-root])
   ) {
   background-color: var(--surface-gray-2);
   border-radius: 4px;
@@ -786,7 +787,8 @@ function resolve() {
 }
 .rte-doc.rte-dragging
   .ProseMirror-selectednode:not(img):not(video):not(
-    :has(> [data-video-fullscreen-root])
+    :has(> [data-video-fullscreen-root]),
+    :has(> [data-embed-root])
   ) {
   opacity: 0.4;
 }

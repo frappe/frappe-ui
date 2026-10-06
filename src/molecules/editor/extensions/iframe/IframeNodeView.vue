@@ -170,7 +170,8 @@ function toggleCaption(): void {
   if (!showCaption.value) props.updateAttributes({ title: '' })
 }
 
-/** A new link for this embed: the `replaceIframe` command's to ask for. */
+/** A new link for this embed, from the pencil or the menu's Replace: the
+ * `replaceIframe` command's to ask for. */
 function changeEmbedLink(): void {
   const pos = safeGetPos(() => props.getPos())
   if (pos === null) return
@@ -264,6 +265,7 @@ function commitCaption(event: Event): void {
       ]"
       :style="{ width: width ? `${width}px` : '100%', maxWidth: '100%' }"
       tabindex="0"
+      data-embed-root
       @keydown="handleKeydown"
     >
       <div
@@ -337,6 +339,7 @@ function commitCaption(event: Event): void {
           :show-caption="showCaption"
           @toggle-caption="toggleCaption"
           @set-align="setAlignment"
+          @edit="changeEmbedLink"
           @replace="changeEmbedLink"
           @open="openInBrowser"
           @duplicate="duplicate"

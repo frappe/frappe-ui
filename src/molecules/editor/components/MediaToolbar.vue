@@ -19,8 +19,10 @@ const props = defineProps<{
 /**
  * Media chrome, per the design (espresso-2.0, node 31403-45433): one
  * `MEDIA_CHROME_BUTTON` 10px in from the top-right corner, with every
- * action in the menu behind it. The design draws a pencil beside it; it
- * was asked off, the caption being a row of the menu already.
+ * action in the menu behind it. The design draws a pencil beside it; on a
+ * picture or a video it was asked off, the caption being a row of the menu
+ * already. On an embed (32354-128183) it stays, and asks for a new link —
+ * the one thing an embed is.
  *
  * A video's menu is the design's one flat list: Caption (a check beside it
  * while it shows), Replace, Align, Video settings (Autoplay, Loop, Muted,
@@ -35,6 +37,8 @@ const props = defineProps<{
  */
 const emit = defineEmits<{
   (e: 'toggle-caption'): void
+  /** the pencil: an embed's link, to change */
+  (e: 'edit'): void
   (e: 'set-align', align: MediaAlign): void
   /** `fraction` of the width the media has to fill */
   (e: 'resize', fraction: number): void
@@ -271,9 +275,19 @@ const options = computed<DropdownOptions>(() => {
 
 <template>
   <div
-    class="absolute top-2.5 right-2.5 z-20 items-center"
+    class="absolute top-2.5 right-2.5 z-20 items-center gap-1.5"
     :class="isVisible ? 'flex' : 'hidden'"
   >
+    <button
+      v-if="isEmbed"
+      type="button"
+      :class="MEDIA_CHROME_BUTTON"
+      aria-label="Change link"
+      @click.stop="emit('edit')"
+      @pointerdown.stop
+    >
+      <span class="lucide-pencil size-4" aria-hidden="true" />
+    </button>
     <Dropdown v-model:open="menuOpen" :options="options" align="end">
       <template #trigger>
         <button
