@@ -52,7 +52,10 @@ export function serveUpload(
     })
     return true
   }
-  if (req.method === 'GET' && url.startsWith(`${ROUTE}/`)) {
+  if (
+    (req.method === 'GET' || req.method === 'HEAD') &&
+    url.startsWith(`${ROUTE}/`)
+  ) {
     const file = files.get(url.slice(ROUTE.length + 1))
     if (!file) {
       res.statusCode = 404
@@ -60,10 +63,54 @@ export function serveUpload(
       return true
     }
     res.setHeader('content-type', file.type)
-    res.setHeader('content-length', file.data.length)
     res.setHeader('cache-control', 'no-store')
-    res.end(file.data)
+    // A video is seekable only as far as the browser can ask for bytes by
+    // range: without 206 answers it may play only what has buffered, and
+    // the playhead cannot be dragged past that.
+    res.setHeader('accept-ranges', 'bytes')
+    const range = byteRange(req.headers.range, file.data.length)
+    if (range === 'invalid') {
+      res.statusCode = 416
+      res.setHeader('content-range', `bytes */${file.data.length}`)
+      res.end()
+      return true
+    }
+    let body = file.data
+    if (range) {
+      const [start, end] = range
+      res.statusCode = 206
+      res.setHeader(
+        'content-range',
+        `bytes ${start}-${end}/${file.data.length}`,
+      )
+      body = file.data.subarray(start, end + 1)
+    }
+    res.setHeader('content-length', body.length)
+    res.end(req.method === 'HEAD' ? undefined : body)
     return true
   }
   return false
+}
+
+/**
+ * The bytes a `Range` header asks for, inclusive: none when there is no
+ * (usable) header, 'invalid' when it points past the file.
+ */
+export function byteRange(
+  header: string | undefined,
+  size: number,
+): [number, number] | 'invalid' | null {
+  const match = /^bytes=(\d*)-(\d*)$/.exec(header?.trim() ?? '')
+  if (!match || (match[1] === '' && match[2] === '')) return null
+  if (size === 0) return 'invalid'
+  // a suffix range: the last N bytes
+  if (match[1] === '') {
+    const count = Math.min(Number(match[2]), size)
+    return count === 0 ? 'invalid' : [size - count, size - 1]
+  }
+  const start = Number(match[1])
+  if (start >= size) return 'invalid'
+  const end = match[2] === '' ? size - 1 : Math.min(Number(match[2]), size - 1)
+  if (end < start) return 'invalid'
+  return [start, end]
 }
