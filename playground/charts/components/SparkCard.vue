@@ -261,7 +261,7 @@ function track(event: MouseEvent) {
         >
           <span
             class="flex items-center gap-0.5"
-            :class="negative ? 'text-ink-red-5' : 'text-ink-green-7'"
+            :class="negative ? 'spark-fall' : 'text-ink-green-7'"
           >
             <span
               class="size-4"
@@ -316,7 +316,7 @@ function track(event: MouseEvent) {
       >
         <span
           class="flex items-center gap-0.5"
-          :class="negative ? 'text-ink-red-5' : 'text-ink-green-7'"
+          :class="negative ? 'spark-fall' : 'text-ink-green-7'"
         >
           <span
             class="size-4"
@@ -359,3 +359,22 @@ function track(event: MouseEvent) {
     </ChartTooltip>
   </div>
 </template>
+
+<style scoped>
+/* The file's red is ink-red-5, which is exactly its #e03636 in light. The red
+   scale does not flip the way the green's does, though: in dark mode the rise
+   beside it (ink-green-7) lands at oklch L 0.77 while ink-red-5 lands at 0.55,
+   so the fall reads dimmer than the rise rather than beside it. Dark takes
+   ink-red-7, which lands at 0.73 — the same weight as the green. */
+.spark-fall {
+  color: var(--ink-red-5);
+}
+:root[data-theme='dark'] .spark-fall {
+  color: var(--ink-red-7);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .spark-fall {
+    color: var(--ink-red-7);
+  }
+}
+</style>
