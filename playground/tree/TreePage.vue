@@ -13,10 +13,13 @@
 // surface-gray-2, pressed on surface-gray-3, focus white inside a 2px
 // outline-gray-3 ring, disabled at half opacity.
 //
-// Two more controls show the row with more in it (node 35800:160601, the
-// file's layers tree): a prefix — a 16px glyph for what the row is, 4 after
-// the chevron's place and 4 before the label, in the chevron's ink-gray-7
-// — and a suffix — a 13px ink-gray-4 note at the row's far end.
+// An Example select swaps the tree: Default is the file's source tree; Layers
+// is the file's second tree (node 35800:160601), where every row carries a
+// prefix — a 16px glyph for what the layer is, 4 after the chevron's place
+// and 4 before the label, in the chevron's ink-gray-7 — and a leaf still
+// keeps the chevron's 16, so glyphs and labels line up down a level. The file
+// shows that one at 320 wide with no guides and full-width rows, and gives
+// its first row a suffix: a 13px ink-gray-4 note at the row's far end.
 //
 // The tree is frappe-ui's `Tree`, whose `guides` prop is the file's
 // indentation property one for one. What the file draws differently is set
@@ -38,7 +41,7 @@
 // fills from the tree's left edge, so the indent is moved inside the row
 // (the `#item` slot knows its level) and the guides are drawn from the
 // tree's left edge, level by level, above the fill.
-import { onMounted, ref } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { Select, Switch, Tree } from '../../src'
 import type {
   DropInfo,
@@ -53,25 +56,79 @@ const guides = ref<Guides>('connectors')
 const fullWidth = ref(false)
 const draggable = ref(false)
 const disabled = ref(false)
-const prefix = ref(false)
 const suffix = ref(false)
 
+type Example = 'default' | 'layers'
+const example = ref<Example>('default')
+const exampleOptions = [
+  { label: 'Default', value: 'default' },
+  { label: 'Layers', value: 'layers' },
+]
+
 /**
- * What a row is, as a glyph from the icon set — the file's layers tree
- * marks a frame, a container, a component, a text and an image; here the
- * project root is the frame, folders are containers, .tsx files components,
- * .ts files text and pictures images.
+ * The file's layers tree (node 35800:160601): each layer's kind is the
+ * glyph before its name — the frame (`single-body`), a container (`square`),
+ * a component (the cube), a text (`text`), an image (`image`), all from the
+ * icon set — and the first row carries the file's note.
  */
-function glyphFor(node: TreeNode): string {
-  const name = String(node.label)
-  if (node.key === 'src') return 'single-body'
-  if (node.children) return 'square'
-  if (name.endsWith('.tsx')) return 'component'
-  if (name.endsWith('.ts')) return 'text'
-  return 'image'
-}
-/** The row's note: how many a folder holds, how big a file is. */
+const layerNodes = ref<TreeNode[]>([
+  {
+    key: 'body',
+    label: 'Body',
+    glyph: 'single-body',
+    hint: 'Desktop',
+    children: [{ key: 'navigation', label: 'Navigation', glyph: 'component' }],
+  },
+  {
+    key: 'container-1',
+    label: 'Container',
+    glyph: 'square',
+    children: [
+      {
+        key: 'container-1-1',
+        label: 'Container',
+        glyph: 'square',
+        children: [
+          { key: 'text-1', label: 'Text 1', glyph: 'text' },
+          { key: 'text-2', label: 'Text 2', glyph: 'text' },
+          { key: 'button-1', label: 'Button', glyph: 'component' },
+          { key: 'button-2', label: 'Button', glyph: 'component' },
+        ],
+      },
+      { key: 'image-1', label: 'Image', glyph: 'image' },
+    ],
+  },
+  {
+    key: 'container-2',
+    label: 'Container',
+    glyph: 'square',
+    children: [
+      { key: 'text-3', label: 'Text 3', glyph: 'text' },
+      { key: 'image-2', label: 'Image', glyph: 'image' },
+    ],
+  },
+  {
+    key: 'container-3',
+    label: 'Container',
+    glyph: 'square',
+    children: [
+      {
+        key: 'container-3-1',
+        label: 'Container',
+        glyph: 'square',
+        children: [
+          { key: 'container-3-1-1', label: 'Container', glyph: 'square' },
+        ],
+      },
+      { key: 'image-3', label: 'Image', glyph: 'image' },
+    ],
+  },
+])
+
+/** The row's note: the file's own on a layer; a count or a size on a file. */
 function hintFor(node: TreeNode): string {
+  if (node.hint) return String(node.hint)
+  if (example.value === 'layers') return ''
   if (node.children) return `${node.children.length} items`
   return String(node.size ?? '')
 }
@@ -83,8 +140,8 @@ const guideOptions = [
   { label: 'Line', value: 'lines' },
 ]
 
-/** The file's own example: a source tree, every folder open. */
-const nodes = ref<TreeNode[]>([
+/** The file's first example: a source tree, every folder open. */
+const sourceNodes = ref<TreeNode[]>([
   {
     key: 'src',
     label: 'src',
@@ -146,6 +203,17 @@ const nodes = ref<TreeNode[]>([
  * for. The library's own guards (not onto itself, not into its own
  * descendants) have run by then.
  */
+const nodes = computed(() =>
+  example.value === 'layers' ? layerNodes.value : sourceNodes.value,
+)
+/** The tree's box: the file draws the source tree 280x476, the layers 320x448. */
+const frame = computed(() =>
+  example.value === 'layers'
+    ? { width: '320px', height: '448px' }
+    : { width: '280px', height: '476px' },
+)
+watch(example, () => nextTick(() => tree.value?.expandAll()))
+
 function parentOf(
   key: TreeKey | null,
   list: TreeNode[] = nodes.value,
@@ -187,8 +255,9 @@ onMounted(() => tree.value?.expandAll())
         this page's scope — the styling below reaches it through the wrap.
       -->
       <div
-        class="tree-espresso h-[476px] w-[280px]"
+        class="tree-espresso"
         :class="fullWidth && 'is-full-width'"
+        :style="frame"
       >
         <Tree
           ref="tree"
@@ -227,9 +296,9 @@ onMounted(() => tree.value?.expandAll())
                 </button>
                 <span v-else class="size-4 shrink-0" aria-hidden="true" />
                 <TreeIcon
-                  v-if="prefix"
+                  v-if="node.glyph"
                   data-slot="prefix-glyph"
-                  :name="glyphFor(node)"
+                  :name="String(node.glyph)"
                   class="size-4 text-ink-gray-7"
                 />
                 <!-- the label gives way, with an ellipsis, before the note does -->
@@ -262,6 +331,17 @@ onMounted(() => tree.value?.expandAll())
         <p class="text-lg-semibold leading-[1.15] text-ink-gray-9">Tree</p>
         <div class="flex flex-col gap-2">
           <div class="flex h-7 items-center justify-between">
+            <span class="text-base text-ink-gray-7">Example</span>
+            <Select
+              v-model="example"
+              :options="exampleOptions"
+              size="sm"
+              variant="subtle"
+              class="w-[120px]"
+              aria-label="Example"
+            />
+          </div>
+          <div class="flex h-7 items-center justify-between">
             <span class="text-base text-ink-gray-7">Indentation</span>
             <Select
               v-model="guides"
@@ -283,10 +363,6 @@ onMounted(() => tree.value?.expandAll())
           <div class="flex h-7 items-center justify-between">
             <span class="text-base text-ink-gray-7">Disabled</span>
             <Switch v-model="disabled" size="sm" aria-label="Disabled" />
-          </div>
-          <div class="flex h-7 items-center justify-between">
-            <span class="text-base text-ink-gray-7">Prefix</span>
-            <Switch v-model="prefix" size="sm" aria-label="Prefix" />
           </div>
           <div class="flex h-7 items-center justify-between">
             <span class="text-base text-ink-gray-7">Suffix</span>
