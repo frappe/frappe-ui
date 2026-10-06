@@ -62,13 +62,27 @@ const crosshair = computed(() => ({
  * on a small screen. Given in pixels the bars close up as the card narrows;
  * given as a share they keep the file's gaps at any width.
  */
-const slot = (gap: number) => ({
-  echartOptions: { barCategoryGap: `${gap}%` },
+const slot = (gap: number, radius = 0) => ({
+  echartOptions: {
+    barCategoryGap: `${gap}%`,
+    itemStyle: { borderRadius: radius },
+  },
 })
 /** a group of bars: the gap around the group, and the gap between its bars */
 const grouped = (gap: number, between: number) => ({
-  echartOptions: { barCategoryGap: `${gap}%`, barGap: `${between}%` },
+  echartOptions: {
+    barCategoryGap: `${gap}%`,
+    barGap: `${between}%`,
+    itemStyle: { borderRadius: 0 },
+  },
 })
+/**
+ * The file's crown, on the two cards that draw a bar on its own: 2 across the
+ * top corners (1356:66389 and 1356:66448). Every stacked and grouped bar in
+ * the file is square — a crown there would round the top segment alone, which
+ * is a shape the stack does not have.
+ */
+const CROWN = 2
 /**
  * The labelled stack: the same 35% slot, and the file's 9px label inside each
  * segment where the library's data labels are 11. At 11 a "$4.6k" is as wide
@@ -92,6 +106,30 @@ const narrowConfig = {
   data3: { label: 'Data 3', ...slot(68) },
   data4: { label: 'Data 4', ...slot(68) },
 }
+
+/**
+ * The file's second stacked card (1356:66568): the same four series in 14-wide
+ * columns, with 1px of the card showing between the segments. echarts has no
+ * gap inside a stack, so each segment carries a half-pixel border in the
+ * card's own surface — a half off each of two neighbours is the file's 1px,
+ * and it follows the card into dark mode.
+ */
+const split = computed(() => {
+  const edge = {
+    ...slot(66).echartOptions,
+    itemStyle: {
+      borderRadius: 0,
+      borderWidth: 0.5,
+      borderColor: props.theme.t('surface-elevation-2'),
+    },
+  }
+  return {
+    data1: { label: 'Data 1', format: count, echartOptions: edge },
+    data2: { label: 'Data 2', format: count, echartOptions: edge },
+    data3: { label: 'Data 3', format: count, echartOptions: edge },
+    data4: { label: 'Data 4', format: count, echartOptions: edge },
+  }
+})
 const money = (value: number) =>
   `$${(value / 1000).toFixed(1).replace(/\.0$/, '')}k`
 </script>
@@ -103,7 +141,9 @@ const money = (value: number) =>
       :data="monthly"
       x="month"
       y="sales"
-      :series-config="{ sales: { label: 'Sales', format: count, ...slot(42) } }"
+      :series-config="{
+        sales: { label: 'Sales', format: count, ...slot(42, CROWN) },
+      }"
       :x-axis="yearAxis"
       :y-axis="salesAxis"
       :palette="single"
@@ -140,7 +180,7 @@ const money = (value: number) =>
       </template>
     </BarChart>
   </Card>
-  <Card>
+  <Card class="bar-card--no-legend">
     <BarChart
       title="100% Stacked"
       :data="stackYear"
@@ -157,7 +197,25 @@ const money = (value: number) =>
       </template>
     </BarChart>
   </Card>
-  <Card>
+  <Card class="bar-card--no-legend">
+    <BarChart
+      title="Stacked Bar Chart"
+      :data="stackYear"
+      x="month"
+      :y="['data1', 'data2', 'data3', 'data4']"
+      stacked
+      :series-config="split"
+      :x-axis="monthAxis"
+      :y-axis="salesAxis"
+      :palette="stack"
+      :echart-options="crosshair"
+    >
+      <template #tooltip="tip">
+        <ChartTip :label="tip.label" :items="tip.items" />
+      </template>
+    </BarChart>
+  </Card>
+  <Card class="bar-card--no-legend">
     <BarChart
       title="Group stack"
       :data="groupYear"
@@ -230,7 +288,7 @@ const money = (value: number) =>
       </template>
     </BarChart>
   </Card>
-  <Card>
+  <Card class="bar-card--no-legend">
     <BarChart
       title="Secondary / Dual Axis with Line"
       :data="monthly"
@@ -238,7 +296,7 @@ const money = (value: number) =>
       y="sales"
       y2="orders"
       :series-config="{
-        sales: { label: 'Sales', format: count, ...slot(42) },
+        sales: { label: 'Sales', format: count, ...slot(42, CROWN) },
         orders: { label: 'Orders', format: count, type: 'line' },
       }"
       :x-axis="yearAxis"
