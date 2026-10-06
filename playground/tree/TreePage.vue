@@ -5,8 +5,9 @@
 // hover fill runs the full width or only the row's own box — plus two the
 // user added: whether rows can be dragged into a new place, and the tree
 // disabled. The tree stands on the left and the controller on the right,
-// both from a fixed top, so a fold or an unfold changes the tree's height
-// in place and moves nothing else.
+// the pair centred on the page — on the tree's full height, the file's 476,
+// which the tree's box keeps whether its folders are open or not, so a fold
+// changes what is drawn inside the box and moves nothing.
 //
 // The row's states are the item set's (node 34717:49031): hover on
 // surface-gray-2, pressed on surface-gray-3, focus white inside a 2px
@@ -149,9 +150,9 @@ onMounted(() => tree.value?.expandAll())
 </script>
 
 <template>
-  <!-- top-anchored, not centred: the tree may grow and shrink, and does so
-       in place -->
-  <div class="flex h-full items-start justify-center px-5 py-10">
+  <!-- centred on the pair's constant height: the tree's box is always its
+       full 476, so a fold happens inside it and the pair stays put -->
+  <div class="flex h-full items-center justify-center px-5 py-10">
     <div class="flex items-start gap-10">
       <!--
         the tree: 280 wide, as the file draws each of its six. Wrapped, since
@@ -159,7 +160,7 @@ onMounted(() => tree.value?.expandAll())
         this page's scope — the styling below reaches it through the wrap.
       -->
       <div
-        class="tree-espresso w-[280px]"
+        class="tree-espresso h-[476px] w-[280px]"
         :class="fullWidth && 'is-full-width'"
       >
         <Tree
