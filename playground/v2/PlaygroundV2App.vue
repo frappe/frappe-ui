@@ -28,6 +28,7 @@ import SettingsModalPatterns from './SettingsModalPatterns.vue'
 import TablePatterns from '../components/TablePatterns.vue'
 import ActivityPatterns from '../activity/ActivityPatterns.vue'
 import CalendarPatterns from '../calendar/CalendarPatterns.vue'
+import ChartsPatterns from '../charts/ChartsPatterns.vue'
 // Figma 35185:59381 — the app's own mark, in place of the Frappe logo
 import appLogo from './assets/app-logo.svg'
 import EIcon from '../espresso-sidebar/EIcon.vue'
@@ -59,6 +60,7 @@ import navToast from './assets/nav/toast.svg?raw'
 import navKanban from './assets/nav/kanban.svg?raw'
 import navColorPicker from './assets/nav/color-picker.svg?raw'
 import navRichText from './assets/nav/richtext.svg?raw'
+import navCharts from './assets/nav/charts.svg?raw'
 import navSettingsModal from './assets/nav/settings-modal.svg?raw'
 import navTable from './assets/nav/table.svg?raw'
 import navActivity from './assets/nav/activity.svg?raw'
@@ -172,6 +174,7 @@ const pages = [
   'Kanban card',
   'Color picker',
   'Rich text editor',
+  'Charts',
   'Settings modal',
   'Table',
   'Activity',
@@ -217,6 +220,9 @@ const NAV_ICONS: Record<string, string> = {
   'kanban-card': navKanban,
   'color-picker': navColorPicker,
   'rich-text-editor': navRichText,
+  // the file's line chart glyph (23513:51323); the page has no nav row of
+  // its own in 35143:169789 yet
+  charts: navCharts,
   'settings-modal': navSettingsModal,
   table: navTable,
   activity: navActivity,
@@ -1091,6 +1097,12 @@ const outlineTitle = computed(
               <KanbanPage v-else-if="page === 'kanban-card'" />
               <ColorPickerPage v-else-if="page === 'color-picker'" />
               <RichTextPage v-else-if="page === 'rich-text-editor'" />
+              <div
+                v-else-if="page === 'charts'"
+                class="v2-scroll h-full overflow-y-auto"
+              >
+                <ChartsPatterns />
+              </div>
 
               <!-- the pattern pages scroll as a document does, so each gets
                    the stage's scroller; its rail finds that scroller and
