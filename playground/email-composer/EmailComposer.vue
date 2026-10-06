@@ -99,8 +99,19 @@ const fieldEls: Record<Field, HTMLElement | null> = {
   cc: null,
   bcc: null,
 }
+/**
+ * A name for an address: the person's, or — for one outside the list — a
+ * name read off the address itself, "harsha.r@timeless.co" as "Harsha R",
+ * so the folded line and the chip read as people, not addresses.
+ */
 const nameOf = (value: string) =>
-  people.find((p) => p.value === value)?.label ?? value
+  people.find((p) => p.value === value)?.label ??
+  value
+    .split('@')[0]
+    .split(/[._-]+/)
+    .filter(Boolean)
+    .map((w) => w[0].toUpperCase() + w.slice(1))
+    .join(' ')
 const folded = (field: Field, values: string[]) =>
   editing.value !== field && values.length > 0
 function openField(field: Field) {
@@ -141,8 +152,14 @@ const matches = computed(() => {
   const q = query.value.trim().toLowerCase()
   // nothing typed, nothing offered: the menu only appears for a query
   if (!q) return []
+  // a word of the name, or the address, starting with what is typed — not
+  // a letter found anywhere ("c" is not Michael)
   return people.filter(
-    (p) => p.label.toLowerCase().includes(q) || p.value.includes(q),
+    (p) =>
+      p.label
+        .toLowerCase()
+        .split(' ')
+        .some((w) => w.startsWith(q)) || p.value.startsWith(q),
   )
 })
 /**
@@ -390,13 +407,13 @@ const root = ref<HTMLElement | null>(null)
             <Avatar
               size="xs"
               class="shrink-0"
-              :label="option?.label ?? value"
+              :label="option?.label ?? nameOf(value)"
               :image="option?.avatar"
             />
             <span
               data-part="chip-label"
               class="truncate text-sm text-ink-gray-7"
-              >{{ option?.label ?? value }}</span
+              >{{ option?.label ?? nameOf(value) }}</span
             >
             <button
               type="button"
@@ -495,13 +512,13 @@ const root = ref<HTMLElement | null>(null)
             <Avatar
               size="xs"
               class="shrink-0"
-              :label="option?.label ?? value"
+              :label="option?.label ?? nameOf(value)"
               :image="option?.avatar"
             />
             <span
               data-part="chip-label"
               class="truncate text-sm text-ink-gray-7"
-              >{{ option?.label ?? value }}</span
+              >{{ option?.label ?? nameOf(value) }}</span
             >
             <button
               type="button"
@@ -802,9 +819,12 @@ const root = ref<HTMLElement | null>(null)
   background: var(--surface-elevation-2);
   box-shadow: var(--elevation-xl);
 }
-/* nothing typed: no menu, whatever the component thinks (it lays the
-   menu out inline, hence the !important) */
-.email-composer.is-quiet :deep([data-slot='content']) {
+/* nothing typed, or nothing to offer (a letter that only matches people
+   already picked would leave the component's "No results"): no menu,
+   whatever the component thinks — it lays the menu out inline, hence the
+   !important */
+.email-composer.is-quiet :deep([data-slot='content']),
+.email-composer :deep([data-slot='content']:not(:has([data-slot='item']))) {
   display: none !important;
 }
 /* only the "Add …" row (node 35740:62909): the menu hugs its label */
