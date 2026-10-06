@@ -112,10 +112,12 @@ describe('media node view caption field', () => {
     trigger.click()
     await settle()
 
-    const toggle = document.body.querySelector(
-      'button[role="switch"]',
-    ) as HTMLButtonElement
-    toggle.click()
+    const row = Array.from(
+      document.body.querySelectorAll<HTMLElement>('[role="menuitem"]'),
+    ).find((el) => el.textContent?.trim() === 'Caption') as HTMLElement
+    row.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))
+    row.dispatchEvent(new PointerEvent('pointerup', { bubbles: true }))
+    row.click()
     await settle()
 
     const input = captionInputs(ctx.root)[0]
@@ -176,7 +178,7 @@ describe('media node view native video fullscreen', () => {
 
     expect(captionInputs(ctx.root)).toHaveLength(0)
     expect(container.classList).not.toContain('bg-black')
-    expect(video.classList).toContain('rounded-4')
+    expect(video.classList).toContain('rounded-6')
     expect(video.classList).not.toContain('rounded-none')
     expect(video.classList).not.toContain('size-full')
 
@@ -250,6 +252,7 @@ describe('media node view actions menu', () => {
       document.body.querySelectorAll('[role="menuitem"]'),
     ).map((el) => el.textContent?.trim())
     expect(labels).toEqual([
+      'Caption',
       'Left',
       'Center',
       'Right',
@@ -261,7 +264,66 @@ describe('media node view actions menu', () => {
       'Download',
       'Delete',
     ])
-    expect(document.body.querySelector('button[role="switch"]')).not.toBeNull()
+    // the caption row carries the design's check only while the caption
+    // shows; the alignment in force carries one always
+    const rows = Array.from(
+      document.body.querySelectorAll<HTMLElement>('[role="menuitem"]'),
+    )
+    const checkedRows = rows
+      .filter((el) => el.querySelector('[data-checked]'))
+      .map((el) => el.textContent?.trim())
+    expect(checkedRows).toEqual(['Left'])
+    ctx.app.unmount()
+  })
+
+  it("lists the design's six rows for a selected video, in its order", async () => {
+    const ctx = mount(
+      '<video src="/files/clip.mp4" data-caption="Release demo" loop></video>',
+    )
+    await settle()
+    ctx.getEditor().commands.setNodeSelection(0)
+    await settle()
+    await openMenu(ctx.root)
+
+    const rows = Array.from(
+      document.body.querySelectorAll<HTMLElement>('[role="menuitem"]'),
+    )
+    expect(rows.map((el) => el.textContent?.trim())).toEqual([
+      'Caption',
+      'Replace',
+      'Align',
+      'Video settings',
+      'Duplicate',
+      'Delete',
+    ])
+    // one list: no group labels, no dividers
+    expect(document.body.querySelector('[role="separator"]')).toBeNull()
+    // the caption shows, so its row is checked; nothing is a switch any more
+    expect(rows[0].querySelector('[data-checked]')).not.toBeNull()
+    expect(document.body.querySelector('button[role="switch"]')).toBeNull()
+    expect(rows[5].className).not.toMatch(/red/)
+    ctx.app.unmount()
+  })
+
+  it('the pencil opens the caption and puts the caret in it', async () => {
+    const ctx = mount(
+      '<p><img src="/files/a.png" width="800" height="400"></p>',
+    )
+    await settle()
+    ctx.getEditor().commands.setNodeSelection(1)
+    await settle()
+    expect(captionInputs(ctx.root)).toHaveLength(0)
+
+    const pencil = ctx.root.querySelector(
+      'button[aria-label="Edit caption"]',
+    ) as HTMLButtonElement
+    expect(pencil).not.toBeNull()
+    pencil.click()
+    await settle()
+
+    const input = captionInputs(ctx.root)[0]
+    expect(input).toBeDefined()
+    expect(document.activeElement).toBe(input)
     ctx.app.unmount()
   })
 

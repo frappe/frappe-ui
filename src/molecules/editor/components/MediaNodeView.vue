@@ -1,5 +1,13 @@
 <script setup lang="ts">
-import { ref, computed, watch, toRaw, onMounted, onBeforeUnmount } from 'vue'
+import {
+  ref,
+  computed,
+  watch,
+  toRaw,
+  nextTick,
+  onMounted,
+  onBeforeUnmount,
+} from 'vue'
 import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3'
 import Button from '#components/Button/Button.vue'
 import { ErrorMessage } from '#components/ErrorMessage'
@@ -300,6 +308,21 @@ function toggleCaptions() {
   }
 }
 
+/**
+ * The pencil in the chrome: the caption, open and ready to type in. The
+ * design puts it beside the menu, where a caption is otherwise one row down
+ * a list and then a click away.
+ */
+const captionInput = ref<HTMLInputElement | null>(null)
+async function editCaption() {
+  if (!showCaption.value) {
+    captionToggle.value = true
+    isFreshInsert.value = false
+  }
+  await nextTick()
+  captionInput.value?.focus()
+}
+
 function onCaptionKeydown(event: KeyboardEvent) {
   handleCaptionKeydown(event, {
     onParagraphAfter: () =>
@@ -404,16 +427,17 @@ function setVideoOptions(options: {
   >
     <div
       ref="containerRef"
-      class="group relative isolate overflow-hidden not-prose rounded-4"
-      :class="
+      class="group relative isolate overflow-hidden not-prose"
+      :class="[
+        isVideo ? 'rounded-6' : 'rounded-4',
         isStandardFullscreen
           ? 'flex items-center justify-center bg-black'
           : containerClasses(
               node.attrs,
               selected,
               isVideo ? SELECTED_MEDIA_RING : SELECTED_IMAGE_RING,
-            )
-      "
+            ),
+      ]"
       :style="{ width: node.attrs.width ? `${node.attrs.width}px` : 'auto' }"
       data-video-fullscreen-root
     >
@@ -439,7 +463,7 @@ function setVideoOptions(options: {
         <img
           v-else-if="isVideo && !isUploaded && videoPoster"
           ref="mediaRef"
-          class="rounded-4"
+          class="rounded-6"
           :src="videoPoster"
           :alt="node.attrs.alt || 'Video preview'"
           :width="node.attrs.width"
@@ -449,7 +473,7 @@ function setVideoOptions(options: {
         <video
           v-else-if="isVideo"
           ref="mediaRef"
-          class="rounded-4"
+          class="rounded-6"
           :class="[
             !isUploaded && 'opacity-40',
             // Fill the screen (aspect preserved) rather than staying at the
@@ -485,6 +509,7 @@ function setVideoOptions(options: {
           :selected="selected"
           :show-caption="showCaption"
           @toggle-caption="toggleCaptions"
+          @edit-caption="editCaption"
           @set-align="onSetAlign"
           @resize="resizeTo"
           @replace="replaceMedia"
@@ -567,7 +592,7 @@ function setVideoOptions(options: {
            edit the document. -->
       <div
         v-if="showCaptionText"
-        class="w-full px-1 pt-1 text-center text-sm text-ink-gray-6"
+        class="w-full px-1 pt-2.5 text-center text-[13px] leading-[1.5] tracking-[0.015em] text-ink-gray-5"
       >
         {{ node.attrs.caption }}
       </div>
@@ -581,7 +606,7 @@ function setVideoOptions(options: {
         v-else-if="showCaptionField"
         data-media-text-field
         draggable="false"
-        class="w-full"
+        class="w-full pt-1.5"
         @pointerdown.stop
         @mousedown.stop
         @dragstart.stop.prevent
@@ -590,9 +615,10 @@ function setVideoOptions(options: {
         @paste.stop
       >
         <input
+          ref="captionInput"
           v-model="caption"
           draggable="false"
-          class="w-full text-center bg-transparent text-sm text-ink-gray-6 h-7 border-none focus:ring-0 placeholder-ink-gray-4"
+          class="h-7 w-full border-none bg-transparent text-center text-[13px] leading-[1.5] tracking-[0.015em] text-ink-gray-5 placeholder-ink-gray-4 focus:ring-0"
           placeholder="Add a caption"
           aria-label="Caption"
           @blur="commitCaption"
