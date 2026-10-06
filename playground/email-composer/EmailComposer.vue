@@ -7,7 +7,10 @@ import { FontColor, InsertLink } from '../../src/molecules/editor/menu'
 import ComposerIcon from './ComposerIcon.vue'
 import EmojiPicker from '../v2/popover/EmojiPicker.vue'
 import { HoldSelection } from './holdSelection'
-import { MultiEmailInput } from '../../experimental/MultiEmailInput'
+import {
+  MultiEmailInput,
+  isValidEmail,
+} from '../../experimental/MultiEmailInput'
 import type { MultiEmailOption } from '../../experimental/MultiEmailInput'
 import { faceFor } from '../components/patterns/designAssets'
 
@@ -144,10 +147,26 @@ const matches = computed(() => {
 })
 /**
  * MultiEmailInput opens its menu on focus and again the moment a pick
- * resets the query. The menu is for what is being typed, so while nothing
- * is, it is given no rows (above) and kept out of sight (`is-quiet`).
+ * resets the query, and shows "No results" for a query nobody matches. The
+ * menu is for what it can offer: while nothing is typed, or while an
+ * unknown address is still being typed and is not yet one the component
+ * would offer to add, it is given no rows (above) and kept out of sight
+ * (`is-quiet`). An address nobody matches is simply new — the menu's
+ * absence says so; it returns with "Add …" once the address is complete.
  */
-const quiet = computed(() => !query.value.trim())
+const quiet = computed(() => {
+  const q = query.value.trim()
+  return !q || (matches.value.length === 0 && !isValidEmail(q))
+})
+
+/**
+ * A row's glyph wears the placeholder's grey until the row holds or is
+ * being given something, then the text's own ink-gray-7.
+ */
+const glyphInk = (filled: boolean) =>
+  filled ? 'text-ink-gray-7' : 'text-ink-gray-4'
+const fieldFilled = (field: Field, values: string[]) =>
+  values.length > 0 || (editing.value === field && query.value.trim() !== '')
 
 const extensions = [
   RichTextKit.configure({ mention: false, tag: false }),
@@ -289,26 +308,26 @@ const root = ref<HTMLElement | null>(null)
   >
     <!-- the header: the title, then pop out and close -->
     <header
-      class="flex h-12 shrink-0 items-center justify-between bg-surface-gray-1 pl-4 pr-3"
+      class="flex h-12 shrink-0 items-center justify-between bg-surface-gray-1 pl-4 pr-2.5"
     >
       <h2 class="text-lg-medium text-ink-gray-8">New message</h2>
       <div class="flex items-center gap-1">
         <Button
           variant="ghost"
-          size="xs"
+          size="sm"
           :label="expanded ? 'Shrink' : 'Pop out'"
           @click="expanded = !expanded"
         >
           <template #icon>
             <ComposerIcon
               :name="expanded ? 'compact' : 'arrow-up-right'"
-              class="size-3.5"
+              class="size-4"
             />
           </template>
         </Button>
-        <Button variant="ghost" size="xs" label="Close" @click="emit('close')">
+        <Button variant="ghost" size="sm" label="Close" @click="emit('close')">
           <template #icon>
-            <ComposerIcon name="small-close" class="size-3.5" />
+            <ComposerIcon name="small-close" class="size-4" />
           </template>
         </Button>
       </div>
@@ -323,13 +342,13 @@ const root = ref<HTMLElement | null>(null)
       Cc and Bcc pressed are the word alone stepping up to ink-gray-7 — no
       fill (the user's call over the file's surface-gray-4 pill).
 
-      11.4 on the right, not the file's 12: the file sets the button's box
+      11.2 on the right, not the file's 12: the file sets the button's box
       12 in, which leaves the word's ink 0.6 short of the close glyph's in
       the header above. The button keeps its own 8 either side, so the
       pressed pill is unchanged; only where it sits moves.
     -->
     <div
-      class="flex shrink-0 items-start gap-2 border-b border-outline-gray-1 py-1.5 pl-2 pr-[11.4px]"
+      class="flex shrink-0 items-start gap-2 border-b border-outline-gray-1 py-1.5 pl-2 pr-[11.2px]"
     >
       <span
         :ref="(el) => (fieldEls.to = el as HTMLElement)"
@@ -337,7 +356,11 @@ const root = ref<HTMLElement | null>(null)
         @focusin="editing = 'to'"
         @focusout="leaveField('to')"
       >
-        <ComposerIcon name="person" class="mt-1.5 size-4 text-ink-gray-7" />
+        <ComposerIcon
+          name="person"
+          class="mt-1.5 size-4 transition-colors"
+          :class="glyphInk(fieldFilled('to', to))"
+        />
         <!-- the line takes no focus of its own: a press that focused it would
              open the field under the pointer before the click could land -->
         <button
@@ -439,7 +462,11 @@ const root = ref<HTMLElement | null>(null)
         @focusin="editing = row[0]"
         @focusout="leaveField(row[0])"
       >
-        <ComposerIcon name="people" class="mt-1.5 size-4 text-ink-gray-7" />
+        <ComposerIcon
+          name="people"
+          class="mt-1.5 size-4 transition-colors"
+          :class="glyphInk(fieldFilled(row[0], row[3]))"
+        />
         <button
           v-if="folded(row[0], row[3])"
           type="button"
@@ -517,7 +544,11 @@ const root = ref<HTMLElement | null>(null)
         aria-label="Subject"
       >
         <template #prefix>
-          <ComposerIcon name="subject" class="size-4 text-ink-gray-7" />
+          <ComposerIcon
+            name="subject"
+            class="size-4 transition-colors"
+            :class="glyphInk(subject.trim() !== '')"
+          />
         </template>
       </TextInput>
     </div>
