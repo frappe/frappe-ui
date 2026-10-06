@@ -13,6 +13,11 @@
 // surface-gray-2, pressed on surface-gray-3, focus white inside a 2px
 // outline-gray-3 ring, disabled at half opacity.
 //
+// Two more controls show the row with more in it (node 35800:160601, the
+// file's layers tree): a prefix — a 16px glyph for what the row is, 4 after
+// the chevron's place and 4 before the label, in the chevron's ink-gray-7
+// — and a suffix — a 13px ink-gray-4 note at the row's far end.
+//
 // The tree is frappe-ui's `Tree`, whose `guides` prop is the file's
 // indentation property one for one. What the file draws differently is set
 // on top of it in CSS below, measured off the file:
@@ -48,6 +53,28 @@ const guides = ref<Guides>('connectors')
 const fullWidth = ref(false)
 const draggable = ref(false)
 const disabled = ref(false)
+const prefix = ref(false)
+const suffix = ref(false)
+
+/**
+ * What a row is, as a glyph from the icon set — the file's layers tree
+ * marks a frame, a container, a component, a text and an image; here the
+ * project root is the frame, folders are containers, .tsx files components,
+ * .ts files text and pictures images.
+ */
+function glyphFor(node: TreeNode): string {
+  const name = String(node.label)
+  if (node.key === 'src') return 'single-body'
+  if (node.children) return 'square'
+  if (name.endsWith('.tsx')) return 'component'
+  if (name.endsWith('.ts')) return 'text'
+  return 'image'
+}
+/** The row's note: how many a folder holds, how big a file is. */
+function hintFor(node: TreeNode): string {
+  if (node.children) return `${node.children.length} items`
+  return String(node.size ?? '')
+}
 
 // the file's own words for its three trees: connector, none, line
 const guideOptions = [
@@ -82,32 +109,32 @@ const nodes = ref<TreeNode[]>([
                         key: 'guides',
                         label: 'guides',
                         children: [
-                          { key: 'blank', label: 'blank.tsx' },
-                          { key: 'elbow', label: 'elbow.tsx' },
+                          { key: 'blank', size: '1.2 KB', label: 'blank.tsx' },
+                          { key: 'elbow', size: '1.4 KB', label: 'elbow.tsx' },
                         ],
                       },
-                      { key: 'index', label: 'index.ts' },
+                      { key: 'index', size: '0.3 KB', label: 'index.ts' },
                     ],
                   },
-                  { key: 'tree-tsx', label: 'tree.tsx' },
+                  { key: 'tree-tsx', size: '6.8 KB', label: 'tree.tsx' },
                 ],
               },
-              { key: 'utils', label: 'utils.ts' },
+              { key: 'utils', size: '2.1 KB', label: 'utils.ts' },
             ],
           },
-          { key: 'main', label: 'main.tsx' },
+          { key: 'main', size: '0.9 KB', label: 'main.tsx' },
         ],
       },
       {
         key: 'assets',
         label: 'assets',
         children: [
-          { key: 'logo', label: 'logo.svg' },
-          { key: 'icon', label: 'icon.svg' },
-          { key: 'cover', label: 'cover.png' },
+          { key: 'logo', size: '4.0 KB', label: 'logo.svg' },
+          { key: 'icon', size: '1.1 KB', label: 'icon.svg' },
+          { key: 'cover', size: '212 KB', label: 'cover.png' },
         ],
       },
-      { key: 'assets-root', label: 'assets' },
+      { key: 'assets-root', size: '—', label: 'assets' },
     ],
   },
 ])
@@ -199,9 +226,23 @@ onMounted(() => tree.value?.expandAll())
                   />
                 </button>
                 <span v-else class="size-4 shrink-0" aria-hidden="true" />
-                <span class="truncate text-base text-ink-gray-6">{{
-                  node.label
-                }}</span>
+                <TreeIcon
+                  v-if="prefix"
+                  data-slot="prefix-glyph"
+                  :name="glyphFor(node)"
+                  class="size-4 text-ink-gray-7"
+                />
+                <!-- the label gives way, with an ellipsis, before the note does -->
+                <span
+                  class="min-w-0 flex-1 truncate text-base text-ink-gray-6"
+                  >{{ node.label }}</span
+                >
+                <span
+                  v-if="suffix"
+                  data-slot="suffix-note"
+                  class="ml-auto shrink-0 pl-2 text-sm text-ink-gray-4"
+                  >{{ hintFor(node) }}</span
+                >
               </span>
             </span>
           </template>
@@ -242,6 +283,14 @@ onMounted(() => tree.value?.expandAll())
           <div class="flex h-7 items-center justify-between">
             <span class="text-base text-ink-gray-7">Disabled</span>
             <Switch v-model="disabled" size="sm" aria-label="Disabled" />
+          </div>
+          <div class="flex h-7 items-center justify-between">
+            <span class="text-base text-ink-gray-7">Prefix</span>
+            <Switch v-model="prefix" size="sm" aria-label="Prefix" />
+          </div>
+          <div class="flex h-7 items-center justify-between">
+            <span class="text-base text-ink-gray-7">Suffix</span>
+            <Switch v-model="suffix" size="sm" aria-label="Suffix" />
           </div>
         </div>
       </div>
