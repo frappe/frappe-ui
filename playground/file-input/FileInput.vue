@@ -23,74 +23,48 @@
 // pinned to the cell's foot.
 //
 // There is no server here: a chosen file "uploads" over a couple of
-// seconds and is then shown. `state` pins a look for review — the file's
-// interaction column — else the field follows the pointer and the file.
+// seconds and is then shown. The states are the field's own: hover and
+// focus come from the pointer and the keyboard (the library's TextInput
+// draws them), filled and loading from the file; `error` and `disabled`
+// are the two a page sets.
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { Button, Progress, Spinner, TextInput } from '../../src'
 import FileInputIcon from './FileInputIcon.vue'
 
 export type FileInputVariant = 'outline' | 'subtle'
 export type FileInputSize = 'xs' | 'sm' | 'md' | 'lg'
-export type FileInputState =
-  | 'auto'
-  | 'hover'
-  | 'active'
-  | 'focus'
-  | 'filled'
-  | 'disabled'
-  | 'loading'
-  | 'error'
-
 const props = withDefaults(
   defineProps<{
     variant?: FileInputVariant
     size?: FileInputSize
     preview?: boolean
     description?: string
-    state?: FileInputState
+    error?: boolean
+    disabled?: boolean
   }>(),
   {
     variant: 'outline',
     size: 'sm',
     preview: false,
     description: '',
-    state: 'auto',
+    error: false,
+    disabled: false,
   },
 )
 
-type Phase = 'empty' | 'loading' | 'filled' | 'error'
+type Phase = 'empty' | 'loading' | 'filled'
 const phase = ref<Phase>('empty')
 const progress = ref(0)
 const fileName = ref('')
 const imageUrl = ref('')
 const dragging = ref(false)
 
-/** The file's own sample, for the pinned looks that need a file. */
-const SAMPLE_NAME = 'Course_image.jpg'
-const SAMPLE_IMAGE =
-  'data:image/svg+xml;utf8,' +
-  encodeURIComponent(
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 140"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d9d4cc"/><stop offset="1" stop-color="#8c8780"/></linearGradient></defs><rect width="260" height="140" fill="url(#g)"/><circle cx="196" cy="42" r="18" fill="#f3efe8" opacity=".9"/><path d="M0 140 L70 78 L120 118 L165 92 L260 140 Z" fill="#5e5953"/></svg>`,
-  )
-
-/** What is shown: the pinned state, else where the file is. */
-const shown = computed<Exclude<FileInputState, 'auto'> | 'default'>(() => {
-  if (props.state !== 'auto') return props.state
-  if (phase.value === 'loading') return 'loading'
-  if (phase.value === 'filled') return 'filled'
-  if (phase.value === 'error') return 'error'
-  return dragging.value ? 'active' : 'default'
-})
-const hasFile = computed(() =>
-  ['filled', 'loading', 'error'].includes(shown.value),
+/** Where the file is. */
+const shown = computed<Phase | 'active'>(() =>
+  phase.value === 'empty' && dragging.value ? 'active' : phase.value,
 )
-const shownName = computed(() =>
-  hasFile.value ? fileName.value || SAMPLE_NAME : '',
-)
-const shownImage = computed(() =>
-  shown.value === 'filled' ? imageUrl.value || SAMPLE_IMAGE : '',
-)
-const disabled = computed(() => shown.value === 'disabled')
+const hasFile = computed(() => phase.value !== 'empty')
+const disabled = computed(() => props.disabled)
 
 let timer: ReturnType<typeof setInterval> | null = null
 function stopTimer() {
@@ -130,7 +104,7 @@ onBeforeUnmount(() => {
 
 const picker = ref<HTMLInputElement | null>(null)
 function open() {
-  if (disabled.value || props.state !== 'auto') return
+  if (disabled.value) return
   picker.value?.click()
 }
 function onPick(e: Event) {
@@ -141,7 +115,7 @@ function onPick(e: Event) {
 }
 function onDrop(e: DragEvent) {
   dragging.value = false
-  if (disabled.value || props.state !== 'auto') return
+  if (disabled.value) return
   const file = e.dataTransfer?.files?.[0]
   if (file) take(file)
 }
@@ -170,10 +144,6 @@ watch(suffixEl, (el, old) => {
   if (el) observer?.observe(el)
 })
 onBeforeUnmount(() => observer?.disconnect())
-
-const progressValue = computed(() =>
-  props.state === 'loading' ? 13 : progress.value,
-)
 </script>
 
 <template>
@@ -185,6 +155,7 @@ const progressValue = computed(() =>
       `is-${shown}`,
       preview && 'has-preview',
       disabled && 'is-disabled',
+      error && 'is-error',
     ]"
     :style="{ '--suffix-w': `${suffixWidth}px` }"
   >
@@ -202,8 +173,8 @@ const progressValue = computed(() =>
       data-slot="preview"
       class="relative h-[140px] w-[260px] shrink-0 overflow-hidden rounded-4 border border-outline-gray-1 bg-surface-elevation-1"
     >
-      <template v-if="shown === 'filled' || (shown === 'error' && shownImage)">
-        <img :src="shownImage" alt="" class="size-full object-cover" />
+      <template v-if="phase === 'filled' && imageUrl">
+        <img :src="imageUrl" alt="" class="size-full object-cover" />
         <Button
           size="xs"
           variant="subtle"
@@ -218,11 +189,11 @@ const progressValue = computed(() =>
         </Button>
       </template>
       <div
-        v-else-if="shown === 'loading'"
+        v-else-if="phase === 'loading'"
         class="flex h-full flex-col items-center justify-center gap-2"
       >
         <span class="text-sm text-ink-gray-6">Uploading</span>
-        <Progress :value="progressValue" size="sm" class="!w-[150px]" />
+        <Progress :value="progress" size="sm" class="!w-[150px]" />
       </div>
       <FileInputIcon
         v-else
@@ -255,7 +226,7 @@ const progressValue = computed(() =>
         <TextInput
           :size="size"
           :variant="variant"
-          :model-value="shownName"
+          :model-value="fileName"
           placeholder="Choose file or drag here"
           readonly
           :aria-disabled="disabled || undefined"
@@ -285,11 +256,11 @@ const progressValue = computed(() =>
                   "
                 >
                   <!-- the word keeps its room while a spinner stands in for it -->
-                  <span :class="shown === 'loading' && 'invisible'"
+                  <span :class="phase === 'loading' && 'invisible'"
                     >Browse</span
                   >
                   <Spinner
-                    v-if="shown === 'loading'"
+                    v-if="phase === 'loading'"
                     size="md"
                     class="absolute inset-0 m-auto text-ink-gray-5"
                   />
@@ -304,9 +275,9 @@ const progressValue = computed(() =>
                 tabindex="-1"
                 @click.stop="open"
               >
-                <span :class="shown === 'loading' && 'invisible'">Browse</span>
+                <span :class="phase === 'loading' && 'invisible'">Browse</span>
                 <Spinner
-                  v-if="shown === 'loading'"
+                  v-if="phase === 'loading'"
                   size="md"
                   class="absolute inset-0 m-auto text-ink-gray-5"
                 />
@@ -357,18 +328,7 @@ const progressValue = computed(() =>
   color: var(--ink-gray-7);
 }
 
-/* the pinned looks, and a file held over the field: the library's own
-   hover / focus declarations, forced */
-.file-input.is-outline.is-hover :deep([data-slot='control']) {
-  border-color: var(--outline-gray-3);
-  box-shadow: var(--elevation-sm);
-}
-.file-input.is-subtle.is-hover :deep([data-slot='control']) {
-  background: var(--surface-gray-3);
-  border-color: var(--surface-gray-3);
-}
-.file-input.is-active :deep([data-slot='control']),
-.file-input.is-focus :deep([data-slot='control']),
+/* a file held over the field: the library's own focus look, forced */
 .file-input .is-dragging :deep([data-slot='control']) {
   background: var(--surface-base);
   border-color: var(--outline-gray-4);

@@ -1,25 +1,22 @@
 <script setup lang="ts">
 // The File input page: one file input on the left and its controller on
 // the right — the file's variant properties (node 29788:20146): Variant
-// (Outline / Subtle), the four sizes, Preview, Description, and the
-// Interaction column (Default, Hover, Active, Focus, Filled, Disabled,
-// Loading, Error) pinned for review. Default is live: the field follows
-// the pointer, opens the picker, takes a dropped file, "uploads" it.
+// (Subtle / Outline) and the four sizes as tabs, Preview and Description,
+// and of the interaction column only the two a page sets, Error and
+// Disabled. The rest happen on the field itself (the user's call
+// 2026-10-06): hover under the pointer, focus from the keyboard, filled and
+// loading from a chosen or dropped file.
 //
 // The input's box is a constant 700x140 — the file's cell with a preview —
 // so switching Preview or Description off moves nothing: the smaller
 // field sits at the box's top-left.
 import { ref } from 'vue'
-import { Select, Switch } from '../../src'
+import { Switch, TabButtons } from '../../src'
 import FileInput from './FileInput.vue'
-import type {
-  FileInputSize,
-  FileInputState,
-  FileInputVariant,
-} from './FileInput.vue'
+import type { FileInputSize, FileInputVariant } from './FileInput.vue'
 
-// `?variant=subtle&size=lg&state=error&preview&description` opens the page
-// on that combination
+// `?variant=subtle&size=lg&error&disabled&preview&description` opens the
+// page on that combination
 const q = new URLSearchParams(window.location.search)
 const pick = <T extends string>(key: string, allowed: T[], fallback: T): T =>
   allowed.includes(q.get(key) as T) ? (q.get(key) as T) : fallback
@@ -29,43 +26,19 @@ const variant = ref<FileInputVariant>(
 const size = ref<FileInputSize>(pick('size', ['xs', 'sm', 'md', 'lg'], 'sm'))
 const preview = ref(q.has('preview'))
 const description = ref(q.has('description'))
-const state = ref<FileInputState>(
-  pick(
-    'state',
-    [
-      'auto',
-      'hover',
-      'active',
-      'focus',
-      'filled',
-      'disabled',
-      'loading',
-      'error',
-    ],
-    'auto',
-  ),
-)
+const error = ref(q.has('error'))
+const disabled = ref(q.has('disabled'))
 
-const variantOptions = [
-  { label: 'Outline', value: 'outline' },
+const variantTabs = [
   { label: 'Subtle', value: 'subtle' },
+  { label: 'Outline', value: 'outline' },
 ]
-const sizeOptions = [
-  { label: 'Extra small', value: 'xs' },
-  { label: 'Small', value: 'sm' },
-  { label: 'Medium', value: 'md' },
-  { label: 'Large', value: 'lg' },
-]
-// the file's column, top to bottom
-const stateOptions = [
-  { label: 'Default', value: 'auto' },
-  { label: 'Hover', value: 'hover' },
-  { label: 'Active', value: 'active' },
-  { label: 'Focus', value: 'focus' },
-  { label: 'Filled', value: 'filled' },
-  { label: 'Disabled', value: 'disabled' },
-  { label: 'Loading', value: 'loading' },
-  { label: 'Error', value: 'error' },
+// the sizes by their own names
+const sizeTabs = [
+  { label: 'xs', value: 'xs' },
+  { label: 'sm', value: 'sm' },
+  { label: 'md', value: 'md' },
+  { label: 'lg', value: 'lg' },
 ]
 
 /** The file's description, word for word. */
@@ -82,7 +55,8 @@ const DESCRIPTION =
           :size="size"
           :preview="preview"
           :description="description ? DESCRIPTION : ''"
-          :state="state"
+          :error="error"
+          :disabled="disabled"
         />
       </div>
       <!-- the controller, as the tree's: 274 wide, 16 inside, radius 16 -->
@@ -95,35 +69,20 @@ const DESCRIPTION =
         <div class="flex flex-col gap-2">
           <div class="flex h-7 items-center justify-between">
             <span class="text-base text-ink-gray-7">Variant</span>
-            <Select
+            <TabButtons
               v-model="variant"
-              :options="variantOptions"
+              :options="variantTabs"
               size="sm"
-              variant="subtle"
-              class="w-[120px]"
               aria-label="Variant"
             />
           </div>
           <div class="flex h-7 items-center justify-between">
             <span class="text-base text-ink-gray-7">Size</span>
-            <Select
+            <TabButtons
               v-model="size"
-              :options="sizeOptions"
+              :options="sizeTabs"
               size="sm"
-              variant="subtle"
-              class="w-[120px]"
               aria-label="Size"
-            />
-          </div>
-          <div class="flex h-7 items-center justify-between">
-            <span class="text-base text-ink-gray-7">Interaction</span>
-            <Select
-              v-model="state"
-              :options="stateOptions"
-              size="sm"
-              variant="subtle"
-              class="w-[120px]"
-              aria-label="Interaction"
             />
           </div>
           <div class="flex h-7 items-center justify-between">
@@ -133,6 +92,14 @@ const DESCRIPTION =
           <div class="flex h-7 items-center justify-between">
             <span class="text-base text-ink-gray-7">Description</span>
             <Switch v-model="description" size="sm" aria-label="Description" />
+          </div>
+          <div class="flex h-7 items-center justify-between">
+            <span class="text-base text-ink-gray-7">Error</span>
+            <Switch v-model="error" size="sm" aria-label="Error" />
+          </div>
+          <div class="flex h-7 items-center justify-between">
+            <span class="text-base text-ink-gray-7">Disabled</span>
+            <Switch v-model="disabled" size="sm" aria-label="Disabled" />
           </div>
         </div>
       </div>
