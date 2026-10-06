@@ -251,13 +251,21 @@ const stackConfig = {
 
 <style scoped>
 /* The file names no band on this card — the plot is the whole of it
-   (1356:67528 carries no legend row). The pad is the one `ChartContainer`
-   drops in for a card with no legend at all, so this plot keeps the baseline
-   its neighbours sit on. */
+   (1356:67528 carries no legend row). */
 .area-card--no-legend :deep([data-slot='chart-legend']) {
   display: none;
 }
+
+/* The two pads a card without a subtitle has to find for itself. The file
+   starts every plot in the row within five pixels of the same line, subtitle
+   or not (1356:67528 opens at 75 against 1356:67489's 80), where a plot here
+   is handed whatever the header leaves it — so this one began directly under
+   its title, a subtitle's worth higher than the four cards around it. The
+   bottom pad is the one `ChartContainer` drops in for a card with no legend,
+   put back by hand because the legend above is hidden rather than absent;
+   without it this plot would hang a row below its neighbours. */
 .area-card--no-legend :deep([data-slot='chart-plot']) {
+  padding-top: 18px;
   padding-bottom: 12px;
 }
 </style>
