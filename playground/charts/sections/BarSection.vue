@@ -10,6 +10,7 @@
 import { computed } from 'vue'
 import { BarChart } from '../../../src/charts'
 import Card from '../components/Card.vue'
+import ChartTip from '../components/ChartTip.vue'
 import {
   CHANNELS,
   channelRevenue,
@@ -18,7 +19,7 @@ import {
   monthly,
   stackYear,
 } from '../chartData'
-import { incomeAxis, monthAxis, salesAxis, yearAxis } from '../chartAxes'
+import { count, incomeAxis, monthAxis, salesAxis, yearAxis } from '../chartAxes'
 import type { ThemeColors } from '../useChartTheme'
 
 const props = defineProps<{ theme: ThemeColors }>()
@@ -32,6 +33,25 @@ const lineOver = computed(() => [
   props.theme.one('bar'),
   props.theme.one('markers'),
 ])
+
+/**
+ * The file points at the column under the cursor with a 1px rule the full
+ * height of the plot, where the library shades the whole slot behind the bars.
+ * The rule is the file's black at 9%, which on either mode is the hairline the
+ * page already draws its outlines in.
+ */
+const crosshair = computed(() => ({
+  tooltip: {
+    axisPointer: {
+      type: 'line',
+      lineStyle: {
+        color: props.theme.t('outline-gray-2'),
+        width: 1,
+        type: 'solid',
+      },
+    },
+  },
+}))
 
 /**
  * A bar's width, as the file sets it: against its slot, not in pixels. The
@@ -61,16 +81,16 @@ const labelledStack = {
 }
 
 const stackedConfig = {
-  data1: { label: 'Data 1', ...slot(35) },
-  data2: { label: 'Data 2', ...slot(35) },
-  data3: { label: 'Data 3', ...slot(35) },
-  data4: { label: 'Data 4', ...slot(35) },
+  data1: { label: 'Data 1', format: count, ...slot(35) },
+  data2: { label: 'Data 2', format: count, ...slot(35) },
+  data3: { label: 'Data 3', format: count, ...slot(35) },
+  data4: { label: 'Data 4', format: count, ...slot(35) },
 }
 const groupedConfig = {
-  data1: { label: 'Data 1', ...grouped(49, 20) },
-  data2: { label: 'Data 2', ...grouped(49, 20) },
-  data3: { label: 'Data 3', ...grouped(49, 20) },
-  data4: { label: 'Data 4', ...grouped(49, 20) },
+  data1: { label: 'Data 1', format: count, ...grouped(49, 20) },
+  data2: { label: 'Data 2', format: count, ...grouped(49, 20) },
+  data3: { label: 'Data 3', format: count, ...grouped(49, 20) },
+  data4: { label: 'Data 4', format: count, ...grouped(49, 20) },
 }
 const narrowConfig = {
   data1: { label: 'Data 1', ...slot(68) },
@@ -89,13 +109,18 @@ const money = (value: number) =>
       :data="monthly"
       x="month"
       y="sales"
-      :series-config="{ sales: { label: 'Sales', ...slot(42) } }"
+      :series-config="{ sales: { label: 'Sales', format: count, ...slot(42) } }"
       :x-axis="yearAxis"
       :y-axis="salesAxis"
       :palette="single"
-    />
+      :echart-options="crosshair"
+    >
+      <template #tooltip="tip">
+        <ChartTip :label="tip.label" :items="tip.items" />
+      </template>
+    </BarChart>
   </Card>
-  <Card no-legend>
+  <Card>
     <BarChart
       title="Stacked Bar Chart"
       :data="stackYear"
@@ -112,9 +137,14 @@ const money = (value: number) =>
       :x-axis="monthAxis"
       :y-axis="salesAxis"
       :palette="labelled"
-    />
+      :echart-options="crosshair"
+    >
+      <template #tooltip="tip">
+        <ChartTip :label="tip.label" :items="tip.items" />
+      </template>
+    </BarChart>
   </Card>
-  <Card no-legend>
+  <Card>
     <BarChart
       title="Stacked Bar Chart"
       :data="stackYear"
@@ -125,9 +155,14 @@ const money = (value: number) =>
       :x-axis="monthAxis"
       :y-axis="salesAxis"
       :palette="stack"
-    />
+      :echart-options="crosshair"
+    >
+      <template #tooltip="tip">
+        <ChartTip :label="tip.label" :items="tip.items" />
+      </template>
+    </BarChart>
   </Card>
-  <Card no-legend>
+  <Card>
     <BarChart
       title="100% Stacked"
       :data="stackYear"
@@ -137,9 +172,14 @@ const money = (value: number) =>
       :series-config="narrowConfig"
       :x-axis="monthAxis"
       :palette="stack"
-    />
+      :echart-options="crosshair"
+    >
+      <template #tooltip="tip">
+        <ChartTip :label="tip.label" :items="tip.items" />
+      </template>
+    </BarChart>
   </Card>
-  <Card no-legend>
+  <Card>
     <BarChart
       title="Group stack"
       :data="groupYear"
@@ -149,7 +189,12 @@ const money = (value: number) =>
       :x-axis="monthAxis"
       :y-axis="salesAxis"
       :palette="group"
-    />
+      :echart-options="crosshair"
+    >
+      <template #tooltip="tip">
+        <ChartTip :label="tip.label" :items="tip.items" />
+      </template>
+    </BarChart>
   </Card>
   <Card>
     <BarChart
@@ -162,7 +207,12 @@ const money = (value: number) =>
       :x-axis="{ title: 'Top countries' }"
       :y-axis="{ ...incomeAxis, title: 'Income per Capita (USD)' }"
       :palette="single"
-    />
+      :echart-options="crosshair"
+    >
+      <template #tooltip="tip">
+        <ChartTip :label="tip.label" :items="tip.items" />
+      </template>
+    </BarChart>
   </Card>
   <Card>
     <BarChart
@@ -177,7 +227,12 @@ const money = (value: number) =>
       "
       :y-axis="incomeAxis"
       :palette="channels"
-    />
+      :echart-options="crosshair"
+    >
+      <template #tooltip="tip">
+        <ChartTip :label="tip.label" :items="tip.items" />
+      </template>
+    </BarChart>
   </Card>
   <Card>
     <BarChart
@@ -190,9 +245,14 @@ const money = (value: number) =>
       stacked="normalized"
       :series-config="Object.fromEntries(CHANNELS.map((c) => [c, slot(40)]))"
       :palette="channels"
-    />
+      :echart-options="crosshair"
+    >
+      <template #tooltip="tip">
+        <ChartTip :label="tip.label" :items="tip.items" />
+      </template>
+    </BarChart>
   </Card>
-  <Card no-legend>
+  <Card>
     <BarChart
       title="Secondary / Dual Axis with Line"
       :data="monthly"
@@ -200,13 +260,67 @@ const money = (value: number) =>
       y="sales"
       y2="orders"
       :series-config="{
-        sales: { label: 'Sales', ...slot(42) },
-        orders: { label: 'Orders', type: 'line' },
+        sales: { label: 'Sales', format: count, ...slot(42) },
+        orders: { label: 'Orders', format: count, type: 'line' },
       }"
       :x-axis="yearAxis"
       :y-axis="salesAxis"
       :y2-axis="{ min: 0, max: 4000 }"
       :palette="lineOver"
-    />
+      :echart-options="crosshair"
+    >
+      <template #tooltip="tip">
+        <ChartTip :label="tip.label" :items="tip.items" />
+      </template>
+    </BarChart>
   </Card>
 </template>
+
+<style scoped>
+/* The file's plot box, measured on its 580×360 card (1356:66389): the 24k
+   gridline 75 down from the card's top edge and the baseline at 318, with the
+   x labels under it ending on the card's own padding. The library puts 8px
+   over the first gridline and reserves the label row under the last, so the
+   plot takes the rest of the 43 the file leaves under the title off the top
+   and gives back the gutter it opens at the bottom. A card carrying a legend
+   loses the row to it, as the file's own legend cards do. */
+:deep([data-slot='chart-plot']) {
+  padding-top: 22px;
+  padding-bottom: 5px;
+}
+
+/* The file's legend, which is what filters the series here (1356:67154, the
+   row at y=324): a 7px square of the series' colour in a 16px cell, the name
+   in 12px ink-gray-5 beside it, items 16 apart. The swatch and the label are
+   the library's; the button around them carries the hover, the press and the
+   switched-off state, so the row reads as something to click. */
+:deep([data-slot='chart-legend']) {
+  column-gap: 4px;
+  row-gap: 2px;
+}
+:deep([data-slot='chart-legend'] button) {
+  padding-left: 6px;
+  padding-right: 6px;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+}
+:deep([data-slot='chart-legend'] button > span > span) {
+  gap: 4.5px;
+}
+:deep([data-slot='chart-legend'] button > span > span > span:first-child) {
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+}
+/* only while the series is on: switched off, the library's own paler ink
+   says so, and the swatch fades with it */
+:deep(
+  [data-slot='chart-legend']
+    button[aria-pressed='true']
+    > span
+    > span
+    > span:nth-child(2)
+) {
+  color: var(--ink-gray-5);
+}
+</style>

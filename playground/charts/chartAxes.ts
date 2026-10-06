@@ -30,30 +30,58 @@ const parse = (value: string) => {
   return { year: y, month: Number(m) - 1 }
 }
 /** the file's labels lie flat, however many months there are */
-const flat = { axisLabel: { interval: 0, hideOverlap: false, rotate: 0 } }
+const flat = { interval: 0, hideOverlap: false, rotate: 0 }
+
+/**
+ * The whole reading, which is what the tooltip's date row carries ("Jan 12,
+ * 2025" in the file; ours is one reading a month, so "May 2021"). The axis
+ * prints far less than this — the file names a few months and leaves the rest
+ * to the gridlines — so what each tick draws is set as an `axisLabel.formatter`
+ * below, which the library takes over the `format` the tooltip reads.
+ */
+const monthYear = (value: string) => {
+  const { year, month } = parse(value)
+  return `${MONTH[month]} ${year}`
+}
 
 /** "2021 · Jul · 2022 · Jul · 2023": the year at January, Jul at July */
 export const yearAxis: ChartXAxisOptions = {
   type: 'category',
-  format: (value: string) => {
-    const { year, month } = parse(value)
-    if (month === 0) return year
-    if (month === 6) return 'Jul'
-    return ''
+  format: monthYear,
+  echartOptions: {
+    axisLabel: {
+      ...flat,
+      formatter: (value: string) => {
+        const { year, month } = parse(value)
+        if (month === 0) return year
+        if (month === 6) return 'Jul'
+        return ''
+      },
+    },
   },
-  echartOptions: flat,
 }
 
 /** "2021 · Mar · May · Jul · Sep · Nov": every other month of one year */
 export const monthAxis: ChartXAxisOptions = {
   type: 'category',
-  format: (value: string) => {
-    const { year, month } = parse(value)
-    if (month === 0) return year
-    return month % 2 === 0 ? MONTH[month] : ''
+  format: monthYear,
+  echartOptions: {
+    axisLabel: {
+      ...flat,
+      formatter: (value: string) => {
+        const { year, month } = parse(value)
+        if (month === 0) return year
+        return month % 2 === 0 ? MONTH[month] : ''
+      },
+    },
   },
-  echartOptions: flat,
 }
+
+/**
+ * A reading in full, for a tooltip row: the file's tooltips print the number
+ * itself ("5302"), where its axes print the short "24k".
+ */
+export const count = (value: number) => value.toLocaleString('en-US')
 
 /** "24k … 3k, 0": thousands with the file's small k */
 export const thousands = (value: number) =>

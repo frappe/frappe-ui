@@ -16,14 +16,6 @@ defineProps<{
   wide?: boolean
   /** a legend of names alone, the share being in the name */
   plainLegend?: boolean
-  /**
-   * A card the file draws with no legend at all — every stacked and grouped
-   * bar card, where the tooltip names the series instead. The library gives
-   * any chart of more than one series a legend, and that row is what makes
-   * two cards side by side disagree: the one without it draws a taller plot,
-   * so their gridlines and baselines sit at different heights.
-   */
-  noLegend?: boolean
 }>()
 </script>
 
@@ -34,7 +26,6 @@ defineProps<{
       small ? 'chart-page-card--small' : wide ? '' : 'aspect-[580/360]',
       wide && 'col-span-full',
       plainLegend && 'chart-page-card--plain-legend',
-      noLegend && 'chart-page-card--no-legend',
     ]"
   >
     <div class="flex h-full w-full flex-col">
@@ -75,16 +66,6 @@ defineProps<{
   > span
   > span:nth-child(3) {
   display: none;
-}
-/* No legend: the row goes, and the plot takes the height back — with the
-   gutter the library opens under a legend-less chart (its own `pb-3`, which
-   it decides by whether a legend was passed, not by whether one shows), so
-   these cards' x labels sit where the single-series cards' do. */
-.chart-page-card--no-legend [data-slot='chart-legend'] {
-  display: none;
-}
-.chart-page-card--no-legend [data-slot='chart-plot'] {
-  padding-bottom: 0.75rem;
 }
 /* the file's legend row: 7px dots, 13px ink-gray-5 labels, 14 apart */
 .chart-page-card [data-slot='chart-legend'] {

@@ -51,8 +51,10 @@ const CHART_TYPES: Array<{
   label: string
   section: Component
   props?: Record<string, unknown>
+  /** the section draws its cards at the file's own 580×360 */
+  figmaSize?: boolean
 }> = [
-  { id: 'bar', label: 'Bar charts', section: BarSection },
+  { id: 'bar', label: 'Bar charts', section: BarSection, figmaSize: true },
   { id: 'sparkline', label: 'Spark line charts', section: SparklineSection },
   { id: 'area', label: 'Area Charts', section: AreaSection },
   { id: 'scatter', label: 'Scatter plot', section: ScatterSection },
@@ -87,6 +89,7 @@ const current = computed(() => CHART_TYPES.find((t) => t.id === type.value)!)
         :key="`${type}-${themeId}`"
         :data-chart-theme="themeId"
         class="chart-grid mt-6"
+        :class="{ 'chart-grid--figma': current.figmaSize }"
       >
         <component
           :is="current.section"
@@ -183,6 +186,21 @@ const current = computed(() => CHART_TYPES.find((t) => t.id === type.value)!)
   }
 }
 
+/* A section drawn at the file's own card size: 580 wide, and 360 tall by the
+   card's 580/360 ratio, so it reads 1:1 against the frame. Two of them and the
+   file's 17 between need 1177 of stage; under that the grid holds one, and
+   under 580 the card gives way rather than overflow. Written after the rules
+   above so it wins over the fluid columns. */
+.chart-grid--figma {
+  grid-template-columns: minmax(0, 580px);
+  justify-content: start;
+}
+@container chart-stage (min-width: 1177px) {
+  .chart-grid--figma {
+    grid-template-columns: repeat(2, 580px);
+  }
+}
+
 /* the file's radio rows are 2px apart; the group lays its padded rows flush */
 .theme-radios :deep([role='radiogroup']) {
   gap: 2px;
@@ -199,5 +217,16 @@ const current = computed(() => CHART_TYPES.find((t) => t.id === type.value)!)
     0 6px 12px -2px rgba(0, 0, 0, 0.12),
     0 0 6px 2px rgba(0, 0, 0, 0.03),
     0 0 1.5px rgba(0, 0, 0, 0.15);
+}
+/* The file's own tooltip box, where a card draws the file's tooltip body
+   (ChartTip): 135 wide on one row with the padding tight to the left of the
+   dot, 8 around once the rows carry swatches. The shell is the library's —
+   it is teleported to the body, so these are not scoped. */
+[data-slot='chart-tooltip']:has([data-tip='figma']) {
+  min-width: 135px;
+  padding: 5px 8px 5px 3px;
+}
+[data-slot='chart-tooltip']:has([data-tip='figma'][data-rows='many']) {
+  padding: 8px 8px 8px 4px;
 }
 </style>
