@@ -23,7 +23,13 @@
 // for (the file's own 24 leaves them 4 apart). The file shows that one at
 // 320 wide with no guides and full-width rows, and gives
 // its first row a hint: a 13px ink-gray-4 note at the row's far end. On the
-// source tree a hint is a file's size; a folder has none.
+// source tree a hint is a file's size; a folder has none. Hierarchy is the
+// file's third tree (node 35807:125292): a team, 500 wide, a 1px
+// outline-gray-1 divider between rows (so rows sit 29 apart), no guides,
+// the hover fill the full row, a 16px dot where a leaf has no chevron, the
+// drag grip in the chevron's place on a hovered row when rows can be
+// dragged, and a suffix on a group row: the file's "+ Assign", a sm ghost
+// Button at the row's right end. The Suffix switch is on for that example.
 //
 // The tree is frappe-ui's `Tree`, whose `guides` prop is the file's
 // indentation property one for one. What the file draws differently is set
@@ -46,7 +52,7 @@
 // (the `#item` slot knows its level) and the guides are drawn from the
 // tree's left edge, level by level, above the fill.
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
-import { Select, Switch, Tree } from '../../src'
+import { Button, Select, Switch, Tree } from '../../src'
 import type {
   DropInfo,
   TreeExposed,
@@ -61,12 +67,90 @@ const fullWidth = ref(false)
 const draggable = ref(false)
 const disabled = ref(false)
 const hint = ref(false)
+const suffix = ref(false)
 
-type Example = 'default' | 'layers'
-const example = ref<Example>('default')
+type Example = 'default' | 'layers' | 'hierarchy'
+const EXAMPLES: Example[] = ['default', 'layers', 'hierarchy']
+// `?example=hierarchy` opens the page on that example
+const fromUrl = new URLSearchParams(window.location.search).get('example')
+const example = ref<Example>(
+  EXAMPLES.includes(fromUrl as Example) ? (fromUrl as Example) : 'default',
+)
 const exampleOptions = [
   { label: 'Default', value: 'default' },
   { label: 'Layers', value: 'layers' },
+  { label: 'Hierarchy', value: 'hierarchy' },
+]
+
+/**
+ * The file's hierarchy tree (node 35807:125292): a sales team. A group row
+ * (the ones with a count) carries the file's suffix, the Assign button; the
+ * people under a lead are folded in the file, so each keeps a report to
+ * open; the members at the end are leaves, drawn with a dot.
+ */
+const hierarchyNodes = ref<TreeNode[]>([
+  {
+    key: 'sales-manager',
+    label: 'Sales Manager (2)',
+    suffix: 'Assign',
+    children: [
+      {
+        key: 'faris',
+        label: 'Faris Ansari',
+        children: [{ key: 'faris-1', label: 'Aarav Mehta' }],
+      },
+      {
+        key: 'rushabh',
+        label: 'Rushabh',
+        children: [
+          {
+            key: 'sales-lead',
+            label: 'Sales Lead',
+            suffix: 'Assign',
+            children: [
+              {
+                key: 'michelle',
+                label: 'Michelle Alwa',
+                children: [{ key: 'michelle-1', label: 'Ishita Rao' }],
+              },
+              {
+                key: 'ritvik',
+                label: 'Ritvik Sardana',
+                children: [{ key: 'ritvik-1', label: 'Dev Kapoor' }],
+              },
+              {
+                key: 'shariq',
+                label: 'Shariq Ansari',
+                children: [{ key: 'shariq-1', label: 'Meera Nair' }],
+              },
+              {
+                key: 'rahul',
+                label: 'Rahul Patel',
+                children: [{ key: 'rahul-1', label: 'Kabir Shah' }],
+              },
+              {
+                key: 'sales-members',
+                label: 'Sales Members (3)',
+                suffix: 'Assign',
+                children: [
+                  { key: 'member-1', label: 'Ritvik Sardana' },
+                  { key: 'member-2', label: 'Shariq Ansari' },
+                  { key: 'member-3', label: 'Jannet Patel' },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+])
+/** The rows the file shows open in the hierarchy; the rest stay folded. */
+const hierarchyOpen = [
+  'sales-manager',
+  'rushabh',
+  'sales-lead',
+  'sales-members',
 ]
 
 /**
@@ -203,19 +287,39 @@ const sourceNodes = ref<TreeNode[]>([
  * descendants) have run by then.
  */
 const nodes = computed(() =>
-  example.value === 'layers' ? layerNodes.value : sourceNodes.value,
+  example.value === 'layers'
+    ? layerNodes.value
+    : example.value === 'hierarchy'
+      ? hierarchyNodes.value
+      : sourceNodes.value,
 )
 /**
- * The tree's width: the file draws the source tree 280 wide and the layers
- * 320. The box around it stays 320x476 — the larger of the two either way —
- * so neither a fold nor a change of example moves anything.
+ * The tree's width: the file draws the source tree 280 wide, the layers 320
+ * and the hierarchy 500. The box around it stays 500x476 — the largest of
+ * the three either way — so neither a fold nor a change of example moves
+ * anything.
  */
-const treeWidth = computed(() =>
-  example.value === 'layers' ? '320px' : '280px',
+const treeWidth = computed(
+  () =>
+    ({ default: '280px', layers: '320px', hierarchy: '500px' })[example.value],
 )
 /** A level's step: the file's 24 on the source tree; one row place, 20, on the layers. */
 const indent = computed(() => (example.value === 'layers' ? 20 : 24))
-watch(example, () => nextTick(() => tree.value?.expandAll()))
+watch(example, applyExample)
+/** What switching example sets up, beyond the nodes. */
+function applyExample(now: Example) {
+  if (now === 'hierarchy') {
+    // the file shows this one without guides, the fill the whole row, and
+    // with its suffix; its folded rows stay folded
+    guides.value = 'none'
+    fullWidth.value = true
+    suffix.value = true
+    expanded.value = [...hierarchyOpen]
+  } else {
+    suffix.value = false
+    nextTick(() => tree.value?.expandAll())
+  }
+}
 
 function parentOf(
   key: TreeKey | null,
@@ -244,12 +348,12 @@ function onDrop(info: DropInfo | null) {
 
 const tree = ref<TreeExposed | null>(null)
 const expanded = ref<string[]>([])
-onMounted(() => tree.value?.expandAll())
+onMounted(() => applyExample(example.value))
 </script>
 
 <template>
-  <!-- centred on the pair's constant size: the tree's box is always 320x476,
-       so a fold, or the other example, happens inside it and the pair stays put -->
+  <!-- centred on the pair's constant size: the tree's box is always 500x476,
+       so a fold, or another example, happens inside it and the pair stays put -->
   <div class="flex h-full items-center justify-center px-5 py-10">
     <div class="flex items-start gap-10">
       <!--
@@ -258,8 +362,11 @@ onMounted(() => tree.value?.expandAll())
         this page's scope — the styling below reaches it through the wrap.
       -->
       <div
-        class="tree-espresso h-[476px] w-[320px]"
-        :class="fullWidth && 'is-full-width'"
+        class="tree-espresso h-[476px] w-[500px]"
+        :class="[
+          fullWidth && 'is-full-width',
+          example === 'hierarchy' && 'is-hierarchy',
+        ]"
         :style="{ '--tree-width': treeWidth, '--tree-indent': `${indent}px` }"
       >
         <Tree
@@ -283,21 +390,37 @@ onMounted(() => tree.value?.expandAll())
               <span
                 class="tree-row-box flex h-7 min-w-0 flex-1 items-center gap-1 rounded-4 px-2"
               >
-                <button
-                  v-if="hasChildren"
-                  type="button"
-                  class="flex size-4 shrink-0 items-center justify-center text-ink-gray-7 outline-none"
-                  :aria-label="open ? 'Collapse' : 'Expand'"
-                  tabindex="-1"
-                  @click.stop="toggle()"
+                <!-- the chevron's place: the chevron, a dot on a hierarchy's
+                     leaf, else blank; the grip takes it over on a hovered row
+                     that can be dragged (hierarchy only, as the file shows) -->
+                <span
+                  class="tree-row-place relative flex size-4 shrink-0 items-center justify-center text-ink-gray-7"
                 >
+                  <button
+                    v-if="hasChildren"
+                    type="button"
+                    class="tree-row-mark flex size-4 items-center justify-center outline-none"
+                    :aria-label="open ? 'Collapse' : 'Expand'"
+                    tabindex="-1"
+                    @click.stop="toggle()"
+                  >
+                    <TreeIcon
+                      name="small-right-chevron"
+                      class="size-4 transition-transform duration-150"
+                      :class="open && 'rotate-90'"
+                    />
+                  </button>
                   <TreeIcon
-                    name="small-right-chevron"
-                    class="size-4 transition-transform duration-150"
-                    :class="open && 'rotate-90'"
+                    v-else-if="example === 'hierarchy'"
+                    name="dot"
+                    class="tree-row-mark size-4"
                   />
-                </button>
-                <span v-else class="size-4 shrink-0" aria-hidden="true" />
+                  <TreeIcon
+                    v-if="example === 'hierarchy' && draggable"
+                    name="drag-vertical"
+                    class="tree-row-grip absolute inset-0 size-4"
+                  />
+                </span>
                 <TreeIcon
                   v-if="node.glyph"
                   data-slot="prefix-glyph"
@@ -315,6 +438,21 @@ onMounted(() => tree.value?.expandAll())
                   class="ml-auto shrink-0 pl-2 text-sm text-ink-gray-4"
                   >{{ hintFor(node) }}</span
                 >
+                <!-- the suffix: the file's "+ Assign", a sm ghost Button
+                     flush with the row's right padding -->
+                <Button
+                  v-if="suffix && node.suffix"
+                  data-slot="suffix"
+                  size="sm"
+                  variant="ghost"
+                  class="ml-auto shrink-0 !text-ink-gray-7"
+                  @click.stop
+                >
+                  <template #prefix>
+                    <TreeIcon name="add" class="size-4" />
+                  </template>
+                  {{ node.suffix }}
+                </Button>
               </span>
             </span>
           </template>
@@ -370,6 +508,10 @@ onMounted(() => tree.value?.expandAll())
           <div class="flex h-7 items-center justify-between">
             <span class="text-base text-ink-gray-7">Hint</span>
             <Switch v-model="hint" size="sm" aria-label="Hint" />
+          </div>
+          <div class="flex h-7 items-center justify-between">
+            <span class="text-base text-ink-gray-7">Suffix</span>
+            <Switch v-model="suffix" size="sm" aria-label="Suffix" />
           </div>
         </div>
       </div>
@@ -428,6 +570,61 @@ onMounted(() => tree.value?.expandAll())
    label goes (the screen-reader announcement stays) */
 .tree-espresso :deep(.frappe-tree-drag-label) {
   display: none;
+}
+
+/* the hierarchy: a 1px outline-gray-1 divider over every row but the
+   first — a straight line the tree's whole width, drawn in the 1px gap
+   above the row (not on the row itself, whose corners are round), so rows
+   sit 29 apart; a hovered row's fill covers the line above it and the one
+   below (the file draws the fill over both) */
+.tree-espresso.is-hierarchy :deep(.frappe-tree-row) {
+  position: relative;
+  margin-top: 1px;
+}
+.tree-espresso.is-hierarchy :deep(.frappe-tree-row::before) {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -1px;
+  height: 1px;
+  background: var(--outline-gray-1);
+}
+.tree-espresso.is-hierarchy
+  :deep(.frappe-tree > li:first-child > .frappe-tree-row) {
+  margin-top: 0;
+}
+.tree-espresso.is-hierarchy
+  :deep(.frappe-tree > li:first-child > .frappe-tree-row::before),
+.tree-espresso.is-hierarchy
+  :deep(li:not([data-disabled]) > .frappe-tree-row:hover::before),
+.tree-espresso.is-hierarchy
+  :deep(li:has(> .frappe-tree-row:hover) + li > .frappe-tree-row::before),
+.tree-espresso.is-hierarchy
+  :deep(
+    li:has(> .frappe-tree-row:hover)
+      > [role='group']
+      > li:first-child
+      > .frappe-tree-row::before
+  ) {
+  content: none;
+}
+/* the grip: hidden until the row is hovered, then in the chevron's place */
+.tree-espresso :deep(.tree-row-grip) {
+  display: none;
+}
+.tree-espresso
+  :deep(li:not([data-disabled]) > .frappe-tree-row:hover .tree-row-grip) {
+  display: block;
+}
+.tree-espresso
+  :deep(
+    li:not([data-disabled])
+      > .frappe-tree-row:hover
+      .tree-row-place:has(.tree-row-grip)
+      .tree-row-mark
+  ) {
+  visibility: hidden;
 }
 
 /* disabled: the box at half opacity, nothing under the pointer */
