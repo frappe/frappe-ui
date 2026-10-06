@@ -21,16 +21,6 @@ const areas = computed(() => props.theme.colors('areas', 4))
 const stepped = computed(() => props.theme.colors('stepped', 4))
 
 /**
- * The wash the file draws under a lone area: its own line colour, flat at
- * 20%, carried the whole way down to the axis — every "Vector 433" in the
- * row is the line's Ocean/B-800 at opacity .2, over a 1.5px stroke of the
- * same (1356:67489, 1356:67428, 1356:67608). The library fades its wash out
- * towards the axis instead, so that two bands crossing stay legible where
- * they overlap; a single area has no overlap to resolve, so these cards name
- * the fill the file drew. The colour is read back from the theme, which means
- * a flip to dark mode re-reads it like every other colour on the page.
- */
-/**
  * The rule the file drops through the hovered reading: a solid 1px hairline,
  * black at 9% over the card (1356:67518 "Line 80"). The bar cards draw the
  * same thing in `outline-gray-2`, which is the token that lands on that grey
@@ -49,6 +39,16 @@ const crosshair = computed(() => ({
   },
 }))
 
+/**
+ * The wash the file draws under a lone area: its own line colour, flat at
+ * 20%, carried the whole way down to the axis — every "Vector 433" in the
+ * row is the line's Ocean/B-800 at opacity .2, over a 1.5px stroke of the
+ * same (1356:67489, 1356:67428, 1356:67608). The library fades its wash out
+ * towards the axis instead, so that two bands crossing stay legible where
+ * they overlap; a single area has no overlap to resolve, so these cards name
+ * the fill the file drew. The colour is read back from the theme, which means
+ * a flip to dark mode re-reads it like every other colour on the page.
+ */
 const wash = computed(() => ({
   areaStyle: { color: props.theme.one('area'), opacity: 0.2 },
   lineStyle: { width: 1.5 },
@@ -70,13 +70,54 @@ const steppedRows = year.map((row, i) => ({
   data4: Math.round(row.sales * 0.1 + (i % 5) * 200),
 }))
 
-const step = { echartOptions: { step: 'end', lineStyle: { width: 1 } } }
-const stepConfig = {
-  data1: { label: 'Data 1', ...step },
-  data2: { label: 'Data 2', ...step },
-  data3: { label: 'Data 3', ...step },
-  data4: { label: 'Data 4', ...step },
-}
+/**
+ * Hovering one band takes the other three back to a tenth of themselves
+ * (1356:67563: every layer but the one under the pointer drops to opacity
+ * .1). `triggerLineEvent` is what makes a band answer the pointer at all —
+ * these series draw no points, and without it echarts only listens on the
+ * symbols. The hovered band keeps its own wash: the file draws it solid, but
+ * the file's layers are hand-cut bands, where a real area runs to the axis,
+ * so a solid fill would bury every band underneath it. What reads as hovered
+ * is the rest of the plot standing back, as on the bar cards.
+ */
+const focus = (color: string, opacity: number) => ({
+  triggerLineEvent: true,
+  // Naming the band's own colour again under `emphasis` is what keeps it:
+  // left alone, echarts lifts whatever is under the pointer a shade lighter,
+  // and a band that changes colour as you reach it is a band that was never
+  // the colour the legend would have named.
+  emphasis: {
+    disabled: false,
+    focus: 'series',
+    lineStyle: { width: 1, color },
+    areaStyle: { color, opacity },
+  },
+  blur: { areaStyle: { opacity: 0.1 }, lineStyle: { opacity: 0.1 } },
+})
+
+/**
+ * The file's stepped bands: each one a flat wash of its own colour taken to
+ * the axis under a 1px step, the lowest at 30% and the rest at 20%
+ * (1356:67528, "Vector 458" against 461/463/466). The palette runs darkest
+ * first, which is the order the y keys are given in below.
+ */
+const stepConfig = computed(() => {
+  const colors = props.theme.colors('stepped', 4)
+  const band = (color: string, opacity: number) => ({
+    echartOptions: {
+      step: 'end',
+      lineStyle: { width: 1 },
+      areaStyle: { color, opacity },
+      ...focus(color, opacity),
+    },
+  })
+  return {
+    data4: { label: 'Data 4', ...band(colors[0], 0.3) },
+    data3: { label: 'Data 3', ...band(colors[1], 0.2) },
+    data2: { label: 'Data 2', ...band(colors[2], 0.2) },
+    data1: { label: 'Data 1', ...band(colors[3], 0.2) },
+  }
+})
 
 /** the upper three of the stack carry no line of their own */
 const noLine = { echartOptions: { lineStyle: { width: 0 } } }
@@ -161,7 +202,7 @@ const stackConfig = {
       </template>
     </AreaChart>
   </Card>
-  <Card>
+  <Card class="area-card--no-legend">
     <AreaChart
       title="Stepped Line"
       :data="steppedRows"
@@ -207,3 +248,16 @@ const stackConfig = {
     </AreaChart>
   </Card>
 </template>
+
+<style scoped>
+/* The file names no band on this card — the plot is the whole of it
+   (1356:67528 carries no legend row). The pad is the one `ChartContainer`
+   drops in for a card with no legend at all, so this plot keeps the baseline
+   its neighbours sit on. */
+.area-card--no-legend :deep([data-slot='chart-legend']) {
+  display: none;
+}
+.area-card--no-legend :deep([data-slot='chart-plot']) {
+  padding-bottom: 12px;
+}
+</style>
