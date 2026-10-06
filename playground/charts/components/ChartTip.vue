@@ -18,9 +18,23 @@ const props = defineProps<{
   /** the category under the pointer, as the axis prints it */
   label?: string
   items: ChartTooltipItem[]
+  /**
+   * The row behind the reading, and how this card prints a number. A card
+   * whose series are formatted for the plot — the stack that labels every
+   * segment "$4.4k" — reads them back here the way the file's rows do, as the
+   * number itself. Left out, each row prints what the series printed.
+   */
+  rows?: Record<string, any>[]
+  value?: (value: number) => string
 }>()
 
 const many = computed(() => props.items.length > 1)
+
+function reading(item: ChartTooltipItem) {
+  const raw = props.rows?.[0]?.[item.name]
+  if (!props.value || typeof raw !== 'number') return item.formattedValue
+  return props.value(raw)
+}
 </script>
 
 <template>
@@ -60,7 +74,7 @@ const many = computed(() => props.items.length > 1)
           <span
             class="shrink-0 text-[12px] font-medium leading-none tracking-[0.02em] tabular-nums text-ink-gray-8"
           >
-            {{ item.formattedValue }}
+            {{ reading(item) }}
           </span>
         </span>
       </div>

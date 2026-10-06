@@ -40,6 +40,9 @@ const lineOver = computed(() => [
  * The rule is the file's black at 9%, which on either mode is the hairline the
  * page already draws its outlines in.
  */
+/** the file's group card points with the bars alone — no rule down the slot */
+const noCrosshair = { tooltip: { axisPointer: { type: 'none' } } }
+
 const crosshair = computed(() => ({
   tooltip: {
     axisPointer: {
@@ -84,6 +87,27 @@ const grouped = (gap: number, between: number) => ({
  */
 const CROWN = 2
 /**
+ * The hover the file draws on the two cards that carry several series at once
+ * (1356:66807, 1356:67347): the series under the pointer stays as it is in
+ * every column, and every other bar — and its label — drops to a fifth. The
+ * library disables per-series emphasis, on the grounds that the axis pointer
+ * and the tooltip already read out the column; these two cards ask for it
+ * back, which is what the file draws when a reader is following one series
+ * across the plot.
+ */
+const FOCUS = {
+  // `color: 'inherit'` keeps the bar under the pointer in its own colour:
+  // echarts lifts it a shade by default, and the file lifts nothing — what
+  // reads as hovered is the rest of the plot standing back.
+  emphasis: {
+    disabled: false,
+    focus: 'series',
+    itemStyle: { color: 'inherit' },
+  },
+  blur: { itemStyle: { opacity: 0.2 }, label: { opacity: 0.2 } },
+}
+
+/**
  * The labelled stack: the same 35% slot, and the file's 9px label inside each
  * segment where the library's data labels are 11. At 11 a "$4.6k" is as wide
  * as the column it sits on, so the labels of neighbouring columns meet in the
@@ -91,14 +115,19 @@ const CROWN = 2
  * draws it.
  */
 const labelledStack = {
-  echartOptions: { ...slot(35).echartOptions, label: { fontSize: 9 } },
+  echartOptions: {
+    ...slot(35).echartOptions,
+    label: { fontSize: 9 },
+    ...FOCUS,
+  },
 }
 
+const group4 = { echartOptions: { ...grouped(49, 20).echartOptions, ...FOCUS } }
 const groupedConfig = {
-  data1: { label: 'Data 1', format: count, ...grouped(49, 20) },
-  data2: { label: 'Data 2', format: count, ...grouped(49, 20) },
-  data3: { label: 'Data 3', format: count, ...grouped(49, 20) },
-  data4: { label: 'Data 4', format: count, ...grouped(49, 20) },
+  data1: { label: 'Data 1', format: count, ...group4 },
+  data2: { label: 'Data 2', format: count, ...group4 },
+  data3: { label: 'Data 3', format: count, ...group4 },
+  data4: { label: 'Data 4', format: count, ...group4 },
 }
 const narrowConfig = {
   data1: { label: 'Data 1', ...slot(68) },
@@ -176,7 +205,12 @@ const money = (value: number) =>
       :echart-options="crosshair"
     >
       <template #tooltip="tip">
-        <ChartTip :label="tip.label" :items="tip.items" />
+        <ChartTip
+          :label="tip.label"
+          :items="tip.items"
+          :rows="tip.rows"
+          :value="count"
+        />
       </template>
     </BarChart>
   </Card>
@@ -225,7 +259,7 @@ const money = (value: number) =>
       :x-axis="monthAxis"
       :y-axis="salesAxis"
       :palette="group"
-      :echart-options="crosshair"
+      :echart-options="noCrosshair"
     >
       <template #tooltip="tip">
         <ChartTip :label="tip.label" :items="tip.items" />
