@@ -1,7 +1,7 @@
 <template>
   <EHeader>
     <template #left>
-      <Breadcrumbs :items="[{ label: 'frappe' }, { label: 'frappe' }]" />
+      <Breadcrumbs :items="crumbs()" />
     </template>
     <template #right>
       <AvatarGroup :images="avatars" :more="3" />
@@ -33,6 +33,7 @@
 </template>
 
 <script setup lang="ts">
+import { useCrumbs } from '../pageCrumb'
 import { Breadcrumbs, Button } from '../../../src'
 import EIcon from '../../espresso-sidebar/EIcon.vue'
 import AvatarGroup from '../AvatarGroup.vue'
@@ -43,4 +44,6 @@ import a2 from '../../espresso-sidebar/avatars/header-2.png'
 import a3 from '../../espresso-sidebar/avatars/header-3.png'
 
 const avatars = [a0, a1, a2, a3]
+
+const crumbs = useCrumbs([{ label: 'frappe' }, { label: 'frappe' }])
 </script>

@@ -5,6 +5,7 @@ import {
   nextTick,
   onMounted,
   onUnmounted,
+  provide,
   reactive,
   ref,
   watch,
@@ -12,6 +13,7 @@ import {
 } from 'vue'
 import { Button, Popover, Tooltip, useColorScheme } from '../../src'
 import ControlSelect from '../controls/ControlSelect.vue'
+import { pageCrumbKey } from '../espresso-header/pageCrumb'
 import ControlToggle from '../controls/ControlToggle.vue'
 import { headerTypes, subheaderTypes } from '../espresso-header/variants'
 import ListPage from './list/ListPage.vue'
@@ -396,6 +398,13 @@ const cellClass = computed(() => [
 ])
 
 const current = computed(() => pages.find((p) => p.id === page.value)!)
+// Pages that aren't about the header show one crumb, their own name, in
+// place of the header pattern's sample crumbs.
+const OWN_CRUMB = ['settings-modal', 'table', 'activity', 'tree', 'file-input']
+provide(
+  pageCrumbKey,
+  computed(() => (OWN_CRUMB.includes(page.value) ? current.value.label : null)),
+)
 
 const open = reactive<Record<string, boolean>>(
   Object.fromEntries(modals.map((m) => [m.id, m.id === initial])),

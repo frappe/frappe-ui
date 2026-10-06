@@ -96,14 +96,14 @@ const DESCRIPTION =
           :disabled="disabled"
         />
       </div>
-      <!-- the controller, as the tree's: 274 wide, 16 inside, radius 16 -->
+      <!-- the controller, as the tree's: 274 wide, 16 inside, radius 16; its rows 12 apart (the user found 8 cramped with tabs and selects in them) -->
       <div
         class="flex w-[274px] shrink-0 flex-col gap-3 rounded-7 border border-outline-gray-1 bg-surface-elevation-2 px-4 pb-[13px] pt-4"
       >
         <p class="text-lg-semibold leading-[1.15] text-ink-gray-9">
           File input
         </p>
-        <div class="flex flex-col gap-2">
+        <div class="flex flex-col gap-3">
           <div class="flex h-7 items-center justify-between">
             <span class="text-base text-ink-gray-7">Input type</span>
             <Select
