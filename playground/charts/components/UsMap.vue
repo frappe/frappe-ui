@@ -97,9 +97,16 @@ const option = computed(() => {
         map: 'USA',
         nameProperty: 'abbr',
         roam: false,
-        left: 16,
-        right: 16,
-        top: 0,
+        // The file gives the map about three quarters of the card's width and
+        // keeps the rest as air — 429.9 across a 580 card, opening at 75
+        // (1356:68047) — where echarts would otherwise run it to the plot's
+        // edges. The plot is the card less its 16 padding, so an eleventh off
+        // each side lands the map on the file's share at this card's size.
+        left: '11%',
+        right: '11%',
+        // and it opens a little under the title rather than against it: the
+        // file leaves 17 between the two on a 360 card.
+        top: 20,
         bottom: 36,
         itemStyle: { borderColor: 'rgba(0,0,0,0.36)', borderWidth: 0.5 },
         emphasis: {
@@ -168,9 +175,15 @@ const gradient = computed(
           class="relative mx-0.5 block h-[10px] w-[102px] rounded-full"
           :style="{ background: gradient }"
         >
+          <!-- The file's marker is a filled 6px dot, not a ring. Its fill is
+               surface/white, which on this page is the elevation the hovered
+               state turns — the card's own surface, so it holds in dark mode. -->
           <span
-            class="absolute top-1/2 size-[6px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-surface-white ring-1 ring-white"
-            :style="{ left: `${marker * 100}%` }"
+            class="absolute top-1/2 size-[6px] -translate-x-1/2 -translate-y-1/2 rounded-full"
+            :style="{
+              left: `${marker * 100}%`,
+              background: t('surface-elevation-2'),
+            }"
           />
           <span
             class="absolute -top-4 -translate-x-1/2 whitespace-nowrap"

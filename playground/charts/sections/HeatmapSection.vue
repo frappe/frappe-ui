@@ -18,12 +18,15 @@ const heat = computed(() => props.theme.colors('heat'))
   <Card>
     <UsMap title="Map Graph" :colors="ramp" :t="theme.t" />
   </Card>
-  <Card wide>
+  <!-- The file draws the table as its own card: the 8px corner and the
+       hairline are the table's, and there is no second frame around it
+       (1356:68481 stands on the page beside the map card, not inside one). -->
+  <div class="col-span-full">
     <HeatTable
       :rows="heatTable"
       :columns="HEAT_COLUMNS"
       :colors="heat"
-      :ink="theme.t('ink-gray-8')"
+      :ink="theme.t('chart-inside-label')"
     />
-  </Card>
+  </div>
 </template>
