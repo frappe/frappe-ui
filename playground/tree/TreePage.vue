@@ -291,6 +291,13 @@ onMounted(() => tree.value?.expandAll())
   background: var(--surface-elevation-1);
   box-shadow: 0 0 0 2px var(--outline-gray-3);
 }
+/* while dragging, the library floats a "Move above …" label by the
+   pointer; the blue line already says where the row will land, so the
+   label goes (the screen-reader announcement stays) */
+.tree-espresso :deep(.frappe-tree-drag-label) {
+  display: none;
+}
+
 /* disabled: the box at half opacity, nothing under the pointer */
 .tree-espresso :deep(li[data-disabled] > .frappe-tree-row) {
   opacity: 0.5;
