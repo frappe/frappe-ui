@@ -30,6 +30,7 @@ import DetailsNodeView from './DetailsNodeView.vue'
 import RteImageSlotView from './RteImageSlot.vue'
 import RteEmbedSlotView from './RteEmbedSlot.vue'
 import { openEmbedSourcePopup } from './rteEmbedPopup'
+import { openRemoveEmbedModal } from './rteRemoveEmbed'
 
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
@@ -406,7 +407,8 @@ export const Columns = Node.create({
 // The empty embed slot /embed lays down (32354:128378), the picture's
 // slot with the embed's word: it stands until a link fills it. It also
 // answers "Replace" on an embed's menu with the file's own card in place
-// of the library's dialog, laid under the embed (rteEmbedPopup.ts).
+// of the library's dialog, hung from the embed's chrome (rteEmbedPopup.ts),
+// and "Delete" with the file's own modal (rteRemoveEmbed.ts).
 export const EmbedSlot = Node.create({
   name: 'embedSlot',
   group: 'block',
@@ -435,6 +437,15 @@ export const EmbedSlot = Node.create({
           openEmbedSourcePopup(editor, pos, (at, embed) =>
             editor.commands.updateIframeAt(at, embed.src),
           )
+          return true
+        },
+      // and Delete asks with the file's own modal (rteRemoveEmbed.ts)
+      removeIframe:
+        (pos: number) =>
+        ({ editor }) => {
+          const node = editor.state.doc.nodeAt(pos)
+          if (!node || node.type.name !== 'iframe') return false
+          openRemoveEmbedModal(editor, pos)
           return true
         },
     }

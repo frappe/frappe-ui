@@ -1,8 +1,12 @@
 /* Dialog's content wrapper takes no class, so size it from inside: every
-   espresso modal frame is a fixed 440, 600, 720 or 960px card. Shadow stays Dialog's xl unless
+   espresso modal frame is a fixed 360, 440, 600, 720 or 960px card. Shadow stays Dialog's xl unless
    the frame asks for the 2xl elevation. */
 .dialog-content:has(> .espresso-modal) {
   max-width: 440px;
+}
+
+.dialog-content:has(> .espresso-modal--360) {
+  max-width: 360px;
 }
 
 .dialog-content:has(> .espresso-modal--600) {

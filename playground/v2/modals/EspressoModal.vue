@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // The espresso "modal new" card, shared by every v2 modal: a fixed 440px
-// (or `width="600"` / `"720"`) card on frappe-ui's Dialog in `bare` mode (its default chrome has different
+// (or `width="360"` / `"600"` / `"720"`; 360 is the file's size sm) card on frappe-ui's Dialog in `bare` mode (its default chrome has different
 // padding, header spacing and icon badge), with the xs ghost close button
 // pinned 8px from the top-right corner.
 //
@@ -23,7 +23,7 @@ const props = withDefaults(
     variant?: 'default' | 'dialog' | 'form' | 'list'
     shadow?: 'xl' | '2xl'
     closePlacement?: 'corner' | 'inline'
-    width?: '440' | '600' | '720'
+    width?: '360' | '440' | '600' | '720'
   }>(),
   {
     variant: 'default',
@@ -47,7 +47,11 @@ const open = defineModel<boolean>('open', { default: false })
 </script>
 
 <template>
-  <Dialog v-model:open="open" :size="width === '440' ? 'md' : '3xl'" bare>
+  <Dialog
+    v-model:open="open"
+    :size="width === '360' ? 'sm' : width === '440' ? 'md' : '3xl'"
+    bare
+  >
     <template #default="{ close }">
       <div
         class="espresso-modal relative flex flex-col px-5 pb-5"
@@ -56,6 +60,7 @@ const open = defineModel<boolean>('open', { default: false })
           closePlacement === 'inline' ? 'pt-5' : 'pt-[18px]',
           {
             'espresso-modal--2xl': shadow === '2xl',
+            'espresso-modal--360': width === '360',
             'espresso-modal--600': width === '600',
             'espresso-modal--720': width === '720',
           },

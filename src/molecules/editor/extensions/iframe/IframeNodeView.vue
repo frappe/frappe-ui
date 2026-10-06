@@ -189,10 +189,16 @@ function duplicate(): void {
 
 /**
  * The design's "Remove Embed": a word before the deed, since an embed
- * is a link that may be hard to find again. Delete on the menu asks;
- * Delete in the dialog does it.
+ * is a link that may be hard to find again. Delete on the menu asks —
+ * through `removeIframe`, so a host can ask with a dialog of its own, and
+ * with this one when none does; Delete in the dialog does it.
  */
 const confirmRemove = ref(false)
+function askRemove(): void {
+  const pos = safeGetPos(() => props.getPos())
+  if (pos === null) return
+  if (!editor.commands.removeIframe(pos)) confirmRemove.value = true
+}
 const removeOptions: Partial<DialogProps> = {
   title: 'Remove Embed',
   message: 'This embedded content will be removed from the document.',
@@ -343,7 +349,7 @@ function commitCaption(event: Event): void {
           @replace="changeEmbedLink"
           @open="openInBrowser"
           @duplicate="duplicate"
-          @remove="confirmRemove = true"
+          @remove="askRemove"
         />
 
         <MediaResizeHandle

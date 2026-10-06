@@ -52,6 +52,12 @@ declare module '@tiptap/core' {
     iframeEdit: {
       /** Swap the src of the iframe node at `pos` (keeps caption/align). */
       updateIframeAt: (pos: number, url: string) => ReturnType
+      /**
+       * Ask before removing the iframe node at `pos`. The library answers
+       * `false` — nobody asked — and the node view raises its own dialog;
+       * a host overrides this to ask its own way.
+       */
+      removeIframe: (pos: number) => ReturnType
     }
   }
 }
@@ -137,6 +143,8 @@ export function buildIframeCommands(
       return true
     }
 
+  const removeIframe: RawCommands['removeIframe'] = () => () => false
+
   const replaceIframe: RawCommands['replaceIframe'] =
     (pos: number) =>
     ({ editor }) => {
@@ -156,6 +164,7 @@ export function buildIframeCommands(
     insertIframeURL,
     openIframeDialog,
     updateIframeAt,
+    removeIframe,
     replaceIframe,
   }
 }
