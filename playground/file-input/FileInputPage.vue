@@ -1,22 +1,24 @@
 <script setup lang="ts">
 // The File input page: one file input on the left and its controller on
 // the right — the file's variant properties (node 29788:20146): Variant
-// (Subtle / Outline) and the four sizes as tabs, Preview and Description,
-// and of the interaction column only the two a page sets, Error and
-// Disabled. The rest happen on the field itself (the user's call
+// (Subtle / Outline) and the four sizes as tabs, Preview — the file's cell,
+// the preview card with the description (the user's call 2026-10-06: the
+// bigger sizes look wrong without it, so the two go together) — and of the
+// interaction column only the two a page sets, Error and Disabled. The rest happen on the field itself (the user's call
 // 2026-10-06): hover under the pointer, focus from the keyboard, filled and
 // loading from a chosen or dropped file.
 //
-// The input's box is a constant 700x140 — the file's cell with a preview —
-// so switching Preview or Description off moves nothing: the smaller
-// field sits at the box's top-left.
+// The input's box is a constant 700x140 — the file's cell with a preview.
+// The field keeps its place whether Preview is on or off: its left edge 272
+// in (after the card and the 12 gap) and its foot on the box's foot, as in
+// the cell; Preview only adds the card and the description around it.
 import { ref } from 'vue'
 import { Switch, TabButtons } from '../../src'
 import FileInput from './FileInput.vue'
 import type { FileInputSize, FileInputVariant } from './FileInput.vue'
 
-// `?variant=subtle&size=lg&error&disabled&preview&description` opens the
-// page on that combination
+// `?variant=subtle&size=lg&error&disabled&preview` opens the page on that
+// combination
 const q = new URLSearchParams(window.location.search)
 const pick = <T extends string>(key: string, allowed: T[], fallback: T): T =>
   allowed.includes(q.get(key) as T) ? (q.get(key) as T) : fallback
@@ -25,7 +27,6 @@ const variant = ref<FileInputVariant>(
 )
 const size = ref<FileInputSize>(pick('size', ['xs', 'sm', 'md', 'lg'], 'sm'))
 const preview = ref(q.has('preview'))
-const description = ref(q.has('description'))
 const error = ref(q.has('error'))
 const disabled = ref(q.has('disabled'))
 
@@ -49,12 +50,15 @@ const DESCRIPTION =
 <template>
   <div class="flex h-full items-center justify-center px-5 py-10">
     <div class="flex items-start gap-10">
-      <div class="h-[140px] w-[700px]">
+      <div
+        class="flex h-[140px] w-[700px] items-end"
+        :class="!preview && 'pl-[272px]'"
+      >
         <FileInput
           :variant="variant"
           :size="size"
           :preview="preview"
-          :description="description ? DESCRIPTION : ''"
+          :description="preview ? DESCRIPTION : ''"
           :error="error"
           :disabled="disabled"
         />
@@ -88,10 +92,6 @@ const DESCRIPTION =
           <div class="flex h-7 items-center justify-between">
             <span class="text-base text-ink-gray-7">Preview</span>
             <Switch v-model="preview" size="sm" aria-label="Preview" />
-          </div>
-          <div class="flex h-7 items-center justify-between">
-            <span class="text-base text-ink-gray-7">Description</span>
-            <Switch v-model="description" size="sm" aria-label="Description" />
           </div>
           <div class="flex h-7 items-center justify-between">
             <span class="text-base text-ink-gray-7">Error</span>

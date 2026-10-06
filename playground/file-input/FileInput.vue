@@ -27,7 +27,7 @@
 // focus come from the pointer and the keyboard (the library's TextInput
 // draws them), filled and loading from the file; `error` and `disabled`
 // are the two a page sets.
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { Button, Progress, Spinner, TextInput } from '../../src'
 import FileInputIcon from './FileInputIcon.vue'
 
@@ -58,6 +58,7 @@ const progress = ref(0)
 const fileName = ref('')
 const imageUrl = ref('')
 const dragging = ref(false)
+const rootEl = ref<HTMLElement | null>(null)
 
 /** Where the file is. */
 const shown = computed<Phase | 'active'>(() =>
@@ -129,6 +130,57 @@ const buttonSize = computed(
       | 'md',
 )
 
+/**
+ * The name as shown: shortened in the middle so its extension always
+ * stays — "Screenshot 2026-06-19 a….png" — to the room the field leaves
+ * between the glyph and Browse, measured in the field's own font. The
+ * whole name is the field's tooltip.
+ */
+const control = ref<HTMLInputElement | null>(null)
+const room = ref(0)
+const font = ref('')
+let ruler: CanvasRenderingContext2D | null = null
+function measure(text: string) {
+  ruler ??= document.createElement('canvas').getContext('2d')
+  if (!ruler) return 0
+  ruler.font = font.value
+  return ruler.measureText(text).width
+}
+const shownName = computed(() => {
+  const name = fileName.value
+  if (!name || !room.value || measure(name) <= room.value) return name
+  const dot = name.lastIndexOf('.')
+  const ext = dot > 0 ? name.slice(dot) : ''
+  const stem = dot > 0 ? name.slice(0, dot) : name
+  let lo = 0
+  let hi = stem.length
+  while (lo < hi) {
+    const mid = Math.ceil((lo + hi) / 2)
+    if (measure(stem.slice(0, mid).trimEnd() + '…' + ext) <= room.value)
+      lo = mid
+    else hi = mid - 1
+  }
+  return stem.slice(0, lo).trimEnd() + '…' + ext
+})
+function readRoom() {
+  const el = control.value
+  if (!el) return
+  const cs = getComputedStyle(el)
+  font.value = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`
+  room.value =
+    el.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight)
+}
+let roomObserver: ResizeObserver | null = null
+onMounted(() => {
+  control.value =
+    rootEl.value?.querySelector<HTMLInputElement>("[data-slot='control']") ??
+    null
+  roomObserver = new ResizeObserver(readRoom)
+  if (control.value) roomObserver.observe(control.value)
+  readRoom()
+})
+onBeforeUnmount(() => roomObserver?.disconnect())
+
 // the field's right padding clears whatever the suffix measures
 const suffixEl = ref<HTMLElement | null>(null)
 const suffixWidth = ref(0)
@@ -144,10 +196,23 @@ watch(suffixEl, (el, old) => {
   if (el) observer?.observe(el)
 })
 onBeforeUnmount(() => observer?.disconnect())
+
+// the room changes with the size, and with the glyph and Browse
+watch(
+  () => [
+    props.size,
+    props.variant,
+    props.preview,
+    hasFile.value,
+    suffixWidth.value,
+  ],
+  () => nextTick(readRoom),
+)
 </script>
 
 <template>
   <div
+    ref="rootEl"
     class="file-input flex items-stretch gap-3"
     :class="[
       `is-${variant}`,
@@ -226,7 +291,8 @@ onBeforeUnmount(() => observer?.disconnect())
         <TextInput
           :size="size"
           :variant="variant"
-          :model-value="fileName"
+          :model-value="shownName"
+          :title="fileName || undefined"
           placeholder="Choose file or drag here"
           readonly
           :aria-disabled="disabled || undefined"
@@ -246,7 +312,8 @@ onBeforeUnmount(() => observer?.disconnect())
             >
               <template v-if="variant === 'outline'">
                 <span
-                  class="relative flex h-full items-center border-l border-outline-gray-2 text-ink-gray-7"
+                  class="relative flex h-full cursor-pointer items-center border-l border-outline-gray-2 text-ink-gray-7"
+                  @click="open"
                   :class="
                     size === 'lg'
                       ? 'px-3 text-lg'
@@ -326,6 +393,29 @@ onBeforeUnmount(() => observer?.disconnect())
 }
 .file-input :deep([data-slot='browse']) {
   color: var(--ink-gray-7);
+}
+
+/* Browse is part of the field: the pointer over it is the pointer over
+   the field, so the field's hover look holds there too (the library only
+   lights its input's own :hover) */
+.file-input:not(.is-disabled).is-outline
+  :deep(
+    [data-slot='field']:has([data-slot='browse']:hover)
+      [data-slot='control']:not(:focus)
+  ) {
+  border-color: var(--outline-gray-3);
+  box-shadow: var(--elevation-sm);
+}
+.file-input:not(.is-disabled).is-subtle
+  :deep(
+    [data-slot='field']:has([data-slot='browse']:hover)
+      [data-slot='control']:not(:focus)
+  ) {
+  background: var(--surface-gray-3);
+  border-color: var(--surface-gray-3);
+}
+.file-input:not(.is-disabled) :deep([data-slot='browse']) {
+  cursor: pointer;
 }
 
 /* a file held over the field: the library's own focus look, forced */
