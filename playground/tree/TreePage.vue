@@ -314,8 +314,15 @@ onMounted(() => tree.value?.expandAll())
 /*
   The guides, drawn from the tree's left edge: a child at level N keeps its
   stem (N-2)*24 + 16 in — under the middle of its parent's chevron — and,
-  with connectors, an arm 12 long on the row's middle. Above the row's fill.
+  with connectors, an arm 12 long on the row's middle. The arm runs 4 into
+  the row's box, and the box paints over it (the file draws the box after
+  the guides), so a hovered row covers the arm's end; the full-width fill
+  is the row behind everything, so there the guides stay on top.
 */
+.tree-espresso:not(.is-full-width) :deep(.tree-row-box) {
+  position: relative;
+  z-index: 2;
+}
 .tree-espresso :deep([role='group'] > li) {
   position: relative;
 }
