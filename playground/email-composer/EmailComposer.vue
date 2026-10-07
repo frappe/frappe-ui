@@ -304,11 +304,17 @@ const glyph = (name: string) => () =>
   h(ComposerIcon, { name, class: 'size-4 text-ink-gray-7' })
 const spellOn = computed(() => props.spellCheck !== false)
 /** A setting's mark: the icon set's check (node 35873:126858) when it is on. */
+// The check keeps its room when off (only hidden), so the menu is one width
+// whichever settings are on — it sizes to its widest row, and "Default to
+// full screen" without its check made it narrower (the user caught the
+// jump between the compact and expanded composer, 2026-10-07).
 const checkMark = (on: boolean) => ({
   suffix: () =>
-    on
-      ? h(ComposerIcon, { name: 'check', class: 'size-4 text-ink-gray-7' })
-      : null,
+    h(ComposerIcon, {
+      name: 'check',
+      class: ['size-4 text-ink-gray-7', !on && 'invisible'],
+      'aria-hidden': 'true',
+    }),
 })
 const moreOptions = computed(() => [
   {
