@@ -1,9 +1,9 @@
 <script setup lang="ts">
 // The file's "Pie charts" row (Figma 1GDS12ys41lxeG3wQpNq41, 1589:43577
-// … 1589:43629): the plain pie, the doughnut and the half doughnut —
-// the library's DonutChart for the rings — and the nested pie.
+// … 1589:43629): the plain pie, the ring, the half ring and the nested pie.
+// All four go through PieCard — see its header for why none of them can be
+// the library's own DonutChart.
 import { computed } from 'vue'
-import { DonutChart } from '../../../src/charts'
 import Card from '../components/Card.vue'
 import PieCard from '../components/PieCard.vue'
 import { slices } from '../chartData'
@@ -20,7 +20,6 @@ const rose = computed(() => props.theme.colors('rose'))
 const named = slices.map((s) => ({ ...s, name: `Data (${s.share}%)` }))
 const five = named.slice(0, 5)
 const six = named.slice(0, 6)
-const percent = (value: number) => `${value}%`
 </script>
 
 <template>
@@ -33,23 +32,15 @@ const percent = (value: number) => `${value}%`
       :t="theme.t"
     />
   </Card>
-  <Card plain-legend>
-    <DonutChart
+  <Card>
+    <PieCard
       title="Doughnut Chart"
-      :data="five"
-      category="name"
-      value="share"
-      :format="percent"
-      :palette="doughnut"
-    >
-      <template #center><span /></template>
-    </DonutChart>
+      :slices="five"
+      :colors="doughnut"
+      variant="donut"
+      :t="theme.t"
+    />
   </Card>
-  <!-- The half ring the file draws is 336 across a 580 card, and the library's
-       own sizes a half donut off the plot's height — which a semicircle only
-       half uses — so it could not reach that width through `DonutChart`, whose
-       series an `echartOptions` merge replaces whole rather than adds to.
-       PieCard draws it at the file's radius, in the file's order. -->
   <Card>
     <PieCard
       title="Doughnut Chart"

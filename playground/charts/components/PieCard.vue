@@ -1,10 +1,11 @@
 <script setup lang="ts">
-// The two pies the library's DonutChart does not draw (Figma
-// 1GDS12ys41lxeG3wQpNq41, 1589:43577 and 1589:43629): the plain pie,
-// 206 across with no hole and no gap, and the nested one, six rings of
-// growing radius around a 30px hole. Drawn through the library's
-// `useChart` in its ChartContainer, with its legend under the plot, so
-// they read as the library's own beside the doughnuts.
+// The file's four pie cards (Figma 1GDS12ys41lxeG3wQpNq41, 1589:43577,
+// 43591, 43605 and 43629): the plain pie, the ring, the half ring and the
+// nested pie. All four are drawn through the library's `useChart` in its
+// ChartContainer, with its legend under the plot, so they read as the
+// library's own — but the geometry is the file's, not the library's
+// defaults, and the slices keep the order they are given rather than being
+// sorted biggest-first.
 import { computed, ref } from 'vue'
 import { TYPE } from '../chartType'
 import { PieChart as PieSeries } from 'echarts/charts'
@@ -22,7 +23,7 @@ const props = defineProps<{
   title: string
   slices: Array<{ name: string; share: number }>
   colors: string[]
-  variant: 'pie' | 'rose' | 'half'
+  variant: 'pie' | 'donut' | 'rose' | 'half'
   t: (name: string) => string
 }>()
 
@@ -30,20 +31,22 @@ const plotEl = ref<HTMLElement>()
 const hidden = ref<string[]>([])
 
 /**
- * The rose's slices, biggest first. The file builds this card out of six arcs
- * that share a centre and a 15px hole and step inwards — 129, 121, 104, 90, 78
- * and 60 — each sweeping on from where the last one stopped (1589:43629's
- * ellipses, all at 290,131). What that draws is a spiral closing inwards, and
- * a rose only draws it if its widest slice is also its longest: left in the
- * order the data happens to be in, the radii jump about and the wedges read as
- * scattered rather than nested. The plain pie keeps the data's own order, where
- * every slice shares one radius and the order is all a reader has.
+ * The plain pie and the ring, as 1589:43577 and 1589:43591 draw them: a 206
+ * circle on a 580×360 card, 187 to 393 across and 77 to 283 down, so its
+ * middle is the card's own middle. echarts measures a pie against the plot —
+ * the card less its padding, its title and its legend — and centres it there,
+ * which filled the plot's height at 43.6% of the card where the file's is
+ * 35.5, and sat high of the card's centre by half the legend. 74.8% of the
+ * plot's half-height is the file's 206 at any card size, the card holding the
+ * file's 580/360 so the plot scales with it, and 51.41% is where the card's
+ * own centre falls inside a one-row-legend plot.
  */
-const ordered = computed(() =>
-  props.variant === 'rose'
-    ? [...props.slices].sort((a, b) => b.share - a.share)
-    : props.slices,
-)
+const PIE_RADIUS = ['0%', '74.8%']
+/** the ring's band: the file's 0.7 of the outer radius (1589:43591) */
+const DONUT_RADIUS = ['52.36%', '74.8%']
+const PIE_CENTER = ['50%', '51.41%']
+/** the file leaves about 1.2° between the ring's arcs and rounds every end on 4 */
+const DONUT_PAD = 1.2
 
 /**
  * The half ring, as 1589:43605 draws it: a 336 arc on a 580 card, so 168 of
@@ -52,119 +55,151 @@ const ordered = computed(() =>
  * width it has — ours came out 43% of the card where the file's is 58. These
  * are percentages of the same half-minimum echarts measures from, taken past
  * 100 so the arc reaches the file's width, and the band holds the file's ratio
- * of 0.8 inner to outer. Its centre sits at three quarters of the plot, which
- * is where the file's 257 of 360 lands.
+ * of 0.8 inner to outer. 87.48% of the plot is where the file's centre at 257
+ * of 360 falls, so the arc's flat edge lands on the file's line.
  */
-const HALF_RADIUS = ['108%', '135%']
+const HALF_RADIUS = ['107.6%', '134.5%']
+const HALF_CENTER = ['50%', '87.48%']
 
 /**
- * The plain pie, as 1589:43577 draws it: a 206 circle on a 580×360 card,
- * centred on the card itself — 187 to 393 across, 77 to 283 down, so its
- * middle is the card's own middle. echarts measures a pie against the plot,
- * which is the card less its padding, its title and its legend, and centres
- * it there: left to itself the circle filled the plot's height and sat high
- * of the card's centre by the legend's half. These two put it back on the
- * file's: 74.8% of the plot's half-height is the file's 206 at any card size
- * (the card holds the file's 580/360, so the plot scales with it), and 51.41%
- * is where the card's own centre falls inside the plot.
+ * The nested pie, as 1589:43629 draws it: six arcs on one centre at (290, 131)
+ * of a 580×360 card, each sweeping on from where the last stopped and each on
+ * a smaller radius — 129, 121, 104, 90, 78 and 60, around a hole of about 15
+ * (the file's six inner fractions, 0.12 … 0.25 of their own radii, all work
+ * out within half a pixel of it). What that draws is a spiral closing inwards,
+ * and the radius falls by position, not by value: the file's own fourth arc is
+ * its widest sweep on its fourth radius. echarts' `roseType` can only tie the
+ * radius to the value, which scattered the wedges instead of nesting them, so
+ * each arc is its own one-slice series here and takes its radius from the file.
+ *
+ * echarts reads a pie's radius as a share of the plot's half-minimum, which on
+ * this card — the only one with two legend rows — is 124.95 for every 580 of
+ * card width. A file radius over that is the same circle at any card size.
  */
-const PIE_RADIUS = ['0%', '74.8%']
-const PIE_CENTER = ['50%', '51.41%']
+const ROSE_RADII = [129, 121, 104, 90, 78, 60]
+const ROSE_HOLE = 15.3
+const ROSE_BASE = 124.95
+const ROSE_CENTER = ['50%', '37.06%']
+const rose = (px: number) => `${((px / ROSE_BASE) * 100).toFixed(2)}%`
+
+const visible = computed(() =>
+  props.slices.filter((s) => !hidden.value.includes(s.name)),
+)
+
+const color = (i: number) => props.colors[i % props.colors.length]
 
 const items = computed(() =>
-  ordered.value.map((s, i) => ({
+  props.slices.map((s, i) => ({
     name: s.name,
     label: s.name,
-    color: props.colors[i % props.colors.length],
+    color: color(i),
     hidden: hidden.value.includes(s.name),
   })),
 )
 
-const option = computed(() => {
-  const data = ordered.value
-    .filter((s) => !hidden.value.includes(s.name))
-    .map((s) => ({
-      name: s.name,
-      value: s.share,
-      itemStyle: {
-        color: props.colors[ordered.value.indexOf(s) % props.colors.length],
+const data = computed(() =>
+  visible.value.map((s) => ({
+    name: s.name,
+    value: s.share,
+    itemStyle: { color: color(props.slices.indexOf(s)) },
+    label: { show: false },
+  })),
+)
+
+const flat = {
+  clockwise: true,
+  emphasis: { scale: false },
+  label: { show: false },
+  labelLine: { show: false },
+} as const
+
+/**
+ * The nested pie's arcs, each its own series so each can carry its own radius.
+ * They sweep clockwise from 3 o'clock, as the file's do, and the angles run
+ * negative because echarts measures them anticlockwise.
+ */
+const roseSeries = computed(() => {
+  const total = visible.value.reduce((sum, s) => sum + s.share, 0)
+  let angle = 0
+  return visible.value.map((s, i) => {
+    const start = angle
+    angle -= total ? (s.share / total) * 360 : 0
+    return {
+      type: 'pie',
+      radius: [rose(ROSE_HOLE), rose(ROSE_RADII[i] ?? ROSE_RADII.at(-1)!)],
+      center: ROSE_CENTER,
+      startAngle: start,
+      endAngle: angle,
+      padAngle: 0,
+      itemStyle: { borderWidth: 0 },
+      ...flat,
+      data: [data.value[i]],
+    }
+  })
+})
+
+const series = computed(() => {
+  if (props.variant === 'rose') return roseSeries.value
+  if (props.variant === 'half')
+    return [
+      {
+        type: 'pie',
+        radius: HALF_RADIUS,
+        center: HALF_CENTER,
+        // both halves sweep across the top, 9 o'clock round to 3
+        startAngle: 180,
+        endAngle: 0,
+        // the file leaves about a degree between its arcs and rounds
+        // every end on 4 (its ellipses' own corner radius)
+        padAngle: 1,
+        itemStyle: { borderWidth: 0, borderRadius: 4 },
+        ...flat,
+        data: data.value,
       },
-      label: { show: false },
-    }))
-  return {
-    animation: true,
-    animationDuration: 500,
-    tooltip: {
-      show: true,
-      trigger: 'item',
-      confine: true,
-      backgroundColor: props.t('surface-elevation-2'),
-      borderWidth: 0,
-      borderRadius: 8,
-      padding: [5, 8, 5, 3],
-      extraCssText:
-        'box-shadow: 0 6px 12px -2px rgba(0,0,0,0.12), 0 0 6px 2px rgba(0,0,0,0.03), 0 0 1.5px rgba(0,0,0,0.15);',
-      textStyle: { fontSize: TYPE.xs, color: props.t('ink-gray-8') },
-      formatter: (p: { name: string; value: number; color: string }) =>
-        // the scale's classes reach this: echarts puts the string in the
-        // document, so the row is set in `text-xs` on the flat line the
-        // file's tooltip rows stand on rather than in inline pixels
-        `<div class="text-xs leading-none" style="display:flex;align-items:center;gap:2px">
+    ]
+  const ring = props.variant === 'donut'
+  return [
+    {
+      type: 'pie',
+      radius: ring ? DONUT_RADIUS : PIE_RADIUS,
+      center: PIE_CENTER,
+      startAngle: 0,
+      padAngle: ring ? DONUT_PAD : 0,
+      itemStyle: ring
+        ? { borderWidth: 0, borderRadius: 4 }
+        : { borderWidth: 0 },
+      ...flat,
+      data: data.value,
+    },
+  ]
+})
+
+const option = computed(() => ({
+  animation: true,
+  animationDuration: 500,
+  tooltip: {
+    show: true,
+    trigger: 'item',
+    confine: true,
+    backgroundColor: props.t('surface-elevation-2'),
+    borderWidth: 0,
+    borderRadius: 8,
+    padding: [5, 8, 5, 3],
+    extraCssText:
+      'box-shadow: 0 6px 12px -2px rgba(0,0,0,0.12), 0 0 6px 2px rgba(0,0,0,0.03), 0 0 1.5px rgba(0,0,0,0.15);',
+    textStyle: { fontSize: TYPE.xs, color: props.t('ink-gray-8') },
+    formatter: (p: { name: string; value: number; color: string }) =>
+      // the scale's classes reach this: echarts puts the string in the
+      // document, so the row is set in `text-xs` on the flat line the
+      // file's tooltip rows stand on rather than in inline pixels
+      `<div class="text-xs leading-none" style="display:flex;align-items:center;gap:2px">
           <span style="display:inline-flex;width:16px;height:16px;align-items:center;justify-content:center"><span style="width:5.5px;height:5.5px;border-radius:999px;background:${p.color}"></span></span>
           <span style="color:${props.t('ink-gray-6')};min-width:64px">${p.name}</span>
           <span class="text-xs-medium leading-none" style="color:${props.t('ink-gray-8')}">${p.value}%</span>
         </div>`,
-    },
-    series: [
-      props.variant === 'pie'
-        ? {
-            type: 'pie',
-            radius: PIE_RADIUS,
-            center: PIE_CENTER,
-            startAngle: 0,
-            clockwise: true,
-            padAngle: 0,
-            itemStyle: { borderWidth: 0 },
-            emphasis: { scale: false },
-            label: { show: false },
-            labelLine: { show: false },
-            data,
-          }
-        : props.variant === 'half'
-          ? {
-              type: 'pie',
-              radius: HALF_RADIUS,
-              center: ['50%', '88%'],
-              // both halves sweep across the top, 9 o'clock round to 3
-              startAngle: 180,
-              endAngle: 0,
-              clockwise: true,
-              // the file leaves about a degree between its arcs and rounds
-              // every end on 4 (its ellipses' own corner radius)
-              padAngle: 1,
-              itemStyle: { borderWidth: 0, borderRadius: 4 },
-              emphasis: { scale: false },
-              label: { show: false },
-              labelLine: { show: false },
-              data,
-            }
-          : {
-              type: 'pie',
-              roseType: 'radius',
-              radius: ['12%', '96%'],
-              center: ['50%', '50%'],
-              startAngle: 0,
-              clockwise: true,
-              padAngle: 0,
-              itemStyle: { borderWidth: 0 },
-              emphasis: { scale: false },
-              label: { show: false },
-              labelLine: { show: false },
-              data,
-            },
-    ],
-  }
-})
+  },
+  series: series.value,
+}))
 
 useChart({ container: plotEl, option: () => option.value })
 

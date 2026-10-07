@@ -14,8 +14,6 @@ defineProps<{
   small?: boolean
   /** a card the width of the row, for the heat table */
   wide?: boolean
-  /** a legend of names alone, the share being in the name */
-  plainLegend?: boolean
 }>()
 </script>
 
@@ -25,7 +23,6 @@ defineProps<{
     :class="[
       small ? 'chart-page-card--small' : wide ? '' : 'aspect-[580/360]',
       wide && 'col-span-full',
-      plainLegend && 'chart-page-card--plain-legend',
     ]"
   >
     <div class="flex h-full w-full flex-col">
@@ -52,20 +49,6 @@ defineProps<{
   @apply text-xs leading-tighter;
   color: var(--ink-gray-5);
   margin-top: 4px;
-}
-/* a ring's legend prints its slice's share after the name; the file's
-   legend names the share in the label itself */
-/* The share sits one span deeper than this reached, so it was printing twice —
-   "Data (22%) 22%" — where the file names it once (1589:43605's legend is the
-   name alone). The legend wraps its row in a truncating span and the row in
-   another, so the reading is the third child of the inner one. */
-.chart-page-card--plain-legend
-  [data-slot='chart-legend']
-  button
-  > span
-  > span
-  > span:nth-child(3) {
-  display: none;
 }
 /* the file's legend row: 7px dots, 13px ink-gray-5 labels, 14 apart */
 .chart-page-card [data-slot='chart-legend'] {
