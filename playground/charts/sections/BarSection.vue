@@ -29,10 +29,11 @@ const stack = computed(() => props.theme.colors('stack', 4))
 const labelled = computed(() => props.theme.colors('stackLabelled', 4))
 const group = computed(() => props.theme.colors('group', 4))
 const channels = computed(() => props.theme.colors('channels'))
-const lineOver = computed(() => [
-  props.theme.one('bar'),
-  props.theme.one('markers'),
-])
+// the cards a theme may colour on their own (chartThemes.ts `OwnRole`)
+const percent = computed(() => props.theme.colors('stackPercent', 4))
+const across = computed(() => [props.theme.one('horizontal')])
+const channelsStacked = computed(() => props.theme.colors('channelsStacked'))
+const lineOver = computed(() => props.theme.colors('dual', 2))
 
 /**
  * The file points at the column under the cursor with a 1px rule the full
@@ -257,7 +258,7 @@ const money = (value: number) =>
       stacked="normalized"
       :series-config="narrowConfig"
       :x-axis="monthAxis"
-      :palette="stack"
+      :palette="percent"
       :echart-options="crosshair"
     >
       <template #tooltip="tip">
@@ -313,7 +314,7 @@ const money = (value: number) =>
       :x-axis="{ title: 'Top countries', echartOptions: sideTitle }"
       :y-axis="{ ...incomeAxis, title: 'Income per Capita (USD)' }"
       axis-title-placement="bottom"
-      :palette="single"
+      :palette="across"
       :echart-options="crosshair"
     >
       <template #tooltip="tip">
@@ -356,7 +357,7 @@ const money = (value: number) =>
       :x-axis="{ echartOptions: flushNames }"
       :y-axis="{ title: 'Channel Contribution' }"
       axis-title-placement="bottom"
-      :palette="channels"
+      :palette="channelsStacked"
       :echart-options="crosshair"
     >
       <template #tooltip="tip">

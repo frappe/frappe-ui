@@ -9,6 +9,8 @@
 //
 // Where the file draws a kind in one theme only (Mist and Earthy have no
 // pies) the role follows the theme's own series order.
+import { HALF_ARCS } from './chartData'
+
 export type ChartTheme =
   | 'ocean'
   | 'mist'
@@ -78,7 +80,27 @@ export type ThemeRole =
   /** the line the annotation cards are drawn over */
   | 'annotation'
 
-export type ThemeRoles = Record<ThemeRole, string[]>
+/**
+ * Cards a theme may colour on their own. Ocean draws each of them with a role
+ * above — the 100% stack with the stack, the horizontal bars with the bar —
+ * and so every theme did; the Qualitative frame gives them colours of their
+ * own (1413:24050). A theme that names one draws it so, and one that does not
+ * falls back to what it drew before (OWN_ROLE_FALLBACK).
+ */
+export type OwnRole =
+  /** the 100% stack, bottom to top */
+  | 'stackPercent'
+  /** the dual-axis card: its bars, then its line */
+  | 'dual'
+  /** the horizontal bars of one series */
+  | 'horizontal'
+  /** the horizontal 100% stack's channels, in CHANNELS order */
+  | 'channelsStacked'
+  /** the half ring's arcs, from 9 o'clock round to 3 */
+  | 'halfArcs'
+
+export type ThemeRoles = Record<ThemeRole, string[]> &
+  Partial<Record<OwnRole, string[]>>
 
 const o = (n: number) => `--chart-ocean-${n}`
 const m = (n: string) => `--chart-mist-${n}`
@@ -246,22 +268,32 @@ const QUALITATIVE: ThemeRoles = {
   steps: [q(3), q(1), q(6), q(7)],
   scatter: [q(1)],
   scatters: [q(1), q(3), q(6), q(8)],
-  channels: [q(1), q(3), q(6), q(8), q(5)],
+  // CHANNELS order: organic, paid, Facebook, referral, others (1416:27814)
+  channels: [q(5), q(1), q(9), q(8), q(3)],
   bubble: [q(4)],
   bubbles: [q(1), q(3), q(6), q(7)],
-  map: [1, 2, 3, 4, 5, 6, 7, 8].map(q),
+  // the map's scale pill, low to high (1413:25718 "Rectangle 41868")
+  map: [1, 5, 3, 8, 6, 4, 9, 7, 2].map(q),
   heat: [q(1), q(7), q(2), q(4), q(6)],
   funnel: [q(1)],
   funnelSteps: [q(1)],
   pie: [q(1), q(4), q(7), q(5), q(2)],
   doughnut: [q(1), q(4), q(7), q(5), q(2)],
   half: [1, 2, 3, 4, 5, 6, 7, 8].map(q),
-  rose: [q(1), q(2), q(3), q(7), q(5), q(4)],
+  // the nested pie's rings widest first, as Ocean's reads them (1532:44143;
+  // the innermost is Q2's colour, left unbound)
+  rose: [q(1), q(5), q(7), q(4), q(3), q(2)],
   area: [q(4)],
   areas: [q(5), q(1), q(3), q(8)],
   stepped: [q(1), q(3), q(4), q(6)],
   spark: [q(5)],
   annotation: [q(5)],
+  // the cards the Qualitative frame colours on their own (1413:24050)
+  stackPercent: [q(7), q(4), q(6), q(1)],
+  dual: [q(8), q(4)],
+  horizontal: [q(3)],
+  channelsStacked: [q(5), q(1), q(9), q(3), q(6)],
+  halfArcs: [q(1), q(4), q(3), q(7), q(2), q(9), q(8), q(5)],
 }
 
 const DIVERGING: ThemeRoles = {
@@ -292,6 +324,16 @@ const DIVERGING: ThemeRoles = {
   stepped: [d(1), d(2), d(7), d(9)],
   spark: [d(2)],
   annotation: [d(8)],
+}
+
+/** what a theme draws a card with when it names no colours of its own for it */
+export const OWN_ROLE_FALLBACK: Record<OwnRole, (r: ThemeRoles) => string[]> = {
+  stackPercent: (r) => r.stack,
+  dual: (r) => [r.bar[0], r.markers[0]],
+  horizontal: (r) => r.bar,
+  channelsStacked: (r) => r.channels,
+  // the arcs carry the half ring's own ramp, at Ocean's steps
+  halfArcs: (r) => HALF_ARCS.map((a) => r.half[a.step % r.half.length]),
 }
 
 export const THEME_ROLES: Record<ChartTheme, ThemeRoles> = {

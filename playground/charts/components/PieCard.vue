@@ -31,6 +31,12 @@ const props = defineProps<{
    * `slices`, in palette order, as the file's does.
    */
   arcs?: Array<{ step: number; sweep: number }>
+  /**
+   * The colour of each of those arcs, in their order, where a theme colours
+   * them otherwise than its legend (the Qualitative frame's half ring); left
+   * out, an arc takes its step's colour from `colors`.
+   */
+  arcColors?: string[]
   t: (name: string) => string
 }>()
 
@@ -130,6 +136,7 @@ const items = computed(() =>
 const data = computed(() => {
   if (props.arcs)
     return props.arcs
+      .map((a, k) => ({ ...a, k }))
       .filter((a) => !isHidden(a.step))
       .map((a) => ({
         name: idOf(a.step),
@@ -138,7 +145,7 @@ const data = computed(() => {
         // carry its own gap or every small arc comes up short and the big one
         // swallows the difference. Here that was 2.4° on the widest.
         value: a.sweep + HALF_PAD,
-        itemStyle: { color: color(a.step) },
+        itemStyle: { color: props.arcColors?.[a.k] ?? color(a.step) },
         label: { show: false },
       }))
   return visible.value.map((s) => ({

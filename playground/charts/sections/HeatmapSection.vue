@@ -6,12 +6,22 @@ import { computed } from 'vue'
 import Card from '../components/Card.vue'
 import HeatTable from '../components/HeatTable.vue'
 import UsMap from '../components/UsMap.vue'
-import { HEAT_COLUMNS, heatSteps, heatTable } from '../chartData'
+import {
+  HEAT_COLUMNS,
+  heatSteps,
+  heatTable,
+  qualitativeHeatSteps,
+} from '../chartData'
+import type { ChartTheme } from '../chartThemes'
 import type { ThemeColors } from '../useChartTheme'
 
-const props = defineProps<{ theme: ThemeColors }>()
+const props = defineProps<{ theme: ThemeColors; themeId?: ChartTheme }>()
 const ramp = computed(() => props.theme.colors('map'))
 const heat = computed(() => props.theme.colors('heat'))
+/** where each cell's colour falls: the Qualitative frame places its own */
+const steps = computed(() =>
+  props.themeId === 'qualitative' ? qualitativeHeatSteps : heatSteps,
+)
 </script>
 
 <template>
@@ -28,7 +38,7 @@ const heat = computed(() => props.theme.colors('heat'))
       :rows="heatTable"
       :columns="HEAT_COLUMNS"
       :colors="heat"
-      :steps="heatSteps"
+      :steps="steps"
       :ink="theme.t('chart-inside-label')"
     />
   </div>

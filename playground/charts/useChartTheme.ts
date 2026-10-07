@@ -5,14 +5,20 @@
 // to a library chart's `palette`, which takes an explicit list and cycles
 // it — nothing in a section names a colour.
 import { computed, type ComputedRef, type Ref } from 'vue'
-import { THEME_ROLES, type ChartTheme, type ThemeRole } from './chartThemes'
+import {
+  OWN_ROLE_FALLBACK,
+  THEME_ROLES,
+  type ChartTheme,
+  type OwnRole,
+  type ThemeRole,
+} from './chartThemes'
 import { useChartTokens } from './useChartTokens'
 
 export type ThemeColors = {
   /** `count` colours for a role, cycled past the role's own length */
-  colors: (role: ThemeRole, count?: number) => string[]
+  colors: (role: ThemeRole | OwnRole, count?: number) => string[]
   /** the first colour of a role */
-  one: (role: ThemeRole) => string
+  one: (role: ThemeRole | OwnRole) => string
   /** a frappe-ui token (`ink-gray-5`), as a colour the chart can take */
   t: (name: string) => string
   /** the theme's whole ramp, light to dark */
@@ -23,9 +29,11 @@ export function useChartTheme(theme: Ref<ChartTheme>): ThemeColors {
   const { version, t } = useChartTokens()
   const roles = computed(() => THEME_ROLES[theme.value])
 
-  function colors(role: ThemeRole, count?: number): string[] {
+  function colors(role: ThemeRole | OwnRole, count?: number): string[] {
     void version.value
-    const names = roles.value[role]
+    // a card the theme colours on its own, or else what it drew before
+    const names =
+      roles.value[role] ?? OWN_ROLE_FALLBACK[role as OwnRole](roles.value)
     const n = count ?? names.length
     return Array.from({ length: n }, (_, i) => t(names[i % names.length]))
   }
