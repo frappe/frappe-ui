@@ -21,6 +21,14 @@ const props = defineProps<{
   colors: string[]
   opacity: number[]
   variant: 'centred' | 'flush' | 'columns'
+  /**
+   * How tall each step stands, as a share of the tallest. The columns card is
+   * the one place the file's taper is too far from the counts to read off
+   * them: 1356:68357 draws 221, 193, 158, 116 and 82, where the counts would
+   * give 221, 151, 114, 75 and 15 and leave the last stage a line rather than
+   * a step. Left out, the counts decide, which is what any other caller wants.
+   */
+  heights?: number[]
 }>()
 
 const first = () => props.stages[0]?.count ?? 1
@@ -37,6 +45,9 @@ const share = (count: number) => Math.round((count / first()) * 100)
 const width = (count: number) => 20 + (count / first()) * 80
 const fill = (i: number) => props.colors[i % props.colors.length]
 const alpha = (i: number) => props.opacity[i % props.opacity.length]
+/** a step's height, the file's share if it was given one */
+const tall = (count: number, i: number) =>
+  props.heights?.[i] !== undefined ? props.heights[i] * 100 : share(count)
 </script>
 
 <template>
@@ -150,11 +161,13 @@ const alpha = (i: number) => props.opacity[i % props.opacity.length]
         >
           {{ row.count }}
         </span>
-        <div class="relative mt-auto h-[72%]">
+        <!-- the tallest step reaches 221 of the file's 360 card, which is
+             three quarters of what the plot is left after the names -->
+        <div class="relative mt-auto h-[73%]">
           <div
             class="absolute inset-x-0 bottom-0"
             :style="{
-              height: `${share(row.count)}%`,
+              height: `${tall(row.count, i)}%`,
               background: fill(i),
               opacity: alpha(i),
               clipPath: 'polygon(0 0, 100% 10px, 100% 100%, 0 100%)',

@@ -12,6 +12,16 @@ const props = defineProps<{ theme: ThemeColors; themeId: ChartTheme }>()
 const colors = computed(() => props.theme.colors('funnel', 5))
 const steps = computed(() => props.theme.colors('funnelSteps', 5))
 const opacity = computed(() => FUNNEL_OPACITY[props.themeId])
+
+/**
+ * The columns card's steps, read off 1356:68357: five shapes 221, 193, 158,
+ * 116 and 82 tall, standing on the same line, which is the taper the file
+ * draws. It is not the one the counts give — 563 to 39 would close the last
+ * step to a fifteenth of the first and leave it a line on the card's edge —
+ * so the shares are carried here the way the heat table carries its steps,
+ * and the counts stay printed over them where a reader can see them.
+ */
+const COLUMN_HEIGHTS = [1, 0.8733, 0.7149, 0.5249, 0.371]
 </script>
 
 <template>
@@ -43,6 +53,7 @@ const opacity = computed(() => FUNNEL_OPACITY[props.themeId])
       :stages="funnel"
       :colors="steps"
       :opacity="opacity.map((o, i) => (i === 0 ? 1 : o))"
+      :heights="COLUMN_HEIGHTS"
       variant="columns"
     />
   </Card>
