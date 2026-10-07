@@ -57,6 +57,20 @@ const ordered = computed(() =>
  */
 const HALF_RADIUS = ['108%', '135%']
 
+/**
+ * The plain pie, as 1589:43577 draws it: a 206 circle on a 580×360 card,
+ * centred on the card itself — 187 to 393 across, 77 to 283 down, so its
+ * middle is the card's own middle. echarts measures a pie against the plot,
+ * which is the card less its padding, its title and its legend, and centres
+ * it there: left to itself the circle filled the plot's height and sat high
+ * of the card's centre by the legend's half. These two put it back on the
+ * file's: 74.8% of the plot's half-height is the file's 206 at any card size
+ * (the card holds the file's 580/360, so the plot scales with it), and 51.41%
+ * is where the card's own centre falls inside the plot.
+ */
+const PIE_RADIUS = ['0%', '74.8%']
+const PIE_CENTER = ['50%', '51.41%']
+
 const items = computed(() =>
   ordered.value.map((s, i) => ({
     name: s.name,
@@ -105,8 +119,8 @@ const option = computed(() => {
       props.variant === 'pie'
         ? {
             type: 'pie',
-            radius: ['0%', '92%'],
-            center: ['50%', '50%'],
+            radius: PIE_RADIUS,
+            center: PIE_CENTER,
             startAngle: 0,
             clockwise: true,
             padAngle: 0,
