@@ -246,11 +246,15 @@ const isOpen = (name: string) =>
       </p>
     </div>
 
-    <!-- link and library: a way back, top-left -->
+    <!-- link and library: a way back, top-left. The chevron's stroke starts
+         4.5 into its 16 box, so the button sits 11.5 in to put the stroke
+         on the area's 16 line, with the search field's edge and the Home
+         icon (whose stroke starts 1 in, so the rows' insides are 7 / 23 / 51
+         rather than the file's 8 / 24 / 52) — the user's call 2026-10-07 -->
     <button
       v-if="view === 'link' || view === 'library'"
       type="button"
-      class="absolute left-4 top-4 z-10 flex items-center gap-2 text-base leading-4 text-ink-gray-7"
+      class="absolute left-[11.5px] top-4 z-10 flex items-center gap-2 text-base leading-4 text-ink-gray-7"
       @click="reset"
     >
       <FileInputIcon name="left-chevron" class="size-4 text-ink-gray-6" />
@@ -311,7 +315,7 @@ const isOpen = (name: string) =>
           variant="ghost"
           size="sm"
           class="fima-row"
-          style="padding-left: 8px"
+          style="padding-left: 7px"
         >
           <template #prefix>
             <FileInputIcon name="home" class="size-4" />
@@ -323,7 +327,7 @@ const isOpen = (name: string) =>
             variant="ghost"
             size="sm"
             class="fima-row"
-            style="padding-left: 24px"
+            style="padding-left: 23px"
             :aria-expanded="isOpen(f.name)"
             @click="toggle(f.name)"
           >
@@ -339,7 +343,7 @@ const isOpen = (name: string) =>
               variant="ghost"
               size="sm"
               class="fima-row"
-              style="padding-left: 52px"
+              style="padding-left: 51px"
               @click="upload(n, 10.2 * 1024)"
             >
               <template #prefix>
