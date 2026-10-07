@@ -213,9 +213,11 @@ onBeforeUnmount(() => {
     <!-- the rail: the kinds of chart, then the palette. It stays put while
          the cards scroll under it, as the other pages' outline does — that
          one stands outside the stage's scroller; this one is inside it, so
-         it sticks to the top instead. -->
+         it sticks to the top instead. It holds 16 off the window's edge, or a
+         hovered row's background runs into it; the width stays 180, so the
+         stage, and every card, keeps its size. -->
     <aside
-      class="sticky top-0 hidden h-fit w-[180px] shrink-0 self-start pt-[66px] lg:block"
+      class="sticky top-0 hidden h-fit w-[180px] shrink-0 self-start pr-4 pt-[66px] lg:block"
     >
       <h2
         id="chart-types"
