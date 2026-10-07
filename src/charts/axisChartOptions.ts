@@ -33,10 +33,10 @@ const BAR_MAX_WIDTH = 32
 /** Slim bars with an airy gap between categories. */
 const BAR_CATEGORY_GAP = '38%'
 const BAR_RADIUS = 4
-/** Room for a data label sitting past the end of a bar. */
-const BAR_LABEL_GUTTER = 40
-/** Room for a data label sitting above a point. */
-const LINE_LABEL_GUTTER = 24
+/** One line of label above a column or a point, at echarts' 5px label distance. */
+const LABEL_GUTTER = DATA_LABEL_FONT_SIZE + 5
+/** A label past the end of a horizontal bar spends its width, not its height. */
+const HORIZONTAL_BAR_LABEL_GUTTER = 40
 
 export const DEFAULT_LINE_WIDTH = 2
 /** Big enough to hit with a pointer, small enough not to read as a scatter plot. */
@@ -153,7 +153,7 @@ export function buildAxisChartOption(
     grid: buildAxisGrid({
       horizontal,
       isRTL,
-      labelGutter: dataLabelGutter(plotted),
+      labelGutter: dataLabelGutter(plotted, horizontal),
       xAxisTitle: config.xAxis.title,
     }),
     xAxis: horizontal ? valueAxis : xColumnAxis,
@@ -352,13 +352,14 @@ function pinValueAxis(
 }
 
 /** Chart-wide room for the labels, i.e. whatever the hungriest mark needs. */
-function dataLabelGutter(plotted: PlottedSeries[]) {
+function dataLabelGutter(plotted: PlottedSeries[], horizontal: boolean) {
   let gutter = 0
   for (const { series, mark, stack } of plotted) {
     if (!series.showDataLabels) continue
-    // Stacked labels sit inside the fill, so they need no gutter.
+    // Stacked bar labels sit inside the fill, so they need no gutter.
+    if (mark === 'bar' && stack) continue
     const needed =
-      mark === 'bar' ? (stack ? 0 : BAR_LABEL_GUTTER) : LINE_LABEL_GUTTER
+      mark === 'bar' && horizontal ? HORIZONTAL_BAR_LABEL_GUTTER : LABEL_GUTTER
     gutter = Math.max(gutter, needed)
   }
   return gutter

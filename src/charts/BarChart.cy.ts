@@ -273,6 +273,23 @@ describe('BarChart', () => {
     })
   })
 
+  describe('data labels', () => {
+    it('keeps the label of a bar at the top of the axis inside the canvas', () => {
+      mountChart({
+        y: 'sales',
+        yAxis: { max: 20 },
+        seriesConfig: { sales: { showDataLabels: true } },
+      })
+      bars().should('have.length', data.length)
+      cy.get('[data-slot="chart-plot"] svg').then(($svg) => {
+        const top = $svg[0].getBoundingClientRect().top
+        cy.get('[data-slot="chart-plot"] svg text').each(($text) => {
+          expect($text[0].getBoundingClientRect().top).to.be.at.least(top)
+        })
+      })
+    })
+  })
+
   describe('maxSeries', () => {
     const byRegion = [
       { month: 'Jan', region: 'East', amount: 50 },

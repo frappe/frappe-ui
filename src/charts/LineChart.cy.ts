@@ -137,6 +137,23 @@ describe('LineChart', () => {
     })
   })
 
+  describe('data labels', () => {
+    it('keeps the label of a point at the top of the axis inside the canvas', () => {
+      mountChart({
+        y: 'sales',
+        yAxis: { max: 20 },
+        seriesConfig: { sales: { showDataLabels: true } },
+      })
+      lines().should('have.length', 1)
+      cy.get('[data-slot="chart-plot"] svg').then(($svg) => {
+        const top = $svg[0].getBoundingClientRect().top
+        cy.get('[data-slot="chart-plot"] svg text').each(($text) => {
+          expect($text[0].getBoundingClientRect().top).to.be.at.least(top)
+        })
+      })
+    })
+  })
+
   describe('reference lines', () => {
     it('draws a rule that is neither a series nor a legend entry', () => {
       mountChart({ referenceLines: [{ value: 12, label: 'Target' }] })

@@ -226,8 +226,20 @@ describe('combo axes', () => {
     }).grid.top
 
     expect(withLine).toBeGreaterThan(bare)
-    // A free bar labels past its tip, which needs more room than a point does.
-    expect(withBar).toBeGreaterThan(withLine)
+    // Above a column or above a point, a label is one line tall.
+    expect(withBar).toBe(withLine)
+  })
+
+  it('reserves a label’s width past the end of a horizontal bar', () => {
+    const labelled = {
+      horizontal: true,
+      series: [{ name: 'sales', showDataLabels: true }, { name: 'refunds' }],
+    }
+    const option = build(labelled)
+    expect(option.grid.top).toBe(8)
+    expect(option.grid.right).toBeGreaterThan(
+      build({ horizontal: true }).grid.right,
+    )
   })
 })
 
