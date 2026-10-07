@@ -46,7 +46,7 @@ const print = (value: number) => value.toLocaleString('en-US')
         <tr v-for="([name, ...cells], r) in rows" :key="name" class="h-10">
           <th
             scope="row"
-            class="w-12 border-b border-l border-outline-gray-1 bg-surface-elevation-2 px-2 text-center font-normal"
+            class="heat-rule w-12 border-b border-l border-outline-gray-1 bg-surface-elevation-2 px-2 text-center font-normal"
             :class="[
               r === 0 && 'rounded-tl-[8px] border-t',
               r === rows.length - 1 && 'rounded-bl-[8px]',
@@ -54,8 +54,11 @@ const print = (value: number) => value.toLocaleString('en-US')
           >
             {{ r + 1 }}
           </th>
+          <!-- the name stands on the number's ground: the two are one label
+               column, and a cell left transparent reads as a second tone
+               against it wherever the card is not white -->
           <td
-            class="w-[134px] border-b border-l border-outline-gray-1 px-2 text-start text-ink-gray-7"
+            class="heat-rule w-[134px] border-b border-l border-outline-gray-1 bg-surface-elevation-2 px-2 text-start text-ink-gray-7"
             :class="r === 0 && 'border-t'"
           >
             {{ name }}
@@ -85,3 +88,19 @@ const print = (value: number) => value.toLocaleString('en-US')
     </table>
   </div>
 </template>
+
+<style scoped>
+/* The label column's rules step a tone in dark mode. outline-gray-1 is the
+   hairline the file draws and it holds in light, but dark resolves it to
+   oklch(0.26 0 0) — which is surface-elevation-2 to the decimal, the very
+   ground the column stands on, so the rules disappeared into it. gray-2
+   lands at 0.341 and reads as a line again. */
+:root[data-theme='dark'] .heat-rule {
+  border-color: var(--outline-gray-2);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .heat-rule {
+    border-color: var(--outline-gray-2);
+  }
+}
+</style>
