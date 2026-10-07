@@ -7,7 +7,8 @@
 // in ink-gray-7, padded by the size's own side padding (8 / 8 / 10 / 12);
 // on the subtle variant a white Button with the sm shadow, inset 2 (4 on
 // lg) and one step smaller than the field (20 / 24 / 28 / 32 tall). A
-// chosen file puts the 16px image glyph before its name, 6 apart; while it
+// chosen file puts the 16px file glyph before its name, 6 apart (generic —
+// any format goes, node 35878:127227); while it
 // uploads a 16px ink-gray-5 Spinner stands on the Browse (which keeps its
 // room); an error turns the outline outline-red-3 (the file's #fdc2c2), or
 // the subtle fill surface-red-1; disabled is
@@ -121,6 +122,15 @@ function onDrop(e: DragEvent) {
   if (file) take(file)
 }
 
+/**
+ * The subtle Browse's corners are concentric with the field's: the field's
+ * radius less the inset it sits in — xs 6 − 2 = 4 (node 35821:65828), sm
+ * and md 8 − 2 = 6, lg 10 − 4 = 6 — where the library's Button gives 6 / 6
+ * / 8 / 8.
+ */
+const browseRadius = computed(
+  () => ({ xs: 4, sm: 6, md: 6, lg: 6 })[props.size],
+)
 /** The Button one step under the field: 20 / 24 / 28 / 32 tall. */
 const buttonSize = computed(
   () =>
@@ -302,7 +312,7 @@ watch(
           @keydown.space.prevent="open"
         >
           <template v-if="hasFile" #prefix>
-            <FileInputIcon name="image" class="size-4 text-ink-gray-7" />
+            <FileInputIcon name="file" class="size-4 text-ink-gray-7" />
           </template>
           <template #suffix>
             <span
@@ -338,7 +348,11 @@ watch(
                 :size="buttonSize"
                 variant="outline"
                 class="relative !border-0 !text-ink-gray-7 shadow-sm"
-                :class="size === 'xs' && '!h-5'"
+                :class="[
+                  size === 'xs' && '!h-5',
+                  buttonSize === 'xs' && '!text-[13px]',
+                ]"
+                :style="{ borderRadius: `${browseRadius}px` }"
                 tabindex="-1"
                 @click.stop="open"
               >

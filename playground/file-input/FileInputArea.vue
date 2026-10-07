@@ -5,9 +5,10 @@
 // click to browse" at 14/21 medium ink-gray-7 (tracked 0.035em — the
 // file's title runs 224.5 wide where the library's 0.02em gives 218, at the
 // same cap height), 4, the note at 14/21
-// ink-gray-6; on the outline variant 16 more and a sm subtle "Select file"
-// Button. Outline: no fill, the line outline-gray-3 on hover. Subtle: no
-// button, surface-gray-1, surface-gray-2 on hover. The area is 174 tall
+// ink-gray-6. No "Select file" button on either variant: the whole area is
+// the way in, a click anywhere opens the picker (the user's call
+// 2026-10-07). Outline: no fill, the line outline-gray-3 on hover. Subtle:
+// surface-gray-1, surface-gray-2 on hover. The area is 174 tall
 // either way, its contents centred in it — the file draws the horizontal
 // one 200, but the user wanted switching orientation to keep its size.
 //
@@ -18,8 +19,7 @@
 //               0.035em, like the title), 4, "1.5 MB • 100%" at 13/20
 //               (ink-gray-7, 5, a 4px gray-3 dot, 5, ink-green-7), the 16px
 //               close glyph at the right. While a file goes up its card sits
-//               inside the area, 34 under the title, the Select file button
-//               gone, a 4px Progress across the card's body, 8 under it.
+//               inside the area, 34 under the title, a 4px Progress across the card's body, 8 under it.
 //   horizontal  60x60 thumbnails, radius 10, 8 apart, 6 under the area; a
 //               14px white badge with the 10px close glyph 4 over the top,
 //               2 past the right; one going up wears a 63% black veil with a
@@ -233,16 +233,6 @@ function onDrop(e: DragEvent) {
             </p>
           </div>
         </div>
-        <Button
-          v-if="variant === 'outline' && !inArea.length"
-          size="sm"
-          variant="subtle"
-          class="!text-ink-gray-7"
-          tabindex="-1"
-          @click.stop="open"
-        >
-          Select file
-        </Button>
       </div>
       <!-- a vertical upload in progress, in the area -->
       <div v-if="inArea.length" class="mt-[34px] flex w-full flex-col gap-3">
