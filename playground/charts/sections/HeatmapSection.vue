@@ -20,8 +20,10 @@ const heat = computed(() => props.theme.colors('heat'))
   </Card>
   <!-- The file draws the table as its own card: the 8px corner and the
        hairline are the table's, and there is no second frame around it
-       (1356:68481 stands on the page beside the map card, not inside one). -->
-  <div class="col-span-full">
+       (1356:68481 stands on the page beside the map card, not inside one).
+       Beside, not beneath — it takes one column of the grid like every
+       other card, so the row reads across. -->
+  <div class="min-w-0">
     <HeatTable
       :rows="heatTable"
       :columns="HEAT_COLUMNS"
