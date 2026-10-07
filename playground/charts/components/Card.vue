@@ -45,16 +45,11 @@ defineProps<{
 }
 /* the file's title: 14 medium, 115%, ink-gray-8 (#171717) */
 .chart-page-card [data-slot='chart-header'] > div > div:first-child {
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 1.15;
-  letter-spacing: 0.015em;
+  @apply text-base-medium leading-tighter;
   color: var(--ink-gray-8);
 }
 .chart-page-card [data-slot='chart-header'] > div > div + div {
-  font-size: 12px;
-  line-height: 1.15;
-  letter-spacing: 0.02em;
+  @apply text-xs leading-tighter;
   color: var(--ink-gray-5);
   margin-top: 4px;
 }
@@ -72,8 +67,7 @@ defineProps<{
   column-gap: 6px;
 }
 .chart-page-card [data-slot='chart-legend'] button {
-  font-size: 13px;
-  letter-spacing: 0.02em;
+  @apply text-sm leading-tighter;
   color: var(--ink-gray-5);
 }
 .chart-page-card [data-slot='chart-legend'] button > span > span:nth-child(2) {

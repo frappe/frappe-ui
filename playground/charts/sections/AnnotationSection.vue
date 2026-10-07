@@ -12,6 +12,7 @@
 // amber-3, green-3 and violet are frappe-ui's red-5, amber-4 and amber-5,
 // green-5 and violet-5, the same colours under the library's numbering.
 import { computed } from 'vue'
+import { TYPE, TYPE_WEIGHT } from '../chartType'
 import { MarkAreaComponent, MarkPointComponent } from 'echarts/components'
 import { LineChart, registerChartModules } from '../../../src/charts'
 import Card from '../components/Card.vue'
@@ -43,8 +44,8 @@ function marks(color: string, label: string, ...indexes: number[]) {
         position: 'bottom',
         distance: 6,
         color,
-        fontSize: 12,
-        fontWeight: 500,
+        fontSize: TYPE.xs,
+        fontWeight: TYPE_WEIGHT.medium,
         formatter: label,
       },
       data: indexes.map(point),
@@ -68,8 +69,8 @@ function band(
       position: 'top',
       distance: 6,
       color: ink,
-      fontSize: 12,
-      fontWeight: 500,
+      fontSize: TYPE.xs,
+      fontWeight: TYPE_WEIGHT.medium,
       formatter: label,
     },
     emphasis: { disabled: true },
@@ -118,7 +119,7 @@ const callout = computed(() => ({
           distance: 8,
           formatter: 'Sales dropped here',
           color: t('ink-gray-6'),
-          fontSize: 12,
+          fontSize: TYPE.xs,
           backgroundColor: t('surface-elevation-2'),
           borderRadius: 8,
           padding: [8, 8, 8, 8],
@@ -193,8 +194,8 @@ const twoBands = computed(() => ({
           show: true,
           position: 'top',
           distance: 6,
-          fontSize: 12,
-          fontWeight: 500,
+          fontSize: TYPE.xs,
+          fontWeight: TYPE_WEIGHT.medium,
           formatter: (p: { name: string }) => p.name,
         },
       },
@@ -220,7 +221,7 @@ const goodAverage = computed(() => ({
                 position: 'insideTopRight',
                 distance: 10,
                 color: t('ink-green-5'),
-                fontSize: 12,
+                fontSize: TYPE.xs,
                 formatter: 'Good',
               },
             },
@@ -236,7 +237,7 @@ const goodAverage = computed(() => ({
                 position: 'insideBottomRight',
                 distance: 10,
                 color: t('ink-amber-5'),
-                fontSize: 12,
+                fontSize: TYPE.xs,
                 formatter: 'Average',
               },
             },

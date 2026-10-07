@@ -294,22 +294,20 @@ function track(event: MouseEvent) {
     </div>
 
     <div class="relative flex h-full flex-col px-3 pt-[11px]">
-      <div class="text-base leading-[1.15] tracking-[0.02em] text-ink-gray-5">
+      <div class="text-base leading-tighter text-ink-gray-5">
         {{ title }}
       </div>
       <div
         class="flex items-end gap-[7px]"
         :class="variant === 'beside' ? 'mt-[29px]' : 'mt-2'"
       >
-        <div
-          class="text-[20px] font-medium leading-[1.15] tracking-[0.01em] text-ink-gray-8"
-        >
+        <div class="text-3xl-medium leading-tighter text-ink-gray-8">
           {{ value }}
         </div>
         <!-- the file sets the change beside the number over a bleeding trend -->
         <div
           v-if="inline && delta"
-          class="flex items-center gap-1 pb-[2px] text-[13px] leading-[1.15] tracking-[0.02em]"
+          class="flex items-center gap-1 pb-[2px] text-sm leading-tighter"
         >
           <span
             class="flex items-center gap-0.5"
@@ -363,7 +361,7 @@ function track(event: MouseEvent) {
       </div>
       <div
         v-if="delta && !inline"
-        class="flex items-center gap-1 text-[13px] leading-[1.15] tracking-[0.02em]"
+        class="flex items-center gap-1 text-sm leading-tighter"
         :class="variant === 'beside' ? 'mt-auto pb-3' : 'mt-1.5'"
       >
         <span

@@ -84,7 +84,7 @@ const current = computed(() => CHART_TYPES.find((t) => t.id === type.value)!)
     <div
       class="chart-stage flex min-w-0 flex-1 flex-col pb-12 pl-[33px] pr-[33px] pt-[43px] lg:pr-12"
     >
-      <h1 class="text-3xl-semibold leading-[1.15] text-ink-gray-9">Charts</h1>
+      <h1 class="text-3xl-semibold leading-tighter text-ink-gray-9">Charts</h1>
       <div
         :key="`${type}-${themeId}`"
         :data-chart-theme="themeId"
@@ -109,7 +109,7 @@ const current = computed(() => CHART_TYPES.find((t) => t.id === type.value)!)
     >
       <h2
         id="chart-types"
-        class="text-base font-semibold leading-[1.15] tracking-[0.015em] text-ink-gray-9"
+        class="text-base-semibold leading-tighter text-ink-gray-9"
       >
         Charts type
       </h2>
@@ -123,7 +123,7 @@ const current = computed(() => CHART_TYPES.find((t) => t.id === type.value)!)
           <button
             type="button"
             role="tab"
-            class="block w-full border-l py-1 pl-4 text-start text-base leading-[1.15] tracking-[0.02em] transition-colors"
+            class="block w-full border-l py-1 pl-4 text-start text-base leading-tighter transition-colors"
             :class="
               type === t.id
                 ? 'border-[color:var(--ink-gray-7)] text-ink-gray-9'
@@ -137,9 +137,7 @@ const current = computed(() => CHART_TYPES.find((t) => t.id === type.value)!)
         </li>
       </ul>
 
-      <h2
-        class="mt-[45px] text-base font-semibold leading-[1.15] tracking-[0.015em] text-ink-gray-9"
-      >
+      <h2 class="mt-[45px] text-base-semibold leading-tighter text-ink-gray-9">
         Theme
       </h2>
       <RadioGroup

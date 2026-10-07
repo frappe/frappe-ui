@@ -42,7 +42,7 @@ const print = (value: number) => value.toLocaleString('en-US')
          number, 134 for the name and seven readings of 60, and the card keeps
          the rest -->
     <table
-      class="w-auto border-separate border-spacing-0 text-[14px] leading-[1.15] tracking-[0.02em] text-ink-gray-8"
+      class="w-auto border-separate border-spacing-0 text-base leading-tighter text-ink-gray-8"
       :aria-label="`Heat map, ${columns.join(', ')}`"
     >
       <tbody>

@@ -413,8 +413,7 @@ const money = (value: number) =>
 :deep([data-slot='chart-legend'] button) {
   padding-left: 6px;
   padding-right: 6px;
-  font-size: 12px;
-  letter-spacing: 0.02em;
+  @apply text-xs leading-tighter;
 }
 :deep([data-slot='chart-legend'] button > span > span) {
   gap: 4.5px;
@@ -430,14 +429,14 @@ const money = (value: number) =>
 .bar-card--axis-title-centre
   :deep([data-slot='chart-plot'] + div:not([data-slot])) {
   justify-content: center;
-  font-size: 11px;
+  @apply text-2xs leading-tighter;
 }
 .bar-card--subtitle-centre :deep([data-slot='chart-header'] > div:first-child) {
   width: 100%;
 }
 .bar-card--subtitle-centre :deep([data-slot='chart-header'] > div > div + div) {
   text-align: center;
-  font-size: 11px;
+  @apply text-2xs leading-tighter;
 }
 
 /* The file hangs this card's legend over the plot, under the title: the
@@ -459,7 +458,7 @@ const money = (value: number) =>
   order: 3;
 }
 .bar-card--legend-top :deep([data-slot='chart-legend'] button) {
-  font-size: 13px;
+  @apply text-sm leading-tighter;
 }
 
 /* A card that names its series in the plot itself needs no legend under it,

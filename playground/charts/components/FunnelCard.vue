@@ -66,9 +66,7 @@ const tall = (count: number, i: number) =>
         class="grid h-[45px] items-center"
         :style="{ gridTemplateColumns: '103px 1fr 103px' }"
       >
-        <span
-          class="ps-2 text-[13px] leading-[1.15] tracking-[0.02em] text-ink-gray-5"
-        >
+        <span class="ps-2 text-sm leading-tighter text-ink-gray-5">
           {{ row.stage }}
         </span>
         <div class="relative flex h-full items-center justify-center">
@@ -81,14 +79,12 @@ const tall = (count: number, i: number) =>
             }"
           />
           <span
-            class="absolute rounded-full bg-surface-elevation-2 px-1.5 py-1 text-[13px] leading-[1.15] tracking-[0.02em] text-ink-gray-8"
+            class="absolute rounded-full bg-surface-elevation-2 px-1.5 py-1 text-sm leading-tighter text-ink-gray-8"
           >
             {{ row.count }}
           </span>
         </div>
-        <span
-          class="pe-2 text-end text-[13px] leading-[1.15] tracking-[0.02em] text-ink-gray-5"
-        >
+        <span class="pe-2 text-end text-sm leading-tighter text-ink-gray-5">
           {{ share(row.count) }}%
         </span>
       </div>
@@ -109,9 +105,7 @@ const tall = (count: number, i: number) =>
         class="grid h-[45px] items-center"
         :style="{ gridTemplateColumns: '23.9% 62.7% 1fr' }"
       >
-        <span
-          class="text-[13px] leading-[1.15] tracking-[0.02em] text-ink-gray-5"
-        >
+        <span class="text-sm leading-tighter text-ink-gray-5">
           {{ row.stage }}
         </span>
         <div class="relative h-full">
@@ -125,7 +119,7 @@ const tall = (count: number, i: number) =>
             }"
           />
           <span
-            class="absolute left-3 top-[11px] rounded-full bg-surface-elevation-2 px-2 py-1 text-[13px] leading-[1.15] tracking-[0.02em] text-ink-gray-8"
+            class="absolute left-3 top-[11px] rounded-full bg-surface-elevation-2 px-2 py-1 text-sm leading-tighter text-ink-gray-8"
           >
             {{ row.count }}
           </span>
@@ -150,13 +144,13 @@ const tall = (count: number, i: number) =>
              235, 345 and 455, each 110 wide, so each one opens where the
              last one closed), and only the text stands off the hairline -->
         <span
-          class="text-[13px] leading-[1.15] tracking-[0.02em] text-ink-gray-5"
+          class="text-sm leading-tighter text-ink-gray-5"
           :class="i > 0 && 'ps-2.5'"
         >
           {{ row.stage }}
         </span>
         <span
-          class="mt-2 text-[13px] leading-[1.15] tracking-[0.02em] text-ink-gray-8"
+          class="mt-2 text-sm leading-tighter text-ink-gray-8"
           :class="i > 0 && 'ps-2.5'"
         >
           {{ row.count }}

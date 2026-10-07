@@ -10,6 +10,7 @@
 // outlines from a trimmed `us-atlas` (us-states.geo.json).
 import { computed, ref, shallowRef, watchEffect } from 'vue'
 import { useIsDark } from '../useChartTokens'
+import { TYPE } from '../chartType'
 import { MapChart as MapSeries } from 'echarts/charts'
 import { TooltipComponent, VisualMapComponent } from 'echarts/components'
 import { registerMap } from 'echarts/core'
@@ -83,7 +84,7 @@ const option = computed(() => {
       padding: [5, 8, 5, 3],
       extraCssText:
         'box-shadow: 0 6px 12px -2px rgba(0,0,0,0.12), 0 0 6px 2px rgba(0,0,0,0.03), 0 0 1.5px rgba(0,0,0,0.15);',
-      textStyle: { fontSize: 12, color: props.t('ink-gray-8') },
+      textStyle: { fontSize: TYPE.xs, color: props.t('ink-gray-8') },
       formatter: (p: {
         name: string
         value: number
@@ -100,12 +101,16 @@ const option = computed(() => {
         // gave this state — so the dot is that state's own step, not the
         // ramp's end. A state the map could not colour keeps the darkest.
         const dot = p.color || props.colors[props.colors.length - 1]
-        return `<div style="display:flex;flex-direction:column;gap:4px;line-height:1;letter-spacing:0.02em">
+        // echarts drops this straight into the document, so the scale's own
+        // classes reach it — `text-xs` is the 12px the file sets these rows
+        // in and carries its tracking with it, and `leading-none` is the flat
+        // line the file's tooltip rows stand on.
+        return `<div class="text-xs leading-none" style="display:flex;flex-direction:column;gap:4px">
           <div style="padding-left:5px;color:${props.t('ink-gray-8')}">${full}</div>
           <div style="display:flex;align-items:center;gap:2px">
             <span style="display:inline-flex;width:16px;height:16px;align-items:center;justify-content:center"><span style="width:5.5px;height:5.5px;border-radius:999px;background:${dot}"></span></span>
             <span style="color:${props.t('ink-gray-6')};min-width:81px">Active users</span>
-            <span style="color:${props.t('ink-gray-8')};font-weight:500">${v}</span>
+            <span class="text-xs-medium leading-none" style="color:${props.t('ink-gray-8')}">${v}</span>
           </div>
         </div>`
       },
@@ -138,7 +143,7 @@ const option = computed(() => {
           itemStyle: { areaColor: props.t('surface-elevation-2') },
           label: {
             show: true,
-            fontSize: 11,
+            fontSize: TYPE['2xs'],
             color: props.t('ink-gray-7'),
             formatter: (p: { name: string }) => p.name,
           },
@@ -192,7 +197,7 @@ const gradient = computed(
       <div ref="plotEl" class="h-full w-full" role="img" :aria-label="title" />
       <!-- the scale: 100, the pill, 10,000, and the marker over it -->
       <div
-        class="pointer-events-none absolute bottom-0 left-1 flex items-center gap-1 text-[11px] leading-[1.15] text-ink-gray-5"
+        class="pointer-events-none absolute bottom-0 left-1 flex items-center gap-1 text-2xs leading-tighter text-ink-gray-5"
         aria-hidden="true"
       >
         <span>100</span>

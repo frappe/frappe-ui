@@ -75,7 +75,7 @@ function reading(item: ChartTooltipItem) {
     <!-- the file insets the date by 5, which puts it over the row's mark -->
     <div
       v-if="label && !bare"
-      class="pl-[5px] text-[12px] leading-none tracking-[0.02em] text-ink-gray-8"
+      class="pl-[5px] text-xs leading-none text-ink-gray-8"
     >
       {{ label }}
     </div>
@@ -111,12 +111,12 @@ function reading(item: ChartTooltipItem) {
         </span>
         <span class="flex min-w-0 flex-1 items-center gap-1">
           <span
-            class="min-w-0 flex-1 truncate text-[12px] leading-none tracking-[0.02em] text-ink-gray-6"
+            class="min-w-0 flex-1 truncate text-xs leading-none text-ink-gray-6"
           >
             {{ item.label }}
           </span>
           <span
-            class="shrink-0 text-[12px] font-medium leading-none tracking-[0.02em] tabular-nums text-ink-gray-8"
+            class="shrink-0 text-xs-medium leading-none tabular-nums text-ink-gray-8"
           >
             {{ reading(item) }}
           </span>
