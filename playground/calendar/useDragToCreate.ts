@@ -461,6 +461,10 @@ export function useDragShadow(root: Ref<HTMLElement | null>) {
     // pointer event after `dragstart` — including the `pointerup` that would
     // clear these. `useMonthDragSkeleton` covers that view instead.
     if (pill.closest('[data-week-row]')) return
+    // An agenda row is never picked up: the list is read and clicked, not
+    // rearranged (the user's call 2026-10-07 — dragging makes no sense
+    // there). It still opens its event on a click.
+    if (pill.closest('.calendar-row')) return
     watching = pill
     origin = rectOf(pill)
     grabX = e.clientX - origin.left
