@@ -309,8 +309,10 @@ watch(example, applyExample)
 /** What switching example sets up, beyond the nodes. */
 function applyExample(now: Example) {
   if (now === 'hierarchy') {
-    // the file shows this one without guides, the fill the whole row, and
-    // with its suffix; its folded rows stay folded
+    // the file shows this one without guides — and it never takes any, so
+    // the Indentation select stays on None and is disabled (the user's call
+    // 2026-10-07) — the fill the whole row, and with its suffix; its folded
+    // rows stay folded
     guides.value = 'none'
     fullWidth.value = true
     suffix.value = true
@@ -491,6 +493,7 @@ onMounted(() => applyExample(example.value))
               variant="subtle"
               class="w-[120px]"
               aria-label="Indentation"
+              :disabled="example === 'hierarchy'"
             />
           </div>
           <div class="flex h-7 items-center justify-between">
