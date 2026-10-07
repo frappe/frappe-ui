@@ -143,8 +143,10 @@ const tall = (count: number, i: number) =>
              touch along their whole edge (1356:68357 has them at 16, 125,
              235, 345 and 455, each 110 wide, so each one opens where the
              last one closed), and only the text stands off the hairline -->
+        <!-- the file opens the names 19 under the title (51 of 360 against
+             a title ending at 32), where the library's header leaves 6 -->
         <span
-          class="text-sm leading-tighter text-ink-gray-5"
+          class="mt-[13px] text-sm leading-tighter text-ink-gray-5"
           :class="i > 0 && 'ps-2.5'"
         >
           {{ row.stage }}
