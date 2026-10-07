@@ -36,9 +36,9 @@ const inputType = ref<InputType>(
 const inputTypes = [
   { label: 'File input', value: 'field' },
   { label: 'File input area', value: 'area' },
-  // the area's other version: a file from the device, the library or a
-  // link (node 35856:51955)
-  { label: 'Multi-source area', value: 'sources' },
+  // the area's other version: a CSV from the device, the library or a link
+  // (node 35856:51955); the user named it
+  { label: 'CSV files', value: 'sources' },
 ]
 const orientation = ref<'vertical' | 'horizontal'>(
   pick('orientation', ['vertical', 'horizontal'], 'vertical'),
@@ -90,7 +90,11 @@ const DESCRIPTION =
            and the area with four files under it -->
       <div class="h-[612px] w-[700px]">
         <!-- the multi-source area is the box's full 700 width, at its top -->
-        <FileImportArea v-if="inputType === 'sources'" :disabled="disabled" />
+        <FileImportArea
+          v-if="inputType === 'sources'"
+          v-model:error="error"
+          :disabled="disabled"
+        />
         <div v-else-if="inputType === 'area'" class="pl-[272px]">
           <FileInputArea
             v-model:error="error"
@@ -133,7 +137,7 @@ const DESCRIPTION =
               aria-label="Input type"
             />
           </div>
-          <!-- the multi-source area has one look, and no error in its file -->
+          <!-- CSV files has one look -->
           <div
             v-if="inputType !== 'sources'"
             class="flex h-7 items-center justify-between"
@@ -177,10 +181,7 @@ const DESCRIPTION =
             <span class="text-base text-ink-gray-7">Preview</span>
             <Switch v-model="preview" size="sm" aria-label="Preview" />
           </div>
-          <div
-            v-if="inputType !== 'sources'"
-            class="flex h-7 items-center justify-between"
-          >
+          <div class="flex h-7 items-center justify-between">
             <span class="text-base text-ink-gray-7">Error</span>
             <Switch v-model="error" size="sm" aria-label="Error" />
           </div>

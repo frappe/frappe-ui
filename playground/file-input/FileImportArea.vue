@@ -30,18 +30,26 @@
 //               under, the folders as full-width sm ghost Buttons — Home 8
 //               in, a folder 24, its files 52 — hover surface-gray-2
 //
+// Error (none in the file — proposed, in the language of the file input
+// area's failed card): the card in a 1px outline-red-5 line, no shadow,
+// "Something went wrong" at 13 ink-red-6 under the name (the area card's
+// longer line doesn't fit the file's 320 beside the button), and
+// a sm red subtle "Try again" Button at the right, which uploads it again.
+//
 // There is no server here: a file "uploads" over a couple of seconds; a
 // CSV from the device is read for its real row and column counts, the rest
 // show the design's 239 and 18.
-import { computed, onBeforeUnmount, ref } from 'vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { Button, Progress, TextInput } from '../../src'
 import FileInputIcon from './FileInputIcon.vue'
 
-const props = withDefaults(defineProps<{ disabled?: boolean }>(), {
-  disabled: false,
-})
+const props = withDefaults(
+  defineProps<{ disabled?: boolean; error?: boolean }>(),
+  { disabled: false, error: false },
+)
+const emit = defineEmits<{ 'update:error': [value: boolean] }>()
 
-type View = 'start' | 'link' | 'library' | 'uploading' | 'uploaded'
+type View = 'start' | 'link' | 'library' | 'uploading' | 'uploaded' | 'error'
 const view = ref<View>('start')
 const file = ref<{ name: string; size: number; rows: number; cols: number }>({
   name: '',
@@ -70,7 +78,29 @@ function upload(name: string, size: number, rows = 239, cols = 18) {
     }
   }, 96)
 }
+/** The Error switch: the file's own failed upload, or back to the start. */
+watch(
+  () => props.error,
+  (on) => {
+    if (on) {
+      stop()
+      file.value = {
+        name: 'Email template.CSV',
+        size: 10.2 * 1024,
+        rows: 239,
+        cols: 18,
+      }
+      view.value = 'error'
+    } else if (view.value === 'error') view.value = 'start'
+  },
+  { immediate: true },
+)
+function retry() {
+  emit('update:error', false)
+  upload(file.value.name, file.value.size, file.value.rows, file.value.cols)
+}
 function reset() {
+  if (view.value === 'error') emit('update:error', false)
   stop()
   view.value = 'start'
   link.value = ''
@@ -345,6 +375,27 @@ const isOpen = (name: string) =>
         </button>
       </div>
       <Progress :value="progress" size="md" />
+    </div>
+
+    <!-- error (proposed): the card in red, the reason, and a way to retry -->
+    <div
+      v-if="view === 'error'"
+      data-slot="error"
+      class="absolute left-[190px] top-[113.5px] flex w-[320px] items-start gap-3 rounded-5 border border-outline-red-5 bg-surface-elevation-1 p-[9px]"
+    >
+      <div class="flex min-w-0 flex-1 flex-col gap-0.5">
+        <p
+          class="truncate text-base font-medium leading-[16.1px] text-ink-gray-8"
+        >
+          {{ file.name }}
+        </p>
+        <p class="truncate text-sm leading-[21px] text-ink-red-6">
+          Something went wrong
+        </p>
+      </div>
+      <Button size="sm" variant="subtle" theme="red" @click="retry">
+        Try again
+      </Button>
     </div>
 
     <!-- uploaded -->
