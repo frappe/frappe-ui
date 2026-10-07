@@ -21,7 +21,8 @@
 //   column — and the drop moves it there whole, its cells and widths with
 //   it; the first rows stay header rows, whichever rows land there;
 // - two 16px strips, 8px off the table's right and bottom edges, that add
-//   a column or a row at the end;
+//   a column or a row at the end — a bare plus, with no ground or rule of
+//   its own;
 // - the card is the table's viewport: a table that outgrows it scrolls
 //   inside it, never the page. A fresh table shares the card's width
 //   between its columns; once a column is added or resized every column
@@ -1702,10 +1703,11 @@ body.rte-tc-dragging .rte-tc-handle {
 .rte-tc-handle.is-open .rte-tc-dots {
   display: block;
 }
-/* a strip: white on a gray-100 rule, 4px corners, the plus gray-400; it
-   takes a gray-50 ground only under the pointer */
+/* a strip: the plus alone, gray-400 over the page, with no ground and no
+   rule around it — the glyph is the whole control, and it only darkens
+   under the pointer */
 .rte-tc-strip {
-  @apply pointer-events-auto fixed flex items-center justify-center rounded-[4px] border border-outline-gray-1 bg-surface-base text-ink-gray-4 transition-colors hover:bg-surface-gray-1 hover:text-ink-gray-6;
+  @apply pointer-events-auto fixed flex items-center justify-center text-ink-gray-4 transition-colors hover:text-ink-gray-6;
 }
 /* the menus: the file's 220px card, 4px in on a 12px radius under the xl
    shadow, its rows 28px on an 8px radius with a 16px glyph 6px off the
