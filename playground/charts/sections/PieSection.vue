@@ -45,7 +45,7 @@ const HALF_ARCS = [
 </script>
 
 <template>
-  <Card>
+  <Card medium-title>
     <PieCard
       title="Default"
       :slices="five"
@@ -54,7 +54,7 @@ const HALF_ARCS = [
       :t="theme.t"
     />
   </Card>
-  <Card>
+  <Card medium-title>
     <PieCard
       title="Doughnut Chart"
       :slices="five"
@@ -63,7 +63,7 @@ const HALF_ARCS = [
       :t="theme.t"
     />
   </Card>
-  <Card>
+  <Card medium-title>
     <PieCard
       title="Doughnut Chart"
       :slices="named"
@@ -73,7 +73,7 @@ const HALF_ARCS = [
       :t="theme.t"
     />
   </Card>
-  <Card>
+  <Card medium-title>
     <PieCard
       title="Default"
       :slices="six"

@@ -57,6 +57,19 @@
   --chart-diverging-7: #f9b571;
   --chart-diverging-8: #ed7854;
   --chart-diverging-9: #d84b5b;
+
+  /* The annotation bands (1356:68610, 1356:68674): the file's ink/amber-1,
+     ink/amber-2 and ink/amber-3 for the amber band's fill, its dashed edges
+     and its word, and surface-alpha/red-1, dark/red/50 and ink/red-3 for the
+     red one's. frappe-ui's amber ramp has no colour near the file's edge
+     (#fbc53f; its nearest, amber-400, is the washed #f4cd80 these were
+     drawn in), so the file's own values are kept here. */
+  --chart-band-amber-fill: #fdfaed;
+  --chart-band-amber-edge: #fbc53f;
+  --chart-band-amber-ink: #e79913;
+  --chart-band-red-fill: #fff7f7;
+  --chart-band-red-edge: #ffdede;
+  --chart-band-red-ink: #e03636;
 }
 
 [data-theme='dark'] {
@@ -89,6 +102,18 @@
   --chart-diverging-7: #e0a366;
   --chart-diverging-8: #d56c4c;
   --chart-diverging-9: #c24452;
+
+  /* The file's dark values where it has them. Two it does not: ink/amber-1
+     resolves to neutral/white in Dark — a white band on a dark card — and
+     dark/red/50 is a primitive with a Light mode only. Those take
+     frappe-ui's own dark pair for the same role, surface-amber-1 and
+     outline-red-2, whose light values are the file's within a step. */
+  --chart-band-amber-fill: var(--surface-amber-1);
+  --chart-band-amber-edge: #753a07;
+  --chart-band-amber-ink: #e27e1b;
+  --chart-band-red-fill: rgba(83, 6, 6, 0.4);
+  --chart-band-red-edge: var(--outline-red-2);
+  --chart-band-red-ink: #d73232;
 }
 
 /* Each theme as the library's own ramps, scoped to the page's grid by its

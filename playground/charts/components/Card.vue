@@ -2,7 +2,7 @@
 // A card of the Charts page, as the Frappe Charts file draws every one
 // (Figma 1GDS12ys41lxeG3wQpNq41, 1356:66389 and its neighbours): the
 // file's 580×360 proportions on a 12px radius behind an outline-gray-1
-// hairline, surface-white, 16 in from every edge, the title in 14px medium
+// hairline, surface-white, 16 in from every edge, the title in 14px semibold
 // ink-gray-8 on the top-left. The library's ChartCard holds the surface
 // (its own corner is 8px and its padding 16/12); the file's are set here,
 // over it, so the chrome under the title — the container, the legend, the
@@ -14,6 +14,8 @@ defineProps<{
   small?: boolean
   /** a card the width of the row, for the heat table */
   wide?: boolean
+  /** the pie row's titles, which the file sets in medium rather than semibold */
+  mediumTitle?: boolean
 }>()
 </script>
 
@@ -23,6 +25,7 @@ defineProps<{
     :class="[
       small ? 'chart-page-card--small' : wide ? '' : 'aspect-[580/360]',
       wide && 'col-span-full',
+      mediumTitle && 'chart-page-card--medium-title',
     ]"
   >
     <div class="flex h-full w-full flex-col">
@@ -40,10 +43,18 @@ defineProps<{
 .chart-page-card--small {
   height: 120px;
 }
-/* the file's title: 14 medium, 115%, ink-gray-8 (#171717) */
+/* The file's title: 14 semibold, 115%, ink-gray-8 (#171717) — text/base/
+   semibold on every card of the file but the pie row's four, which set
+   theirs in text/base/medium (1589:43577 … 43629). */
 .chart-page-card [data-slot='chart-header'] > div > div:first-child {
-  @apply text-base-medium leading-tighter;
+  @apply text-base-semibold leading-tighter;
   color: var(--ink-gray-8);
+}
+.chart-page-card--medium-title
+  [data-slot='chart-header']
+  > div
+  > div:first-child {
+  @apply text-base-medium;
 }
 .chart-page-card [data-slot='chart-header'] > div > div + div {
   @apply text-xs leading-tighter;

@@ -13,16 +13,20 @@
 // green-5 and violet-5, the same colours under the library's numbering.
 import { computed } from 'vue'
 import { TYPE, TYPE_WEIGHT } from '../chartType'
-import { MarkAreaComponent, MarkPointComponent } from 'echarts/components'
+import {
+  MarkAreaComponent,
+  MarkLineComponent,
+  MarkPointComponent,
+} from 'echarts/components'
 import { LineChart, registerChartModules } from '../../../src/charts'
 import Card from '../components/Card.vue'
-import { monthly, MONTHS } from '../chartData'
-import { salesAxis, yearAxis } from '../chartAxes'
+import { annotated, monthly, MONTHS } from '../chartData'
+import { endLabels, filePlot, salesAxis, yearAxis } from '../chartAxes'
 import type { ThemeColors } from '../useChartTheme'
 
 // the points and the bands are marks the library's line chart does not
 // register for itself
-registerChartModules([MarkPointComponent, MarkAreaComponent])
+registerChartModules([MarkPointComponent, MarkAreaComponent, MarkLineComponent])
 
 const props = defineProps<{ theme: ThemeColors }>()
 
@@ -53,42 +57,78 @@ function marks(color: string, label: string, ...indexes: number[]) {
   }
 }
 
-/** a band from one month to another, in a tint, its edges dashed */
-function band(
-  fill: string,
-  edge: string,
-  ink: string,
-  label: string,
-  from: number,
-  to: number,
-) {
+/**
+ * Bands from one month to another, as the file draws its reference areas
+ * (1356:68610, 1356:68674): a tint over the plot's full height, a dashed rule
+ * down each side and none along the top or the foot, and the band's word
+ * centred 7 over it in its own ink. A mark area can only dash all four sides
+ * of itself, so the tint is the area and the two rules are a mark line.
+ */
+type Band = {
+  /** the months the band opens and closes on */
+  from: number
+  to: number
+  label: string
+  fill: string
+  edge: string
+  ink: string
+}
+function bands(...list: Band[]) {
   return {
-    itemStyle: { color: fill, opacity: 1 },
-    label: {
-      show: true,
-      position: 'top',
-      distance: 6,
-      color: ink,
-      fontSize: TYPE.xs,
-      fontWeight: TYPE_WEIGHT.medium,
-      formatter: label,
-    },
-    emphasis: { disabled: true },
-    data: [
-      [
+    markArea: {
+      silent: true,
+      emphasis: { disabled: true },
+      label: {
+        show: true,
+        position: 'top',
+        distance: 7,
+        fontSize: TYPE.xs,
+        fontWeight: TYPE_WEIGHT.medium,
+      },
+      data: list.map((b) => [
         {
-          xAxis: at(from),
-          itemStyle: {
-            borderColor: edge,
-            borderWidth: 1,
-            borderType: [2, 2],
-          },
+          xAxis: at(b.from),
+          itemStyle: { color: b.fill, opacity: 1, borderWidth: 0 },
+          label: { color: b.ink, formatter: b.label },
         },
-        { xAxis: at(to) },
-      ],
-    ],
+        { xAxis: at(b.to) },
+      ]),
+    },
+    markLine: {
+      silent: true,
+      symbol: 'none',
+      label: { show: false },
+      emphasis: { disabled: true },
+      data: list.flatMap((b) =>
+        [b.from, b.to].map((i) => ({
+          xAxis: at(i),
+          lineStyle: { color: b.edge, width: 1, type: [2, 2] },
+        })),
+      ),
+    },
   }
 }
+const amber = computed(() => ({
+  fill: t('chart-band-amber-fill'),
+  edge: t('chart-band-amber-edge'),
+  ink: t('chart-band-amber-ink'),
+}))
+const red = computed(() => ({
+  fill: t('chart-band-red-fill'),
+  edge: t('chart-band-red-edge'),
+  ink: t('chart-band-red-ink'),
+}))
+/**
+ * The file's plot box, and its months 10 under the plot (328 against a foot at
+ * 318) where the library's 8 margin leaves them 6 under it.
+ */
+const bandPlot = {
+  ...filePlot,
+  xAxis: { axisLabel: { ...endLabels.axisLabel, margin: 12 } },
+}
+
+/** the file's 1.5 line with no dot under the pointer (1356:68610 "Vector 434") */
+const fileLine = { lineStyle: { width: 1.5 }, symbol: 'none' }
 
 const sales = { label: 'Sales' }
 const pointOf = computed(() => ({
@@ -132,18 +172,22 @@ const callout = computed(() => ({
     },
   },
 }))
+/**
+ * Where the bands sit, in months from the first: the file's are 87 wide, about
+ * four months, set by hand at 264→351 and 441→528 (1356:68610, 68674). A
+ * category axis rounds a position to its nearest month, so the amber band
+ * lands within 2 of the file's and the red one, which the file sets a quarter
+ * of a month past July 2022, 6 to the left of it.
+ */
+const AMBER_BAND = { from: 10, to: 14 }
+const RED_BAND = { from: 18, to: 22 }
+
 const oneBand = computed(() => ({
   sales: {
     ...sales,
     echartOptions: {
-      markArea: band(
-        t('ink-amber-1'),
-        t('ink-amber-4'),
-        t('ink-amber-5'),
-        'Reference Area',
-        10,
-        14,
-      ),
+      ...fileLine,
+      ...bands({ ...AMBER_BAND, label: 'Reference Area', ...amber.value }),
     },
   },
 }))
@@ -151,54 +195,11 @@ const twoBands = computed(() => ({
   sales: {
     ...sales,
     echartOptions: {
-      markArea: {
-        ...band(
-          t('ink-amber-1'),
-          t('ink-amber-4'),
-          t('ink-amber-5'),
-          '',
-          10,
-          14,
-        ),
-        data: [
-          [
-            {
-              xAxis: at(10),
-              name: 'First area',
-              itemStyle: {
-                color: t('ink-amber-1'),
-                borderColor: t('ink-amber-4'),
-                borderWidth: 1,
-                borderType: [2, 2],
-              },
-              label: { color: t('ink-amber-5') },
-            },
-            { xAxis: at(14) },
-          ],
-          [
-            {
-              xAxis: at(18),
-              name: 'Second area',
-              itemStyle: {
-                color: t('surface-red-1'),
-                borderColor: t('outline-red-2'),
-                borderWidth: 1,
-                borderType: [2, 2],
-              },
-              label: { color: t('ink-red-5') },
-            },
-            { xAxis: at(22) },
-          ],
-        ],
-        label: {
-          show: true,
-          position: 'top',
-          distance: 6,
-          fontSize: TYPE.xs,
-          fontWeight: TYPE_WEIGHT.medium,
-          formatter: (p: { name: string }) => p.name,
-        },
-      },
+      ...fileLine,
+      ...bands(
+        { ...AMBER_BAND, label: 'First area', ...amber.value },
+        { ...RED_BAND, label: 'Second area', ...red.value },
+      ),
     },
   },
 }))
@@ -406,25 +407,27 @@ const goodAverage = computed(() => ({
       ]"
     />
   </Card>
-  <Card>
+  <Card class="band-card">
     <LineChart
       title="Area"
-      :data="monthly"
+      :data="annotated"
       x="month"
       y="sales"
       :series-config="oneBand"
+      :echart-options="bandPlot"
       :x-axis="yearAxis"
       :y-axis="salesAxis"
       :palette="line"
     />
   </Card>
-  <Card>
+  <Card class="band-card">
     <LineChart
       title="X-axis Multi Area Reference"
-      :data="monthly"
+      :data="annotated"
       x="month"
       y="sales"
       :series-config="twoBands"
+      :echart-options="bandPlot"
       :x-axis="yearAxis"
       :y-axis="salesAxis"
       :palette="line"
@@ -443,3 +446,13 @@ const goodAverage = computed(() => ({
     />
   </Card>
 </template>
+
+<style scoped>
+/* The band cards carry no legend, so the library's container pads the plot
+   12 under it, where the file closes its plot at 318 of 360 and sets the
+   months 10 under that. The months' wider margin (bandPlot) is taken out of
+   the plot, so the padding gives back 10 rather than the line row's 6. */
+.band-card :deep([data-slot='chart-plot']) {
+  padding-bottom: 2px;
+}
+</style>

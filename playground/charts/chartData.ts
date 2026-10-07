@@ -44,6 +44,25 @@ export const monthly = MONTHS.map((month, i) => ({
   target: 10000,
 }))
 
+/**
+ * The annotation row's line, as the file draws it (1356:68610 "Vector 434",
+ * the same on every card of the row). It is the line row's shape set about
+ * 1.93k lower, drawn by hand as 23 points on a grid a little wider than the
+ * months — so it cannot be the sales above less a constant, which put ours
+ * 11.6px off it on average. These are the file's line read at each month's
+ * tick on its 48→564 plot instead: 1.9px off on average, 11 at the one peak
+ * that falls between two ticks.
+ */
+export const ANNOTATION_SALES = [
+  11977, 12670, 14745, 13648, 15219, 14989, 13073, 12762, 14036, 14277, 12307,
+  8860, 10366, 8985, 11858, 14123, 12924, 10620, 10102, 11247, 10969, 14057,
+  12397, 13807, 11487,
+]
+export const annotated = monthly.map((row, i) => ({
+  ...row,
+  sales: ANNOTATION_SALES[i],
+}))
+
 /** the first year alone, for the cards whose axis reads 2021 … Nov */
 export const year = monthly.slice(0, 12)
 

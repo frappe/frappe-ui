@@ -18,6 +18,9 @@ import {
   salesAxis,
   thousands,
   yearAxis,
+  FILE_BOX,
+  endLabels,
+  filePlot,
 } from '../chartAxes'
 import type { ChartTooltipItem } from '../../../src/charts/types'
 import type { ThemeColors } from '../useChartTheme'
@@ -49,34 +52,6 @@ const crosshair = computed(() => ({
 }))
 
 /**
- * The box the file draws its plot in: 48,75,516,243 of a 580×360 card
- * (1356:68175's "Frame 1000009725", and the same on 68378, 68269 and 68212),
- * which is 8.28% in from the left, 2.76% from the right, 20.83% down and
- * 11.67% up. The library sizes a plot from what is left over instead — the
- * header takes what it needs and the grid takes the rest — so ours opened a
- * third of the way higher and sat a little to the left.
- *
- * The shares are of the canvas rather than of the card, since the header above
- * it is a fixed height and not a fraction of one, and they are the numbers
- * that put the drawn plot on the file's — measured rather than derived, since
- * what the library holds back for a label is its own business.
- */
-const FILE_BOX = { right: -3 } as const
-
-/**
- * And why the plot can reach that right edge at all. The file's end labels are
- * not centred on their ticks the way the ones between them are: "2021" starts
- * at 51 against a plot opening at 48, and "2023" ends at 560 against one
- * closing at 564 — each is pulled inside the plot rather than straddling its
- * edge. echarts centres them by default and then reserves half a label's width
- * at either end so nothing overhangs, which is the room the plot was losing.
- * Aligning the two end labels the way the file aligns them gives it back.
- */
-const endLabels = {
-  axisLabel: { alignMinLabel: 'left', alignMaxLabel: 'right' },
-}
-const plotTop = { grid: { ...FILE_BOX, left: 1, top: '10.2%' } }
-/**
  * The stepped card gives its legend the room instead: the file closes that
  * plot at 278 rather than 318 and opens it at 62 (1356:68437), which is 40
  * less at the foot and 13 more at the head.
@@ -87,8 +62,7 @@ const stepsPlot = {
 
 const lineOptions = computed(() => ({
   ...crosshair.value,
-  ...plotTop,
-  xAxis: endLabels,
+  ...filePlot,
 }))
 const stepsOptions = computed(() => ({
   ...crosshair.value,
