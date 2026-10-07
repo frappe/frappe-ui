@@ -209,6 +209,7 @@ const MIST: ThemeRoles = {
   spark: [m('graphite')],
   annotation: [m('harboar')],
   // the cards the Mist frame colours on their own (1048:56376)
+  stackPercent: [m('graphite'), m('harboar'), m('dune'), m('apricot')],
   dual: [m('graphite'), m('dune')],
   sparkWash: [m('harboar')],
 }
