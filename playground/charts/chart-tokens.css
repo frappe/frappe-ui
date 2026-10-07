@@ -35,6 +35,9 @@
   --chart-earthy-clay: #d9ae94;
   --chart-earthy-olive: #9b9b7a;
   --chart-earthy-moss: #797d62;
+  /* not a variable: the third stop of the file's map scale (961:35318), left
+     unbound between olive and wheat */
+  --chart-earthy-honey: #eec27e;
 
   /* Qualitative/qualitative - 1 … 9 */
   --chart-qualitative-1: #8dd3c7;

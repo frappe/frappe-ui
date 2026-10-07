@@ -443,7 +443,8 @@ export const HALF_ARCS = [
  * the table in "Group 1000007955"): placed by hand again rather than read off
  * Ocean's — the same Ocean step comes out Q1 in one cell and Q4 in the next —
  * so the theme carries its own grid, as indexes into its `heat` colours
- * (Q1, Q7, Q2, Q4, Q6).
+ * (Q1, Q7, Q2, Q4, Q6). Mist and Earthy place their cells by the same hand
+ * (1048:58469, 961:35752), each in its own five.
  */
 export const qualitativeHeatSteps = [
   [0, 1, 2, 0, 2, 0, 3],

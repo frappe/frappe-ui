@@ -63,6 +63,11 @@ const props = withDefaults(
     variant?: SparkVariant
     /** the trend's stroke, from the theme */
     color: string
+    /**
+     * the gradient under the line, where a theme fills it in another colour
+     * than the stroke (Mist's harboar under graphite, 1048:59048)
+     */
+    wash?: string
     /** the card's height, the file's 120 unless told otherwise */
     height?: number
   }>(),
@@ -239,8 +244,8 @@ function track(event: MouseEvent) {
              card's bottom edge rather than fading out halfway down. -->
         <defs>
           <linearGradient :id="id" x1="0" y1="0.23" x2="0" y2="1.79">
-            <stop offset="0" :stop-color="color" stop-opacity="1" />
-            <stop offset="0.764" :stop-color="color" stop-opacity="0" />
+            <stop offset="0" :stop-color="wash ?? color" stop-opacity="1" />
+            <stop offset="0.764" :stop-color="wash ?? color" stop-opacity="0" />
           </linearGradient>
         </defs>
         <path

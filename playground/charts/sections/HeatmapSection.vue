@@ -20,15 +20,15 @@ const props = defineProps<{ theme: ThemeColors; themeId?: ChartTheme }>()
 const ramp = computed(() => props.theme.colors('map'))
 const heat = computed(() => props.theme.colors('heat'))
 /**
- * where each cell's colour falls: the Qualitative and Diverging frames place
- * their own
+ * where each cell's colour falls: Ocean's frame places its own, the Diverging
+ * one its own, and Qualitative, Mist and Earthy share one hand
  */
 const steps = computed(() =>
-  props.themeId === 'qualitative'
-    ? qualitativeHeatSteps
-    : props.themeId === 'diverging'
-      ? divergingHeatSteps
-      : heatSteps,
+  props.themeId === 'diverging'
+    ? divergingHeatSteps
+    : props.themeId === undefined || props.themeId === 'ocean'
+      ? heatSteps
+      : qualitativeHeatSteps,
 )
 </script>
 

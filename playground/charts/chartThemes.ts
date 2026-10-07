@@ -98,6 +98,8 @@ export type OwnRole =
   | 'channelsStacked'
   /** the half ring's arcs, from 9 o'clock round to 3 */
   | 'halfArcs'
+  /** the gradient under a sparkline */
+  | 'sparkWash'
 
 export type ThemeRoles = Record<ThemeRole, string[]> &
   Partial<Record<OwnRole, string[]>>
@@ -152,9 +154,11 @@ const MIST: ThemeRoles = {
   steps: [m('apricot'), m('graphite'), m('meadow'), m('limestone')],
   scatter: [m('apricot')],
   scatters: [m('apricot'), m('dune'), m('rosewood'), m('harboar')],
+  // CHANNELS order: organic, paid, Facebook, referral, others; the file's
+  // bars run paid graphite, organic harboar (1048:57142, 1048:57198)
   channels: [
-    m('graphite'),
     m('harboar'),
+    m('graphite'),
     m('rosewood'),
     m('apricot'),
     m('dune'),
@@ -169,7 +173,8 @@ const MIST: ThemeRoles = {
     m('apricot'),
     m('rosewood'),
   ],
-  heat: [m('rosewood'), m('limestone'), m('apricot'), m('dune')],
+  // the table's fifth step is dune again (1048:58469)
+  heat: [m('rosewood'), m('limestone'), m('apricot'), m('dune'), m('dune')],
   funnel: [m('harboar')],
   funnelSteps: [m('harboar')],
   pie: [m('harboar'), m('graphite'), m('apricot'), m('dune'), m('rosewood')],
@@ -203,6 +208,9 @@ const MIST: ThemeRoles = {
   stepped: [m('limestone'), m('apricot'), m('rosewood'), m('dune')],
   spark: [m('graphite')],
   annotation: [m('harboar')],
+  // the cards the Mist frame colours on their own (1048:56376)
+  dual: [m('graphite'), m('dune')],
+  sparkWash: [m('harboar')],
 }
 
 const EARTHY: ThemeRoles = {
@@ -213,15 +221,22 @@ const EARTHY: ThemeRoles = {
   line: [e('moss')],
   markers: [e('moss')],
   lines: [e('terracotta'), e('moss')],
-  steps: [e('dune'), e('moss'), e('clay'), e('stone')],
+  // the third line is olive in the file, though its legend says clay
+  // (961:35708)
+  steps: [e('dune'), e('moss'), e('olive'), e('stone')],
   scatter: [e('dune')],
   scatters: [e('clay'), e('olive'), e('dune'), e('stone')],
-  channels: [e('moss'), e('olive'), e('dune'), e('terracotta'), e('wheat')],
+  // CHANNELS order: organic, paid, Facebook, referral, others; the file's
+  // bars run paid moss, organic olive (961:34425, 961:34481)
+  channels: [e('olive'), e('moss'), e('dune'), e('terracotta'), e('stone')],
   bubble: [e('olive')],
   bubbles: [e('moss'), e('sand'), e('clay'), e('olive')],
+  // the scale pill's eight even stops, wheat twice (961:35318)
   map: [
     e('moss'),
     e('olive'),
+    e('honey'),
+    e('wheat'),
     e('wheat'),
     e('clay'),
     e('terracotta'),
@@ -255,6 +270,16 @@ const EARTHY: ThemeRoles = {
   stepped: [e('terracotta'), e('stone'), e('moss'), e('dune')],
   spark: [e('moss')],
   annotation: [e('terracotta')],
+  // the cards the Earthy frame colours on their own (961:33659)
+  dual: [e('moss'), e('dune')],
+  horizontal: [e('olive')],
+  channelsStacked: [
+    e('olive'),
+    e('moss'),
+    e('wheat'),
+    e('terracotta'),
+    e('dune'),
+  ],
 }
 
 const QUALITATIVE: ThemeRoles = {
@@ -345,6 +370,7 @@ export const OWN_ROLE_FALLBACK: Record<OwnRole, (r: ThemeRoles) => string[]> = {
   channelsStacked: (r) => r.channels,
   // the arcs carry the half ring's own ramp, at Ocean's steps
   halfArcs: (r) => HALF_ARCS.map((a) => r.half[a.step % r.half.length]),
+  sparkWash: (r) => r.spark,
 }
 
 export const THEME_ROLES: Record<ChartTheme, ThemeRoles> = {
@@ -356,29 +382,27 @@ export const THEME_ROLES: Record<ChartTheme, ThemeRoles> = {
 }
 
 /**
- * The funnel's opacity per step: Ocean fades its five variables in from a
- * fifth to full, and Qualitative and Diverging fade their one, Q1 and D2,
- * the same way down all three cards (1413:25979 … 1413:26028, 1462:26746 …
- * 1462:26795); the rest draw one variable at a fifth.
+ * The funnel's opacity per step: every theme fades its colours in from a
+ * fifth to full down all three cards — Ocean its five variables, the others
+ * their one (1413:25979, 1462:26746, 1048:58296, 961:35579 and their rows).
  */
 export const FUNNEL_OPACITY: Record<ChartTheme, number[]> = {
   ocean: [0.2, 0.4, 0.6, 0.8, 1],
-  mist: [0.2, 0.2, 0.2, 0.2, 0.2],
-  earthy: [0.2, 0.2, 0.2, 0.2, 0.2],
+  mist: [0.2, 0.4, 0.6, 0.8, 1],
+  earthy: [0.2, 0.4, 0.6, 0.8, 1],
   qualitative: [0.2, 0.4, 0.6, 0.8, 1],
   diverging: [0.2, 0.4, 0.6, 0.8, 1],
 }
 
 /**
- * The columns card's opacity per step. Most themes stand the first column at
- * full colour over the faded rest; Qualitative and Diverging keep their ladder
- * there too, the first column at a fifth like the other two cards' first bar
- * (1413:26028, 1462:26795).
+ * The columns card's opacity per step. Ocean stands its first column, its
+ * lightest variable, at full colour; the others keep the ladder there too,
+ * the first column at a fifth like the other two cards' first bar.
  */
 export const FUNNEL_COLUMN_OPACITY: Record<ChartTheme, number[]> = {
   ocean: [1, 0.4, 0.6, 0.8, 1],
-  mist: [1, 0.2, 0.2, 0.2, 0.2],
-  earthy: [1, 0.2, 0.2, 0.2, 0.2],
+  mist: FUNNEL_OPACITY.mist,
+  earthy: FUNNEL_OPACITY.earthy,
   qualitative: FUNNEL_OPACITY.qualitative,
   diverging: FUNNEL_OPACITY.diverging,
 }

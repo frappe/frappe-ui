@@ -9,6 +9,7 @@ import type { ThemeColors } from '../useChartTheme'
 
 const props = defineProps<{ theme: ThemeColors }>()
 const color = computed(() => props.theme.one('spark'))
+const wash = computed(() => props.theme.one('sparkWash'))
 </script>
 
 <template>
@@ -25,6 +26,7 @@ const color = computed(() => props.theme.one('spark'))
       :range="[162, 198]"
       variant="area"
       :color="color"
+      :wash="wash"
     />
     <SparkCard
       title="Spark line"
@@ -35,6 +37,7 @@ const color = computed(() => props.theme.one('spark'))
       :range="[162, 198]"
       variant="line"
       :color="color"
+      :wash="wash"
     />
     <SparkCard
       title="Tickets"
@@ -47,6 +50,7 @@ const color = computed(() => props.theme.one('spark'))
       ]"
       variant="bars"
       :color="color"
+      :wash="wash"
     />
     <SparkCard
       title="Spark line"
@@ -57,6 +61,7 @@ const color = computed(() => props.theme.one('spark'))
       :range="[162, 198]"
       variant="solid"
       :color="color"
+      :wash="wash"
     />
     <SparkCard
       title="My tickets"
@@ -67,6 +72,7 @@ const color = computed(() => props.theme.one('spark'))
       :range="[78, 92]"
       variant="beside"
       :color="color"
+      :wash="wash"
     />
     <SparkCard
       title="Spark line"
@@ -78,6 +84,7 @@ const color = computed(() => props.theme.one('spark'))
       :format="(v: number) => `${Math.round(v)}%`"
       variant="inset"
       :color="color"
+      :wash="wash"
     />
     <!-- the sales card with its trend sits second on the second row, ahead of
          the two plain sales cards -->
@@ -90,6 +97,7 @@ const color = computed(() => props.theme.one('spark'))
       variant="inset"
       :height="106"
       :color="color"
+      :wash="wash"
     />
     <SparkCard
       title="Sales"
@@ -98,8 +106,15 @@ const color = computed(() => props.theme.one('spark'))
       caption="vs last month"
       :height="95"
       :color="color"
+      :wash="wash"
     />
-    <SparkCard title="Sales" value="$12,83,456" :height="71" :color="color" />
+    <SparkCard
+      title="Sales"
+      value="$12,83,456"
+      :height="71"
+      :color="color"
+      :wash="wash"
+    />
   </div>
 </template>
 
