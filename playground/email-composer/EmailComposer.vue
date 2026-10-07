@@ -1,6 +1,13 @@
 <script setup lang="ts">
 import { computed, h, nextTick, ref, watch } from 'vue'
-import { Avatar, Button, Dropdown, Popover, TextInput } from '../../src'
+import {
+  Avatar,
+  Button,
+  Dropdown,
+  Popover,
+  TextInput,
+  Tooltip,
+} from '../../src'
 import { Editor, EditorContent, RichTextKit } from '../../src/molecules/editor'
 import type { TiptapEditor } from '../../src/molecules/editor'
 import { FontColor, InsertLink } from '../../src/molecules/editor/menu'
@@ -801,95 +808,117 @@ const root = ref<HTMLElement | null>(null)
           </template>
         </Dropdown>
 
-        <Button
-          variant="ghost"
-          size="sm"
-          class="!text-ink-gray-7"
-          label="Text colour"
-          @mousedown.prevent
-          @click="pickColour"
-        >
-          <template #icon>
-            <ComposerIcon name="text-colour" class="size-4" />
-          </template>
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          class="!text-ink-gray-7"
-          label="Attach a file"
-          @mousedown.prevent
-          @click="attachFile"
-        >
-          <template #icon>
-            <ComposerIcon name="attachment" class="size-4" />
-          </template>
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          class="!text-ink-gray-7"
-          label="Link"
-          @mousedown.prevent
-          @click="insertLink"
-        >
-          <template #icon>
-            <ComposerIcon name="link" class="size-4" />
-          </template>
-        </Button>
+        <Tooltip text="Text color" side="top">
+          <Button
+            variant="ghost"
+            size="sm"
+            class="!text-ink-gray-7"
+            label="Text color"
+            @mousedown.prevent
+            @click="pickColour"
+          >
+            <template #icon>
+              <ComposerIcon name="text-colour" class="size-4" />
+            </template>
+          </Button>
+        </Tooltip>
+        <Tooltip text="Attachment" side="top">
+          <Button
+            variant="ghost"
+            size="sm"
+            class="!text-ink-gray-7"
+            label="Attachment"
+            @mousedown.prevent
+            @click="attachFile"
+          >
+            <template #icon>
+              <ComposerIcon name="attachment" class="size-4" />
+            </template>
+          </Button>
+        </Tooltip>
+        <Tooltip text="Link" side="top">
+          <Button
+            variant="ghost"
+            size="sm"
+            class="!text-ink-gray-7"
+            label="Link"
+            @mousedown.prevent
+            @click="insertLink"
+          >
+            <template #icon>
+              <ComposerIcon name="link" class="size-4" />
+            </template>
+          </Button>
+        </Tooltip>
         <Popover side="top" align="start" :offset="6" bare>
           <template #trigger="{ open }">
-            <Button
-              variant="ghost"
-              size="sm"
-              class="!text-ink-gray-7"
-              :class="open && '!bg-surface-gray-3'"
-              label="Emoji"
-              @mousedown.prevent
-            >
-              <template #icon>
-                <ComposerIcon name="emoji" class="size-4" />
-              </template>
-            </Button>
+            <!-- a plain box between the popover and the tooltip: Tooltip
+                 passes on none of the trigger's handlers, so the popover
+                 attaches to this box and the tooltip to the button in it -->
+            <span class="inline-flex">
+              <Tooltip text="Emoji" side="top">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  class="!text-ink-gray-7"
+                  :class="open && '!bg-surface-gray-3'"
+                  label="Emoji"
+                  @mousedown.prevent
+                >
+                  <template #icon>
+                    <ComposerIcon name="emoji" class="size-4" />
+                  </template>
+                </Button>
+              </Tooltip>
+            </span>
           </template>
           <template #default="{ close }">
             <EmojiPicker @pick="(e: string) => (insertEmoji(e), close())" />
           </template>
         </Popover>
-        <Button
-          variant="ghost"
-          size="sm"
-          class="!text-ink-gray-7"
-          label="Insert from Drive"
-        >
-          <template #icon>
-            <ComposerIcon name="folder" class="size-4" />
-          </template>
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          class="!text-ink-gray-7"
-          label="Image"
-          @mousedown.prevent
-          @click="insertImage"
-        >
-          <template #icon>
-            <ComposerIcon name="image" class="size-4" />
-          </template>
-        </Button>
-        <Dropdown :options="moreOptions" side="top" align="start" :offset="4">
+        <Tooltip text="Drive" side="top">
           <Button
             variant="ghost"
             size="sm"
             class="!text-ink-gray-7"
-            label="More"
-            @mousedown.prevent
+            label="Drive"
           >
             <template #icon>
-              <ComposerIcon name="dot-vertical" class="size-4" />
+              <ComposerIcon name="folder" class="size-4" />
             </template>
           </Button>
+        </Tooltip>
+        <Tooltip text="Images" side="top">
+          <Button
+            variant="ghost"
+            size="sm"
+            class="!text-ink-gray-7"
+            label="Images"
+            @mousedown.prevent
+            @click="insertImage"
+          >
+            <template #icon>
+              <ComposerIcon name="image" class="size-4" />
+            </template>
+          </Button>
+        </Tooltip>
+        <Dropdown :options="moreOptions" side="top" align="start" :offset="4">
+          <!-- the same box between the menu and the tooltip -->
+          <span class="inline-flex">
+            <Tooltip text="More Options" side="top">
+              <Button
+                variant="ghost"
+                size="sm"
+                class="!text-ink-gray-7"
+                label="More Options"
+                @mousedown.prevent
+              >
+                <template #icon>
+                  <ComposerIcon name="dot-vertical" class="size-4" />
+                </template>
+              </Button>
+            </Tooltip>
+          </span>
         </Dropdown>
       </div>
       <Button

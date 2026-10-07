@@ -82,8 +82,12 @@ export const espressoCalendar = [
   '[&_.grid-cols-7>span>span.bg-surface-gray-10]:!text-white',
   '[&_.grid-cols-7>span>span.bg-surface-gray-10]:!rounded-3',
   '[&_.grid-cols-7>span>span.bg-surface-gray-10]:!h-6',
-  '[&_.grid-cols-7>span>span.bg-surface-gray-10]:!w-auto',
-  '[&_.grid-cols-7>span>span.bg-surface-gray-10]:!px-[5px]',
+  // One box for every date: 26 wide whether the day has one digit or two —
+  // the tag does not hug a "7" (the user's call 2026-10-07); the numeral
+  // centred in it, in tabular figures.
+  '[&_.grid-cols-7>span>span.bg-surface-gray-10]:!w-[26px]',
+  '[&_.grid-cols-7>span>span.bg-surface-gray-10]:!px-0',
+  '[&_.grid-cols-7>span>span.bg-surface-gray-10]:tabular-nums',
 
   // The all-day band: 34 in the file with nothing in it. A floor, not a
   // height — a week with bars in the row still gets its lanes.
