@@ -24,6 +24,13 @@ const props = defineProps<{
   slices: Array<{ name: string; share: number }>
   colors: string[]
   variant: 'pie' | 'donut' | 'rose' | 'half'
+  /**
+   * The arcs the plot draws, where the file places them by hand instead of
+   * reading its own numbers: the palette step each one carries and the angle
+   * it sweeps, in the order they run round the arc. The legend still reads
+   * `slices`, in palette order, as the file's does.
+   */
+  arcs?: Array<{ step: number; sweep: number }>
   t: (name: string) => string
 }>()
 
@@ -60,6 +67,8 @@ const DONUT_PAD = 1.2
  */
 const HALF_RADIUS = ['107.6%', '134.5%']
 const HALF_CENTER = ['50%', '87.48%']
+/** the file leaves about a degree between the half ring's arcs (0.84°–1.2°) */
+const HALF_PAD = 1
 
 /**
  * The nested pie, as 1589:43629 draws it: six arcs on one centre at (290, 131)
@@ -97,14 +106,32 @@ const items = computed(() =>
   })),
 )
 
-const data = computed(() =>
-  visible.value.map((s) => ({
+/** what the legend prints against a name, which an `arcs` plot does not size by */
+const shareOf = computed(
+  () => new Map(props.slices.map((s) => [s.name, s.share])),
+)
+
+const data = computed(() => {
+  if (props.arcs)
+    return props.arcs
+      .filter((a) => !hidden.value.includes(props.slices[a.step]?.name ?? ''))
+      .map((a) => ({
+        name: props.slices[a.step].name,
+        // echarts spends the gap out of the slice rather than out of the span —
+        // a sector ends up `share × span − padAngle` wide — so a weight has to
+        // carry its own gap or every small arc comes up short and the big one
+        // swallows the difference. Here that was 2.4° on the widest.
+        value: a.sweep + HALF_PAD,
+        itemStyle: { color: color(a.step) },
+        label: { show: false },
+      }))
+  return visible.value.map((s) => ({
     name: s.name,
     value: s.share,
     itemStyle: { color: color(props.slices.indexOf(s)) },
     label: { show: false },
-  })),
-)
+  }))
+})
 
 const flat = {
   clockwise: true,
@@ -149,9 +176,8 @@ const series = computed(() => {
         // both halves sweep across the top, 9 o'clock round to 3
         startAngle: 180,
         endAngle: 0,
-        // the file leaves about a degree between its arcs and rounds
-        // every end on 4 (its ellipses' own corner radius)
-        padAngle: 1,
+        // the file rounds every end on 4, its ellipses' own corner radius
+        padAngle: HALF_PAD,
         itemStyle: { borderWidth: 0, borderRadius: 4 },
         ...flat,
         data: data.value,
@@ -188,14 +214,14 @@ const option = computed(() => ({
     extraCssText:
       'box-shadow: 0 6px 12px -2px rgba(0,0,0,0.12), 0 0 6px 2px rgba(0,0,0,0.03), 0 0 1.5px rgba(0,0,0,0.15);',
     textStyle: { fontSize: TYPE.xs, color: props.t('ink-gray-8') },
-    formatter: (p: { name: string; value: number; color: string }) =>
+    formatter: (p: { name: string; color: string }) =>
       // the scale's classes reach this: echarts puts the string in the
       // document, so the row is set in `text-xs` on the flat line the
       // file's tooltip rows stand on rather than in inline pixels
       `<div class="text-xs leading-none" style="display:flex;align-items:center;gap:2px">
           <span style="display:inline-flex;width:16px;height:16px;align-items:center;justify-content:center"><span style="width:5.5px;height:5.5px;border-radius:999px;background:${p.color}"></span></span>
           <span style="color:${props.t('ink-gray-6')};min-width:64px">${p.name}</span>
-          <span class="text-xs-medium leading-none" style="color:${props.t('ink-gray-8')}">${p.value}%</span>
+          <span class="text-xs-medium leading-none" style="color:${props.t('ink-gray-8')}">${shareOf.value.get(p.name)}%</span>
         </div>`,
   },
   series: series.value,
