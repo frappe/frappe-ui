@@ -20,6 +20,7 @@ import {
   yearAxis,
   FILE_BOX,
   endLabels,
+  fileCrosshair,
   filePlot,
 } from '../chartAxes'
 import type { ChartTooltipItem } from '../../../src/charts/types'
@@ -32,24 +33,7 @@ const markers = computed(() => [props.theme.one('markers')])
 const lines = computed(() => props.theme.colors('lines', 2))
 const steps = computed(() => props.theme.colors('steps', 4))
 
-/**
- * The rule the file drops through the hovered reading: a solid 1px hairline,
- * black at 9% over the card — every card in this row carries the same "Line
- * 80" (1356:68175, 68378, 68437, 68269, 68212). `outline-gray-2` is the token
- * that lands on that grey and, unlike a black wash, survives a flip to dark.
- */
-const crosshair = computed(() => ({
-  tooltip: {
-    axisPointer: {
-      type: 'line',
-      lineStyle: {
-        color: props.theme.t('outline-gray-2'),
-        width: 1,
-        type: 'solid',
-      },
-    },
-  },
-}))
+const crosshair = computed(() => fileCrosshair(props.theme.t))
 
 /**
  * The stepped card gives its legend the room instead: the file closes that

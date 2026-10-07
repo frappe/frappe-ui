@@ -20,8 +20,16 @@ import {
 } from 'echarts/components'
 import { LineChart, registerChartModules } from '../../../src/charts'
 import Card from '../components/Card.vue'
+import ChartTip from '../components/ChartTip.vue'
 import { annotated, monthly, MONTHS } from '../chartData'
-import { endLabels, filePlot, salesAxis, yearAxis } from '../chartAxes'
+import {
+  count,
+  endLabels,
+  fileCrosshair,
+  filePlot,
+  salesAxis,
+  yearAxis,
+} from '../chartAxes'
 import type { ThemeColors } from '../useChartTheme'
 
 // the points and the bands are marks the library's line chart does not
@@ -126,6 +134,15 @@ const bandPlot = {
   ...filePlot,
   xAxis: { axisLabel: { ...endLabels.axisLabel, margin: 12 } },
 }
+
+/**
+ * The file's hover on every card of the row: its solid hairline through the
+ * reading under the pointer, and its own tooltip (ChartTip) — the date over
+ * a dotted row of name and number — where the library's default printed a
+ * larger date and a bold, shortened value ("16.1k").
+ */
+const hover = computed(() => fileCrosshair(t))
+const bandHover = computed(() => ({ ...bandPlot, ...fileCrosshair(t) }))
 
 /** the file's 1.5 line with no dot under the pointer (1356:68610 "Vector 434") */
 const fileLine = { lineStyle: { width: 1.5 }, symbol: 'none' }
@@ -275,7 +292,17 @@ const goodAverage = computed(() => ({
           labelPlacement: 'start-bottom',
         },
       ]"
-    />
+      :echart-options="hover"
+    >
+      <template #tooltip="tip">
+        <ChartTip
+          :label="tip.label"
+          :items="tip.items"
+          :rows="tip.rows"
+          :value="count"
+        />
+      </template>
+    </LineChart>
   </Card>
   <Card>
     <LineChart
@@ -288,7 +315,17 @@ const goodAverage = computed(() => ({
       :x-axis="yearAxis"
       :y-axis="salesAxis"
       :palette="line"
-    />
+      :echart-options="hover"
+    >
+      <template #tooltip="tip">
+        <ChartTip
+          :label="tip.label"
+          :items="tip.items"
+          :rows="tip.rows"
+          :value="count"
+        />
+      </template>
+    </LineChart>
   </Card>
   <Card>
     <LineChart
@@ -300,7 +337,17 @@ const goodAverage = computed(() => ({
       :x-axis="yearAxis"
       :y-axis="salesAxis"
       :palette="line"
-    />
+      :echart-options="hover"
+    >
+      <template #tooltip="tip">
+        <ChartTip
+          :label="tip.label"
+          :items="tip.items"
+          :rows="tip.rows"
+          :value="count"
+        />
+      </template>
+    </LineChart>
   </Card>
   <Card>
     <LineChart
@@ -312,7 +359,17 @@ const goodAverage = computed(() => ({
       :x-axis="yearAxis"
       :y-axis="salesAxis"
       :palette="line"
-    />
+      :echart-options="hover"
+    >
+      <template #tooltip="tip">
+        <ChartTip
+          :label="tip.label"
+          :items="tip.items"
+          :rows="tip.rows"
+          :value="count"
+        />
+      </template>
+    </LineChart>
   </Card>
   <Card>
     <LineChart
@@ -333,7 +390,17 @@ const goodAverage = computed(() => ({
           labelPlacement: 'end-bottom',
         },
       ]"
-    />
+      :echart-options="hover"
+    >
+      <template #tooltip="tip">
+        <ChartTip
+          :label="tip.label"
+          :items="tip.items"
+          :rows="tip.rows"
+          :value="count"
+        />
+      </template>
+    </LineChart>
   </Card>
   <Card>
     <LineChart
@@ -360,7 +427,17 @@ const goodAverage = computed(() => ({
           labelPlacement: 'end-top',
         },
       ]"
-    />
+      :echart-options="hover"
+    >
+      <template #tooltip="tip">
+        <ChartTip
+          :label="tip.label"
+          :items="tip.items"
+          :rows="tip.rows"
+          :value="count"
+        />
+      </template>
+    </LineChart>
   </Card>
   <Card>
     <LineChart
@@ -381,7 +458,17 @@ const goodAverage = computed(() => ({
           labelPlacement: 'end-top',
         },
       ]"
-    />
+      :echart-options="hover"
+    >
+      <template #tooltip="tip">
+        <ChartTip
+          :label="tip.label"
+          :items="tip.items"
+          :rows="tip.rows"
+          :value="count"
+        />
+      </template>
+    </LineChart>
   </Card>
   <Card>
     <LineChart
@@ -409,7 +496,17 @@ const goodAverage = computed(() => ({
           labelPlacement: 'end-top',
         },
       ]"
-    />
+      :echart-options="hover"
+    >
+      <template #tooltip="tip">
+        <ChartTip
+          :label="tip.label"
+          :items="tip.items"
+          :rows="tip.rows"
+          :value="count"
+        />
+      </template>
+    </LineChart>
   </Card>
   <Card class="band-card">
     <LineChart
@@ -418,11 +515,20 @@ const goodAverage = computed(() => ({
       x="month"
       y="sales"
       :series-config="oneBand"
-      :echart-options="bandPlot"
+      :echart-options="bandHover"
       :x-axis="yearAxis"
       :y-axis="salesAxis"
       :palette="line"
-    />
+    >
+      <template #tooltip="tip">
+        <ChartTip
+          :label="tip.label"
+          :items="tip.items"
+          :rows="tip.rows"
+          :value="count"
+        />
+      </template>
+    </LineChart>
   </Card>
   <Card class="band-card">
     <LineChart
@@ -431,24 +537,42 @@ const goodAverage = computed(() => ({
       x="month"
       y="sales"
       :series-config="twoBands"
-      :echart-options="bandPlot"
+      :echart-options="bandHover"
       :x-axis="yearAxis"
       :y-axis="salesAxis"
       :palette="line"
-    />
+    >
+      <template #tooltip="tip">
+        <ChartTip
+          :label="tip.label"
+          :items="tip.items"
+          :rows="tip.rows"
+          :value="count"
+        />
+      </template>
+    </LineChart>
   </Card>
   <Card class="band-card">
     <LineChart
       title="Area"
       :data="annotated"
-      :echart-options="bandPlot"
+      :echart-options="bandHover"
       x="month"
       y="sales"
       :series-config="goodAverage"
       :x-axis="yearAxis"
       :y-axis="salesAxis"
       :palette="line"
-    />
+    >
+      <template #tooltip="tip">
+        <ChartTip
+          :label="tip.label"
+          :items="tip.items"
+          :rows="tip.rows"
+          :value="count"
+        />
+      </template>
+    </LineChart>
   </Card>
 </template>
 

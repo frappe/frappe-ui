@@ -157,3 +157,19 @@ export const filePlot = {
   grid: { ...FILE_BOX, left: 1, top: '10.2%' },
   xAxis: endLabels,
 }
+
+/**
+ * The rule the file drops through the hovered reading: a solid 1px hairline,
+ * black at 9% over the card — every card in the line row carries the same "Line
+ * 80" (1356:68175, 68378, 68437, 68269, 68212), and the annotation row's
+ * cards the same (1356:68610). `outline-gray-2` is the token
+ * that lands on that grey and, unlike a black wash, survives a flip to dark.
+ */
+export const fileCrosshair = (t: (name: string) => string) => ({
+  tooltip: {
+    axisPointer: {
+      type: 'line',
+      lineStyle: { color: t('outline-gray-2'), width: 1, type: 'solid' },
+    },
+  },
+})

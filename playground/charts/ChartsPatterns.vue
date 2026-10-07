@@ -216,6 +216,14 @@ const current = computed(() => CHART_TYPES.find((t) => t.id === type.value)!)
     0 0 6px 2px rgba(0, 0, 0, 0.03),
     0 0 1.5px rgba(0, 0, 0, 0.15);
 }
+/* And a tone above the card it floats over. The library paints its tooltip
+   in the card's own surface (elevation-2), which in dark mode is the same
+   grey as the card and leaves the box to its shadow alone; elevation-3 is
+   that surface one step up, and in light both are white. The map's tooltip
+   took this step first. `body` outranks the library's utility class. */
+body [data-slot='chart-tooltip'] {
+  background-color: var(--surface-elevation-3);
+}
 /* The file's own tooltip box, where a card draws the file's tooltip body
    (ChartTip): 135 wide on one row with the padding tight to the left of the
    dot, 8 around once the rows carry swatches. The shell is the library's —

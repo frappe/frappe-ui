@@ -82,8 +82,10 @@ const option = computed(() => {
       borderWidth: 0,
       borderRadius: 8,
       padding: [5, 8, 5, 3],
+      // the file's box (1356:66558): 135 across, the name filling the row so
+      // the number stands against the right edge, as ChartTip lays it out
       extraCssText:
-        'box-shadow: 0 6px 12px -2px rgba(0,0,0,0.12), 0 0 6px 2px rgba(0,0,0,0.03), 0 0 1.5px rgba(0,0,0,0.15);',
+        'min-width: 135px; box-sizing: border-box; box-shadow: 0 6px 12px -2px rgba(0,0,0,0.12), 0 0 6px 2px rgba(0,0,0,0.03), 0 0 1.5px rgba(0,0,0,0.15);',
       textStyle: { fontSize: TYPE.xs, color: props.t('ink-gray-8') },
       formatter: (p: {
         name: string
@@ -107,9 +109,9 @@ const option = computed(() => {
         // line the file's tooltip rows stand on.
         return `<div class="text-xs leading-none" style="display:flex;flex-direction:column;gap:4px">
           <div style="padding-left:5px;color:${props.t('ink-gray-8')}">${full}</div>
-          <div style="display:flex;align-items:center;gap:2px">
-            <span style="display:inline-flex;width:16px;height:16px;align-items:center;justify-content:center"><span style="width:5.5px;height:5.5px;border-radius:999px;background:${dot}"></span></span>
-            <span style="color:${props.t('ink-gray-6')};min-width:81px">Active users</span>
+          <div style="display:flex;align-items:center;gap:2px;width:100%">
+            <span style="display:inline-flex;flex-shrink:0;width:16px;height:16px;align-items:center;justify-content:center"><span style="width:5.5px;height:5.5px;border-radius:999px;background:${dot}"></span></span>
+            <span style="color:${props.t('ink-gray-6')};flex:1;min-width:0;margin-right:4px">Active users</span>
             <span class="text-xs-medium leading-none" style="color:${props.t('ink-gray-8')}">${v}</span>
           </div>
         </div>`
