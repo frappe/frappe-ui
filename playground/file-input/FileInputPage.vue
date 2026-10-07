@@ -72,29 +72,34 @@ const DESCRIPTION =
 <template>
   <div class="flex h-full items-center justify-center px-5 py-10">
     <div class="flex items-start gap-10">
-      <!-- the area's box: 400 wide, tall enough for the area with four
-           cards under it, so files coming and going move nothing above -->
-      <div v-if="inputType === 'area'" class="h-[500px] w-[400px]">
-        <FileInputArea
-          v-model:error="error"
-          :variant="variant"
-          :orientation="orientation"
-          :disabled="disabled"
-        />
-      </div>
-      <div
-        v-else
-        class="flex h-[140px] w-[700px] items-end"
-        :class="!preview && 'pl-[272px]'"
-      >
-        <FileInput
-          :variant="variant"
-          :size="size"
-          :preview="preview"
-          :description="preview ? DESCRIPTION : ''"
-          :error="error"
-          :disabled="disabled"
-        />
+      <!-- one box for both input types, so switching between them moves
+           nothing: the field and the area share a top-left corner — 272 in
+           (where the field sits after the preview card) and 112 down (where
+           the field sits at the foot of its 140 row) — and the box is tall
+           enough for the area with four files under it (112 + 500) -->
+      <div class="h-[612px] w-[700px]">
+        <div v-if="inputType === 'area'" class="pl-[272px] pt-[112px]">
+          <FileInputArea
+            v-model:error="error"
+            :variant="variant"
+            :orientation="orientation"
+            :disabled="disabled"
+          />
+        </div>
+        <div
+          v-else
+          class="flex h-[140px] w-[700px] items-end"
+          :class="!preview && 'pl-[272px]'"
+        >
+          <FileInput
+            :variant="variant"
+            :size="size"
+            :preview="preview"
+            :description="preview ? DESCRIPTION : ''"
+            :error="error"
+            :disabled="disabled"
+          />
+        </div>
       </div>
       <!-- the controller, as the tree's: 274 wide, 16 inside, radius 16; its rows 12 apart (the user found 8 cramped with tabs and selects in them) -->
       <div
