@@ -25,7 +25,7 @@
 //               2 past the right; one going up wears a 63% black veil with a
 //               12px spinner.
 // An error (vertical, the file's): the card in a 1px outline-red-5 line, no
-// shadow, the note "Something went wrong, please retry" at 13 ink-red-6 and a
+// shadow, the note "Something went wrong" at 13 ink-red-6 and a
 // sm red subtle "Try again" Button. Horizontal has no error in the file —
 // this one is proposed for review: the tile on surface-red-1 in the same
 // red line, the design's reload glyph in its middle (it retries), and a
@@ -331,7 +331,7 @@ function onDrop(e: DragEvent) {
               v-if="item.status === 'error'"
               class="truncate text-sm leading-[20px] text-ink-red-6"
             >
-              Something went wrong, please retry
+              Something went wrong
             </p>
             <p
               v-else

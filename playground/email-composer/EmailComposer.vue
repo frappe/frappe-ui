@@ -112,8 +112,13 @@ const nameOf = (value: string) =>
     .filter(Boolean)
     .map((w) => w[0].toUpperCase() + w.slice(1))
     .join(' ')
-const folded = (field: Field, values: string[]) =>
-  editing.value !== field && values.length > 0
+/**
+ * A single field never folds while the focus is among the recipients: open
+ * the folded line and To, Cc and Bcc all show their people as tags (the
+ * user's call 2026-10-07). Folding happens once, for the group, when the
+ * focus leaves them all — see `groupFolded`.
+ */
+const folded = (_field: Field, _values: string[]) => false
 function openField(field: Field) {
   editing.value = field
   nextTick(() => fieldRefs[field]?.focus())

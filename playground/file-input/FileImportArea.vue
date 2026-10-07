@@ -250,7 +250,7 @@ const isOpen = (name: string) =>
     <button
       v-if="view === 'link' || view === 'library'"
       type="button"
-      class="absolute left-4 top-4 flex items-center gap-2 text-base leading-4 text-ink-gray-7"
+      class="absolute left-4 top-4 z-10 flex items-center gap-2 text-base leading-4 text-ink-gray-7"
       @click="reset"
     >
       <FileInputIcon name="left-chevron" class="size-4 text-ink-gray-6" />
@@ -303,7 +303,10 @@ const isOpen = (name: string) =>
           <FileInputIcon name="search" class="size-4 text-ink-gray-6" />
         </template>
       </TextInput>
-      <div class="fima-tree min-h-0 flex-1 overflow-y-auto">
+      <!-- the rows step out 8 either side, so their icons and labels sit on
+           the area's 16 line with the search above (their own 8 inside
+           would put Home at 24); the hover fill takes that 8 of margin -->
+      <div class="fima-tree -mx-2 min-h-0 flex-1 overflow-y-auto">
         <Button
           variant="ghost"
           size="sm"

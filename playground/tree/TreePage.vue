@@ -612,6 +612,14 @@ onMounted(() => applyExample(example.value))
   ) {
   content: none;
 }
+/* the suffix button sits on a row that already fills under the pointer:
+   the button draws no hover or press fill of its own over it (the user's
+   call 2026-10-07) — it stays a button: it takes the click, the focus ring
+   and the keyboard as before */
+.tree-espresso :deep([data-slot='suffix']:hover),
+.tree-espresso :deep([data-slot='suffix']:active) {
+  background-color: transparent;
+}
 /* the grip: hidden until the row is hovered, then in the chevron's place */
 .tree-espresso :deep(.tree-row-grip) {
   display: none;
