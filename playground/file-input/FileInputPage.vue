@@ -21,6 +21,7 @@ import { ref, watch } from 'vue'
 import { Select, Switch, TabButtons } from '../../src'
 import FileInput from './FileInput.vue'
 import FileInputArea from './FileInputArea.vue'
+import FileImportArea from './FileImportArea.vue'
 import type { FileInputSize, FileInputVariant } from './FileInput.vue'
 
 // `?variant=subtle&size=lg&error&disabled&preview` opens the page on that
@@ -28,11 +29,16 @@ import type { FileInputSize, FileInputVariant } from './FileInput.vue'
 const q = new URLSearchParams(window.location.search)
 const pick = <T extends string>(key: string, allowed: T[], fallback: T): T =>
   allowed.includes(q.get(key) as T) ? (q.get(key) as T) : fallback
-type InputType = 'field' | 'area'
-const inputType = ref<InputType>(pick('type', ['field', 'area'], 'field'))
+type InputType = 'field' | 'area' | 'sources'
+const inputType = ref<InputType>(
+  pick('type', ['field', 'area', 'sources'], 'field'),
+)
 const inputTypes = [
   { label: 'File input', value: 'field' },
   { label: 'File input area', value: 'area' },
+  // the area's other version: a file from the device, the library or a
+  // link (node 35856:51955)
+  { label: 'Multi-source area', value: 'sources' },
 ]
 const orientation = ref<'vertical' | 'horizontal'>(
   pick('orientation', ['vertical', 'horizontal'], 'vertical'),
@@ -83,7 +89,9 @@ const DESCRIPTION =
            its 140 row as before. The box is tall enough for the field's row
            and the area with four files under it -->
       <div class="h-[612px] w-[700px]">
-        <div v-if="inputType === 'area'" class="pl-[272px]">
+        <!-- the multi-source area is the box's full 700 width, at its top -->
+        <FileImportArea v-if="inputType === 'sources'" :disabled="disabled" />
+        <div v-else-if="inputType === 'area'" class="pl-[272px]">
           <FileInputArea
             v-model:error="error"
             :variant="variant"
@@ -125,7 +133,11 @@ const DESCRIPTION =
               aria-label="Input type"
             />
           </div>
-          <div class="flex h-7 items-center justify-between">
+          <!-- the multi-source area has one look, and no error in its file -->
+          <div
+            v-if="inputType !== 'sources'"
+            class="flex h-7 items-center justify-between"
+          >
             <span class="text-base text-ink-gray-7">Variant</span>
             <TabButtons
               v-model="variant"
@@ -165,7 +177,10 @@ const DESCRIPTION =
             <span class="text-base text-ink-gray-7">Preview</span>
             <Switch v-model="preview" size="sm" aria-label="Preview" />
           </div>
-          <div class="flex h-7 items-center justify-between">
+          <div
+            v-if="inputType !== 'sources'"
+            class="flex h-7 items-center justify-between"
+          >
             <span class="text-base text-ink-gray-7">Error</span>
             <Switch v-model="error" size="sm" aria-label="Error" />
           </div>
