@@ -53,9 +53,20 @@ const CHART_TYPES: Array<{
   props?: Record<string, unknown>
   /** the section draws its cards at the file's own 580×360 */
   figmaSize?: boolean
+  /**
+   * The section is a row of the file's small 223 cards (the sparklines). The
+   * section lays itself on their columns, so the row stands in the middle of
+   * the stage and its title starts over the first card.
+   */
+  smallCards?: boolean
 }> = [
   { id: 'bar', label: 'Bar charts', section: BarSection, figmaSize: true },
-  { id: 'sparkline', label: 'Spark line charts', section: SparklineSection },
+  {
+    id: 'sparkline',
+    label: 'Spark line charts',
+    section: SparklineSection,
+    smallCards: true,
+  },
   { id: 'area', label: 'Area Charts', section: AreaSection },
   { id: 'scatter', label: 'Scatter plot', section: ScatterSection },
   {
@@ -168,10 +179,12 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="flex min-h-full bg-surface-base">
-    <!-- the page: title, then the grid -->
+    <!-- the page: title, then the grid. Beside the rail it pads both sides
+         alike, 81 between them as before, so the cards stand in the middle
+         of it at the same width they had. -->
     <div
       ref="stage"
-      class="chart-stage flex min-w-0 flex-1 flex-col pb-12 pl-[33px] pr-[33px] pt-[43px] lg:pr-12"
+      class="chart-stage flex min-w-0 flex-1 flex-col pb-12 pl-[33px] pr-[33px] pt-[43px] lg:px-[40.5px]"
     >
       <h1 class="sr-only">Charts</h1>
       <!-- every kind, one after another, each under its own name — the file's
@@ -185,7 +198,11 @@ onBeforeUnmount(() => {
         :key="t.id"
         :ref="setSection(t.id)"
         class="scroll-mt-[43px]"
-        :class="i > 0 && 'mt-12'"
+        :class="[
+          i > 0 && 'mt-12',
+          t.figmaSize && 'self-center',
+          t.smallCards && 'small-cards',
+        ]"
         :aria-labelledby="`charts-${t.id}-title`"
       >
         <h2
@@ -300,15 +317,31 @@ onBeforeUnmount(() => {
    card's 580/360 ratio, so it reads 1:1 against the frame. Two of them and the
    file's 17 between need 1177 of stage; under that the grid holds one, and
    under 580 the card gives way rather than overflow. Written after the rules
-   above so it wins over the fluid columns. */
+   above so it wins over the fluid columns. The grid stands in the middle of
+   the stage, and its section shrinks to it (`self-center`), so the title
+   still starts over the first card. */
 .chart-grid--figma {
   grid-template-columns: minmax(0, 580px);
-  justify-content: start;
+  justify-content: center;
 }
 @container chart-stage (min-width: 1177px) {
   .chart-grid--figma {
     grid-template-columns: repeat(2, 580px);
   }
+}
+
+/* A section of the file's 223 cards takes their columns itself, as many as
+   the stage holds and in its middle, and its title and grid span them all: the
+   cards' own grid (SparklineSection) then gets exactly that many columns' width
+   and the title starts over the first card. */
+.small-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(0, 223px));
+  justify-content: center;
+  column-gap: 17px;
+}
+.small-cards > * {
+  grid-column: 1 / -1;
 }
 
 /* the file's radio rows are 2px apart; the group lays its padded rows flush */
