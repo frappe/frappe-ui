@@ -60,13 +60,17 @@ const print = (value: number) => value.toLocaleString('en-US')
           >
             {{ name }}
           </td>
+          <!-- A reading carries no rule of its own: the file turns the cell's
+               stroke off (1356:68481, every advanced-cell's stroke is
+               `visible: false`) and hangs the hairline on the row instead,
+               where the next row's fill covers it — so it shows across the
+               unruled name column and nowhere over the readings. The field
+               is one unbroken sheet of colour, right out to the corners. -->
           <td
             v-for="(value, c) in cells"
             :key="columns[c]"
-            class="w-[60px] border-b border-outline-gray-1 px-2 text-start tabular-nums"
+            class="w-[60px] px-2 text-start tabular-nums"
             :class="[
-              r === 0 && 'border-t',
-              c === cells.length - 1 && 'border-r',
               r === 0 && c === cells.length - 1 && 'rounded-tr-[8px]',
               r === rows.length - 1 &&
                 c === cells.length - 1 &&
