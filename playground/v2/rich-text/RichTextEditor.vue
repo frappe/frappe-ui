@@ -845,16 +845,27 @@ function resolve() {
   border-bottom-right-radius: 11px;
 }
 /* tiptap's column resize handle: a 1px gray-600 line on the edge under
-   the pointer, the cell's height */
+   the pointer, the cell's height. Every cell on the column draws its own
+   segment, so the line is only unbroken if each one reaches the next: a
+   cell's rule lives on its bottom border, which `bottom: 0` stops short
+   of (it answers to the padding box), and the rule showed through as a
+   pixel of gray-100 at every row. The segment is taken 1px past instead,
+   the same way the selected cell's ring reaches its rules, and lifted
+   over the cells' own grounds so a coloured row cannot cut it either. */
 .rte-doc .column-resize-handle {
   position: absolute;
   top: 0;
-  bottom: 0;
+  bottom: -1px;
   right: -1px;
   width: 1px;
   background-color: var(--ink-gray-6);
   pointer-events: none;
-  z-index: 1;
+  z-index: 2;
+}
+/* the last row carries no rule beneath it, so its segment ends on the
+   cell — a pixel further is a pixel past the table */
+.rte-doc.prose-v3 table tr:last-child > * > .column-resize-handle {
+  bottom: 0;
 }
 /* on the last column it stays inside the cell: 1px past the table is 1px of
    overflow in the card, and a scrollbar the table has no need of */
