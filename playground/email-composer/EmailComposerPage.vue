@@ -18,6 +18,9 @@ import ComposerIcon from './ComposerIcon.vue'
  * calendar: the last thing on the right.
  */
 const open = ref(false)
+// the ⋮ menu's two settings: they outlast one composer, so the page holds them
+const fullScreen = ref(false)
+const spellCheck = ref(true)
 
 /**
  * The bin closes the composer and says so in a toast, with Undo: the draft
@@ -60,6 +63,8 @@ function closed() {
     <div class="relative min-h-0 flex-1">
       <EmailComposer
         v-if="open"
+        v-model:full-screen-default="fullScreen"
+        v-model:spell-check="spellCheck"
         :initial="draft"
         @close="closed"
         @discard="discarded"

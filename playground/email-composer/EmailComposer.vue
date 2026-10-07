@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, ref, watch } from 'vue'
+import { computed, h, nextTick, ref, watch } from 'vue'
 import { Avatar, Button, Dropdown, Popover, TextInput } from '../../src'
 import { Editor, EditorContent, RichTextKit } from '../../src/molecules/editor'
 import type { TiptapEditor } from '../../src/molecules/editor'
@@ -58,9 +58,15 @@ export interface Draft {
 const props = defineProps<{
   /** A discarded draft to open with, when the toast's Undo brings it back. */
   initial?: Draft | null
+  /** "Default to full screen", from the ⋮ menu: the composer opens expanded. */
+  fullScreenDefault?: boolean
+  /** "Spell check", from the ⋮ menu (on unless turned off). */
+  spellCheck?: boolean
 }>()
 const emit = defineEmits<{
   close: []
+  'update:fullScreenDefault': [value: boolean]
+  'update:spellCheck': [value: boolean]
   /** The bin: the draft as it was, for the toast's Undo. */
   discard: [draft: Draft]
 }>()
@@ -282,7 +288,67 @@ function schedule() {
 }
 
 /** Pop out: the window takes the whole stage, 24 in on every side. */
-const expanded = ref(false)
+const expanded = ref(!!props.fullScreenDefault)
+
+/**
+ * The toolbar's ⋮: a menu of three, each with its glyph from the icon set
+ * (node 35872:126785 — expand, print, text). The two settings are the
+ * library's switch items and live on the page, so they outlast the window:
+ * Default to full screen opens every composer expanded (and expands this
+ * one when turned on); Spell check turns the browser's checking in the
+ * message on or off. Print prints the message as it stands.
+ */
+const glyph = (name: string) => () =>
+  h(ComposerIcon, { name, class: 'size-4 text-ink-gray-7' })
+const spellOn = computed(() => props.spellCheck !== false)
+const moreOptions = computed(() => [
+  {
+    label: 'Default to full screen',
+    icon: glyph('expand'),
+    switch: true as const,
+    switchValue: !!props.fullScreenDefault,
+    onClick: (on: boolean) => {
+      emit('update:fullScreenDefault', on)
+      if (on) expanded.value = true
+    },
+  },
+  { label: 'Print', icon: glyph('print'), onClick: () => printMessage() },
+  {
+    label: 'Spell check',
+    icon: glyph('text'),
+    switch: true as const,
+    switchValue: spellOn.value,
+    onClick: (on: boolean) => emit('update:spellCheck', on),
+  },
+])
+watch(
+  [spellOn, () => ed()],
+  ([on]) => ed()?.view.dom.setAttribute('spellcheck', on ? 'true' : 'false'),
+  { immediate: true, flush: 'post' },
+)
+/** The message on its own page, printed from a frame the page never shows. */
+function printMessage() {
+  const names = (list: string[]) => list.map(nameOf).join(', ')
+  const esc = (t: string) =>
+    t.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]!)
+  const lines = [
+    to.value.length && `<p><b>To:</b> ${esc(names(to.value))}</p>`,
+    cc.value.length && `<p><b>Cc:</b> ${esc(names(cc.value))}</p>`,
+    bcc.value.length && `<p><b>Bcc:</b> ${esc(names(bcc.value))}</p>`,
+  ].filter(Boolean)
+  const frame = document.createElement('iframe')
+  frame.style.cssText = 'position:fixed;width:0;height:0;border:0;opacity:0'
+  document.body.appendChild(frame)
+  const doc = frame.contentDocument!
+  doc.open()
+  doc.write(
+    `<html><head><title>${esc(subject.value || 'New message')}</title><style>body{font:14px/1.5 Inter,system-ui,sans-serif;margin:40px;color:#171717}h1{font-size:20px}</style></head><body><h1>${esc(subject.value || 'New message')}</h1>${lines.join('')}<hr>${ed()?.getHTML() ?? ''}</body></html>`,
+  )
+  doc.close()
+  frame.contentWindow!.focus()
+  frame.contentWindow!.print()
+  setTimeout(() => frame.remove(), 1000)
+}
 
 function reset() {
   to.value = []
@@ -798,11 +864,19 @@ const root = ref<HTMLElement | null>(null)
             <ComposerIcon name="image" class="size-4" />
           </template>
         </Button>
-        <Button variant="ghost" size="sm" class="!text-ink-gray-7" label="More">
-          <template #icon>
-            <ComposerIcon name="dot-vertical" class="size-4" />
-          </template>
-        </Button>
+        <Dropdown :options="moreOptions" side="top" align="start" :offset="4">
+          <Button
+            variant="ghost"
+            size="sm"
+            class="!text-ink-gray-7"
+            label="More"
+            @mousedown.prevent
+          >
+            <template #icon>
+              <ComposerIcon name="dot-vertical" class="size-4" />
+            </template>
+          </Button>
+        </Dropdown>
       </div>
       <Button
         variant="ghost"
