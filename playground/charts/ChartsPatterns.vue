@@ -19,7 +19,7 @@
 // radio group has picked. The theme is a set of the file's colour
 // variables (chartThemes.ts) resolved off the page (useChartTokens.ts),
 // so the dark mode is the file's dark column of the same variables.
-import { computed, ref, type Component } from 'vue'
+import { onBeforeUnmount, onMounted, ref, type Component } from 'vue'
 import { Radio, RadioGroup } from '../../src'
 import { CHART_THEMES, type ChartTheme } from './chartThemes'
 import { useChartTheme } from './useChartTheme'
@@ -71,36 +71,143 @@ const CHART_TYPES: Array<{
   { id: 'pie', label: 'Pie charts', section: PieSection },
 ]
 
+/** the section in view, which the rail marks */
 const type = ref<ChartType>('bar')
 const themeId = ref<ChartTheme>('ocean')
 const theme = useChartTheme(themeId)
 
-const current = computed(() => CHART_TYPES.find((t) => t.id === type.value)!)
+/**
+ * One page of every kind, in the rail's order, rather than one kind at a time:
+ * the reader scrolls from the bar charts into the sparklines and on down, and
+ * the rail follows — the row marked is the section whose heading has passed
+ * the top of the page — and takes them back to any of them.
+ *
+ * The page scrolls inside the playground's stage rather than the window, so
+ * the scroller is found from the page itself.
+ */
+const stage = ref<HTMLElement>()
+const sectionEls = new Map<ChartType, HTMLElement>()
+const setSection = (id: ChartType) => (el: unknown) => {
+  if (el instanceof HTMLElement) sectionEls.set(id, el)
+  else sectionEls.delete(id)
+}
+let scroller: HTMLElement | null = null
+/** a section is the one being read once its heading is this far up the view */
+const READING_LINE = 120
+/** while a click carries the page to a section, the rail keeps that one */
+let arriving: ChartType | null = null
+let arriveTimer: ReturnType<typeof setTimeout> | undefined
+
+function scrollerOf(el: HTMLElement | null): HTMLElement | null {
+  for (let n = el?.parentElement; n; n = n.parentElement) {
+    const { overflowY } = getComputedStyle(n)
+    // asked of the box, not of what it holds yet: at mount the charts may
+    // not have drawn, and the page's scroller is not yet taller than its view
+    if (/(auto|scroll)/.test(overflowY)) return n
+  }
+  return null
+}
+
+function follow() {
+  if (!scroller) return
+  if (arriving) {
+    type.value = arriving
+    return
+  }
+  const top = scroller.getBoundingClientRect().top
+  const atFoot =
+    scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 2
+  let inView: ChartType = CHART_TYPES[0].id
+  for (const t of CHART_TYPES) {
+    const el = sectionEls.get(t.id)
+    if (el && el.getBoundingClientRect().top - top <= READING_LINE)
+      inView = t.id
+  }
+  // the last sections are shorter than the view, so their headings may never
+  // reach the line: at the foot of the page, the last one is the one in view
+  type.value = atFoot ? CHART_TYPES[CHART_TYPES.length - 1].id : inView
+}
+
+let frame = 0
+const onScroll = () => {
+  cancelAnimationFrame(frame)
+  frame = requestAnimationFrame(follow)
+}
+
+function go(id: ChartType) {
+  const el = sectionEls.get(id)
+  if (!el) return
+  type.value = id
+  arriving = id
+  clearTimeout(arriveTimer)
+  // `scrollend` closes the trip where it is supported; the timer covers the
+  // rest, and a trip that ends early (the page's foot) still lets go
+  arriveTimer = setTimeout(() => (arriving = null), 900)
+  el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
+const onScrollEnd = () => {
+  if (!arriving) return
+  arriving = null
+  clearTimeout(arriveTimer)
+  follow()
+}
+
+onMounted(() => {
+  scroller = scrollerOf(stage.value ?? null)
+  scroller?.addEventListener('scroll', onScroll, { passive: true })
+  scroller?.addEventListener('scrollend', onScrollEnd)
+  follow()
+})
+onBeforeUnmount(() => {
+  scroller?.removeEventListener('scroll', onScroll)
+  scroller?.removeEventListener('scrollend', onScrollEnd)
+  cancelAnimationFrame(frame)
+  clearTimeout(arriveTimer)
+})
 </script>
 
 <template>
   <div class="flex min-h-full bg-surface-base">
     <!-- the page: title, then the grid -->
     <div
+      ref="stage"
       class="chart-stage flex min-w-0 flex-1 flex-col pb-12 pl-[33px] pr-[33px] pt-[43px] lg:pr-12"
     >
-      <!-- the page names the kind of chart on it, as the rail does -->
-      <h1 class="text-3xl-semibold leading-tighter text-ink-gray-9">
-        {{ current.label }}
-      </h1>
-      <div
-        :key="`${type}-${themeId}`"
-        :data-chart-theme="themeId"
-        class="chart-grid mt-6"
-        :class="{ 'chart-grid--figma': current.figmaSize }"
+      <h1 class="sr-only">Charts</h1>
+      <!-- every kind, one after another, each under its own name — the file's
+           title, 20 semibold with its grid 24 under it — and 48 between one
+           section's last card and the next one's name. A section stops 43
+           short of the top when the rail takes the page to it, where the page
+           opens its first. -->
+      <section
+        v-for="(t, i) in CHART_TYPES"
+        :id="`charts-${t.id}`"
+        :key="t.id"
+        :ref="setSection(t.id)"
+        class="scroll-mt-[43px]"
+        :class="i > 0 && 'mt-12'"
+        :aria-labelledby="`charts-${t.id}-title`"
       >
-        <component
-          :is="current.section"
-          :theme="theme"
-          :theme-id="themeId"
-          v-bind="current.props"
-        />
-      </div>
+        <h2
+          :id="`charts-${t.id}-title`"
+          class="text-3xl-semibold leading-tighter text-ink-gray-9"
+        >
+          {{ t.label }}
+        </h2>
+        <div
+          :key="themeId"
+          :data-chart-theme="themeId"
+          class="chart-grid mt-6"
+          :class="{ 'chart-grid--figma': t.figmaSize }"
+        >
+          <component
+            :is="t.section"
+            :theme="theme"
+            :theme-id="themeId"
+            v-bind="t.props"
+          />
+        </div>
+      </section>
     </div>
 
     <!-- the rail: the kinds of chart, then the palette. It stays put while
@@ -116,29 +223,29 @@ const current = computed(() => CHART_TYPES.find((t) => t.id === type.value)!)
       >
         Charts type
       </h2>
-      <ul
-        class="mt-[19px] flex flex-col gap-0.5 border-l border-outline-gray-1 py-1"
-        role="tablist"
-        aria-labelledby="chart-types"
-        aria-orientation="vertical"
-      >
-        <li v-for="t in CHART_TYPES" :key="t.id" class="-ml-px">
-          <button
-            type="button"
-            role="tab"
-            class="block w-full border-l py-1 pl-4 text-start text-base leading-tighter transition-colors"
-            :class="
-              type === t.id
-                ? 'border-[color:var(--ink-gray-7)] text-ink-gray-9'
-                : 'border-transparent text-ink-gray-8 hover:text-ink-gray-9'
-            "
-            :aria-selected="type === t.id"
-            @click="type = t.id"
-          >
-            {{ t.label }}
-          </button>
-        </li>
-      </ul>
+      <!-- the page's contents: each row takes the page to its section, and the
+           one being read carries the line's segment -->
+      <nav aria-labelledby="chart-types">
+        <ul
+          class="mt-[19px] flex flex-col gap-0.5 border-l border-outline-gray-1 py-1"
+        >
+          <li v-for="t in CHART_TYPES" :key="t.id" class="-ml-px">
+            <a
+              :href="`#charts-${t.id}`"
+              class="block w-full border-l py-1 pl-4 text-start text-base leading-tighter transition-colors"
+              :class="
+                type === t.id
+                  ? 'border-[color:var(--ink-gray-7)] text-ink-gray-9'
+                  : 'border-transparent text-ink-gray-8 hover:text-ink-gray-9'
+              "
+              :aria-current="type === t.id ? 'location' : undefined"
+              @click.prevent="go(t.id)"
+            >
+              {{ t.label }}
+            </a>
+          </li>
+        </ul>
+      </nav>
 
       <h2 class="mt-[45px] text-base-semibold leading-tighter text-ink-gray-9">
         Theme
