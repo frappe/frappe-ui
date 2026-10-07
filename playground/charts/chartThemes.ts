@@ -108,7 +108,10 @@ const OCEAN: ThemeRoles = {
   pie: [o(400), o(900), o(700), o(600), o(800)],
   doughnut: [o(400), o(500), o(600), o(700), o(800)],
   half: [o(300), o(400), o(500), o(600), o(700), o(800), o(900), o(200)],
-  rose: [o(500), o(800), o(700), o(600), o(300), o(900)],
+  // the nested pie's six arcs in the order the file stacks them, widest first:
+  // B-500, 300, 600, 900, 700, 800 (1589:43629, read off the 258, 242, 208,
+  // 180, 156 and 120 ellipses)
+  rose: [o(500), o(300), o(600), o(900), o(700), o(800)],
   area: [o(800)],
   areas: [o(800), o(700), o(400), o(300)],
   stepped: [o(900), o(800), o(700), o(400)],

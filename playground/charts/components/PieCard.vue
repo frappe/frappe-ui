@@ -29,8 +29,24 @@ const props = defineProps<{
 const plotEl = ref<HTMLElement>()
 const hidden = ref<string[]>([])
 
+/**
+ * The rose's slices, biggest first. The file builds this card out of six arcs
+ * that share a centre and a 15px hole and step inwards — 129, 121, 104, 90, 78
+ * and 60 — each sweeping on from where the last one stopped (1589:43629's
+ * ellipses, all at 290,131). What that draws is a spiral closing inwards, and
+ * a rose only draws it if its widest slice is also its longest: left in the
+ * order the data happens to be in, the radii jump about and the wedges read as
+ * scattered rather than nested. The plain pie keeps the data's own order, where
+ * every slice shares one radius and the order is all a reader has.
+ */
+const ordered = computed(() =>
+  props.variant === 'rose'
+    ? [...props.slices].sort((a, b) => b.share - a.share)
+    : props.slices,
+)
+
 const items = computed(() =>
-  props.slices.map((s, i) => ({
+  ordered.value.map((s, i) => ({
     name: s.name,
     label: s.name,
     color: props.colors[i % props.colors.length],
@@ -39,13 +55,13 @@ const items = computed(() =>
 )
 
 const option = computed(() => {
-  const data = props.slices
+  const data = ordered.value
     .filter((s) => !hidden.value.includes(s.name))
-    .map((s, i) => ({
+    .map((s) => ({
       name: s.name,
       value: s.share,
       itemStyle: {
-        color: props.colors[props.slices.indexOf(s) % props.colors.length],
+        color: props.colors[ordered.value.indexOf(s) % props.colors.length],
       },
       label: { show: false },
     }))
@@ -116,10 +132,24 @@ function toggle(name: string) {
 </script>
 
 <template>
-  <ChartContainer :title="title">
+  <ChartContainer :title="title" :class="variant === 'rose' && 'pie-rose'">
     <div ref="plotEl" class="h-full w-full" role="img" :aria-label="title" />
     <template #legend>
       <ChartLegend :items="items" @change="toggle" />
     </template>
   </ChartContainer>
 </template>
+
+<style scoped>
+/* The file breaks this legend three to a row — two rows of three, centred
+   under the plot (1589:43629's "Frame 1171278973" holds them in 303 of 580).
+   Given the card's full width the six ran five and one. The count is what the
+   file fixes, not the width: these names are as long as their numbers, so a
+   max-width that holds three of the file's would drop one of ours onto a line
+   of its own the moment "17.2%" and "14%" met. Three columns says it once. */
+.pie-rose :deep([data-slot='chart-legend']) {
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  justify-content: center;
+}
+</style>
