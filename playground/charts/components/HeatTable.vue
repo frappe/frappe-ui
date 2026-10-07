@@ -2,7 +2,7 @@
 // The file's table heat map (Figma 1GDS12ys41lxeG3wQpNq41, 1356:68481):
 // nine companies in 40px rows behind an outline-gray-1 hairline on an 8px
 // outer radius — a 48px numbered column, the name in 14px ink-gray-7, then
-// seven cells 88 wide, each inset by 8, holding a 14px number on a fill from
+// seven cells 60 wide, each inset by 8, holding a 14px number on a fill from
 // the theme's heat ramp, the ink turning white on the darkest two steps. A table rather
 // than the library's HeatmapChart, whose plot has no numbered column and
 // no ruled rows; the ramp is read the way the library reads one.
@@ -35,8 +35,9 @@ const print = (value: number) => value.toLocaleString('en-US')
 
 <template>
   <div class="overflow-x-auto">
-    <!-- the file sets the table at its own 798: 48 for the number, 134 for the
-         name and seven readings of 88, and lets the card keep the rest -->
+    <!-- the table keeps its own width rather than stretching: 48 for the
+         number, 134 for the name and seven readings of 60, and the card keeps
+         the rest -->
     <table
       class="w-auto border-separate border-spacing-0 text-[14px] leading-[1.15] tracking-[0.02em] text-ink-gray-8"
       :aria-label="`Heat map, ${columns.join(', ')}`"
@@ -62,7 +63,7 @@ const print = (value: number) => value.toLocaleString('en-US')
           <td
             v-for="(value, c) in cells"
             :key="columns[c]"
-            class="w-[88px] border-b border-outline-gray-1 px-2 text-start tabular-nums"
+            class="w-[60px] border-b border-outline-gray-1 px-2 text-start tabular-nums"
             :class="[
               r === 0 && 'border-t',
               c === cells.length - 1 && 'border-r',
