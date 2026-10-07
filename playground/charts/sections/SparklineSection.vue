@@ -125,7 +125,7 @@ const wash = computed(() => props.theme.one('sparkWash'))
 .spark-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(0, 223px));
-  justify-content: center;
+  justify-content: start;
   column-gap: 17px;
   row-gap: 18px;
 }
