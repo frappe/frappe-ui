@@ -84,7 +84,10 @@ const current = computed(() => CHART_TYPES.find((t) => t.id === type.value)!)
     <div
       class="chart-stage flex min-w-0 flex-1 flex-col pb-12 pl-[33px] pr-[33px] pt-[43px] lg:pr-12"
     >
-      <h1 class="text-3xl-semibold leading-tighter text-ink-gray-9">Charts</h1>
+      <!-- the page names the kind of chart on it, as the rail does -->
+      <h1 class="text-3xl-semibold leading-tighter text-ink-gray-9">
+        {{ current.label }}
+      </h1>
       <div
         :key="`${type}-${themeId}`"
         :data-chart-theme="themeId"

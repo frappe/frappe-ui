@@ -79,15 +79,8 @@ const color = computed(() => props.theme.one('spark'))
       variant="inset"
       :color="color"
     />
-    <SparkCard
-      title="Sales"
-      value="$12,83,456"
-      delta="+7%"
-      caption="vs last month"
-      :height="95"
-      :color="color"
-    />
-    <SparkCard title="Sales" value="$12,83,456" :height="71" :color="color" />
+    <!-- the sales card with its trend sits second on the second row, ahead of
+         the two plain sales cards -->
     <SparkCard
       title="Sales"
       value="$12,83,456"
@@ -98,6 +91,15 @@ const color = computed(() => props.theme.one('spark'))
       :height="106"
       :color="color"
     />
+    <SparkCard
+      title="Sales"
+      value="$12,83,456"
+      delta="+7%"
+      caption="vs last month"
+      :height="95"
+      :color="color"
+    />
+    <SparkCard title="Sales" value="$12,83,456" :height="71" :color="color" />
   </div>
 </template>
 
