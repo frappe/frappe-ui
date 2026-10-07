@@ -464,7 +464,7 @@ onMounted(() => applyExample(example.value))
                   {{ node.suffix }}
                 </Button>
                 <!-- the hover suffix (nodes 35870:126688 / 35871:126758): a
-                     24px icon-only ghost Button flush with the row's 2px
+                     24px icon-only ghost Button flush with the row's 6px
                      right inside, shown under the pointer (or when the row
                      holds the focus) — "more" on the source tree, the lock on
                      the layers, which stays shown on a locked layer -->
@@ -620,7 +620,9 @@ onMounted(() => applyExample(example.value))
    first — a straight line the tree's whole width, drawn in the 1px gap
    above the row (not on the row itself, whose corners are round), so rows
    sit 29 apart; a hovered row's fill covers the line above it and the one
-   below (the file draws the fill over both) */
+   right below it — its first child's when it is open, else the next row's.
+   An open row's next sibling comes after its children, so that line stays
+   (the user caught it vanishing under the children, 2026-10-07) */
 .tree-espresso.is-hierarchy :deep(.frappe-tree-row) {
   position: relative;
   margin-top: 1px;
@@ -643,7 +645,33 @@ onMounted(() => applyExample(example.value))
 .tree-espresso.is-hierarchy
   :deep(li:not([data-disabled]) > .frappe-tree-row:hover::before),
 .tree-espresso.is-hierarchy
-  :deep(li:has(> .frappe-tree-row:hover) + li > .frappe-tree-row::before),
+  :deep(
+    li:not([aria-expanded='true']):has(> .frappe-tree-row:hover)
+      + li
+      > .frappe-tree-row::before
+  ),
+.tree-espresso.is-hierarchy
+  :deep(
+    li:has(
+        > [role='group']
+          > li:last-child:not([aria-expanded='true'])
+          > .frappe-tree-row:hover
+      )
+      + li
+      > .frappe-tree-row::before
+  ),
+.tree-espresso.is-hierarchy
+  :deep(
+    li:has(
+        > [role='group']
+          > li:last-child
+          > [role='group']
+          > li:last-child:not([aria-expanded='true'])
+          > .frappe-tree-row:hover
+      )
+      + li
+      > .frappe-tree-row::before
+  ),
 .tree-espresso.is-hierarchy
   :deep(
     li:has(> .frappe-tree-row:hover)
@@ -663,9 +691,10 @@ onMounted(() => applyExample(example.value))
 }
 /* the hover suffix: in its place always (so nothing shifts), seen only on
    the row under the pointer, the row holding the focus, or a locked layer;
-   the row's box keeps 2 inside on the right for it, as the file does */
+   the row's box keeps 6 inside on the right for it (node 35870:126405 —
+   the file's update over its first 2) */
 .tree-espresso :deep(.tree-row-box:has(.tree-hover-suffix)) {
-  padding-right: 2px;
+  padding-right: 6px;
 }
 .tree-espresso :deep(.tree-hover-suffix) {
   opacity: 0;

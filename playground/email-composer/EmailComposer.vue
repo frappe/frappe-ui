@@ -292,8 +292,10 @@ const expanded = ref(!!props.fullScreenDefault)
 
 /**
  * The toolbar's ⋮: a menu of three, each with its glyph from the icon set
- * (node 35872:126785 — expand, print, text). The two settings are the
- * library's switch items and live on the page, so they outlast the window:
+ * (node 35872:126785 — expand, print, text). The two settings are plain
+ * items — the menu's own hover and press — with the icon set's check at
+ * the right when on (the user's call over switches, 2026-10-07); they live
+ * on the page, so they outlast the window:
  * Default to full screen opens every composer expanded (and expands this
  * one when turned on); Spell check turns the browser's checking in the
  * message on or off. Print prints the message as it stands.
@@ -301,13 +303,20 @@ const expanded = ref(!!props.fullScreenDefault)
 const glyph = (name: string) => () =>
   h(ComposerIcon, { name, class: 'size-4 text-ink-gray-7' })
 const spellOn = computed(() => props.spellCheck !== false)
+/** A setting's mark: the icon set's check (node 35873:126858) when it is on. */
+const checkMark = (on: boolean) => ({
+  suffix: () =>
+    on
+      ? h(ComposerIcon, { name: 'check', class: 'size-4 text-ink-gray-7' })
+      : null,
+})
 const moreOptions = computed(() => [
   {
     label: 'Default to full screen',
     icon: glyph('expand'),
-    switch: true as const,
-    switchValue: !!props.fullScreenDefault,
-    onClick: (on: boolean) => {
+    slots: checkMark(!!props.fullScreenDefault),
+    onClick: () => {
+      const on = !props.fullScreenDefault
       emit('update:fullScreenDefault', on)
       if (on) expanded.value = true
     },
@@ -316,9 +325,8 @@ const moreOptions = computed(() => [
   {
     label: 'Spell check',
     icon: glyph('text'),
-    switch: true as const,
-    switchValue: spellOn.value,
-    onClick: (on: boolean) => emit('update:spellCheck', on),
+    slots: checkMark(spellOn.value),
+    onClick: () => emit('update:spellCheck', !spellOn.value),
   },
 ])
 watch(
