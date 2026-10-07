@@ -288,22 +288,26 @@ export const slices = [
 ]
 
 /**
- * The file's heat table, company by company and column by column
- * (Figma 1GDS12ys41lxeG3wQpNq41, 1356:68481). The file's own cells are
- * coloured by hand rather than by what they hold — 51,987 sits on a pale
- * step and 12,345 on the darkest — so the numbers are the file's and the
- * ramp is read off them here, which is the one thing a heat map has to do.
+ * The file's heat table, company by company and column by column (Figma
+ * 1GDS12ys41lxeG3wQpNq41, 1356:68481), carried in hundreds so each cell
+ * prints three digits: the file's 51,987 is 520 here. Dividing every
+ * reading by the same number leaves the ramp exactly where it was, since a
+ * cell's step is its place between the lowest and highest reading.
+ *
+ * The file's own cells are coloured by hand rather than by what they hold —
+ * 51,987 sits on a pale step and 12,345 on the darkest — so the ramp is read
+ * off the numbers here, which is the one thing a heat map has to do.
  */
 export const heatTable = [
-  ['Attentive', 51987, 21234, 45678, 78321, 15432, 12345, 22345],
-  ['Gumroad', 32678, 28901, 29876, 88776, 63456, 42345, 30456],
-  ['Zapier', 64321, 12456, 20456, 21987, 23456, 15678, 50123],
-  ['Evergreen', 72145, 25678, 47890, 76543, 31234, 53456, 39876],
-  ['Hourglass', 45210, 36789, 19876, 54321, 34567, 38765, 45678],
-  ['Squarespace', 25432, 39876, 39876, 32109, 27890, 34567, 28910],
-  ['Github', 45678, 24321, 22345, 89012, 56789, 7890, 34567],
-  ['Airbnb', 38765, 44321, 32456, 67890, 22345, 60123, 21234],
-  ['Figma', 29876, 55789, 35678, 50123, 45678, 48901, 27890],
+  ['Attentive', 520, 212, 457, 783, 154, 123, 223],
+  ['Gumroad', 327, 289, 299, 888, 635, 423, 305],
+  ['Zapier', 643, 125, 205, 220, 235, 157, 501],
+  ['Evergreen', 721, 257, 479, 765, 312, 535, 399],
+  ['Hourglass', 452, 368, 199, 543, 346, 388, 457],
+  ['Squarespace', 254, 399, 399, 321, 279, 346, 289],
+  ['Github', 457, 243, 223, 890, 568, 79, 346],
+  ['Airbnb', 388, 443, 325, 679, 223, 601, 212],
+  ['Figma', 299, 558, 357, 501, 457, 489, 279],
 ] as const
 export const HEAT_COLUMNS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul']
 export const heatCells = heatTable.flatMap(([company, ...values]) =>
