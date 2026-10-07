@@ -7,37 +7,36 @@ export type DataLabelSide = 'top' | 'right' | 'left'
 const DEFAULT_LABEL_DISTANCE = 5
 
 /**
- * Where the grid edge has to sit for every data label to stay inside the bounds
- * the option gave it, or `null` when the edge is already right.
- *
- * echarts contains axis labels in the grid's outer bounds but not data labels,
- * and how much room a label needs depends on the axis ends echarts picks and on
- * the plot's size, so it can only be read off the laid-out chart. A label is
- * held to `bound`, the edge the option builder set, which is where the axis
- * labels on that side stop too.
+ * The axis end one tick past the current one, or `null` when echarts has drawn
+ * fewer than two ticks to read a step from. Read off the ticks rather than the
+ * scale's extent, because the ticks are what the reader sees and what a label
+ * has to clear.
  */
-export function fitDataLabels(
-  chart: ECharts,
-  side: DataLabelSide,
-  bound: number,
-): number | null {
-  const current = (chart.getOption() as any).grid?.[0]?.[side]
-  if (typeof current !== 'number') return null
-
-  const overflow = dataLabelOverflow(chart, side, bound)
-  if (overflow === null) return null
-  const next = Math.max(bound, current + overflow)
-  // A fraction of a pixel either way is the plot rescaling under the labels,
-  // and chasing it would lay the chart out again for nothing.
-  return Math.abs(next - current) < 1 ? null : next
+export function nextAxisMax(chart: ECharts, axis: 'xAxis' | 'yAxis') {
+  const ticks = (chart as any)
+    .getModel()
+    .getComponent(axis, 0)
+    ?.axis?.scale?.getTicks?.()
+  if (!ticks || ticks.length < 2) return null
+  const last = ticks[ticks.length - 1].value
+  return last + (last - ticks[ticks.length - 2].value)
 }
 
 /**
  * How far the furthest data label reaches past `bound`: positive when it
  * overflows, negative when there is room to spare, `null` when nothing is
  * labelled past the end of a mark.
+ *
+ * echarts contains axis labels in the grid's outer bounds but not data labels,
+ * and how far a label reaches depends on the axis ends echarts picks and on the
+ * plot's size, so it can only be read off the laid-out chart. `bound` is the
+ * grid edge the option set, which is where the axis labels on that side stop.
  */
-function dataLabelOverflow(chart: ECharts, side: DataLabelSide, bound: number) {
+export function dataLabelOverflow(
+  chart: ECharts,
+  side: DataLabelSide,
+  bound: number,
+) {
   const width = chart.getWidth()
   let overflow: number | null = null
 

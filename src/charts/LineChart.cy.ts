@@ -138,13 +138,14 @@ describe('LineChart', () => {
   })
 
   describe('data labels', () => {
-    it('keeps the label of a point at the top of the axis inside the canvas', () => {
+    it('raises the axis a tick for a label at the top of the scale', () => {
+      // Sales top out at 20, which is where echarts ends the scale.
       mountChart({
         y: 'sales',
-        yAxis: { max: 20 },
         seriesConfig: { sales: { showDataLabels: true } },
       })
       lines().should('have.length', 1)
+      cy.get('[data-slot="chart-plot"] svg text').should('contain.text', '25')
       cy.get('[data-slot="chart-plot"] svg').then(($svg) => {
         const top = $svg[0].getBoundingClientRect().top
         cy.get('[data-slot="chart-plot"] svg text').each(($text) => {

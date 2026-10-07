@@ -274,52 +274,63 @@ describe('BarChart', () => {
   })
 
   describe('data labels', () => {
-    it('keeps the label of a bar at the top of the axis inside the canvas', () => {
-      mountChart({
-        y: 'sales',
-        yAxis: { max: 20 },
-        seriesConfig: { sales: { showDataLabels: true } },
-      })
-      bars().should('have.length', data.length)
+    const plotText = () => cy.get('[data-slot="chart-plot"] svg text')
+
+    /** Every label and tick inside the canvas, on the side the bars grow to. */
+    function insideCanvas(side: 'top' | 'right') {
       cy.get('[data-slot="chart-plot"] svg').then(($svg) => {
-        const top = $svg[0].getBoundingClientRect().top
-        cy.get('[data-slot="chart-plot"] svg text').each(($text) => {
-          expect($text[0].getBoundingClientRect().top).to.be.at.least(top)
+        const canvas = $svg[0].getBoundingClientRect()
+        plotText().each(($text) => {
+          const box = $text[0].getBoundingClientRect()
+          if (side === 'top') expect(box.top).to.be.at.least(canvas.top)
+          else expect(box.right).to.be.at.most(canvas.right)
         })
       })
+    }
+
+    // Sales top out at 20, which is where echarts ends the scale.
+    const labelled = {
+      y: 'sales',
+      seriesConfig: { sales: { showDataLabels: true } },
+    }
+
+    it('raises the axis a tick for a label at the top of the scale', () => {
+      mountChart(labelled)
+      bars().should('have.length', data.length)
+      plotText().should('contain.text', '25')
+      insideCanvas('top')
     })
 
-    it('reserves nothing when the axis already clears the labels', () => {
-      const topTick = () =>
-        cy
-          .contains('[data-slot="chart-plot"] svg text', /^40$/)
-          .then(($tick) => $tick[0].getBoundingClientRect().top)
-
-      mountChart({ y: 'sales', yAxis: { max: 40 } })
-      topTick().then((bare) => {
-        mountChart({
-          y: 'sales',
-          yAxis: { max: 40 },
-          seriesConfig: { sales: { showDataLabels: true } },
-        })
-        topTick().should('equal', bare)
-      })
-    })
-
-    it('keeps the label past the end of a row inside the canvas', () => {
+    it('leaves the axis alone when the labels already fit', () => {
       mountChart({
-        y: 'sales',
-        horizontal: true,
-        yAxis: { max: 20 },
-        seriesConfig: { sales: { showDataLabels: true } },
+        ...labelled,
+        data: data.map((row) => ({ ...row, sales: row.sales - 7 })),
       })
       bars().should('have.length', data.length)
-      cy.get('[data-slot="chart-plot"] svg').then(($svg) => {
-        const right = $svg[0].getBoundingClientRect().right
-        cy.get('[data-slot="chart-plot"] svg text').each(($text) => {
-          expect($text[0].getBoundingClientRect().right).to.be.at.most(right)
-        })
+      plotText().should('contain.text', '15').and('not.contain.text', '20')
+    })
+
+    it('raises the value axis of a row chart the same way', () => {
+      mountChart({ ...labelled, horizontal: true })
+      bars().should('have.length', data.length)
+      plotText().should('contain.text', '25')
+      insideCanvas('right')
+    })
+
+    it('makes room for a label at the top of the second axis', () => {
+      mountChart({
+        y: 'sales',
+        y2: 'refunds',
+        seriesConfig: { refunds: { showDataLabels: true } },
       })
+      bars().should('have.length', data.length * 2)
+      insideCanvas('top')
+    })
+
+    it('keeps an axis end the caller fixed', () => {
+      mountChart({ ...labelled, yAxis: { max: 20 } })
+      bars().should('have.length', data.length)
+      plotText().should('not.contain.text', '25')
     })
   })
 

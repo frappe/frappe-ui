@@ -341,8 +341,8 @@ export function axisChartBase(
  * the grid only reserves room for its own axis labels and names. echarts does
  * that reservation itself: it measures the labels it has already laid out and
  * shrinks the plot until they fit the outer bounds. What it does not cover is
- * data labels, which sit past the end of a mark: `useAxisChart` moves the edge
- * for those once the chart is laid out (see `fitDataLabels`).
+ * data labels, which sit past the end of a mark: `useAxisChart` raises the
+ * value axis a tick for those once the chart is laid out (see `fitLabels`).
  *
  * A label is measured as the box its rotation gives it, so a tilted category
  * axis (see `categoryLabelFit`) takes its own height out of the plot without the
