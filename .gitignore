@@ -66,3 +66,4 @@ cypress/screenshots
 # deliberately overrules the export (radius 9, font weights, dropped sizes,
 # the oklch conversion). See docs/content/docs/foundations/tailwind.md.
 .figma-export/
+.vercel
