@@ -61,7 +61,7 @@ const crosshair = computed(() => ({
  * that put the drawn plot on the file's — measured rather than derived, since
  * what the library holds back for a label is its own business.
  */
-const FILE_BOX = { right: 0 } as const
+const FILE_BOX = { right: -3 } as const
 
 /**
  * And why the plot can reach that right edge at all. The file's end labels are
@@ -75,14 +75,14 @@ const FILE_BOX = { right: 0 } as const
 const endLabels = {
   axisLabel: { alignMinLabel: 'left', alignMaxLabel: 'right' },
 }
-const plotTop = { grid: { ...FILE_BOX, left: '4.56%', top: '12%' } }
+const plotTop = { grid: { ...FILE_BOX, left: 1, top: '10.2%' } }
 /**
  * The stepped card gives its legend the room instead: the file closes that
  * plot at 278 rather than 318 and opens it at 62 (1356:68437), which is 40
  * less at the foot and 13 more at the head.
  */
 const stepsPlot = {
-  grid: { ...FILE_BOX, left: '4.9%', top: '12.6%', bottom: 10 },
+  grid: { ...FILE_BOX, left: 1, top: '11.07%', bottom: 10 },
 }
 
 const lineOptions = computed(() => ({
@@ -153,17 +153,23 @@ const stepped = year.map((row, i) => ({
 }))
 
 /**
- * The file's second line swings where the shared reading barely moves: its
- * Orders run between about 500 and 6,300 against the same 0–24k axis
- * (1356:68269's "Vector 435" covers 60 of the plot's 243, where the page's
- * own `orders` sits flat around 2k and covers barely a tenth of that). The
- * card carries its own so the pair reads the way the file draws it, without
- * moving a reading the bar row plots on its own axis.
+ * The file's own second line, read off the drawing. "Vector 435" of 1356:68269
+ * is a 23-point polyline sitting 252 down a plot that runs 75 to 318 for 0 to
+ * 24k, so each of its vertices is a reading: 4,346 then 4,691, down to 593,
+ * up to 5,284, and so on to the 6,519 it peaks at. The page's shared `orders`
+ * sits flat around 2k and covers a tenth of the plot the file gives this line,
+ * so the card carries the file's rather than moving a reading the bar row
+ * plots on its own axis. Our months run two past the file's vertices, which
+ * close on readings it already draws.
  */
+const FILE_ORDERS = [
+  4346, 4691, 1827, 593, 5284, 938, 5284, 3852, 5284, 1827, 2864, 1136, 1136,
+  2864, 5284, 938, 2864, 1136, 3852, 2864, 5827, 6519, 3852, 2864, 1827,
+]
 const twoLines = monthly.map((row, i) => ({
   month: row.month,
   sales: row.sales,
-  orders: Math.round(row.orders * 0.5 + ((i * 5) % 7) * 850),
+  orders: FILE_ORDERS[i] ?? row.orders,
 }))
 
 /** step-after at 1px, as the file draws every stepped series */
@@ -192,7 +198,7 @@ const inOrder = (items: ChartTooltipItem[]) =>
 </script>
 
 <template>
-  <Card>
+  <Card class="line-card">
     <LineChart
       title="Line chart"
       :data="monthly"
@@ -214,7 +220,7 @@ const inOrder = (items: ChartTooltipItem[]) =>
       </template>
     </LineChart>
   </Card>
-  <Card>
+  <Card class="line-card">
     <LineChart
       title="Value label"
       :data="monthly"
@@ -266,7 +272,7 @@ const inOrder = (items: ChartTooltipItem[]) =>
       </template>
     </LineChart>
   </Card>
-  <Card class="line-card--no-legend">
+  <Card class="line-card line-card--no-legend">
     <LineChart
       title="Multi Line Chart"
       :data="twoLines"
@@ -292,7 +298,7 @@ const inOrder = (items: ChartTooltipItem[]) =>
       </template>
     </LineChart>
   </Card>
-  <Card>
+  <Card class="line-card">
     <LineChart
       title="Line chart with markers"
       :data="monthly"
@@ -327,7 +333,14 @@ const inOrder = (items: ChartTooltipItem[]) =>
 .line-card--no-legend :deep([data-slot='chart-legend']) {
   display: none;
 }
+
+/* The foot the file leaves under the x axis. `ChartContainer` holds back 12
+   below a plot with no legend, which puts this row's month labels about six
+   pixels higher in the card than 1356:68175 puts them; six is the half of it
+   that lands the last gridline on the file's. The card with the hidden legend
+   has to be told, since the container counts the slot as filled. */
+.line-card :deep([data-slot='chart-plot']),
 .line-card--no-legend :deep([data-slot='chart-plot']) {
-  padding-bottom: 12px;
+  padding-bottom: 6px;
 }
 </style>
