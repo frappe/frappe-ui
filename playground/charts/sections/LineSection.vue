@@ -81,7 +81,9 @@ const plotTop = { grid: { ...FILE_BOX, left: '4.56%', top: '12%' } }
  * plot at 278 rather than 318 and opens it at 62 (1356:68437), which is 40
  * less at the foot and 13 more at the head.
  */
-const stepsPlot = { grid: { ...FILE_BOX, left: '3.5%', top: '8%', bottom: 29 } }
+const stepsPlot = {
+  grid: { ...FILE_BOX, left: '4.9%', top: '12.6%', bottom: 10 },
+}
 
 const lineOptions = computed(() => ({
   ...crosshair.value,
@@ -107,6 +109,33 @@ const stroke = (width: number) => ({
 })
 /** the markers card keeps its symbols, so only the width is named */
 const marked = { echartOptions: { lineStyle: { width: 1.5 } } }
+
+/**
+ * The printed values, as the file sets them (1356:68378). Two things it does
+ * that the library does not.
+ *
+ * It strokes every label in the card's own surface — a 1px halo — which is how
+ * its labels stay readable where the line runs under them, and the card is
+ * thick with them: twenty-five readings across 592 leaves 24 between, so a
+ * label and the line will meet. The token is read rather than written white,
+ * so the halo is the card's ground in either mode.
+ *
+ * And it pulls the first and last label inside the plot rather than centring
+ * them on readings that sit on its edges: the file's own first label opens at
+ * 45.5 against a line starting at 51.5. Centred, ours ran into the y axis at
+ * one end and off the canvas at the other.
+ */
+const LAST = monthly.length - 1
+const valueLabels = computed(() => ({
+  label: {
+    textBorderColor: props.theme.t('surface-elevation-2'),
+    textBorderWidth: 1,
+  },
+  labelLayout: (p: { dataIndex: number }) => ({
+    hideOverlap: true,
+    dx: p.dataIndex === 0 ? 14 : p.dataIndex === LAST ? -14 : 0,
+  }),
+}))
 
 /**
  * The file's four categories, lightest line highest: Toys runs along the
@@ -196,7 +225,7 @@ const inOrder = (items: ChartTooltipItem[]) =>
         sales: {
           label: 'Sales',
           format: thousands,
-          echartOptions: { lineStyle: { width: 1.5 } },
+          echartOptions: { lineStyle: { width: 1.5 }, ...valueLabels },
         },
       }"
       :x-axis="yearAxis"
