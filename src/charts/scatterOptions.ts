@@ -187,12 +187,7 @@ export function buildScatterOption(
     // No `tooltip` key and no TooltipComponent: a point is read on its own
     // rather than through an axis pointer, and the visible tooltip is a Vue
     // component (ChartTooltip).
-    grid: buildAxisGrid({
-      horizontal: false,
-      isRTL,
-      // Nothing is printed past the end of a mark: a point is the mark.
-      labelGutter: 0,
-    }),
+    grid: buildAxisGrid({ horizontal: false }),
     // The x axis title is drawn on the axis, the way the category axis carries
     // its own; the y axis title is chrome, drawn above the plot by the
     // component. Same split as every other cartesian chart.

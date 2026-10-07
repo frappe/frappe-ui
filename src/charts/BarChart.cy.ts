@@ -288,6 +288,39 @@ describe('BarChart', () => {
         })
       })
     })
+
+    it('reserves nothing when the axis already clears the labels', () => {
+      const topTick = () =>
+        cy
+          .contains('[data-slot="chart-plot"] svg text', /^40$/)
+          .then(($tick) => $tick[0].getBoundingClientRect().top)
+
+      mountChart({ y: 'sales', yAxis: { max: 40 } })
+      topTick().then((bare) => {
+        mountChart({
+          y: 'sales',
+          yAxis: { max: 40 },
+          seriesConfig: { sales: { showDataLabels: true } },
+        })
+        topTick().should('equal', bare)
+      })
+    })
+
+    it('keeps the label past the end of a row inside the canvas', () => {
+      mountChart({
+        y: 'sales',
+        horizontal: true,
+        yAxis: { max: 20 },
+        seriesConfig: { sales: { showDataLabels: true } },
+      })
+      bars().should('have.length', data.length)
+      cy.get('[data-slot="chart-plot"] svg').then(($svg) => {
+        const right = $svg[0].getBoundingClientRect().right
+        cy.get('[data-slot="chart-plot"] svg text').each(($text) => {
+          expect($text[0].getBoundingClientRect().right).to.be.at.most(right)
+        })
+      })
+    })
   })
 
   describe('maxSeries', () => {

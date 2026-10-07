@@ -1,5 +1,6 @@
 import { computed, reactive, ref, watch, type Ref } from 'vue'
 import type { EChartsCoreOption } from 'echarts/core'
+import { fitDataLabels } from './dataLabelFit'
 import { useChart } from './useChart'
 import { usePlotKeyboard } from './usePlotKeyboard'
 import { useTooltipDismiss } from './useTooltipDismiss'
@@ -155,6 +156,9 @@ export function useAxisChart<C extends AxisChartConfig>(
       click: (params: any) => {
         select(params.seriesName, rows.value[params.dataIndex])
       },
+      // Fires inside the frame that laid the chart out, before it is painted,
+      // so moving the edge here never shows a clipped label.
+      updated: () => fitLabels(),
     },
     onZrEvents: {
       mousemove: (e: any) => updateTooltip(e.offsetX, e.offsetY, e.event),
@@ -163,6 +167,20 @@ export function useAxisChart<C extends AxisChartConfig>(
       },
     },
   })
+
+  function fitLabels() {
+    const instance = chart.value
+    const grid = (built.value.option as any)?.grid
+    if (!instance || !grid) return
+    const side = horizontal.value
+      ? dir.value === 'rtl'
+        ? 'left'
+        : 'right'
+      : 'top'
+    if (typeof grid[side] !== 'number') return
+    const edge = fitDataLabels(instance, side, grid[side])
+    if (edge !== null) instance.setOption({ grid: { [side]: edge } })
+  }
 
   const legendItems = computed<ChartLegendItem[]>(() =>
     config.value.series.map((series) => ({

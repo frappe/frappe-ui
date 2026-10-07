@@ -209,38 +209,6 @@ describe('combo axes', () => {
     expect(build(dual({}), ['rate']).yAxis[1].max).toBe(2000)
     expect(build(dual({ max: 1800 }), ['rate']).yAxis[1].max).toBe(1800)
   })
-
-  it('reserves label room for the hungriest mark that shows labels', () => {
-    const bare = build().grid.top
-    const withLine = build({
-      series: [
-        { name: 'sales' },
-        { name: 'refunds', type: 'line', showDataLabels: true },
-      ],
-    }).grid.top
-    const withBar = build({
-      series: [
-        { name: 'sales', showDataLabels: true },
-        { name: 'refunds', type: 'line', showDataLabels: true },
-      ],
-    }).grid.top
-
-    expect(withLine).toBeGreaterThan(bare)
-    // Above a column or above a point, a label is one line tall.
-    expect(withBar).toBe(withLine)
-  })
-
-  it('reserves a label’s width past the end of a horizontal bar', () => {
-    const labelled = {
-      horizontal: true,
-      series: [{ name: 'sales', showDataLabels: true }, { name: 'refunds' }],
-    }
-    const option = build(labelled)
-    expect(option.grid.top).toBe(8)
-    expect(option.grid.right).toBeGreaterThan(
-      build({ horizontal: true }).grid.right,
-    )
-  })
 })
 
 describe('combo colors', () => {
