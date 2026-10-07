@@ -146,6 +146,10 @@ describe('LineChart', () => {
       })
       lines().should('have.length', 1)
       cy.get('[data-slot="chart-plot"] svg text').should('contain.text', '25')
+      // The tick at 20 and the label on the point that reaches it.
+      cy.get('[data-slot="chart-plot"] svg text')
+        .filter((_, el) => el.textContent === '20')
+        .should('have.length', 2)
       cy.get('[data-slot="chart-plot"] svg').then(($svg) => {
         const top = $svg[0].getBoundingClientRect().top
         cy.get('[data-slot="chart-plot"] svg text').each(($text) => {

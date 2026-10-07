@@ -288,6 +288,12 @@ describe('BarChart', () => {
       })
     }
 
+    /** The tick at 20 and the label on the bar that reaches it, both drawn. */
+    const topLabelDrawn = () =>
+      plotText()
+        .filter((_, el) => el.textContent === '20')
+        .should('have.length', 2)
+
     // Sales top out at 20, which is where echarts ends the scale.
     const labelled = {
       y: 'sales',
@@ -298,6 +304,7 @@ describe('BarChart', () => {
       mountChart(labelled)
       bars().should('have.length', data.length)
       plotText().should('contain.text', '25')
+      topLabelDrawn()
       insideCanvas('top')
     })
 
@@ -314,6 +321,7 @@ describe('BarChart', () => {
       mountChart({ ...labelled, horizontal: true })
       bars().should('have.length', data.length)
       plotText().should('contain.text', '25')
+      topLabelDrawn()
       insideCanvas('right')
     })
 
