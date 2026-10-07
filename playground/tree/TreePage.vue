@@ -68,6 +68,14 @@ const draggable = ref(false)
 const disabled = ref(false)
 const hint = ref(false)
 const suffix = ref(false)
+/** Layers locked from the lock suffix; a locked one keeps its lock shown. */
+const locked = ref<string[]>([])
+function toggleLock(key: TreeKey) {
+  const k = String(key)
+  locked.value = locked.value.includes(k)
+    ? locked.value.filter((x) => x !== k)
+    : [...locked.value, k]
+}
 
 type Example = 'default' | 'layers' | 'hierarchy'
 const EXAMPLES: Example[] = ['default', 'layers', 'hierarchy']
@@ -455,6 +463,39 @@ onMounted(() => applyExample(example.value))
                   </template>
                   {{ node.suffix }}
                 </Button>
+                <!-- the hover suffix (nodes 35870:126688 / 35871:126758): a
+                     24px icon-only ghost Button flush with the row's 2px
+                     right inside, shown under the pointer (or when the row
+                     holds the focus) — "more" on the source tree, the lock on
+                     the layers, which stays shown on a locked layer -->
+                <Button
+                  v-else-if="suffix && example !== 'hierarchy'"
+                  data-slot="suffix"
+                  size="xs"
+                  variant="ghost"
+                  class="tree-hover-suffix ml-auto shrink-0 !text-ink-gray-7"
+                  :class="locked.includes(String(node.key)) && 'is-pinned'"
+                  :aria-label="
+                    example === 'layers'
+                      ? locked.includes(String(node.key))
+                        ? `Unlock ${node.label}`
+                        : `Lock ${node.label}`
+                      : `More for ${node.label}`
+                  "
+                  :aria-pressed="
+                    example === 'layers'
+                      ? locked.includes(String(node.key))
+                      : undefined
+                  "
+                  @click.stop="example === 'layers' && toggleLock(node.key)"
+                >
+                  <template #icon>
+                    <TreeIcon
+                      :name="example === 'layers' ? 'lock' : 'dot-horizontal'"
+                      class="size-4"
+                    />
+                  </template>
+                </Button>
               </span>
             </span>
           </template>
@@ -619,6 +660,22 @@ onMounted(() => applyExample(example.value))
 .tree-espresso :deep([data-slot='suffix']:hover),
 .tree-espresso :deep([data-slot='suffix']:active) {
   background-color: transparent;
+}
+/* the hover suffix: in its place always (so nothing shifts), seen only on
+   the row under the pointer, the row holding the focus, or a locked layer;
+   the row's box keeps 2 inside on the right for it, as the file does */
+.tree-espresso :deep(.tree-row-box:has(.tree-hover-suffix)) {
+  padding-right: 2px;
+}
+.tree-espresso :deep(.tree-hover-suffix) {
+  opacity: 0;
+}
+.tree-espresso
+  :deep(li:not([data-disabled]) > .frappe-tree-row:hover .tree-hover-suffix),
+.tree-espresso :deep(li:focus-visible > .frappe-tree-row .tree-hover-suffix),
+.tree-espresso :deep(.tree-hover-suffix:focus-visible),
+.tree-espresso :deep(.tree-hover-suffix.is-pinned) {
+  opacity: 1;
 }
 /* the grip: hidden until the row is hovered, then in the chevron's place */
 .tree-espresso :deep(.tree-row-grip) {
