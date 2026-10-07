@@ -139,6 +139,36 @@ const cc = ref<string[]>(props.initial?.cc ?? [])
 const bcc = ref<string[]>(props.initial?.bcc ?? [])
 const showCc = ref(cc.value.length > 0)
 const showBcc = ref(bcc.value.length > 0)
+/**
+ * The recipients folded together: with the focus out of all three fields,
+ * the To line carries everyone — "Alison Samuel Cc: Sandeep Prabhakaran,
+ * Faris Ansari" — and the Cc and Bcc rows stay out of the way until the
+ * line is opened again (the user's call 2026-10-07, as Gmail does).
+ */
+const groupFolded = computed(
+  () =>
+    editing.value === null &&
+    to.value.length + cc.value.length + bcc.value.length > 0,
+)
+const foldedGroups = computed(() =>
+  [
+    { label: '', names: to.value },
+    { label: 'Cc:', names: cc.value },
+    { label: 'Bcc:', names: bcc.value },
+  ]
+    .filter((g) => g.names.length)
+    .map((g) => ({ label: g.label, text: g.names.map(nameOf).join(', ') })),
+)
+/** Opening the folded line: To, with Cc and Bcc back as they were. */
+function openGroup() {
+  openField('to')
+}
+/** Cc / Bcc pressed: the row shows, and takes the caret when it opens. */
+function toggleRow(field: 'cc' | 'bcc') {
+  const show = field === 'cc' ? showCc : showBcc
+  show.value = !show.value
+  if (show.value) openField(field)
+}
 const subject = ref(props.initial?.subject ?? '')
 const body = ref(props.initial?.body ?? '')
 
@@ -381,7 +411,23 @@ const root = ref<HTMLElement | null>(null)
         <!-- the line takes no focus of its own: a press that focused it would
              open the field under the pointer before the click could land -->
         <button
-          v-if="folded('to', to)"
+          v-if="groupFolded"
+          type="button"
+          data-slot="folded-recipients"
+          class="h-7 min-w-0 flex-1 truncate text-left text-base text-ink-gray-7"
+          @mousedown.prevent
+          @click="openGroup"
+        >
+          <template v-for="(g, i) in foldedGroups" :key="g.label">
+            <span v-if="i" aria-hidden="true">&ensp;</span>
+            <span v-if="g.label" class="mr-1 text-ink-gray-5">{{
+              g.label
+            }}</span
+            >{{ g.text }}
+          </template>
+        </button>
+        <button
+          v-else-if="folded('to', to)"
           type="button"
           class="h-7 min-w-0 flex-1 truncate text-left text-base text-ink-gray-7"
           @mousedown.prevent
@@ -450,7 +496,7 @@ const root = ref<HTMLElement | null>(null)
           label="Cc"
           :class="showCc ? '!text-ink-gray-7' : '!text-ink-gray-5'"
           :aria-pressed="showCc"
-          @click="showCc = !showCc"
+          @click="toggleRow('cc')"
         />
         <Button
           variant="ghost"
@@ -458,7 +504,7 @@ const root = ref<HTMLElement | null>(null)
           label="Bcc"
           :class="showBcc ? '!text-ink-gray-7' : '!text-ink-gray-5'"
           :aria-pressed="showBcc"
-          @click="showBcc = !showBcc"
+          @click="toggleRow('bcc')"
         />
       </div>
     </div>
@@ -469,7 +515,7 @@ const root = ref<HTMLElement | null>(null)
         ['cc', 'Cc', showCc, cc, (v: string[]) => (cc = v)],
         ['bcc', 'Bcc', showBcc, bcc, (v: string[]) => (bcc = v)],
       ] as const"
-      v-show="row[2]"
+      v-show="row[2] && !groupFolded"
       :key="row[0]"
       class="flex shrink-0 items-start gap-2 border-b border-outline-gray-1 px-2 py-1.5"
     >
