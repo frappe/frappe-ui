@@ -2,7 +2,7 @@
 // The file's table heat map (Figma 1GDS12ys41lxeG3wQpNq41, 1356:68481):
 // nine companies in 40px rows behind an outline-gray-1 hairline on an 8px
 // outer radius — a 48px numbered column, the name in 14px ink-gray-7, then
-// seven cells 60 wide, each inset by 8, holding a 14px number on a fill from
+// seven cells 60 wide, each centring a 14px number on a fill from
 // the theme's heat ramp, the ink turning white on the darkest two steps. A table rather
 // than the library's HeatmapChart, whose plot has no numbered column and
 // no ruled rows; the ramp is read the way the library reads one.
@@ -75,7 +75,7 @@ const print = (value: number) => value.toLocaleString('en-US')
           <td
             v-for="(value, c) in cells"
             :key="columns[c]"
-            class="w-[60px] px-2 text-start tabular-nums"
+            class="w-[60px] px-2 text-center tabular-nums"
             :class="[
               r === 0 && c === cells.length - 1 && 'rounded-tr-[8px]',
               r === rows.length - 1 &&
