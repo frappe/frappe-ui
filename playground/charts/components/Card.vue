@@ -54,7 +54,9 @@ defineProps<{
   [data-slot='chart-header']
   > div
   > div:first-child {
-  @apply text-base-medium;
+  /* the weight alone: text-base-medium carries the scale's own 1.35, which
+     would undo the 1.15 the title stands on and lower the plot by 2.8 */
+  @apply text-base-medium leading-tighter;
 }
 .chart-page-card [data-slot='chart-header'] > div > div + div {
   @apply text-xs leading-tighter;

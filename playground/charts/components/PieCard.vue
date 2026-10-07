@@ -88,35 +88,51 @@ const HALF_PAD = 1
 const ROSE_RADII = [129, 121, 104, 90, 78, 60]
 const ROSE_HOLE = 15.3
 const ROSE_BASE = 124.95
-const ROSE_CENTER = ['50%', '37.06%']
+/** the file's centre, 131 of the card's 360, as a share of this plot */
+const ROSE_CENTER_Y = 0.3706
+const ROSE_CENTER = ['50%', `${ROSE_CENTER_Y * 100}%`]
+/** from that centre to the plot's top and foot, in half-heights */
+const ROSE_ROOM = { up: 2 * ROSE_CENTER_Y, down: 2 * (1 - ROSE_CENTER_Y) }
 const rose = (px: number) => `${((px / ROSE_BASE) * 100).toFixed(2)}%`
 
+/**
+ * Each slice's identity is its place in the list, not its name: the file's
+ * legend repeats a label ("Data (11%)" twice on the nested and half pies), and
+ * the legend and echarts both address a slice by name — so one click hid both
+ * slices of that name, and the legend keyed two rows alike. The label is still
+ * what the legend and the tooltip print.
+ */
+const idOf = (i: number) => `slice-${i}`
+const labelOf = computed(
+  () => new Map(props.slices.map((s, i) => [idOf(i), s.name])),
+)
+/** what a slice reads as, which an `arcs` plot does not size by */
+const shareOf = computed(
+  () => new Map(props.slices.map((s, i) => [idOf(i), s.share])),
+)
+const isHidden = (i: number) => hidden.value.includes(idOf(i))
+
 const visible = computed(() =>
-  props.slices.filter((s) => !hidden.value.includes(s.name)),
+  props.slices.map((s, i) => ({ ...s, i })).filter((s) => !isHidden(s.i)),
 )
 
 const color = (i: number) => props.colors[i % props.colors.length]
 
 const items = computed(() =>
   props.slices.map((s, i) => ({
-    name: s.name,
+    name: idOf(i),
     label: s.name,
     color: color(i),
-    hidden: hidden.value.includes(s.name),
+    hidden: isHidden(i),
   })),
-)
-
-/** what the legend prints against a name, which an `arcs` plot does not size by */
-const shareOf = computed(
-  () => new Map(props.slices.map((s) => [s.name, s.share])),
 )
 
 const data = computed(() => {
   if (props.arcs)
     return props.arcs
-      .filter((a) => !hidden.value.includes(props.slices[a.step]?.name ?? ''))
+      .filter((a) => !isHidden(a.step))
       .map((a) => ({
-        name: props.slices[a.step].name,
+        name: idOf(a.step),
         // echarts spends the gap out of the slice rather than out of the span —
         // a sector ends up `share × span − padAngle` wide — so a weight has to
         // carry its own gap or every small arc comes up short and the big one
@@ -126,9 +142,9 @@ const data = computed(() => {
         label: { show: false },
       }))
   return visible.value.map((s) => ({
-    name: s.name,
+    name: idOf(s.i),
     value: s.share,
-    itemStyle: { color: color(props.slices.indexOf(s)) },
+    itemStyle: { color: color(s.i) },
     label: { show: false },
   }))
 })
@@ -141,28 +157,63 @@ const flat = {
 } as const
 
 /**
+ * How far a sector reaches above and below its centre, as a share of its
+ * radius: the sine's least and greatest over the sweep, which turn at 90° and
+ * 270°. Angles run clockwise from 3 o'clock, as the screen's do.
+ */
+function reach(from: number, to: number) {
+  const sin = (deg: number) => Math.sin((deg * Math.PI) / 180)
+  const sines = [sin(from), sin(to)]
+  for (const turn of [90, 270, 450, 630])
+    if (turn > from && turn < to) sines.push(sin(turn))
+  return {
+    up: Math.max(0, -Math.min(...sines)),
+    down: Math.max(0, Math.max(...sines)),
+  }
+}
+
+/**
  * The nested pie's arcs, each its own series so each can carry its own radius.
  * They sweep clockwise from 3 o'clock, as the file's do, and the angles run
  * negative because echarts measures them anticlockwise.
+ *
+ * The file's centre sits high — 131 of 360 — which only has room because its
+ * spiral puts its short radii over the top. Hide a slice from the legend and
+ * the sweeps grow and the radii close up behind it, and a long one can swing
+ * over the top: it ran 11 above the plot and was cut off. So the radii shrink
+ * together, just enough for the tallest reach to meet the plot's edge, when
+ * and only when one would cross it; with every slice shown nothing moves.
  */
 const roseSeries = computed(() => {
   const total = visible.value.reduce((sum, s) => sum + s.share, 0)
   let angle = 0
-  return visible.value.map((s, i) => {
+  const arcs = visible.value.map((s, i) => {
     const start = angle
     angle -= total ? (s.share / total) * 360 : 0
-    return {
-      type: 'pie',
-      radius: [rose(ROSE_HOLE), rose(ROSE_RADII[i] ?? ROSE_RADII.at(-1)!)],
-      center: ROSE_CENTER,
-      startAngle: start,
-      endAngle: angle,
-      padAngle: 0,
-      itemStyle: { borderWidth: 0 },
-      ...flat,
-      data: [data.value[i]],
-    }
+    const px = ROSE_RADII[i] ?? ROSE_RADII.at(-1)!
+    return { i, start, end: angle, px, ...reach(-start, -angle) }
   })
+  // room from the centre to the plot's top and foot, in the half-heights a
+  // rose radius is measured in
+  const fit = arcs.reduce((scale, a) => {
+    const r = a.px / ROSE_BASE
+    return Math.min(
+      scale,
+      a.up ? ROSE_ROOM.up / (r * a.up) : 1,
+      a.down ? ROSE_ROOM.down / (r * a.down) : 1,
+    )
+  }, 1)
+  return arcs.map((a) => ({
+    type: 'pie',
+    radius: [rose(ROSE_HOLE), rose(a.px * fit)],
+    center: ROSE_CENTER,
+    startAngle: a.start,
+    endAngle: a.end,
+    padAngle: 0,
+    itemStyle: { borderWidth: 0 },
+    ...flat,
+    data: [data.value[a.i]],
+  }))
 })
 
 const series = computed(() => {
@@ -225,7 +276,7 @@ const option = computed(() => ({
       // file's tooltip rows stand on rather than in inline pixels
       `<div class="text-xs leading-none" style="display:flex;align-items:center;gap:2px;width:100%">
           <span style="display:inline-flex;flex-shrink:0;width:16px;height:16px;align-items:center;justify-content:center"><span style="width:5.5px;height:5.5px;border-radius:999px;background:${p.color}"></span></span>
-          <span style="color:${props.t('ink-gray-6')};flex:1;min-width:0;margin-right:4px">${p.name}</span>
+          <span style="color:${props.t('ink-gray-6')};flex:1;min-width:0;margin-right:4px">${labelOf.value.get(p.name) ?? p.name}</span>
           <span class="text-xs-medium leading-none" style="color:${props.t('ink-gray-8')}">${shareOf.value.get(p.name)}%</span>
         </div>`,
   },
