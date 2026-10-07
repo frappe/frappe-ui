@@ -5,13 +5,18 @@ import { computed } from 'vue'
 import Card from '../components/Card.vue'
 import FunnelCard from '../components/FunnelCard.vue'
 import { funnel } from '../chartData'
-import { FUNNEL_OPACITY, type ChartTheme } from '../chartThemes'
+import {
+  FUNNEL_COLUMN_OPACITY,
+  FUNNEL_OPACITY,
+  type ChartTheme,
+} from '../chartThemes'
 import type { ThemeColors } from '../useChartTheme'
 
 const props = defineProps<{ theme: ThemeColors; themeId: ChartTheme }>()
 const colors = computed(() => props.theme.colors('funnel', 5))
 const steps = computed(() => props.theme.colors('funnelSteps', 5))
 const opacity = computed(() => FUNNEL_OPACITY[props.themeId])
+const columnOpacity = computed(() => FUNNEL_COLUMN_OPACITY[props.themeId])
 
 /**
  * The columns card's steps, read off 1356:68357: five shapes 221, 193, 158,
@@ -52,7 +57,7 @@ const COLUMN_HEIGHTS = [1, 0.8733, 0.7149, 0.5249, 0.371]
       title="Funnel chart"
       :stages="funnel"
       :colors="steps"
-      :opacity="opacity.map((o, i) => (i === 0 ? 1 : o))"
+      :opacity="columnOpacity"
       :heights="COLUMN_HEIGHTS"
       variant="columns"
     />

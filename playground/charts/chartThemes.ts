@@ -346,12 +346,27 @@ export const THEME_ROLES: Record<ChartTheme, ThemeRoles> = {
 
 /**
  * The funnel's opacity per step: Ocean fades its five variables in from a
- * fifth to full; every other theme draws one variable at a fifth.
+ * fifth to full, and Qualitative fades its one, Q1, the same way down all
+ * three cards (1413:25979, 1413:26006, 1413:26028); the rest draw one
+ * variable at a fifth.
  */
 export const FUNNEL_OPACITY: Record<ChartTheme, number[]> = {
   ocean: [0.2, 0.4, 0.6, 0.8, 1],
   mist: [0.2, 0.2, 0.2, 0.2, 0.2],
   earthy: [0.2, 0.2, 0.2, 0.2, 0.2],
-  qualitative: [0.2, 0.2, 0.2, 0.2, 0.2],
+  qualitative: [0.2, 0.4, 0.6, 0.8, 1],
   diverging: [0.2, 0.2, 0.2, 0.2, 0.2],
+}
+
+/**
+ * The columns card's opacity per step. Most themes stand the first column at
+ * full colour over the faded rest; Qualitative keeps its ladder there too, the
+ * first column at a fifth like the other two cards' first bar (1413:26028).
+ */
+export const FUNNEL_COLUMN_OPACITY: Record<ChartTheme, number[]> = {
+  ocean: [1, 0.4, 0.6, 0.8, 1],
+  mist: [1, 0.2, 0.2, 0.2, 0.2],
+  earthy: [1, 0.2, 0.2, 0.2, 0.2],
+  qualitative: FUNNEL_OPACITY.qualitative,
+  diverging: [1, 0.2, 0.2, 0.2, 0.2],
 }
