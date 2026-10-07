@@ -203,26 +203,34 @@ const twoBands = computed(() => ({
     },
   },
 }))
+/**
+ * The file's "Good" over "Average" (1356:68643): the plot split at 10.7k (its
+ * two rectangles meet at 210 of a plot running 75→318), the upper green and
+ * the lower amber, each word in text/xs/regular 10 in from its corner.
+ */
 const goodAverage = computed(() => ({
   sales: {
     ...sales,
     echartOptions: {
+      ...fileLine,
       markArea: {
         silent: true,
         emphasis: { disabled: true },
         z: -1,
+        label: {
+          show: true,
+          distance: 10,
+          fontSize: TYPE.xs,
+          fontWeight: TYPE_WEIGHT.regular,
+        },
         data: [
           [
             {
               yAxis: 10700,
-              name: 'Good',
-              itemStyle: { color: t('ink-green-1'), opacity: 1 },
+              itemStyle: { color: t('chart-band-green-fill'), opacity: 1 },
               label: {
-                show: true,
                 position: 'insideTopRight',
-                distance: 10,
-                color: t('ink-green-5'),
-                fontSize: TYPE.xs,
+                color: t('chart-band-green-ink'),
                 formatter: 'Good',
               },
             },
@@ -231,14 +239,10 @@ const goodAverage = computed(() => ({
           [
             {
               yAxis: 0,
-              name: 'Average',
-              itemStyle: { color: t('ink-amber-1'), opacity: 1 },
+              itemStyle: { color: amber.value.fill, opacity: 1 },
               label: {
-                show: true,
                 position: 'insideBottomRight',
-                distance: 10,
-                color: t('ink-amber-5'),
-                fontSize: TYPE.xs,
+                color: amber.value.ink,
                 formatter: 'Average',
               },
             },
@@ -433,10 +437,11 @@ const goodAverage = computed(() => ({
       :palette="line"
     />
   </Card>
-  <Card>
+  <Card class="band-card">
     <LineChart
       title="Area"
-      :data="monthly"
+      :data="annotated"
+      :echart-options="bandPlot"
       x="month"
       y="sales"
       :series-config="goodAverage"
