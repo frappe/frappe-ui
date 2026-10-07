@@ -307,7 +307,9 @@ const DIVERGING: ThemeRoles = {
   steps: [d(8), d(1), d(7), d(2)],
   scatter: [d(8)],
   scatters: [d(1), d(7), d(9), d(2)],
-  channels: [d(1), d(2), d(3), d(7), d(8)],
+  // CHANNELS order: organic, paid, Facebook, referral, others; the file's
+  // legend names organic D2 and paid D1 (1462:25583)
+  channels: [d(2), d(1), d(3), d(7), d(8)],
   bubble: [d(1)],
   bubbles: [d(1), d(2), d(8), d(3)],
   // the file's Spectral legend: red at the low end, blue at the high
@@ -318,12 +320,21 @@ const DIVERGING: ThemeRoles = {
   pie: [d(1), d(7), d(2), d(8), d(3)],
   doughnut: [d(2), d(8), d(3), d(1), d(7)],
   half: [d(2), d(7), d(6), d(8), d(1), d(4), d(3), d(9)],
-  rose: [d(7), d(3), d(8), d(2), d(5), d(1)],
+  // the nested pie's rings widest first (1534:45075); the fifth is bound to
+  // Qualitative 6 in the file, an orange the diverging ramp does not have
+  rose: [d(1), q(6), d(2), d(8), d(3), d(7)],
   area: [d(2)],
-  areas: [d(1), d(2), d(3), d(3)],
+  // bottom to top, the lowest two both D1 (1462:26080)
+  areas: [d(1), d(1), d(2), d(3)],
   stepped: [d(1), d(2), d(7), d(9)],
   spark: [d(2)],
   annotation: [d(8)],
+  // the cards the Diverging frame colours on their own (1462:24955)
+  stackPercent: [d(1), d(2), d(3), d(4)],
+  dual: [d(6), d(8)],
+  horizontal: [d(2)],
+  channelsStacked: [d(2), d(1), d(3), d(6), d(7)],
+  halfArcs: [d(2), d(8), d(6), d(3), d(7), d(4), d(9), d(1)],
 }
 
 /** what a theme draws a card with when it names no colours of its own for it */
@@ -346,27 +357,28 @@ export const THEME_ROLES: Record<ChartTheme, ThemeRoles> = {
 
 /**
  * The funnel's opacity per step: Ocean fades its five variables in from a
- * fifth to full, and Qualitative fades its one, Q1, the same way down all
- * three cards (1413:25979, 1413:26006, 1413:26028); the rest draw one
- * variable at a fifth.
+ * fifth to full, and Qualitative and Diverging fade their one, Q1 and D2,
+ * the same way down all three cards (1413:25979 … 1413:26028, 1462:26746 …
+ * 1462:26795); the rest draw one variable at a fifth.
  */
 export const FUNNEL_OPACITY: Record<ChartTheme, number[]> = {
   ocean: [0.2, 0.4, 0.6, 0.8, 1],
   mist: [0.2, 0.2, 0.2, 0.2, 0.2],
   earthy: [0.2, 0.2, 0.2, 0.2, 0.2],
   qualitative: [0.2, 0.4, 0.6, 0.8, 1],
-  diverging: [0.2, 0.2, 0.2, 0.2, 0.2],
+  diverging: [0.2, 0.4, 0.6, 0.8, 1],
 }
 
 /**
  * The columns card's opacity per step. Most themes stand the first column at
- * full colour over the faded rest; Qualitative keeps its ladder there too, the
- * first column at a fifth like the other two cards' first bar (1413:26028).
+ * full colour over the faded rest; Qualitative and Diverging keep their ladder
+ * there too, the first column at a fifth like the other two cards' first bar
+ * (1413:26028, 1462:26795).
  */
 export const FUNNEL_COLUMN_OPACITY: Record<ChartTheme, number[]> = {
   ocean: [1, 0.4, 0.6, 0.8, 1],
   mist: [1, 0.2, 0.2, 0.2, 0.2],
   earthy: [1, 0.2, 0.2, 0.2, 0.2],
   qualitative: FUNNEL_OPACITY.qualitative,
-  diverging: [1, 0.2, 0.2, 0.2, 0.2],
+  diverging: FUNNEL_OPACITY.diverging,
 }

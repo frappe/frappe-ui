@@ -47,17 +47,6 @@
   --chart-qualitative-8: #fccde5;
   --chart-qualitative-9: #d9d9d9;
 
-  /* diverging/diverging-1 … 9 */
-  --chart-diverging-1: #3288bd;
-  --chart-diverging-2: #66c2a5;
-  --chart-diverging-3: #abdda4;
-  --chart-diverging-4: #e6f598;
-  --chart-diverging-5: #ffffbf;
-  --chart-diverging-6: #fee08b;
-  --chart-diverging-7: #f9b571;
-  --chart-diverging-8: #ed7854;
-  --chart-diverging-9: #d84b5b;
-
   /* The annotation bands (1356:68610, 1356:68674, 1356:68643): the file's
      ink/amber-1, ink/amber-2 and ink/amber-3 for the amber band's fill, its
      dashed edges and its word; surface-alpha/red-1, dark/red/50 and ink/red-3
@@ -95,16 +84,6 @@
   --chart-qualitative-8: #c774a8;
   --chart-qualitative-9: #bababa;
 
-  --chart-diverging-1: #2d7aaa;
-  --chart-diverging-2: #5caf94;
-  --chart-diverging-3: #9ac794;
-  --chart-diverging-4: #cfdc89;
-  --chart-diverging-5: #e5e5ac;
-  --chart-diverging-6: #e5ca7d;
-  --chart-diverging-7: #e0a366;
-  --chart-diverging-8: #d56c4c;
-  --chart-diverging-9: #c24452;
-
   /* The file's dark values where it has them. Three it does not:
      ink/amber-1 and ink/green-1 resolve to neutral/white in Dark — a white
      band on a dark card — and dark/red/50 is a primitive with a Light mode
@@ -119,6 +98,36 @@
   --chart-band-red-ink: #d73232;
   --chart-band-green-fill: var(--surface-green-1);
   --chart-band-green-ink: #1db269;
+}
+
+/* diverging/diverging-1 … 9. The library's own stylesheet (src/charts/style.css)
+   names a diverging ramp of its own under these very properties, blue to red,
+   on the same `:root` and `[data-theme='dark']`, and it loads after this file,
+   so the Diverging theme was drawn in the library's ramp rather than the
+   file's Spectral one. The doubled `:root` lets the file's values win here
+   without touching the library's. */
+:root:root {
+  --chart-diverging-1: #3288bd;
+  --chart-diverging-2: #66c2a5;
+  --chart-diverging-3: #abdda4;
+  --chart-diverging-4: #e6f598;
+  --chart-diverging-5: #ffffbf;
+  --chart-diverging-6: #fee08b;
+  --chart-diverging-7: #f9b571;
+  --chart-diverging-8: #ed7854;
+  --chart-diverging-9: #d84b5b;
+}
+
+:root:root[data-theme='dark'] {
+  --chart-diverging-1: #2d7aaa;
+  --chart-diverging-2: #5caf94;
+  --chart-diverging-3: #9ac794;
+  --chart-diverging-4: #cfdc89;
+  --chart-diverging-5: #e5e5ac;
+  --chart-diverging-6: #e5ca7d;
+  --chart-diverging-7: #e0a366;
+  --chart-diverging-8: #d56c4c;
+  --chart-diverging-9: #c24452;
 }
 
 /* Each theme as the library's own ramps, scoped to the page's grid by its

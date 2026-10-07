@@ -11,6 +11,7 @@ import {
   heatSteps,
   heatTable,
   qualitativeHeatSteps,
+  divergingHeatSteps,
 } from '../chartData'
 import type { ChartTheme } from '../chartThemes'
 import type { ThemeColors } from '../useChartTheme'
@@ -18,9 +19,16 @@ import type { ThemeColors } from '../useChartTheme'
 const props = defineProps<{ theme: ThemeColors; themeId?: ChartTheme }>()
 const ramp = computed(() => props.theme.colors('map'))
 const heat = computed(() => props.theme.colors('heat'))
-/** where each cell's colour falls: the Qualitative frame places its own */
+/**
+ * where each cell's colour falls: the Qualitative and Diverging frames place
+ * their own
+ */
 const steps = computed(() =>
-  props.themeId === 'qualitative' ? qualitativeHeatSteps : heatSteps,
+  props.themeId === 'qualitative'
+    ? qualitativeHeatSteps
+    : props.themeId === 'diverging'
+      ? divergingHeatSteps
+      : heatSteps,
 )
 </script>
 

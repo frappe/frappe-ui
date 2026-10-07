@@ -456,3 +456,20 @@ export const qualitativeHeatSteps = [
   [2, 2, 0, 4, 0, 1, 2],
   [0, 0, 1, 2, 4, 0, 4],
 ] as const
+
+/**
+ * The heat table's cells as the Diverging frame colours them (1462:26919), as
+ * indexes into its `heat` colours (D2, D3, D5, D7, D6). The hand is the
+ * Qualitative frame's but for one cell, the eighth row's first.
+ */
+export const divergingHeatSteps = [
+  [0, 1, 2, 0, 2, 0, 3],
+  [2, 0, 0, 3, 0, 1, 0],
+  [3, 2, 4, 2, 4, 4, 1],
+  [0, 4, 2, 1, 2, 1, 4],
+  [2, 1, 2, 4, 4, 2, 3],
+  [1, 0, 0, 4, 0, 0, 2],
+  [2, 0, 2, 0, 2, 3, 4],
+  [1, 2, 0, 4, 0, 1, 2],
+  [0, 0, 1, 2, 4, 0, 4],
+] as const
