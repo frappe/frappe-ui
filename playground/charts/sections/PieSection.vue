@@ -45,18 +45,19 @@ const percent = (value: number) => `${value}%`
       <template #center><span /></template>
     </DonutChart>
   </Card>
-  <Card plain-legend>
-    <DonutChart
+  <!-- The half ring the file draws is 336 across a 580 card, and the library's
+       own sizes a half donut off the plot's height — which a semicircle only
+       half uses — so it could not reach that width through `DonutChart`, whose
+       series an `echartOptions` merge replaces whole rather than adds to.
+       PieCard draws it at the file's radius, in the file's order. -->
+  <Card>
+    <PieCard
       title="Doughnut Chart"
-      :data="named"
-      category="name"
-      value="share"
+      :slices="named"
+      :colors="half"
       variant="half"
-      :format="percent"
-      :palette="half"
-    >
-      <template #center><span /></template>
-    </DonutChart>
+      :t="theme.t"
+    />
   </Card>
   <Card>
     <PieCard

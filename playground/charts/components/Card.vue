@@ -55,9 +55,14 @@ defineProps<{
 }
 /* a ring's legend prints its slice's share after the name; the file's
    legend names the share in the label itself */
+/* The share sits one span deeper than this reached, so it was printing twice —
+   "Data (22%) 22%" — where the file names it once (1589:43605's legend is the
+   name alone). The legend wraps its row in a truncating span and the row in
+   another, so the reading is the third child of the inner one. */
 .chart-page-card--plain-legend
   [data-slot='chart-legend']
   button
+  > span
   > span
   > span:nth-child(3) {
   display: none;

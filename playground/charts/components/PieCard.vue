@@ -22,7 +22,7 @@ const props = defineProps<{
   title: string
   slices: Array<{ name: string; share: number }>
   colors: string[]
-  variant: 'pie' | 'rose'
+  variant: 'pie' | 'rose' | 'half'
   t: (name: string) => string
 }>()
 
@@ -44,6 +44,18 @@ const ordered = computed(() =>
     ? [...props.slices].sort((a, b) => b.share - a.share)
     : props.slices,
 )
+
+/**
+ * The half ring, as 1589:43605 draws it: a 336 arc on a 580 card, so 168 of
+ * radius against the library's own, which caps a half donut on the plot's
+ * height. A semicircle is twice as wide as it is tall, so that cap spends the
+ * width it has — ours came out 43% of the card where the file's is 58. These
+ * are percentages of the same half-minimum echarts measures from, taken past
+ * 100 so the arc reaches the file's width, and the band holds the file's ratio
+ * of 0.8 inner to outer. Its centre sits at three quarters of the plot, which
+ * is where the file's 257 of 360 lands.
+ */
+const HALF_RADIUS = ['108%', '135%']
 
 const items = computed(() =>
   ordered.value.map((s, i) => ({
@@ -104,20 +116,38 @@ const option = computed(() => {
             labelLine: { show: false },
             data,
           }
-        : {
-            type: 'pie',
-            roseType: 'radius',
-            radius: ['12%', '96%'],
-            center: ['50%', '50%'],
-            startAngle: 0,
-            clockwise: true,
-            padAngle: 0,
-            itemStyle: { borderWidth: 0 },
-            emphasis: { scale: false },
-            label: { show: false },
-            labelLine: { show: false },
-            data,
-          },
+        : props.variant === 'half'
+          ? {
+              type: 'pie',
+              radius: HALF_RADIUS,
+              center: ['50%', '88%'],
+              // both halves sweep across the top, 9 o'clock round to 3
+              startAngle: 180,
+              endAngle: 0,
+              clockwise: true,
+              // the file leaves about a degree between its arcs and rounds
+              // every end on 4 (its ellipses' own corner radius)
+              padAngle: 1,
+              itemStyle: { borderWidth: 0, borderRadius: 4 },
+              emphasis: { scale: false },
+              label: { show: false },
+              labelLine: { show: false },
+              data,
+            }
+          : {
+              type: 'pie',
+              roseType: 'radius',
+              radius: ['12%', '96%'],
+              center: ['50%', '50%'],
+              startAngle: 0,
+              clockwise: true,
+              padAngle: 0,
+              itemStyle: { borderWidth: 0 },
+              emphasis: { scale: false },
+              label: { show: false },
+              labelLine: { show: false },
+              data,
+            },
     ],
   }
 })
