@@ -34,9 +34,30 @@ const props = defineProps<{
    * grows to 160 and the rows close up to 12px with 4 between.
    */
   plain?: boolean
+  /**
+   * The file's four-row line tooltip (1356:68437), which names no reading at
+   * all: the rows stand alone in a 180 box, 8 in on every side with 4 between,
+   * and nothing says which month they are. A reader on that card has the
+   * crosshair for the month and the rows for the four series.
+   */
+  bare?: boolean
+  /**
+   * The mark on a row, when the file's is not the one the row count implies.
+   * The file reaches for a square where a legend names the series and a dot
+   * where it does not, which does not always follow from how many rows there
+   * are: its two-line card keeps dots (1356:68269 "icon/solid/dot-md") where
+   * its four-step card takes squares (1356:68437 "icon/solid/square-md").
+   */
+  mark?: 'dot' | 'square'
 }>()
 
 const many = computed(() => props.items.length > 1)
+const shape = computed(() => props.mark ?? (many.value ? 'square' : 'dot'))
+// The roomier box goes with the square, not with the row count: the file gives
+// its square-marked tooltips 8 above and below and keeps 5 for the dotted ones,
+// whether a dotted one carries one row or two (1356:68269 is 135×62 at the
+// same 5/8/5/3 as the single-row 1356:68175, where the four-row stack of the
+// area row opens out to 8/8/8/4).
 
 function reading(item: ChartTooltipItem) {
   const raw = props.rows?.[0]?.[item.name]
@@ -47,18 +68,25 @@ function reading(item: ChartTooltipItem) {
 
 <template>
   <div
-    :data-tip="plain ? 'measures' : 'figma'"
-    :data-rows="many ? 'many' : 'one'"
+    :data-tip="bare ? 'steps' : plain ? 'measures' : 'figma'"
+    :data-rows="shape === 'square' ? 'many' : 'one'"
     class="flex flex-col gap-1"
   >
     <!-- the file insets the date by 5, which puts it over the row's mark -->
     <div
-      v-if="label"
+      v-if="label && !bare"
       class="pl-[5px] text-[12px] leading-none tracking-[0.02em] text-ink-gray-8"
     >
       {{ label }}
     </div>
-    <div class="flex flex-col" :class="plain ? 'gap-1' : 'gap-[2px]'">
+    <!-- The rows close to 2 only in the area row's stack, which is the same
+         card the roomier padding belongs to; everywhere else the file leaves
+         4 between them (1356:68269's two rows sit 20 apart on a 16 row, as do
+         1356:68437's four, where the area row's four sit 18 apart). -->
+    <div
+      class="flex flex-col"
+      :class="shape === 'square' && !bare ? 'gap-[2px]' : 'gap-1'"
+    >
       <div
         v-for="item in items"
         :key="item.name"
@@ -72,7 +100,11 @@ function reading(item: ChartTooltipItem) {
           <span
             class="block shrink-0"
             :class="
-              many ? 'size-[7px] rounded-[2px]' : 'size-[5.5px] rounded-full'
+              shape === 'dot'
+                ? 'size-[5.5px] rounded-full'
+                : bare
+                  ? 'size-[5.5px] rounded-[1.5px]'
+                  : 'size-[7px] rounded-[2px]'
             "
             :style="{ backgroundColor: item.color }"
           />

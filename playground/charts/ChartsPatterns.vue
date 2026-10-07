@@ -236,4 +236,11 @@ const current = computed(() => CHART_TYPES.find((t) => t.id === type.value)!)
   min-width: 160px;
   padding: 8px;
 }
+/* And the four-step line card's, which the file draws wider still and names
+   no month on: 180 across, an even 8 all round, its four rows 4 apart
+   (1356:68437 is 180×92 against the two-line card's 135×62). */
+[data-slot='chart-tooltip']:has([data-tip='steps']) {
+  min-width: 180px;
+  padding: 8px;
+}
 </style>
