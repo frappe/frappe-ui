@@ -808,7 +808,7 @@ const root = ref<HTMLElement | null>(null)
           </template>
         </Dropdown>
 
-        <Tooltip text="Text color" side="top">
+        <Tooltip text="Text color" side="top" :hover-delay="150">
           <Button
             variant="ghost"
             size="sm"
@@ -822,7 +822,7 @@ const root = ref<HTMLElement | null>(null)
             </template>
           </Button>
         </Tooltip>
-        <Tooltip text="Attachment" side="top">
+        <Tooltip text="Attachment" side="top" :hover-delay="150">
           <Button
             variant="ghost"
             size="sm"
@@ -836,7 +836,7 @@ const root = ref<HTMLElement | null>(null)
             </template>
           </Button>
         </Tooltip>
-        <Tooltip text="Link" side="top">
+        <Tooltip text="Link" side="top" :hover-delay="150">
           <Button
             variant="ghost"
             size="sm"
@@ -856,7 +856,7 @@ const root = ref<HTMLElement | null>(null)
                  passes on none of the trigger's handlers, so the popover
                  attaches to this box and the tooltip to the button in it -->
             <span class="inline-flex">
-              <Tooltip text="Emoji" side="top">
+              <Tooltip text="Emoji" side="top" :hover-delay="150">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -876,7 +876,7 @@ const root = ref<HTMLElement | null>(null)
             <EmojiPicker @pick="(e: string) => (insertEmoji(e), close())" />
           </template>
         </Popover>
-        <Tooltip text="Drive" side="top">
+        <Tooltip text="Drive" side="top" :hover-delay="150">
           <Button
             variant="ghost"
             size="sm"
@@ -888,7 +888,7 @@ const root = ref<HTMLElement | null>(null)
             </template>
           </Button>
         </Tooltip>
-        <Tooltip text="Images" side="top">
+        <Tooltip text="Images" side="top" :hover-delay="150">
           <Button
             variant="ghost"
             size="sm"
@@ -905,7 +905,7 @@ const root = ref<HTMLElement | null>(null)
         <Dropdown :options="moreOptions" side="top" align="start" :offset="4">
           <!-- the same box between the menu and the tooltip -->
           <span class="inline-flex">
-            <Tooltip text="More Options" side="top">
+            <Tooltip text="More Options" side="top" :hover-delay="150">
               <Button
                 variant="ghost"
                 size="sm"
@@ -1077,6 +1077,25 @@ const root = ref<HTMLElement | null>(null)
 </style>
 
 <style>
+/* The toolbar's tooltips: up after 150ms (the library waits 500) and in on a
+   150ms fade with a 2px rise from the button, so they come soon without
+   snapping in (the user's call 2026-10-07). Tooltips portal to the body, so
+   this reaches them from there, only while a composer is open. */
+@keyframes composer-tip-in {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+body:has(.email-composer)
+  [data-reka-popper-content-wrapper]
+  > [data-slot='content'][data-side='top']:has(> [data-slot='bubble']) {
+  animation: composer-tip-in 150ms cubic-bezier(0.2, 0, 0, 1);
+}
 /*
   The library's editor popovers — the colour picker and the link popup —
   wear the 2xl elevation inside a 1px outline-gray-2 border. The design

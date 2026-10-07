@@ -870,7 +870,7 @@ function dayBand(label: string) {
               -->
                   <span
                     v-if="band.today"
-                    class="ml-1 inline-flex h-6 items-center rounded-3 bg-surface-red-7 px-[5px] text-white"
+                    class="ml-1 inline-flex h-6 w-[26px] items-center justify-center rounded-3 bg-surface-red-7 tabular-nums text-white"
                   >
                     {{ band.date }}
                   </span>
