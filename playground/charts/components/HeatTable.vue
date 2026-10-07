@@ -16,20 +16,23 @@ const props = defineProps<{
   colors: string[]
   /** the ink on a pale cell */
   ink: string
+  /** the file's own step per cell, as an index into `colors` */
+  steps: ReadonlyArray<readonly number[]>
 }>()
 
-const values = computed(() => props.rows.flatMap(([, ...v]) => v))
-const min = computed(() => Math.min(...values.value))
-const max = computed(() => Math.max(...values.value))
-
-/** the ramp step a value falls in */
-function fill(value: number): string {
+/**
+ * The colour the file gives this cell. The file's steps are placed by hand
+ * and have nothing to do with what a cell holds — 51,987 sits on B-300 and
+ * 12,345 on B-900 — so the step is carried in the data and read here, not
+ * worked out from the reading. A theme whose ramp is shorter than the file's
+ * seven wraps rather than clamping, so its cells keep the file's pattern.
+ */
+function fill(r: number, c: number): string {
   const n = props.colors.length
-  const span = max.value - min.value || 1
-  const i = Math.min(n - 1, Math.floor(((value - min.value) / span) * n))
-  return props.colors[i]
+  if (!n) return 'transparent'
+  return props.colors[(props.steps[r]?.[c] ?? 0) % n]
 }
-const ink = (value: number) => insideLabelColor(fill(value), props.ink)
+const ink = (r: number, c: number) => insideLabelColor(fill(r, c), props.ink)
 const print = (value: number) => value.toLocaleString('en-US')
 </script>
 
@@ -79,7 +82,7 @@ const print = (value: number) => value.toLocaleString('en-US')
                 c === cells.length - 1 &&
                 'rounded-br-[8px]',
             ]"
-            :style="{ background: fill(value), color: ink(value) }"
+            :style="{ background: fill(r, c), color: ink(r, c) }"
           >
             {{ print(value) }}
           </td>

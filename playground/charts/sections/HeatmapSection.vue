@@ -6,7 +6,7 @@ import { computed } from 'vue'
 import Card from '../components/Card.vue'
 import HeatTable from '../components/HeatTable.vue'
 import UsMap from '../components/UsMap.vue'
-import { HEAT_COLUMNS, heatTable } from '../chartData'
+import { HEAT_COLUMNS, heatSteps, heatTable } from '../chartData'
 import type { ThemeColors } from '../useChartTheme'
 
 const props = defineProps<{ theme: ThemeColors }>()
@@ -28,6 +28,7 @@ const heat = computed(() => props.theme.colors('heat'))
       :rows="heatTable"
       :columns="HEAT_COLUMNS"
       :colors="heat"
+      :steps="heatSteps"
       :ink="theme.t('chart-inside-label')"
     />
   </div>

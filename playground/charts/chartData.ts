@@ -295,8 +295,8 @@ export const slices = [
  * cell's step is its place between the lowest and highest reading.
  *
  * The file's own cells are coloured by hand rather than by what they hold —
- * 51,987 sits on a pale step and 12,345 on the darkest — so the ramp is read
- * off the numbers here, which is the one thing a heat map has to do.
+ * 51,987 sits on a pale step and 12,345 on the darkest — so the steps are
+ * carried beside the readings in `heatSteps` rather than read off them.
  */
 export const heatTable = [
   ['Attentive', 520, 212, 457, 783, 154, 123, 223],
@@ -308,6 +308,25 @@ export const heatTable = [
   ['Github', 457, 243, 223, 890, 568, 79, 346],
   ['Airbnb', 388, 443, 325, 679, 223, 601, 212],
   ['Figma', 299, 558, 357, 501, 457, 489, 279],
+] as const
+/**
+ * The step each cell stands on, straight off the file (1356:68481): an index
+ * into the theme's `heat` ramp, which for Ocean is the file's own seven —
+ * B-100, 200, 300, 400, 700, 800, 900 — so 0 is #edf7fc and 6 is #095895.
+ * The file places these by hand, so they are carried rather than derived; a
+ * theme with a shorter ramp wraps, the way every other role on this page
+ * cycles its colours.
+ */
+export const heatSteps = [
+  [2, 0, 4, 3, 4, 6, 3],
+  [4, 6, 3, 2, 3, 0, 1],
+  [3, 3, 1, 4, 2, 3, 0],
+  [3, 5, 3, 0, 3, 0, 1],
+  [4, 0, 4, 1, 5, 4, 3],
+  [0, 3, 2, 5, 1, 3, 6],
+  [4, 1, 4, 2, 4, 5, 3],
+  [4, 4, 1, 6, 3, 0, 1],
+  [1, 3, 0, 4, 6, 3, 2],
 ] as const
 export const HEAT_COLUMNS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul']
 export const heatCells = heatTable.flatMap(([company, ...values]) =>
