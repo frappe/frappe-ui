@@ -37,6 +37,10 @@ const inputTypes = [
 const orientation = ref<'vertical' | 'horizontal'>(
   pick('orientation', ['vertical', 'horizontal'], 'vertical'),
 )
+// coming back to the field, it starts at its default size, sm
+watch(inputType, (type) => {
+  if (type === 'field') size.value = 'sm'
+})
 const orientationTabs = [
   { label: 'Vertical', value: 'vertical' },
   { label: 'Horizontal', value: 'horizontal' },
@@ -73,12 +77,13 @@ const DESCRIPTION =
   <div class="flex h-full items-center justify-center px-5 py-10">
     <div class="flex items-start gap-10">
       <!-- one box for both input types, so switching between them moves
-           nothing: the field and the area share a top-left corner — 272 in
-           (where the field sits after the preview card) and 112 down (where
-           the field sits at the foot of its 140 row) — and the box is tall
-           enough for the area with four files under it (112 + 500) -->
+           nothing: the controller stays put, the field and the area share a
+           left edge, 272 in (where the field sits after the preview card);
+           the area's top is the controller's, the field sits at the foot of
+           its 140 row as before. The box is tall enough for the field's row
+           and the area with four files under it -->
       <div class="h-[612px] w-[700px]">
-        <div v-if="inputType === 'area'" class="pl-[272px] pt-[112px]">
+        <div v-if="inputType === 'area'" class="pl-[272px]">
           <FileInputArea
             v-model:error="error"
             :variant="variant"
@@ -106,7 +111,7 @@ const DESCRIPTION =
         class="flex w-[274px] shrink-0 flex-col gap-3 rounded-7 border border-outline-gray-1 bg-surface-elevation-2 px-4 pb-[13px] pt-4"
       >
         <p class="text-lg-semibold leading-[1.15] text-ink-gray-9">
-          File input
+          Preview control
         </p>
         <div class="flex flex-col gap-3">
           <div class="flex h-7 items-center justify-between">

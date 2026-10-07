@@ -8,7 +8,8 @@
 // ink-gray-6; on the outline variant 16 more and a sm subtle "Select file"
 // Button. Outline: no fill, the line outline-gray-3 on hover. Subtle: no
 // button, surface-gray-1, surface-gray-2 on hover. The area is 174 tall
-// (200 when the files sit across), its contents centred in it.
+// either way, its contents centred in it — the file draws the horizontal
+// one 200, but the user wanted switching orientation to keep its size.
 //
 // Files, two ways (`orientation`):
 //   vertical    a card per file, 400 wide, 16 under the area and 12 apart —
@@ -200,7 +201,7 @@ function onDrop(e: DragEvent) {
       class="fia-area relative flex cursor-pointer flex-col items-center justify-center rounded-7 px-6 outline-none focus-visible:ring-2 focus-visible:ring-outline-gray-3"
       :class="[
         dragging && 'is-dragging',
-        orientation === 'horizontal' ? 'min-h-[200px]' : 'min-h-[174px]',
+        'min-h-[174px]',
         inArea.length ? 'justify-between py-6' : '',
       ]"
       @click="open"
