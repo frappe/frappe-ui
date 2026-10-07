@@ -65,10 +65,17 @@
   },
   {
     name: 'variant',
-    description: 'Visual treatment.\n- `subtle` (default): a filled cell with a left indicator bar when active —\n  for image/avatar items like communities or workspaces.\n- `ghost`: transparent until hovered, a raised highlight when active — for\n  icon shortcuts like Search or Notifications.',
+    description: 'Visual treatment.\n- `subtle` (default): a filled cell with a left indicator bar when active —\n  for workspace items like communities. Add `bare` when the item shows an image.\n- `ghost`: transparent until hovered, a raised highlight when active — for\n  icon shortcuts like Search or Notifications.',
     required: false,
     type: '"subtle" | "ghost"',
     default: '"subtle"'
+  },
+  {
+    name: 'bare',
+    description: 'Render the default slot without the cell\'s fill, in every state. Use it\nfor content that brings its own surface and fills the cell, like an image.\nA fill under an image shows through its rounded corners as a faint rim.\nOn a `subtle` item, the indicator bar still marks the active item.',
+    required: false,
+    type: 'boolean',
+    default: 'false'
   }
 ]
 

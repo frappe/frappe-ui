@@ -2440,6 +2440,17 @@ for every other way into the page.
 users came from. If you need a push that always happens, use a plain `Button`
 with your own `router.push`.
 
+#### SidebarRailItem — `bare` removes the gray rim around images (additive)
+
+A `subtle` item painted a gray fill behind its slot. When the slot held a
+rounded image, such as a community logo, the fill showed through the image's
+corners as a faint gray rim, most visibly in dark mode. The new `bare` prop
+paints no fill, so the image sits directly on the rail. The indicator bar
+still marks the active item.
+
+**What to do:** add `bare` to items whose slot holds an image. When only some
+items have one, bind it per item: `:bare="Boolean(community.image)"`.
+
 ### App shell, page header and color scheme
 
 #### ThemeSwitcher — moved to `frappe-ui/experimental` (breaking, loud)

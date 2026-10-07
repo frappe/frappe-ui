@@ -122,6 +122,8 @@ _Avoid_ (Alert): `intent`, `visible`, `yellow`
 **bare** (Dialog):
 Prop (default `false`) that suppresses the dialog's default chrome so the `#default`
 slot fills the entire modal shell. For command palettes, full-screen settings, etc.
+Popover and Tooltip use it the same way for their panel and bubble, and
+`SidebarRailItem` for the fill behind an image.
 _Avoid_: `flush`, `chromeless`, `unstyled` (in new code)
 
 **fluid** (TabButtons):

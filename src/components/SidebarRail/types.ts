@@ -38,9 +38,17 @@ export interface SidebarRailItemProps {
   /**
    * Visual treatment.
    * - `subtle` (default): a filled cell with a left indicator bar when active —
-   *   for image/avatar items like communities or workspaces.
+   *   for workspace items like communities. Add `bare` when the item shows an image.
    * - `ghost`: transparent until hovered, a raised highlight when active — for
    *   icon shortcuts like Search or Notifications.
    */
   variant?: 'subtle' | 'ghost'
+
+  /**
+   * Render the default slot without the cell's fill, in every state. Use it
+   * for content that brings its own surface and fills the cell, like an image.
+   * A fill under an image shows through its rounded corners as a faint rim.
+   * On a `subtle` item, the indicator bar still marks the active item.
+   */
+  bare?: boolean
 }
