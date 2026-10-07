@@ -9,6 +9,7 @@
 // through the library's `useChart` inside its ChartContainer, with the
 // outlines from a trimmed `us-atlas` (us-states.geo.json).
 import { computed, ref, shallowRef, watchEffect } from 'vue'
+import { useIsDark } from '../useChartTokens'
 import { MapChart as MapSeries } from 'echarts/charts'
 import { TooltipComponent, VisualMapComponent } from 'echarts/components'
 import { registerMap } from 'echarts/core'
@@ -31,6 +32,20 @@ const props = defineProps<{
 
 const MIN = 100
 const MAX = 10000
+
+const isDark = useIsDark()
+
+/**
+ * The rule between the states. The file binds it to `black overlay/300`
+ * — black at 36% — and that primitive carries a Light mode only, so it
+ * never flips: in dark mode a black overlay on a near-black map draws
+ * nothing, and the hovered state, which turns the card's own surface,
+ * lost its shape altogether. Dark takes the same overlay in white, which
+ * separates the states there exactly as the black one does in light.
+ */
+const stateRule = computed(() =>
+  isDark.value ? 'rgba(255,255,255,0.36)' : 'rgba(0,0,0,0.36)',
+)
 
 const plotEl = ref<HTMLElement>()
 const ready = shallowRef(false)
@@ -59,7 +74,10 @@ const option = computed(() => {
       show: true,
       trigger: 'item',
       confine: true,
-      backgroundColor: props.t('surface-elevation-2'),
+      // the tooltip stands a tone above the card rather than on its level:
+      // both elevations are white in light, so this only parts the two in
+      // dark, where the card is 0.26 and the tooltip 0.341
+      backgroundColor: props.t('surface-elevation-3'),
       borderWidth: 0,
       borderRadius: 8,
       padding: [5, 8, 5, 3],
@@ -69,16 +87,23 @@ const option = computed(() => {
       formatter: (p: {
         name: string
         value: number
+        color?: string
         data?: { full?: string }
       }) => {
         const full = fullName(p.name)
         const v = Number.isFinite(p.value)
           ? p.value.toLocaleString('en-US')
           : '—'
+        // The dot reads the state off the map: the file fills it from the
+        // ramp (1356:68106's dot is Ocean/B-900, not a brand blue), and
+        // echarts hands the formatter the colour the visual map actually
+        // gave this state — so the dot is that state's own step, not the
+        // ramp's end. A state the map could not colour keeps the darkest.
+        const dot = p.color || props.colors[props.colors.length - 1]
         return `<div style="display:flex;flex-direction:column;gap:4px;line-height:1;letter-spacing:0.02em">
           <div style="padding-left:5px;color:${props.t('ink-gray-8')}">${full}</div>
           <div style="display:flex;align-items:center;gap:2px">
-            <span style="display:inline-flex;width:16px;height:16px;align-items:center;justify-content:center"><span style="width:5.5px;height:5.5px;border-radius:999px;background:${props.colors[props.colors.length - 1]}"></span></span>
+            <span style="display:inline-flex;width:16px;height:16px;align-items:center;justify-content:center"><span style="width:5.5px;height:5.5px;border-radius:999px;background:${dot}"></span></span>
             <span style="color:${props.t('ink-gray-6')};min-width:81px">Active users</span>
             <span style="color:${props.t('ink-gray-8')};font-weight:500">${v}</span>
           </div>
@@ -108,7 +133,7 @@ const option = computed(() => {
         // file leaves 17 between the two on a 360 card.
         top: 20,
         bottom: 36,
-        itemStyle: { borderColor: 'rgba(0,0,0,0.36)', borderWidth: 0.5 },
+        itemStyle: { borderColor: stateRule.value, borderWidth: 0.5 },
         emphasis: {
           itemStyle: { areaColor: props.t('surface-elevation-2') },
           label: {
