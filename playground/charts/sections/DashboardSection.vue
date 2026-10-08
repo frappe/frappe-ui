@@ -5,10 +5,10 @@
 // three lines over their gradients; the half ring and a ring with its names
 // down the left; bars on two axes and one bar cut into eight stages; the
 // countries as pairs of bars and the funnel; the map with its scale stood up
-// the left edge, and beside it the companies' table, named "Table". The
-// readings are the file's own, traced off its lines (chartData's `week`), and
-// the colours are its Ocean steps, each a role (chartThemes' `dash*`) that
-// falls back to the rows above for the other themes.
+// the left edge, and beside it the companies' table. The readings are the
+// file's own, traced off its lines (chartData's `week`), and the colours are
+// its Ocean steps, each a role (chartThemes' `dash*`) that falls back to the
+// rows above for the other themes.
 import { computed } from 'vue'
 import { AreaChart, BarChart, LineChart } from '../../../src/charts'
 import Card from '../components/Card.vue'
@@ -386,11 +386,8 @@ const steps = computed(() =>
   <Card>
     <UsMap title="Map Graph" :colors="ramp" :t="theme.t" scale="bar" />
   </Card>
-  <!-- the table stands beside the map, named over it rather than carded -->
+  <!-- the table stands beside the map, uncarded and untitled -->
   <div class="min-w-0">
-    <h3 class="mb-2 text-base-semibold leading-tighter text-ink-gray-9">
-      Table
-    </h3>
     <HeatTable
       :rows="heatTable"
       :columns="HEAT_COLUMNS"
