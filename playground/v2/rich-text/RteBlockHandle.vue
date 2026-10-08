@@ -52,6 +52,18 @@ const MEDIA_ROW = '[data-type="columns"][data-media="true"]'
 const inCell = (el: Element) =>
   el.parentElement?.matches('[data-type="column"]') === true &&
   el.closest(MEDIA_ROW) !== null
+/**
+ * A picture carried from one cell of a row onto another cell's picture
+ * changes places with it, rather than standing over it in the same cell and
+ * leaving its own cell a slot: in a row of pictures that is what moving one
+ * to the right means. Onto an empty slot, or anywhere else, it lands as any
+ * block does.
+ */
+const swapsWith = (from: Element, to: Element) =>
+  inCell(from) &&
+  inCell(to) &&
+  from.parentElement !== to.parentElement &&
+  to.querySelector('img') !== null
 const spans = (el: Element, y: number) => {
   const r = el.getBoundingClientRect()
   return y >= r.top && y < r.bottom
@@ -213,7 +225,11 @@ let source: { el: HTMLElement; pos: number } | null = null
 let grab = { dx: 0, dy: 0 }
 let ghost: HTMLElement | null = null
 let line: HTMLElement | null = null
-let landing: { pos: number; before: boolean } | null = null
+let landing: {
+  el: HTMLElement
+  pos: number
+  before: boolean
+} | null = null
 // the browser's own snapshot is replaced by nothing: the copy is drawn here
 const blank = new Image()
 blank.src =
@@ -293,12 +309,23 @@ function onDragOver(e: DragEvent) {
   e.preventDefault()
   e.stopPropagation()
   if (e.dataTransfer) e.dataTransfer.dropEffect = 'move'
-  landing = { pos: at.pos, before: at.before }
+  landing = { el: at.el, pos: at.pos, before: at.before }
   if (line) {
     line.hidden = false
     line.style.left = `${at.box.left}px`
     line.style.width = `${at.box.width}px`
-    line.style.top = `${at.before ? at.box.top - 3 : at.box.bottom}px`
+    // a swap rings the picture it would change places with, not its line
+    const swap = source !== null && swapsWith(source.el, at.el)
+    const ring = swap
+      ? (at.el.querySelector('img')?.getBoundingClientRect() ?? at.box)
+      : at.box
+    line.classList.toggle('is-swap', swap)
+    line.style.left = `${ring.left}px`
+    line.style.width = `${ring.width}px`
+    line.style.height = swap ? `${ring.height}px` : ''
+    line.style.top = swap
+      ? `${ring.top}px`
+      : `${at.before ? at.box.top - 3 : at.box.bottom}px`
   }
 }
 function onDrop(e: DragEvent) {
@@ -314,6 +341,29 @@ function onDrop(e: DragEvent) {
   const node = state.doc.nodeAt(from.pos)
   const beside = state.doc.nodeAt(at.pos)
   if (!node || !beside) return
+  if (swapsWith(from.el, at.el)) {
+    // the later one first, so the earlier position still holds
+    const [first, second] =
+      from.pos < at.pos
+        ? [
+            { pos: from.pos, node },
+            { pos: at.pos, node: beside },
+          ]
+        : [
+            { pos: at.pos, node: beside },
+            { pos: from.pos, node },
+          ]
+    const tr = state.tr
+      .replaceWith(second.pos, second.pos + second.node.nodeSize, first.node)
+      .replaceWith(first.pos, first.pos + first.node.nodeSize, second.node)
+    // the carried picture, where it now stands, stays selected
+    const shift = second.node.nodeSize - first.node.nodeSize
+    const landed = from.pos < at.pos ? at.pos + shift : at.pos
+    tr.setSelection(NodeSelection.create(tr.doc, landed))
+    ed.view.dispatch(tr.scrollIntoView())
+    ed.view.focus()
+    return
+  }
   const edge = at.before ? at.pos : at.pos + beside.nodeSize
   // the block is already there
   if (edge === from.pos || edge === from.pos + node.nodeSize) return
@@ -451,6 +501,12 @@ const px = (n: number) => `${n}px`
   border-radius: 9999px;
   pointer-events: none;
   background-color: var(--surface-gray-10, #383838);
+}
+/* the picture a swap would trade with, ringed as a selected picture is */
+.rte-bh-line.is-swap {
+  border-radius: 6px;
+  background-color: transparent;
+  box-shadow: 0 0 0 2px var(--surface-gray-10, #383838);
 }
 /* the library's drop cursor stands down while the grip's line is up */
 body.rte-block-drag .editor-drop-cursor {
