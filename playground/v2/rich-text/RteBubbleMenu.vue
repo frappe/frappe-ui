@@ -142,11 +142,14 @@ const shouldShow: InstanceType<typeof BubbleMenu>['$props']['shouldShow'] = ({
 </script>
 
 <template>
+  <!-- above the block grip's layer (z-55, RteBlockHandle), which otherwise
+       drew its six dots over the bar's buttons -->
   <BubbleMenu
     v-if="editor"
     :editor="editor"
     :should-show="shouldShow"
     :options="{ placement: 'top' }"
+    class="z-[60]"
   >
     <div class="rte-bubble" role="toolbar" aria-label="Text formatting">
       <!-- the block style: "Text ⌄", its menu 10px beneath, flush with the

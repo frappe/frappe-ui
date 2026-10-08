@@ -166,8 +166,17 @@ function posOf(view: View, el: HTMLElement): number | null {
   return null
 }
 
+/** text is selected: the formatting bar is up, and the grip steps aside */
+function selectingText() {
+  const sel = editor.value?.state.selection
+  return !!sel && !sel.empty && !(sel instanceof NodeSelection)
+}
 function place() {
   if (dragging) return
+  if (selectingText()) {
+    hide()
+    return
+  }
   const el = target.value
   if (!el || !el.isConnected) {
     hide()
@@ -207,7 +216,7 @@ function hide() {
 function onMove(e: MouseEvent) {
   if (dragging) return
   const ed = editor.value
-  if (!ed || ed.isDestroyed || !ed.isEditable) {
+  if (!ed || ed.isDestroyed || !ed.isEditable || selectingText()) {
     hide()
     return
   }
