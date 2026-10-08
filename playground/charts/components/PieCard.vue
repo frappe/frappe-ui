@@ -161,16 +161,11 @@ const flat = {
   emphasis: { scale: false },
   label: { show: false },
   labelLine: { show: false },
-  // The entry grows every slice out from the centre at once rather than
-  // echarts' default fan, which crowds all the slices into one thin wedge at
-  // 3 o'clock and opens it under an ease that starts slow — and the nested
-  // pie, six series, fanned out as six separate spokes. Growing from the
-  // centre on an ease-out moves most at the start and settles gently, and
-  // the nested pie's rings grow together as the one shape they make.
-  // A pie series keeps echarts' own 1000ms unless told otherwise.
-  animationType: 'scale',
-  animationEasing: 'cubicOut',
-  animationDuration: 600,
+  // echarts draws no entry of its own: the plot is revealed by SWEEP below.
+  // Its own entry, the fan, crowds every slice into one wedge at 3 o'clock
+  // and opens them together, and the nested pie fanned out as six spokes.
+  // A pie series keeps echarts' 1000ms unless told otherwise, hence here.
+  animationDuration: 0,
 } as const
 
 /**
@@ -270,8 +265,7 @@ const series = computed(() => {
 
 const option = computed(() => ({
   animation: true,
-  animationDuration: 600,
-  animationEasing: 'cubicOut',
+  animationDuration: 0,
   tooltip: {
     show: true,
     trigger: 'item',
@@ -301,7 +295,43 @@ const option = computed(() => ({
   series: series.value,
 }))
 
-useChart({ container: plotEl, option: () => option.value })
+/**
+ * The entry: a clock hand sweeping round the pie's own centre and uncovering
+ * it, so the slices appear in the order they run — from 3 o'clock, where the
+ * first slice starts, on the pie, the doughnut and the nested pie (whose
+ * spiral then draws ring by ring), and from 9 o'clock over the top on the half
+ * ring, like a gauge filling. A conic mask on the plot does it, centred where
+ * echarts centres the pie (both read the same box), and comes off once the
+ * sweep is done so nothing is masked when a slice is hidden or hovered.
+ */
+const SWEEP = {
+  pie: { center: PIE_CENTER, from: 90, span: 360 },
+  donut: { center: PIE_CENTER, from: 90, span: 360 },
+  rose: { center: ROSE_CENTER, from: 90, span: 360 },
+  half: { center: HALF_CENTER, from: 270, span: 180 },
+}
+const sweep = ref<'waiting' | 'running' | 'done'>('waiting')
+const sweepStyle = computed(() => {
+  const { center, from, span } = SWEEP[props.variant]
+  return {
+    '--pie-cx': center[0],
+    '--pie-cy': center[1],
+    '--pie-from': `${from}deg`,
+    '--pie-span': `${span}deg`,
+  }
+})
+/** the sweep starts on the first frame echarts draws, not on mount */
+function startSweep() {
+  if (sweep.value !== 'waiting') return
+  const still = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+  sweep.value = still ? 'done' : 'running'
+}
+
+useChart({
+  container: plotEl,
+  option: () => option.value,
+  events: { rendered: startSweep },
+})
 
 function toggle(name: string) {
   hidden.value = hidden.value.includes(name)
@@ -312,7 +342,15 @@ function toggle(name: string) {
 
 <template>
   <ChartContainer :title="title" :class="variant === 'rose' && 'pie-rose'">
-    <div ref="plotEl" class="h-full w-full" role="img" :aria-label="title" />
+    <div
+      ref="plotEl"
+      class="h-full w-full"
+      :class="sweep !== 'done' && ['pie-sweep', `pie-sweep--${sweep}`]"
+      :style="sweepStyle"
+      role="img"
+      :aria-label="title"
+      @animationend.self="sweep = 'done'"
+    />
     <template #legend>
       <ChartLegend :items="items" @change="toggle" />
     </template>
@@ -320,6 +358,31 @@ function toggle(name: string) {
 </template>
 
 <style scoped>
+/* The entry's clock hand (see SWEEP): everything inside the swept angle shows,
+   nothing past it. The angle is a registered property so it can animate. */
+@property --pie-sweep {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+.pie-sweep {
+  --pie-sweep: 0deg;
+  mask-image: conic-gradient(
+    from var(--pie-from) at var(--pie-cx) var(--pie-cy),
+    #000 var(--pie-sweep),
+    transparent var(--pie-sweep)
+  );
+}
+.pie-sweep--running {
+  /* ease-out: most of the turn early, settling into the end */
+  animation: pie-sweep 800ms cubic-bezier(0.33, 1, 0.68, 1) forwards;
+}
+@keyframes pie-sweep {
+  to {
+    --pie-sweep: var(--pie-span);
+  }
+}
+
 /* The file breaks this legend three to a row — two rows of three, centred
    under the plot (1589:43629's "Frame 1171278973" holds them in 303 of 580).
    Given the card's full width the six ran five and one. The count is what the
