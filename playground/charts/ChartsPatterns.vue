@@ -106,8 +106,8 @@ const mode = ref<Mode>('charts')
  */
 type DashboardVersion = 'v1' | 'v2'
 const DASHBOARDS = [
-  { value: 'v1', label: 'Dashboard v1' },
-  { value: 'v2', label: 'Dashboard v2' },
+  { value: 'v1', label: 'Version 1' },
+  { value: 'v2', label: 'Version 2' },
 ]
 const dashboard = ref<DashboardVersion>('v1')
 async function setMode(next: Mode) {

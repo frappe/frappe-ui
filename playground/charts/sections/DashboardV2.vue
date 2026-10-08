@@ -5,7 +5,7 @@
 // 560 column and a 320 one, 20 apart, each a stack of 12px-cornered cards
 // 20 apart — tasks, follow-ups, the funnel and the forecast on the left;
 // meetings, new leads, deals by stage, top open deals and the month's
-// expected closure on the right. Every card is 16 in, its title 18 semibold
+// expected closure on the right. Every card is 16 in, its title 16 semibold
 // over a 14 ink-gray-5 line. The charts take the theme the rail has picked
 // (chartThemes' `crm*` roles, the file's Ocean steps, falling back to the
 // rows above), so the page answers the Theme radios like every other one.
@@ -323,14 +323,17 @@ const closed = crmClosure.won / crmClosure.target
         <section class="crm-card !pb-0">
           <h3 class="crm-title">Funnel Conversion</h3>
           <p class="crm-sub">Visualize lead-to-deal progress.</p>
-          <div ref="funnelEl" class="relative mt-[18px] h-[209px]">
-            <!-- the stage names, ruled apart down to the plot -->
-            <div class="absolute inset-0 flex">
+          <!-- the steps run 14 short of the card's right edge, not 16 -->
+          <div ref="funnelEl" class="relative -mr-0.5 mt-[18px] h-[209px]">
+            <!-- the stage names over their own steps, each ruled off from the
+                 last on the line its step drops at, down to the plot -->
+            <div class="absolute inset-0">
               <div
-                v-for="(s, i) in crmFunnel"
+                v-for="(s, i) in steps"
                 :key="s.stage"
-                class="min-w-0 flex-1"
+                class="absolute inset-y-0 min-w-0"
                 :class="i > 0 && 'border-l border-outline-gray-1 pl-3'"
+                :style="{ left: `${s.x}px`, width: `${s.w}px` }"
               >
                 <div class="truncate text-sm leading-tighter text-ink-gray-5">
                   {{ s.stage }}
@@ -454,26 +457,34 @@ const closed = crmClosure.won / crmClosure.target
           <p class="crm-sub">
             You have <span class="text-ink-gray-8">4</span> new leads
           </p>
-          <ul class="mt-2">
-            <li
-              v-for="l in crmNewLeads"
-              :key="l.org"
-              class="flex h-[52px] items-center gap-2"
-            >
-              <Avatar :image="l.logo" :label="l.org" shape="square" size="md" />
-              <div class="min-w-0 flex-1">
-                <div class="truncate text-base text-ink-gray-8">
-                  {{ l.org }}
+          <!-- each lead a row to open, lit on hover across the card's width
+               less 8 a side, as a list row is -->
+          <ul class="-mx-2 mt-2">
+            <li v-for="l in crmNewLeads" :key="l.org">
+              <button
+                type="button"
+                class="flex h-[52px] w-full items-center gap-2 rounded-[8px] px-2 text-start transition-colors hover:bg-surface-gray-2 focus-visible:focus-ring active:bg-surface-gray-3"
+                :aria-label="`Open ${l.org}, ${l.person}`"
+              >
+                <Avatar
+                  :image="l.logo"
+                  :label="l.org"
+                  shape="square"
+                  size="md"
+                />
+                <div class="min-w-0 flex-1">
+                  <div class="truncate text-base text-ink-gray-8">
+                    {{ l.org }}
+                  </div>
+                  <div class="truncate text-base text-ink-gray-6">
+                    {{ l.person }}
+                  </div>
                 </div>
-                <div class="truncate text-base text-ink-gray-6">
-                  {{ l.person }}
-                </div>
-              </div>
-              <Button
-                variant="ghost"
-                icon="lucide-chevron-right"
-                :aria-label="`Open ${l.org}`"
-              />
+                <span
+                  class="lucide-chevron-right mr-1.5 size-4 shrink-0 text-ink-gray-8"
+                  aria-hidden="true"
+                />
+              </button>
             </li>
           </ul>
         </section>
@@ -613,7 +624,7 @@ const closed = crmClosure.won / crmClosure.target
   @apply min-w-0 overflow-hidden rounded-[12px] border border-outline-gray-1 bg-surface-elevation-2 p-4;
 }
 .crm-title {
-  @apply text-2xl-semibold leading-tighter text-ink-gray-9;
+  @apply text-lg-semibold leading-tighter text-ink-gray-9;
 }
 .crm-sub {
   @apply mt-1.5 text-base text-ink-gray-5;
