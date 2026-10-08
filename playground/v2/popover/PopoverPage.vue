@@ -75,7 +75,9 @@ onMounted(placeModeChip)
         data-label="Default"
       >
         <h2 class="text-3xl-semibold text-ink-gray-8">Default</h2>
-        <DefaultPopovers />
+        <div class="popover-stage">
+          <DefaultPopovers />
+        </div>
       </section>
       <section
         id="picker-grid"
@@ -84,11 +86,13 @@ onMounted(placeModeChip)
         data-label="Picker grid"
       >
         <h2 class="text-3xl-semibold text-ink-gray-8">Picker grid</h2>
-        <PickerPopovers
-          layout="grid"
-          @react="flying?.launch($event)"
-          @raise-hand="onRaiseHand"
-        />
+        <div class="popover-stage">
+          <PickerPopovers
+            layout="grid"
+            @react="flying?.launch($event)"
+            @raise-hand="onRaiseHand"
+          />
+        </div>
       </section>
       <section
         id="picker-list"
@@ -97,15 +101,19 @@ onMounted(placeModeChip)
         data-label="Picker list"
       >
         <h2 class="text-3xl-semibold text-ink-gray-8">Picker list</h2>
-        <PickerPopovers
-          layout="list"
-          @react="flying?.launch($event)"
-          @raise-hand="onRaiseHand"
-        />
+        <div class="popover-stage">
+          <PickerPopovers
+            layout="list"
+            @react="flying?.launch($event)"
+            @raise-hand="onRaiseHand"
+          />
+        </div>
       </section>
       <section id="form" class="v2-section" data-section data-label="Form">
         <h2 class="text-3xl-semibold text-ink-gray-8">Form</h2>
-        <FormPopovers />
+        <div class="popover-stage">
+          <FormPopovers />
+        </div>
       </section>
       <section
         id="onboarding"
@@ -114,11 +122,15 @@ onMounted(placeModeChip)
         data-label="Onboarding"
       >
         <h2 class="text-3xl-semibold text-ink-gray-8">Onboarding</h2>
-        <OnboardingPopover />
+        <div class="popover-stage">
+          <OnboardingPopover />
+        </div>
       </section>
       <section id="filter" class="v2-section" data-section data-label="Filter">
         <h2 class="text-3xl-semibold text-ink-gray-8">Filter</h2>
-        <FilterPopover />
+        <div class="popover-stage">
+          <FilterPopover />
+        </div>
       </section>
       <section
         id="notifications"
@@ -127,7 +139,9 @@ onMounted(placeModeChip)
         data-label="Notifications"
       >
         <h2 class="text-3xl-semibold text-ink-gray-8">Notifications</h2>
-        <NotificationPopovers />
+        <div class="popover-stage">
+          <NotificationPopovers />
+        </div>
       </section>
       <section
         id="comments"
@@ -136,7 +150,9 @@ onMounted(placeModeChip)
         data-label="Comments"
       >
         <h2 class="text-3xl-semibold text-ink-gray-8">Comments</h2>
-        <CommentPopover />
+        <div class="popover-stage">
+          <CommentPopover />
+        </div>
       </section>
       <section
         id="app-switcher"
@@ -145,7 +161,9 @@ onMounted(placeModeChip)
         data-label="App switcher"
       >
         <h2 class="text-3xl-semibold text-ink-gray-8">App switcher</h2>
-        <AppSwitcherPopovers />
+        <div class="popover-stage">
+          <AppSwitcherPopovers />
+        </div>
       </section>
       <section
         id="call-dialer"
@@ -154,7 +172,9 @@ onMounted(placeModeChip)
         data-label="Call dialer"
       >
         <h2 class="text-3xl-semibold text-ink-gray-8">Call dialer</h2>
-        <CallDialer />
+        <div class="popover-stage">
+          <CallDialer />
+        </div>
       </section>
       <section
         id="voice-record"
@@ -163,7 +183,9 @@ onMounted(placeModeChip)
         data-label="Voice record"
       >
         <h2 class="text-3xl-semibold text-ink-gray-8">Voice record</h2>
-        <VoiceRecorder />
+        <div class="popover-stage">
+          <VoiceRecorder />
+        </div>
       </section>
       <section
         id="embed-link"
@@ -172,9 +194,12 @@ onMounted(placeModeChip)
         data-label="Embed link"
       >
         <h2 class="text-3xl-semibold text-ink-gray-8">Embed link</h2>
-        <EmbedPopovers />
+        <div class="popover-stage">
+          <EmbedPopovers />
+        </div>
       </section>
-      <!-- xs over sm, all left-aligned; Card (floating) or Ghost (bare) for both -->
+      <!-- xs over sm, all left-aligned; Card (floating) or Ghost (bare) for both.
+           The group is left-aligned within itself and centred in its frame. -->
       <section
         id="toolbar"
         class="v2-section"
@@ -182,53 +207,55 @@ onMounted(placeModeChip)
         data-label="Toolbar"
       >
         <h2 class="text-3xl-semibold text-ink-gray-8">Toolbar</h2>
-        <div class="flex flex-col items-start gap-10">
-          <div
-            ref="modeRow"
-            class="relative flex h-7 w-44 gap-1 rounded-4 bg-surface-gray-2 p-px dark:bg-surface-gray-1"
-            role="radiogroup"
-            aria-label="Toolbar style"
-          >
-            <span
-              v-if="modeChip"
-              class="v2-glide-chip absolute rounded-[7px] bg-surface-elevation-3 shadow-sm"
-              :style="{
-                left: `${modeChip.left}px`,
-                top: `${modeChip.top}px`,
-                width: `${modeChip.width}px`,
-                height: `${modeChip.height}px`,
-              }"
-              aria-hidden="true"
-            />
-            <button
-              v-for="m in TOOLBAR_MODES"
-              :key="m.value"
-              type="button"
-              role="radio"
-              :aria-checked="toolbarMode === m.value"
-              class="relative flex-1 rounded-[7px] text-base transition-colors duration-200"
-              :class="
-                toolbarMode === m.value
-                  ? 'text-ink-gray-8'
-                  : 'text-ink-gray-5 hover:text-ink-gray-7'
-              "
-              @click="toolbarMode = m.value"
-            >
-              {{ m.label }}
-            </button>
-          </div>
-
-          <div class="flex flex-col items-start gap-8">
+        <div class="popover-stage">
+          <div class="flex flex-col items-start gap-10">
             <div
-              v-for="size in ['xs', 'sm'] as const"
-              :key="size"
-              class="flex flex-col items-start gap-2"
+              ref="modeRow"
+              class="relative flex h-7 w-44 gap-1 rounded-4 bg-surface-gray-2 p-px dark:bg-surface-gray-1"
+              role="radiogroup"
+              aria-label="Toolbar style"
             >
-              <span class="text-sm text-ink-gray-5">{{ size }}</span>
-              <FormattingToolbar
-                :size="size"
-                :floating="toolbarMode === 'card'"
+              <span
+                v-if="modeChip"
+                class="v2-glide-chip absolute rounded-[7px] bg-surface-elevation-3 shadow-sm"
+                :style="{
+                  left: `${modeChip.left}px`,
+                  top: `${modeChip.top}px`,
+                  width: `${modeChip.width}px`,
+                  height: `${modeChip.height}px`,
+                }"
+                aria-hidden="true"
               />
+              <button
+                v-for="m in TOOLBAR_MODES"
+                :key="m.value"
+                type="button"
+                role="radio"
+                :aria-checked="toolbarMode === m.value"
+                class="relative flex-1 rounded-[7px] text-base transition-colors duration-200"
+                :class="
+                  toolbarMode === m.value
+                    ? 'text-ink-gray-8'
+                    : 'text-ink-gray-5 hover:text-ink-gray-7'
+                "
+                @click="toolbarMode = m.value"
+              >
+                {{ m.label }}
+              </button>
+            </div>
+
+            <div class="flex flex-col items-start gap-8">
+              <div
+                v-for="size in ['xs', 'sm'] as const"
+                :key="size"
+                class="flex flex-col items-start gap-2"
+              >
+                <span class="text-sm text-ink-gray-5">{{ size }}</span>
+                <FormattingToolbar
+                  :size="size"
+                  :floating="toolbarMode === 'card'"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -239,3 +266,17 @@ onMounted(placeModeChip)
     <FlyingReactions ref="flying" side="left" />
   </div>
 </template>
+
+<style scoped>
+/* Each section's popovers stand in one frame: the column's full width, a
+   hairline and the page's quietest fill under them, the way a canvas holds a
+   design, so every example reads as a bounded piece and they all line up on
+   the same edges — the title over the frame's left edge, the popovers centred
+   in it. The section is `text-center` (the flow layout centres its screens),
+   which every popover inherited: a comment's text and a notification's
+   message came out centred line by line. The frame sets the text back to the
+   start; the few places that centre on purpose say so themselves. */
+.popover-stage {
+  @apply flex w-full justify-center rounded-6 border border-outline-gray-1 bg-surface-gray-1 px-6 py-10 text-left;
+}
+</style>
