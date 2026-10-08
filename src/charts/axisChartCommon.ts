@@ -473,18 +473,24 @@ export function buildXAxis(
  * A line's end points sit on the plot's edges, under the value axis' ticks. A
  * time axis cannot take a half slot, so it is padded by a fixed distance on
  * each side, whatever the span or the plot is wide. Echarts does this itself,
- * but only for bars it draws. A lone date has no span to pad.
+ * but only for bars it draws. A lone date has no span to pad, and an axis whose
+ * caller set either end is theirs to lay out.
  *
  * `dataRange` is what the padding is not: the ticks that land in it say nothing
  * about the series, so they go unlabelled (see `xAxisLabelFormat`).
  */
 function timeInset(config: AxisChartBaseConfig, values: any[], width?: number) {
-  // Read the way echarts reads the points, so the pad is measured from them.
-  const times = values
-    .map((value) => dayjs(value).valueOf())
-    .filter((time) => !Number.isNaN(time))
-  const first = Math.min(...times)
-  const last = Math.max(...times)
+  const { min, max } = config.xAxis.echartOptions ?? {}
+  if (min !== undefined || max !== undefined) return undefined
+
+  let first = Infinity
+  let last = -Infinity
+  for (const value of values) {
+    // Read the way echarts reads the points, so the pad is measured from them.
+    const time = dayjs(value).valueOf()
+    if (time < first) first = time
+    if (time > last) last = time
+  }
   const plot = width ? plotWidth(config, width) : 0
   if (!(last > first) || plot <= 2 * LINE_AXIS_INSET) return undefined
 

@@ -157,6 +157,29 @@ describe('line chart option time axis inset', () => {
     }
   })
 
+  it('pads a series too long to spread into Math.min', () => {
+    const start = new Date(2000, 0, 1).getTime()
+    const data = Array.from({ length: 200_000 }, (_, index) => ({
+      day: new Date(start + index * 60_000).toISOString(),
+      sales: 1,
+    }))
+    expect(buildOn({ data }).xAxis.min).toBeLessThan(start)
+  })
+
+  it('leaves an axis whose caller set an end, labels and all', () => {
+    const option = buildOn({
+      xAxis: {
+        key: 'day',
+        type: 'time',
+        timeGrain: 'day',
+        echartOptions: { min: FIRST - 3 * DAY },
+      },
+    })
+    expect(option.xAxis.min).toBe(FIRST - 3 * DAY)
+    expect(option.xAxis.max).toBeUndefined()
+    expect(option.xAxis.axisLabel.formatter(FIRST - DAY)).toBe('4')
+  })
+
   it('pads an area chart the same way', () => {
     expect(buildOn({ type: 'area' }).xAxis.min).toBeLessThan(FIRST)
   })
