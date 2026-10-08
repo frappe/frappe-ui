@@ -58,7 +58,7 @@ const records: Record[] = [
   {
     value: 'zendesk',
     title: 'Zendesk',
-    domain: 'Zendesk.com',
+    domain: 'zendesk.com',
     logo: 'zendesk',
     calls: [
       { title: 'Onboarding call', kind: 'outgoing', people: [3, 1] },
@@ -68,7 +68,7 @@ const records: Record[] = [
   {
     value: 'webflow',
     title: 'Webflow',
-    domain: 'Webflowindia.com',
+    domain: 'webflowindia.com',
     logo: 'webflow',
     calls: [
       { title: 'Renewal discussion', kind: 'incoming', people: [2, 6] },
@@ -96,7 +96,7 @@ const records: Record[] = [
   {
     value: 'copper',
     title: 'Copper',
-    domain: 'Cooper.co',
+    domain: 'cooper.co',
     logo: 'copper',
     calls: [
       { title: 'Pricing call', kind: 'outgoing', people: [5, 8] },
@@ -107,7 +107,7 @@ const records: Record[] = [
   {
     value: 'skullcandy',
     title: 'Skullcandy',
-    domain: 'Skullcandy.com',
+    domain: 'skullcandy.com',
     logo: 'skullcandy',
     calls: [{ title: 'Intro call', kind: 'incoming', people: [8, 1] }],
   },
