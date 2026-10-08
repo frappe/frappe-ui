@@ -7,12 +7,12 @@
 // 8px radius with a 16px glyph 6px off the 14/16 gray-700 label. Then
 // 24px controls on an 8px radius with 14px gray-700 glyphs, pressed on
 // gray-100: bold, italic, underline, strike, link, text colour, highlight
-// │ left, centre, right; a divider is a 16px hairline in a 9px slot. It
-// rises over a run of text — not over a selected block, where there is no
-// text to set.
+// (a marker) │ left, centre, right, each named by a Tooltip on hover; a
+// divider is a 16px hairline in a 9px slot. It rises over a run of text —
+// not over a selected block, where there is no text to set.
 import { computed, h, ref, watch } from 'vue'
 import { BubbleMenu } from '@tiptap/vue-3/menus'
-import { Dropdown, Popover } from '../../../src'
+import { Dropdown, Popover, Tooltip } from '../../../src'
 import type { DropdownOptions } from '../../../src/components/Dropdown/types'
 import { useResolvedEditor } from '../../../src/molecules/editor/editor-context'
 import { InsertLink } from '../../../src/molecules/editor/menu'
@@ -178,75 +178,80 @@ const shouldShow: InstanceType<typeof BubbleMenu>['$props']['shouldShow'] = ({
       </Dropdown>
       <div ref="menuHost" class="rte-bubble-menus" />
 
-      <button
-        v-for="m in marks"
-        :key="m.name"
-        type="button"
-        class="rte-bubble-btn"
-        :aria-pressed="m.pressed()"
-        :aria-label="m.label"
-        :title="m.label"
-        @click="m.run"
-      >
-        <RteIcon :name="m.icon" class="size-3.5" />
-      </button>
+      <Tooltip v-for="m in marks" :key="m.name" :text="m.label">
+        <button
+          type="button"
+          class="rte-bubble-btn"
+          :aria-pressed="m.pressed()"
+          :aria-label="m.label"
+          @click="m.run"
+        >
+          <RteIcon :name="m.icon" class="size-3.5" />
+        </button>
+      </Tooltip>
 
-      <button
-        type="button"
-        class="rte-bubble-btn"
-        :aria-pressed="linked"
-        aria-label="Link"
-        title="Link"
-        @click="InsertLink.action(editor)"
-      >
-        <RteIcon name="link" class="size-3.5" />
-      </button>
+      <Tooltip text="Link">
+        <button
+          type="button"
+          class="rte-bubble-btn"
+          :aria-pressed="linked"
+          aria-label="Link"
+          @click="InsertLink.action(editor)"
+        >
+          <RteIcon name="link" class="size-3.5" />
+        </button>
+      </Tooltip>
 
-      <!-- colour: the picker card (31845:36005) on the library's Popover -->
-      <Popover side="bottom" align="start" :offset="6" bare>
-        <template #trigger="{ open }">
-          <button
-            type="button"
-            class="rte-bubble-btn"
-            :class="open && 'is-open'"
-            :aria-pressed="coloured"
-            aria-label="Text colour"
-            title="Text colour"
-          >
-            <RteIcon name="text" class="size-3.5" />
-          </button>
-        </template>
-        <template #default="{ close }">
-          <RteColorPanel :editor="editor" @pick="close" />
-        </template>
-      </Popover>
+      <!-- colour: the picker card (31845:36005) on the library's Popover.
+           A Tooltip on the Popover's own trigger stops it opening (as the
+           toolbar found), so the Tooltip holds a span around the whole. -->
+      <Tooltip text="Text colour">
+        <span class="flex">
+          <Popover side="bottom" align="start" :offset="6" bare>
+            <template #trigger="{ open }">
+              <button
+                type="button"
+                class="rte-bubble-btn"
+                :class="open && 'is-open'"
+                :aria-pressed="coloured"
+                aria-label="Text colour"
+              >
+                <RteIcon name="text" class="size-3.5" />
+              </button>
+            </template>
+            <template #default="{ close }">
+              <RteColorPanel :editor="editor" @pick="close" />
+            </template>
+          </Popover>
+        </span>
+      </Tooltip>
 
-      <!-- highlight: the file draws it with the same A glyph as the colour -->
-      <button
-        type="button"
-        class="rte-bubble-btn"
-        :aria-pressed="highlighted"
-        aria-label="Highlight"
-        title="Highlight"
-        @click="chain().toggleHighlightByName('yellow').run()"
-      >
-        <RteIcon name="text" class="size-3.5" />
-      </button>
+      <!-- highlight: a marker, so it reads apart from the colour's A -->
+      <Tooltip text="Highlight">
+        <button
+          type="button"
+          class="rte-bubble-btn"
+          :aria-pressed="highlighted"
+          aria-label="Highlight"
+          @click="chain().toggleHighlightByName('yellow').run()"
+        >
+          <RteIcon name="highlight" class="size-3.5" />
+        </button>
+      </Tooltip>
 
       <span class="rte-bubble-divider" aria-hidden="true" />
 
-      <button
-        v-for="a in aligns"
-        :key="a.name"
-        type="button"
-        class="rte-bubble-btn"
-        :aria-pressed="a.pressed()"
-        :aria-label="a.label"
-        :title="a.label"
-        @click="a.run"
-      >
-        <RteIcon :name="a.icon" class="size-3.5" />
-      </button>
+      <Tooltip v-for="a in aligns" :key="a.name" :text="a.label">
+        <button
+          type="button"
+          class="rte-bubble-btn"
+          :aria-pressed="a.pressed()"
+          :aria-label="a.label"
+          @click="a.run"
+        >
+          <RteIcon :name="a.icon" class="size-3.5" />
+        </button>
+      </Tooltip>
     </div>
   </BubbleMenu>
 </template>
