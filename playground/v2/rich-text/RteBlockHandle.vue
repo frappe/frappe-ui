@@ -11,7 +11,11 @@
 // the offset it was picked up, a line marks the edge of the block the
 // pointer is over — above it in its top half, below it in its bottom — and
 // the drop puts the block at that edge, wherever over the document or its
-// margins the pointer lets go. A click selects the block.
+// margins the pointer lets go. Near a block's left or right edge the line
+// stands upright, and the block lands beside it — a block on its own becomes
+// a row of two, a block in a row gets a cell of its own next to it — and
+// what it leaves closes up: an emptied cell goes, a row of one dissolves.
+// Every block in a row's cell has its own grip. A click selects the block.
 import { ref, shallowRef, watch } from 'vue'
 import { NodeSelection } from '@tiptap/pm/state'
 import { Tooltip } from '../../../src'
@@ -47,8 +51,18 @@ const FIRST_LINE = 'p, h1, h2, h3, h4, h5, h6, summary, pre'
 /** what the editor draws at the top level that is not a block */
 const SKIP =
   '.ProseMirror-gapcursor, .ProseMirror-widget, .ProseMirror-separator, br'
-/** a row of pictures, whose cells each hold a block of their own */
+/** a row of columns, whose cells each hold blocks of their own */
+const ROW = '[data-type="columns"]'
+/** a row of pictures, ruled and filled as the file draws it */
 const MEDIA_ROW = '[data-type="columns"][data-media="true"]'
+/** the most columns a row holds (the schema's `column{2,4}`) */
+const MAX_COLUMNS = 4
+/**
+ * Beside a block, as Notion drops one: a pointer this near a block's left
+ * or right edge — or out past it, in the margin — lands the block beside it
+ * rather than above or below, under a vertical line.
+ */
+const SIDE_ZONE = 48
 const inCell = (el: Element) =>
   el.parentElement?.matches('[data-type="column"]') === true &&
   el.closest(MEDIA_ROW) !== null
@@ -96,10 +110,10 @@ function blockAt(
     }
   }
   if (!el || nearest > REACH) return null
-  // in a row of pictures each cell's own block — the picture's line, or
-  // the empty slot — has the grip, so one picture moves on its own; the
-  // row itself answers from the gaps between its cells
-  if (el.matches(MEDIA_ROW)) {
+  // in a row each cell's own block has the grip — a picture's line, the
+  // empty slot, a paragraph — so one block moves on its own, as Notion moves
+  // them; the row itself answers from the gaps between its cells
+  if (el.matches(ROW)) {
     const cell = [...el.children].find(
       (c): c is HTMLElement =>
         c instanceof HTMLElement &&
@@ -229,6 +243,7 @@ let landing: {
   el: HTMLElement
   pos: number
   before: boolean
+  side: 'left' | 'right' | null
 } | null = null
 // the browser's own snapshot is replaced by nothing: the copy is drawn here
 const blank = new Image()
@@ -285,7 +300,25 @@ function moveGhost(x: number, y: number) {
   if (ghost)
     ghost.style.transform = `translate(${x - grab.dx}px, ${y - grab.dy}px)`
 }
-/** the edge the pointer is over: a block's top in its upper half, else its bottom */
+type Side = 'left' | 'right' | null
+/**
+ * Whether a block can take another beside it: a block standing on its own
+ * at the top level becomes a row of two, a block in a row's cell gets a
+ * cell of its own next to it — while the row has room. A list's item does
+ * not; nor does a row itself.
+ */
+function sideable(el: HTMLElement) {
+  if (el.matches(ROW) || el.matches('li')) return false
+  const cell = el.parentElement
+  if (cell?.matches('[data-type="column"]'))
+    return (cell.parentElement?.childElementCount ?? MAX_COLUMNS) < MAX_COLUMNS
+  return el.parentElement === editor.value?.view.dom
+}
+/**
+ * The edge the pointer is over: beside the block near its left or right
+ * edge (see SIDE_ZONE), else its top in its upper half and its bottom in
+ * its lower one.
+ */
 function landingAt(x: number, y: number) {
   const ed = editor.value
   if (!ed || ed.isDestroyed || !source) return null
@@ -294,7 +327,13 @@ function landingAt(x: number, y: number) {
   const pos = posOf(ed.view, el)
   if (pos === null) return null
   const r = el.getBoundingClientRect()
-  return { el, pos, before: y < r.top + r.height / 2, box: r }
+  const zone = Math.min(SIDE_ZONE, r.width / 4)
+  let side: Side = null
+  if (sideable(el) && !swapsWith(source.el, el)) {
+    if (x < r.left + zone) side = 'left'
+    else if (x > r.right - zone) side = 'right'
+  }
+  return { el, pos, before: y < r.top + r.height / 2, side, box: r }
 }
 function onDragOver(e: DragEvent) {
   if (!dragging) return
@@ -309,8 +348,18 @@ function onDragOver(e: DragEvent) {
   e.preventDefault()
   e.stopPropagation()
   if (e.dataTransfer) e.dataTransfer.dropEffect = 'move'
-  landing = { el: at.el, pos: at.pos, before: at.before }
-  if (line) {
+  landing = { el: at.el, pos: at.pos, before: at.before, side: at.side }
+  if (line && at.side) {
+    // beside: a vertical line down the edge it would stand at
+    line.hidden = false
+    line.classList.remove('is-swap')
+    line.classList.add('is-side')
+    line.style.top = `${at.box.top}px`
+    line.style.height = `${at.box.height}px`
+    line.style.width = ''
+    line.style.left = `${at.side === 'left' ? at.box.left - 6 : at.box.right + 3}px`
+  } else if (line) {
+    line.classList.remove('is-side')
     line.hidden = false
     line.style.left = `${at.box.left}px`
     line.style.width = `${at.box.width}px`
@@ -341,6 +390,14 @@ function onDrop(e: DragEvent) {
   const node = state.doc.nodeAt(from.pos)
   const beside = state.doc.nodeAt(at.pos)
   if (!node || !beside) return
+  if (at.side) {
+    const tr = dropBeside(state, from.pos, at.pos, at.side)
+    if (tr) {
+      ed.view.dispatch(tr.scrollIntoView())
+      ed.view.focus()
+    }
+    return
+  }
   if (swapsWith(from.el, at.el)) {
     // the later one first, so the earlier position still holds
     const [first, second] =
@@ -367,11 +424,17 @@ function onDrop(e: DragEvent) {
   const edge = at.before ? at.pos : at.pos + beside.nodeSize
   // the block is already there
   if (edge === from.pos || edge === from.pos + node.nodeSize) return
-  const tr = state.tr.delete(from.pos, from.pos + node.nodeSize)
-  const to = tr.mapping.map(edge, at.before ? -1 : 1)
+  // placed first, then taken from where it was: the insert only ever adds,
+  // so the source's position still maps — the other way round, a row
+  // dissolving behind the block could swallow the edge it was going to
+  const tr = state.tr
+  const cell = emptiedCell(state, from.pos)
   // insert fits the block to its new place: an item dropped among
   // paragraphs is wrapped in a list, a paragraph among items in an item
-  tr.insert(to, node)
+  tr.insert(edge, node)
+  const placed = tr.steps.length
+  leave(tr, from.pos, node.nodeSize, cell)
+  const to = tr.mapping.slice(placed).map(edge, at.before ? -1 : 1)
   // the block, wherever the fit put it, stays selected
   let moved: number | null = null
   tr.doc.nodesBetween(
@@ -385,6 +448,128 @@ function onDrop(e: DragEvent) {
   if (moved !== null) tr.setSelection(NodeSelection.create(tr.doc, moved))
   ed.view.dispatch(tr.scrollIntoView())
   ed.view.focus()
+}
+type Tr = View['state']['tr']
+/**
+ * The cell a block leaves empty behind it: its only block, in a row of
+ * prose. (A row of pictures keeps the cell and offers it an Add Image slot,
+ * extensions.ts.)
+ */
+function emptiedCell(state: View['state'], from: number) {
+  const $from = state.doc.resolve(from)
+  const column = state.schema.nodes.column
+  return $from.parent.type === column &&
+    $from.parent.childCount === 1 &&
+    !$from.node($from.depth - 1).attrs.media
+    ? { pos: $from.before(), row: $from.before($from.depth - 1) }
+    : null
+}
+/**
+ * Take the block at `from` (in the document `tr` started from) out of `tr`,
+ * after whatever `tr` has already placed: the block, or the cell it leaves
+ * empty — and a row left with one cell is a row no more, its blocks
+ * standing on their own again.
+ */
+function leave(
+  tr: Tr,
+  from: number,
+  size: number,
+  cell: { pos: number; row: number } | null,
+) {
+  const columns = tr.doc.type.schema.nodes.columns
+  if (!cell) {
+    const at = tr.mapping.map(from)
+    tr.delete(at, at + size)
+    return
+  }
+  const rowAt = tr.mapping.map(cell.row, -1)
+  const row = tr.doc.nodeAt(rowAt)
+  const cellPos = tr.mapping.map(cell.pos)
+  const gone = tr.doc.nodeAt(cellPos)
+  if (!row || row.type !== columns || !gone) return
+  if (row.childCount === 2) {
+    // one cell would be left: the row goes, and the other cell's blocks
+    // stand on their own in its place. (Deleting the cell first is no
+    // use — the schema keeps a row at two cells, and refills the gap with
+    // an empty one.)
+    const kept = row.child(cellPos === rowAt + 1 ? 1 : 0)
+    tr.replaceWith(rowAt, rowAt + row.nodeSize, kept.content)
+    return
+  }
+  tr.delete(cellPos, cellPos + gone.nodeSize)
+  const after = tr.doc.nodeAt(rowAt)
+  if (after?.type === columns)
+    tr.setNodeMarkup(rowAt, undefined, {
+      ...after.attrs,
+      count: after.childCount,
+      widths: null,
+    })
+}
+/**
+ * The block at `from` stood beside the block at `to`, on `side` — as a new
+ * cell of the row `to` is in, or, `to` standing alone, as a row of two made
+ * of them both. Where it came from closes up behind it: a cell it leaves
+ * empty goes, and a row left with one cell is a row no more — its blocks
+ * stand on their own again. A row of pictures keeps its cells and offers
+ * the emptied one an Add Image slot (extensions.ts), as before.
+ */
+function dropBeside(
+  state: View['state'],
+  from: number,
+  to: number,
+  side: 'left' | 'right',
+) {
+  const { schema } = state
+  const columns = schema.nodes.columns
+  const column = schema.nodes.column
+  const node = state.doc.nodeAt(from)
+  const beside = state.doc.nodeAt(to)
+  if (!columns || !column || !node || !beside) return null
+  const tr = state.tr
+
+  const fromCell = emptiedCell(state, from)
+
+  // where it goes
+  const $to = state.doc.resolve(to)
+  let landed: number
+  if ($to.parent.type === column) {
+    const cellPos = $to.before()
+    const cell = $to.parent
+    const at = side === 'left' ? cellPos : cellPos + cell.nodeSize
+    tr.insert(at, column.create(null, node))
+    landed = at + 1
+    const rowPos = $to.before($to.depth - 1)
+    const row = tr.doc.nodeAt(rowPos)!
+    tr.setNodeMarkup(rowPos, undefined, {
+      ...row.attrs,
+      count: row.childCount,
+      widths: null,
+    })
+  } else {
+    const cells =
+      side === 'left'
+        ? [column.create(null, node), column.create(null, beside)]
+        : [column.create(null, beside), column.create(null, node)]
+    tr.replaceWith(
+      to,
+      to + beside.nodeSize,
+      columns.create({ count: 2 }, cells),
+    )
+    landed = side === 'left' ? to + 2 : to + 2 + cells[0].nodeSize
+  }
+  const placed = tr.steps.length
+
+  // the block leaves where it was
+  leave(tr, from, node.nodeSize, fromCell)
+
+  // the carried block, where it now stands, stays selected
+  const moved = tr.mapping.slice(placed).map(landed)
+  try {
+    tr.setSelection(NodeSelection.create(tr.doc, moved))
+  } catch {
+    // a block that cannot hold a node selection keeps the caret's
+  }
+  return tr
 }
 function finishDrag() {
   const ed = editor.value
@@ -501,6 +686,10 @@ const px = (n: number) => `${n}px`
   border-radius: 9999px;
   pointer-events: none;
   background-color: var(--surface-gray-10, #383838);
+}
+/* beside: the vertical line at the edge the block would stand at */
+.rte-bh-line.is-side {
+  width: 3px;
 }
 /* the picture a swap would trade with, ringed as a selected picture is */
 .rte-bh-line.is-swap {
