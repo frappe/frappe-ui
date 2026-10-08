@@ -285,13 +285,18 @@ const options = computed<DropdownOptions>(() => {
       aria-label="Change link"
       @click.stop="emit('edit')"
       @pointerdown.stop
+      @mousedown.prevent.stop
     >
       <span class="lucide-pencil size-4" aria-hidden="true" />
     </button>
     <!-- Not modal: a modal menu marks everything around its trigger
          aria-hidden as it opens, and its trigger is inside the document — so
          every block beside the picture took the attribute, ProseMirror read
-         that as an edit and re-parsed them, and the menu never opened. -->
+         that as an edit and re-parsed them, and the menu never opened.
+         Not modal, it closes when focus leaves it, so the press on the ⋯
+         keeps its mousedown from the editor (`mousedown.prevent.stop`):
+         let through, ProseMirror took focus back into the document on the
+         release and the menu shut as soon as it had opened. -->
     <Dropdown
       v-model:open="menuOpen"
       :options="options"
@@ -305,6 +310,7 @@ const options = computed<DropdownOptions>(() => {
           aria-label="Media options"
           @click.stop
           @pointerdown.stop
+          @mousedown.prevent.stop
         >
           <span class="lucide-ellipsis size-4" aria-hidden="true" />
         </button>

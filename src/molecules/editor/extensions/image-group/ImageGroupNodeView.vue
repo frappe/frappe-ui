@@ -25,6 +25,7 @@
         "
         class="absolute top-2.5 right-2.5 z-20 flex"
         @pointerdown.prevent.stop
+        @mousedown.prevent.stop
       >
         <Dropdown
           v-model:open="galleryMenuOpen"
@@ -71,6 +72,7 @@
             "
             class="absolute top-2.5 right-2.5 z-20 flex"
             @pointerdown.prevent.stop
+            @mousedown.prevent.stop
           >
             <Dropdown
               :open="pictureMenuOpen === idx"
