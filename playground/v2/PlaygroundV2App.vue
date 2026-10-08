@@ -1068,10 +1068,21 @@ const outlineTitle = computed(
                outline reads its screens once the new one has arrived -->
           <Transition name="v2-page" mode="out-in" @after-enter="scanSections">
             <div :key="page" class="absolute inset-0">
-              <!-- one screen per modal width, as the other pages do: the
-                   outline names them and the scroll carries the next set in.
-                   Triggers are sm subtle, 10px apart, centred -->
-              <div v-if="page === 'modal'" class="v2-sections" data-sections>
+              <!-- every modal width down one column under a Modals title,
+                   each under its heading in a frame (.v2-frame), as the
+                   List and Popovers pages lay theirs out; the outline names
+                   them. Triggers are sm subtle, 10px apart, centred -->
+              <div
+                v-if="page === 'modal'"
+                class="v2-sections is-flow"
+                data-sections
+              >
+                <header class="v2-flow-head">
+                  <h1 class="text-4xl-semibold text-ink-gray-9">Modals</h1>
+                  <p class="text-p-base text-ink-gray-6">
+                    Every modal, by width, down the page.
+                  </p>
+                </header>
                 <section
                   v-for="s in sizes"
                   :id="`modal-${parseInt(s.width)}`"
@@ -1080,19 +1091,24 @@ const outlineTitle = computed(
                   data-section
                   :data-label="s.width"
                 >
-                  <div
-                    class="flex max-w-[600px] flex-wrap justify-center gap-2.5"
-                  >
-                    <Button
-                      v-for="(m, i) in s.modals"
-                      :key="m.id"
-                      class="v2-trigger"
-                      :style="{ '--i': i }"
-                      size="sm"
-                      @click="open[m.id] = true"
+                  <h2 class="text-3xl-semibold text-ink-gray-8">
+                    {{ s.width }}
+                  </h2>
+                  <div class="v2-frame">
+                    <div
+                      class="flex max-w-[600px] flex-wrap justify-center gap-2.5"
                     >
-                      {{ m.label }}
-                    </Button>
+                      <Button
+                        v-for="(m, i) in s.modals"
+                        :key="m.id"
+                        class="v2-trigger"
+                        :style="{ '--i': i }"
+                        size="sm"
+                        @click="open[m.id] = true"
+                      >
+                        {{ m.label }}
+                      </Button>
+                    </div>
                   </div>
                 </section>
               </div>
