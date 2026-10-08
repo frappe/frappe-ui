@@ -72,194 +72,209 @@ const xlRows = [
 </script>
 
 <template>
-  <div class="flex flex-wrap items-start justify-center gap-8">
-    <!-- sm -->
-    <article class="espresso-list-card h-[168px] w-[268px] rounded-7">
-      <header
-        class="-mt-px flex h-11 items-center gap-2 border-b border-outline-gray-1 px-3.5 py-3 dark:border-outline-gray-2"
-      >
-        <img :src="logo" alt="" class="size-5 shrink-0 rounded-[5px]" />
-        <p
-          class="flex h-4 min-w-0 items-center truncate text-base-semibold text-ink-gray-8"
+  <!-- two rows of two: the sm and md cards, then the lg and xl, each row
+       centred, rather than three across and one left over -->
+  <div class="flex flex-col items-center gap-8">
+    <div class="flex flex-wrap items-start justify-center gap-8">
+      <!-- sm -->
+      <article class="espresso-list-card h-[168px] w-[268px] rounded-7">
+        <header
+          class="-mt-px flex h-11 items-center gap-2 border-b border-outline-gray-1 px-3.5 py-3 dark:border-outline-gray-2"
         >
-          Backups
-        </p>
-      </header>
-      <div class="flex flex-col gap-3 px-4 py-3">
-        <div
-          v-for="(row, i) in smRows"
-          :key="i"
-          class="flex h-4 items-center gap-2"
-        >
-          <span class="size-4 shrink-0 text-ink-gray-6" v-html="row.icon" />
-          <p v-if="row.text" class="min-w-0 truncate text-base text-ink-gray-6">
-            {{ row.text }}
-          </p>
-          <span v-else class="flex">
-            <img
-              v-for="(a, j) in row.avatars"
-              :key="j"
-              :src="a"
-              alt=""
-              class="size-4 rounded-full shadow-[0_0_0_2px_var(--card-surface)]"
-              :class="j > 0 ? '-ml-0.5' : ''"
-            />
-          </span>
-        </div>
-      </div>
-    </article>
-
-    <!-- md -->
-    <article
-      class="espresso-list-card h-[264px] w-[280px] justify-between rounded-6 p-3.5"
-    >
-      <div class="flex flex-col gap-3">
-        <div class="flex flex-col gap-2">
-          <Badge
-            theme="green"
-            variant="outline"
-            size="md"
-            class="self-start !border-outline-green-2"
+          <img :src="logo" alt="" class="size-5 shrink-0 rounded-[5px]" />
+          <p
+            class="flex h-4 min-w-0 items-center truncate text-base-semibold text-ink-gray-8"
           >
-            8 seats available
-          </Badge>
-          <div class="flex flex-col gap-1">
-            <p class="truncate text-lg-semibold text-ink-gray-8">
-              Master Digital Product Design
-            </p>
-            <p class="line-clamp-2 text-p-base text-ink-gray-6">
-              Digital products are more abstract and complex than any product
-              we’ve designed before.
-            </p>
-          </div>
-        </div>
-        <div class="flex flex-col gap-2.5">
+            Backups
+          </p>
+        </header>
+        <div class="flex flex-col gap-3 px-4 py-3">
           <div
-            v-for="row in mdRows"
-            :key="row.text"
+            v-for="(row, i) in smRows"
+            :key="i"
             class="flex h-4 items-center gap-2"
           >
             <span class="size-4 shrink-0 text-ink-gray-6" v-html="row.icon" />
-            <p class="min-w-0 truncate text-base text-ink-gray-6">
+            <p
+              v-if="row.text"
+              class="min-w-0 truncate text-base text-ink-gray-6"
+            >
               {{ row.text }}
             </p>
-          </div>
-        </div>
-      </div>
-      <p class="flex h-[18px] items-baseline gap-1">
-        <span class="text-lg-semibold text-ink-gray-7">₹899</span>
-        <span class="text-sm text-ink-gray-5 line-through">₹1,200</span>
-      </p>
-    </article>
-
-    <!-- lg -->
-    <article
-      class="espresso-list-card h-[332px] w-[280px] justify-between rounded-6 p-4"
-    >
-      <div class="flex flex-col gap-4">
-        <div class="flex flex-col gap-2">
-          <p class="flex h-4 items-center text-base-medium text-ink-gray-7">
-            Current plan
-          </p>
-          <div class="flex flex-col gap-1">
-            <p class="flex h-[23px] items-center gap-2">
-              <!-- one struck run in the file: the price with its /mo tail -->
-              <span class="text-3xl-semibold text-ink-gray-7 line-through">
-                ₹1,999<span class="text-sm text-ink-gray-5">/mo</span>
-              </span>
-              <Badge theme="amber" variant="subtle" size="md">Free trial</Badge>
-            </p>
-            <p
-              class="flex h-[15px] items-center text-sm-medium text-ink-gray-5"
-            >
-              Expiring in 7 days
-            </p>
-          </div>
-        </div>
-        <div class="flex flex-col gap-3">
-          <p class="flex h-4 items-center text-base-medium text-ink-gray-7">
-            Can support
-          </p>
-          <div class="flex flex-col gap-3">
-            <div
-              v-for="row in lgRows"
-              :key="row"
-              class="flex h-4 items-center gap-2"
-            >
-              <span
-                class="size-4 shrink-0 text-ink-gray-7"
-                v-html="tasksIcon"
+            <span v-else class="flex">
+              <img
+                v-for="(a, j) in row.avatars"
+                :key="j"
+                :src="a"
+                alt=""
+                class="size-4 rounded-full shadow-[0_0_0_2px_var(--card-surface)]"
+                :class="j > 0 ? '-ml-0.5' : ''"
               />
-              <p class="min-w-0 truncate text-base text-ink-gray-7">
-                {{ row }}
+            </span>
+          </div>
+        </div>
+      </article>
+
+      <!-- md -->
+      <article
+        class="espresso-list-card h-[264px] w-[280px] justify-between rounded-6 p-3.5"
+      >
+        <div class="flex flex-col gap-3">
+          <div class="flex flex-col gap-2">
+            <Badge
+              theme="green"
+              variant="outline"
+              size="md"
+              class="self-start !border-outline-green-2"
+            >
+              8 seats available
+            </Badge>
+            <div class="flex flex-col gap-1">
+              <p class="truncate text-lg-semibold text-ink-gray-8">
+                Master Digital Product Design
+              </p>
+              <p class="line-clamp-2 text-p-base text-ink-gray-6">
+                Digital products are more abstract and complex than any product
+                we’ve designed before.
               </p>
             </div>
           </div>
-        </div>
-      </div>
-      <div class="flex flex-col gap-3">
-        <div class="flex h-4 items-center gap-2">
-          <span class="size-4 shrink-0 text-ink-gray-5" v-html="alertIcon" />
-          <p class="min-w-0 truncate text-base text-ink-gray-5">
-            Free trial ends in 7 days
-          </p>
-        </div>
-        <Button
-          variant="subtle"
-          theme="red"
-          size="sm"
-          class="w-full"
-          @click="emit('upgrade')"
-        >
-          Upgrade
-        </Button>
-      </div>
-    </article>
-
-    <!-- xl -->
-    <article
-      class="espresso-list-card h-[374px] w-[350px] justify-between rounded-6 p-4"
-    >
-      <div class="flex flex-col gap-[15px]">
-        <div class="flex flex-col gap-1">
-          <p class="truncate text-2xl-semibold text-ink-gray-7">
-            Introducing Frappe LMS
-          </p>
-          <p class="line-clamp-2 text-p-base text-ink-gray-6">
-            Digital products are more abstract and complex than any product
-            we've designed before. People can touch them.
-          </p>
-        </div>
-        <p class="flex h-[21px] items-baseline gap-2">
-          <span class="text-2xl-semibold text-ink-gray-7">₹499</span>
-          <!-- both runs are 12px in the file, not 14 -->
-          <span class="flex items-baseline gap-1.5 text-xs">
-            <span class="text-ink-gray-5 line-through">₹2,499</span>
-            <span class="text-ink-gray-8">80% off</span>
-          </span>
-        </p>
-        <div class="flex flex-col gap-3">
-          <p class="flex h-[18px] items-center text-lg-medium text-ink-gray-7">
-            This course includes:
-          </p>
-          <div class="flex flex-col gap-3">
+          <div class="flex flex-col gap-2.5">
             <div
-              v-for="row in xlRows"
+              v-for="row in mdRows"
               :key="row.text"
-              class="flex h-[18px] items-center gap-2"
+              class="flex h-4 items-center gap-2"
             >
-              <span class="size-4 shrink-0 text-ink-gray-7" v-html="row.icon" />
-              <p class="min-w-0 truncate text-lg text-ink-gray-7">
+              <span class="size-4 shrink-0 text-ink-gray-6" v-html="row.icon" />
+              <p class="min-w-0 truncate text-base text-ink-gray-6">
                 {{ row.text }}
               </p>
             </div>
           </div>
         </div>
-      </div>
-      <Button variant="solid" size="md" class="w-full" @click="emit('buy')"
-        >Buy now</Button
+        <p class="flex h-[18px] items-baseline gap-1">
+          <span class="text-lg-semibold text-ink-gray-7">₹899</span>
+          <span class="text-sm text-ink-gray-5 line-through">₹1,200</span>
+        </p>
+      </article>
+    </div>
+    <div class="flex flex-wrap items-start justify-center gap-8">
+      <!-- lg -->
+      <article
+        class="espresso-list-card h-[332px] w-[280px] justify-between rounded-6 p-4"
       >
-    </article>
+        <div class="flex flex-col gap-4">
+          <div class="flex flex-col gap-2">
+            <p class="flex h-4 items-center text-base-medium text-ink-gray-7">
+              Current plan
+            </p>
+            <div class="flex flex-col gap-1">
+              <p class="flex h-[23px] items-center gap-2">
+                <!-- one struck run in the file: the price with its /mo tail -->
+                <span class="text-3xl-semibold text-ink-gray-7 line-through">
+                  ₹1,999<span class="text-sm text-ink-gray-5">/mo</span>
+                </span>
+                <Badge theme="amber" variant="subtle" size="md"
+                  >Free trial</Badge
+                >
+              </p>
+              <p
+                class="flex h-[15px] items-center text-sm-medium text-ink-gray-5"
+              >
+                Expiring in 7 days
+              </p>
+            </div>
+          </div>
+          <div class="flex flex-col gap-3">
+            <p class="flex h-4 items-center text-base-medium text-ink-gray-7">
+              Can support
+            </p>
+            <div class="flex flex-col gap-3">
+              <div
+                v-for="row in lgRows"
+                :key="row"
+                class="flex h-4 items-center gap-2"
+              >
+                <span
+                  class="size-4 shrink-0 text-ink-gray-7"
+                  v-html="tasksIcon"
+                />
+                <p class="min-w-0 truncate text-base text-ink-gray-7">
+                  {{ row }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="flex flex-col gap-3">
+          <div class="flex h-4 items-center gap-2">
+            <span class="size-4 shrink-0 text-ink-gray-5" v-html="alertIcon" />
+            <p class="min-w-0 truncate text-base text-ink-gray-5">
+              Free trial ends in 7 days
+            </p>
+          </div>
+          <Button
+            variant="subtle"
+            theme="red"
+            size="sm"
+            class="w-full"
+            @click="emit('upgrade')"
+          >
+            Upgrade
+          </Button>
+        </div>
+      </article>
+
+      <!-- xl -->
+      <article
+        class="espresso-list-card h-[374px] w-[350px] justify-between rounded-6 p-4"
+      >
+        <div class="flex flex-col gap-[15px]">
+          <div class="flex flex-col gap-1">
+            <p class="truncate text-2xl-semibold text-ink-gray-7">
+              Introducing Frappe LMS
+            </p>
+            <p class="line-clamp-2 text-p-base text-ink-gray-6">
+              Digital products are more abstract and complex than any product
+              we've designed before. People can touch them.
+            </p>
+          </div>
+          <p class="flex h-[21px] items-baseline gap-2">
+            <span class="text-2xl-semibold text-ink-gray-7">₹499</span>
+            <!-- both runs are 12px in the file, not 14 -->
+            <span class="flex items-baseline gap-1.5 text-xs">
+              <span class="text-ink-gray-5 line-through">₹2,499</span>
+              <span class="text-ink-gray-8">80% off</span>
+            </span>
+          </p>
+          <div class="flex flex-col gap-3">
+            <p
+              class="flex h-[18px] items-center text-lg-medium text-ink-gray-7"
+            >
+              This course includes:
+            </p>
+            <div class="flex flex-col gap-3">
+              <div
+                v-for="row in xlRows"
+                :key="row.text"
+                class="flex h-[18px] items-center gap-2"
+              >
+                <span
+                  class="size-4 shrink-0 text-ink-gray-7"
+                  v-html="row.icon"
+                />
+                <p class="min-w-0 truncate text-lg text-ink-gray-7">
+                  {{ row.text }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <Button variant="solid" size="md" class="w-full" @click="emit('buy')"
+          >Buy now</Button
+        >
+      </article>
+    </div>
   </div>
 </template>
 
