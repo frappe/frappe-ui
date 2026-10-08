@@ -288,7 +288,16 @@ const options = computed<DropdownOptions>(() => {
     >
       <span class="lucide-pencil size-4" aria-hidden="true" />
     </button>
-    <Dropdown v-model:open="menuOpen" :options="options" align="end">
+    <!-- Not modal: a modal menu marks everything around its trigger
+         aria-hidden as it opens, and its trigger is inside the document — so
+         every block beside the picture took the attribute, ProseMirror read
+         that as an edit and re-parsed them, and the menu never opened. -->
+    <Dropdown
+      v-model:open="menuOpen"
+      :options="options"
+      :modal="false"
+      align="end"
+    >
       <template #trigger>
         <button
           type="button"
