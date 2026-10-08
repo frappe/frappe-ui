@@ -23,7 +23,7 @@ const props = defineProps<{
   title: string
   slices: Array<{ name: string; share: number }>
   colors: string[]
-  variant: 'pie' | 'donut' | 'rose' | 'half'
+  variant: 'pie' | 'donut' | 'rose' | 'half' | 'ring'
   /**
    * The arcs the plot draws, where the file places them by hand instead of
    * reading its own numbers: the palette step each one carries and the angle
@@ -60,6 +60,19 @@ const DONUT_RADIUS = ['52.36%', '74.8%']
 const PIE_CENTER = ['50%', '51.41%']
 /** the file leaves about 1.2° between the ring's arcs and rounds every end on 4 */
 const DONUT_PAD = 1.2
+
+/**
+ * The dashboard's ring (1536:35040's "Pie Chart"): a 244 circle whose band is
+ * a fifth of its radius, standing at (400, 180) of the 580×360 card with its
+ * eight names listed down the left rather than under it. The legend is taken
+ * out of the flow (see the style below), so the plot is the card under its
+ * title — 548 across and 301 down — and these are the file's numbers as shares
+ * of it: the centre 70% across and 45.4% down, the radii of its half-height.
+ */
+const RING_RADIUS = ['64.78%', '81.06%']
+const RING_CENTER = ['69.98%', '45.43%']
+/** its first slice opens just short of 12 o'clock, 100° round from 3 */
+const RING_START = 100
 
 /**
  * The half ring, as 1589:43605 draws it: a 336 arc on a 580 card, so 168 of
@@ -246,13 +259,14 @@ const series = computed(() => {
         data: data.value,
       },
     ]
-  const ring = props.variant === 'donut'
+  const ring = props.variant === 'donut' || props.variant === 'ring'
+  const side = props.variant === 'ring'
   return [
     {
       type: 'pie',
-      radius: ring ? DONUT_RADIUS : PIE_RADIUS,
-      center: PIE_CENTER,
-      startAngle: 0,
+      radius: side ? RING_RADIUS : ring ? DONUT_RADIUS : PIE_RADIUS,
+      center: side ? RING_CENTER : PIE_CENTER,
+      startAngle: side ? RING_START : 0,
       padAngle: ring ? DONUT_PAD : 0,
       itemStyle: ring
         ? { borderWidth: 0, borderRadius: 4 }
@@ -309,6 +323,9 @@ const SWEEP = {
   donut: { center: PIE_CENTER, from: 90, span: 360 },
   rose: { center: ROSE_CENTER, from: 90, span: 360 },
   half: { center: HALF_CENTER, from: 270, span: 180 },
+  // the clock hand starts where the first slice does: 100° anticlockwise of
+  // 3 o'clock is 350° clockwise of 12, which is where a conic gradient starts
+  ring: { center: RING_CENTER, from: 90 - RING_START, span: 360 },
 }
 const sweep = ref<'waiting' | 'running' | 'done'>('waiting')
 const sweepStyle = computed(() => {
@@ -341,7 +358,11 @@ function toggle(name: string) {
 </script>
 
 <template>
-  <ChartContainer :title="title" :class="variant === 'rose' && 'pie-rose'">
+  <ChartContainer
+    :title="title"
+    class="relative"
+    :class="{ 'pie-rose': variant === 'rose', 'pie-ring': variant === 'ring' }"
+  >
     <div
       ref="plotEl"
       class="h-full w-full"
@@ -393,5 +414,22 @@ function toggle(name: string) {
   display: grid;
   grid-template-columns: repeat(3, auto);
   justify-content: center;
+}
+
+/* The dashboard's ring names its slices down the card's left, one to a row
+   27 apart, the first 86 down the card and its dot 69 in (1536:35040), in
+   the plot's room
+   rather than under it — so the plot keeps the card's whole height. */
+.pie-ring :deep([data-slot='chart-legend']) {
+  position: absolute;
+  top: 54px;
+  left: 41px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+}
+/* the file's names here are 14px, a step up from a legend under a plot */
+.pie-ring :deep([data-slot='chart-legend'] button) {
+  @apply text-base;
 }
 </style>

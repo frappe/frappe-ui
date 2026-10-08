@@ -474,3 +474,104 @@ export const divergingHeatSteps = [
   [1, 2, 0, 4, 0, 1, 2],
   [0, 0, 1, 2, 4, 0, 4],
 ] as const
+
+/**
+ * The dashboard's week (Figma 1GDS12ys41lxeG3wQpNq41, 1536:35040): 65
+ * readings from Monday to Sunday, read off the file's own lines at each of
+ * their vertices, 8 apart on its 512-wide plots. The file draws one shape
+ * several times over — the stacked area's lower band is the stacked lines'
+ * lowest, 280 up; the gradient card's three are the stacked lines', a little
+ * higher — so those are carried once here and moved, as the file moves them.
+ */
+const WEEK_BASIC = [
+  900, 790, 1110, 1070, 1140, 1300, 1030, 1110, 1260, 1110, 1540, 1200, 1280,
+  1330, 1780, 1340, 1440, 1430, 1030, 1210, 1150, 1660, 1440, 1220, 1670, 2510,
+  2240, 2420, 2810, 1950, 2370, 2670, 2240, 2450, 2460, 2900, 2480, 2680, 2630,
+  2910, 2480, 2240, 2510, 2750, 3590, 3390, 3190, 3170, 2960, 3410, 3860, 3640,
+  3470, 3870, 3940, 4410, 4040, 4220, 4370, 4130, 3890, 4350, 4320, 4560, 4570,
+]
+const WEEK_LOW = [
+  310, 360, 430, 410, 450, 510, 390, 440, 490, 440, 630, 470, 520, 540, 750,
+  540, 600, 580, 390, 480, 470, 700, 580, 490, 730, 1130, 1000, 1100, 1240, 860,
+  1060, 1190, 980, 1100, 1100, 1320, 1100, 1220, 1190, 1320, 1100, 1000, 1130,
+  1260, 1670, 1560, 1450, 1450, 1360, 1580, 1800, 1680, 1610, 1800, 1830, 2070,
+  1880, 1970, 2050, 1930, 1800, 2050, 2020, 2150, 2150,
+]
+const WEEK_MID = [
+  810, 900, 1060, 1020, 1090, 1240, 980, 1060, 1210, 1050, 1490, 1150, 1220,
+  1290, 1720, 1290, 1390, 1380, 980, 1150, 1100, 1610, 1390, 1170, 1620, 2460,
+  2180, 2370, 2770, 1900, 2320, 2620, 2180, 2400, 2410, 2850, 2420, 2630, 2580,
+  2860, 2420, 2180, 2450, 2250, 2600, 2890, 2700, 2680, 2470, 2910, 2870, 3140,
+  2970, 3090, 2920, 3150, 3030, 3030, 3180, 2940, 3140, 3600, 3570, 3820, 3820,
+]
+const WEEK_HIGH = [
+  1960, 2270, 2420, 2320, 2520, 2190, 2000, 2570, 2220, 2060, 2780, 2510, 2640,
+  2240, 2800, 2640, 2700, 2700, 2480, 2510, 2460, 2130, 2680, 3120, 2860, 3580,
+  3200, 3050, 3200, 3320, 3170, 3710, 3770, 3410, 3370, 3540, 3360, 3500, 3460,
+  3690, 3550, 3750, 3790, 4160, 4270, 3730, 3910, 3670, 3920, 4100, 4460, 4300,
+  4350, 4110, 4520, 4660, 4730, 5110, 4580, 4900, 4770, 4940, 4990, 4800, 5140,
+]
+/** the stacked area's upper band, its own height over the lower one */
+const WEEK_BAND = [
+  510, 530, 550, 560, 570, 580, 540, 570, 590, 600, 640, 580, 590, 650, 690,
+  610, 630, 610, 560, 570, 590, 670, 630, 620, 720, 650, 620, 690, 730, 790,
+  900, 910, 860, 880, 930, 960, 910, 930, 950, 960, 860, 840, 870, 640, 490,
+  760, 740, 710, 710, 780, 560, 830, 810, 680, 550, 460, 570, 490, 490, 470,
+  770, 830, 840, 880, 880,
+]
+
+export const WEEK_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+/**
+ * Where the file prints each day: its labels fall at these readings, Monday on
+ * the first and Sunday on the last, the five between not quite evenly.
+ */
+export const WEEK_TICKS = [0, 12, 22, 33, 43, 53, 64]
+
+/** one row per reading, `at` its place in the week */
+export const week = WEEK_BASIC.map((basic, i) => ({
+  at: String(i),
+  basic,
+  // the stacked lines, lowest first as the legend names them
+  data1: Math.max(0, WEEK_LOW[i] - 280),
+  data2: WEEK_MID[i],
+  data3: WEEK_HIGH[i],
+  // the stacked area: the lower band, then the upper one's own height
+  lower: WEEK_LOW[i],
+  upper: WEEK_BAND[i],
+  // the gradient card's three, top line first
+  top: WEEK_HIGH[i] + 230,
+  middle: WEEK_MID[i] + 230,
+  bottom: WEEK_LOW[i],
+}))
+
+/** the dashboard's bars, read off the file's 0–4 axis (1536:35040) */
+export const dashBars = [
+  1.2, 2.86, 1.28, 1.65, 3.61, 1.2, 2.5, 1.47, 3.03, 0.64, 0.94, 1.95, 1.36,
+  2.72, 1.1, 0.42, 0.8, 1.1, 1.65, 1.36,
+].map((value, i) => ({ at: String(i + 1), value }))
+
+/** the dashboard's countries, two readings each, in thousands */
+export const dashCountries = [
+  { country: 'World', current: 618, previous: 580 },
+  { country: 'China', current: 500, previous: 420 },
+  { country: 'India', current: 320, previous: 280 },
+  { country: 'USA', current: 252, previous: 220 },
+  { country: 'Indonesia', current: 157, previous: 132 },
+  { country: 'Brazil', current: 98, previous: 62 },
+]
+
+/**
+ * The dashboard's one stacked bar: eight stages of a pipeline, each as wide as
+ * the file draws it. `legend` is the place the file names it in under the bar,
+ * which is not the order the bar runs in.
+ */
+export const pipelineShares = [
+  { name: 'Potential Leads', value: 232, legend: 0 },
+  { name: 'Lead Data', value: 104, legend: 1 },
+  { name: 'Price Quotation', value: 82, legend: 3 },
+  { name: 'Qualified Prospects', value: 258, legend: 2 },
+  { name: 'Ready for Close', value: 192, legend: 4 },
+  { name: 'Converted', value: 65, legend: 5 },
+  { name: 'Lead Information', value: 65, legend: 6 },
+  { name: 'Customer Data', value: 54, legend: 7 },
+]

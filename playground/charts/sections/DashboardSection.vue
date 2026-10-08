@@ -1,143 +1,244 @@
 <script setup lang="ts">
-// The page's last row: the charts above put together as one dashboard would
-// use them. Four readings across the top on the file's small cards, then the
-// file's 580×360 cards two to a row: revenue over time, orders a month, the
-// share by channel and the sales pipeline. Every card is one the rows above
-// already draw — the same components, colours and axes — so it moves with
-// the theme picked in the rail like the rest of the page.
+// The file's dashboard (Figma 1GDS12ys41lxeG3wQpNq41, 1536:35040, "Charts -
+// ocean blue" on the Review page): five spark-line readings across the top,
+// then two to a row the week as one line, three lines, two stacked bands and
+// three lines over their gradients; the half ring and a ring with its names
+// down the left; bars on two axes and one bar cut into eight stages; the
+// countries as pairs of bars and the funnel; the map with its scale stood up
+// the left edge, and under it the companies' table, named "Table". The
+// readings are the file's own, traced off its lines (chartData's `week`), and
+// the colours are its Ocean steps, each a role (chartThemes' `dash*`) that
+// falls back to the rows above for the other themes.
 import { computed } from 'vue'
-import { BarChart, LineChart } from '../../../src/charts'
+import { AreaChart, BarChart, LineChart } from '../../../src/charts'
 import Card from '../components/Card.vue'
 import ChartTip from '../components/ChartTip.vue'
 import FunnelCard from '../components/FunnelCard.vue'
+import HeatTable from '../components/HeatTable.vue'
 import PieCard from '../components/PieCard.vue'
 import SparkCard from '../components/SparkCard.vue'
+import StackBarCard from '../components/StackBarCard.vue'
+import UsMap from '../components/UsMap.vue'
 import {
+  HALF_ARCS,
+  HEAT_COLUMNS,
   SPARK_BESIDE,
   SPARK_DOWN,
   SPARK_UP,
+  dashBars,
+  dashCountries,
+  divergingHeatSteps,
   funnel,
-  monthly,
+  heatSteps,
+  heatTable,
+  pipelineShares,
+  qualitativeHeatSteps,
   slices,
+  week,
 } from '../chartData'
 import {
   count,
   fileCrosshair,
   filePlot,
-  salesAxis,
   thousands,
-  yearAxis,
+  weekAxis,
+  weekValueAxis,
 } from '../chartAxes'
-import type { ChartValueAxisOptions } from '../../../src/charts/types'
 import { FUNNEL_OPACITY, type ChartTheme } from '../chartThemes'
 import type { ThemeColors } from '../useChartTheme'
 
 const props = defineProps<{ theme: ThemeColors; themeId: ChartTheme }>()
 
-const spark = computed(() => props.theme.one('spark'))
-const wash = computed(() => props.theme.one('sparkWash'))
-const line = computed(() => [props.theme.one('line')])
-const bar = computed(() => [props.theme.one('bar')])
-const doughnut = computed(() => props.theme.colors('doughnut'))
-const funnelColors = computed(() => props.theme.colors('funnel', 5))
-const funnelOpacity = computed(() => FUNNEL_OPACITY[props.themeId])
-
 const crosshair = computed(() => fileCrosshair(props.theme.t))
-const lineOptions = computed(() => ({ ...crosshair.value, ...filePlot }))
+const plot = computed(() => ({ ...crosshair.value, ...filePlot }))
 
-/** the line row's stroke: 1.5, and no dot but the crosshair's */
-const revenueSeries = {
-  sales: {
+// ---- the readings: the file's first is its darkest line, the rest one step up
+const firstSpark = computed(() => props.theme.one('line'))
+const spark = computed(() => props.theme.one('markers'))
+const wash = computed(() => props.theme.one('sparkWash'))
+const readings = [
+  { value: '289', delta: '+7%', path: SPARK_BESIDE, range: [262, 298] },
+  { value: '10 days', delta: '-4%', path: SPARK_DOWN, range: [8, 12] },
+  { value: '44', delta: '+8%', path: SPARK_UP, range: [38, 47] },
+  { value: '44', delta: '+8%', path: SPARK_UP, range: [38, 47] },
+  { value: '02', delta: '+8%', path: SPARK_UP, range: [1, 3] },
+] as const
+
+// ---- the week
+const line = computed(() => props.theme.colors('dashLine', 1))
+const lines = computed(() => props.theme.colors('dashLines', 3))
+const areas = computed(() => props.theme.colors('dashAreas', 2))
+const gradient = computed(() => props.theme.colors('dashGradient', 3))
+
+/** a 1.5px line with no dot of its own, as the line row draws its lines */
+const stroke = { echartOptions: { lineStyle: { width: 1.5 }, symbol: 'none' } }
+
+/**
+ * The gradient card's wash: each line's own colour, from a quarter at its
+ * line down to nothing at the baseline, so where two overlap they deepen —
+ * the file's three washes, laid one over another (1536:35040).
+ */
+const fade = (color: string) => ({
+  type: 'linear',
+  x: 0,
+  y: 0,
+  x2: 0,
+  y2: 1,
+  colorStops: [
+    { offset: 0, color: alpha(color, 0.25) },
+    { offset: 1, color: alpha(color, 0) },
+  ],
+})
+/** a resolved colour — `#rrggbb` or `rgb(…)` — at an opacity */
+function alpha(color: string, a: number) {
+  const hex = /^#([0-9a-f]{6})$/i.exec(color)?.[1]
+  const rgb = hex
+    ? [0, 2, 4].map((i) => parseInt(hex.slice(i, i + 2), 16))
+    : (color.match(/[\d.]+/g) ?? ['0', '0', '0']).slice(0, 3).map(Number)
+  return `rgba(${rgb.join(', ')}, ${a})`
+}
+const gradientConfig = computed(() => {
+  const [top, middle, bottom] = gradient.value
+  const washed = (label: string, color: string) => ({
+    label,
+    format: count,
+    echartOptions: {
+      lineStyle: { width: 1.5 },
+      symbol: 'none',
+      areaStyle: { color: fade(color), opacity: 1 },
+    },
+  })
+  return {
+    top: washed('Data-1', top),
+    middle: washed('Data-2', middle),
+    bottom: washed('Data-3', bottom),
+  }
+})
+
+/** the stacked bands draw no line of their own, only their fills */
+const band = {
+  echartOptions: {
+    lineStyle: { width: 0 },
+    symbol: 'none',
+    areaStyle: { opacity: 1 },
+  },
+}
+
+// ---- the rings
+const half = computed(() => props.theme.colors('half'))
+const halfArcs = computed(() => props.theme.colors('halfArcs'))
+const ring = computed(() => props.theme.colors('dashRing', 8))
+/** the half ring names each slice by its share alone, as the pie row does */
+const shares = slices.map((s) => ({ ...s, name: `Data (${s.share}%)` }))
+/** the ring names them in full */
+const named = slices.map((s) => ({ ...s, name: `${s.name} (${s.share}%)` }))
+
+// ---- the bars
+const bar = computed(() => props.theme.one('dashBar'))
+/**
+ * The file's bars read on two scales at once — 0 to 4 on the left, 0 to 16k
+ * on the right — so the card carries both: the same bars in thousands on the
+ * second axis, drawn exactly over the first and left unpainted, so the
+ * tooltip reads out both numbers for the one bar it points at.
+ */
+const dualBars = dashBars.map((b) => ({ ...b, revenue: b.value * 4000 }))
+const barSeries = {
+  value: {
+    label: 'Hours',
+    echartOptions: {
+      barCategoryGap: '42%',
+      barGap: '-100%',
+      itemStyle: { borderRadius: [3, 3, 0, 0] },
+    },
+  },
+  revenue: {
     label: 'Revenue',
     format: count,
-    echartOptions: { lineStyle: { width: 1.5 }, symbol: 'none' },
+    echartOptions: {
+      barCategoryGap: '42%',
+      barGap: '-100%',
+      itemStyle: { opacity: 0 },
+      emphasis: { itemStyle: { opacity: 0 } },
+    },
   },
 }
-/** the bar row's default card: bars 42% apart with a 2px crown */
-const orderSeries = {
-  orders: {
-    label: 'Orders',
-    format: count,
-    echartOptions: { barCategoryGap: '42%', itemStyle: { borderRadius: 2 } },
-  },
-}
-/** orders peak near 2.6k: 0 → 3k in steps of 500 */
-const orderAxis: ChartValueAxisOptions = {
+const hoursAxis = {
   min: 0,
-  max: 3000,
+  max: 4,
+  format: (v: number) => String(v),
+  echartOptions: { interval: 0.5 },
+}
+const revenueAxis = {
+  min: 0,
+  max: 16000,
   format: thousands,
-  echartOptions: { interval: 500 },
+  echartOptions: { interval: 2000 },
+}
+/** the file prints nothing under its bars */
+const noLabels = {
+  type: 'category' as const,
+  echartOptions: { axisLabel: { show: false } },
 }
 
-const channels = ['Direct', 'Partners', 'Marketplace', 'Referral', 'Events']
-const channelShare = slices
-  .slice(0, 5)
-  .map((s, i) => ({ ...s, name: `${channels[i]} (${s.share}%)` }))
+const stack = computed(() => props.theme.colors('dashStack', 8))
+
+const countries = computed(() => props.theme.colors('dashCountries', 2))
+const pair = {
+  echartOptions: {
+    barCategoryGap: '36%',
+    barGap: '6%',
+    itemStyle: { borderRadius: [0, 3, 3, 0] },
+  },
+}
+const thousandsAxis = {
+  min: 0,
+  max: 700,
+  format: (v: number) => (v === 0 ? '0' : `${v}k`),
+  echartOptions: { interval: 100 },
+}
+
+// ---- the funnel, the map and the table
+const funnelColor = computed(() => props.theme.colors('dashFunnel', 1))
+const funnelOpacity = computed(() => FUNNEL_OPACITY[props.themeId])
+const ramp = computed(() => props.theme.colors('map'))
+const heat = computed(() => props.theme.colors('heat'))
+const steps = computed(() =>
+  props.themeId === 'diverging'
+    ? divergingHeatSteps
+    : props.themeId === 'ocean'
+      ? heatSteps
+      : qualitativeHeatSteps,
+)
 </script>
 
 <template>
-  <div class="dashboard-kpis col-span-full">
+  <div class="dashboard-readings col-span-full">
     <SparkCard
-      title="Revenue"
-      value="$1.28M"
-      delta="+7%"
-      caption="vs last month"
-      :path="SPARK_UP"
-      :range="[1150000, 1283456]"
-      :format="(v: number) => `$${(v / 1e6).toFixed(2)}M`"
-      variant="area"
-      :color="spark"
-      :wash="wash"
-    />
-    <SparkCard
-      title="Orders"
-      value="184"
-      delta="+7%"
-      caption="vs last month"
-      :data="[
-        6, 10, 13, 10, 11, 17, 20, 28, 22, 22, 16, 27, 20, 20, 13, 26, 14, 17,
-        20, 15, 6, 19, 20, 30, 28, 16, 10, 6, 6, 9,
-      ]"
-      variant="bars"
-      :color="spark"
-      :wash="wash"
-    />
-    <SparkCard
-      title="Open tickets"
-      value="87"
-      delta="+7%"
+      v-for="(r, i) in readings"
+      :key="i"
+      :title="`Spark-line - ${i + 1}`"
+      :value="r.value"
+      :delta="r.delta"
       caption="vs last week"
-      :path="SPARK_BESIDE"
-      :range="[78, 92]"
+      :path="r.path"
+      :range="[r.range[0], r.range[1]]"
       variant="beside"
-      :color="spark"
-      :wash="wash"
-    />
-    <SparkCard
-      title="Conversion"
-      value="38%"
-      delta="-4%"
-      caption="vs last month"
-      :path="SPARK_DOWN"
-      :range="[34, 41]"
-      :format="(v: number) => `${Math.round(v)}%`"
-      variant="inset"
-      :color="spark"
+      :color="i === 0 ? firstSpark : spark"
       :wash="wash"
     />
   </div>
 
-  <Card>
+  <Card class="dash-card--no-legend">
     <LineChart
-      title="Revenue"
-      :data="monthly"
-      x="month"
-      y="sales"
-      :series-config="revenueSeries"
-      :x-axis="yearAxis"
-      :y-axis="salesAxis"
+      title="Basic line chart"
+      :data="week"
+      x="at"
+      y="basic"
+      :series-config="{ basic: { label: 'Data', format: count, ...stroke } }"
+      :x-axis="weekAxis"
+      :y-axis="weekValueAxis"
       :palette="line"
-      :echart-options="lineOptions"
+      :echart-options="plot"
     >
       <template #tooltip="tip">
         <ChartTip :label="tip.label" :items="tip.items" :rows="tip.rows" />
@@ -145,15 +246,98 @@ const channelShare = slices
     </LineChart>
   </Card>
   <Card>
+    <LineChart
+      title="Stacked line chart"
+      :data="week"
+      x="at"
+      :y="['data1', 'data2', 'data3']"
+      :series-config="{
+        data1: { label: 'Data-1', format: count, ...stroke },
+        data2: { label: 'Data-2', format: count, ...stroke },
+        data3: { label: 'Data-3', format: count, ...stroke },
+      }"
+      :x-axis="weekAxis"
+      :y-axis="weekValueAxis"
+      :palette="lines"
+      :echart-options="plot"
+    >
+      <template #tooltip="tip">
+        <ChartTip :label="tip.label" :items="tip.items" :rows="tip.rows" />
+      </template>
+    </LineChart>
+  </Card>
+  <Card>
+    <AreaChart
+      title="Stacked area chart"
+      :data="week"
+      x="at"
+      :y="['lower', 'upper']"
+      stacked
+      :series-config="{
+        lower: { label: 'Data-1', format: count, ...band },
+        upper: { label: 'Data-2', format: count, ...band },
+      }"
+      :x-axis="weekAxis"
+      :y-axis="weekValueAxis"
+      :palette="areas"
+      :echart-options="plot"
+    >
+      <template #tooltip="tip">
+        <ChartTip :label="tip.label" :items="tip.items" :rows="tip.rows" />
+      </template>
+    </AreaChart>
+  </Card>
+  <Card>
+    <LineChart
+      title="Gradient stacked line chart"
+      :data="week"
+      x="at"
+      :y="['top', 'middle', 'bottom']"
+      :series-config="gradientConfig"
+      :x-axis="weekAxis"
+      :y-axis="weekValueAxis"
+      :palette="gradient"
+      :echart-options="plot"
+    >
+      <template #tooltip="tip">
+        <ChartTip :label="tip.label" :items="tip.items" :rows="tip.rows" />
+      </template>
+    </LineChart>
+  </Card>
+
+  <Card>
+    <PieCard
+      title="Half Doughnut Chart"
+      :slices="shares"
+      :colors="half"
+      :arcs="HALF_ARCS"
+      :arc-colors="halfArcs"
+      variant="half"
+      :t="theme.t"
+    />
+  </Card>
+  <Card>
+    <PieCard
+      title="Pie Chart"
+      :slices="named"
+      :colors="ring"
+      variant="ring"
+      :t="theme.t"
+    />
+  </Card>
+
+  <Card class="dash-card--no-legend">
     <BarChart
-      title="Orders"
-      :data="monthly"
-      x="month"
-      y="orders"
-      :series-config="orderSeries"
-      :x-axis="yearAxis"
-      :y-axis="orderAxis"
-      :palette="bar"
+      title="Basic Bar Chart"
+      :data="dualBars"
+      x="at"
+      y="value"
+      y2="revenue"
+      :series-config="barSeries"
+      :x-axis="noLabels"
+      :y-axis="hoursAxis"
+      :y2-axis="revenueAxis"
+      :palette="[bar, bar]"
       :echart-options="crosshair"
     >
       <template #tooltip="tip">
@@ -161,36 +345,79 @@ const channelShare = slices
       </template>
     </BarChart>
   </Card>
-  <Card medium-title>
-    <PieCard
-      title="Sales by channel"
-      :slices="channelShare"
-      :colors="doughnut"
-      variant="donut"
-      :t="theme.t"
+  <Card>
+    <StackBarCard
+      title="Horizontal stacked bar chart"
+      :shares="pipelineShares"
+      :colors="stack"
     />
+  </Card>
+
+  <Card class="dash-card--no-legend">
+    <BarChart
+      title="Horizontal bar chart"
+      :data="dashCountries"
+      x="country"
+      :y="['current', 'previous']"
+      horizontal
+      :series-config="{
+        current: { label: 'This year', ...pair },
+        previous: { label: 'Last year', ...pair },
+      }"
+      :y-axis="thousandsAxis"
+      :palette="countries"
+      :echart-options="crosshair"
+    >
+      <template #tooltip="tip">
+        <ChartTip :label="tip.label" :items="tip.items" />
+      </template>
+    </BarChart>
   </Card>
   <Card>
     <FunnelCard
-      title="Sales pipeline"
+      title="Funnel chart"
       :stages="funnel"
-      :colors="funnelColors"
+      :colors="funnelColor"
       :opacity="funnelOpacity"
       variant="centred"
     />
   </Card>
+
+  <Card>
+    <UsMap title="Map Graph" :colors="ramp" :t="theme.t" scale="bar" />
+  </Card>
+  <!-- the table stands on the page under the map, named over it rather than
+       carded, as the file draws it -->
+  <div class="col-start-1 min-w-0">
+    <h3 class="mb-2 text-base-semibold leading-tighter text-ink-gray-9">
+      Table
+    </h3>
+    <HeatTable
+      :rows="heatTable"
+      :columns="HEAT_COLUMNS"
+      :colors="heat"
+      :steps="steps"
+      :ink="theme.t('chart-inside-label')"
+    />
+  </div>
 </template>
 
 <style scoped>
-/* four readings across the two big cards' width, the grid's 17 between */
-.dashboard-kpis {
+/* the five readings across the width of the two big cards, the grid's 17
+   between; two to a row where there is room for only one big card */
+.dashboard-readings {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 18px 17px;
 }
 @container chart-stage (min-width: 1177px) {
-  .dashboard-kpis {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+  .dashboard-readings {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
   }
+}
+
+/* a card the file draws with no legend: the plot takes the row back */
+.dash-card--no-legend :deep([data-slot='chart-legend']) {
+  display: none;
 }
 </style>

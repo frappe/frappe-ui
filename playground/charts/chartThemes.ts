@@ -100,6 +100,24 @@ export type OwnRole =
   | 'halfArcs'
   /** the gradient under a sparkline */
   | 'sparkWash'
+  /** the dashboard (1536:35040): its one line */
+  | 'dashLine'
+  /** the dashboard's three stacked lines, Data-1 to Data-3 */
+  | 'dashLines'
+  /** the dashboard's stacked area, lower band then upper */
+  | 'dashAreas'
+  /** the dashboard's gradient lines, top line first */
+  | 'dashGradient'
+  /** the dashboard's bars */
+  | 'dashBar'
+  /** the dashboard's countries, this year then last */
+  | 'dashCountries'
+  /** the dashboard's ring, Data 1 to Data 8 */
+  | 'dashRing'
+  /** the dashboard's stacked bar, in the order its legend names them */
+  | 'dashStack'
+  /** the dashboard's funnel: one colour, faded down the ladder */
+  | 'dashFunnel'
 
 export type ThemeRoles = Record<ThemeRole, string[]> &
   Partial<Record<OwnRole, string[]>>
@@ -141,6 +159,16 @@ const OCEAN: ThemeRoles = {
   stepped: [o(900), o(800), o(700), o(400)],
   spark: [o(700)],
   annotation: [o(800)],
+  // the dashboard, read off its frame (1536:35040)
+  dashLine: [o(700)],
+  dashLines: [o(600), o(900), o(800)],
+  dashAreas: [o(800), o(500)],
+  dashGradient: [o(600), o(800), o(400)],
+  dashBar: [o(600)],
+  dashCountries: [o(600), o(800)],
+  dashRing: [o(400), o(300), o(800), o(200), o(500), o(900), o(700), o(600)],
+  dashStack: [o(500), o(400), o(900), o(200), o(600), o(300), o(800), o(700)],
+  dashFunnel: [o(600)],
 }
 
 const MIST: ThemeRoles = {
@@ -372,6 +400,15 @@ export const OWN_ROLE_FALLBACK: Record<OwnRole, (r: ThemeRoles) => string[]> = {
   // the arcs carry the half ring's own ramp, at Ocean's steps
   halfArcs: (r) => HALF_ARCS.map((a) => r.half[a.step % r.half.length]),
   sparkWash: (r) => r.spark,
+  dashLine: (r) => r.line,
+  dashLines: (r) => r.steps.slice(0, 3),
+  dashAreas: (r) => r.areas.slice(0, 2),
+  dashGradient: (r) => r.steps.slice(0, 3),
+  dashBar: (r) => r.bar,
+  dashCountries: (r) => [r.bar[0], r.markers[0]],
+  dashRing: (r) => r.half,
+  dashStack: (r) => r.half,
+  dashFunnel: (r) => [r.funnel[Math.min(1, r.funnel.length - 1)]],
 }
 
 export const THEME_ROLES: Record<ChartTheme, ThemeRoles> = {

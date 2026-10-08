@@ -8,6 +8,7 @@ import type {
   ChartValueAxisOptions,
   ChartXAxisOptions,
 } from '../../src/charts/types'
+import { WEEK_DAYS, WEEK_TICKS } from './chartData'
 
 const MONTH = [
   'Jan',
@@ -173,3 +174,36 @@ export const fileCrosshair = (t: (name: string) => string) => ({
     },
   },
 })
+
+/** the day a reading of the dashboard's week falls in */
+const dayOf = (value: string) => {
+  const i = Number(value)
+  let day = 0
+  WEEK_TICKS.forEach((tick, d) => {
+    if (i >= tick) day = d
+  })
+  return WEEK_DAYS[day]
+}
+
+/** "Mon · Tue … Sun": the dashboard's week, a day at each of WEEK_TICKS */
+export const weekAxis: ChartXAxisOptions = {
+  type: 'category',
+  format: dayOf,
+  echartOptions: {
+    axisLabel: {
+      ...flat,
+      formatter: (value: string) => {
+        const d = WEEK_TICKS.indexOf(Number(value))
+        return d === -1 ? '' : WEEK_DAYS[d]
+      },
+    },
+  },
+}
+
+/** 0 → 6k in steps of 1k, the dashboard's week */
+export const weekValueAxis: ChartValueAxisOptions = {
+  min: 0,
+  max: 6000,
+  format: thousands,
+  echartOptions: { interval: 1000 },
+}

@@ -29,6 +29,12 @@ const props = defineProps<{
   colors: string[]
   /** a frappe-ui token, as a colour */
   t: (name: string) => string
+  /**
+   * The scale's shape: the file's map card draws a pill of the ramp along the
+   * foot with its ends named; the dashboard's (1536:35040) stands a bare
+   * 10×100 bar of it up the left edge, darkest at the top.
+   */
+  scale?: 'pill' | 'bar'
 }>()
 
 const MIN = 100
@@ -191,14 +197,24 @@ const marker = computed(() => {
 const gradient = computed(
   () => `linear-gradient(to right, ${props.colors.join(', ')})`,
 )
+const barGradient = computed(
+  () => `linear-gradient(to top, ${props.colors.join(', ')})`,
+)
 </script>
 
 <template>
   <ChartContainer :title="title">
     <div class="relative h-full w-full">
       <div ref="plotEl" class="h-full w-full" role="img" :aria-label="title" />
+      <span
+        v-if="scale === 'bar'"
+        class="pointer-events-none absolute bottom-[14px] left-[14px] block h-[100px] w-[10px] rounded-full"
+        :style="{ background: barGradient }"
+        aria-hidden="true"
+      />
       <!-- the scale: 100, the pill, 10,000, and the marker over it -->
       <div
+        v-else
         class="pointer-events-none absolute bottom-0 left-1 flex items-center gap-1 text-2xs leading-tighter text-ink-gray-5"
         aria-hidden="true"
       >

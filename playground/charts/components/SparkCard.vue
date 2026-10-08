@@ -306,7 +306,9 @@ function track(event: MouseEvent) {
         class="flex items-end gap-[7px]"
         :class="variant === 'beside' ? 'mt-[29px]' : 'mt-2'"
       >
-        <div class="text-3xl-medium leading-tighter text-ink-gray-8">
+        <div
+          class="whitespace-nowrap text-3xl-medium leading-tighter text-ink-gray-8"
+        >
           {{ value }}
         </div>
         <!-- the file sets the change beside the number over a bleeding trend -->
@@ -344,11 +346,13 @@ function track(event: MouseEvent) {
             </template>
           </Dropdown>
         </div>
-        <!-- beside the number: the file's "My tickets" line -->
+        <!-- beside the number: the file's "My tickets" line, 120 across, and
+             narrower beside a longer reading rather than pushing it onto two
+             lines (the dashboard's "10 days", 1536:35040) -->
         <svg
           v-if="variant === 'beside'"
           ref="trendEl"
-          class="mb-[2px] ml-auto h-[18px] w-[120px] shrink-0"
+          class="mb-[2px] ml-auto h-[18px] w-[120px] min-w-0 shrink"
           :viewBox="`0 0 ${H} ${H}`"
           preserveAspectRatio="none"
           aria-hidden="true"
