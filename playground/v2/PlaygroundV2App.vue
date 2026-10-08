@@ -397,6 +397,12 @@ const screens = new Map<string, HTMLElement>()
 const activeSection = ref<string>()
 let observer: IntersectionObserver | undefined
 const onScreen = new Set<string>()
+// The section the outline has just sent the page to, while the smooth scroll
+// is still carrying it there. Every section it passes crosses the band on the
+// way, and the mark followed each one — clicking Email large lit File, then
+// Email compact, then Email medium, before settling — so it holds on the
+// destination until the scroll ends.
+let arriving: string | undefined
 
 function scanSections() {
   const scroller = document.querySelector<HTMLElement>('[data-sections]')
@@ -421,6 +427,7 @@ function scanSections() {
         if (entry.isIntersecting) onScreen.add(entry.target.id)
         else onScreen.delete(entry.target.id)
       }
+      if (arriving) return
       // the topmost screen in the band wins, so the mark never flickers
       activeSection.value =
         sections.value.find((s) => onScreen.has(s.id))?.id ??
@@ -453,6 +460,7 @@ function scanSections() {
 }
 
 function markFoot(e: Event) {
+  if (arriving) return
   const el = e.currentTarget as HTMLElement
   const last = sections.value[sections.value.length - 1]
   if (last && el.scrollTop + el.clientHeight >= el.scrollHeight - 2)
@@ -473,16 +481,22 @@ function goToSection(id: string) {
     scroller.scrollTop -
     (parseFloat(getComputedStyle(target).scrollMarginTop) || 0)
   scroller.style.scrollSnapType = 'none'
-  scroller.scrollTo({ top, behavior: 'smooth' })
   activeSection.value = id
+  arriving = id
   const restore = () => {
     scroller.style.scrollSnapType = ''
+    arriving = undefined
     scroller.removeEventListener('scrollend', restore)
+    clearTimeout(restoreSnap)
   }
   scroller.addEventListener('scrollend', restore)
-  // scrollend is not everywhere yet; a timer closes the gap
+  // scrollend is not everywhere yet; a timer closes the gap, long enough
+  // that it does not let go halfway down a long page where scrollend exists
   clearTimeout(restoreSnap)
-  restoreSnap = window.setTimeout(restore, 900)
+  restoreSnap = window.setTimeout(restore, 'onscrollend' in window ? 3000 : 900)
+  // already there: no scroll, so no scrollend to let go on
+  if (Math.abs(scroller.scrollTop - top) < 1) return restore()
+  scroller.scrollTo({ top, behavior: 'smooth' })
 }
 
 onMounted(() => nextTick(scanSections))
