@@ -1,77 +1,96 @@
 <template>
   <NodeViewWrapper>
-    <!-- Selectable like every other media node: click selects, controls live
-         in the on-selection dark toolbar (same pattern as MediaToolbar). -->
+    <!-- A picture's chrome, as the single image draws it (MediaNodeView,
+         MediaToolbar): selected, the gallery takes the picture's ring and one
+         ⋯ button in its corner with every gallery action behind it. A click
+         on a picture of a selected gallery picks that picture: the ring and
+         the ⋯ move to it, with what a picture offers — open, copy, download,
+         delete. The 65%-black pills — a toolbar for the gallery, a cross on
+         every picture — are gone with it. The menus are not modal: a modal
+         menu marks everything else on the page aria-hidden as it opens, the
+         document's own blocks included, and ProseMirror read that storm of
+         attribute changes as an edit and re-parsed the gallery into one
+         picture with no source. -->
     <div
       class="group/gallery relative isolate w-full not-prose my-2 rounded-4"
       :class="{
-        [SELECTED_MEDIA_RING]: selected && isEditable,
+        [SELECTED_IMAGE_RING]: selected && isEditable && activeIdx === null,
         'cursor-pointer': isEditable && !selected,
       }"
       @click="onContainerClick"
     >
       <div
-        v-if="selected && isEditable"
-        class="absolute top-2 right-2 z-20 flex items-center gap-2 rounded-4 bg-black/65 px-1.5 py-1"
+        v-if="
+          isEditable && (galleryMenuOpen || (selected && activeIdx === null))
+        "
+        class="absolute top-2.5 right-2.5 z-20 flex"
         @pointerdown.prevent.stop
       >
-        <Tooltip text="Edit gallery" class="h-5">
-          <button type="button" aria-label="Edit gallery" @click.stop="edit">
-            <span
-              class="lucide-pencil size-4 text-ink-gray-4 hover:text-ink-base"
-            />
-          </button>
-        </Tooltip>
-        <span class="h-4 w-px bg-white/25" aria-hidden="true" />
-        <Tooltip
-          v-for="n in ALLOWED_COLUMNS"
-          :key="n"
-          :text="`${n} columns`"
-          class="h-5"
+        <Dropdown
+          v-model:open="galleryMenuOpen"
+          :modal="false"
+          :options="galleryOptions"
+          align="end"
         >
-          <button
-            type="button"
-            class="px-0.5 text-xs-medium tabular-nums hover:text-ink-base"
-            :class="columns === n ? 'text-ink-base' : 'text-ink-gray-4'"
-            :aria-label="`${n} columns`"
-            :aria-pressed="columns === n"
-            @click.stop="setColumns(n)"
-          >
-            {{ n }}
-          </button>
-        </Tooltip>
+          <template #trigger>
+            <button
+              type="button"
+              :class="MEDIA_CHROME_BUTTON"
+              aria-label="Gallery options"
+              @click.stop
+            >
+              <span class="lucide-ellipsis size-4" aria-hidden="true" />
+            </button>
+          </template>
+        </Dropdown>
       </div>
 
       <div class="grid gap-2" :style="gridStyle">
         <div
           v-for="(img, idx) in images"
           :key="(img.attrs.uploadId ?? img.attrs.src) + '-' + idx"
-          class="relative aspect-square w-full h-full overflow-hidden rounded-4 bg-surface-gray-1 group"
+          class="relative aspect-square w-full h-full rounded-4 bg-surface-gray-1 group"
+          :class="{
+            [SELECTED_IMAGE_RING]: selected && isEditable && activeIdx === idx,
+          }"
+          @click="onImageClick(idx, $event)"
         >
-          <button
-            v-if="isEditable && selected"
-            type="button"
-            class="absolute top-1 right-1 z-10 rounded-4 bg-black/65 p-1 transition-opacity opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100 focus:opacity-100"
-            aria-label="Remove image"
-            @click.stop="removeImage(idx)"
-          >
-            <span
-              class="lucide-x size-4 text-ink-gray-4 hover:text-ink-base"
+          <div class="size-full overflow-hidden rounded-4">
+            <img
+              :src="img.attrs.src"
+              :alt="img.attrs.alt || ''"
+              class="object-cover w-full h-full not-prose"
+              :class="!isEditable && 'cursor-pointer'"
             />
-          </button>
-          <img
-            v-if="!isEditable"
-            :src="img.attrs.src"
-            :alt="img.attrs.alt || ''"
-            class="object-cover w-full h-full not-prose cursor-pointer"
-            @click="openViewer(idx)"
-          />
-          <img
-            v-else
-            :src="img.attrs.src"
-            :alt="img.attrs.alt || ''"
-            class="object-cover w-full h-full not-prose"
-          />
+          </div>
+
+          <div
+            v-if="
+              isEditable &&
+              (pictureMenuOpen === idx || (selected && activeIdx === idx))
+            "
+            class="absolute top-2.5 right-2.5 z-20 flex"
+            @pointerdown.prevent.stop
+          >
+            <Dropdown
+              :open="pictureMenuOpen === idx"
+              :modal="false"
+              :options="pictureOptions(idx)"
+              align="end"
+              @update:open="(open) => (pictureMenuOpen = open ? idx : null)"
+            >
+              <template #trigger>
+                <button
+                  type="button"
+                  :class="MEDIA_CHROME_BUTTON"
+                  aria-label="Image options"
+                  @click.stop
+                >
+                  <span class="lucide-ellipsis size-4" aria-hidden="true" />
+                </button>
+              </template>
+            </Dropdown>
+          </div>
 
           <div
             v-if="img.attrs.alt"
@@ -108,13 +127,23 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, toRaw } from 'vue'
+import { computed, h, ref, toRaw, watch } from 'vue'
 import { NodeViewWrapper, type Editor } from '@tiptap/vue-3'
 import type { NodeViewProps } from '@tiptap/vue-3'
 import type { Node as ProseMirrorNode } from '@tiptap/pm/model'
-import Tooltip from '#components/Tooltip/Tooltip.vue'
+import Dropdown from '#components/Dropdown/Dropdown.vue'
+import type { DropdownOptions } from '#components/Dropdown/types'
 import ImageViewerModal from '#molecules/editor/components/ImageViewerModal.vue'
-import { SELECTED_MEDIA_RING } from '#molecules/editor/components/media-node-view-utils'
+import {
+  MEDIA_CHROME_BUTTON,
+  SELECTED_IMAGE_RING,
+} from '#molecules/editor/components/media-node-view-utils'
+import {
+  copyImageToClipboard,
+  downloadMedia,
+  duplicateMedia,
+  removeMedia,
+} from '#molecules/editor/components/media-node-view-controller'
 import { useNodeViewEditable } from '#molecules/editor/composables/useNodeViewEditable'
 import ImageGroupUploadDialog from './ImageGroupUploadDialog.vue'
 import { ALLOWED_COLUMNS, clampColumns } from './image-group-utils'
@@ -144,6 +173,131 @@ const images = computed<ProseMirrorNode[]>(() => {
 const gridStyle = computed(() => ({
   gridTemplateColumns: `repeat(${columns.value}, minmax(0, 1fr))`,
 }))
+
+/**
+ * The picture a click on a selected gallery picked, whose ring and ⋯ the
+ * gallery's give way to; `null` is the gallery as a whole. It lets go when
+ * the gallery does.
+ */
+const activeIdx = ref<number | null>(null)
+watch(
+  () => props.selected,
+  (on) => {
+    if (!on) activeIdx.value = null
+  },
+)
+// An open menu keeps its button mounted while the node loses its selection:
+// the menu portals out of the editor, so a click in it is a click outside.
+const galleryMenuOpen = ref(false)
+const pictureMenuOpen = ref<number | null>(null)
+
+/** The design's check at the end of a row that is on (as MediaToolbar). */
+const check = () =>
+  h('span', {
+    class: 'lucide-check ml-auto size-4 shrink-0 text-ink-gray-7',
+    'aria-hidden': 'true',
+  })
+
+const galleryOptions = computed<DropdownOptions>(() => [
+  {
+    group: 'gallery',
+    hideLabel: true,
+    options: [
+      { label: 'Edit gallery', icon: 'lucide-pencil', onClick: edit },
+      {
+        label: 'Columns',
+        icon: 'lucide-columns-3',
+        submenu: ALLOWED_COLUMNS.map((n) => ({
+          label: `${n} columns`,
+          onClick: () => setColumns(n),
+          ...(columns.value === n ? { slots: { suffix: check } } : {}),
+        })),
+      },
+    ],
+  },
+  {
+    group: 'media',
+    hideLabel: true,
+    options: [
+      {
+        label: 'Duplicate',
+        icon: 'lucide-copy-plus',
+        onClick: () => duplicateMedia(editor, () => props.getPos()),
+      },
+    ],
+  },
+  {
+    group: 'remove',
+    hideLabel: true,
+    options: [
+      {
+        label: 'Delete',
+        icon: 'lucide-trash-2',
+        onClick: () => removeMedia(editor, () => props.getPos()),
+      },
+    ],
+  },
+])
+
+/** A picture's own: what MediaToolbar offers a single image's bytes. */
+function pictureOptions(idx: number): DropdownOptions {
+  const src = () => images.value[idx]?.attrs.src as string | undefined
+  return [
+    {
+      group: 'share',
+      hideLabel: true,
+      options: [
+        {
+          label: 'Open link',
+          icon: 'lucide-external-link',
+          onClick: () => {
+            const url = src()
+            if (url) window.open(url, '_blank', 'noopener')
+          },
+        },
+        {
+          label: 'Copy image',
+          icon: 'lucide-copy',
+          onClick: () => {
+            const url = src()
+            if (url) void copyImageToClipboard(url)
+          },
+        },
+        {
+          label: 'Download',
+          icon: 'lucide-download',
+          onClick: () => {
+            const url = src()
+            if (url) void downloadMedia(url, 'image')
+          },
+        },
+      ],
+    },
+    {
+      group: 'remove',
+      hideLabel: true,
+      options: [
+        {
+          label: 'Delete',
+          icon: 'lucide-trash-2',
+          onClick: () => removeImage(idx),
+        },
+      ],
+    },
+  ]
+}
+
+/**
+ * A picture of a gallery that is already selected is picked by a click; a
+ * click on any part of an unselected gallery selects the gallery. Read-only,
+ * a picture opens the viewer.
+ */
+function onImageClick(idx: number, event: MouseEvent) {
+  if (!isEditable.value) return openViewer(idx)
+  if (!props.selected) return
+  event.stopPropagation()
+  activeIdx.value = activeIdx.value === idx ? null : idx
+}
 
 function setColumns(n: number) {
   setImageGroupColumns(editor, props.getPos, n)
@@ -198,6 +352,7 @@ function openViewer(idx: number) {
 }
 
 function removeImage(idx: number) {
+  activeIdx.value = null
   removeImageAt(editor, props.getPos, idx)
 }
 </script>
