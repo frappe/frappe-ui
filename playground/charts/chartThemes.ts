@@ -100,6 +100,8 @@ export type OwnRole =
   | 'halfArcs'
   /** the gradient under a sparkline */
   | 'sparkWash'
+  /** the dashboard (1536:35040): its five spark lines, left to right */
+  | 'dashSparks'
   /** the dashboard (1536:35040): its one line */
   | 'dashLine'
   /** the dashboard's three stacked lines, Data-1 to Data-3 */
@@ -118,6 +120,10 @@ export type OwnRole =
   | 'dashStack'
   /** the dashboard's funnel: one colour, faded down the ladder */
   | 'dashFunnel'
+  /** the dashboard's half ring: its legend, in slice order */
+  | 'dashHalf'
+  /** and its arcs, from 9 o'clock round to 3 */
+  | 'dashHalfArcs'
   /** the CRM dashboard (1555:35858): the pipeline's four stages */
   | 'crmStages'
   /** the CRM dashboard's funnel steps, first to last; its edge the last */
@@ -128,6 +134,11 @@ export type OwnRole =
   | 'crmWash'
   /** the expected closure's progress */
   | 'crmProgress'
+  /**
+   * the meetings' edges, in their order — where a theme names none, the CRM
+   * dashboard keeps the Ocean frame's amber, blue, pink and teal
+   */
+  | 'crmMeetings'
 
 export type ThemeRoles = Record<ThemeRole, string[]> &
   Partial<Record<OwnRole, string[]>>
@@ -170,6 +181,7 @@ const OCEAN: ThemeRoles = {
   spark: [o(700)],
   annotation: [o(800)],
   // the dashboard, read off its frame (1536:35040)
+  dashSparks: [o(900), o(800), o(800), o(800), o(800)],
   dashLine: [o(700)],
   dashLines: [o(600), o(900), o(800)],
   dashAreas: [o(800), o(500)],
@@ -364,6 +376,30 @@ const QUALITATIVE: ThemeRoles = {
   horizontal: [q(3)],
   channelsStacked: [q(5), q(1), q(9), q(3), q(6)],
   halfArcs: [q(1), q(4), q(3), q(7), q(2), q(9), q(8), q(5)],
+  // the dashboard, read off the Qualitative frames (1511:29309, dark
+  // 1523:32561). Its gradient card is bound to three Diverging colours in
+  // both, and its half ring names Q7 twice in the legend; both as drawn.
+  dashSparks: [q(7), q(4), q(1), q(3), q(5)],
+  dashLine: [q(5)],
+  dashLines: [q(1), q(6), q(5)],
+  dashAreas: [q(8), q(5)],
+  dashGradient: [d(2), d(7), d(1)],
+  dashBar: [q(3)],
+  dashCountries: [q(1), q(5)],
+  dashRing: [1, 3, 9, 5, 6, 7, 8, 4].map(q),
+  dashStack: [3, 1, 7, 9, 4, 8, 6, 5].map(q),
+  dashFunnel: [q(5)],
+  dashHalf: [1, 4, 3, 7, 5, 8, 9, 7].map(q),
+  dashHalfArcs: [1, 4, 2, 7, 5, 8, 9, 3].map(q),
+  // the CRM dashboard (1511:29921, dark 1523:33173): its funnel one colour
+  // faded, its wash the frame's own amber (chart-tokens.css)
+  crmStages: [q(1), q(3), q(5), q(4)],
+  crmFunnel: [q(5)],
+  crmLines: [q(4), q(5)],
+  crmWash: ['--chart-crm-wash'],
+  crmProgress: [q(5)],
+  // both frames edge the meetings in four Diverging steps
+  crmMeetings: [d(1), d(8), d(9), d(7)],
 }
 
 const DIVERGING: ThemeRoles = {
@@ -405,6 +441,28 @@ const DIVERGING: ThemeRoles = {
   horizontal: [d(2)],
   channelsStacked: [d(2), d(1), d(3), d(6), d(7)],
   halfArcs: [d(2), d(8), d(6), d(3), d(7), d(4), d(9), d(1)],
+  // the dashboard, read off the Diverging frames (1507:25827, dark
+  // 1524:40266)
+  dashSparks: [d(8), d(7), d(1), d(2), d(9)],
+  dashLine: [d(1)],
+  dashLines: [d(1), d(8), d(3)],
+  dashAreas: [d(6), d(7)],
+  dashGradient: [d(2), d(7), d(1)],
+  dashBar: [d(2)],
+  dashCountries: [d(1), d(2)],
+  dashRing: [1, 2, 3, 4, 6, 7, 8, 9].map(d),
+  dashStack: [2, 1, 7, 9, 3, 8, 6, 4].map(d),
+  dashFunnel: [d(2)],
+  dashHalf: [1, 2, 3, 6, 4, 7, 8, 9].map(d),
+  dashHalfArcs: [1, 2, 3, 6, 4, 7, 8, 9].map(d),
+  // the CRM dashboard (1511:27161, dark 1524:41285)
+  crmStages: [d(2), d(1), d(9), d(7)],
+  crmFunnel: [d(2)],
+  crmLines: [d(9), d(2)],
+  crmWash: ['--chart-crm-wash'],
+  crmProgress: [d(1)],
+  // both frames edge the meetings in four Diverging steps
+  crmMeetings: [d(1), d(8), d(9), d(7)],
 }
 
 /** what a theme draws a card with when it names no colours of its own for it */
@@ -416,6 +474,7 @@ export const OWN_ROLE_FALLBACK: Record<OwnRole, (r: ThemeRoles) => string[]> = {
   // the arcs carry the half ring's own ramp, at Ocean's steps
   halfArcs: (r) => HALF_ARCS.map((a) => r.half[a.step % r.half.length]),
   sparkWash: (r) => r.spark,
+  dashSparks: (r) => [r.line[0], ...Array(4).fill(r.markers[0])],
   dashLine: (r) => r.line,
   dashLines: (r) => r.steps.slice(0, 3),
   dashAreas: (r) => r.areas.slice(0, 2),
@@ -425,11 +484,14 @@ export const OWN_ROLE_FALLBACK: Record<OwnRole, (r: ThemeRoles) => string[]> = {
   dashRing: (r) => r.half,
   dashStack: (r) => r.half,
   dashFunnel: (r) => [r.funnel[Math.min(1, r.funnel.length - 1)]],
+  dashHalf: (r) => r.half,
+  dashHalfArcs: (r) => HALF_ARCS.map((a) => r.half[a.step % r.half.length]),
   crmStages: (r) => r.stack,
   crmFunnel: (r) => r.funnel,
   crmLines: (r) => r.lines,
   crmWash: (r) => r.bar,
   crmProgress: (r) => r.bar,
+  crmMeetings: () => [],
 }
 
 export const THEME_ROLES: Record<ChartTheme, ThemeRoles> = {
@@ -464,4 +526,24 @@ export const FUNNEL_COLUMN_OPACITY: Record<ChartTheme, number[]> = {
   earthy: FUNNEL_OPACITY.earthy,
   qualitative: FUNNEL_OPACITY.qualitative,
   diverging: FUNNEL_OPACITY.diverging,
+}
+
+/**
+ * How the CRM dashboard fades a funnel drawn in one colour (1511:29921,
+ * 1511:27161): a tenth at the first step, then 0.3, 0.5, 0.7 and the colour
+ * itself. A theme that gives each step its own colour (Ocean) is not faded.
+ */
+export const CRM_FUNNEL_OPACITY = [0.1, 0.3, 0.5, 0.7, 1]
+
+/**
+ * How thick the CRM dashboard lays the wash behind a top deal's value. Ocean's
+ * is its deep blue laid thin, which is its light blue on white and a tint in
+ * the dark; Qualitative and Diverging draw a wash of their own at full.
+ */
+export const CRM_WASH_OPACITY: Record<ChartTheme, number> = {
+  ocean: 0.17,
+  mist: 0.17,
+  earthy: 0.17,
+  qualitative: 1,
+  diverging: 1,
 }

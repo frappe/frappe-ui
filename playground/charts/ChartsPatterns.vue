@@ -299,7 +299,7 @@ onBeforeUnmount(() => {
         :data-chart-theme="themeId"
         aria-label="Dashboard"
       >
-        <DashboardV2 :theme="theme" />
+        <DashboardV2 :theme="theme" :theme-id="themeId" />
       </section>
     </div>
 

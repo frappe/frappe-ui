@@ -26,9 +26,14 @@ import {
   crmTopDeals,
   type ForecastRange,
 } from '../crmDashboard'
+import {
+  CRM_FUNNEL_OPACITY,
+  CRM_WASH_OPACITY,
+  type ChartTheme,
+} from '../chartThemes'
 import type { ThemeColors } from '../useChartTheme'
 
-const props = defineProps<{ theme: ThemeColors }>()
+const props = defineProps<{ theme: ThemeColors; themeId: ChartTheme }>()
 
 const money = (v: number) => `$${v.toLocaleString('en-IN')}`
 
@@ -40,7 +45,11 @@ const newOptions = [
   { label: 'Task', icon: 'lucide-circle-check', onClick: () => {} },
 ]
 
-/** the meetings' edges: the file's brown, blue, pink and teal */
+/**
+ * The meetings' edges: the Ocean frame's brown, blue, pink and teal, or the
+ * theme's own where it names them (`crmMeetings`).
+ */
+const meetingEdges = computed(() => props.theme.colors('crmMeetings'))
 const TONE: Record<string, string> = {
   orange: 'bg-amber-800',
   blue: 'bg-blue-600',
@@ -53,11 +62,12 @@ const stageColors = computed(() => props.theme.colors('crmStages', 4))
 const stageTotal = crmStages.reduce((sum, s) => sum + s.share, 0)
 const wash = computed(() => props.theme.one('crmWash'))
 /**
- * The wash is the deep blue laid thin rather than a pale blue laid solid: on
- * white the two are the file's #dceef9, and in dark mode a pale fill would
- * light up behind white figures where a thin one stays a tint.
+ * Ocean's wash is its deep blue laid thin rather than a pale blue laid solid:
+ * on white the two are the file's #dceef9, and in dark mode a pale fill would
+ * light up behind white figures where a thin one stays a tint. Qualitative and
+ * Diverging draw a wash of their own, at full (CRM_WASH_OPACITY).
  */
-const WASH_OPACITY = 0.17
+const washOpacity = computed(() => CRM_WASH_OPACITY[props.themeId])
 const topValue = Math.max(...crmTopDeals.map((d) => d.value))
 /**
  * The wash behind a value, as wide as its share of the largest: the file's
@@ -66,7 +76,14 @@ const topValue = Math.max(...crmTopDeals.map((d) => d.value))
 const washWidth = (value: number) => `${Math.round((value / topValue) * 97)}px`
 
 // ---- the funnel: five steps, the file's own heights, one outline over them
+/**
+ * A step a colour (Ocean's five), or one colour faded down the steps, as the
+ * Qualitative and Diverging frames draw it. The outline is the last step's.
+ */
+const funnelRole = computed(() => props.theme.colors('crmFunnel'))
 const funnelColors = computed(() => props.theme.colors('crmFunnel', 5))
+const funnelOpacity = (i: number) =>
+  funnelRole.value.length === 1 ? CRM_FUNNEL_OPACITY[i] : 1
 const edge = computed(() => funnelColors.value[funnelColors.value.length - 1])
 const FUNNEL_PLOT = 158
 const STEP_RADIUS = 6
@@ -358,6 +375,7 @@ const closed = crmClosure.won / crmClosure.target
                 :width="Math.max(0, s.w - (i < steps.length - 1 ? 1 : 0))"
                 :height="FUNNEL_PLOT - s.top"
                 :fill="funnelColors[i]"
+                :fill-opacity="funnelOpacity(i)"
               >
                 <title>{{ s.stage }}: {{ s.count }}</title>
               </rect>
@@ -416,7 +434,12 @@ const closed = crmClosure.won / crmClosure.target
             >
               <span
                 class="h-8 w-0.5 shrink-0 rounded-full"
-                :class="TONE[m.tone]"
+                :class="!meetingEdges.length && TONE[m.tone]"
+                :style="
+                  meetingEdges.length
+                    ? { background: meetingEdges[i % meetingEdges.length] }
+                    : undefined
+                "
                 aria-hidden="true"
               />
               <div class="min-w-0 flex-1">
@@ -552,7 +575,7 @@ const closed = crmClosure.won / crmClosure.target
                   :style="{
                     width: washWidth(d.value),
                     background: wash,
-                    opacity: WASH_OPACITY,
+                    opacity: washOpacity,
                   }"
                   aria-hidden="true"
                 />

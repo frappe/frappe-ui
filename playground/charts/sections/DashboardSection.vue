@@ -52,9 +52,9 @@ const props = defineProps<{ theme: ThemeColors; themeId: ChartTheme }>()
 const crosshair = computed(() => fileCrosshair(props.theme.t))
 const plot = computed(() => ({ ...crosshair.value, ...filePlot }))
 
-// ---- the readings: the file's first is its darkest line, the rest one step up
-const firstSpark = computed(() => props.theme.one('line'))
-const spark = computed(() => props.theme.one('markers'))
+// ---- the readings: a colour each (Ocean's first its darkest, the rest a step
+// up; the other frames five apart)
+const sparks = computed(() => props.theme.colors('dashSparks', 5))
 const wash = computed(() => props.theme.one('sparkWash'))
 const readings = [
   { value: '289', delta: '+7%', path: SPARK_BESIDE, range: [262, 298] },
@@ -125,8 +125,8 @@ const band = {
 }
 
 // ---- the rings
-const half = computed(() => props.theme.colors('half'))
-const halfArcs = computed(() => props.theme.colors('halfArcs'))
+const half = computed(() => props.theme.colors('dashHalf', 8))
+const halfArcs = computed(() => props.theme.colors('dashHalfArcs', 8))
 const ring = computed(() => props.theme.colors('dashRing', 8))
 /** the half ring names each slice by its share alone, as the pie row does */
 const shares = slices.map((s) => ({ ...s, name: `Data (${s.share}%)` }))
@@ -223,7 +223,7 @@ const steps = computed(() =>
       :path="r.path"
       :range="[r.range[0], r.range[1]]"
       variant="beside"
-      :color="i === 0 ? firstSpark : spark"
+      :color="sparks[i]"
       :wash="wash"
     />
   </div>

@@ -49,6 +49,9 @@
   --chart-qualitative-7: #b5da77;
   --chart-qualitative-8: #fccde5;
   --chart-qualitative-9: #d9d9d9;
+  /* the CRM dashboard's wash behind a top deal's value, in the Qualitative
+     and Diverging frames alike (1511:29921, 1511:27161) */
+  --chart-crm-wash: #faf0d8;
 
   /* The annotation bands (1356:68610, 1356:68674, 1356:68643): the file's
      ink/amber-1, ink/amber-2 and ink/amber-3 for the amber band's fill, its
@@ -86,6 +89,8 @@
   --chart-qualitative-7: #88af45;
   --chart-qualitative-8: #c774a8;
   --chart-qualitative-9: #bababa;
+  /* (1523:33173, 1524:41285) */
+  --chart-crm-wash: #524830;
 
   /* The file's dark values where it has them. Three it does not:
      ink/amber-1 and ink/green-1 resolve to neutral/white in Dark — a white
