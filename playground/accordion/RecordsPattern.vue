@@ -4,7 +4,9 @@
 // (experimental) — reka's root, items, triggers and the animated panel —
 // with its look set to the file's:
 //
-//   label      "Records", 14 ink-gray-5, 10 over the list
+//   width      700, the Course content card's (the user's call 2026-10-08 —
+//              the file's 580, and its "Records" label, gave way to the
+//              page's own section title)
 //   row        40 tall (6 + a 28 cell + 6), no rule between rows; the
 //              file's small-down chevron (16, ink-gray-6) first, at the
 //              row's left edge — where the library puts its own chevron
@@ -50,28 +52,35 @@ type Record = {
   calls: Call[]
 }
 
-// the file's six organisations; Dropbox, open in the file, carries its calls
+// the file's six organisations, each with calls to show when opened —
+// Dropbox's are the file's, the rest are made up in its manner
 const records: Record[] = [
   {
     value: 'zendesk',
     title: 'Zendesk',
     domain: 'Zendesk.com',
     logo: 'zendesk',
-    calls: [],
+    calls: [
+      { title: 'Onboarding call', kind: 'outgoing', people: [3, 1] },
+      { title: 'Support escalation', kind: 'incoming', people: [4, 2, 5] },
+    ],
   },
   {
     value: 'webflow',
     title: 'Webflow',
     domain: 'Webflowindia.com',
     logo: 'webflow',
-    calls: [],
+    calls: [
+      { title: 'Renewal discussion', kind: 'incoming', people: [2, 6] },
+      { title: 'Missed call', kind: 'missed', people: [7] },
+    ],
   },
   {
     value: 'timeless',
     title: 'Timeless',
     domain: 'timeless.co',
     logo: 'timeless',
-    calls: [],
+    calls: [{ title: 'Design review', kind: 'outgoing', people: [1, 3, 4] }],
   },
   {
     value: 'dropbox',
@@ -89,22 +98,25 @@ const records: Record[] = [
     title: 'Copper',
     domain: 'Cooper.co',
     logo: 'copper',
-    calls: [],
+    calls: [
+      { title: 'Pricing call', kind: 'outgoing', people: [5, 8] },
+      { title: 'Missed call', kind: 'missed', people: [6] },
+      { title: 'Follow-up', kind: 'incoming', people: [2, 7] },
+    ],
   },
   {
     value: 'skullcandy',
     title: 'Skullcandy',
     domain: 'Skullcandy.com',
     logo: 'skullcandy',
-    calls: [],
+    calls: [{ title: 'Intro call', kind: 'incoming', people: [8, 1] }],
   },
 ]
 const recordOf = (value: string) => records.find((r) => r.value === value)!
 </script>
 
 <template>
-  <div class="records w-[580px]">
-    <p class="mb-2.5 text-base leading-4 text-ink-gray-5">Records</p>
+  <div class="records w-[700px]">
     <Accordion
       :items="records"
       type="multiple"
