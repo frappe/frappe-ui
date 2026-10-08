@@ -95,10 +95,26 @@ export const article = `
 <p>Together, these products help businesses manage critical processes through a unified and consistent experience.</p>
 <hr>
 <h2>Code Block</h2>
-<pre><code class="language-python">def welcome():
-    print("Welcome to Frappe!")
+<pre><code class="language-python">import frappe
 
-welcome()</code></pre>
+
+def welcome(user):
+    """Greet a user and list the tickets waiting on them."""
+    name = frappe.db.get_value("User", user, "full_name") or user
+    print(f"Welcome to Frappe, {name}!")
+
+    tickets = frappe.get_all(
+        "HD Ticket",
+        filters={"status": "Open", "_assign": ["like", f"%{user}%"]},
+        fields=["name", "subject", "priority"],
+        order_by="modified desc",
+        limit=5,
+    )
+    for ticket in tickets:
+        print(f"#{ticket.name} [{ticket.priority}] {ticket.subject}")
+
+
+welcome("jacob@frappe.in")</code></pre>
 <hr>
 <h2>Frappe Team</h2>
 <img src="${team3}" alt="Frappeverse 2023 group photo" data-caption="Image with captions provide context">
