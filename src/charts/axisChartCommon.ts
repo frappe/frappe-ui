@@ -341,8 +341,8 @@ export function axisChartBase(
  * the grid only reserves room for its own axis labels and names. echarts does
  * that reservation itself: it measures the labels it has already laid out and
  * shrinks the plot until they fit the outer bounds. What it does not cover is
- * data labels, which sit past the end of a mark and would otherwise be clipped
- * by the plot edge — hence `labelGutter`.
+ * data labels, which sit past the end of a mark: `useAxisChart` raises the
+ * value axis a tick for those once the chart is laid out (see `fitLabels`).
  *
  * A label is measured as the box its rotation gives it, so a tilted category
  * axis (see `categoryLabelFit`) takes its own height out of the plot without the
@@ -356,19 +356,16 @@ const EDGE_PAD = 2
 
 export function buildAxisGrid(opts: {
   horizontal: boolean
-  isRTL: boolean
-  labelGutter: number
   /** Title on the category axis, which only a horizontal chart draws inline. */
   xAxisTitle?: string
 }) {
-  const { horizontal, isRTL, labelGutter, xAxisTitle } = opts
-  const endGutter = horizontal ? labelGutter : 0
+  const { horizontal, xAxisTitle } = opts
 
   return {
-    top: 8 + (horizontal ? 0 : labelGutter),
+    top: 8,
     bottom: 0,
-    left: EDGE_PAD + (isRTL ? endGutter : 0),
-    right: (xAxisTitle && horizontal ? 24 : EDGE_PAD) + (isRTL ? 0 : endGutter),
+    left: EDGE_PAD,
+    right: xAxisTitle && horizontal ? 24 : EDGE_PAD,
     // What `containLabel` did until echarts 6, plus the two things it never did:
     // it reserves on both dimensions, so the label at either end of a horizontal
     // axis stops overhanging the canvas, and `all` covers the axis name as well

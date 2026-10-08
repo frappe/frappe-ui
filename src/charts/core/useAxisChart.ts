@@ -1,5 +1,6 @@
 import { computed, reactive, ref, watch, type Ref } from 'vue'
 import type { EChartsCoreOption } from 'echarts/core'
+import { dataLabelOverflow, nextAxisMax } from './dataLabelFit'
 import { useChart } from './useChart'
 import { usePlotKeyboard } from './usePlotKeyboard'
 import { useTooltipDismiss } from './useTooltipDismiss'
@@ -155,6 +156,9 @@ export function useAxisChart<C extends AxisChartConfig>(
       click: (params: any) => {
         select(params.seriesName, rows.value[params.dataIndex])
       },
+      // Fires inside the frame that laid the chart out, before it is painted,
+      // so raising the axis here never shows a clipped label.
+      updated: () => fitLabels(),
     },
     onZrEvents: {
       mousemove: (e: any) => updateTooltip(e.offsetX, e.offsetY, e.event),
@@ -163,6 +167,39 @@ export function useAxisChart<C extends AxisChartConfig>(
       },
     },
   })
+
+  // The option the value axis was last raised for. A label still clipping
+  // after one more step is in a plot too short to fit it, and stepping again
+  // would only squash the bars.
+  let raisedFor: EChartsCoreOption | undefined
+
+  /**
+   * A data label at the top of the scale reaches past the plot. The value axis
+   * goes up one tick to make room for it, so the plot keeps its place in the
+   * card whatever the numbers are. An axis end the caller fixed is theirs.
+   */
+  function fitLabels() {
+    const instance = chart.value
+    const option = built.value.option as any
+    if (!instance || !option?.grid || raisedFor === option) return
+    const valueAxis = horizontal.value ? 'xAxis' : 'yAxis'
+    const primary = [option[valueAxis]].flat()[0]
+    if (primary?.max != null) return
+
+    const side = horizontal.value
+      ? dir.value === 'rtl'
+        ? 'left'
+        : 'right'
+      : 'top'
+    if (typeof option.grid[side] !== 'number') return
+    const overflow = dataLabelOverflow(instance, side, option.grid[side])
+    if (overflow === null || overflow <= 0) return
+
+    const max = nextAxisMax(instance, valueAxis)
+    if (max === null) return
+    raisedFor = option
+    instance.setOption({ [valueAxis]: [{ max }] })
+  }
 
   const legendItems = computed<ChartLegendItem[]>(() =>
     config.value.series.map((series) => ({

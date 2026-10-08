@@ -33,10 +33,6 @@ const BAR_MAX_WIDTH = 32
 /** Slim bars with an airy gap between categories. */
 const BAR_CATEGORY_GAP = '38%'
 const BAR_RADIUS = 4
-/** Room for a data label sitting past the end of a bar. */
-const BAR_LABEL_GUTTER = 40
-/** Room for a data label sitting above a point. */
-const LINE_LABEL_GUTTER = 24
 
 export const DEFAULT_LINE_WIDTH = 2
 /** Big enough to hit with a pointer, small enough not to read as a scatter plot. */
@@ -152,8 +148,6 @@ export function buildAxisChartOption(
     ...axisChartBase(tokens, hasBars ? 'shadow' : 'line'),
     grid: buildAxisGrid({
       horizontal,
-      isRTL,
-      labelGutter: dataLabelGutter(plotted),
       xAxisTitle: config.xAxis.title,
     }),
     xAxis: horizontal ? valueAxis : xColumnAxis,
@@ -349,19 +343,6 @@ function pinValueAxis(
       axisLabel: { formatter: (value: number) => formatPercent(value) },
     }),
   }
-}
-
-/** Chart-wide room for the labels, i.e. whatever the hungriest mark needs. */
-function dataLabelGutter(plotted: PlottedSeries[]) {
-  let gutter = 0
-  for (const { series, mark, stack } of plotted) {
-    if (!series.showDataLabels) continue
-    // Stacked labels sit inside the fill, so they need no gutter.
-    const needed =
-      mark === 'bar' ? (stack ? 0 : BAR_LABEL_GUTTER) : LINE_LABEL_GUTTER
-    gutter = Math.max(gutter, needed)
-  }
-  return gutter
 }
 
 function buildSeries(

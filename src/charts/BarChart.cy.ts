@@ -273,6 +273,75 @@ describe('BarChart', () => {
     })
   })
 
+  describe('data labels', () => {
+    const plotText = () => cy.get('[data-slot="chart-plot"] svg text')
+
+    /** Every label and tick inside the canvas, on the side the bars grow to. */
+    function insideCanvas(side: 'top' | 'right') {
+      cy.get('[data-slot="chart-plot"] svg').then(($svg) => {
+        const canvas = $svg[0].getBoundingClientRect()
+        plotText().each(($text) => {
+          const box = $text[0].getBoundingClientRect()
+          if (side === 'top') expect(box.top).to.be.at.least(canvas.top)
+          else expect(box.right).to.be.at.most(canvas.right)
+        })
+      })
+    }
+
+    /** The tick at 20 and the label on the bar that reaches it, both drawn. */
+    const topLabelDrawn = () =>
+      plotText()
+        .filter((_, el) => el.textContent === '20')
+        .should('have.length', 2)
+
+    // Sales top out at 20, which is where echarts ends the scale.
+    const labelled = {
+      y: 'sales',
+      seriesConfig: { sales: { showDataLabels: true } },
+    }
+
+    it('raises the axis a tick for a label at the top of the scale', () => {
+      mountChart(labelled)
+      bars().should('have.length', data.length)
+      plotText().should('contain.text', '25')
+      topLabelDrawn()
+      insideCanvas('top')
+    })
+
+    it('leaves the axis alone when the labels already fit', () => {
+      mountChart({
+        ...labelled,
+        data: data.map((row) => ({ ...row, sales: row.sales - 7 })),
+      })
+      bars().should('have.length', data.length)
+      plotText().should('contain.text', '15').and('not.contain.text', '20')
+    })
+
+    it('raises the value axis of a row chart the same way', () => {
+      mountChart({ ...labelled, horizontal: true })
+      bars().should('have.length', data.length)
+      plotText().should('contain.text', '25')
+      topLabelDrawn()
+      insideCanvas('right')
+    })
+
+    it('makes room for a label at the top of the second axis', () => {
+      mountChart({
+        y: 'sales',
+        y2: 'refunds',
+        seriesConfig: { refunds: { showDataLabels: true } },
+      })
+      bars().should('have.length', data.length * 2)
+      insideCanvas('top')
+    })
+
+    it('keeps an axis end the caller fixed', () => {
+      mountChart({ ...labelled, yAxis: { max: 20 } })
+      bars().should('have.length', data.length)
+      plotText().should('not.contain.text', '25')
+    })
+  })
+
   describe('maxSeries', () => {
     const byRegion = [
       { month: 'Jan', region: 'East', amount: 50 },

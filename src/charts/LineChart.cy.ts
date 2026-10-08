@@ -137,6 +137,28 @@ describe('LineChart', () => {
     })
   })
 
+  describe('data labels', () => {
+    it('raises the axis a tick for a label at the top of the scale', () => {
+      // Sales top out at 20, which is where echarts ends the scale.
+      mountChart({
+        y: 'sales',
+        seriesConfig: { sales: { showDataLabels: true } },
+      })
+      lines().should('have.length', 1)
+      cy.get('[data-slot="chart-plot"] svg text').should('contain.text', '25')
+      // The tick at 20 and the label on the point that reaches it.
+      cy.get('[data-slot="chart-plot"] svg text')
+        .filter((_, el) => el.textContent === '20')
+        .should('have.length', 2)
+      cy.get('[data-slot="chart-plot"] svg').then(($svg) => {
+        const top = $svg[0].getBoundingClientRect().top
+        cy.get('[data-slot="chart-plot"] svg text').each(($text) => {
+          expect($text[0].getBoundingClientRect().top).to.be.at.least(top)
+        })
+      })
+    })
+  })
+
   describe('reference lines', () => {
     it('draws a rule that is neither a series nor a legend entry', () => {
       mountChart({ referenceLines: [{ value: 12, label: 'Target' }] })

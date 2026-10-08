@@ -261,11 +261,12 @@ describe('line chart option chrome', () => {
     expect(option.tooltip.axisPointer.z).toBe(1)
   })
 
-  it('reserves room above the plot only when labels are shown', () => {
-    expect(build().grid.top).toBe(8)
+  it('leaves the room for data labels to the laid-out chart', () => {
+    // How far a label reaches depends on the axis ends echarts picks, so
+    // `useAxisChart` moves the edge after layout rather than guessing here.
     expect(
       build({ series: [{ name: 'sales', showDataLabels: true }] }).grid.top,
-    ).toBeGreaterThan(8)
+    ).toBe(8)
   })
 
   it('leaves the y-axis title to the chrome above the plot', () => {
