@@ -450,18 +450,18 @@ const closed = crmClosure.won / crmClosure.target
                   {{ m.title }}
                 </div>
               </div>
-              <span class="flex shrink-0 items-center">
+              <span class="flex shrink-0 items-center self-end pb-0.5">
                 <Avatar
                   v-for="(p, j) in m.people"
                   :key="j"
                   :image="p"
-                  size="sm"
-                  class="ring-2 ring-surface-elevation-2"
-                  :class="j > 0 && '-ml-1.5'"
+                  size="xs"
+                  class="shadow-[0_0_0_1px_var(--surface-elevation-2)]"
+                  :class="j > 0 && '-ml-0.5'"
                 />
                 <span
                   v-if="'count' in m && m.count"
-                  class="-ml-1 flex size-5 items-center justify-center rounded-full bg-surface-gray-2 text-xs text-ink-gray-7"
+                  class="-ml-0.5 flex size-4 items-center justify-center rounded-full bg-surface-gray-2 text-2xs text-ink-gray-7 shadow-[0_0_0_1px_var(--surface-elevation-2)]"
                   >{{ m.count }}</span
                 >
               </span>
