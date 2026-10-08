@@ -1,15 +1,16 @@
 <script setup lang="ts">
 // Figma: espresso-2.0 › toolbar (35728:87337), the floating bar. A 28px
 // bar on elevation-2, 2px in, on a 10px radius under the md shadow. It
-// opens with the block style's select — 100×24 on a 6px radius, 6/4 in,
-// the 13/15 gray-700 label and a 14px chevron — whose menu is the file's
-// 180px card: 4px in on a 10px radius under the xl shadow, rows 28px on an
-// 8px radius with a 16px glyph 6px off the 14/16 gray-700 label. Then
-// 24px controls on an 8px radius with 14px gray-700 glyphs, pressed on
-// gray-100: bold, italic, underline, strike, link, text colour, highlight
-// (a marker) │ left, centre, right, each named by a Tooltip on hover; a
-// divider is a 16px hairline in a 9px slot. It rises over a run of text —
-// not over a selected block, where there is no text to set.
+// opens with the block style's select — at least 100×24, wider for a long
+// name such as "Numbered list", on a 6px radius, 6/4 in, the 13/15
+// gray-700 label and a 14px chevron — whose menu is the file's 180px card:
+// 4px in on a 10px radius under the xl shadow, rows 28px on an 8px radius
+// with a 16px glyph 6px off the 14/16 gray-700 label. Then 24px controls
+// on an 8px radius with 14px gray-700 glyphs, pressed on gray-100: bold,
+// italic, underline, strike, link, text colour, highlight (a marker) │
+// left, centre, right, each named by a Tooltip on hover; a divider is a
+// 16px hairline in a 9px slot. It rises over a run of text — not over a
+// selected block, where there is no text to set.
 import { computed, h, ref, watch } from 'vue'
 import { BubbleMenu } from '@tiptap/vue-3/menus'
 import { Dropdown, Popover, Tooltip } from '../../../src'
@@ -169,7 +170,7 @@ const shouldShow: InstanceType<typeof BubbleMenu>['$props']['shouldShow'] = ({
             :class="open && 'is-open'"
             aria-label="Text style"
           >
-            <span class="truncate text-sm leading-[15px]">{{
+            <span class="whitespace-nowrap text-sm leading-[15px]">{{
               blockLabel(activeBlock)
             }}</span>
             <RteIcon name="small-down" class="size-3.5 shrink-0" />
@@ -260,10 +261,10 @@ const shouldShow: InstanceType<typeof BubbleMenu>['$props']['shouldShow'] = ({
 .rte-bubble {
   @apply flex h-7 items-center rounded-[10px] bg-surface-elevation-2 p-0.5 shadow-md;
 }
-/* the select: 100×24, 6/4 in, the label and chevron 4 apart on a 6px
-   radius; filled gray-100 under the pointer and while its menu is open */
+/* the select: at least 100×24 (it grows to fit a long name rather than
+   cut it), 6/4 in, the label and chevron 4 apart on a 6px radius; filled gray-100 under the pointer and while its menu is open */
 .rte-bubble-select {
-  @apply flex h-6 w-[100px] shrink-0 items-center justify-between gap-1 rounded-[6px] py-1 pl-1.5 pr-1 text-ink-gray-7 transition-colors hover:bg-surface-gray-2;
+  @apply flex h-6 min-w-[100px] shrink-0 items-center justify-between gap-1 rounded-[6px] py-1 pl-1.5 pr-1 text-ink-gray-7 transition-colors hover:bg-surface-gray-2;
 }
 .rte-bubble-select.is-open {
   @apply bg-surface-gray-2;
