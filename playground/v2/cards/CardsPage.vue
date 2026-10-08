@@ -1,8 +1,8 @@
 <script setup lang="ts">
 // The Cards page: every card type stacked down one column under a Cards
-// title, each under its heading, as the Popovers and List pages lay theirs
-// out — without their frames: the cards carry their own edges. The outline on
-// the right names them. (The old "Card type" picker —
+// title, as the Popovers and List pages lay theirs out — without their frames
+// or headings: the cards carry their own edges, a hairline parts one type from
+// the next, and the outline on the right names them. (The old "Card type" picker —
 // list/ListTypePicker.vue — is parked, not deleted.)
 import DefaultCards from './DefaultCards.vue'
 import ListCards from './ListCards.vue'
@@ -26,23 +26,18 @@ import KpiCards from './KpiCards.vue'
         data-section
         data-label="Default"
       >
-        <h2 class="text-3xl-semibold text-ink-gray-8">Default</h2>
         <DefaultCards />
       </section>
       <section id="list" class="v2-section" data-section data-label="List">
-        <h2 class="text-3xl-semibold text-ink-gray-8">List</h2>
         <ListCards />
       </section>
       <section id="note" class="v2-section" data-section data-label="Note">
-        <h2 class="text-3xl-semibold text-ink-gray-8">Note</h2>
         <NoteCards />
       </section>
       <section id="file" class="v2-section" data-section data-label="File">
-        <h2 class="text-3xl-semibold text-ink-gray-8">File</h2>
         <FileCards />
       </section>
       <section id="kpi" class="v2-section" data-section data-label="KPI">
-        <h2 class="text-3xl-semibold text-ink-gray-8">KPI</h2>
         <KpiCards />
       </section>
     </div>
@@ -64,5 +59,11 @@ import KpiCards from './KpiCards.vue'
 }
 .v2-sections.is-flow.cards-flow > .v2-section {
   text-align: start;
+}
+/* a hairline between one card type and the next, in the middle of the 64
+   the column leaves between them */
+.v2-sections.is-flow.cards-flow > .v2-section + .v2-section {
+  @apply border-t border-outline-gray-1 pt-8;
+  margin-top: -32px;
 }
 </style>
