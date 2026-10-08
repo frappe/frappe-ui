@@ -123,12 +123,12 @@ describe('combo axes', () => {
     expect(option.tooltip.axisPointer.type).toBe('shadow')
   })
 
-  it('runs a bar-free chart edge to edge with a rule for a pointer', () => {
+  it('shades no pointer on a bar-free chart, which points with a rule', () => {
     const option = build({
       type: 'line',
       series: [{ name: 'sales' }, { name: 'refunds', type: 'area' }],
     })
-    expect(option.xAxis.boundaryGap).toBe(false)
+    expect(option.xAxis.boundaryGap).toBe(true)
     expect(option.tooltip.axisPointer.type).toBe('line')
   })
 

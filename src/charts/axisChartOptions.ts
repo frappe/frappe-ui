@@ -113,7 +113,7 @@ export function buildAxisChartOption(
     (entry) => !hiddenSeries.includes(entry.series.name),
   )
   // Read over *every* series rather than the visible ones: hiding the last bar
-  // in the legend should not re-space the category axis under the plot.
+  // in the legend should not swap the pointer from a shade to a rule.
   const hasBars = plotted.some((entry) => entry.mark === 'bar')
   const categories = rows.map((row) => row[config.xAxis.key])
   // A point on a value axis carries its own coordinate; on the other two the
@@ -129,8 +129,8 @@ export function buildAxisChartOption(
     categories,
     horizontal,
     isRTL,
-    // Bars need a half-slot inset at each end to sit in; a line runs edge to edge.
-    boundaryGap: hasBars,
+    // Echarts pads a time axis for the bars it draws, so only the visible count.
+    inset: !horizontal && !visible.some((entry) => entry.mark === 'bar'),
     width,
   })
   const hasSecondary = hasSecondaryValueAxis(config, horizontal)

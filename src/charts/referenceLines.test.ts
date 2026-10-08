@@ -309,8 +309,7 @@ describe('reference lines against the rest of the plot', () => {
   })
 
   it('is not counted as a bar', () => {
-    // A bar host would take a slot in every category and narrow the real bars;
-    // it would also inset a line chart's category axis.
+    // A bar host would take a slot in every category and narrow the real bars.
     const bars = build({ referenceLines: [{ value: 15 }] })
     expect(hostsOf(bars)[0].type).toBe('line')
     expect(hostsOf(bars)[0].data).toEqual([])
@@ -320,7 +319,6 @@ describe('reference lines against the rest of the plot', () => {
       series: [{ name: 'sales' }],
       referenceLines: [{ value: 15 }],
     })
-    expect(lines.xAxis.boundaryGap).toBe(false)
     expect(lines.tooltip.axisPointer.type).toBe('line')
   })
 

@@ -177,13 +177,11 @@ describe('the slot a label is measured against', () => {
     expect(labelsOf(build(repeat(4, chars + 1))).width).toBe(137)
   })
 
-  it('measures a line chart between its ticks, there being no slot', () => {
-    // Points sit on the dividers, so four categories leave three gaps — wider
-    // than the four slots a bar chart divides the same plot into.
+  it('gives a line chart the same slots, its points sitting in them too', () => {
     const line = { type: 'line' as const }
-    const chars = widestFlat(PLOT / 3)
+    const chars = widestFlat(PLOT / 4)
     expect(labelsOf(build(repeat(4, chars), line)).width).toBeUndefined()
-    expect(labelsOf(build(repeat(4, chars))).width).toBe(137)
+    expect(labelsOf(build(repeat(4, chars + 1), line)).width).toBe(137)
   })
 
   it('takes a second value axis out of the room first', () => {

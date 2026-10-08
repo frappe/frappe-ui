@@ -1,3 +1,4 @@
+import { dayjs } from '#utils/dayjs'
 import {
   estimateTextWidth,
   formatAxisValue,
@@ -354,6 +355,15 @@ export function axisChartBase(
 // plot to keep the labels inside it and never spends the two pixels.
 const EDGE_PAD = 2
 
+// How far in from the value axis a line's first and last point sit on a time
+// axis, in pixels: enough to clear the y tick labels and a data label over it.
+const LINE_AXIS_INSET = 32
+
+// Echarts' own `splitNumber` for a time axis. It divides the span by this to
+// pick the tick interval, so a padded span has to be given more splits to keep
+// the ticks as dense as the same data unpadded.
+const TIME_AXIS_SPLIT_NUMBER = 6
+
 export function buildAxisGrid(opts: {
   horizontal: boolean
   /** Title on the category axis, which only a horizontal chart draws inline. */
@@ -387,14 +397,18 @@ export function buildXAxis(
     categories: any[]
     horizontal: boolean
     isRTL: boolean
-    /** Bars need a half-slot inset at each end; a line runs edge to edge. */
-    boundaryGap: boolean
+    /** Whether a time axis is padded at each end, as echarts only does for bars. */
+    inset: boolean
     /** Plot width in pixels, when known. Decides how the labels are laid out. */
     width?: number
   },
 ) {
-  const { categories, horizontal, isRTL, boundaryGap } = opts
+  const { categories, horizontal, isRTL, width } = opts
   const { type, timeGrain } = resolveXAxis(config, horizontal)
+  const inset =
+    type === 'time' && opts.inset
+      ? timeInset(config, categories, width)
+      : undefined
   const { rotate, labelWidth } = categoryLabelFit(config, { ...opts, type })
 
   const axis = {
@@ -407,7 +421,10 @@ export function buildXAxis(
     // horizontal bar chart is inverted so the first category sits on top.
     inverse: horizontal ? true : isRTL,
     position: horizontal ? (isRTL ? 'right' : 'left') : 'bottom',
-    ...(type === 'category' ? { data: categories, boundaryGap } : {}),
+    // A line's points sit in a half slot at each end as a bar does. A pixel pad
+    // like the time axis' is out: echarts rounds a category `min` and `max`.
+    ...(type === 'category' ? { data: categories, boundaryGap: true } : {}),
+    ...(inset ? inset.extent : {}),
     name: config.xAxis.title ? formatLabel(config.xAxis.title) : undefined,
     nameLocation: 'end',
     nameGap: 8,
@@ -440,11 +457,47 @@ export function buildXAxis(
       // Left out entirely when the labels fit, so a flat axis carries no
       // rotation key at all.
       ...(rotate ? { rotate } : {}),
-      ...xAxisLabelFormat(type, { tokens, timeGrain, labelWidth }),
+      ...xAxisLabelFormat(type, {
+        tokens,
+        timeGrain,
+        labelWidth,
+        dataRange: inset?.dataRange,
+      }),
     },
   }
 
   return mergeDeep(axis, config.xAxis.echartOptions)
+}
+
+/**
+ * A line's end points sit on the plot's edges, under the value axis' ticks. A
+ * time axis cannot take a half slot, so it is padded by a fixed distance on
+ * each side, whatever the span or the plot is wide. Echarts does this itself,
+ * but only for bars it draws. A lone date has no span to pad.
+ *
+ * `dataRange` is what the padding is not: the ticks that land in it say nothing
+ * about the series, so they go unlabelled (see `xAxisLabelFormat`).
+ */
+function timeInset(config: AxisChartBaseConfig, values: any[], width?: number) {
+  // Read the way echarts reads the points, so the pad is measured from them.
+  const times = values
+    .map((value) => dayjs(value).valueOf())
+    .filter((time) => !Number.isNaN(time))
+  const first = Math.min(...times)
+  const last = Math.max(...times)
+  const plot = width ? plotWidth(config, width) : 0
+  if (!(last > first) || plot <= 2 * LINE_AXIS_INSET) return undefined
+
+  const padded = plot / (plot - 2 * LINE_AXIS_INSET)
+  const pad = ((last - first) * (padded - 1)) / 2
+  return {
+    extent: {
+      min: first - pad,
+      max: last + pad,
+      splitNumber: Math.round(TIME_AXIS_SPLIT_NUMBER * padded),
+    },
+    dataRange: [first, last] as const,
+  }
 }
 
 /**
@@ -455,7 +508,13 @@ export function buildXAxis(
  */
 function xAxisLabelFormat(
   type: ResolvedXAxis['type'],
-  opts: { tokens: ChartTokens; timeGrain?: TimeGrain; labelWidth?: number },
+  opts: {
+    tokens: ChartTokens
+    timeGrain?: TimeGrain
+    labelWidth?: number
+    /** A padded time axis labels only the ticks between these two. */
+    dataRange?: readonly [number, number]
+  },
 ) {
   if (type === 'time') {
     return {
@@ -464,7 +523,10 @@ function xAxisLabelFormat(
       // than as another tick. `primary` is echarts' own name for that level's
       // rich style.
       formatter: (value: any, _index: number, extra?: { level: number }) =>
-        formatTimeAxisLabel(value, opts.timeGrain, extra?.level),
+        opts.dataRange &&
+        (value < opts.dataRange[0] || value > opts.dataRange[1])
+          ? ''
+          : formatTimeAxisLabel(value, opts.timeGrain, extra?.level),
       rich: {
         primary: {
           color: opts.tokens.axisTitle,
@@ -513,7 +575,6 @@ function categoryLabelFit(
     categories: any[]
     horizontal: boolean
     isRTL: boolean
-    boundaryGap: boolean
     width?: number
     type: ResolvedXAxis['type']
   },
@@ -550,28 +611,26 @@ function categoryLabelFit(
   }
 }
 
+/** The room the x axis has: the chart less its edge pad and the value axes. */
+function plotWidth(config: AxisChartBaseConfig, width: number) {
+  return width - 2 * EDGE_PAD - valueAxisReserve(config)
+}
+
 /**
  * The room one category gets along the axis, or undefined where there is
- * nothing to decide from: a chart that has not been measured, one measured at
- * nothing, or a line with a single point, which has no neighbour to collide
- * with.
+ * nothing to decide from: a chart that has not been measured, or one measured
+ * at nothing. Only a column chart asks: a row chart's categories are stacked.
  */
 function categorySlotWidth(
   config: AxisChartBaseConfig,
-  opts: { categories: any[]; boundaryGap: boolean; width?: number },
+  opts: { categories: any[]; width?: number },
 ) {
-  if (!opts.width) return undefined
+  if (!opts.width || !opts.categories.length) return undefined
 
-  const plot = opts.width - 2 * EDGE_PAD - valueAxisReserve(config)
-  // `boundaryGap` gives every category a slot of its own to sit in the middle
-  // of; without it they sit on the dividers, so what has to hold a label is
-  // the distance between two ticks.
-  const slots = opts.boundaryGap
-    ? opts.categories.length
-    : opts.categories.length - 1
-
-  if (plot <= 0 || slots < 1) return undefined
-  return plot / slots
+  const plot = plotWidth(config, opts.width)
+  // A column chart's `boundaryGap` gives every category a slot of its own to
+  // sit in the middle of.
+  return plot > 0 ? plot / opts.categories.length : undefined
 }
 
 /**

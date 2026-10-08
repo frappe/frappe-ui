@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { buildAxisChartOption, DEFAULT_LINE_WIDTH } from './axisChartOptions'
-import { dashedLine } from './axisChartCommon'
+import { AXIS_LABEL_FONT_SIZE, dashedLine } from './axisChartCommon'
+import { estimateTextWidth, formatValue } from './format'
 import type { ChartTokens } from './tokens'
 import type { AxisChartConfig } from './types'
 
@@ -50,8 +51,8 @@ describe('line chart option axes', () => {
     expect(option.yAxis.position).toBe('left')
   })
 
-  it('runs the line to the plot edge instead of insetting it', () => {
-    expect(build().xAxis.boundaryGap).toBe(false)
+  it('insets a line on a category axis half a slot, as a bar sits', () => {
+    expect(build().xAxis.boundaryGap).toBe(true)
   })
 
   it('draws horizontal gridlines only, in token ink', () => {
@@ -98,6 +99,102 @@ describe('line chart option axes', () => {
     expect(option.yAxis.axisLabel.formatter(1500)).toBe('1.5K')
     expect(option.yAxis.min).toBe(0)
     expect(option.yAxis.max).toBe(100)
+  })
+})
+
+describe('line chart option time axis inset', () => {
+  const WIDTH = 600
+  const INSET = 32
+  const DAY = 24 * 60 * 60 * 1000
+  const FIRST = new Date(2026, 0, 5).getTime()
+  const LAST = new Date(2026, 0, 25).getTime()
+  // The one-digit tick the value axis prints, and its margin.
+  const TICKS = Math.ceil(estimateTextWidth('1', AXIS_LABEL_FONT_SIZE)) + 8
+  const PLOT = WIDTH - 4 - TICKS
+
+  const dates = (days: number[]) =>
+    days.map((day) => ({
+      day: `2026-01-${String(day).padStart(2, '0')}`,
+      sales: 1,
+    }))
+
+  function buildOn(
+    overrides: Partial<AxisChartConfig> = {},
+    measured: number | null = WIDTH,
+  ) {
+    return buildAxisChartOption(
+      config({
+        data: dates([5, 15, 25]),
+        xAxis: { key: 'day', type: 'time', timeGrain: 'day' },
+        series: [{ name: 'sales' }],
+        ...overrides,
+      }),
+      { tokens, width: measured ?? undefined },
+    ) as any
+  }
+
+  it('pads each end of the axis by 32px of the plot', () => {
+    const { min, max } = buildOn().xAxis
+    const pixelsPerMs = PLOT / (max - min)
+    expect((FIRST - min) * pixelsPerMs).toBeCloseTo(INSET)
+    expect((max - LAST) * pixelsPerMs).toBeCloseTo(INSET)
+  })
+
+  it('holds the pad at 32px as the plot narrows', () => {
+    const { min, max } = buildOn({}, 300).xAxis
+    const pixelsPerMs = (300 - 4 - TICKS) / (max - min)
+    expect((FIRST - min) * pixelsPerMs).toBeCloseTo(INSET)
+  })
+
+  it('pads nothing for a single date, a chart not yet measured, or a plot too narrow', () => {
+    for (const option of [
+      buildOn({ data: dates([5, 5]) }),
+      buildOn({}, null),
+      buildOn({}, 2 * INSET + 4 + TICKS),
+    ]) {
+      expect(option.xAxis.min).toBeUndefined()
+      expect(option.xAxis.max).toBeUndefined()
+    }
+  })
+
+  it('pads an area chart the same way', () => {
+    expect(buildOn({ type: 'area' }).xAxis.min).toBeLessThan(FIRST)
+  })
+
+  it('leaves a chart with a bar to echarts, which insets for it', () => {
+    const option = buildOn({
+      type: 'bar',
+      series: [{ name: 'sales' }, { name: 'refunds', type: 'line' }],
+    })
+    expect(option.xAxis.min).toBeUndefined()
+    expect(option.xAxis.max).toBeUndefined()
+    expect(option.xAxis.splitNumber).toBeUndefined()
+  })
+
+  it('leaves a row chart and a value axis as they were', () => {
+    expect(buildOn({ horizontal: true }).yAxis.min).toBeUndefined()
+    const value = buildOn({ xAxis: { key: 'sales', type: 'value' } })
+    expect(value.xAxis.min).toBeUndefined()
+  })
+
+  it('splits the padded span further, to keep the ticks as dense as unpadded', () => {
+    // Echarts divides the span by this to pick the interval, and a wider span
+    // otherwise tips it into a coarser one.
+    expect(buildOn().xAxis.splitNumber).toBeGreaterThan(6)
+  })
+
+  it('labels no tick that falls in the pad, past either end of the series', () => {
+    const { formatter } = buildOn().xAxis.axisLabel
+    expect(formatter(FIRST)).toBe('5')
+    expect(formatter(LAST)).toBe('25')
+    expect(formatter(FIRST - DAY)).toBe('')
+    expect(formatter(LAST + DAY)).toBe('')
+  })
+
+  it('labels every tick on an axis it did not pad', () => {
+    const { formatter } = buildOn({}, null).xAxis.axisLabel
+    expect(formatter(FIRST - DAY)).toBe('4')
+    expect(formatter(LAST + DAY)).toBe('26')
   })
 })
 
