@@ -60,10 +60,9 @@ import KpiCards from './KpiCards.vue'
 .v2-sections.is-flow.cards-flow > .v2-section {
   text-align: start;
 }
-/* a hairline between one card type and the next, in the middle of the 64
-   the column leaves between them */
+/* a hairline between one card type and the next, 64 from the cards on either
+   side: the column's own 64 above it, as much again below */
 .v2-sections.is-flow.cards-flow > .v2-section + .v2-section {
-  @apply border-t border-outline-gray-1 pt-8;
-  margin-top: -32px;
+  @apply border-t border-outline-gray-1 pt-16;
 }
 </style>
