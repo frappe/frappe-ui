@@ -123,40 +123,31 @@ function commitRange(which: 0 | 1) {
   range.value = next
 }
 
-// ---- sidebar: shortcuts, counted from the shown date so the calendar
-// stays on the file's month
-const base = computed(() => dayjs(START_DATE))
+// ---- sidebar: shortcuts, counted back from today (the calendar moves to
+// the picked month)
+const base = computed(() => dayjs())
 const fmt = (d: dayjs.Dayjs) => d.format('YYYY-MM-DD')
-const dateShortcuts = computed(() => [
-  { label: 'Today', value: fmt(base.value) },
-  { label: 'Tomorrow', value: fmt(base.value.add(1, 'day')) },
-  { label: 'Next Monday', value: fmt(base.value.day(8)) },
-  { label: 'Next week', value: fmt(base.value.add(1, 'week')) },
-  { label: 'Next month', value: fmt(base.value.add(1, 'month')) },
-])
-const rangeShortcuts = computed(() => [
-  {
-    label: 'Last 7 days',
-    value: [fmt(base.value.subtract(6, 'day')), fmt(base.value)],
-  },
-  {
-    label: 'This week',
-    value: [fmt(base.value.day(1)), fmt(base.value.day(7))],
-  },
-  {
-    label: 'Next 7 days',
-    value: [fmt(base.value), fmt(base.value.add(6, 'day'))],
-  },
-  {
-    label: 'This month',
-    value: [fmt(base.value.startOf('month')), fmt(base.value.endOf('month'))],
-  },
-  {
-    label: 'Last 30 days',
-    value: [fmt(base.value.subtract(29, 'day')), fmt(base.value)],
-  },
-])
-const isRange = computed(() => props.range && props.variant !== 'date-time')
+// the file's shortcuts (node 35942:69507): a window back from today — the range it spans, or its first day for a single date; Custom
+// leaves the pick to the calendar
+const SHORTCUTS = [
+  { label: 'Yesterday', days: 1 },
+  { label: 'Last 3 days', days: 3 },
+  { label: 'Last 7 days', days: 7 },
+  { label: 'Last 30 days', days: 30 },
+  { label: 'Custom', days: 0 },
+]
+function pickShortcut(days: number) {
+  if (!days) return
+  const from = fmt(base.value.subtract(days, 'day'))
+  const to = fmt(base.value.subtract(days === 1 ? 1 : 0, 'day'))
+  if (isRange.value) range.value = [from, to]
+  else date.value = from
+}
+const isRange = computed(() => props.range)
+
+// the sun button picks today; the library keeps showing the month it was
+// on, so the calendar is redrawn — it opens on the picked date's month
+const calendarKey = ref(0)
 
 // ---- footer: Reset clears, Cancel goes back to the file's date, Apply keeps
 function reset() {
@@ -235,29 +226,36 @@ const icons = {
         aria-label="Shortcuts"
       >
         <Button
-          v-for="s in isRange ? rangeShortcuts : dateShortcuts"
+          v-for="s in SHORTCUTS"
           :key="s.label"
           variant="ghost"
           size="sm"
-          class="w-full !justify-start !text-sm"
+          class="dp-shortcut w-full !justify-start"
           :label="s.label"
-          @click="
-            isRange
-              ? (range = s.value as DateRangeValue)
-              : (date = s.value as string)
-          "
+          @click="pickShortcut(s.days)"
         />
       </div>
 
-      <div class="dp-cal">
+      <!-- a fixed width: 196 for one month, 392 for two -->
+      <div
+        class="dp-cal shrink-0"
+        :class="isRange && doublePane ? 'w-[392px]' : 'w-[196px]'"
+      >
         <DateRangeCalendar
           v-if="isRange"
-          :key="String(doublePane)"
+          :key="`${doublePane}-${calendarKey}`"
           v-model="range"
           :dual-pane="doublePane"
           today-label="Today"
+          @today="calendarKey++"
         />
-        <DateCalendar v-else v-model="date" today-label="Today" />
+        <DateCalendar
+          v-else
+          :key="calendarKey"
+          v-model="date"
+          today-label="Today"
+          @today="calendarKey++"
+        />
       </div>
     </div>
 
@@ -318,6 +316,13 @@ const icons = {
 <style scoped>
 .dp-glyph {
   filter: none;
+}
+
+/* the shortcuts: menu items, 13 regular ink-gray-6 (node 35942:69507) */
+.dp-shortcut {
+  font-size: 13px;
+  font-weight: 420;
+  color: var(--ink-gray-6);
 }
 
 /* ---- the calendar body: 8 in, 6 under the month row ---- */
@@ -480,6 +485,27 @@ const icons = {
   color: var(--ink-gray-4);
 }
 
+/* the date states (node 23667:9349): hover surface-gray-3; today a 1px
+   outline-gray-6 ring, regular weight, ink-gray-7; disabled ink-gray-3 at
+   full opacity (the library bolds today and fades disabled days) */
+.dp-cal :deep([role='row'] > button:not([aria-selected='true']):hover) {
+  background: var(--surface-gray-3);
+}
+.dp-cal :deep([role='row'] > button[aria-label$='(Today)']) {
+  font-weight: 420;
+}
+.dp-cal
+  :deep(
+    [role='row'] > button[aria-label$='(Today)']:not([aria-selected='true'])
+  ) {
+  color: var(--ink-gray-7);
+  box-shadow: inset 0 0 0 1px var(--outline-gray-6);
+}
+.dp-cal :deep([role='row'] > button[data-disabled]) {
+  opacity: 1;
+  color: var(--ink-gray-3);
+}
+
 /* the range: one surface-gray-1 bar from end to end */
 .dp-cal :deep([role='row'] > button.bg-surface-gray-3) {
   background: var(--surface-gray-1);
@@ -526,7 +552,6 @@ const icons = {
   height: 28px;
   padding: 0 8px;
   border-radius: 8px;
-  text-align: left;
   font-size: 13px;
   color: var(--ink-gray-7);
 }
@@ -557,5 +582,13 @@ const icons = {
   color: var(--ink-gray-7);
   -webkit-mask-image: var(--dp-select);
   mask-image: var(--dp-select);
+}
+</style>
+
+<style>
+/* the time selects' lists show six options and scroll for the rest; the
+   list is portalled out of the picker, so this is gated on the time row */
+body:has(.dp-time) [data-slot='content'] [data-reka-select-viewport] {
+  max-height: calc(6 * 24px + 8px);
 }
 </style>
