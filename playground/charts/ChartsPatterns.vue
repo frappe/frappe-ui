@@ -19,8 +19,8 @@
 // radio group has picked. The theme is a set of the file's colour
 // variables (chartThemes.ts) resolved off the page (useChartTokens.ts),
 // so the dark mode is the file's dark column of the same variables.
-import { onBeforeUnmount, onMounted, ref, type Component } from 'vue'
-import { Radio, RadioGroup } from '../../src'
+import { nextTick, onBeforeUnmount, onMounted, ref, type Component } from 'vue'
+import { Radio, RadioGroup, TabButtons } from '../../src'
 import { CHART_THEMES, type ChartTheme } from './chartThemes'
 import { useChartTheme } from './useChartTheme'
 import BarSection from './sections/BarSection.vue'
@@ -45,7 +45,6 @@ type ChartType =
   | 'funnel'
   | 'annotation'
   | 'pie'
-  | 'dashboard'
 
 /** the rail's rows, in the file's order and words */
 const CHART_TYPES: Array<{
@@ -79,8 +78,28 @@ const CHART_TYPES: Array<{
   { id: 'funnel', label: 'Funnel chart', section: FunnelSection },
   { id: 'annotation', label: 'Annotation', section: AnnotationSection },
   { id: 'pie', label: 'Pie charts', section: PieSection },
-  { id: 'dashboard', label: 'Dashboard', section: DashboardSection },
 ]
+
+/**
+ * What the page shows, picked at the head of the rail: every kind of chart,
+ * one section after another, with the rail's contents to move between them;
+ * or the file's dashboard (1536:35040), the cards put together as one page.
+ * The theme picks for both.
+ */
+type Mode = 'charts' | 'dashboard'
+const MODES = [
+  { value: 'charts', label: 'Charts' },
+  { value: 'dashboard', label: 'Dashboard' },
+]
+const mode = ref<Mode>('charts')
+async function setMode(next: Mode) {
+  if (next === mode.value) return
+  mode.value = next
+  // a page of its own: it opens at its top, and the rail's mark starts over
+  await nextTick()
+  if (scroller) scroller.scrollTop = 0
+  follow()
+}
 
 /** the section in view, which the rail marks */
 const type = ref<ChartType>('bar')
@@ -192,36 +211,59 @@ onBeforeUnmount(() => {
            section's last card and the next one's name. A section stops 43
            short of the top when the rail takes the page to it, where the page
            opens its first. -->
+      <template v-if="mode === 'charts'">
+        <section
+          v-for="(t, i) in CHART_TYPES"
+          :id="`charts-${t.id}`"
+          :key="t.id"
+          :ref="setSection(t.id)"
+          class="scroll-mt-[43px]"
+          :class="[
+            i > 0 && 'mt-12',
+            t.smallCards ? 'small-cards' : 'self-center',
+          ]"
+          :aria-labelledby="`charts-${t.id}-title`"
+        >
+          <h2
+            :id="`charts-${t.id}-title`"
+            class="text-3xl-semibold leading-tighter text-ink-gray-9"
+          >
+            {{ t.label }}
+          </h2>
+          <div
+            :key="themeId"
+            :data-chart-theme="themeId"
+            class="chart-grid mt-6"
+            :class="{ 'chart-grid--figma': !t.smallCards }"
+          >
+            <component
+              :is="t.section"
+              :theme="theme"
+              :theme-id="themeId"
+              v-bind="t.props"
+            />
+          </div>
+        </section>
+      </template>
+      <!-- the dashboard: the file's page of cards, under its own name -->
       <section
-        v-for="(t, i) in CHART_TYPES"
-        :id="`charts-${t.id}`"
-        :key="t.id"
-        :ref="setSection(t.id)"
-        class="scroll-mt-[43px]"
-        :class="[
-          i > 0 && 'mt-12',
-          t.smallCards ? 'small-cards' : 'self-center',
-        ]"
-        :aria-labelledby="`charts-${t.id}-title`"
+        v-else
+        id="charts-dashboard"
+        class="self-center"
+        aria-labelledby="charts-dashboard-title"
       >
         <h2
-          :id="`charts-${t.id}-title`"
+          id="charts-dashboard-title"
           class="text-3xl-semibold leading-tighter text-ink-gray-9"
         >
-          {{ t.label }}
+          Dashboard
         </h2>
         <div
           :key="themeId"
           :data-chart-theme="themeId"
-          class="chart-grid mt-6"
-          :class="{ 'chart-grid--figma': !t.smallCards }"
+          class="chart-grid chart-grid--figma mt-6"
         >
-          <component
-            :is="t.section"
-            :theme="theme"
-            :theme-id="themeId"
-            v-bind="t.props"
-          />
+          <DashboardSection :theme="theme" :theme-id="themeId" />
         </div>
       </section>
     </div>
@@ -235,35 +277,53 @@ onBeforeUnmount(() => {
     <aside
       class="sticky top-0 hidden h-fit w-[180px] shrink-0 self-start pr-4 pt-[66px] lg:block"
     >
+      <!-- the mode: the chart sections, or the dashboard, the file's
+           segmented control, each tab as wide as its name -->
       <h2
-        id="chart-types"
+        id="chart-mode"
         class="text-base-semibold leading-tighter text-ink-gray-9"
       >
-        Charts type
+        Mode
       </h2>
-      <!-- the page's contents: each row takes the page to its section, and the
-           one being read carries the line's segment -->
-      <nav aria-labelledby="chart-types">
-        <ul
-          class="mt-[19px] flex flex-col gap-0.5 border-l border-outline-gray-1 py-1"
+      <TabButtons
+        class="mt-[18px]"
+        :model-value="mode"
+        :options="MODES"
+        aria-labelledby="chart-mode"
+        @update:model-value="(v) => setMode(v as Mode)"
+      />
+
+      <template v-if="mode === 'charts'">
+        <h2
+          id="chart-types"
+          class="mt-[45px] text-base-semibold leading-tighter text-ink-gray-9"
         >
-          <li v-for="t in CHART_TYPES" :key="t.id" class="-ml-px">
-            <a
-              :href="`#charts-${t.id}`"
-              class="block w-full border-l py-1 pl-4 text-start text-base leading-tighter transition-colors"
-              :class="
-                type === t.id
-                  ? 'border-[color:var(--ink-gray-7)] text-ink-gray-9'
-                  : 'border-transparent text-ink-gray-8 hover:text-ink-gray-9'
-              "
-              :aria-current="type === t.id ? 'location' : undefined"
-              @click.prevent="go(t.id)"
-            >
-              {{ t.label }}
-            </a>
-          </li>
-        </ul>
-      </nav>
+          Charts type
+        </h2>
+        <!-- the page's contents: each row takes the page to its section, and the
+           one being read carries the line's segment -->
+        <nav aria-labelledby="chart-types">
+          <ul
+            class="mt-[19px] flex flex-col gap-0.5 border-l border-outline-gray-1 py-1"
+          >
+            <li v-for="t in CHART_TYPES" :key="t.id" class="-ml-px">
+              <a
+                :href="`#charts-${t.id}`"
+                class="block w-full border-l py-1 pl-4 text-start text-base leading-tighter transition-colors"
+                :class="
+                  type === t.id
+                    ? 'border-[color:var(--ink-gray-7)] text-ink-gray-9'
+                    : 'border-transparent text-ink-gray-8 hover:text-ink-gray-9'
+                "
+                :aria-current="type === t.id ? 'location' : undefined"
+                @click.prevent="go(t.id)"
+              >
+                {{ t.label }}
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </template>
 
       <h2 class="mt-[45px] text-base-semibold leading-tighter text-ink-gray-9">
         Theme
