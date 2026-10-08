@@ -75,7 +75,7 @@ onMounted(placeModeChip)
         data-label="Default"
       >
         <h2 class="text-3xl-semibold text-ink-gray-8">Default</h2>
-        <div class="popover-stage">
+        <div class="v2-frame">
           <DefaultPopovers />
         </div>
       </section>
@@ -86,7 +86,7 @@ onMounted(placeModeChip)
         data-label="Picker grid"
       >
         <h2 class="text-3xl-semibold text-ink-gray-8">Picker grid</h2>
-        <div class="popover-stage">
+        <div class="v2-frame">
           <PickerPopovers
             layout="grid"
             @react="flying?.launch($event)"
@@ -101,7 +101,7 @@ onMounted(placeModeChip)
         data-label="Picker list"
       >
         <h2 class="text-3xl-semibold text-ink-gray-8">Picker list</h2>
-        <div class="popover-stage">
+        <div class="v2-frame">
           <PickerPopovers
             layout="list"
             @react="flying?.launch($event)"
@@ -111,7 +111,7 @@ onMounted(placeModeChip)
       </section>
       <section id="form" class="v2-section" data-section data-label="Form">
         <h2 class="text-3xl-semibold text-ink-gray-8">Form</h2>
-        <div class="popover-stage">
+        <div class="v2-frame">
           <FormPopovers />
         </div>
       </section>
@@ -122,13 +122,13 @@ onMounted(placeModeChip)
         data-label="Onboarding"
       >
         <h2 class="text-3xl-semibold text-ink-gray-8">Onboarding</h2>
-        <div class="popover-stage">
+        <div class="v2-frame">
           <OnboardingPopover />
         </div>
       </section>
       <section id="filter" class="v2-section" data-section data-label="Filter">
         <h2 class="text-3xl-semibold text-ink-gray-8">Filter</h2>
-        <div class="popover-stage">
+        <div class="v2-frame">
           <FilterPopover />
         </div>
       </section>
@@ -139,7 +139,7 @@ onMounted(placeModeChip)
         data-label="Notifications"
       >
         <h2 class="text-3xl-semibold text-ink-gray-8">Notifications</h2>
-        <div class="popover-stage">
+        <div class="v2-frame">
           <NotificationPopovers />
         </div>
       </section>
@@ -150,7 +150,7 @@ onMounted(placeModeChip)
         data-label="Comments"
       >
         <h2 class="text-3xl-semibold text-ink-gray-8">Comments</h2>
-        <div class="popover-stage">
+        <div class="v2-frame">
           <CommentPopover />
         </div>
       </section>
@@ -161,7 +161,7 @@ onMounted(placeModeChip)
         data-label="App switcher"
       >
         <h2 class="text-3xl-semibold text-ink-gray-8">App switcher</h2>
-        <div class="popover-stage">
+        <div class="v2-frame">
           <AppSwitcherPopovers />
         </div>
       </section>
@@ -172,7 +172,7 @@ onMounted(placeModeChip)
         data-label="Call dialer"
       >
         <h2 class="text-3xl-semibold text-ink-gray-8">Call dialer</h2>
-        <div class="popover-stage">
+        <div class="v2-frame">
           <CallDialer />
         </div>
       </section>
@@ -183,7 +183,7 @@ onMounted(placeModeChip)
         data-label="Voice record"
       >
         <h2 class="text-3xl-semibold text-ink-gray-8">Voice record</h2>
-        <div class="popover-stage">
+        <div class="v2-frame">
           <VoiceRecorder />
         </div>
       </section>
@@ -194,7 +194,7 @@ onMounted(placeModeChip)
         data-label="Embed link"
       >
         <h2 class="text-3xl-semibold text-ink-gray-8">Embed link</h2>
-        <div class="popover-stage">
+        <div class="v2-frame">
           <EmbedPopovers />
         </div>
       </section>
@@ -207,7 +207,7 @@ onMounted(placeModeChip)
         data-label="Toolbar"
       >
         <h2 class="text-3xl-semibold text-ink-gray-8">Toolbar</h2>
-        <div class="popover-stage">
+        <div class="v2-frame">
           <div class="flex flex-col items-start gap-10">
             <div
               ref="modeRow"
@@ -266,17 +266,3 @@ onMounted(placeModeChip)
     <FlyingReactions ref="flying" side="left" />
   </div>
 </template>
-
-<style scoped>
-/* Each section's popovers stand in one frame: the column's full width, an
-   outline-gray-1 hairline round the page's own white, the way a canvas holds
-   a design, so every example reads as a bounded piece and they all line up on
-   the same edges — the title over the frame's left edge, the popovers centred
-   in it. The section is `text-center` (the flow layout centres its screens),
-   which every popover inherited: a comment's text and a notification's
-   message came out centred line by line. The frame sets the text back to the
-   start; the few places that centre on purpose say so themselves. */
-.popover-stage {
-  @apply flex w-full justify-center rounded-6 border border-outline-gray-1 bg-surface-base px-6 py-10 text-left;
-}
-</style>

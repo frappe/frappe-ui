@@ -1350,6 +1350,17 @@ const outlineTitle = computed(
 .v2-sections.is-flow > .v2-section > h2 {
   @apply self-start text-left;
 }
+/* A flow page's example in its frame: the column's full width, an
+   outline-gray-1 hairline round the page's own white, the way a canvas holds
+   a design, so every example reads as a bounded piece and they all line up on
+   the same edges — the heading over the frame's left edge, the example centred
+   in it. The section is `text-center` (the flow layout centres its screens)
+   and an example inherited it, so a comment or a message came out centred line
+   by line; the frame sets the text back to the start, and the few places that
+   centre on purpose say so themselves. */
+.v2-frame {
+  @apply flex w-full justify-center rounded-6 border border-outline-gray-1 bg-surface-base px-6 py-10 text-left;
+}
 @media (prefers-reduced-motion: reduce) {
   .v2-sections {
     scroll-behavior: auto;

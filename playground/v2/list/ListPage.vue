@@ -1,8 +1,9 @@
 <script setup lang="ts">
 // Figma: espresso-2.0 › List (34984:218610; Email compact / medium / large:
 // 34984:225794 / 224389 / 224989, see the Email* lists; Task: 30989:24065;
-// Notification: 34945:113760; Event: 30989:24929). Each list is a screen of
-// its own, scrolled and snapped to; the File list is 960px wide:
+// Notification: 34945:113760; Event: 30989:24929). Every list stacked down
+// one column under its heading, each in its frame (.v2-frame), as the
+// Popovers page lays out its popovers; the File list is 960px wide:
 //   row      p 12, 16px between the 140 × 82 thumbnail and the content;
 //            12px-radius surface-gray-1 hover; outline-gray-1 rules between
 //            rows, hidden around the hovered one
@@ -134,91 +135,103 @@ function duplicate(file: FileRow) {
 
 <template>
   <div class="relative h-full">
-    <div class="v2-sections" data-sections>
+    <div class="v2-sections is-flow list-flow" data-sections>
+      <header class="v2-flow-head">
+        <h1 class="text-4xl-semibold text-ink-gray-9">Lists</h1>
+        <p class="text-p-base text-ink-gray-6">
+          Every list type, down the page.
+        </p>
+      </header>
       <section id="file" class="v2-section" data-section data-label="File">
-        <ul class="espresso-list w-[960px] max-w-full">
-          <li
-            v-for="file in files"
-            :key="file.id"
-            class="espresso-list-row relative flex gap-4 rounded-6 p-3 transition-colors hover:bg-surface-gray-1 dark:hover:bg-surface-gray-2"
-          >
-            <img
-              :src="file.thumbnail"
-              alt=""
-              class="espresso-thumb h-[82px] w-[140px] shrink-0 rounded-4 object-cover"
-            />
+        <h2 class="text-3xl-semibold text-ink-gray-8">File</h2>
+        <div class="v2-frame">
+          <ul class="espresso-list w-[960px] max-w-full">
+            <li
+              v-for="file in files"
+              :key="file.id"
+              class="espresso-list-row relative flex gap-4 rounded-6 p-3 transition-colors hover:bg-surface-gray-1 dark:hover:bg-surface-gray-2"
+            >
+              <img
+                :src="file.thumbnail"
+                alt=""
+                class="espresso-thumb h-[82px] w-[140px] shrink-0 rounded-4 object-cover"
+              />
 
-            <div class="flex min-w-0 flex-1 gap-2">
-              <div class="flex min-w-0 flex-1 flex-col gap-1">
-                <p class="flex items-baseline gap-1">
-                  <span class="truncate text-lg-medium text-ink-gray-7">{{
-                    file.title
-                  }}</span>
-                  <span
-                    v-if="file.hint"
-                    class="shrink-0 text-base text-ink-gray-5"
-                  >
-                    · {{ file.hint }}
-                  </span>
-                </p>
-                <div class="flex flex-col gap-5">
-                  <p
-                    class="flex items-center gap-2 text-p-base text-ink-gray-6"
-                  >
+              <div class="flex min-w-0 flex-1 gap-2">
+                <div class="flex min-w-0 flex-1 flex-col gap-1">
+                  <p class="flex items-baseline gap-1">
+                    <span class="truncate text-lg-medium text-ink-gray-7">{{
+                      file.title
+                    }}</span>
                     <span
-                      class="size-4 shrink-0 text-ink-gray-7"
-                      v-html="globeIcon"
-                    />
-                    <span class="truncate">{{ file.link }}</span>
-                  </p>
-                  <p
-                    class="flex h-6 items-center gap-2 text-base text-ink-gray-7"
-                  >
-                    {{ file.edited }}・
-                    <Badge
-                      :theme="STATUS[file.status].theme"
-                      variant="subtle"
-                      size="lg"
+                      v-if="file.hint"
+                      class="shrink-0 text-base text-ink-gray-5"
                     >
-                      {{ STATUS[file.status].label }}
-                    </Badge>
+                      · {{ file.hint }}
+                    </span>
                   </p>
+                  <div class="flex flex-col gap-5">
+                    <p
+                      class="flex items-center gap-2 text-p-base text-ink-gray-6"
+                    >
+                      <span
+                        class="size-4 shrink-0 text-ink-gray-7"
+                        v-html="globeIcon"
+                      />
+                      <span class="truncate">{{ file.link }}</span>
+                    </p>
+                    <p
+                      class="flex h-6 items-center gap-2 text-base text-ink-gray-7"
+                    >
+                      {{ file.edited }}・
+                      <Badge
+                        :theme="STATUS[file.status].theme"
+                        variant="subtle"
+                        size="lg"
+                      >
+                        {{ STATUS[file.status].label }}
+                      </Badge>
+                    </p>
+                  </div>
+                </div>
+
+                <!-- 24px owner avatar · 8px · ⋯ -->
+                <div class="flex h-6 shrink-0 items-center gap-2">
+                  <Avatar
+                    size="md"
+                    shape="circle"
+                    :image="file.owner.image"
+                    :label="file.owner.name"
+                  />
+                  <Dropdown :options="rowActions(file)" align="end">
+                    <Button
+                      variant="ghost"
+                      size="xs"
+                      :label="`More actions for ${file.title}`"
+                    >
+                      <template #icon>
+                        <span class="lucide-ellipsis size-4 text-ink-gray-7" />
+                      </template>
+                    </Button>
+                  </Dropdown>
                 </div>
               </div>
-
-              <!-- 24px owner avatar · 8px · ⋯ -->
-              <div class="flex h-6 shrink-0 items-center gap-2">
-                <Avatar
-                  size="md"
-                  shape="circle"
-                  :image="file.owner.image"
-                  :label="file.owner.name"
-                />
-                <Dropdown :options="rowActions(file)" align="end">
-                  <Button
-                    variant="ghost"
-                    size="xs"
-                    :label="`More actions for ${file.title}`"
-                  >
-                    <template #icon>
-                      <span class="lucide-ellipsis size-4 text-ink-gray-7" />
-                    </template>
-                  </Button>
-                </Dropdown>
-              </div>
-            </div>
-          </li>
-        </ul>
+            </li>
+          </ul>
+        </div>
       </section>
 
-      <!-- Email comes in three densities; each gets its own screen -->
+      <!-- Email comes in three densities; each gets its own section -->
       <section
         id="email-compact"
         class="v2-section"
         data-section
         data-label="Email compact"
       >
-        <EmailCompactList />
+        <h2 class="text-3xl-semibold text-ink-gray-8">Email compact</h2>
+        <div class="v2-frame">
+          <EmailCompactList />
+        </div>
       </section>
       <section
         id="email-medium"
@@ -226,7 +239,10 @@ function duplicate(file: FileRow) {
         data-section
         data-label="Email medium"
       >
-        <EmailMediumList />
+        <h2 class="text-3xl-semibold text-ink-gray-8">Email medium</h2>
+        <div class="v2-frame">
+          <EmailMediumList />
+        </div>
       </section>
       <section
         id="email-large"
@@ -234,11 +250,17 @@ function duplicate(file: FileRow) {
         data-section
         data-label="Email large"
       >
-        <EmailLargeList />
+        <h2 class="text-3xl-semibold text-ink-gray-8">Email large</h2>
+        <div class="v2-frame">
+          <EmailLargeList />
+        </div>
       </section>
 
       <section id="task" class="v2-section" data-section data-label="Task">
-        <TaskList />
+        <h2 class="text-3xl-semibold text-ink-gray-8">Task</h2>
+        <div class="v2-frame">
+          <TaskList />
+        </div>
       </section>
       <section
         id="notification"
@@ -246,16 +268,29 @@ function duplicate(file: FileRow) {
         data-section
         data-label="Notification"
       >
-        <NotificationList />
+        <h2 class="text-3xl-semibold text-ink-gray-8">Notification</h2>
+        <div class="v2-frame">
+          <NotificationList />
+        </div>
       </section>
       <section id="event" class="v2-section" data-section data-label="Event">
-        <EventList />
+        <h2 class="text-3xl-semibold text-ink-gray-8">Event</h2>
+        <div class="v2-frame">
+          <EventList />
+        </div>
       </section>
     </div>
   </div>
 </template>
 
 <style>
+/* The column holds the widest list as the file draws it: the File list's
+   960 and the frame's 24 either side, where the other flow pages keep 900. */
+.v2-sections.is-flow.list-flow > .v2-flow-head,
+.v2-sections.is-flow.list-flow > .v2-section {
+  max-width: 1010px;
+}
+
 /* the thumbnail's shadow, as the file draws it — three plain drops, no
    inset hairline (shadow-sm would ring the image) */
 .espresso-thumb {
