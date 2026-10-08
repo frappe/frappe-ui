@@ -54,6 +54,24 @@ const wash = computed(() => ({
   lineStyle: { width: 1.5 },
 }))
 
+/**
+ * The labelled card's first number stands just right of the axis, not across
+ * it. Centred on the first point, which sits 8 off the value axis, a label as
+ * wide as "13.9k" reached back over the axis's own "15k" on the same line. The
+ * file leaves its first label 5 clear of the axis (1356:67428), so this one
+ * starts 3 left of its point and runs right; every other label stays centred.
+ */
+const FIRST_LABEL_LEAD = 3
+const washLabelled = computed(() => ({
+  ...wash.value,
+  // a function replaces the library's `{ hideOverlap: true }`, so it says so
+  // again: labels that would collide still drop out
+  labelLayout: (p: { dataIndex: number; labelRect: { width: number } }) => ({
+    hideOverlap: true,
+    ...(p.dataIndex === 0 && { dx: p.labelRect.width / 2 - FIRST_LABEL_LEAD }),
+  }),
+}))
+
 const stacked = monthly.map((row, i) => ({
   month: row.month,
   data1: Math.round(row.sales * 0.4),
@@ -187,7 +205,11 @@ const stackConfig = {
       y="sales"
       show-data-labels
       :series-config="{
-        sales: { label: 'Sales', format: thousands, echartOptions: wash },
+        sales: {
+          label: 'Sales',
+          format: thousands,
+          echartOptions: washLabelled,
+        },
       }"
       :x-axis="yearAxis"
       :y-axis="salesAxis"
