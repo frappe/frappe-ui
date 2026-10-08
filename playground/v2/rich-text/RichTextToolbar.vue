@@ -377,7 +377,7 @@ const moreOptions = computed<DropdownOptions>(() => [
   },
   {
     label: 'Clear formatting',
-    icon: lucide('remove-formatting'),
+    icon: icon('clear-formatting'),
     onClick: () => chain().unsetAllMarks().clearNodes().run(),
   },
 ])
