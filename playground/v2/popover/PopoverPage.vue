@@ -268,15 +268,15 @@ onMounted(placeModeChip)
 </template>
 
 <style scoped>
-/* Each section's popovers stand in one frame: the column's full width, a
-   hairline and the page's quietest fill under them, the way a canvas holds a
-   design, so every example reads as a bounded piece and they all line up on
+/* Each section's popovers stand in one frame: the column's full width, an
+   outline-gray-1 hairline round the page's own white, the way a canvas holds
+   a design, so every example reads as a bounded piece and they all line up on
    the same edges — the title over the frame's left edge, the popovers centred
    in it. The section is `text-center` (the flow layout centres its screens),
    which every popover inherited: a comment's text and a notification's
    message came out centred line by line. The frame sets the text back to the
    start; the few places that centre on purpose say so themselves. */
 .popover-stage {
-  @apply flex w-full justify-center rounded-6 border border-outline-gray-1 bg-surface-gray-1 px-6 py-10 text-left;
+  @apply flex w-full justify-center rounded-6 border border-outline-gray-1 bg-surface-base px-6 py-10 text-left;
 }
 </style>
