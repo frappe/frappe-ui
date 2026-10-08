@@ -118,6 +118,16 @@ export type OwnRole =
   | 'dashStack'
   /** the dashboard's funnel: one colour, faded down the ladder */
   | 'dashFunnel'
+  /** the CRM dashboard (1555:35858): the pipeline's four stages */
+  | 'crmStages'
+  /** the CRM dashboard's funnel steps, first to last; its edge the last */
+  | 'crmFunnel'
+  /** the CRM dashboard's forecast, then actual */
+  | 'crmLines'
+  /** the wash behind a top deal's value, laid at a fifth (see DashboardV2) */
+  | 'crmWash'
+  /** the expected closure's progress */
+  | 'crmProgress'
 
 export type ThemeRoles = Record<ThemeRole, string[]> &
   Partial<Record<OwnRole, string[]>>
@@ -169,6 +179,12 @@ const OCEAN: ThemeRoles = {
   dashRing: [o(400), o(300), o(800), o(200), o(500), o(900), o(700), o(600)],
   dashStack: [o(500), o(400), o(900), o(200), o(600), o(300), o(800), o(700)],
   dashFunnel: [o(600)],
+  // the CRM dashboard, read off its frame (1555:35858)
+  crmStages: [o(900), o(700), o(500), o(300)],
+  crmFunnel: [o(300), o(500), o(600), o(800), o(900)],
+  crmLines: [o(900), o(700)],
+  crmWash: [o(800)],
+  crmProgress: [o(700)],
 }
 
 const MIST: ThemeRoles = {
@@ -409,6 +425,11 @@ export const OWN_ROLE_FALLBACK: Record<OwnRole, (r: ThemeRoles) => string[]> = {
   dashRing: (r) => r.half,
   dashStack: (r) => r.half,
   dashFunnel: (r) => [r.funnel[Math.min(1, r.funnel.length - 1)]],
+  crmStages: (r) => r.stack,
+  crmFunnel: (r) => r.funnel,
+  crmLines: (r) => r.lines,
+  crmWash: (r) => r.bar,
+  crmProgress: (r) => r.bar,
 }
 
 export const THEME_ROLES: Record<ChartTheme, ThemeRoles> = {

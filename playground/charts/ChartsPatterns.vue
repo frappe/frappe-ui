@@ -19,7 +19,14 @@
 // radio group has picked. The theme is a set of the file's colour
 // variables (chartThemes.ts) resolved off the page (useChartTokens.ts),
 // so the dark mode is the file's dark column of the same variables.
-import { nextTick, onBeforeUnmount, onMounted, ref, type Component } from 'vue'
+import {
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  watch,
+  type Component,
+} from 'vue'
 import { Radio, RadioGroup, TabButtons } from '../../src'
 import { CHART_THEMES, type ChartTheme } from './chartThemes'
 import { useChartTheme } from './useChartTheme'
@@ -33,6 +40,7 @@ import FunnelSection from './sections/FunnelSection.vue'
 import AnnotationSection from './sections/AnnotationSection.vue'
 import PieSection from './sections/PieSection.vue'
 import DashboardSection from './sections/DashboardSection.vue'
+import DashboardV2 from './sections/DashboardV2.vue'
 
 type ChartType =
   | 'bar'
@@ -92,6 +100,16 @@ const MODES = [
   { value: 'dashboard', label: 'Dashboard' },
 ]
 const mode = ref<Mode>('charts')
+/**
+ * Which dashboard: v1 is the charts put together (1536:35040), v2 a CRM's
+ * home page for one sales agent (1555:35858).
+ */
+type DashboardVersion = 'v1' | 'v2'
+const DASHBOARDS = [
+  { value: 'v1', label: 'Dashboard v1' },
+  { value: 'v2', label: 'Dashboard v2' },
+]
+const dashboard = ref<DashboardVersion>('v1')
 async function setMode(next: Mode) {
   if (next === mode.value) return
   mode.value = next
@@ -100,6 +118,11 @@ async function setMode(next: Mode) {
   if (scroller) scroller.scrollTop = 0
   follow()
 }
+// a different dashboard is a different page too
+watch(dashboard, async () => {
+  await nextTick()
+  if (scroller) scroller.scrollTop = 0
+})
 
 /** the section in view, which the rail marks */
 const type = ref<ChartType>('bar')
@@ -211,6 +234,7 @@ onBeforeUnmount(() => {
            section's last card and the next one's name. A section stops 43
            short of the top when the rail takes the page to it, where the page
            opens its first. -->
+
       <template v-if="mode === 'charts'">
         <section
           v-for="(t, i) in CHART_TYPES"
@@ -245,9 +269,9 @@ onBeforeUnmount(() => {
           </div>
         </section>
       </template>
-      <!-- the dashboard: the file's page of cards, under its own name -->
+      <!-- the dashboard: v1, the file's page of cards under its own name -->
       <section
-        v-else
+        v-else-if="dashboard === 'v1'"
         id="charts-dashboard"
         class="self-center"
         aria-labelledby="charts-dashboard-title"
@@ -265,6 +289,17 @@ onBeforeUnmount(() => {
         >
           <DashboardSection :theme="theme" :theme-id="themeId" />
         </div>
+      </section>
+      <!-- or v2, the agent's home page, which opens on its own greeting -->
+      <section
+        v-else
+        id="charts-dashboard"
+        :key="themeId"
+        class="grid"
+        :data-chart-theme="themeId"
+        aria-label="Dashboard"
+      >
+        <DashboardV2 :theme="theme" />
       </section>
     </div>
 
@@ -292,6 +327,31 @@ onBeforeUnmount(() => {
         aria-labelledby="chart-mode"
         @update:model-value="(v) => setMode(v as Mode)"
       />
+
+      <!-- in the dashboard, which of the two -->
+      <template v-if="mode === 'dashboard'">
+        <h2
+          id="chart-dashboard"
+          class="mt-[45px] text-base-semibold leading-tighter text-ink-gray-9"
+        >
+          Dashboard
+        </h2>
+        <RadioGroup
+          v-model="dashboard"
+          class="theme-radios mt-[18px]"
+          size="sm"
+          padded
+          orientation="vertical"
+          aria-labelledby="chart-dashboard"
+        >
+          <Radio
+            v-for="d in DASHBOARDS"
+            :key="d.value"
+            :value="d.value"
+            :label="d.label"
+          />
+        </RadioGroup>
+      </template>
 
       <template v-if="mode === 'charts'">
         <h2
