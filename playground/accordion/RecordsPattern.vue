@@ -13,7 +13,7 @@
 //              last, so that one is hidden and the file's goes in the
 //              label slot — turned up when open
 //   cell       8 in: the company's 16px logo, 8, its name in text/base/medium
-//              ink-gray-7, 6, the domain at 12 ink-gray-5
+//              ink-gray-7, 6, the domain in text/base/regular ink-gray-5
 //              on the name's baseline
 //   suffix     a lg subtle gray Badge, the file's org glyph before
 //              "Organisation"
@@ -142,7 +142,7 @@ const recordOf = (value: string) => records.find((r) => r.value === value)!
               >
             </span>
             <span
-              class="shrink-0 text-xs font-normal leading-[14px] text-ink-gray-5"
+              class="shrink-0 text-base font-normal leading-4 text-ink-gray-5"
               >{{ recordOf(item.value).domain }}</span
             >
           </span>
