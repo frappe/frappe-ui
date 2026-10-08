@@ -480,9 +480,20 @@ function onFocusIn(e: FocusEvent) {
           :class="open && 'is-open'"
           aria-label="Text style"
         >
-          <span class="text-base leading-4 text-ink-gray-7">{{
-            activeBlockLabel
-          }}</span>
+          <!-- every style's name laid in one cell, the others unseen, so
+               the select is as wide as the longest ("Numbered list") and
+               the controls after it hold still as the caret moves from a
+               paragraph into a list -->
+          <span class="grid text-base leading-4 text-ink-gray-7">
+            <span
+              v-for="b in BLOCKS"
+              :key="b.value"
+              class="[grid-area:1/1]"
+              :class="b.label !== activeBlockLabel && 'invisible'"
+              :aria-hidden="b.label !== activeBlockLabel"
+              >{{ b.label }}</span
+            >
+          </span>
           <RteIcon :name="open ? 'small-up' : 'small-down'" class="size-4" />
         </button>
       </template>
@@ -497,9 +508,17 @@ function onFocusIn(e: FocusEvent) {
           :class="open && 'is-open'"
           aria-label="Font"
         >
-          <span class="text-base leading-4 text-ink-gray-7">{{
-            activeFont
-          }}</span>
+          <!-- as the style's: as wide as the widest face's name -->
+          <span class="grid text-base leading-4 text-ink-gray-7">
+            <span
+              v-for="f in FONTS"
+              :key="f.label"
+              class="[grid-area:1/1]"
+              :class="f.label !== activeFont && 'invisible'"
+              :aria-hidden="f.label !== activeFont"
+              >{{ f.label }}</span
+            >
+          </span>
           <RteIcon name="small-down" class="size-4" />
         </button>
       </template>
