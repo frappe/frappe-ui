@@ -370,6 +370,39 @@ describe('dialog.ts — imperative API', () => {
     cy.contains('button', 'Cancel').should('exist')
   })
 
+  it('prompt autofocuses the first text field and submits on Enter', () => {
+    const onConfirm = cy.spy().as('onConfirm')
+
+    cy.mount(DialogManager)
+
+    cy.then(() => {
+      prompt({
+        title: 'Rename project',
+        fields: [
+          {
+            name: 'name',
+            label: 'Name',
+            defaultValue: 'Old name',
+          },
+        ],
+        onConfirm,
+      })
+    })
+
+    cy.get('[role=dialog] input[type=text]')
+      .should('have.focus')
+      .type('New name')
+      .type('{enter}')
+
+    cy.get('@onConfirm').should('have.been.calledOnce')
+    cy.get('@onConfirm').then((spy: any) => {
+      const ctx = spy.firstCall.args[0]
+      expect(ctx.values).to.deep.equal({ name: 'New name' })
+    })
+
+    cy.get('[role=dialog]').should('not.exist')
+  })
+
   it('prompt submits typed values via onConfirm', () => {
     const onConfirm = cy.spy().as('onConfirm')
     cy.mount(DialogManager)
