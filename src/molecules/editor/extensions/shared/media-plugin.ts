@@ -13,6 +13,7 @@ import type { Transaction, EditorState } from '@tiptap/pm/state'
 import type { EditorView } from '@tiptap/pm/view'
 import type { Editor } from '@tiptap/core'
 import { dispatchIfAlive } from '#molecules/editor/extensions/shared/node-view'
+import { isRemoteChange } from '#molecules/editor/extensions/shared/collaboration'
 import { resolveUploadOptions } from '#molecules/editor/extensions/shared/media-upload-engine'
 import type {
   MediaUploadConfig,
@@ -79,23 +80,50 @@ export function createMediaPlugin(
     },
 
     /**
-     * After any doc-changing transaction, back-fill width/height onto freshly
-     * inserted nodes that have a `src` but no dimensions and are not loading.
+     * Back-fill width/height onto media the person's own edit just added that
+     * has a `src` but no dimensions and is not loading. Stored media, loaded
+     * content, a collaborator's change and undo/redo are left as they are, so
+     * opening or watching a document writes nothing.
      */
     appendTransaction(
       transactions: readonly Transaction[],
-      _oldState: EditorState,
+      oldState: EditorState,
       newState: EditorState,
     ): Transaction | null {
       if (!transactions.some((tr) => tr.docChanged)) return null
+      if (isRemoteChange(transactions, newState)) return null
+      if (
+        transactions.some(
+          (tr) => tr.getMeta('preventUpdate') || tr.getMeta('history$'),
+        )
+      )
+        return null
+
+      const before = new Set<unknown>()
+      oldState.doc.descendants((node) => {
+        before.add(node)
+      })
+
+      const storedAt = new Map<number, string>()
+      oldState.doc.descendants((node, pos) => {
+        if (node.type.name !== config.nodeName || !node.attrs.src) return
+        if (node.attrs.loading) return
+        const mapped = transactions.reduce(
+          (at, tr) => tr.mapping.map(at, 1),
+          pos,
+        )
+        storedAt.set(mapped, node.attrs.src)
+      })
 
       const pending: number[] = []
       newState.doc.descendants((node, pos) => {
         if (
+          !before.has(node) &&
           node.type.name === config.nodeName &&
           node.attrs.src &&
           (!node.attrs.width || !node.attrs.height) &&
-          !node.attrs.loading
+          !node.attrs.loading &&
+          storedAt.get(pos) !== node.attrs.src
         ) {
           pending.push(pos)
         }
