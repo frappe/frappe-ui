@@ -55,13 +55,26 @@ const editor = useResolvedEditor(() => undefined)
 // the editor is not reactive on its own; a tick per transaction lets the
 // controls read their state fresh (as the library's MenuItems does)
 const version = ref(0)
+// The editor opens with its caret at the top of the document, in the title,
+// which named the style select "Heading 1" before anyone had clicked into the
+// page. Until the editor has been focused or its caret moved, the select
+// reads "Text".
+const engaged = ref(false)
 watch(
   () => editor.value,
   (ed, _old, onCleanup) => {
     if (!ed) return
     const bump = () => version.value++
+    const engage = () => (engaged.value = true)
+    if (ed.isFocused) engage()
     ed.on('transaction', bump)
-    onCleanup(() => ed.off('transaction', bump))
+    ed.on('focus', engage)
+    ed.on('selectionUpdate', engage)
+    onCleanup(() => {
+      ed.off('transaction', bump)
+      ed.off('focus', engage)
+      ed.off('selectionUpdate', engage)
+    })
   },
   { immediate: true },
 )
@@ -84,7 +97,7 @@ const chain = () => editor.value!.chain().focus()
 // ---- the block style: what the cursor sits in, and the menu to change it
 // (the list and the commands are rteBlocks', shared with the floating bar)
 const activeBlock = computed<BlockValue>(() =>
-  live((ed) => activeBlockOf(ed), 'paragraph'),
+  engaged.value ? live((ed) => activeBlockOf(ed), 'paragraph') : 'paragraph',
 )
 const activeBlockLabel = computed(() => blockLabel(activeBlock.value))
 const blockOptions = computed<DropdownOptions>(() =>
@@ -484,7 +497,9 @@ function onFocusIn(e: FocusEvent) {
                the select is as wide as the longest ("Numbered list") and
                the controls after it hold still as the caret moves from a
                paragraph into a list -->
-          <span class="grid text-base leading-4 text-ink-gray-7">
+          <span
+            class="grid justify-items-start text-left text-base leading-4 text-ink-gray-7"
+          >
             <span
               v-for="b in BLOCKS"
               :key="b.value"
@@ -509,7 +524,9 @@ function onFocusIn(e: FocusEvent) {
           aria-label="Font"
         >
           <!-- as the style's: as wide as the widest face's name -->
-          <span class="grid text-base leading-4 text-ink-gray-7">
+          <span
+            class="grid justify-items-start text-left text-base leading-4 text-ink-gray-7"
+          >
             <span
               v-for="f in FONTS"
               :key="f.label"
