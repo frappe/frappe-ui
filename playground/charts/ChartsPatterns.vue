@@ -32,6 +32,7 @@ import LineSection from './sections/LineSection.vue'
 import FunnelSection from './sections/FunnelSection.vue'
 import AnnotationSection from './sections/AnnotationSection.vue'
 import PieSection from './sections/PieSection.vue'
+import DashboardSection from './sections/DashboardSection.vue'
 
 type ChartType =
   | 'bar'
@@ -44,6 +45,7 @@ type ChartType =
   | 'funnel'
   | 'annotation'
   | 'pie'
+  | 'dashboard'
 
 /** the rail's rows, in the file's order and words */
 const CHART_TYPES: Array<{
@@ -77,6 +79,7 @@ const CHART_TYPES: Array<{
   { id: 'funnel', label: 'Funnel chart', section: FunnelSection },
   { id: 'annotation', label: 'Annotation', section: AnnotationSection },
   { id: 'pie', label: 'Pie charts', section: PieSection },
+  { id: 'dashboard', label: 'Dashboard', section: DashboardSection },
 ]
 
 /** the section in view, which the rail marks */
