@@ -497,6 +497,42 @@ describe('dialog.ts — imperative API', () => {
     cy.contains('[role=option]', 'Create').should('not.exist')
   })
 
+    it('prompt combobox does not submit on Enter while selecting an option', () => {
+    const onConfirm = cy.spy().as('onConfirm')
+
+    cy.mount(DialogManager)
+
+    cy.then(() => {
+      prompt({
+        title: 'Pick a label',
+        fields: [
+          {
+            name: 'label',
+            label: 'Label',
+            type: 'combobox',
+            options: [
+              { label: 'Bug', value: 'bug' },
+              { label: 'Docs', value: 'docs' },
+            ],
+          },
+        ],
+        onConfirm,
+      })
+    })
+
+    cy.get('[role=dialog] [role=combobox]').click().type('Bug')
+    cy.contains('[role=option]', 'Bug').should('exist')
+    cy.get('[role=dialog] [role=combobox]').type('{enter}')
+
+    cy.get('@onConfirm').should('not.have.been.called')
+    cy.get('[role=dialog]').should('exist')
+
+    cy.contains('button', 'Submit').click()
+
+    cy.get('@onConfirm').should('have.been.calledOnce')
+    cy.get('[role=dialog]').should('not.exist')
+  })
+
   it('prompt seeds defaultValue and submits it untouched', () => {
     const onConfirm = cy.spy().as('onConfirm')
     cy.mount(DialogManager)
