@@ -10,10 +10,11 @@
 //              where the library's own (last, hidden) would be — the title
 //              at 16 medium ink-gray-8, and at the right "5 lessons · 28 min"
 //              at 14 ink-gray-7, the dot between a 2px ink-gray-4 disc
-//   lessons    under an open chapter, 8 below it: rows 42 tall overlapping
-//              by 2 (40 apart), 12 / 20 in, 12 apart — the file's lesson
-//              glyph (18, ink-gray-8), the title at 14 ink-gray-8 and its
-//              length at 14 ink-gray-7; 5 under the last
+//              (the first chapter 20 / 12 in, the last 16 / 20 and 54 tall)
+//   lessons    straight under an open chapter: rows 42 tall, 42 apart,
+//              12 / 20 in, 12 apart — the file's lesson glyph (18,
+//              ink-gray-8), the title at 14 ink-gray-8 and its length at
+//              14 ink-gray-7; the next chapter follows the last directly
 import { Accordion } from '../../experimental/Accordion'
 import AccordionIcon from './AccordionIcon.vue'
 
@@ -136,7 +137,7 @@ const chapterOf = (value: string) => chapters.find((c) => c.value === value)!
         </span>
       </template>
       <template #item-content="{ item }">
-        <ul class="flex flex-col pb-[5px] pt-2">
+        <ul class="flex flex-col">
           <li
             v-for="lesson in chapterOf(item.value).items"
             :key="lesson.title"
@@ -182,8 +183,14 @@ const chapterOf = (value: string) => chapters.find((c) => c.value === value)!
 .course :deep([data-slot='content'] > div) {
   padding: 0;
 }
-/* the lessons overlap by 2, as the file's 42 rows sit 40 apart */
-.course-lesson + .course-lesson {
-  margin-top: -2px;
+/* the first chapter sits 20 / 12 in and the last 16 / 20, so the card
+   has 20 above and below; the rest are 16 / 16 */
+.course :deep([data-slot='item']:first-child [data-slot='trigger']) {
+  padding-top: 20px;
+  padding-bottom: 12px;
+}
+.course :deep([data-slot='item']:last-child [data-slot='trigger']) {
+  height: 54px;
+  padding-bottom: 20px;
 }
 </style>

@@ -12,8 +12,8 @@
 //              row's left edge — where the library puts its own chevron
 //              last, so that one is hidden and the file's goes in the
 //              label slot — turned up when open
-//   cell       8 in: the company's 16px logo, 8, its name at 14 semibold
-//              ink-gray-7 (tracked 0.015em), 6, the domain at 12 ink-gray-5
+//   cell       8 in: the company's 16px logo, 8, its name in text/base/medium
+//              ink-gray-7, 6, the domain at 12 ink-gray-5
 //              on the name's baseline
 //   suffix     a lg subtle gray Badge, the file's org glyph before
 //              "Organisation"
@@ -137,7 +137,7 @@ const recordOf = (value: string) => records.find((r) => r.value === value)!
                 class="size-4 shrink-0 rounded-full"
               />
               <span
-                class="truncate text-base font-semibold leading-4 tracking-[0.015em] text-ink-gray-7"
+                class="truncate text-base font-medium leading-4 text-ink-gray-7"
                 >{{ item.title }}</span
               >
             </span>
