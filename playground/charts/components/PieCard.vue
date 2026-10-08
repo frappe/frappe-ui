@@ -161,6 +161,16 @@ const flat = {
   emphasis: { scale: false },
   label: { show: false },
   labelLine: { show: false },
+  // The entry grows every slice out from the centre at once rather than
+  // echarts' default fan, which crowds all the slices into one thin wedge at
+  // 3 o'clock and opens it under an ease that starts slow — and the nested
+  // pie, six series, fanned out as six separate spokes. Growing from the
+  // centre on an ease-out moves most at the start and settles gently, and
+  // the nested pie's rings grow together as the one shape they make.
+  // A pie series keeps echarts' own 1000ms unless told otherwise.
+  animationType: 'scale',
+  animationEasing: 'cubicOut',
+  animationDuration: 600,
 } as const
 
 /**
@@ -260,7 +270,8 @@ const series = computed(() => {
 
 const option = computed(() => ({
   animation: true,
-  animationDuration: 500,
+  animationDuration: 600,
+  animationEasing: 'cubicOut',
   tooltip: {
     show: true,
     trigger: 'item',
