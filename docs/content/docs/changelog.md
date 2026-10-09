@@ -2854,6 +2854,16 @@ everywhere. `show-plus` still draws every plus, and `:show-plus="false"` none.
 
 ### Other components
 
+#### Stepper — new component (additive)
+
+`Stepper` shows where a flow or a job is in an ordered list of steps. Bind the
+current step's value with `v-model`; every earlier step shows as done and every
+later one as upcoming. Mark a step `skipped`, and set `loading` or `failed` for
+the current step. It renders as a vertical list with one level of sub-steps,
+or, by default, as the stock `Progress` with one interval per step. With
+`clickable`, finished steps become buttons that set `v-model`. See the
+[Stepper docs](/docs/components/stepper).
+
 #### Tree — expansion moves to a keyed `v-model:expanded` (breaking, silent)
 
 `expanded` was a boolean that expanded everything, and each node's open or
