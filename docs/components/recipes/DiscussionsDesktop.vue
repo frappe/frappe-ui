@@ -523,6 +523,7 @@ const spaceActions = [
               :active="activeCommunity === c.id"
               :badge="c.unread"
               badge-style="count"
+              bare
               @click="activeCommunity = c.id"
             >
               <Avatar

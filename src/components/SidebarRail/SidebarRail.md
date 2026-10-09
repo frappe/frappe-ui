@@ -56,6 +56,24 @@ its items, so moving between items shows each tooltip with no delay.
 - `variant="ghost"` is transparent until hovered, and raised when active. Pass
   an `icon` for a shortcut such as Search or Notifications.
 
+### Images
+
+Add `bare` when the default slot holds an image, or anything else that brings
+its own surface and fills the cell. A `bare` item paints no fill in any state.
+The rounded corners of a fill and of an image never cover each other exactly,
+so a fill under the image shows as a faint gray rim, most visibly in dark mode.
+On a `subtle` item, the indicator bar still marks the active item.
+
+When only some items have an image, set `bare` per item, so initials keep the
+fill:
+
+```vue
+<SidebarRailItem :label="c.title" :bare="Boolean(c.image)">
+  <img v-if="c.image" :src="c.image" alt="" class="size-7 rounded-[7px]" />
+  <span v-else>{{ c.initials }}</span>
+</SidebarRailItem>
+```
+
 ### Links
 
 `route` renders a router link and `href` a plain same-tab link. `route` wins
