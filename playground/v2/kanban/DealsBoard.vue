@@ -9,19 +9,19 @@
 // foot. The board is wider than the stage, so it scrolls sideways as a
 // board does.
 //
-// The cards move: pick one up and carry it to another stage, or above or
-// below its neighbours. While it is in the air a plain gray-100 slot its
-// own size opens where it would land — anywhere over the column, its head
-// included — the card stays where it was, dimmed, and nothing else on the
-// board changes: no wash on the columns, no shuffle. Dropping it on the
-// slot moves it; dropping anywhere else puts it back.
+// The cards move: press one and carry it to another stage, or above or
+// below its neighbours. It lifts off the board — tilted a touch, under a
+// deeper shadow — and rides the pointer; where it was, and wherever it
+// would land, a plain gray-100 slot its own size stands open, and the
+// cards around it slide aside over 220ms. Let go and the card glides into
+// the slot; let go off the board, or press Escape, and it glides home.
+// Near a column's top or foot, or the board's sides, the lists scroll.
 //
-// Nothing jumps: the slot fades in where it opens, and whenever it opens,
-// moves or closes the cards it displaces slide to their new places over
-// 220ms; the dropped card settles in with a fade. The slot's place under
-// the pointer is read off the layout, not off cards mid-slide, so it
-// never flickers.
-import { computed, nextTick, onMounted, ref, watch } from 'vue'
+// The drag is the pointer's own rather than the browser's drag and drop:
+// that one carries a still picture of the card, cannot be tilted or eased,
+// and snaps back on a missed drop. The slot's place under the pointer is
+// read off the layout, not off cards mid-slide, so it never flickers.
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import EIcon from '../../espresso-sidebar/EIcon.vue'
 import DealCard from './DealCard.vue'
 import { STAGES, type Deal } from './deals'
@@ -55,83 +55,239 @@ const columns = ref<Column[]>(
 // what is in the air, and the slot it is over
 const dragging = ref<{ id: string; from: number } | null>(null)
 const over = ref<{ column: number; index: number } | null>(null)
+// the card in the air: where it is drawn, and whether it is lifted (tilted)
+// or landing (gliding into its slot)
+const air = ref<{
+  card: Card
+  x: number
+  y: number
+  w: number
+  h: number
+  lifted: boolean
+  landing: boolean
+} | null>(null)
+// the card that has just landed takes its place without a fade
+const landed = ref<string | null>(null)
 
-function lift(e: DragEvent, card: Card, column: number) {
-  dragging.value = { id: card.id, from: column }
-  if (!e.dataTransfer) return
-  e.dataTransfer.effectAllowed = 'move'
-  e.dataTransfer.setData('text/plain', card.id)
-  // the card in the air rides tilted under a deeper shadow, as the
-  // reference carries it: a copy, drawn that way, is the drag image
-  const el = e.currentTarget as HTMLElement
-  const ghost = el.cloneNode(true) as HTMLElement
-  const r = el.getBoundingClientRect()
-  ghost.classList.add('kanban-ghost')
-  ghost.style.width = `${r.width}px`
-  document.body.appendChild(ghost)
-  e.dataTransfer.setDragImage(ghost, e.clientX - r.left, e.clientY - r.top)
-  requestAnimationFrame(() => ghost.remove())
+const board = ref<HTMLElement | null>(null)
+const reduced =
+  typeof matchMedia === 'function' &&
+  matchMedia('(prefers-reduced-motion: reduce)').matches
+const LAND_MS = reduced ? 0 : 220
+
+// A press only becomes a drag past 4px, so a click stays a click
+let press: {
+  card: Card
+  column: number
+  x: number
+  y: number
+  dx: number
+  dy: number
+  rect: DOMRect
+} | null = null
+let pointer = { x: 0, y: 0 }
+let frame = 0
+
+function down(e: PointerEvent, card: Card, column: number) {
+  if (e.button !== 0 || air.value) return
+  if ((e.target as HTMLElement).closest('button, a, input')) return
+  const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
+  press = {
+    card,
+    column,
+    x: e.clientX,
+    y: e.clientY,
+    dx: e.clientX - rect.left,
+    dy: e.clientY - rect.top,
+    rect,
+  }
+  window.addEventListener('pointermove', move)
+  window.addEventListener('pointerup', up)
+  window.addEventListener('pointercancel', cancel)
+  window.addEventListener('keydown', key)
 }
 
-// Where in the column the pointer is: above a card's middle means before
-// it, past the last card's middle means the end. The card in the air still
-// stands in its place, so the index counts it like any other. The cards'
-// places come from the layout (offsetTop), which a card sliding under a
-// transform has already left: read off the slide, the slot would chase it.
-function hover(e: DragEvent, column: number) {
+function move(e: PointerEvent) {
+  pointer = { x: e.clientX, y: e.clientY }
+  if (!press) return
+  if (!air.value) {
+    if (Math.hypot(e.clientX - press.x, e.clientY - press.y) < 4) return
+    lift()
+  }
+  if (!air.value || air.value.landing) return
+  air.value.x = e.clientX - press.dx
+  air.value.y = e.clientY - press.dy
+  track()
+}
+
+function lift() {
+  if (!press) return
+  const { card, column, rect } = press
+  const at = columns.value[column].cards.indexOf(card)
+  dragging.value = { id: card.id, from: column }
+  over.value = { column, index: at }
+  air.value = {
+    card,
+    x: rect.left,
+    y: rect.top,
+    w: rect.width,
+    h: rect.height,
+    lifted: false,
+    landing: false,
+  }
+  document.documentElement.classList.add('kanban-grabbing')
+  // tilt on the next frame, so it eases in from flat
+  requestAnimationFrame(() => {
+    if (air.value) air.value.lifted = true
+  })
+  frame = requestAnimationFrame(scrollLoop)
+}
+
+// Where the pointer is: over a column, the slot goes above the first card
+// whose middle is below it, or to the end; off the board, it goes home.
+// The cards' places come from the layout (offsetTop), which a card
+// sliding under a transform has already left.
+function track() {
   if (!dragging.value) return
-  e.preventDefault()
-  if (e.dataTransfer) e.dataTransfer.dropEffect = 'move'
-  const section = e.currentTarget as HTMLElement
-  const list = lists.get(column)
-  const base = section.getBoundingClientRect().top - (list?.scrollTop ?? 0)
-  const cards = [...section.querySelectorAll<HTMLElement>('[data-card]')]
-  let index = cards.length
-  for (let i = 0; i < cards.length; i++) {
-    const top = base + cards[i].offsetTop
-    if (e.clientY < top + cards[i].offsetHeight / 2) {
-      index = i
-      break
+  const { x, y } = pointer
+  const b = board.value?.getBoundingClientRect()
+  let next: { column: number; index: number }
+  if (!b || x < b.left || x > b.right || y < b.top || y > b.bottom) {
+    const from = columns.value[dragging.value.from]
+    next = {
+      column: dragging.value.from,
+      index: from.cards.findIndex((c) => c.id === dragging.value!.id),
+    }
+  } else {
+    const section = [
+      ...board.value!.querySelectorAll<HTMLElement>('[data-column]'),
+    ].find((el) => {
+      const r = el.getBoundingClientRect()
+      return x >= r.left && x < r.right
+    })
+    if (!section) return
+    const column = Number(section.dataset.column)
+    const list = lists.get(column)
+    const base = section.getBoundingClientRect().top - (list?.scrollTop ?? 0)
+    const cards = [
+      ...section.querySelectorAll<HTMLElement>(
+        '[data-card]:not(.kanban-leave-active)',
+      ),
+    ]
+    let index = cards.length
+    for (let i = 0; i < cards.length; i++) {
+      if (y < base + cards[i].offsetTop + cards[i].offsetHeight / 2) {
+        index = i
+        break
+      }
+    }
+    next = { column, index }
+  }
+  if (over.value?.column !== next.column || over.value.index !== next.index)
+    over.value = next
+}
+
+// near a list's top or foot, or the board's sides, scroll toward the edge
+function scrollLoop() {
+  if (!air.value || air.value.landing) return
+  const { x, y } = pointer
+  const EDGE = 48
+  const speed = (d: number) => Math.ceil(((EDGE - d) / EDGE) * 14)
+  let moved = false
+  const scroller = board.value?.parentElement
+  if (scroller) {
+    const r = scroller.getBoundingClientRect()
+    if (x - r.left < EDGE && scroller.scrollLeft > 0) {
+      scroller.scrollLeft -= speed(x - r.left)
+      moved = true
+    } else if (r.right - x < EDGE) {
+      const before = scroller.scrollLeft
+      scroller.scrollLeft += speed(r.right - x)
+      moved ||= scroller.scrollLeft !== before
     }
   }
-  if (over.value?.column !== column || over.value.index !== index)
-    over.value = { column, index }
+  if (over.value) {
+    const list = lists.get(over.value.column)
+    if (list) {
+      const r = list.getBoundingClientRect()
+      const before = list.scrollTop
+      if (y - r.top < EDGE && y > r.top - EDGE)
+        list.scrollTop -= speed(Math.max(0, y - r.top))
+      else if (r.bottom - y < EDGE && y < r.bottom + EDGE)
+        list.scrollTop += speed(Math.max(0, r.bottom - y))
+      moved ||= list.scrollTop !== before
+    }
+  }
+  if (moved) track()
+  frame = requestAnimationFrame(scrollLoop)
 }
 
-// Leaving a column: every element entered inside it fires its own enter
-// and leave, and Chrome's leave often names no element it went to, so
-// the column counts enters against leaves and is left at nought
-const depth = new Map<number, number>()
-function enter(e: DragEvent, column: number) {
-  if (!dragging.value) return
-  e.preventDefault()
-  depth.set(column, (depth.get(column) ?? 0) + 1)
-}
-function leave(column: number) {
-  if (!dragging.value) return
-  const d = Math.max(0, (depth.get(column) ?? 1) - 1)
-  depth.set(column, d)
-  if (d === 0 && over.value?.column === column) over.value = null
+function up() {
+  if (!air.value) return reset()
+  land()
 }
 
-function drop(e: DragEvent, column: number) {
-  e.preventDefault()
-  if (!dragging.value || !over.value) return settle()
-  const from = columns.value[dragging.value.from]
-  const at = from.cards.findIndex((c) => c.id === dragging.value!.id)
-  let index = over.value.index
-  // within its own column the card counted itself in the index
-  if (column === dragging.value.from && at < index) index -= 1
-  const [card] = from.cards.splice(at, 1)
-  columns.value[column].cards.splice(index, 0, card)
-  settle()
+function cancel() {
+  if (!air.value) return reset()
+  if (dragging.value) {
+    const from = columns.value[dragging.value.from]
+    over.value = {
+      column: dragging.value.from,
+      index: from.cards.findIndex((c) => c.id === dragging.value!.id),
+    }
+  }
+  nextTick(land)
 }
 
-function settle() {
+function key(e: KeyboardEvent) {
+  if (e.key === 'Escape' && air.value && !air.value.landing) cancel()
+}
+
+// Glide the card into the slot, then put it there. The slot's place is
+// its layout place, where it is going, not where a slide has it now.
+function land() {
+  const a = air.value
+  if (!a || a.landing || !over.value) return
+  cancelAnimationFrame(frame)
+  const list = lists.get(over.value.column)
+  const slot = list?.querySelector<HTMLElement>('.kanban-slot')
+  const section = slot?.offsetParent as HTMLElement | null
+  if (slot && section) {
+    const r = section.getBoundingClientRect()
+    a.x = r.left + slot.offsetLeft
+    a.y = r.top + slot.offsetTop - (list?.scrollTop ?? 0)
+  }
+  a.landing = true
+  a.lifted = false
+  window.setTimeout(commit, LAND_MS)
+}
+
+function commit() {
+  if (dragging.value && over.value) {
+    const from = columns.value[dragging.value.from]
+    const at = from.cards.findIndex((c) => c.id === dragging.value!.id)
+    const [card] = from.cards.splice(at, 1)
+    columns.value[over.value.column].cards.splice(over.value.index, 0, card)
+    landed.value = card.id
+    window.setTimeout(() => (landed.value = null), 50)
+  }
+  reset()
+}
+
+function reset() {
+  press = null
+  air.value = null
   dragging.value = null
   over.value = null
-  depth.clear()
+  cancelAnimationFrame(frame)
+  document.documentElement.classList.remove('kanban-grabbing')
+  window.removeEventListener('pointermove', move)
+  window.removeEventListener('pointerup', up)
+  window.removeEventListener('pointercancel', cancel)
+  window.removeEventListener('keydown', key)
 }
+
+onBeforeUnmount(reset)
 
 // ---- the lists' edges: where there is more to scroll, the cards fade out
 // under the head or into the foot rather than being cut flat
@@ -166,8 +322,9 @@ onMounted(() => nextTick(measureFades))
 // each column's cards with the open slot in place, as the list draws them
 const laid = computed(() =>
   columns.value.map((col, ci) => {
-    const rows: ({ kind: 'card'; card: Card } | { kind: 'slot' })[] =
-      col.cards.map((card) => ({ kind: 'card' as const, card }))
+    const rows: ({ kind: 'card'; card: Card } | { kind: 'slot' })[] = col.cards
+      .filter((card) => card.id !== dragging.value?.id)
+      .map((card) => ({ kind: 'card' as const, card }))
     if (over.value?.column === ci)
       rows.splice(over.value.index, 0, { kind: 'slot' })
     return rows
@@ -179,12 +336,13 @@ watch(laid, () => nextTick(measureFades), { flush: 'post' })
 <template>
   <div class="v2-scroll w-full overflow-x-auto">
     <div
+      ref="board"
       class="flex w-max"
       :class="dragging && 'is-dragging'"
       role="list"
       aria-label="Deals by stage"
     >
-      <!-- the whole column takes the drop, its head included, so the slot
+      <!-- the whole column takes the card, its head included, so the slot
            never blinks out while the card crosses the head row -->
       <section
         v-for="(stage, ci) in columns"
@@ -192,10 +350,7 @@ watch(laid, () => nextTick(measureFades), { flush: 'post' })
         class="kanban-column relative isolate flex h-[850px] w-[284px] shrink-0 flex-col gap-2.5 rounded-7 p-2"
         role="listitem"
         :aria-label="stage.name"
-        @dragenter="enter($event, ci)"
-        @dragover="hover($event, ci)"
-        @dragleave="leave(ci)"
-        @drop="drop($event, ci)"
+        :data-column="ci"
       >
         <header class="flex h-7 items-center gap-2 pl-1.5">
           <EIcon name="stage" class="size-4 shrink-0" :class="stage.tone" />
@@ -235,18 +390,19 @@ watch(laid, () => nextTick(measureFades), { flush: 'post' })
             v-for="row in laid[ci]"
             :key="row.kind === 'card' ? row.card.id : 'slot'"
             :data-card="row.kind === 'card' ? row.card.id : undefined"
-            :draggable="row.kind === 'card'"
             :class="
               row.kind === 'card'
                 ? [
-                    'cursor-grab transition-opacity duration-150 active:cursor-grabbing',
-                    dragging?.id === row.card.id && 'opacity-40',
+                    'kanban-card cursor-grab touch-none select-none',
+                    landed === row.card.id && 'is-landed',
                   ]
-                : 'kanban-slot h-[172px] w-[268px] rounded-7 bg-surface-gray-2'
+                : 'kanban-slot w-[268px] shrink-0 rounded-7 bg-surface-gray-2'
+            "
+            :style="
+              row.kind === 'slot' ? { height: `${air?.h ?? 172}px` } : undefined
             "
             :aria-hidden="row.kind === 'slot' || undefined"
-            @dragstart="row.kind === 'card' && lift($event, row.card, ci)"
-            @dragend="settle"
+            @pointerdown="row.kind === 'card' && down($event, row.card, ci)"
           >
             <DealCard
               v-if="row.kind === 'card'"
@@ -258,6 +414,24 @@ watch(laid, () => nextTick(measureFades), { flush: 'post' })
       </section>
     </div>
   </div>
+  <!-- the card in the air rides over everything, outside the lists' masks:
+       the outer box follows the pointer, the inner one tilts and lifts -->
+  <Teleport to="body">
+    <div
+      v-if="air"
+      class="kanban-air"
+      :class="air.landing && 'is-landing'"
+      :style="{
+        width: `${air.w}px`,
+        transform: `translate3d(${air.x}px, ${air.y}px, 0)`,
+      }"
+      aria-hidden="true"
+    >
+      <div class="kanban-air-tilt" :class="air.lifted && 'is-lifted'">
+        <DealCard :deal="air.card" :photo="air.card.photo" />
+      </div>
+    </div>
+  </Teleport>
 </template>
 
 <style>
@@ -330,16 +504,52 @@ watch(laid, () => nextTick(measureFades), { flush: 'post' })
     transition: none;
   }
 }
-/* the card in the air: tilted a touch, under the md shadow */
-.kanban-ghost {
-  position: fixed;
-  top: -1000px;
-  left: -1000px;
-  transform: rotate(-2deg);
-  opacity: 1 !important;
+/* the card that has just landed takes the place the glide brought it to */
+.kanban-enter-active.is-landed {
+  transition: none;
 }
-.kanban-ghost article {
-  @apply shadow-md;
+.kanban-enter-from.is-landed {
+  opacity: 1;
+  transform: none;
+}
+/* the card in the air: it follows the pointer as is, and eases only into
+   its slot. Lifted, it tilts a touch and rises under the lg shadow. */
+.kanban-air {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 50;
+  pointer-events: none;
+  will-change: transform;
+}
+.kanban-air.is-landing {
+  transition: transform 220ms cubic-bezier(0.2, 0, 0, 1);
+}
+.kanban-air-tilt {
+  transition: transform 180ms cubic-bezier(0.2, 0, 0, 1);
+}
+.kanban-air-tilt.is-lifted {
+  transform: rotate(-2deg) scale(1.02);
+}
+.kanban-air-tilt article {
+  transition: box-shadow 180ms cubic-bezier(0.2, 0, 0, 1);
+}
+.kanban-air-tilt.is-lifted article {
+  @apply shadow-lg;
+}
+@media (prefers-reduced-motion: reduce) {
+  .kanban-air.is-landing,
+  .kanban-air-tilt,
+  .kanban-air-tilt article {
+    transition: none;
+  }
+}
+/* while a card is in the air the whole page shows the closed hand, and
+   no text is picked up on the way */
+.kanban-grabbing,
+.kanban-grabbing * {
+  cursor: grabbing !important;
+  user-select: none !important;
 }
 .kanban-glyph {
   @apply flex size-4 items-center justify-center rounded-2 transition-colors hover:text-ink-gray-9;
