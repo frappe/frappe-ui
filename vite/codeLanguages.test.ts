@@ -8,7 +8,10 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { readFileSync, readdirSync } from 'node:fs'
-import { build, optimizeDeps, resolveConfig, type RollupOutput } from 'vite'
+import { build, type Plugin } from 'vite'
+import type { RollupOutput } from 'rollup'
+import * as vite7 from 'vite'
+import * as vite8 from '@test/vite8'
 import { afterAll, describe, expect, it } from 'vitest'
 import { codeLanguages, OPTIONAL_LANGUAGES } from './codeLanguages.js'
 
@@ -61,7 +64,10 @@ import { loadLanguage } from 'frappe-ui/code-editor'
 window.load = loadLanguage
 `
 
-async function bundle(root: string, plugins = [codeLanguages()]) {
+async function bundle(
+  root: string,
+  plugins: Plugin[] = [codeLanguages() as Plugin],
+) {
   const result = (await build({
     root,
     configFile: false,
@@ -209,29 +215,38 @@ describe('codeLanguages', () => {
   })
 })
 
-/**
- * Vite pre-bundles bare specifiers with esbuild, and that step runs no Rollup
- * plugin hooks. `frappe-ui/code-editor` is a bare specifier, so the optimizer
- * reaches `languages.ts` on its own, and an absent package there kills the dev
- * server instead of degrading. The plugin's esbuild twin covers it.
- */
-describe('codeLanguages in dependency pre-bundling', () => {
-  async function optimize(root: string, plugins = [codeLanguages()]) {
-    const config = await resolveConfig(
+// Exercise both optimizer APIs so the Rolldown path runs in the normal test suite.
+describe.each([
+  ['Vite 7 (esbuild)', false],
+  ['Vite 8 (Rolldown)', true],
+])('codeLanguages in dependency pre-bundling: %s', (_, usesRolldown) => {
+  async function optimize(
+    root: string,
+    plugins = [codeLanguages()],
+    dependency = 'frappe-ui/code-editor',
+  ) {
+    const options = {
+      root,
+      configFile: false as const,
+      logLevel: 'silent' as const,
+      plugins: plugins as (vite7.Plugin & vite8.Plugin)[],
+      optimizeDeps: { include: [dependency] },
+    }
+    if (usesRolldown) {
+      const config = await vite8.resolveConfig(options, 'serve')
+      return vite8.optimizeDeps(config, true)
+    }
+    const config = await vite7.resolveConfig(
       {
-        root,
-        configFile: false,
-        logLevel: 'silent',
-        plugins,
+        ...options,
         optimizeDeps: {
-          include: ['frappe-ui/code-editor'],
-          // esbuild prints its own errors, and the failing case expects one.
+          ...options.optimizeDeps,
           esbuildOptions: { logLevel: 'silent' },
         },
       },
       'serve',
     )
-    return optimizeDeps(config, true)
+    return vite7.optimizeDeps(config, true)
   }
 
   /**
@@ -239,8 +254,11 @@ describe('codeLanguages in dependency pre-bundling', () => {
    * metadata rather than from the root: a project without a `package.json`
    * caches in `.vite`, not in `node_modules/.vite`.
    */
-  function optimized(metadata: Awaited<ReturnType<typeof optimizeDeps>>) {
-    const dir = dirname(metadata.optimized['frappe-ui/code-editor'].file)
+  function optimized(
+    metadata: Awaited<ReturnType<typeof optimize>>,
+    dependency = 'frappe-ui/code-editor',
+  ) {
+    const dir = dirname(metadata.optimized[dependency].file)
     return readdirSync(dir)
       .filter((name) => name.endsWith('.js'))
       .map((name) => readFileSync(join(dir, name), 'utf8'))
@@ -258,13 +276,19 @@ describe('codeLanguages in dependency pre-bundling', () => {
     )
   }, 30000)
 
-  it('is the reason dev works', async () => {
-    // Without the twin, esbuild ends the optimize step and `vite dev` exits.
+  it('does not add a language stub without the plugin', async () => {
     const root = project(FRAPPE_UI)
 
-    await expect(optimize(root, [])).rejects.toThrow(
-      /Could not resolve "@codemirror\/lang-json"/,
-    )
+    if (!usesRolldown) {
+      await expect(optimize(root, [])).rejects.toThrow(
+        /Could not resolve "@codemirror\/lang-json"/,
+      )
+    } else {
+      // Rolldown leaves unresolved dynamic imports for the browser to load.
+      const code = optimized(await optimize(root, []))
+      expect(code).toContain('import("@codemirror/lang-json")')
+      expect(code).not.toContain('Cannot find module')
+    }
   }, 30000)
 
   it('leaves an installed package alone', async () => {
@@ -304,22 +328,16 @@ describe('codeLanguages in dependency pre-bundling', () => {
       'node_modules/other-ui/src/molecules/code-editor/languages.js': LANGUAGES,
     })
 
-    const config = await resolveConfig(
-      {
-        root,
-        configFile: false,
-        logLevel: 'silent',
-        plugins: [codeLanguages()],
-        optimizeDeps: {
-          include: ['other-ui/code-editor'],
-          esbuildOptions: { logLevel: 'silent' },
-        },
-      },
-      'serve',
-    )
+    const result = optimize(root, [codeLanguages()], 'other-ui/code-editor')
 
-    await expect(optimizeDeps(config, true)).rejects.toThrow(
-      /Could not resolve "@codemirror\/lang-json"/,
-    )
+    if (!usesRolldown) {
+      await expect(result).rejects.toThrow(
+        /Could not resolve "@codemirror\/lang-json"/,
+      )
+    } else {
+      const code = optimized(await result, 'other-ui/code-editor')
+      expect(code).toContain('import("@codemirror/lang-json")')
+      expect(code).not.toContain('Cannot find module')
+    }
   }, 30000)
 })
