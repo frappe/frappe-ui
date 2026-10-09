@@ -11,7 +11,9 @@
 // a hairline list of 14px rows 26 apart, the one in hand carrying a 24px
 // ink-gray-7 segment of the line. 41 under the list, "Theme", and 18
 // under that the file's padded radio group: Ocean, Qualitative,
-// Diverging, Mist, Earthy.
+// Diverging, Mist, Earthy. Under that, "Empty state" and its switch:
+// on, every card draws the library's empty state — its title kept, its
+// plot and legend given way to "No data to show".
 //
 // The cards are the Frappe Charts file's (Figma 1GDS12ys41lxeG3wQpNq41,
 // "Charts - ocean blue" and its theme frames): each row of the rail is
@@ -20,14 +22,17 @@
 // variables (chartThemes.ts) resolved off the page (useChartTokens.ts),
 // so the dark mode is the file's dark column of the same variables.
 import {
+  computed,
   nextTick,
   onBeforeUnmount,
   onMounted,
+  provide,
   ref,
   watch,
   type Component,
 } from 'vue'
-import { Radio, RadioGroup, TabButtons } from '../../src'
+import { Radio, RadioGroup, Switch, TabButtons } from '../../src'
+import { CHARTS_EMPTY } from './chartsEmpty'
 import { CHART_THEMES, type ChartTheme } from './chartThemes'
 import { useChartTheme } from './useChartTheme'
 import BarSection from './sections/BarSection.vue'
@@ -128,6 +133,13 @@ watch(dashboard, async () => {
 const type = ref<ChartType>('bar')
 const themeId = ref<ChartTheme>('ocean')
 const theme = useChartTheme(themeId)
+/** every card in its empty state, as the rail's switch has it */
+const empty = ref(false)
+// the switch stands in the charts' rail alone: the dashboards keep their data
+provide(
+  CHARTS_EMPTY,
+  computed(() => empty.value && mode.value === 'charts'),
+)
 
 /**
  * One page of every kind, in the rail's order, rather than one kind at a time:
@@ -403,6 +415,20 @@ onBeforeUnmount(() => {
           :label="t.label"
         />
       </RadioGroup>
+
+      <!-- the empty state: the heading and its switch on one row -->
+      <label
+        v-if="mode === 'charts'"
+        class="mt-[45px] flex cursor-pointer items-center justify-between gap-3"
+      >
+        <span
+          id="chart-empty"
+          class="text-base-semibold leading-tighter text-ink-gray-9"
+        >
+          Empty state
+        </span>
+        <Switch v-model="empty" size="sm" aria-labelledby="chart-empty" />
+      </label>
     </aside>
   </div>
 </template>

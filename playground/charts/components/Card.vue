@@ -8,6 +8,7 @@
 // over it, so the chrome under the title — the container, the legend, the
 // states — stays the library's.
 import { ChartCard } from '../../../src/charts'
+import { useChartsEmpty } from '../chartsEmpty'
 
 defineProps<{
   /** the file's small sparkline card: 223×120, 16 in */
@@ -17,6 +18,11 @@ defineProps<{
   /** the pie row's titles, which the file sets in medium rather than semibold */
   mediumTitle?: boolean
 }>()
+
+// the page's empty state: the card keeps its title, and the plot, the
+// axis titles and the legend give way to the library's own "No data to
+// show" — what ChartContainer draws for a chart with nothing to plot
+const empty = useChartsEmpty()
 </script>
 
 <template>
@@ -26,6 +32,7 @@ defineProps<{
       small ? 'chart-page-card--small' : wide ? '' : 'aspect-[580/360]',
       wide && 'col-span-full',
       mediumTitle && 'chart-page-card--medium-title',
+      empty && 'is-empty',
     ]"
   >
     <div class="flex h-full w-full flex-col">
@@ -35,6 +42,18 @@ defineProps<{
 </template>
 
 <style>
+/* Empty: the library's empty state, word for word and in its type, drawn
+   over the plot it hides. The plot stays mounted, as the library keeps it
+   through every state, so turning the switch off brings it straight back. */
+.chart-page-card.is-empty [data-slot='chart-plot'] > *,
+.chart-page-card.is-empty [data-slot='chart-container'] > div:not([data-slot]),
+.chart-page-card.is-empty [data-slot='chart-legend'] {
+  visibility: hidden;
+}
+.chart-page-card.is-empty [data-slot='chart-plot']::after {
+  content: 'No data to show';
+  @apply absolute inset-0 flex items-center justify-center text-center text-p-sm text-ink-gray-5;
+}
 /* the file's card over the library's: 12px corner, white, 16 in */
 .chart-page-card[data-slot='chart-card'] {
   border-radius: 12px;

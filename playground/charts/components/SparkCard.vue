@@ -17,7 +17,12 @@
 // The file draws no hover state for these, so the one here is the page's own
 // and is the plot's: the reading under the pointer gets a dot, and the
 // library's tooltip shell carries the file's tooltip body (ChartTip).
+//
+// In the page's empty state the card reads as the library's NumberCard
+// does with nothing to show: the em dash in gray-400 for the reading, "No
+// data" in 13px gray-500 beside it, and no trend.
 import { computed, ref } from 'vue'
+import { useChartsEmpty } from '../chartsEmpty'
 import { Dropdown } from '../../../src'
 import { ChartTooltip } from '../../../src/charts'
 import type { ChartTooltipItem } from '../../../src/charts/types'
@@ -131,6 +136,7 @@ const bars = computed(() =>
 const negative = computed(() => props.delta?.startsWith('-'))
 /** the file sets the change beside the number over a bleeding trend */
 const inline = computed(() => ['area', 'line', 'solid'].includes(props.variant))
+const empty = useChartsEmpty()
 const id = `spark-${Math.random().toString(36).slice(2, 8)}`
 
 // --- the hover ------------------------------------------------------------
@@ -222,7 +228,7 @@ function track(event: MouseEvent) {
          itself: an svg is a replaced element, so left and right alone never
          stretch it — it takes the width its viewBox' ratio asks for. -->
     <div
-      v-if="box && variant !== 'bars'"
+      v-if="box && variant !== 'bars' && !empty"
       ref="trendEl"
       class="pointer-events-none absolute"
       :style="{
@@ -274,7 +280,7 @@ function track(event: MouseEvent) {
     </div>
 
     <div
-      v-else-if="box"
+      v-else-if="box && !empty"
       ref="trendEl"
       class="pointer-events-none absolute"
       :style="{
@@ -307,13 +313,22 @@ function track(event: MouseEvent) {
         :class="variant === 'beside' ? 'mt-[29px]' : 'mt-2'"
       >
         <div
-          class="whitespace-nowrap text-3xl-medium leading-tighter text-ink-gray-8"
+          class="whitespace-nowrap text-3xl-medium leading-tighter"
+          :class="empty ? 'text-ink-gray-4' : 'text-ink-gray-8'"
         >
-          {{ value }}
+          {{ empty ? '—' : value }}
+        </div>
+        <!-- beside the dash, where the change would stand: the shortest
+             card has no second line to give it -->
+        <div
+          v-if="empty"
+          class="pb-[2px] text-sm leading-tighter text-ink-gray-5"
+        >
+          No data
         </div>
         <!-- the file sets the change beside the number over a bleeding trend -->
         <div
-          v-if="inline && delta"
+          v-if="inline && delta && !empty"
           class="flex items-center gap-1 pb-[2px] text-sm leading-tighter"
         >
           <span
@@ -350,7 +365,7 @@ function track(event: MouseEvent) {
              narrower beside a longer reading rather than pushing it onto two
              lines (the dashboard's "10 days", 1536:35040) -->
         <svg
-          v-if="variant === 'beside'"
+          v-if="variant === 'beside' && !empty"
           ref="trendEl"
           class="mb-[2px] ml-auto h-[18px] w-[120px] min-w-0 shrink"
           :viewBox="`0 0 ${H} ${H}`"
@@ -369,7 +384,7 @@ function track(event: MouseEvent) {
         </svg>
       </div>
       <div
-        v-if="delta && !inline"
+        v-if="delta && !inline && !empty"
         class="flex items-center gap-1 text-sm leading-tighter"
         :class="variant === 'beside' ? 'mt-auto pb-3' : 'mt-1.5'"
       >
@@ -406,7 +421,7 @@ function track(event: MouseEvent) {
     </div>
 
     <ChartTooltip
-      :open="at !== null && items.length > 0"
+      :open="!empty && at !== null && items.length > 0"
       :x="pointer.x"
       :y="pointer.y"
       :items="items"

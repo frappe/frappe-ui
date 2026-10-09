@@ -6,8 +6,12 @@
 // the theme's heat ramp, the ink turning white on the darkest two steps. A table rather
 // than the library's HeatmapChart, whose plot has no numbered column and
 // no ruled rows; the ramp is read the way the library reads one.
+//
+// In the page's empty state the table gives its place to a frame of the same
+// size and corner, holding the library's "No data to show".
 import { computed } from 'vue'
 import { insideLabelColor } from '../../../src/charts/tokens'
+import { useChartsEmpty } from '../chartsEmpty'
 
 const props = defineProps<{
   rows: ReadonlyArray<readonly [string, ...number[]]>
@@ -34,6 +38,7 @@ function fill(r: number, c: number): string {
 }
 const ink = (r: number, c: number) => insideLabelColor(fill(r, c), props.ink)
 const print = (value: number) => value.toLocaleString('en-US')
+const empty = useChartsEmpty()
 </script>
 
 <template>
@@ -41,7 +46,15 @@ const print = (value: number) => value.toLocaleString('en-US')
     <!-- the table keeps its own width rather than stretching: 48 for the
          number, 134 for the name and seven readings of 60, and the card keeps
          the rest -->
+    <div
+      v-if="empty"
+      class="flex w-[602px] max-w-full items-center justify-center rounded-[8px] border border-outline-gray-1 text-p-sm text-ink-gray-5"
+      :style="{ height: `${rows.length * 40}px` }"
+    >
+      No data to show
+    </div>
     <table
+      v-else
       class="w-auto border-separate border-spacing-0 text-base leading-tighter text-ink-gray-8"
       :aria-label="`Heat map, ${columns.join(', ')}`"
     >
