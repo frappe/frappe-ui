@@ -1,12 +1,33 @@
 import type { Theme } from 'vitepress'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import { h } from 'vue'
-import { theme as DocsTheme } from 'frappe-ui/vitepress'
+import {
+  theme as DocsTheme,
+  sidebarStoriesKey,
+  type SidebarStoryLoader,
+} from 'frappe-ui/vitepress'
 // Apps get these tokens from the `frappe-ui/charts` barrel. The docs alias
 // `frappe-ui` at src and render some charts without importing the barrel, so
 // pull the stylesheet in by path here.
 import 'frappe-ui/charts/style.css'
 import Layout from './Layout.vue'
+
+// Every story, lazily, for the sidebar's hover-card previews. Keyed by the
+// same `<Component>-<Story>` id `<ComponentPreview>` takes. Chart stories sit
+// in `src/charts/stories` but are named `Charts-…`, so ids match ignoring case.
+const storyModules = import.meta.glob([
+  '../../../src/components/*/stories/*.vue',
+  '../../../src/charts/stories/*.vue',
+  '../../../experimental/*/stories/*.vue',
+])
+const storiesById = Object.fromEntries(
+  Object.entries(storyModules).map(([file, load]) => {
+    const [, component, story] = file.match(/([^/]+)\/stories\/([^/]+)\.vue$/)!
+    return [`${component}-${story}`.toLowerCase(), load]
+  }),
+)
+const loadSidebarStory: SidebarStoryLoader = (id) =>
+  storiesById[id.toLowerCase()] as ReturnType<SidebarStoryLoader>
 
 // VitePress runs its own routing, but frappe-ui components like Breadcrumbs,
 // Sidebar and SidebarRail render `<router-link>` and call `useRouter()`.
@@ -28,6 +49,7 @@ export default {
   enhanceApp(ctx) {
     DocsTheme.enhanceApp?.(ctx)
     ctx.app.use(router)
+    ctx.app.provide(sidebarStoriesKey, loadSidebarStory)
 
     // A demo whose component throws in setup() (e.g. a `<router-link>` pointing at
     // a named route this stub router doesn't register) must not blank the whole
