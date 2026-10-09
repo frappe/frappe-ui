@@ -23,7 +23,7 @@
 //   months     two lists 88 wide, 4 apart, rows 28 tall, 1 apart, 8 in,
 //              left aligned; the current year and month on surface-gray-2
 //   time       (date & time) under the calendar, a rule, 8 in: three xs
-//              subtle selects 57 wide, 4 apart — hour, minute, AM/PM
+//              subtle selects filling the row, 4 apart — hour, minute, AM/PM
 //   header     (optional) a rule under it, 8 in: an xs subtle field, two
 //              with the calendar glyph for a range
 //   footer     (optional) a rule over it, 8 in: Reset ghost, then a subtle
@@ -572,9 +572,14 @@ const icons = {
 }
 
 /* ---- the time: the file's small-select chevrons, the selects 57 wide ---- */
-.dp-time :deep(button[role='combobox']),
+/* the three selects share the row: fill, 4 apart (the user's call
+   2026-10-09 — the file's 57 each left a gap once the picker grew) */
+.dp-time > * {
+  flex: 1 1 0;
+  min-width: 0;
+}
 .dp-time :deep(button) {
-  width: 57px;
+  width: 100%;
 }
 .dp-time :deep([data-slot='chevron']) {
   width: 14px;
