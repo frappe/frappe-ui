@@ -1,6 +1,16 @@
+// What the Sidebar's hover card shows for an item. `story` is a
+// `<Component>-<Story>` id, the same name `<ComponentPreview>` takes; the site
+// turns it into a component through `provideSidebarStories`.
+export interface SidebarPreview {
+  story?: string
+  description?: string
+  count?: number
+}
+
 export interface SidebarItem {
   text: string
   link: string
+  preview?: SidebarPreview
 }
 
 export interface SidebarSection {
