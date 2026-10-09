@@ -121,10 +121,12 @@ function resize(e: PointerEvent) {
   window.addEventListener('pointerup', up)
 }
 
-// a press anywhere on the body, past the last line too, puts the caret in
+// a press on the body's own padding puts the caret at the end; a press on
+// the text is the editor's, and one on the floating bar (drawn inside the
+// body) is the bar's — taking it would drop the selection the bar acts on
 function focusEnd(ed: TiptapEditor | null, e: MouseEvent) {
-  if (!ed || props.disabled) return
-  if ((e.target as HTMLElement).closest('.ProseMirror')) return
+  if (!ed || props.disabled || e.target !== e.currentTarget) return
+  e.preventDefault()
   toRaw(ed).commands.focus('end')
 }
 
@@ -225,7 +227,7 @@ const shouldShow: InstanceType<typeof BubbleMenu>['$props']['shouldShow'] = ({
           class="z-[60]"
         >
           <div class="te-float">
-            <TeToolbar :editor="editor" kind="full" />
+            <TeToolbar :editor="editor" kind="full" floating />
           </div>
         </BubbleMenu>
       </template>
@@ -279,6 +281,10 @@ const shouldShow: InstanceType<typeof BubbleMenu>['$props']['shouldShow'] = ({
 .te-field.is-disabled .te-body {
   @apply cursor-default;
 }
+/* the ghost has no edge to clip to, and its floating bar rises above
+   its first line: nothing of it may cut the bar off, or the bar would
+   drop under the selection to stay in view */
+.te-field.is-ghost,
 .te-field.is-ghost .te-body {
   @apply overflow-visible;
 }

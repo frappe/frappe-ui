@@ -24,7 +24,14 @@ const props = defineProps<{
   editor: TiptapEditor
   kind: 'full' | 'comment'
   disabled?: boolean
+  /** riding over a selection: the align menu opens inside the bar */
+  floating?: boolean
 }>()
+
+// Over a selection the bar is placed by its own floating layer: a menu
+// portalled to the page's end would be placed before the bar is, and
+// open at the page's corner, so there it opens in a host inside the bar
+const menuHost = ref<HTMLElement | null>(null)
 
 const chain = () => toRaw(props.editor).chain().focus()
 
@@ -204,6 +211,9 @@ const highlightSwatch = computed(() =>
         :options="alignOptions"
         side="bottom"
         align="start"
+        :offset="floating ? 8 : 4"
+        :modal="!floating"
+        :portal-to="floating ? (menuHost ?? undefined) : undefined"
         :disabled="disabled"
       >
         <template #trigger="{ open }">
@@ -218,6 +228,8 @@ const highlightSwatch = computed(() =>
           </button>
         </template>
       </Dropdown>
+
+      <div v-if="floating" ref="menuHost" class="te-menus" />
 
       <span class="te-divider" aria-hidden="true" />
 
@@ -290,6 +302,9 @@ const highlightSwatch = computed(() =>
 }
 .te-swatch.is-highlight {
   @apply border-outline-gray-1 bg-surface-base;
+}
+.te-menus {
+  @apply contents;
 }
 .te-divider {
   @apply mx-1 h-4 w-px shrink-0 bg-surface-gray-3;
