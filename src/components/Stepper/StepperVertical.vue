@@ -7,6 +7,7 @@
       :data-state="step.state"
       :aria-current="isCurrent(step) ? 'step' : undefined"
     >
+      <!-- Only phrasing content inside, so the row is valid as a <button>. -->
       <component
         :is="isButton(step) ? 'button' : 'div'"
         :type="isButton(step) ? 'button' : undefined"
@@ -14,7 +15,7 @@
         :class="[rowDirection, headClass(step)]"
         @click="isButton(step) && emit('select', step.item.value)"
       >
-        <div
+        <span
           class="flex min-w-0 flex-1 flex-col justify-center"
           :class="[textAlign, ui.headPad]"
         >
@@ -32,8 +33,8 @@
               {{ step.item.description }}
             </span>
           </slot>
-        </div>
-        <div
+        </span>
+        <span
           v-if="step.item.meta || $slots['step-suffix']"
           class="order-first self-center text-sm tabular-nums text-ink-gray-5"
           :class="metaGap"
@@ -41,8 +42,8 @@
           <slot name="step-suffix" v-bind="slotProps(step)">{{
             step.item.meta
           }}</slot>
-        </div>
-        <div
+        </span>
+        <span
           class="flex shrink-0 flex-col items-center"
           :class="[ui.railWidth, railGap]"
         >
@@ -64,7 +65,7 @@
             :class="ui.segBottom"
             v-bind="segAttrs(i, 'bottom')"
           />
-        </div>
+        </span>
       </component>
 
       <div

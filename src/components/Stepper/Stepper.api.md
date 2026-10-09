@@ -69,7 +69,7 @@
   },
   {
     name: 'clickable',
-    description: 'Finished steps become buttons that set `v-model`.',
+    description: 'Finished steps become buttons that set `v-model`. Off while `completed`\nis set, since `completed` would override the value a click sets.',
     required: false,
     type: 'boolean',
     default: 'false'

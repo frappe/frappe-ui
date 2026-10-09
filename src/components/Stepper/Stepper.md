@@ -70,8 +70,9 @@ reduced motion.
 ### Going back
 
 With `clickable`, finished and skipped steps are buttons. Clicking one emits
-`update:modelValue` with its value. The stepper never moves on its own: the
-caller decides what the next step is.
+`update:modelValue` with its value. While `completed` is set, no step is a
+button, because `completed` overrides the value a click would set. The stepper
+never moves on its own: the caller decides what the next step is.
 
 ## Accessibility
 
