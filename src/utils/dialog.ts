@@ -490,6 +490,7 @@ function createNewOption(
   }
 }
 
+let promptFormId = 0
 export function prompt(args: PromptArgs): DialogHandle {
   const state = reactive<LifecycleState>({
     open: true,
@@ -499,6 +500,7 @@ export function prompt(args: PromptArgs): DialogHandle {
   let assignedId = -1
   const close = makeClose(state)
   const setError = makeSetError(state)
+  const formId = `frappe-ui-prompt-${++promptFormId}`
 
   const values = reactive<Record<string, any>>(
     Object.fromEntries(args.fields.map((f) => [f.name, initialFieldValue(f)])),
@@ -580,6 +582,11 @@ export function prompt(args: PromptArgs): DialogHandle {
   const resolvedIcon = resolveIcon(args.theme, args.icon)
   const buttonTheme = themeToButtonTheme(args.theme)
 
+  const autofocusField = args.fields.find(
+    (field) =>
+      !field.type || field.type === 'text' || field.type === 'textarea',
+  )
+
   const renderField = (field: PromptField) => {
     const onUpdate = (val: any) => {
       values[field.name] = val
@@ -609,6 +616,7 @@ export function prompt(args: PromptArgs): DialogHandle {
         label: field.label,
         description: field.description,
         type: (field.type as any) || 'text',
+        autofocus: field === autofocusField || undefined,
         required: field.required,
         placeholder: field.placeholder,
         options,
@@ -655,17 +663,31 @@ export function prompt(args: PromptArgs): DialogHandle {
           },
           {
             default: () =>
-              h('div', { class: 'space-y-3' }, [
-                args.message
-                  ? h(
-                      'p',
-                      { class: 'text-p-base text-ink-gray-7' },
-                      args.message,
-                    )
-                  : null,
-                ...args.fields.map(renderField),
-                state.error ? h(ErrorMessage, { message: state.error }) : null,
-              ]),
+              h(
+                'form',
+                {
+                  id: formId,
+                  class: 'space-y-3',
+                  novalidate: true,
+                  onSubmit: (event: Event) => {
+                    event.preventDefault()
+                    onSubmit()
+                  },
+                },
+                [
+                  args.message
+                    ? h(
+                        'p',
+                        { class: 'text-p-base text-ink-gray-7' },
+                        args.message,
+                      )
+                    : null,
+                  ...args.fields.map(renderField),
+                  state.error
+                    ? h(ErrorMessage, { message: state.error })
+                    : null,
+                ],
+              ),
             actions: () =>
               h('div', { class: 'flex flex-row-reverse gap-2' }, [
                 h(Button, {
@@ -673,7 +695,8 @@ export function prompt(args: PromptArgs): DialogHandle {
                   variant: 'solid',
                   theme: buttonTheme,
                   loading: state.loading,
-                  onClick: onSubmit,
+                  type: 'submit',
+                  form: formId,
                 }),
                 h(Button, {
                   label: args.cancelLabel || 'Cancel',
