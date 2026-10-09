@@ -7,6 +7,8 @@ export interface SidebarPreview {
   count?: number
   /** The story fills the width and draws its own chrome, as `<ComponentPreview self-layout>`. */
   selfLayout?: boolean
+  /** The story needs the room of `<ComponentPreview wide>` (up to 1000px). */
+  wide?: boolean
 }
 
 export interface SidebarItem {
