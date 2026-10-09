@@ -32,6 +32,7 @@
             data-slot="content"
             class="my-8 inline-block w-full transform overflow-hidden rounded-7 bg-surface-elevation-1 text-start align-middle shadow-xl dialog-content focus-visible:outline-none"
             :class="sizeClass"
+            v-bind="describedByOptOut"
             @open-auto-focus="handleOpenAutoFocus"
             @escape-key-down="
               (e: Event) => {
@@ -208,6 +209,18 @@ const slots = useReactiveSlots<DialogSlots>()
 
 const isDismissible = computed(() => props.dismissible !== false)
 
+// The chrome renders a Description only for a `message` with no default
+// slot (the slot replaces it). Otherwise reka's default aria-describedby
+// would point at nothing and warn on every open, so opt out with an explicit
+// undefined. A bare dialog keeps the default: it may render its own
+// Dialog.Description.
+const describedByOptOut = computed(() => {
+  const rendersDescription = Boolean(props.message) && !slots.default
+  return !props.bare && !rendersDescription
+    ? { 'aria-describedby': undefined }
+    : {}
+})
+
 const sizeClass = computed(() => {
   const map: Record<string, string> = {
     xs: 'max-w-xs',
@@ -360,9 +373,7 @@ const reactiveActions = computed((): DialogReactiveAction[] => {
 
 const isSingleActionFullWidth = computed(() => {
   const smallSizes = ['xs', 'sm', 'md']
-  return (
-    reactiveActions.value.length === 1 && smallSizes.includes(props.size)
-  )
+  return reactiveActions.value.length === 1 && smallSizes.includes(props.size)
 })
 
 // Whether the auto-header should render at all. Per spec, the header

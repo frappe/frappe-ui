@@ -23,6 +23,18 @@ password.
 
 <ComponentPreview name="Password-NewPassword" />
 
+## Usage Guidelines
+
+<ComponentPreview name="Password-Guidelines" hide-code />
+
+<div class="guideline-text">
+
+- Label each password field. A placeholder disappears once people type.
+- Ask for a longer password, not a mix of uppercase, numbers and symbols. Those rules lead to guessable ones like “Password1!”.
+- Use Password for any secret, like an API token, not only for passwords.
+
+</div>
+
 ## Behavior
 
 ### Show and hide
@@ -31,8 +43,9 @@ The eye icon toggles the field between hidden and plain text. `Cmd+I` on macOS
 and `Ctrl+I` elsewhere do the same while the field has focus. A tooltip on the
 icon names the action and the shortcut.
 
-The icon is hidden while the value contains `*`, such as a masked
-`********` value from the server.
+The icon is hidden while the value is only asterisks, such as a masked
+`********` value from the server. A `*` inside a real password does not hide
+it.
 
 ### Slots
 
@@ -43,7 +56,7 @@ on [TextInput](./textinput).
 ### Label, description and error
 
 `label` renders above the field and `description` below it. `error` renders
-below the field and hides `description`. It takes a string, an array of strings
+below the field and hides `description`, and turns the field's border red. It takes a string, an array of strings
 (one line each), or an `Error`, the same values as
 [ErrorMessage](./errormessage). An empty string or an empty array means no
 error. `required` adds a red asterisk to the label and sets `required` on the
@@ -60,14 +73,24 @@ description or error shows, and the field box otherwise. Every other attribute
 and listener goes on the `<input>`, including `name`, `autocomplete` and
 `@blur`.
 
+Give every password field an `autocomplete` value: `current-password` where
+people enter the password they have, and `new-password` where they choose
+one. Without it, a password manager can't tell the fields apart. It may fill
+the saved password into a new-password field, and it won't suggest a strong
+one.
+
+Don't cap the length with `maxlength`. A long passphrase, or the 64-character
+password a password manager generates, gets cut off without a warning, and the
+saved password no longer matches.
+
 ## Accessibility
 
 | Keys               | Action                    |
 | ------------------ | ------------------------- |
 | `Cmd+I` / `Ctrl+I` | Show or hide the password |
 
-- The eye icon is not a button and cannot be reached with `Tab`. Keyboard
-  users toggle with the shortcut above.
+- The eye icon is a button named "Show password" or "Hide password", and can
+  be reached with `Tab`. The shortcut above also works from the field.
 - The `<label>` is linked to the `<input>`, so screen readers announce it as
   the field's name.
 - The description and the error are linked with `aria-describedby`.

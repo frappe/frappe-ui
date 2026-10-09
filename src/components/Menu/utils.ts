@@ -15,8 +15,11 @@ export type NormalizedMenuGroup = MenuGroupOption & {
 }
 
 export const menuClasses = {
+  // Capped to the room reka measures between the trigger and the viewport
+  // edge, so a long menu (or submenu) scrolls instead of running off screen
+  // with its last items out of reach.
   content:
-    'menu-content z-[100] min-w-40 divide-y divide-outline-elevation-2 rounded-6 bg-surface-elevation-2 shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none',
+    'menu-content z-[100] min-w-40 max-h-[var(--reka-popper-available-height)] overflow-y-auto divide-y divide-outline-elevation-2 rounded-6 bg-surface-elevation-2 shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none',
   group: 'p-1.5',
   groupLabel:
     'flex h-7 items-center px-2 text-sm font-medium leading-tighter text-ink-gray-4',

@@ -71,7 +71,9 @@ withDefaults(defineProps<PasswordProps>(), {
 const model = defineModel<string>()
 
 const show = ref(false)
-const showEye = computed(() => !model.value?.includes('*'))
+// Hide the eye only for a fully masked value from the server, like
+// `********`. A `*` typed as part of a real password must not hide it.
+const showEye = computed(() => !/^\*+$/.test(model.value ?? ''))
 const toggleLabel = computed(() =>
   show.value ? 'Hide password' : 'Show password',
 )

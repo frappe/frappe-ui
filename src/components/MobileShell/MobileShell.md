@@ -112,6 +112,10 @@ embedded use.
 
 ## Accessibility
 
+The page content sits in a `<main>` landmark, so screen-reader users can jump
+straight to it. A page inside the shell should not add its own `<main>`: a page
+has only one.
+
 `MobileNav` renders a `<nav>` element. Each item uses its `label` as its
 accessible name. The item whose `route` is the current route gets
 `aria-current="page"`.

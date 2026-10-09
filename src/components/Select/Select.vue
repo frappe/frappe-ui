@@ -45,6 +45,7 @@ import {
   triggerSizeClasses,
   triggerVariantClasses,
 } from './utils'
+import { withInvalidBorder } from '../../utils/invalidBorder'
 
 defineOptions({
   inheritAttrs: false,
@@ -153,7 +154,10 @@ const triggerClasses = computed(() => [
   triggerBaseClasses,
   triggerSizeClasses(props.size),
   inputFontSizeClasses(props.size),
-  triggerVariantClasses(props.variant, Boolean(props.disabled)),
+  withInvalidBorder(
+    triggerVariantClasses(props.variant, Boolean(props.disabled)),
+    hasError.value && !props.disabled,
+  ),
 ])
 
 function normalizeOption(option: SelectOption): SelectNormalizedOption | null {
@@ -215,9 +219,8 @@ const internalModel = computed<SelectOptionValue | undefined>({
 
 const selectedOption = computed(() => {
   return (
-    selectOptions.value.find(
-      (option) => option.value === currentValue.value,
-    ) ?? null
+    selectOptions.value.find((option) => option.value === currentValue.value) ??
+    null
   )
 })
 
@@ -437,7 +440,11 @@ defineExpose(exposed)
           data-slot="content"
           class="z-[100] origin-[var(--reka-select-content-transform-origin)]"
           :class="
-            usesPopperPosition ? 'min-w-[--reka-select-trigger-width]' : null
+            usesPopperPosition
+              ? // Item-aligned mode is sized to the viewport by reka; popper
+                // mode isn't, so cap it or a long list runs off screen.
+                'min-w-[--reka-select-trigger-width] max-h-[var(--reka-select-content-available-height)]'
+              : null
           "
           :position="usesPopperPosition ? 'popper' : 'item-aligned'"
           :side="side"
@@ -450,7 +457,7 @@ defineExpose(exposed)
           entrance reads as a glitch. The ~80ms opacity fade that remains
           masks reka's 1-frame position-settle.
         -->
-          <PopoverPanel class="flex flex-col">
+          <PopoverPanel class="flex min-h-0 flex-col">
             <SelectViewport class="flex min-h-0 flex-col p-1">
               <div
                 v-if="!selectOptions.length"

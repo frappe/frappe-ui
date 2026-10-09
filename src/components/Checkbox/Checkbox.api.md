@@ -15,7 +15,7 @@
   },
   {
     name: 'padded',
-    description: 'Wraps the control and label in a clickable surface with hover, active and focus states — useful for selection lists and menu items. The control always stays on the leading side.',
+    description: 'Wraps the control and label in a clickable surface with hover, active and focus states, for selection lists and menu items. The control always stays on the leading side.',
     required: false,
     type: 'boolean',
     default: 'false'
@@ -28,7 +28,7 @@
   },
   {
     name: 'indeterminate',
-    description: 'Renders the mixed "—" state (e.g. a select-all that\'s partially selected).\nPurely visual — the native `indeterminate` DOM property is not reflected as\nan attribute, so it must be set via this prop, not markup.',
+    description: 'Renders the mixed state, a dash in the box (e.g. a select-all that\'s\npartially selected). Purely visual: the native `indeterminate` DOM property\nis not reflected as an attribute, so it must be set via this prop, not\nmarkup.',
     required: false,
     type: 'boolean',
     default: 'false'

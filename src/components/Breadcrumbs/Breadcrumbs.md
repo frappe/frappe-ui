@@ -21,6 +21,18 @@ The `#prefix` slot shows an icon or an avatar before each label. The slot reads
 
 <ComponentPreview name="Breadcrumbs-PersonPath" />
 
+## Usage Guidelines
+
+<ComponentPreview name="Breadcrumbs-Guidelines" hide-code />
+
+<div class="guideline-text">
+
+- Show a record's title in the trail, not its ID.
+- Always maintain a consistent position so it's easy to navigate between pages.
+- Put view switching, like list, kanban and saved views, in a menu on the last crumb.
+
+</div>
+
 ## Behavior
 
 ### Item shape
@@ -73,13 +85,15 @@ receives `{ item }`, and they render for every crumb.
 
 When the items do not fit their container and there are more than two, all
 items except the last two move into a menu behind a "…" button. The menu opens
-each item with its `onClick` or `route`. An item with only `href` does nothing
-in that menu, so give it an `onClick` too.
+each item with its `onClick`, `route` or `href`.
 
 ## Accessibility
 
 - Breadcrumbs does not add a landmark. Wrap it in
   `<nav aria-label="Breadcrumb">` when it is the page's main breadcrumb trail.
+- The last crumb has `aria-current="page"`, so screen readers announce it as
+  the current page.
+- The "…" button that opens hidden pages is labelled "Show hidden pages".
 - The `/` separators are hidden from screen readers.
 
 <!-- @include: ./Breadcrumbs.api.md -->

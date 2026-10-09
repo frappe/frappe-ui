@@ -27,12 +27,24 @@ The `#content` slot shows the button's name and its shortcut.
 
 <ComponentPreview name="Tooltip-FilePreview" />
 
-### Warning on a delete button
+### Full name of a truncated label
 
-`:hover-delay="0"` shows the warning as soon as the pointer reaches the
-button.
+A file name cut short in a narrow column. `:hover-delay="0"` shows the full
+name as soon as the pointer reaches it. The label has `tabindex="0"`, so
+keyboard users can focus it and see the tooltip too.
 
 <ComponentPreview name="Tooltip-Examples" />
+
+## Usage Guidelines
+
+<ComponentPreview name="Tooltip-Guidelines" hide-code />
+
+<div class="guideline-text">
+
+- Use a tooltip for extra context. Don't hide essential information inside it.
+- Keep tooltip text short, so it's easy to scan.
+
+</div>
 
 ## Behavior
 
@@ -76,5 +88,15 @@ label applies only in some states.
 The tooltip opens when its trigger gets keyboard focus and closes on
 <kbd>Escape</kbd>. It has the `tooltip` role, and screen readers read it as the
 trigger's description.
+
+A description is not a name. An icon-only button wrapped in `Tooltip` is still
+announced as just "button" unless it has a `label`. On a `Button`, use its own
+`tooltip` prop instead: with no `label`, the tooltip text also becomes the
+button's name.
+
+```vue
+<!-- named "Bold", with a hover tooltip -->
+<Button icon="lucide-bold" tooltip="Bold" />
+```
 
 <!-- @include: ./Tooltip.api.md -->
