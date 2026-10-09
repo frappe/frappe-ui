@@ -8,7 +8,7 @@
  * focusing the field), and one image's caption could show up under the next
  * one when ProseMirror reused the node view.
  */
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { createApp, h, nextTick, reactive } from 'vue'
 
 let Editor: any
@@ -112,10 +112,12 @@ describe('media node view caption field', () => {
     trigger.click()
     await settle()
 
-    const toggle = document.body.querySelector(
-      'button[role="switch"]',
-    ) as HTMLButtonElement
-    toggle.click()
+    const row = Array.from(
+      document.body.querySelectorAll<HTMLElement>('[role="menuitem"]'),
+    ).find((el) => el.textContent?.trim() === 'Caption') as HTMLElement
+    row.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))
+    row.dispatchEvent(new PointerEvent('pointerup', { bubbles: true }))
+    row.click()
     await settle()
 
     const input = captionInputs(ctx.root)[0]
@@ -176,7 +178,7 @@ describe('media node view native video fullscreen', () => {
 
     expect(captionInputs(ctx.root)).toHaveLength(0)
     expect(container.classList).not.toContain('bg-black')
-    expect(video.classList).toContain('rounded-4')
+    expect(video.classList).toContain('rounded-6')
     expect(video.classList).not.toContain('rounded-none')
     expect(video.classList).not.toContain('size-full')
 
@@ -209,5 +211,257 @@ describe('media node view reuse', () => {
 
     expect(captionInputs(ctx.root).map((i) => i.value)).toEqual(['Second'])
     ctx.app.unmount()
+  })
+})
+
+describe('media node view actions menu', () => {
+  async function openMenu(root: HTMLElement) {
+    const trigger = root.querySelector(
+      'button[aria-label="Media options"]',
+    ) as HTMLButtonElement
+    trigger.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))
+    trigger.click()
+    await settle()
+  }
+  function item(label: string): HTMLElement {
+    const items = Array.from(
+      document.body.querySelectorAll<HTMLElement>('[role="menuitem"]'),
+    )
+    const found = items.find((el) => el.textContent?.trim() === label)
+    if (!found) throw new Error(`no menu item "${label}"`)
+    return found
+  }
+  async function pick(label: string) {
+    const el = item(label)
+    el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))
+    el.dispatchEvent(new PointerEvent('pointerup', { bubbles: true }))
+    el.click()
+    await settle()
+  }
+
+  it('lists every action for a selected image', async () => {
+    const ctx = mount(
+      '<p><img src="/files/a.png" width="800" height="400"></p>',
+    )
+    await settle()
+    ctx.getEditor().commands.setNodeSelection(1)
+    await settle()
+    await openMenu(ctx.root)
+
+    const labels = Array.from(
+      document.body.querySelectorAll('[role="menuitem"]'),
+    ).map((el) => el.textContent?.trim())
+    expect(labels).toEqual([
+      'Caption',
+      'Left',
+      'Center',
+      'Right',
+      'Resize',
+      'Replace image',
+      'Duplicate',
+      'Open link',
+      'Copy image',
+      'Download',
+      'Delete',
+    ])
+    // the caption row carries the design's check only while the caption
+    // shows; the alignment in force carries one always
+    const rows = Array.from(
+      document.body.querySelectorAll<HTMLElement>('[role="menuitem"]'),
+    )
+    const checkedRows = rows
+      .filter((el) => el.querySelector('[data-checked]'))
+      .map((el) => el.textContent?.trim())
+    expect(checkedRows).toEqual(['Left'])
+    ctx.app.unmount()
+  })
+
+  it("lists the design's six rows for a selected video, in its order", async () => {
+    const ctx = mount(
+      '<video src="/files/clip.mp4" data-caption="Release demo" loop></video>',
+    )
+    await settle()
+    ctx.getEditor().commands.setNodeSelection(0)
+    await settle()
+    await openMenu(ctx.root)
+
+    const rows = Array.from(
+      document.body.querySelectorAll<HTMLElement>('[role="menuitem"]'),
+    )
+    expect(rows.map((el) => el.textContent?.trim())).toEqual([
+      'Caption',
+      'Replace',
+      'Align',
+      'Video settings',
+      'Duplicate',
+      'Delete',
+    ])
+    // one list: no group labels, no dividers
+    expect(document.body.querySelector('[role="separator"]')).toBeNull()
+    // the caption shows, so its row is checked; nothing is a switch any more
+    expect(rows[0].querySelector('[data-checked]')).not.toBeNull()
+    expect(document.body.querySelector('button[role="switch"]')).toBeNull()
+    expect(rows[5].className).not.toMatch(/red/)
+    ctx.app.unmount()
+  })
+
+  it('deletes the image and leaves the paragraph', async () => {
+    const ctx = mount(
+      '<p>x</p><p><img src="/files/a.png" width="800" height="400"></p><p>y</p>',
+    )
+    await settle()
+    ctx.getEditor().commands.setNodeSelection(4)
+    await settle()
+    await openMenu(ctx.root)
+    await pick('Delete')
+
+    expect(ctx.getEditor().getHTML()).toBe('<p>x</p><p></p><p>y</p>')
+    ctx.app.unmount()
+  })
+
+  it('duplicates the image into a paragraph of its own, caption and all', async () => {
+    const ctx = mount(
+      '<p><img src="/files/a.png" data-caption="Cat" width="800" height="400"></p><p>y</p>',
+    )
+    await settle()
+    const editor = ctx.getEditor()
+    editor.commands.setNodeSelection(1)
+    await settle()
+    await openMenu(ctx.root)
+    await pick('Duplicate')
+
+    const images: { caption: string | null }[] = []
+    editor.state.doc.descendants((node: any) => {
+      if (node.type.name === 'image')
+        images.push({ caption: node.attrs.caption })
+    })
+    expect(images).toEqual([{ caption: 'Cat' }, { caption: 'Cat' }])
+    expect(editor.getHTML()).toMatch(
+      /^<p><img [^>]*><\/p><p><img [^>]*><\/p><p>y<\/p>$/,
+    )
+    // the copy is the selected one, ready to be captioned or moved
+    expect(editor.state.selection.toJSON()).toMatchObject({
+      type: 'node',
+      anchor: 4,
+    })
+    ctx.app.unmount()
+  })
+
+  it('resizes to a share of the width it has, keeping the ratio', async () => {
+    const ctx = mount(
+      '<p><img src="/files/a.png" width="800" height="400"></p>',
+    )
+    await settle()
+    const editor = ctx.getEditor()
+    const wrapper = ctx.root.querySelector(
+      '[data-node-view-wrapper]',
+    ) as HTMLElement
+    Object.defineProperty(wrapper, 'clientWidth', { value: 700 })
+    editor.commands.setNodeSelection(1)
+    await settle()
+    await openMenu(ctx.root)
+    const resize = item('Resize')
+    resize.dispatchEvent(new PointerEvent('pointermove', { bubbles: true }))
+    resize.dispatchEvent(new PointerEvent('pointerenter', { bubbles: true }))
+    resize.click()
+    await settle()
+    await pick('Medium')
+
+    const node = editor.state.doc.nodeAt(1)
+    expect(node.attrs.width).toBe(350)
+    expect(node.attrs.height).toBe(175)
+    // and stays selected, its pills and menu still up for the next change
+    expect(editor.state.selection.toJSON()).toMatchObject({
+      type: 'node',
+      anchor: 1,
+    })
+    ctx.app.unmount()
+  })
+})
+
+describe('video playback switches', () => {
+  async function mountVideo(html: string) {
+    const ctx = mount(html)
+    await settle()
+    const video = ctx.root.querySelector('video') as HTMLVideoElement
+    // a video is a block of its own, so it sits at the top of the document
+    ctx.getEditor().commands.setNodeSelection(0)
+    await settle()
+    return { ...ctx, video }
+  }
+
+  it('keeps an off flag off across a round trip through HTML', async () => {
+    const ctx = await mountVideo('<video src="/files/clip.mp4"></video>')
+    const html: string = ctx.getEditor().getHTML()
+    expect(html).not.toContain('autoplay')
+    expect(html).not.toContain('loop')
+    expect(html).not.toContain('muted')
+    expect(ctx.video.hasAttribute('autoplay')).toBe(false)
+
+    ctx.getEditor().commands.setVideoOptions({ loop: true })
+    await settle()
+    expect(ctx.getEditor().getHTML()).toContain('loop=""')
+    expect(ctx.getEditor().getHTML()).not.toContain('autoplay')
+  })
+
+  it('reads the flags back as booleans', async () => {
+    const ctx = await mountVideo(
+      '<video src="/files/clip.mp4" autoplay muted></video>',
+    )
+    const node = ctx.getEditor().state.doc.nodeAt(0)
+    expect(node.attrs).toMatchObject({
+      autoplay: true,
+      loop: false,
+      muted: true,
+    })
+  })
+
+  it('starts the video when Autoplay goes on, and stops it when off', async () => {
+    const ctx = await mountVideo('<video src="/files/clip.mp4"></video>')
+    let paused = true
+    Object.defineProperty(ctx.video, 'paused', { get: () => paused })
+    const play = vi
+      .spyOn(ctx.video, 'play')
+      .mockImplementation(() => ((paused = false), Promise.resolve()))
+    const pause = vi
+      .spyOn(ctx.video, 'pause')
+      .mockImplementation(() => void (paused = true))
+
+    ctx.getEditor().commands.setVideoOptions({ autoplay: true })
+    await settle()
+    expect(play).toHaveBeenCalledTimes(1)
+
+    ctx.getEditor().commands.setVideoOptions({ autoplay: false })
+    await settle()
+    expect(pause).toHaveBeenCalledTimes(1)
+  })
+
+  it('plays muted when the browser refuses sound', async () => {
+    const ctx = await mountVideo('<video src="/files/clip.mp4"></video>')
+    Object.defineProperty(ctx.video, 'paused', { get: () => true })
+    const play = vi
+      .spyOn(ctx.video, 'play')
+      .mockImplementationOnce(() =>
+        Promise.reject(new DOMException('no gesture', 'NotAllowedError')),
+      )
+      .mockImplementation(() => Promise.resolve())
+
+    ctx.getEditor().commands.setVideoOptions({ autoplay: true })
+    await settle()
+    await new Promise((r) => setTimeout(r, 0))
+    expect(play).toHaveBeenCalledTimes(2)
+    expect(ctx.video.muted).toBe(true)
+  })
+
+  it('starts a video that opens with Autoplay on', async () => {
+    const play = vi
+      .spyOn(HTMLMediaElement.prototype, 'play')
+      .mockImplementation(() => Promise.resolve())
+    try {
+      await mountVideo('<video src="/files/clip.mp4" autoplay></video>')
+      expect(play).toHaveBeenCalled()
+    } finally {
+      play.mockRestore()
+    }
   })
 })

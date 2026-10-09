@@ -4,13 +4,19 @@
     :items="props.items"
     :command="(item) => onItemSelect(item as CommandItem)"
     container-class="min-w-48"
-    item-class="h-7"
     :show-no-results="true"
   >
+    <!-- the Dropdown item's icon and label (`menuClasses`, MenuItemContent) -->
     <template #default="{ item }">
-      <span v-if="item.icon" :class="[item.icon, 'mr-2 h-4 w-4']" />
-      <div v-else class="mr-2 h-4 w-4"></div>
-      <span>{{ item.title }}</span>
+      <span data-slot="item-prefix" class="flex shrink-0 items-center">
+        <span
+          v-if="item.icon"
+          :class="[item.icon, menuClasses.itemIcon, 'text-ink-gray-6']"
+          aria-hidden="true"
+        />
+        <span v-else :class="menuClasses.itemIconPlaceholder" />
+      </span>
+      <span class="truncate">{{ item.title }}</span>
     </template>
   </SuggestionList>
 </template>
@@ -18,6 +24,7 @@
 <script setup lang="ts">
 import { ref, type PropType } from 'vue'
 import SuggestionList from '../suggestion/SuggestionList.vue'
+import { menuClasses } from '#components/Menu/utils'
 import type { Editor, Range } from '@tiptap/core'
 import type { SuggestionListExpose } from '#molecules/editor/extensions/shared/suggestion-types'
 import { forwardKeyDown } from '#molecules/editor/composables/useSuggestionList'

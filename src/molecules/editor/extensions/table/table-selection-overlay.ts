@@ -85,11 +85,13 @@ class SelectionOverlay {
     this.observe(host)
 
     // Convert viewport rect → host content coordinates (so the box scrolls with
-    // the wrapper's horizontal overflow).
+    // the wrapper's horizontal overflow). The box is positioned from the host's
+    // padding edge, while the rect is measured from its border edge, so a host
+    // with a border (a styled wrapper) has to take its border width off.
     const box: Rect = union
     const el = this.ensure(host)
-    el.style.left = `${box.left - hostRect.left + host.scrollLeft}px`
-    el.style.top = `${box.top - hostRect.top + host.scrollTop}px`
+    el.style.left = `${box.left - hostRect.left - host.clientLeft + host.scrollLeft}px`
+    el.style.top = `${box.top - hostRect.top - host.clientTop + host.scrollTop}px`
     el.style.width = `${box.right - box.left}px`
     el.style.height = `${box.bottom - box.top}px`
   }

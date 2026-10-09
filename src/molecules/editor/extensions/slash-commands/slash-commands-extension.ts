@@ -63,7 +63,13 @@ function inGroup(group: string, items: CommandItem[]): CommandItem[] {
   return items.map((item) => ({ ...item, group }))
 }
 
-const getCommands = (): CommandItem[] => [
+/**
+ * The built-in command registry — what the menu shows when `items` is not
+ * configured. Exported so a consumer that configures `items` can start from
+ * this list and add to, drop from or re-order it, rather than re-declaring
+ * every command the editor already offers.
+ */
+export const getDefaultSlashCommands = (): CommandItem[] => [
   ...inGroup('Text', [
     slashCommand(headingMeta(2), ({ editor, range }: CommandExecutionProps) => {
       editor
@@ -191,7 +197,7 @@ export const SlashCommands = createSuggestionExtension<CommandItem>({
         ?.items ?? null,
     )
     return filterByQuery(
-      (configured ?? getCommands()).filter(
+      (configured ?? getDefaultSlashCommands()).filter(
         (item) => item.isAvailable?.(editor) !== false,
       ),
       query,

@@ -14,6 +14,7 @@ import {
   mergeAttributes,
 } from '@tiptap/core'
 import type { Editor } from '@tiptap/core'
+import type { Transaction } from '@tiptap/pm/state'
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
 import MediaNodeView from '#molecules/editor/components/MediaNodeView.vue'
 import { createMediaPlugin } from '#molecules/editor/extensions/shared/media-plugin'
@@ -242,17 +243,39 @@ export const ImageExtension = NodeExtension.create<ImageExtensionOptions>({
         },
 
       replaceImage:
-        (pos: number, file: File) =>
+        (pos: number, file?: File) =>
         ({ editor }: { editor: Editor }) => {
           const node = editor.view.state.doc.nodeAt(pos)
           if (!node || node.type.name !== this.name) return false
-          void imageEngine.uploadReplace(
-            file,
-            editor,
-            pos,
-            resolve(editor),
-            node.attrs,
-          )
+          const upload = (chosen: File, at: number) => {
+            const live = editor.view.state.doc.nodeAt(at)
+            if (!live || live.type.name !== this.name) return
+            void imageEngine.uploadReplace(
+              chosen,
+              editor,
+              at,
+              resolve(editor),
+              live.attrs,
+            )
+          }
+          if (file) {
+            upload(file, pos)
+            return true
+          }
+          // No file in hand: the picker asks for one. The document may move
+          // while it is open, so the node's position is carried through
+          // every transaction until the picker answers.
+          let at = pos
+          const track = ({ transaction }: { transaction: Transaction }) => {
+            at = transaction.mapping.map(at)
+          }
+          editor.on('transaction', track)
+          void pickFiles({ accept: 'image/*' })
+            .then((files) => {
+              if (editor.isDestroyed || !files[0]) return
+              upload(files[0], at)
+            })
+            .finally(() => editor.off('transaction', track))
           return true
         },
     }

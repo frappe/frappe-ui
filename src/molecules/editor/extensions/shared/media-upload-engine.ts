@@ -150,7 +150,7 @@ export async function dataUrlOrBlobToFile(
 export function createMediaUploadEngine(
   config: MediaUploadConfig,
 ): MediaUploadEngine {
-  const { nodeName, probeDimensions, storeBase64 } = config
+  const { nodeName, probeDimensions, storeBase64, validate } = config
 
   function findInsertPosition(editor: Editor): number {
     return editor.view.state.selection.from
@@ -195,10 +195,18 @@ export function createMediaUploadEngine(
       abort: () => abortController.abort(),
     })
     try {
-      // Reject over-limit files before the expensive staging work: no base64
-      // encode, no dimension probe — just an error placeholder with the staged
-      // file kept so "Try again" / "Choose another" still work.
-      const validationError = fileSizeLimitMessage(file)
+      // Nothing is written to the document in the same tick as the command
+      // that started this run: tiptap dispatches that command's own
+      // transaction once the command returns, and a placeholder written
+      // before then leaves it built on a state that has already moved on
+      // ("Applying a mismatched transaction"). The staging path always
+      // awaits before its first write; the rejection path below did not.
+      await Promise.resolve()
+      // Reject over-limit and unsupported files before the expensive staging
+      // work: no base64 encode, no dimension probe — just an error placeholder
+      // with the staged file kept so "Try again" / "Choose another" still work.
+      const validationError =
+        fileSizeLimitMessage(file) ?? validate?.(file) ?? null
       if (validationError) {
         setLocalFile(uploadId, { file })
         if (editor.isDestroyed) {

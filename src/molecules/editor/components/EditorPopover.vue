@@ -5,8 +5,15 @@
     tabindex="-1"
     :loop="loop"
     :trapped="trapped"
-    class="editor-popover border border-outline-gray-2 bg-surface-elevation-2 shadow-2xl outline-none"
-    :class="contentClass"
+    class="editor-popover bg-surface-elevation-2 shadow-2xl outline-none"
+    :class="[
+      variant === 'menu'
+        ? 'menu-content ring-1 ring-black ring-opacity-5'
+        : 'border border-outline-gray-2',
+      contentClass,
+    ]"
+    :data-slot="variant === 'menu' ? 'content' : undefined"
+    :data-motion="variant === 'menu' ? 'none' : undefined"
     @mount-auto-focus="onMountAutoFocus"
     @unmount-auto-focus="onUnmountAutoFocus"
   >
@@ -47,8 +54,19 @@ const props = withDefaults(
     trapped?: boolean
     /** Loop Tab focus at the panel edges. Defaults `true`. */
     loop?: boolean
+    /**
+     * `menu` draws the edge the way the Dropdown's menu does (`menuClasses`):
+     * a faint ring rather than the panel's outline-gray-2 border, so a list of
+     * choices typed into the editor reads as the same menu as one clicked
+     * open. It also carries the menu's own hooks — `.menu-content` and
+     * `data-slot="content"` — so an app that restyles its Dropdowns through
+     * them restyles this menu with them. `data-motion="none"`: the panel's
+     * enter animation is its own, not the Dropdown's fade.
+     * Defaults to `panel`.
+     */
+    variant?: 'panel' | 'menu'
   }>(),
-  { autofocus: true, trapped: true, loop: true },
+  { autofocus: true, trapped: true, loop: true, variant: 'panel' },
 )
 
 function onMountAutoFocus(event: Event) {

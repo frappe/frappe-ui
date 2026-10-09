@@ -1,0 +1,252 @@
+/* The chart colour variables of the Frappe Charts file (Figma
+   1GDS12ys41lxeG3wQpNq41, collection "Color Styles", modes Light and
+   Dark), one custom property per variable, named after it. Ocean,
+   Qualitative and diverging take other values in the dark mode; Mist and
+   Earthy are the same in both. Nothing else in the playground paints a
+   chart: every series reads these (useChartTokens.ts). */
+:root {
+  /* Ocean/B-100 … B-900 */
+  --chart-ocean-100: #edf7fc;
+  --chart-ocean-200: #dceef9;
+  --chart-ocean-300: #b8def2;
+  --chart-ocean-400: #9cd1ee;
+  --chart-ocean-500: #91ccec;
+  --chart-ocean-600: #71bde5;
+  --chart-ocean-700: #4eacdf;
+  --chart-ocean-800: #2283c3;
+  --chart-ocean-900: #095895;
+
+  /* Mist/mist-* */
+  --chart-mist-meadow: #9ec599;
+  --chart-mist-graphite: #546f7a;
+  --chart-mist-smoke: #889ca5;
+  --chart-mist-harboar: #7fa6b5;
+  --chart-mist-dune: #f4c98f;
+  --chart-mist-limestone: #c5ac9d;
+  --chart-mist-apricot: #e7977e;
+  --chart-mist-rosewood: #d16682;
+
+  /* Earthy/earthy-* */
+  --chart-earthy-stone: #997b66;
+  --chart-earthy-terracotta: #d08c60;
+  --chart-earthy-dune: #e4b074;
+  --chart-earthy-wheat: #f8d488;
+  --chart-earthy-sand: #e5c59e;
+  --chart-earthy-clay: #d9ae94;
+  --chart-earthy-olive: #9b9b7a;
+  --chart-earthy-moss: #797d62;
+  /* not a variable: the third stop of the file's map scale (961:35318), left
+     unbound between olive and wheat */
+  --chart-earthy-honey: #eec27e;
+
+  /* Qualitative/qualitative - 1 … 9 */
+  --chart-qualitative-1: #8dd3c7;
+  --chart-qualitative-2: #f7f799;
+  --chart-qualitative-3: #bebada;
+  --chart-qualitative-4: #fb8f83;
+  --chart-qualitative-5: #80b1d3;
+  --chart-qualitative-6: #fdb463;
+  --chart-qualitative-7: #b5da77;
+  --chart-qualitative-8: #fccde5;
+  --chart-qualitative-9: #d9d9d9;
+  /* the CRM dashboard's wash behind a top deal's value, in the Qualitative
+     and Diverging frames alike (1511:29921, 1511:27161) */
+  --chart-crm-wash: #faf0d8;
+
+  /* The annotation bands (1356:68610, 1356:68674, 1356:68643): the file's
+     ink/amber-1, ink/amber-2 and ink/amber-3 for the amber band's fill, its
+     dashed edges and its word; surface-alpha/red-1, dark/red/50 and ink/red-3
+     for the red one's; and ink/green-1 and ink/green-3 for the "Good" band. frappe-ui's amber ramp has no colour near the file's edge
+     (#fbc53f; its nearest, amber-400, is the washed #f4cd80 these were
+     drawn in), so the file's own values are kept here. */
+  --chart-band-amber-fill: #fdfaed;
+  --chart-band-amber-edge: #fbc53f;
+  --chart-band-amber-ink: #e79913;
+  --chart-band-red-fill: #fff7f7;
+  --chart-band-red-edge: #ffdede;
+  --chart-band-red-ink: #e03636;
+  --chart-band-green-fill: #f2fdf4;
+  --chart-band-green-ink: #46b37e;
+}
+
+[data-theme='dark'] {
+  --chart-ocean-100: #c1c9cd;
+  --chart-ocean-200: #b4c2cb;
+  --chart-ocean-300: #93b2c2;
+  --chart-ocean-400: #7da7be;
+  --chart-ocean-500: #74a3bd;
+  --chart-ocean-600: #5a97b7;
+  --chart-ocean-700: #3e8ab2;
+  --chart-ocean-800: #1b699c;
+  --chart-ocean-900: #074677;
+
+  --chart-qualitative-1: #3ca99a;
+  --chart-qualitative-2: #c8be57;
+  --chart-qualitative-3: #8c81d3;
+  --chart-qualitative-4: #dc675a;
+  --chart-qualitative-5: #5c98c1;
+  --chart-qualitative-6: #d59a4e;
+  --chart-qualitative-7: #88af45;
+  --chart-qualitative-8: #c774a8;
+  --chart-qualitative-9: #bababa;
+  /* (1523:33173, 1524:41285) */
+  --chart-crm-wash: #524830;
+
+  /* The file's dark values where it has them. Three it does not:
+     ink/amber-1 and ink/green-1 resolve to neutral/white in Dark — a white
+     band on a dark card — and dark/red/50 is a primitive with a Light mode
+     only. Those take frappe-ui's own dark pair for the same role,
+     surface-amber-1, surface-green-1 and outline-red-2, whose light values
+     are the file's within a step. */
+  --chart-band-amber-fill: var(--surface-amber-1);
+  --chart-band-amber-edge: #753a07;
+  --chart-band-amber-ink: #e27e1b;
+  --chart-band-red-fill: rgba(83, 6, 6, 0.4);
+  --chart-band-red-edge: var(--outline-red-2);
+  --chart-band-red-ink: #d73232;
+  --chart-band-green-fill: var(--surface-green-1);
+  --chart-band-green-ink: #1db269;
+}
+
+/* diverging/diverging-1 … 9. The library's own stylesheet (src/charts/style.css)
+   names a diverging ramp of its own under these very properties, blue to red,
+   on the same `:root` and `[data-theme='dark']`, and it loads after this file,
+   so the Diverging theme was drawn in the library's ramp rather than the
+   file's Spectral one. The doubled `:root` lets the file's values win here
+   without touching the library's. */
+:root:root {
+  --chart-diverging-1: #3288bd;
+  --chart-diverging-2: #66c2a5;
+  --chart-diverging-3: #abdda4;
+  --chart-diverging-4: #e6f598;
+  --chart-diverging-5: #ffffbf;
+  --chart-diverging-6: #fee08b;
+  --chart-diverging-7: #f9b571;
+  --chart-diverging-8: #ed7854;
+  --chart-diverging-9: #d84b5b;
+}
+
+:root:root[data-theme='dark'] {
+  --chart-diverging-1: #2d7aaa;
+  --chart-diverging-2: #5caf94;
+  --chart-diverging-3: #9ac794;
+  --chart-diverging-4: #cfdc89;
+  --chart-diverging-5: #e5e5ac;
+  --chart-diverging-6: #e5ca7d;
+  --chart-diverging-7: #e0a366;
+  --chart-diverging-8: #d56c4c;
+  --chart-diverging-9: #c24452;
+}
+
+/* Each theme as the library's own ramps, scoped to the page's grid by its
+   `data-chart-theme`: `--chart-categorical-*` is the theme's series order,
+   `--chart-sequential-*` its ramp dark to light, `--chart-diverging-*` the
+   file's diverging variables. A library chart handed no palette of its own
+   — a tooltip swatch, a default heat map — reads these and follows the
+   theme too. The cards name their colours by role (chartThemes.ts); this
+   is the floor under them. */
+[data-chart-theme='ocean'] {
+  --chart-categorical-1: var(--chart-ocean-900);
+  --chart-categorical-2: var(--chart-ocean-800);
+  --chart-categorical-3: var(--chart-ocean-700);
+  --chart-categorical-4: var(--chart-ocean-400);
+  --chart-categorical-5: var(--chart-ocean-600);
+  --chart-categorical-6: var(--chart-ocean-500);
+  --chart-categorical-7: var(--chart-ocean-300);
+  --chart-categorical-8: var(--chart-ocean-200);
+  --chart-categorical-9: var(--chart-ocean-100);
+  --chart-categorical-10: var(--chart-ocean-900);
+  --chart-sequential-1: var(--chart-ocean-900);
+  --chart-sequential-2: var(--chart-ocean-800);
+  --chart-sequential-3: var(--chart-ocean-700);
+  --chart-sequential-4: var(--chart-ocean-600);
+  --chart-sequential-5: var(--chart-ocean-500);
+  --chart-sequential-6: var(--chart-ocean-400);
+  --chart-sequential-7: var(--chart-ocean-300);
+  --chart-sequential-8: var(--chart-ocean-200);
+  --chart-sequential-9: var(--chart-ocean-100);
+}
+[data-chart-theme='mist'] {
+  --chart-categorical-1: var(--chart-mist-graphite);
+  --chart-categorical-2: var(--chart-mist-harboar);
+  --chart-categorical-3: var(--chart-mist-smoke);
+  --chart-categorical-4: var(--chart-mist-meadow);
+  --chart-categorical-5: var(--chart-mist-dune);
+  --chart-categorical-6: var(--chart-mist-limestone);
+  --chart-categorical-7: var(--chart-mist-apricot);
+  --chart-categorical-8: var(--chart-mist-rosewood);
+  --chart-categorical-9: var(--chart-mist-graphite);
+  --chart-categorical-10: var(--chart-mist-harboar);
+  --chart-sequential-1: var(--chart-mist-rosewood);
+  --chart-sequential-2: var(--chart-mist-apricot);
+  --chart-sequential-3: var(--chart-mist-dune);
+  --chart-sequential-4: var(--chart-mist-harboar);
+  --chart-sequential-5: var(--chart-mist-smoke);
+  --chart-sequential-6: var(--chart-mist-graphite);
+  --chart-sequential-7: var(--chart-mist-limestone);
+  --chart-sequential-8: var(--chart-mist-meadow);
+  --chart-sequential-9: var(--chart-mist-dune);
+}
+[data-chart-theme='earthy'] {
+  --chart-categorical-1: var(--chart-earthy-moss);
+  --chart-categorical-2: var(--chart-earthy-stone);
+  --chart-categorical-3: var(--chart-earthy-terracotta);
+  --chart-categorical-4: var(--chart-earthy-dune);
+  --chart-categorical-5: var(--chart-earthy-wheat);
+  --chart-categorical-6: var(--chart-earthy-sand);
+  --chart-categorical-7: var(--chart-earthy-clay);
+  --chart-categorical-8: var(--chart-earthy-olive);
+  --chart-categorical-9: var(--chart-earthy-moss);
+  --chart-categorical-10: var(--chart-earthy-stone);
+  --chart-sequential-1: var(--chart-earthy-stone);
+  --chart-sequential-2: var(--chart-earthy-terracotta);
+  --chart-sequential-3: var(--chart-earthy-clay);
+  --chart-sequential-4: var(--chart-earthy-wheat);
+  --chart-sequential-5: var(--chart-earthy-olive);
+  --chart-sequential-6: var(--chart-earthy-moss);
+  --chart-sequential-7: var(--chart-earthy-dune);
+  --chart-sequential-8: var(--chart-earthy-sand);
+  --chart-sequential-9: var(--chart-earthy-wheat);
+}
+[data-chart-theme='qualitative'] {
+  --chart-categorical-1: var(--chart-qualitative-1);
+  --chart-categorical-2: var(--chart-qualitative-2);
+  --chart-categorical-3: var(--chart-qualitative-3);
+  --chart-categorical-4: var(--chart-qualitative-4);
+  --chart-categorical-5: var(--chart-qualitative-5);
+  --chart-categorical-6: var(--chart-qualitative-6);
+  --chart-categorical-7: var(--chart-qualitative-7);
+  --chart-categorical-8: var(--chart-qualitative-8);
+  --chart-categorical-9: var(--chart-qualitative-9);
+  --chart-categorical-10: var(--chart-qualitative-1);
+  --chart-sequential-1: var(--chart-qualitative-8);
+  --chart-sequential-2: var(--chart-qualitative-7);
+  --chart-sequential-3: var(--chart-qualitative-6);
+  --chart-sequential-4: var(--chart-qualitative-5);
+  --chart-sequential-5: var(--chart-qualitative-4);
+  --chart-sequential-6: var(--chart-qualitative-3);
+  --chart-sequential-7: var(--chart-qualitative-2);
+  --chart-sequential-8: var(--chart-qualitative-1);
+  --chart-sequential-9: var(--chart-qualitative-9);
+}
+[data-chart-theme='diverging'] {
+  --chart-categorical-1: var(--chart-diverging-1);
+  --chart-categorical-2: var(--chart-diverging-9);
+  --chart-categorical-3: var(--chart-diverging-3);
+  --chart-categorical-4: var(--chart-diverging-7);
+  --chart-categorical-5: var(--chart-diverging-2);
+  --chart-categorical-6: var(--chart-diverging-8);
+  --chart-categorical-7: var(--chart-diverging-4);
+  --chart-categorical-8: var(--chart-diverging-6);
+  --chart-categorical-9: var(--chart-diverging-5);
+  --chart-categorical-10: var(--chart-diverging-1);
+  --chart-sequential-1: var(--chart-diverging-1);
+  --chart-sequential-2: var(--chart-diverging-2);
+  --chart-sequential-3: var(--chart-diverging-3);
+  --chart-sequential-4: var(--chart-diverging-4);
+  --chart-sequential-5: var(--chart-diverging-5);
+  --chart-sequential-6: var(--chart-diverging-6);
+  --chart-sequential-7: var(--chart-diverging-7);
+  --chart-sequential-8: var(--chart-diverging-8);
+  --chart-sequential-9: var(--chart-diverging-9);
+}

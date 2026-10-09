@@ -15,6 +15,7 @@ export {
 export type { AspectRatioInfo, PlatformConfig } from './iframe-embed-utils'
 export {
   IFRAME_ALLOWLIST,
+  ANY_HOST,
   IFRAME_SANDBOX,
   validateIframeUrl,
   getIframeAllowlist,

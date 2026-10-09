@@ -2,12 +2,14 @@
 /**
  * Resize handle(s) for media / embed node views, in two placements.
  *
+ * - `edges` — the pair of vertical pills on the left and right edges, as the
+ *   design draws them on a picture (espresso-2.0, node 32243-108985): 3 × 66
+ *   on full corners, 4px in from the edge and centred on it, a solid dark
+ *   gray in a 1px white halo so it reads on any picture in either theme.
+ *   Images and videos: a video's playback bar owns the bottom of the frame,
+ *   and a picture's corner is where the actions menu's mirror would sit.
  * - `corner` (default) — one grip in the bottom-right corner carrying the
- *   diagonal resize glyph, the affordance every OS window and image editor
- *   already trains people for. Used by images and embeds.
- * - `edges` — the pair of vertical pills on the left and right edges. Videos
- *   keep these: their playback bar owns the bottom of the frame, so a corner
- *   grip either sits on the controls or hovers awkwardly above them.
+ *   diagonal resize glyph. Embeds keep it.
  *
  * Both report which edge started the drag so `useNodeViewResize` can pick the
  * matching drag math (a corner reads both axes; an edge reads X and inverts
@@ -35,18 +37,24 @@ const edges = ['left', 'right'] as const
 
 <template>
   <template v-if="placement === 'edges'">
+    <!-- The button is the hand's target, 14px deep from the edge; the pill
+         inside it stands 4px in. A short picture gets a shorter pill. -->
     <button
       v-for="edge in edges"
       :key="edge"
       type="button"
-      class="absolute top-1/2 z-30 flex h-8 max-h-[50%] w-4 -translate-y-1/2 cursor-ew-resize touch-none items-center justify-center bg-transparent"
-      :class="edge === 'left' ? 'left-0' : 'right-0'"
+      class="absolute top-1/2 z-30 flex h-[66px] max-h-[50%] w-3.5 -translate-y-1/2 cursor-ew-resize touch-none items-center bg-transparent"
+      :class="
+        edge === 'left'
+          ? 'left-0 justify-start pl-1'
+          : 'right-0 justify-end pr-1'
+      "
       :aria-label="`${label} from ${edge} edge`"
       @pointerdown.prevent="emit('resize-start', $event, edge)"
       @keydown="emit('resize-keydown', $event)"
     >
       <span
-        class="pointer-events-none h-full w-1 rounded-full bg-black-overlay-600 ring-1 ring-white-overlay-500"
+        class="pointer-events-none h-full w-[3px] rounded-full bg-[#383838] ring-1 ring-white"
       />
     </button>
   </template>

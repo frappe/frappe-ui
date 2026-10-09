@@ -7,7 +7,7 @@
     :show-no-results="true"
   >
     <template #default="{ item }">
-      <span class="mr-2">{{ item.emoji }}</span>
+      <span>{{ item.emoji }}</span>
       <span>{{ item.name }}</span>
     </template>
   </SuggestionList>
