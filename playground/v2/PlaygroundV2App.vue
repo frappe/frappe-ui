@@ -22,6 +22,7 @@ import NotificationPage from './notification/NotificationPage.vue'
 import KanbanPage from './kanban/KanbanPage.vue'
 import ColorPickerPage from './color-picker/ColorPickerPage.vue'
 import RichTextPage from './rich-text/RichTextPage.vue'
+import TextEditorPage from './text-editor/TextEditorPage.vue'
 // the pattern pages, built in a separate checkout and merged in: each
 // draws its own page and its own "On this page" rail
 import SettingsModalPatterns from './SettingsModalPatterns.vue'
@@ -61,6 +62,7 @@ import navKanban from './assets/nav/kanban.svg?raw'
 import navColorPicker from './assets/nav/color-picker.svg?raw'
 import navRichText from './assets/nav/richtext.svg?raw'
 import navCharts from './assets/nav/charts.svg?raw'
+import navTextEditor from './assets/nav/text-editor.svg?raw'
 import navSettingsModal from './assets/nav/settings-modal.svg?raw'
 import navTable from './assets/nav/table.svg?raw'
 import navActivity from './assets/nav/activity.svg?raw'
@@ -175,6 +177,7 @@ const pages = [
   'Color picker',
   'Rich text editor',
   'Charts',
+  'Text editor',
   'Settings modal',
   'Table',
   'Activity',
@@ -223,6 +226,8 @@ const NAV_ICONS: Record<string, string> = {
   // the file's line chart glyph (23513:51323); the page has no nav row of
   // its own in 35143:169789 yet
   charts: navCharts,
+  // the file's text cursor (23513:51614), the editor page's own glyph
+  'text-editor': navTextEditor,
   'settings-modal': navSettingsModal,
   table: navTable,
   activity: navActivity,
@@ -1133,6 +1138,7 @@ const outlineTitle = computed(
               >
                 <ChartsPatterns />
               </div>
+              <TextEditorPage v-else-if="page === 'text-editor'" />
 
               <!-- the pattern pages scroll as a document does, so each gets
                    the stage's scroller; its rail finds that scroller and
