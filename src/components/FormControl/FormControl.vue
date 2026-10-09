@@ -7,7 +7,11 @@
     :class="[fillWidth ? 'w-full' : null, attrs.class]"
     :style="attrs.style"
   >
-    <template v-for="name in Object.keys($slots)" :key="name" #[name]="slotProps">
+    <template
+      v-for="name in Object.keys($slots)"
+      :key="name"
+      #[name]="slotProps"
+    >
       <!-- @vue-ignore -->
       <slot :name="name" v-bind="slotProps" />
     </template>
@@ -17,6 +21,7 @@
 import { useAttrs, computed, ref, watchEffect } from 'vue'
 import { useId } from '../../utils/useId'
 import { TextInput } from '../TextInput'
+import { Password } from '../Password'
 import { Select } from '../Select'
 import { Textarea } from '../Textarea'
 import { Checkbox } from '../Checkbox'
@@ -85,6 +90,10 @@ const resolvedComponent = computed(() => {
       return MultiSelect
     case 'textarea':
       return Textarea
+    // Password, not a TextInput with type="password", so the field gets the
+    // show/hide toggle like a standalone password field.
+    case 'password':
+      return Password
     case 'checkbox':
       return Checkbox
     case 'date':
@@ -128,6 +137,9 @@ const forwardedAttrs = computed(() => {
   // composite types (select/combobox/multiselect/textarea/checkbox)
   // and lets the rest fall through to <TextInput :type="...">.
   const composite = new Set([
+    // Password sets the input type itself as it toggles between hidden and
+    // shown, so a forwarded `type` must not pin it.
+    'password',
     'select',
     'combobox',
     'multiselect',
