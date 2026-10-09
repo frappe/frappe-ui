@@ -150,6 +150,23 @@ describe('Stepper', () => {
     cy.contains('Configure').should('not.exist')
   })
 
+  it('renders no buttons while completed, since a click could not apply', () => {
+    cy.mount(Stepper, {
+      props: { steps, completed: true, vertical: true, clickable: true },
+    })
+
+    cy.get('[data-slot="stepper"] button').should('not.exist')
+  })
+
+  it('keeps only phrasing content inside clickable rows', () => {
+    cy.mount(Stepper, {
+      props: { steps, modelValue: 'import', vertical: true, clickable: true },
+    })
+
+    // <button> allows phrasing content only, so no block wrappers inside it
+    cy.get('[data-slot="stepper"] button div').should('not.exist')
+  })
+
   it('completes every step', () => {
     cy.mount(Stepper, { props: { steps, completed: true, vertical: true } })
 

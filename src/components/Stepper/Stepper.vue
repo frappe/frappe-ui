@@ -11,7 +11,7 @@
       :steps="resolved"
       :size="size"
       :loading="loading"
-      :clickable="clickable"
+      :clickable="clickable && !completed"
       v-bind="vertical ? { edge, substeps } : {}"
       @select="select"
     >

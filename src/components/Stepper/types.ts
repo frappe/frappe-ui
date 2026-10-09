@@ -60,7 +60,10 @@ export interface StepperProps {
   /** Vertical only: show sub-steps for every step, or only the current one. */
   substeps?: 'all' | 'current'
 
-  /** Finished steps become buttons that set `v-model`. */
+  /**
+   * Finished steps become buttons that set `v-model`. Off while `completed`
+   * is set, since `completed` would override the value a click sets.
+   */
   clickable?: boolean
 }
 
