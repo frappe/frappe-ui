@@ -54,9 +54,10 @@ watch(range, (on) => !on && (doublePane.value = false))
   <div class="flex h-full items-center justify-center px-5 py-10">
     <div class="flex items-start gap-10">
       <!-- one box, the size of the largest picker (sidebar, two months,
-           header, time and footer), so switching moves nothing: the picker
-           keeps its top-left corner -->
-      <div class="h-[400px] w-[560px]">
+           header, time and footer), so the controller never moves; the picker
+           sits in its middle (the user's call 2026-10-09 — a single pane
+           pinned top-left looked off) -->
+      <div class="flex h-[400px] w-[560px] items-center justify-center">
         <DatePickerPreview
           :variant="variant"
           :range="range"

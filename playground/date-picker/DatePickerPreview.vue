@@ -194,6 +194,15 @@ const MONTHS = [
 ]
 function goToToday(e: MouseEvent) {
   const btn = (e.target as HTMLElement).closest('button')
+  // inline has no month list: the month is only a label
+  if (
+    props.variant === 'inline' &&
+    btn?.getAttribute('aria-label') === 'cycle-calendar-view'
+  ) {
+    e.stopPropagation()
+    e.preventDefault()
+    return
+  }
   const nav = btn?.parentElement
   if (!btn || !nav || btn !== nav.children[1] || nav.children.length !== 3)
     return
@@ -347,7 +356,7 @@ const icons = {
         size="xs"
         variant="subtle"
         aria-label="Hour"
-        side="bottom"
+        side="top"
         :offset="4"
       />
       <Select
@@ -356,7 +365,7 @@ const icons = {
         size="xs"
         variant="subtle"
         aria-label="Minute"
-        side="bottom"
+        side="top"
         :offset="4"
       />
       <Select
@@ -365,7 +374,7 @@ const icons = {
         size="xs"
         variant="subtle"
         aria-label="AM or PM"
-        side="bottom"
+        side="top"
         :offset="4"
       />
     </div>
@@ -640,6 +649,15 @@ const icons = {
 }
 .dp-cal :deep([aria-label='Select month and year'] button[data-selected]) {
   background: var(--surface-gray-2);
+}
+
+/* inline: the month is a plain label — no month list, so no chevron and no
+   button look; the arrows still move between months */
+.dp--inline .dp-cal :deep([aria-label='cycle-calendar-view']) {
+  pointer-events: none;
+}
+.dp--inline .dp-cal :deep([aria-label='cycle-calendar-view']::after) {
+  display: none;
 }
 
 /* ---- double pane: a rule between, the month centred, no Today ---- */
