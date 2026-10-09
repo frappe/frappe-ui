@@ -109,6 +109,34 @@ function commitTyped() {
   if (v) date.value = v
   else typed.value = show(date.value)
 }
+// one pane, one field, shortened where the dates share a month or a year:
+// "5 – 11 Jun 2023", "26 Jun – 4 Jul 2023"
+function showRange([from, to]: DateRangeValue) {
+  if (!from) return ''
+  if (!to) return `${show(from)} – `
+  const a = dayjs(from)
+  const b = dayjs(to)
+  const head = !a.isSame(b, 'year')
+    ? show(from)
+    : !a.isSame(b, 'month')
+      ? a.format('D MMM')
+      : a.format('D')
+  return `${head} – ${show(to)}`
+}
+const typedRange = ref('')
+watch(range, (r) => (typedRange.value = showRange(r)), { immediate: true })
+function commitTypedRange() {
+  const [a = '', b = ''] = typedRange.value.split(/\s+[–-]\s+|\s+to\s+/)
+  const to = parse(b)
+  // the start borrows what it leaves out (month, year) from the end
+  const parts = b.trim().split(/\s+/)
+  const from =
+    parse(a) ||
+    parse(`${a} ${parts.slice(-1)}`) ||
+    parse(`${a} ${parts.slice(-2).join(' ')}`)
+  if (from && to) range.value = from <= to ? [from, to] : [to, from]
+  else typedRange.value = showRange(range.value)
+}
 function commitRange(which: 0 | 1) {
   const text = which ? typedTo.value : typedFrom.value
   const v = parse(text)
@@ -145,9 +173,44 @@ function pickShortcut(days: number) {
 }
 const isRange = computed(() => props.range)
 
-// the sun button picks today; the library keeps showing the month it was
-// on, so the calendar is redrawn — it opens on the picked date's month
+// the sun button goes back to today's month — it doesn't pick a date; today
+// shows in its outline (the date states, node 23667:9349). The library's
+// Today button picks today instead, so its click is taken here and the
+// calendar is stepped month by month with its own prev / next buttons
 const calendarKey = ref(0)
+const MONTHS = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+]
+function goToToday(e: MouseEvent) {
+  const btn = (e.target as HTMLElement).closest('button')
+  const nav = btn?.parentElement
+  if (!btn || !nav || btn !== nav.children[1] || nav.children.length !== 3)
+    return
+  e.stopPropagation()
+  e.preventDefault()
+  const root = btn.closest('.dp-cal')!
+  const label = root.querySelector('[aria-label="cycle-calendar-view"]')
+  const [m, y] = (label?.textContent ?? '').trim().split(/\s+/)
+  const shown = Number(y) * 12 + MONTHS.indexOf(m)
+  const now = dayjs()
+  let steps = now.year() * 12 + now.month() - shown
+  const step = nav.children[steps > 0 ? 2 : 0] as HTMLButtonElement
+  while (steps !== 0) {
+    step.click()
+    steps += steps > 0 ? -1 : 1
+  }
+}
 
 // ---- footer: Reset clears, Cancel goes back to the file's date, Apply keeps
 function reset() {
@@ -184,9 +247,9 @@ const icons = {
     <!-- header: type a date -->
     <div
       v-if="header"
-      class="flex gap-2 border-b border-outline-gray-1 p-2 pb-[7px]"
+      class="flex w-0 min-w-full gap-2 border-b border-outline-gray-1 p-2 pb-[7px]"
     >
-      <template v-if="isRange">
+      <template v-if="isRange && doublePane">
         <TextInput
           v-for="i in [0, 1] as const"
           :key="i"
@@ -205,6 +268,21 @@ const icons = {
           </template>
         </TextInput>
       </template>
+      <TextInput
+        v-else-if="isRange"
+        v-model="typedRange"
+        size="xs"
+        variant="subtle"
+        class="w-full"
+        placeholder="Type a range"
+        aria-label="Type a range"
+        @keydown.enter="commitTypedRange"
+        @blur="commitTypedRange"
+      >
+        <template #prefix>
+          <img :src="iconCalendar" alt="" class="dp-glyph size-3.5" />
+        </template>
+      </TextInput>
       <TextInput
         v-else
         v-model="typed"
@@ -239,6 +317,7 @@ const icons = {
       <!-- a fixed width: 196 for one month, 392 for two -->
       <div
         class="dp-cal shrink-0"
+        @click.capture="goToToday"
         :class="isRange && doublePane ? 'w-[392px]' : 'w-[196px]'"
       >
         <DateRangeCalendar
@@ -247,14 +326,12 @@ const icons = {
           v-model="range"
           :dual-pane="doublePane"
           today-label="Today"
-          @today="calendarKey++"
         />
         <DateCalendar
           v-else
           :key="calendarKey"
           v-model="date"
           today-label="Today"
-          @today="calendarKey++"
         />
       </div>
     </div>
@@ -262,7 +339,7 @@ const icons = {
     <!-- date & time: hour, minute, AM/PM -->
     <div
       v-if="variant === 'date-time'"
-      class="dp-time flex gap-1 border-t border-outline-gray-1 p-2 pt-[7px]"
+      class="dp-time flex w-0 min-w-full gap-1 border-t border-outline-gray-1 p-2 pt-[7px]"
     >
       <Select
         v-model="hour"
@@ -270,6 +347,8 @@ const icons = {
         size="xs"
         variant="subtle"
         aria-label="Hour"
+        side="bottom"
+        :offset="4"
       />
       <Select
         v-model="minute"
@@ -277,6 +356,8 @@ const icons = {
         size="xs"
         variant="subtle"
         aria-label="Minute"
+        side="bottom"
+        :offset="4"
       />
       <Select
         v-model="meridiem"
@@ -284,13 +365,15 @@ const icons = {
         size="xs"
         variant="subtle"
         aria-label="AM or PM"
+        side="bottom"
+        :offset="4"
       />
     </div>
 
     <!-- footer -->
     <div
       v-if="footer"
-      class="flex items-center justify-between border-t border-outline-gray-1 p-2 pt-[7px]"
+      class="flex w-0 min-w-full items-center justify-between border-t border-outline-gray-1 p-2 pt-[7px]"
     >
       <Button
         variant="ghost"
