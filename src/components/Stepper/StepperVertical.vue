@@ -20,14 +20,16 @@
           :class="[textAlign, ui.headPad]"
         >
           <slot name="step-label" v-bind="slotProps(step)">
-            <span class="break-words" :class="[ui.title, TITLE[step.state]]">{{
-              step.item.label
-            }}</span>
+            <span
+              class="break-words transition-colors group-hover:text-ink-gray-9 motion-reduce:transition-none"
+              :class="[ui.title, TITLE[step.state]]"
+              >{{ step.item.label }}</span
+            >
           </slot>
           <slot name="step-description" v-bind="slotProps(step)">
             <span
               v-if="step.item.description"
-              class="mt-px text-sm"
+              class="mt-px text-sm transition-colors group-hover:text-ink-gray-6 motion-reduce:transition-none"
               :class="CAPTION[step.state]"
             >
               {{ step.item.description }}
@@ -217,7 +219,7 @@ const railGap = computed(() => RAIL_GAP[props.edge][props.size])
 // Meta sits on the far side from the indicators: `order-first` lands it at the
 // row's main start, which `flex-row-reverse` turns into the trailing edge.
 const metaGap = computed(() => (props.edge === 'start' ? 'ms-2' : 'me-2'))
-// With `clickable`, rows bleed 8px each side so the hover fill has room;
+// With `clickable`, rows bleed 8px each side so the focus ring has room;
 // every row does it, so the lines stay aligned.
 const bleed = computed(() =>
   props.clickable ? '-mx-2 w-[calc(100%+1rem)] px-2' : '',
@@ -241,8 +243,8 @@ function headClass(step: ResolvedStep) {
   if (!isButton(step)) return bleed.value
   return [
     bleed.value,
-    'rounded-5 cursor-pointer transition-colors motion-reduce:transition-none',
-    'hover:bg-surface-gray-2 active:bg-surface-gray-3 focus-visible:focus-ring',
+    // Hover darkens the text (see the label and description), no fill.
+    'group rounded-5 cursor-pointer focus-visible:focus-ring',
   ]
 }
 

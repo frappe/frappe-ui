@@ -28,7 +28,7 @@
           </slot>
           <slot name="step-label" v-bind="slotProps(step)">
             <span
-              class="truncate"
+              class="truncate transition-colors group-hover:text-ink-gray-9 motion-reduce:transition-none"
               :class="[title, TITLE[step.state]]"
               :title="step.item.label"
             >
@@ -66,8 +66,9 @@ const TITLE: Record<StepState, string> = {
 }
 
 const BUTTON = [
-  '-mx-1 w-[calc(100%+0.5rem)] px-1 rounded-4 cursor-pointer',
-  'hover:bg-surface-gray-2 active:bg-surface-gray-3 focus-visible:focus-ring',
+  // Hover darkens the label, no fill; the inset gives the focus ring room.
+  'group -mx-1 w-[calc(100%+0.5rem)] px-1 rounded-4 cursor-pointer',
+  'focus-visible:focus-ring',
 ]
 
 const indicator = computed(() => (props.size === 'sm' ? 'xs' : 'sm'))
