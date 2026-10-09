@@ -17,6 +17,10 @@ import { useSidebarStories } from './sidebarStories'
 // slides after it instead of closing and reopening.
 const OPEN_DELAY = 300
 const CLOSE_DELAY = 150
+// The card's thumbnail is 360 x 204. Stories render at the width they get on
+// their page (the 720px prose column, or up to 1000px when `wide`) and are
+// scaled down to fit.
+const THUMB = { width: 360, height: 204 }
 const SLIDE = 'transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1)'
 
 const loadStory = useSidebarStories()
@@ -44,6 +48,16 @@ function getStory(item: SidebarItem | null) {
 }
 
 const story = computed(() => getStory(active.value))
+
+const frameStyle = computed(() => {
+  const width = active.value?.preview?.wide ? 1000 : 720
+  const scale = THUMB.width / width
+  return {
+    width: `${width}px`,
+    height: `${THUMB.height / scale}px`,
+    transform: `scale(${scale})`,
+  }
+})
 
 const countLabel = computed(() => {
   const count = active.value?.preview?.count
@@ -115,8 +129,8 @@ defineExpose({ show, hide })
       data-sidebar-preview
       class="sidebar-preview w-[360px]"
     >
-      <!-- The story renders live at the docs column's width (720px) and is
-           scaled to half, so it reads as a thumbnail. `safe center` centres
+      <!-- The story renders live at its page width and is scaled down (see
+           `frameStyle`), so it reads as a thumbnail. `safe center` centres
            small stories but pins layouts larger than the frame to its top-left
            instead of clipping both edges. Self-layout stories (charts) take
            the full width from the top, as they do on their page. `inert`
@@ -130,14 +144,18 @@ defineExpose({ show, hide })
       >
         <div
           v-if="active.preview.selfLayout"
-          class="absolute left-0 top-0 w-[720px] origin-top-left scale-50 p-4"
+          class="absolute left-0 top-0 origin-top-left p-4"
+          :style="frameStyle"
         >
           <component :is="story" :key="active.link" />
         </div>
         <div
           v-else
-          class="absolute left-0 top-0 flex h-[408px] w-[720px] origin-top-left scale-50 p-8"
-          style="align-items: safe center; justify-content: safe center"
+          class="absolute left-0 top-0 flex origin-top-left p-8"
+          :style="[
+            frameStyle,
+            { alignItems: 'safe center', justifyContent: 'safe center' },
+          ]"
         >
           <component :is="story" :key="active.link" />
         </div>
