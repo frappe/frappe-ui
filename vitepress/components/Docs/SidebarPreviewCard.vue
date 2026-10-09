@@ -118,8 +118,10 @@ defineExpose({ show, hide })
       <!-- The story renders live at the docs column's width (720px) and is
            scaled to half, so it reads as a thumbnail. `safe center` centres
            small stories but pins layouts larger than the frame to its top-left
-           instead of clipping both edges. `inert` keeps it from taking
-           focus or clicks; it's a picture of the component, not a demo. -->
+           instead of clipping both edges. Self-layout stories (charts) take
+           the full width from the top, as they do on their page. `inert`
+           keeps it from taking focus or clicks; it's a picture of the
+           component, not a demo. -->
       <div
         v-if="story"
         inert
@@ -127,6 +129,13 @@ defineExpose({ show, hide })
         class="relative h-[204px] overflow-hidden border-b border-outline-gray-1 bg-surface-gray-1"
       >
         <div
+          v-if="active.preview.selfLayout"
+          class="absolute left-0 top-0 w-[720px] origin-top-left scale-50 p-4"
+        >
+          <component :is="story" :key="active.link" />
+        </div>
+        <div
+          v-else
           class="absolute left-0 top-0 flex h-[408px] w-[720px] origin-top-left scale-50 p-8"
           style="align-items: safe center; justify-content: safe center"
         >
