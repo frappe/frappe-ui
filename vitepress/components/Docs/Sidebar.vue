@@ -4,6 +4,7 @@ import { useData, useRoute, withBase } from 'vitepress'
 import { ScrollArea } from 'frappe-ui'
 import Brand from '../Brand.vue'
 import Search from './Search.vue'
+import SidebarPreviewCard from './SidebarPreviewCard.vue'
 import { getSidebarList, isActiveLink } from './sidebarList'
 
 const { site, theme } = useData()
@@ -49,20 +50,24 @@ const isActive = (link: string) =>
           </div>
 
           <div class="flex flex-col gap-0.5">
-            <a
+            <SidebarPreviewCard
               v-for="item in section.items"
               :key="item.text"
-              :href="withBase(item.link)"
-              :aria-current="isActive(item.link) ? 'page' : undefined"
-              class="flex h-7 items-center rounded-4 pl-2 text-sm transition"
-              :class="
-                isActive(item.link)
-                  ? 'bg-surface-elevation-3 text-ink-gray-8 shadow-sm'
-                  : 'text-ink-gray-6 hover:bg-surface-gray-2'
-              "
+              :item="item"
             >
-              {{ item.text }}
-            </a>
+              <a
+                :href="withBase(item.link)"
+                :aria-current="isActive(item.link) ? 'page' : undefined"
+                class="flex h-7 items-center rounded-4 pl-2 text-sm transition"
+                :class="
+                  isActive(item.link)
+                    ? 'bg-surface-elevation-3 text-ink-gray-8 shadow-sm'
+                    : 'text-ink-gray-6 hover:bg-surface-gray-2'
+                "
+              >
+                {{ item.text }}
+              </a>
+            </SidebarPreviewCard>
           </div>
         </div>
       </nav>
