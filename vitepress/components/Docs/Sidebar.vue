@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { state } from '../../state'
+import { ref } from 'vue'
 import { useData, useRoute, withBase } from 'vitepress'
 import { ScrollArea } from 'frappe-ui'
 import Brand from '../Brand.vue'
@@ -12,6 +13,8 @@ const { site, theme } = useData()
 const list = getSidebarList(theme.value.sections ?? theme.value.sidebar ?? [])
 
 state.sidebarList = list
+
+const preview = ref<InstanceType<typeof SidebarPreviewCard> | null>(null)
 
 const route = useRoute()
 const isActive = (link: string) =>
@@ -43,31 +46,34 @@ const isActive = (link: string) =>
          overflow-hidden doesn't clip it. The brand, the search field and the
          row pills all sit on the same px-3 gutter. -->
     <ScrollArea class="min-h-0 flex-1" viewport-class="px-3 pt-2 pb-10">
-      <nav class="flex flex-col gap-5">
+      <!-- `relative` so the preview card's anchor can sit on the hovered row. -->
+      <nav class="relative flex flex-col gap-5" @pointerleave="preview?.hide()">
+        <SidebarPreviewCard ref="preview" />
         <div v-for="section in list" :key="section.text">
           <div class="flex h-7 items-center pl-2 text-base text-ink-gray-5">
             {{ section.text }}
           </div>
 
           <div class="flex flex-col gap-0.5">
-            <SidebarPreviewCard
+            <a
               v-for="item in section.items"
               :key="item.text"
-              :item="item"
+              :href="withBase(item.link)"
+              @pointerenter="
+                preview?.show(item, $event.currentTarget as HTMLElement)
+              "
+              @focus="preview?.show(item, $event.currentTarget as HTMLElement)"
+              @blur="preview?.hide()"
+              :aria-current="isActive(item.link) ? 'page' : undefined"
+              class="flex h-7 items-center rounded-4 pl-2 text-sm transition"
+              :class="
+                isActive(item.link)
+                  ? 'bg-surface-elevation-3 text-ink-gray-8 shadow-sm'
+                  : 'text-ink-gray-6 hover:bg-surface-gray-2'
+              "
             >
-              <a
-                :href="withBase(item.link)"
-                :aria-current="isActive(item.link) ? 'page' : undefined"
-                class="flex h-7 items-center rounded-4 pl-2 text-sm transition"
-                :class="
-                  isActive(item.link)
-                    ? 'bg-surface-elevation-3 text-ink-gray-8 shadow-sm'
-                    : 'text-ink-gray-6 hover:bg-surface-gray-2'
-                "
-              >
-                {{ item.text }}
-              </a>
-            </SidebarPreviewCard>
+              {{ item.text }}
+            </a>
           </div>
         </div>
       </nav>
