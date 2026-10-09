@@ -8,6 +8,7 @@ import {
 } from 'frappe-ui/vitepress'
 import { meta } from './meta'
 import {
+  getChartPreview,
   getComponentItems,
   getComponentPreview,
   getExperimentalItems,
@@ -29,6 +30,15 @@ const sourceRoots = [
   // `src` itself, for families that sit directly under it (src/charts).
   path.resolve(repoRoot, 'src'),
 ]
+
+// Chart pages live in `src/charts/docs`, one per component.
+function chartItem(name: string) {
+  return {
+    text: name,
+    link: `/docs/charts/${name.toLowerCase()}`,
+    preview: getChartPreview(name),
+  }
+}
 
 // frappe-ui's information architecture. The shared Sidebar is data-driven —
 // it renders whatever tree we hand defineDocsConfig({ sidebar }). Component /
@@ -84,24 +94,24 @@ function buildSidebar(): SidebarSection[] {
     {
       text: 'Charts',
       items: [
-        { text: 'Overview', link: '/docs/charts/overview' },
-        { text: 'Colors', link: '/docs/charts/colors' },
-        { text: 'BarChart', link: '/docs/charts/barchart' },
-        { text: 'LineChart', link: '/docs/charts/linechart' },
-        { text: 'AreaChart', link: '/docs/charts/areachart' },
-        { text: 'DonutChart', link: '/docs/charts/donutchart' },
-        { text: 'FunnelChart', link: '/docs/charts/funnelchart' },
-        { text: 'HeatmapChart', link: '/docs/charts/heatmapchart' },
-        { text: 'ScatterChart', link: '/docs/charts/scatterchart' },
-        { text: 'SankeyChart', link: '/docs/charts/sankeychart' },
-        { text: 'NumberCard', link: '/docs/charts/numbercard' },
-        { text: 'ChartCard', link: '/docs/charts/chartcard' },
-        { text: 'ChartContainer', link: '/docs/charts/chartcontainer' },
-        { text: 'ChartLegend', link: '/docs/charts/chartlegend' },
-        { text: 'ChartTooltip', link: '/docs/charts/charttooltip' },
-        { text: 'States', link: '/docs/charts/states' },
-        { text: 'Dashboard', link: '/docs/charts/dashboard' },
-      ],
+        'Overview',
+        'Colors',
+        'BarChart',
+        'LineChart',
+        'AreaChart',
+        'DonutChart',
+        'FunnelChart',
+        'HeatmapChart',
+        'ScatterChart',
+        'SankeyChart',
+        'NumberCard',
+        'ChartCard',
+        'ChartContainer',
+        'ChartLegend',
+        'ChartTooltip',
+        'States',
+        'Dashboard',
+      ].map(chartItem),
     },
     {
       text: 'Molecules',
