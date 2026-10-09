@@ -7,7 +7,12 @@ import {
   type SidebarSection,
 } from 'frappe-ui/vitepress'
 import { meta } from './meta'
-import { getComponentItems, getExperimentalItems } from './utils'
+import {
+  getComponentItems,
+  getComponentPreview,
+  getExperimentalItems,
+  getExperimentalPreview,
+} from './utils'
 
 const configDir = path.dirname(fileURLToPath(import.meta.url))
 // rootDir is the docs dir (defineDocsConfig sets srcDir: 'content' under it).
@@ -33,6 +38,7 @@ function buildSidebar(): SidebarSection[] {
     ...getComponentItems().map((name) => ({
       text: name,
       link: `/docs/components/${name.toLowerCase()}`,
+      preview: getComponentPreview(name),
     })),
   ]
 
@@ -41,6 +47,7 @@ function buildSidebar(): SidebarSection[] {
     ...getExperimentalItems().map((name) => ({
       text: name,
       link: `/docs/experimental/${name.toLowerCase()}`,
+      preview: getExperimentalPreview(name),
     })),
   ]
 
