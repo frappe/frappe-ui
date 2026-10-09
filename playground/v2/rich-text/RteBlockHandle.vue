@@ -11,11 +11,12 @@
 // the offset it was picked up, a line marks the edge of the block the
 // pointer is over — above it in its top half, below it in its bottom — and
 // the drop puts the block at that edge, wherever over the document or its
-// margins the pointer lets go. Near a block's left or right edge the line
-// stands upright, and the block lands beside it — a block on its own becomes
-// a row of two, a block in a row gets a cell of its own next to it — and
-// what it leaves closes up: an emptied cell goes, a row of one dissolves.
-// Every block in a row's cell has its own grip. A click selects the block.
+// margins the pointer lets go. Just inside a block's left edge, or near its
+// right one, the line stands upright, and the block lands beside it — a
+// block on its own becomes a row of two, a block in a row gets a cell of
+// its own next to it — and what it leaves closes up: an emptied cell goes,
+// a row of one dissolves. Every block in a row's cell has its own grip. A
+// click selects the block.
 import { ref, shallowRef, watch } from 'vue'
 import { NodeSelection } from '@tiptap/pm/state'
 import { Tooltip } from '../../../src'
@@ -58,11 +59,15 @@ const MEDIA_ROW = '[data-type="columns"][data-media="true"]'
 /** the most columns a row holds (the schema's `column{2,4}`) */
 const MAX_COLUMNS = 4
 /**
- * Beside a block, as Notion drops one: a pointer this near a block's left
- * or right edge — or out past it, in the margin — lands the block beside it
- * rather than above or below, under a vertical line.
+ * Beside a block, as Notion drops one: a pointer this far into a block from
+ * its left edge, or near its right edge or out past it, lands the block
+ * beside it rather than above or below, under a vertical line. Out past the
+ * left edge is not beside: the grip sits in that margin, so a block carried
+ * straight up or down rides there, and would land in a row every time.
  */
 const SIDE_ZONE = 48
+/** how far in past a block's left edge the left zone starts */
+const SIDE_INSET = 6
 const inCell = (el: Element) =>
   el.parentElement?.matches('[data-type="column"]') === true &&
   el.closest(MEDIA_ROW) !== null
@@ -339,7 +344,8 @@ function landingAt(x: number, y: number) {
   const zone = Math.min(SIDE_ZONE, r.width / 4)
   let side: Side = null
   if (sideable(el) && !swapsWith(source.el, el)) {
-    if (x < r.left + zone) side = 'left'
+    if (x >= r.left + SIDE_INSET && x < r.left + SIDE_INSET + zone)
+      side = 'left'
     else if (x > r.right - zone) side = 'right'
   }
   return { el, pos, before: y < r.top + r.height / 2, side, box: r }
