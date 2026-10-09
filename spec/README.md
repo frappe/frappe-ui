@@ -53,6 +53,8 @@ Copying the current behavior into the spec is how a bug becomes the contract.
   the plot/chrome split. The API itself is documented on the docs site. The
   shape it takes is [ADR-0014](./adr/0014-flat-props-name-columns.md), and what
   the family admits is [ADR-0015](./adr/0015-what-enters-charts.md)
+- [`stepper.md`](./stepper.md) — `Stepper`: progress through ordered steps, with
+  sub-steps, skipped steps, and a running or failed current step
 
 ## Freeze work
 
