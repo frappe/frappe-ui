@@ -12,26 +12,28 @@ import {
 import 'frappe-ui/charts/style.css'
 import Layout from './Layout.vue'
 
-// VitePress runs its own routing, but frappe-ui components like Breadcrumbs,
-// Sidebar and SidebarRail render `<router-link>` and call `useRouter()`.
-// Recipes are standalone app screens, so give the app a real (in-memory)
-// vue-router: links resolve to `<a>` and no injection warnings fire. It never
-// drives the URL.
 // Every story, lazily, for the sidebar's hover-card previews. Keyed by the
-// same `<Component>-<Story>` id `<ComponentPreview>` takes.
+// same `<Component>-<Story>` id `<ComponentPreview>` takes. Chart stories sit
+// in `src/charts/stories` but are named `Charts-…`, so ids match ignoring case.
 const storyModules = import.meta.glob([
   '../../../src/components/*/stories/*.vue',
+  '../../../src/charts/stories/*.vue',
   '../../../experimental/*/stories/*.vue',
 ])
 const storiesById = Object.fromEntries(
   Object.entries(storyModules).map(([file, load]) => {
     const [, component, story] = file.match(/([^/]+)\/stories\/([^/]+)\.vue$/)!
-    return [`${component}-${story}`, load]
+    return [`${component}-${story}`.toLowerCase(), load]
   }),
 )
 const loadSidebarStory: SidebarStoryLoader = (id) =>
-  storiesById[id] as ReturnType<SidebarStoryLoader>
+  storiesById[id.toLowerCase()] as ReturnType<SidebarStoryLoader>
 
+// VitePress runs its own routing, but frappe-ui components like Breadcrumbs,
+// Sidebar and SidebarRail render `<router-link>` and call `useRouter()`.
+// Recipes are standalone app screens, so give the app a real (in-memory)
+// vue-router: links resolve to `<a>` and no injection warnings fire. It never
+// drives the URL.
 const router = createRouter({
   history: createMemoryHistory(),
   routes: [{ path: '/:pathMatch(.*)*', component: { render: () => h('div') } }],
