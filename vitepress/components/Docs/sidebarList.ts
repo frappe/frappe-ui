@@ -5,6 +5,8 @@ export interface SidebarPreview {
   story?: string
   description?: string
   count?: number
+  /** The story fills the width and draws its own chrome, as `<ComponentPreview self-layout>`. */
+  selfLayout?: boolean
 }
 
 export interface SidebarItem {
