@@ -42,12 +42,13 @@ function readDescription(markdown: string): string | undefined {
     .replace(/\s+/g, ' ')
 }
 
-// The page's first `<ComponentPreview>`: its story id and whether it lays
-// itself out (`self-layout`).
+// The page's first `<ComponentPreview>`: its story id and the layout flags
+// it renders with (`self-layout`, `wide`).
 function readLeadStory(markdown: string) {
-  const tag = markdown.match(/<ComponentPreview\s[^>]*>/)?.[0]
-  const story = tag?.match(/name=["']([^"']+)["']/)?.[1]
-  return { story, selfLayout: !!tag && /\sself-layout\b/.test(tag) }
+  const tag = markdown.match(/<ComponentPreview\s[^>]*>/)?.[0] ?? ''
+  const story = tag.match(/name=["']([^"']+)["']/)?.[1]
+  const hasFlag = (flag: string) => new RegExp(`\\s${flag}(\\s|/|>)`).test(tag)
+  return { story, selfLayout: hasFlag('self-layout'), wide: hasFlag('wide') }
 }
 
 // What the sidebar hover card shows: the intro, the page's first
