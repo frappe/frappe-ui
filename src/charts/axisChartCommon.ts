@@ -754,7 +754,9 @@ function categoryLabelWidth(width?: number) {
 
 function categoryLabel(label: string, labelWidth?: number) {
   if (!labelWidth) return label
-  return truncateMiddleToWidth(label, labelWidth, AXIS_LABEL_FONT_SIZE)
+  // zrender truncates against `width - 1`, not `width` (parseText.js), so a
+  // label fitted to the full width can still get an end ellipsis of its own.
+  return truncateMiddleToWidth(label, labelWidth - 1, AXIS_LABEL_FONT_SIZE)
 }
 
 /**
