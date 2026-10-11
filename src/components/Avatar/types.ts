@@ -21,4 +21,10 @@ export interface AvatarProps {
 
   /** Visual color theme used for the fallback avatar */
   theme?: AvatarTheme
+
+  /**
+   * Hides the avatar from screen readers. Set it when the person's name is
+   * already visible next to the avatar, so the name isn't read twice.
+   */
+  decorative?: boolean
 }

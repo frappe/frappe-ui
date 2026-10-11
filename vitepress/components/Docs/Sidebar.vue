@@ -32,10 +32,10 @@ const isActive = (link: string) =>
     </div>
 
     <!-- Search is navigation, so it lives in the rail with the links. Same
-         px-3 gutter as the rows below; `outline` gives it a border so the
-         gray field still reads as a field on the gray rail. -->
+         px-3 gutter as the rows below; `ghost` keeps it transparent so it
+         reads like the nav rows rather than a boxed-in field. -->
     <div class="shrink-0 px-3 pt-1 pb-2">
-      <Search variant="outline" placeholder="Search" class="flex w-full" />
+      <Search variant="ghost" placeholder="Search" class="flex w-full" />
     </div>
 
     <!-- Padding lives on the viewport so the active row's shadow has room and

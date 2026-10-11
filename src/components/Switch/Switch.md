@@ -19,6 +19,19 @@ buttons beside it. A click anywhere on the row toggles the switch.
 
 <ComponentPreview name="Switch-Toolbar" />
 
+## Usage Guidelines
+
+<ComponentPreview name="Switch-Guidelines" hide-code />
+
+<div class="guideline-text">
+
+- In a settings cell, make only the switch the touch target, not the whole cell.
+- Align switches to the right in list items.
+- Use switches for immediate state changes.
+- Don't use a switch for mutually exclusive choices.
+
+</div>
+
 ## Behavior
 
 ### Icon

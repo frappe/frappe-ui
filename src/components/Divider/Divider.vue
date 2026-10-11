@@ -13,7 +13,15 @@
     />
   </div>
 
-  <hr v-else class="border-0 border-outline-gray-2" :class="dividerClasses" />
+  <!-- An <hr> is a horizontal separator unless told otherwise. -->
+  <hr
+    v-else
+    class="border-0 border-outline-gray-2"
+    :class="dividerClasses"
+    :aria-orientation="
+      props.orientation === 'vertical' ? 'vertical' : undefined
+    "
+  />
 </template>
 
 <script lang="ts" setup>

@@ -29,15 +29,22 @@ const members = [
     <div
       v-for="m in members"
       :key="m.name"
-      class="flex items-center gap-2 rounded px-2 py-1.5 hover:bg-surface-gray-2"
+      class="flex items-center gap-2.5 rounded-4 px-2 py-1.5 hover:bg-surface-gray-2"
     >
-      <Avatar :image="m.image" :label="m.name" size="lg">
+      <Avatar decorative :image="m.image" :label="m.name" size="lg">
         <template #indicator>
-          <span class="block size-full rounded-full" :class="dot[m.status]" />
+          <!-- A ring in the page color keeps the dot visible on a dark
+               photo. -->
+          <span
+            class="block size-full rounded-full ring-2 ring-[var(--surface-base)]"
+            :class="dot[m.status]"
+          />
         </template>
       </Avatar>
-      <span class="flex-1 text-base text-ink-gray-8">{{ m.name }}</span>
-      <span class="text-sm capitalize text-ink-gray-5">{{ m.status }}</span>
+      <div class="flex min-w-0 flex-col">
+        <span class="text-base text-ink-gray-8">{{ m.name }}</span>
+        <span class="text-sm capitalize text-ink-gray-5">{{ m.status }}</span>
+      </div>
     </div>
   </div>
 </template>

@@ -6,6 +6,7 @@ import { Avatar, Button } from 'frappe-ui'
   <div class="flex w-full max-w-md items-center gap-4">
     <!-- A size-* class goes past the largest size step. -->
     <Avatar
+      decorative
       image="https://i.pravatar.cc/160?u=jane@example.com"
       label="Jane Cooper"
       class="size-16"
