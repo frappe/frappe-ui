@@ -7,7 +7,7 @@ outline: [2, 4]
 This page lists every change between **v0.1.278** and **1.0.0** that affects
 apps. It records breaking changes, deprecations, behavior changes you can see,
 and migration steps. It does not record internal refactors or new tests. For
-releases after 1.0.0, see the [v1 changelog](/docs/changelog/v1).
+releases after 1.0.0, see the [v1 Changelog](/docs/changelog/v1).
 
 A deprecated API keeps working through v1.x and logs a one-time warning in
 development, unless the entry says otherwise. Deprecated APIs are removed after

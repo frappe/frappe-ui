@@ -61,7 +61,6 @@ function buildSidebar(): SidebarSection[] {
         { text: 'Tailwind Setup', link: '/docs/getting-started/tailwind' },
         { text: 'Migration from v0', link: '/docs/migration' },
         { text: 'Changelog', link: '/docs/changelog/v1' },
-        { text: 'Changes from v0', link: '/docs/changelog/v0-to-v1' },
       ],
     },
     {
