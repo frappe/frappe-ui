@@ -6,75 +6,84 @@ import { describe, expect, it, vi } from 'vitest'
 import { onDocUpdate } from './realtime'
 import type { Socket } from 'socket.io-client'
 
-// Minimal socket.io-client Socket stub that captures emitted events and lets
-// tests fire `connect` manually, as socket.io does on (re)connect.
+// Minimal socket.io-client Socket stub. Like socket.io, it buffers emits while
+// disconnected and sends them before firing `connect`.
+type Handler = (...args: unknown[]) => void
+
 function makeSocket() {
-  const handlers: Record<string, Array<(...args: any[]) => void>> = {}
-  const emits: Array<[string, ...any[]]> = []
+  const handlers: Record<string, Handler[]> = {}
+  const buffer: unknown[][] = []
+  const emits: unknown[][] = []
   const socket = {
-    emit: vi.fn((event: string, ...args: any[]) => {
-      emits.push([event, ...args])
+    connected: false,
+    emit: vi.fn((...args: unknown[]) => {
+      ;(socket.connected ? emits : buffer).push(args)
     }),
-    on: vi.fn((event: string, cb: (...args: any[]) => void) => {
+    on: vi.fn((event: string, cb: Handler) => {
       ;(handlers[event] ||= []).push(cb)
     }),
-    // test helper: fire a connect event
+    // test helpers
     _connect() {
+      socket.connected = true
+      emits.push(...buffer.splice(0))
       for (const cb of handlers['connect'] || []) cb()
+    },
+    _disconnect() {
+      socket.connected = false
     },
     _emits: emits,
   }
   return socket as unknown as Socket & {
     _connect: () => void
-    _emits: Array<[string, ...any[]]>
+    _disconnect: () => void
+    _emits: unknown[][]
   }
+}
+
+function subscribes(socket: { _emits: unknown[][] }) {
+  return socket._emits
+    .filter(([ev]) => ev === 'doctype_subscribe')
+    .map(([, doctype]) => doctype)
 }
 
 describe('onDocUpdate', () => {
   it('subscribes to a doctype once per socket', () => {
     const socket = makeSocket()
+    socket._connect()
     const cb = vi.fn()
     onDocUpdate(socket, 'CRM Deal', cb)
     onDocUpdate(socket, 'CRM Deal', cb)
 
-    const subscribeEmits = socket._emits.filter(
-      ([ev]) => ev === 'doctype_subscribe',
-    )
-    expect(subscribeEmits).toHaveLength(1)
-    expect(subscribeEmits[0]).toEqual(['doctype_subscribe', 'CRM Deal'])
+    expect(subscribes(socket)).toEqual(['CRM Deal'])
   })
 
-  it('re-emits the full subscription set on reconnect', () => {
+  it('subscribes once on the first connect and again on every reconnect', () => {
     const socket = makeSocket()
-    const cb = vi.fn()
-    onDocUpdate(socket, 'CRM Deal', cb)
-    onDocUpdate(socket, 'ToDo', cb)
+    onDocUpdate(socket, 'CRM Deal', vi.fn())
+    onDocUpdate(socket, 'ToDo', vi.fn())
 
-    // Before reconnect: two distinct doctypes emitted once each.
-    expect(
-      socket._emits.filter(([ev]) => ev === 'doctype_subscribe'),
-    ).toHaveLength(2)
+    socket._connect()
+    expect(subscribes(socket).sort()).toEqual(['CRM Deal', 'ToDo'])
 
-    // Drop the "connection" and reconnect — socket.io drops server-side rooms.
+    // socket.io drops server-side rooms on disconnect.
+    socket._disconnect()
+    onDocUpdate(socket, 'Note', vi.fn())
     socket._emits.length = 0
     socket._connect()
-
-    const reEmits = socket._emits.filter(([ev]) => ev === 'doctype_subscribe')
-    expect(reEmits).toHaveLength(2)
-    expect(reEmits.map(([, dt]) => dt).sort()).toEqual(['CRM Deal', 'ToDo'])
+    expect(subscribes(socket).sort()).toEqual(['CRM Deal', 'Note', 'ToDo'])
   })
 
   it('does not re-subscribe a fresh socket to a doctype another socket joined', () => {
     const socketA = makeSocket()
     const socketB = makeSocket()
+    socketA._connect()
     onDocUpdate(socketA, 'CRM Deal', vi.fn())
 
     // A brand-new socket (re-login, second app instance) must emit its own
     // subscribe even for the same doctype — it is a different server-side room.
+    socketB._connect()
     onDocUpdate(socketB, 'CRM Deal', vi.fn())
-    expect(
-      socketB._emits.filter(([ev]) => ev === 'doctype_subscribe'),
-    ).toHaveLength(1)
+    expect(subscribes(socketB)).toEqual(['CRM Deal'])
   })
 
   it('fires the callback only for the matching doctype', () => {

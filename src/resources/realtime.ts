@@ -29,11 +29,8 @@ function subscribe(socket: Socket, doctype: string): void {
   if (!doctypes) {
     doctypes = new Set()
     subscribed.set(socket, doctypes)
-    // Server-side rooms are per-socket and dropped on disconnect. Re-emit the
-    // full subscription set whenever the socket (re)connects, so a reconnected
-    // socket re-joins every room it had before. Listening on `connect` rather
-    // than socket.io's `reconnect` also covers the initial connect, and any
-    // subscribe() that ran while the socket was still connecting.
+    // Server-side rooms are per-socket and dropped on disconnect. This handler
+    // subscribes to every doctype on the first connect and on each reconnect.
     const current = doctypes
     socket.on('connect', () => {
       for (const type of current) {
@@ -43,5 +40,7 @@ function subscribe(socket: Socket, doctype: string): void {
   }
   if (doctypes.has(doctype)) return
   doctypes.add(doctype)
-  socket.emit('doctype_subscribe', doctype)
+  // socket.io buffers emits while disconnected and flushes them before
+  // `connect`, so emit directly only on a connected socket.
+  if (socket.connected) socket.emit('doctype_subscribe', doctype)
 }
