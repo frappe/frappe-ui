@@ -287,4 +287,97 @@ describe('Checkbox', () => {
       cy.get('@onClick').should('have.been.calledOnce')
     })
   })
+
+  // The checked and indeterminate fill is the text colour, painted through
+  // `currentColor`. `:checked` does not match an indeterminate box, so each
+  // state is checked on its own.
+  describe('checked and indeterminate fill', () => {
+    // Park the pointer outside the component so a new mount does not start
+    // under it.
+    beforeEach(() => pointerAt(0, 0))
+
+    const states = {
+      checked: { modelValue: true },
+      indeterminate: { indeterminate: true },
+    }
+
+    for (const [state, stateProps] of Object.entries(states)) {
+      it(`lightens a ${state} box on hover and press, without a shadow`, () => {
+        cy.mount(Checkbox, { props: { label: 'abc', ...stateProps } })
+
+        cy.get('input').then(($input) => {
+          const restShadow = getComputedStyle($input[0]).boxShadow
+          shouldHaveFill('input', 10)
+
+          pointer('mouseMoved', 'input')
+          shouldHaveFill('input', 9)
+          cy.get('input').should('have.css', 'box-shadow', restShadow)
+
+          pointer('mousePressed', 'input')
+          shouldHaveFill('input', 8)
+          pointer('mouseReleased', 'input')
+        })
+      })
+
+      it(`lightens a ${state} box when its padded row is hovered`, () => {
+        cy.mount(Checkbox, {
+          props: { label: 'abc', padded: true, ...stateProps },
+        })
+
+        shouldHaveFill('input', 10)
+        pointer('mouseMoved', '.group')
+        shouldHaveFill('input', 9)
+      })
+    }
+  })
 })
+
+// `trigger('mouseover')` does not apply CSS `:hover` or `:active`, so these
+// helpers move the real pointer through the Chrome DevTools Protocol.
+type PointerEvent = 'mouseMoved' | 'mousePressed' | 'mouseReleased'
+
+function pointer(type: PointerEvent, selector: string) {
+  cy.get(selector).then(($el) => {
+    // CDP takes coordinates in the runner window. The app under test sits in a
+    // scaled iframe inside it.
+    const frame = window.top!.document.querySelector('iframe.aut-iframe')!
+    const frameRect = frame.getBoundingClientRect()
+    const scale = frameRect.width / frame.clientWidth
+    const rect = $el[0].getBoundingClientRect()
+    return dispatchPointer(
+      type,
+      frameRect.left + (rect.left + rect.width / 2) * scale,
+      frameRect.top + (rect.top + rect.height / 2) * scale,
+    )
+  })
+}
+
+function pointerAt(x: number, y: number) {
+  cy.then(() => dispatchPointer('mouseMoved', x, y))
+}
+
+function dispatchPointer(type: PointerEvent, x: number, y: number) {
+  return Cypress.automation('remote:debugger:protocol', {
+    command: 'Input.dispatchMouseEvent',
+    params: {
+      type,
+      x,
+      y,
+      button: type === 'mouseMoved' ? 'none' : 'left',
+      clickCount: type === 'mouseMoved' ? 0 : 1,
+    },
+  })
+}
+
+// Compares against a probe painted with the token, so the assertion does not
+// depend on how the browser formats the colour.
+function shouldHaveFill(selector: string, gray: 8 | 9 | 10) {
+  cy.document().then((doc) => {
+    const probe = doc.createElement('span')
+    probe.style.color = `var(--surface-gray-${gray})`
+    doc.body.append(probe)
+    const expected = getComputedStyle(probe).color
+    probe.remove()
+    cy.get(selector).should('have.css', 'color', expected)
+  })
+}
