@@ -42,10 +42,8 @@ async function mergedPrNumber(commit) {
     )
   }
   const pulls = await response.json()
-  const merged = pulls
-    .filter((pr) => pr.merged_at && pr.base.ref === 'main')
-    .sort((a, b) => a.merged_at.localeCompare(b.merged_at))
-  return merged[0] ? String(merged[0].number) : null
+  const merged = pulls.find((pr) => pr.merged_at && pr.base.ref === 'main')
+  return merged ? String(merged.number) : null
 }
 
 async function getReleaseLine(changeset) {
