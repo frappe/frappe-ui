@@ -74,6 +74,19 @@ const label = (chars: number) => 'n'.repeat(chars)
 const repeat = (count: number, chars: number) =>
   Array.from({ length: count }, () => label(chars))
 
+/** A label measuring more than `width - 1` but no more than `width`. */
+function edgeLabel(width: number) {
+  for (let n = 1; n < 40; n++) {
+    for (let r = 0; r < 40; r++) {
+      const text = label(n) + 'r'.repeat(r)
+      const measured = estimateTextWidth(text, AXIS_LABEL_FONT_SIZE)
+      if (measured > width - 1 && measured <= width) return text
+      if (measured > width) break
+    }
+  }
+  throw new Error(`no label measures within 1px of ${width}`)
+}
+
 /** The longest such label that draws inside a slot, its clear air included. */
 function widestFlat(slot: number) {
   let chars = 1
@@ -119,6 +132,17 @@ describe('crowded category labels', () => {
     ).toBeLessThanOrEqual(width)
     // A label already inside the cap is drawn as it stands.
     expect(formatter('Outbound')).toBe('Outbound')
+  })
+
+  it('shortens a label at the edge of the cap itself, so echarts never cuts it again', () => {
+    const { formatter, width } = labelsOf(build(repeat(8, 20)))
+    // zrender truncates against `width - 1`, so a label measuring between that
+    // and `width` would get echarts' end ellipsis if it were passed through.
+    const edge = edgeLabel(width)
+    expect(formatter(edge)).toMatch(/^n[nr]*…r+$/)
+    expect(
+      estimateTextWidth(formatter(edge), AXIS_LABEL_FONT_SIZE),
+    ).toBeLessThanOrEqual(width - 1)
   })
 
   it('leans the other way in RTL, where the value axis is', () => {
