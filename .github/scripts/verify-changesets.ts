@@ -20,6 +20,19 @@ import path from 'node:path'
 
 const PACKAGE = 'frappe-ui'
 const MINOR_LABEL = 'release:minor'
+// The `files` list of each package, split into included and excluded entries.
+const ROOTS = ['.', 'packages/create-frappe-ui'].map((dir) => {
+  const files: string[] = JSON.parse(
+    readFileSync(path.join(dir, 'package.json'), 'utf8'),
+  ).files
+  return {
+    dir,
+    included: files.filter((entry) => !entry.startsWith('!')),
+    excluded: files
+      .filter((entry) => entry.startsWith('!'))
+      .map((entry) => entry.slice(1)),
+  }
+})
 
 const changes = execSync('git diff --name-status --no-renames HEAD^1 HEAD', {
   encoding: 'utf8',
@@ -111,17 +124,10 @@ function readReleases(file: string): [string, string][] {
 
 function isShipped(file: string): boolean {
   if (file.endsWith('.md')) return false
-  return ['.', 'packages/create-frappe-ui'].some((dir) => {
+  return ROOTS.some(({ dir, included, excluded }) => {
     const relative = path.posix.relative(dir, file)
     if (relative.startsWith('..')) return false
     if (relative === 'package.json') return true
-    const files: string[] = JSON.parse(
-      readFileSync(path.join(dir, 'package.json'), 'utf8'),
-    ).files
-    const included = files.filter((entry) => !entry.startsWith('!'))
-    const excluded = files
-      .filter((entry) => entry.startsWith('!'))
-      .map((entry) => entry.slice(1))
     return (
       included.some(
         (entry) => relative === entry || relative.startsWith(`${entry}/`),
