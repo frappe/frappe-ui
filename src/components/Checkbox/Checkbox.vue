@@ -208,7 +208,7 @@ const inputClasses = computed(() => {
       sizeClasses,
       'cursor-not-allowed bg-surface-base border-outline-gray-3',
       'text-[color:var(--surface-gray-5)]',
-      'hover:shadow-none focus:ring-0 focus:ring-offset-0',
+      'focus:ring-0 focus:ring-offset-0',
     ]
   }
 
@@ -219,10 +219,11 @@ const inputClasses = computed(() => {
     'cursor-pointer transition focus:ring-0 focus:ring-offset-0',
     // Unchecked — surface-base fill, outline scale: default 4 / hover 5 / active 6.
     'bg-surface-base border-outline-gray-4',
-    // Checked / indeterminate fill (via currentColor): default 10 / hover 9 /
-    // active 8. The hover / active tokens below carry no `checked:` variant:
-    // `:checked` misses an indeterminate box, and the colour only shows as a
-    // fill once the box is checked or indeterminate, so it is safe to set always.
+    // Checked / indeterminate fill (via currentColor): default 10, hover 9,
+    // active 8 (non-padded only). The hover and active tokens in the branch
+    // below have no `checked:` variant, because `:checked` does not match an
+    // indeterminate box. The colour paints a fill only when the box is checked
+    // or indeterminate.
     'text-[color:var(--surface-gray-10)]',
     // Non-padded shows the global espresso ring on keyboard focus. forms sets a
     // transparent `:focus` outline that outranks the global `:focus-visible` rule,
@@ -230,7 +231,7 @@ const inputClasses = computed(() => {
     // on the row instead, via `[&:has(:focus-visible)]` on the container.)
     padded
       ? 'group-hover:border-outline-gray-5 group-hover:text-[color:var(--surface-gray-9)]'
-      : 'hover:border-outline-gray-5 active:border-outline-gray-6 focus-visible:focus-ring hover:text-[color:var(--surface-gray-9)] active:text-[color:var(--surface-gray-8)]',
+      : 'hover:border-outline-gray-5 active:border-outline-gray-6 hover:text-[color:var(--surface-gray-9)] active:text-[color:var(--surface-gray-8)] focus-visible:focus-ring',
   ]
 })
 </script>
