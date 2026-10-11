@@ -9,8 +9,12 @@ permissions:
 
 jobs:
   verify:
-    # The release PR deletes the changesets it applies.
-    if: ${{ !startsWith(github.head_ref, 'changeset-release/') }}
+    # Skips only the bot's release PR, which deletes the changesets it applies.
+    # A fork branch with the same name does not match.
+    if: >-
+      ${{ !(github.head_ref == 'changeset-release/main' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.user.login == 'github-actions[bot]') }}
     runs-on: ubuntu-latest
     steps:
       # Checks out the merge commit, so HEAD^1 is the base branch.
