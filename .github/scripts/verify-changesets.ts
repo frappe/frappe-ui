@@ -74,15 +74,13 @@ for (const { file } of changesets) {
   for (const [name, bump] of readReleases(file)) {
     if (name !== PACKAGE) {
       errors.push(`${file}: names "${name}". Name "${PACKAGE}" only.`)
-    } else if (!['patch', 'minor', 'major'].includes(bump)) {
-      errors.push(`${file}: "${bump}" is not patch, minor or major.`)
-    } else if (bump === 'major') {
-      errors.push(
-        `${file}: asks for a major release. v1 takes no major release from a PR.`,
-      )
     } else if (bump === 'minor' && !labels.includes(MINOR_LABEL)) {
       errors.push(
         `${file}: asks for a minor release. Add the "${MINOR_LABEL}" label, or use patch.`,
+      )
+    } else if (bump !== 'patch' && bump !== 'minor') {
+      errors.push(
+        `${file}: asks for "${bump}". Use patch, or minor with the "${MINOR_LABEL}" label. v1 takes no major release from a PR.`,
       )
     }
   }
