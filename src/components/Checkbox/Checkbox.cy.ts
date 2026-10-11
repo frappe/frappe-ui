@@ -290,7 +290,7 @@ describe('Checkbox', () => {
 
   // The checked and indeterminate fill is the text colour, painted through
   // `currentColor`. `:checked` does not match an indeterminate box, so each
-  // state is checked on its own.
+  // state is tested on its own.
   describe('checked and indeterminate fill', () => {
     // Park the pointer outside the component so a new mount does not start
     // under it.
@@ -334,9 +334,9 @@ describe('Checkbox', () => {
 
 // `trigger('mouseover')` does not apply CSS `:hover` or `:active`, so these
 // helpers move the real pointer through the Chrome DevTools Protocol.
-type PointerEvent = 'mouseMoved' | 'mousePressed' | 'mouseReleased'
+type MouseEventType = 'mouseMoved' | 'mousePressed' | 'mouseReleased'
 
-function pointer(type: PointerEvent, selector: string) {
+function pointer(type: MouseEventType, selector: string) {
   cy.get(selector).then(($el) => {
     // CDP takes coordinates in the runner window. The app under test sits in a
     // scaled iframe inside it.
@@ -356,7 +356,7 @@ function pointerAt(x: number, y: number) {
   cy.then(() => dispatchPointer('mouseMoved', x, y))
 }
 
-function dispatchPointer(type: PointerEvent, x: number, y: number) {
+function dispatchPointer(type: MouseEventType, x: number, y: number) {
   return Cypress.automation('remote:debugger:protocol', {
     command: 'Input.dispatchMouseEvent',
     params: {
