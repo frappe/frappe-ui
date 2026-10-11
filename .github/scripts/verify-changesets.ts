@@ -36,6 +36,7 @@ const labels: string[] = JSON.parse(process.env.LABELS ?? '[]')
 const errors: string[] = []
 
 const shipped = changes.filter(({ file }) => isShipped(file))
+// Checks added and edited changesets. Only an added one covers this PR.
 const changesets = changes.filter(
   ({ status, file }) =>
     status !== 'D' &&
@@ -44,7 +45,7 @@ const changesets = changes.filter(
     file !== '.changeset/README.md',
 )
 
-if (shipped.length && !changesets.length) {
+if (shipped.length && !changesets.some(({ status }) => status === 'A')) {
   errors.push(
     [
       `This PR changes shipped files but adds no changeset:`,
