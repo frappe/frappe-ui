@@ -30,7 +30,7 @@ spec/*.md > accepted ADRs > PHILOSOPHY.md > CONTEXT.md > v1-release research/pla
 - Use semantic Tailwind tokens (`surface-*`, `ink-*`, `outline-*`) instead of hardcoded colors.
 - Prefer stable styling hooks (`data-slot`, `data-state`, `data-size`, `data-variant`, `data-disabled`) over DOM/class assumptions.
 - Accessibility, keyboard behavior, focus management, and ARIA semantics are part of done.
-- Update docs, stories, tests, and changelog/migration notes when public behavior changes.
+- Update docs, stories, tests, and migration notes when public behavior changes. Add a changeset as described in [`.claude/skills/changeset/SKILL.md`](../.claude/skills/changeset/SKILL.md).
 
 ## Component API rules
 
