@@ -69,8 +69,12 @@ current route.
 
 `badge` takes an unread count. `badgeStyle="count"` (default) shows it as a
 pill, and counts above 99 show as "99+". `badgeStyle="dot"` shows a dot, and
-the tooltip spells out the number unless `description` is set. The pill is
-rendered outside the rail, so an `overflow-hidden` container does not clip it.
+the tooltip spells out the number unless `description` is set.
+
+Both badges are drawn inside the item, so they scroll and clip with it. The
+pill sits 8px above the item and reaches 10px past its right edge, into the
+rail's gutter. A scrolling container around the items should span the rail's
+full width and leave 8px of padding above the first item.
 
 ### Attributes
 

@@ -143,8 +143,40 @@ describe('<SidebarRailItem />', () => {
         badgeStyle: 'count',
       },
     })
-    // The pill teleports to <body>.
-    cy.get('body').should('contain.text', '99+')
+    cy.get(
+      '[data-slot=sidebar-rail-item] [data-slot=sidebar-rail-item-badge]',
+    ).should('contain.text', '99+')
+  })
+
+  it('keeps the count pill on its item when a scroll area moves it', () => {
+    cy.mount({
+      render: () =>
+        h(
+          'div',
+          {
+            'data-testid': 'scroller',
+            class: 'h-20 w-[50px] overflow-y-auto pt-2',
+          },
+          [
+            h('div', { class: 'flex h-60 flex-col items-center pt-12' }, [
+              h(SidebarRailItem, { label: 'Design', badge: 3 }),
+            ]),
+          ],
+        ),
+    })
+    cy.get('[data-slot=sidebar-rail-item-badge]').should('be.visible')
+    cy.get('[data-testid=scroller]').then(($scroller) => {
+      const item = $scroller[0].querySelector('[data-slot=sidebar-rail-item]')!
+      const pill = item.querySelector('[data-slot=sidebar-rail-item-badge]')!
+      const pillOffset = () =>
+        pill.getBoundingClientRect().top - item.getBoundingClientRect().top
+
+      const before = pillOffset()
+      $scroller[0].scrollTop = 40
+      // Read in the same task as the scroll, before any scroll event fires: a
+      // pill that is moved after its item on scroll would still be 40px off here.
+      expect(pillOffset()).to.equal(before)
+    })
   })
 
   it('lets `description` replace the unread line under the tooltip label', () => {

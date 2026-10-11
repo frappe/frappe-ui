@@ -2440,6 +2440,21 @@ for every other way into the page.
 users came from. If you need a push that always happens, use a plain `Button`
 with your own `router.push`.
 
+#### SidebarRailItem — the count badge stays on its item while scrolling (fix)
+
+The count pill was rendered in `<body>` and moved to follow its item after each
+scroll event. It trailed its item by a frame while a scroll area moved, it did
+not move at all during the page's overscroll bounce, and an item that a scroll
+area had cut off still showed its pill in full, over whatever sat next to the
+list. The pill is now drawn inside the item, so it moves and clips with it. Its
+right edge is fixed 10px past the item, so a longer count grows over the item
+instead of out of the rail.
+
+**What to do:** nothing, unless rail items sit in a scrolling container. That
+container now clips their pills, so make it span the rail's full width (the
+pill reaches into the rail's right gutter) and give it 8px of padding above the
+first item.
+
 ### App shell, page header and color scheme
 
 #### ThemeSwitcher — moved to `frappe-ui/experimental` (breaking, loud)
