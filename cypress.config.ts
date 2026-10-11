@@ -18,6 +18,17 @@ export default defineConfig({
     },
     setupNodeEvents(on, config) {
       cypressSplit(on, config)
+      // The preset wraps `hover:` in `@media (hover: hover) and (pointer: fine)`.
+      // Headless Chrome reports no pointing device, so that query never matches
+      // and no hover style applies. Report a mouse, as a desktop browser would.
+      on('before:browser:launch', (browser, launchOptions) => {
+        if (browser.family === 'chromium' && browser.name !== 'electron') {
+          launchOptions.args.push(
+            '--blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4',
+          )
+        }
+        return launchOptions
+      })
       if (process.env.COVERAGE === 'true') {
         // Start each run clean, then keep one file per spec.
         rmSync(coverageDir, { recursive: true, force: true })
