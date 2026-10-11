@@ -16,12 +16,12 @@ function makeSocket() {
   const emits: unknown[][] = []
   const socket = {
     connected: false,
-    emit: vi.fn((...args: unknown[]) => {
+    emit(...args: unknown[]) {
       ;(socket.connected ? emits : buffer).push(args)
-    }),
-    on: vi.fn((event: string, cb: Handler) => {
+    },
+    on(event: string, cb: Handler) {
       ;(handlers[event] ||= []).push(cb)
-    }),
+    },
     // test helpers
     _connect() {
       socket.connected = true
@@ -31,11 +31,15 @@ function makeSocket() {
     _disconnect() {
       socket.connected = false
     },
+    _fire(event: string, ...args: unknown[]) {
+      for (const cb of handlers[event] || []) cb(...args)
+    },
     _emits: emits,
   }
   return socket as unknown as Socket & {
     _connect: () => void
     _disconnect: () => void
+    _fire: (event: string, ...args: unknown[]) => void
     _emits: unknown[][]
   }
 }
@@ -73,7 +77,7 @@ describe('onDocUpdate', () => {
     expect(subscribes(socket).sort()).toEqual(['CRM Deal', 'Note', 'ToDo'])
   })
 
-  it('does not re-subscribe a fresh socket to a doctype another socket joined', () => {
+  it('subscribes a new socket on its own', () => {
     const socketA = makeSocket()
     const socketB = makeSocket()
     socketA._connect()
@@ -92,12 +96,9 @@ describe('onDocUpdate', () => {
     onDocUpdate(socket, 'CRM Deal', cb)
     onDocUpdate(socket, 'ToDo', vi.fn())
 
-    // Reach into the list_update handler registered by onDocUpdate
-    const handlers = (socket.on as ReturnType<typeof vi.fn>).mock.calls
-    const updateHandler = handlers.find(
-      ([ev]) => ev === 'list_update',
-    )![1] as any
-    updateHandler({ doctype: 'CRM Deal', name: 'DEAL-0002' })
+    socket._fire('list_update', { doctype: 'ToDo', name: 'TODO-0001' })
+    socket._fire('list_update', { doctype: 'CRM Deal', name: 'DEAL-0002' })
+    expect(cb).toHaveBeenCalledOnce()
     expect(cb).toHaveBeenCalledWith('DEAL-0002')
   })
 })

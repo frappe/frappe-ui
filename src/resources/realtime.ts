@@ -17,23 +17,18 @@ export function onDocUpdate(
   })
 }
 
-// Track subscriptions per socket instance. Keying by the Socket (via WeakMap)
-// means a brand-new Socket (re-login, a second app on the same page) is never
-// assumed to already be subscribed to a doctype it has never joined. The set
-// holds the doctypes this socket has subscribed to, so they can be re-emitted
-// after the underlying connection drops and reconnects.
+// Doctypes subscribed per socket, so each new Socket subscribes on its own and
+// a closed one can be garbage collected.
 const subscribed = new WeakMap<Socket, Set<string>>()
 
 function subscribe(socket: Socket, doctype: string): void {
-  let doctypes = subscribed.get(socket)
-  if (!doctypes) {
-    doctypes = new Set()
+  const doctypes = subscribed.get(socket) ?? new Set<string>()
+  if (!subscribed.has(socket)) {
     subscribed.set(socket, doctypes)
     // Server-side rooms are per-socket and dropped on disconnect. This handler
     // subscribes to every doctype on the first connect and on each reconnect.
-    const current = doctypes
     socket.on('connect', () => {
-      for (const type of current) {
+      for (const type of doctypes) {
         socket.emit('doctype_subscribe', type)
       }
     })
