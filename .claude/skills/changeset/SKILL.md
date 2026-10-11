@@ -16,9 +16,10 @@ file and adds no changeset. Shipped files are:
 
 - the `files` list in `package.json`, such as `src/`, `vite/` and `tailwind/`,
 - the `files` list in `packages/create-frappe-ui/package.json`,
-- `package.json`.
+- `package.json` and `packages/create-frappe-ui/package.json`.
 
-Tests, stories and playgrounds do not count.
+Tests, stories, playgrounds and Markdown files do not count, even inside
+`src/`. Component docs such as `src/components/Button/Button.md` count as docs.
 
 | Change | What to add |
 | --- | --- |

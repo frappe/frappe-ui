@@ -9,8 +9,9 @@ import path from 'node:path'
 //   - a changeset asks for `major`. v1 takes no major release from a PR.
 //
 // Shipped files are the `files` lists of frappe-ui and create-frappe-ui, plus
-// package.json. create-frappe-ui has the same version as frappe-ui, so its
-// changes take a frappe-ui changeset.
+// the package.json of each. Markdown files are docs, so they do not count.
+// create-frappe-ui has the same version as frappe-ui, so its changes take a
+// frappe-ui changeset.
 //
 // Runs on Node 24 without an install: it uses only built-in modules.
 //
@@ -108,10 +109,11 @@ function readReleases(file: string): [string, string][] {
 }
 
 function isShipped(file: string): boolean {
-  if (file === 'package.json') return true
+  if (file.endsWith('.md')) return false
   return ['.', 'packages/create-frappe-ui'].some((dir) => {
     const relative = path.posix.relative(dir, file)
     if (relative.startsWith('..')) return false
+    if (relative === 'package.json') return true
     const files: string[] = JSON.parse(
       readFileSync(path.join(dir, 'package.json'), 'utf8'),
     ).files
