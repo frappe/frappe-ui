@@ -73,6 +73,7 @@ All from the `frappe-ui` root entry.
 - [Switch](https://ui.frappe.io/docs/components/switch): boolean toggle for settings.
 - [TabButtons](https://ui.frappe.io/docs/components/tabbuttons): segmented control with radiogroup semantics, for a filter, setting or form field.
 - [Tabs](https://ui.frappe.io/docs/components/tabs): full content tabs.
+- [Tag](https://ui.frappe.io/docs/components/tag): interactive label for filters and selected values; Badge's `variant` + `theme` axes, plus `dismissible` (× emits `dismiss`, also Delete/Backspace) and `disabled`.
 - [Textarea](https://ui.frappe.io/docs/components/textarea): multi-line text input.
 - [TextInput](https://ui.frappe.io/docs/components/textinput): single-line text input.
 - [ThemeSwitcher](https://ui.frappe.io/docs/components/themeswitcher): light / dark / system picker; drives `<html data-theme>` through `useColorScheme` with no wiring.
