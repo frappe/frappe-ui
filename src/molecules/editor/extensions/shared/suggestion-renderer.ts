@@ -101,12 +101,14 @@ export function createSuggestionRenderer(
 
     // Positions once, then keeps the popup on the caret through scroll, window
     // resize and its own height changes (`flip()` measures a height that async
-    // rows and late fonts change after the fact).
+    // rows and late fonts change after the fact). autoUpdate reads only
+    // `contextElement`, to find the editor's scroll ancestors; `updatePosition`
+    // reads the caret rect itself.
     cleanupAutoUpdate = autoUpdate(
       {
         getBoundingClientRect: () =>
           getReferenceClientRect?.() ?? new DOMRect(),
-        contextElement: props.editor?.view?.dom as HTMLElement | undefined,
+        contextElement: props.editor.view.dom,
       },
       floatingEl,
       updatePosition,
