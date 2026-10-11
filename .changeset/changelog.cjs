@@ -4,7 +4,7 @@
 //
 // The PR number comes from the squash-merge subject of the commit that added
 // the changeset, such as "fix(Checkbox): … (#1186)". A changeset without one
-// gets no link.
+// gets no link. A failed git lookup fails the version step.
 
 const { execFileSync } = require('node:child_process')
 
@@ -12,14 +12,10 @@ const REPO_URL = 'https://github.com/frappe/frappe-ui'
 
 function prNumber(commit) {
   if (!commit) return null
-  try {
-    const subject = execFileSync('git', ['log', '-1', '--format=%s', commit], {
-      encoding: 'utf8',
-    })
-    return subject.match(/\(#(\d+)\)\s*$/)?.[1] ?? null
-  } catch {
-    return null
-  }
+  const subject = execFileSync('git', ['log', '-1', '--format=%s', commit], {
+    encoding: 'utf8',
+  })
+  return subject.match(/\(#(\d+)\)\s*$/)?.[1] ?? null
 }
 
 async function getReleaseLine(changeset) {
