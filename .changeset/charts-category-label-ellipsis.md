@@ -2,4 +2,4 @@
 'frappe-ui': patch
 ---
 
-Charts: a long category axis label now shows one ellipsis in the middle, such as `Referral…Network`, and no longer gets a second ellipsis at the end (fix).
+Charts: a category axis label that is shortened in the middle now keeps its ending, and no longer gets a second ellipsis at the end (fix).
