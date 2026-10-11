@@ -26,15 +26,18 @@ export function findBenchPath() {
   // Set by a bench manager when the app lives outside the bench and is linked
   // into apps/, so no bench folder sits above it (for example `pilot dev`).
   if (process.env.FRAPPE_BENCH_PATH) {
-    return path.resolve(process.env.FRAPPE_BENCH_PATH)
+    const benchPath = path.resolve(process.env.FRAPPE_BENCH_PATH)
+    if (!isBench(benchPath)) {
+      console.warn(
+        `FRAPPE_BENCH_PATH is ${benchPath}, which has no apps/ and sites/ folders`,
+      )
+    }
+    return benchPath
   }
 
   let currentDir = path.resolve('.')
   while (currentDir !== '/') {
-    if (
-      fs.existsSync(path.join(currentDir, 'sites')) &&
-      fs.existsSync(path.join(currentDir, 'apps'))
-    ) {
+    if (isBench(currentDir)) {
       return currentDir
     }
     currentDir = path.resolve(currentDir, '..')
@@ -73,6 +76,13 @@ export function findAppName() {
   }
 
   return null
+}
+
+function isBench(dir) {
+  return (
+    fs.existsSync(path.join(dir, 'sites')) &&
+    fs.existsSync(path.join(dir, 'apps'))
+  )
 }
 
 function realPath(filePath) {

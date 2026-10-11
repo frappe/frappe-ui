@@ -1,4 +1,3 @@
-import fs from 'fs'
 import path from 'path'
 import { findBenchPath } from './utils.js'
 
@@ -25,8 +24,13 @@ export function benchFiles() {
         return resolved
       }
       const benchPath = findBenchPath()
-      const file = benchPath && path.join(benchPath, 'sites', match[1])
-      return file && fs.existsSync(file) ? file : null
+      if (!benchPath) {
+        return null
+      }
+      return this.resolve(path.join(benchPath, 'sites', match[1]), importer, {
+        ...options,
+        skipSelf: true,
+      })
     },
   }
 }

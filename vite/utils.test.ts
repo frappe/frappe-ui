@@ -1,4 +1,5 @@
 import {
+  existsSync,
   mkdirSync,
   mkdtempSync,
   realpathSync,
@@ -15,6 +16,7 @@ import { findAppName, findBenchPath } from './utils.js'
 let root: string
 
 beforeEach(() => {
+  vi.stubEnv('FRAPPE_BENCH_PATH', '')
   root = realpathSync(mkdtempSync(join(tmpdir(), 'frappe-ui-bench-')))
   mkdirSync(join(root, 'bench', 'sites'), { recursive: true })
   mkdirSync(join(root, 'bench', 'apps', 'helpdesk', 'frontend'), {
@@ -62,10 +64,17 @@ describe('bench lookup', () => {
 })
 
 describe('bench files', () => {
-  const resolveIn = (resolved: string | null) =>
+  // Stands in for Vite: an absolute path resolves when the file exists,
+  // ignoring a query such as ?raw; a relative import never does.
+  const viteResolve = async (id: string) => {
+    const file = id.split('?')[0]
+    return file.startsWith('/') && existsSync(file) ? { id } : null
+  }
+
+  const resolveIn = (source: string) =>
     benchFiles().resolveId.call(
-      { resolve: async () => (resolved ? { id: resolved } : null) },
-      '../../../../sites/common_site_config.json',
+      { resolve: viteResolve },
+      source,
       '/src/socket.ts',
       {},
     )
@@ -74,17 +83,17 @@ describe('bench files', () => {
     writeFileSync(join(root, 'bench', 'sites', 'common_site_config.json'), '{}')
   })
 
-  it('keeps an import that resolves where the app sits', async () => {
-    expect(await resolveIn('/bench/sites/common_site_config.json')).toEqual({
-      id: '/bench/sites/common_site_config.json',
-    })
+  it('leaves other imports to Vite', async () => {
+    expect(await resolveIn('./socket.ts')).toBeNull()
   })
 
-  it('resolves an unreachable sites import in the bench', async () => {
+  it('resolves an unreachable sites import in the bench, keeping its query', async () => {
     vi.stubEnv('FRAPPE_BENCH_PATH', join(root, 'bench'))
 
-    expect(await resolveIn(null)).toBe(
-      join(root, 'bench', 'sites', 'common_site_config.json'),
-    )
+    expect(
+      await resolveIn('../../../../sites/common_site_config.json?raw'),
+    ).toEqual({
+      id: join(root, 'bench', 'sites', 'common_site_config.json?raw'),
+    })
   })
 })
