@@ -87,8 +87,13 @@ Badge: the `theme` prop is deprecated; use `variant` instead (deprecation).
 
 Maintainers release. Agents do not merge the release PR.
 
-1. Each merge to `main` updates the `chore(release): version packages` PR.
-2. Before merging it, copy the new `CHANGELOG.md` section into
-   `docs/content/docs/changelog.md`.
-3. Merging it changes the version. `publish.yml` publishes to npm and tags the
-   commit.
+1. Each merge to `main` updates the `chore(release): version packages` PR. It
+   writes each changeset as one line in `CHANGELOG.md`, followed by a link to
+   its PR (`.changeset/changelog.cjs`).
+2. Merging it changes the version. `publish.yml` publishes to npm, tags the
+   commit, and creates a GitHub release from the version's `CHANGELOG.md`
+   section.
+
+The docs page `/docs/changelog/v1` includes `CHANGELOG.md`, so it needs no
+copy. `/docs/changelog/v0-to-v1` lists the changes up to 1.0.0 and does not
+change.

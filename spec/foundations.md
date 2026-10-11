@@ -130,7 +130,7 @@ item or list header keeps the height it had at 1.15. Put it on the element that
 carries the text, not on a wrapper whose child sets its own `text-*` style.
 
 The tight styles used to be 1.15. The
-[changelog](../docs/content/docs/changelog.md) records the break.
+[changelog](../docs/content/docs/changelog/v0-to-v1.md) records the break.
 
 The Figma text styles still export 115%. `TEXT_LINE_HEIGHT_OVERRIDE` in
 [`tailwind/tokens/build.js`](../tailwind/tokens/build.js) maps it to 135% for

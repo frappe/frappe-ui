@@ -114,11 +114,7 @@
     { "path": "spec/charts.md", "scope": ["src/charts/**"] },
     {
       "path": "spec/foundations.md",
-      "scope": [
-        "tailwind/**",
-        "src/style.css",
-        "src/fonts/**"
-      ]
+      "scope": ["tailwind/**", "src/style.css", "src/fonts/**"]
     },
     {
       "path": "spec/adr/0013-v1-resources-implementation-freeze.md",
@@ -143,9 +139,19 @@
       ]
     },
     {
-      "path": "docs/content/docs/changelog.md",
-      "description": "Consumer-facing changelog policy and the 1.0.0 entries. Changeset text follows .claude/skills/changeset/SKILL.md.",
-      "scope": ["docs/content/docs/changelog.md", "package.json"]
+      "path": "docs/content/docs/changelog/v0-to-v1.md",
+      "description": "Consumer-facing changes from v0 to 1.0.0: breaking changes, deprecations and migration steps.",
+      "scope": ["docs/content/docs/changelog/**", "package.json"]
+    },
+    {
+      "path": "CHANGELOG.md",
+      "description": "The live 1.x changelog, generated from changesets and shown on /docs/changelog/v1. Changeset text follows .claude/skills/changeset/SKILL.md.",
+      "scope": [".changeset/**", "CHANGELOG.md", "package.json"]
+    },
+    {
+      "path": ".changeset/changelog.cjs",
+      "description": "Formats each changeset as one CHANGELOG.md line followed by its PR link.",
+      "scope": [".changeset/**", "CHANGELOG.md"]
     }
   ]
 }

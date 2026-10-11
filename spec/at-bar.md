@@ -135,7 +135,7 @@ ADR-0008 requires a changelog entry for every removal, and a migration guide bef
 document replaces.
 
 **Every removal or rename gets a changelog line** in
-[`changelog.md`](../docs/content/docs/changelog.md).
+[`changelog/v0-to-v1.md`](../docs/content/docs/changelog/v0-to-v1.md).
 
 **A before/after in [`migration.md`](../docs/content/docs/migration.md) is required when
 the break is silent** — old code still compiles and runs, but behaves differently:
