@@ -9,7 +9,7 @@
       <div
         v-if="hasPrefixSlot"
         ref="prefixSlotEl"
-        class="absolute left-0 top-1/2 z-[1] flex max-w-[35%] -translate-y-1/2 justify-start"
+        class="absolute start-0 top-1/2 z-[1] flex max-w-[35%] -translate-y-1/2 justify-start"
       >
         <slot name="prefix" />
       </div>
@@ -26,7 +26,7 @@
       <div
         v-if="hasSuffixSlot"
         ref="suffixSlotEl"
-        class="absolute right-0 top-1/2 z-[1] flex max-w-[35%] -translate-y-1/2 justify-end"
+        class="absolute end-0 top-1/2 z-[1] flex max-w-[35%] -translate-y-1/2 justify-end"
       >
         <slot name="suffix" />
       </div>
