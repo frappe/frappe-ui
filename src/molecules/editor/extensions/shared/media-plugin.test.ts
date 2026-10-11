@@ -65,6 +65,8 @@ function makeEditor(content: string) {
       Text,
       Image,
       YSync,
+      // Short, so a test can wait past it and turn a recorded write into its
+      // own undo step. prosemirror-history treats 0 as its 500 ms default.
       UndoRedo.configure({ newGroupDelay: 1 }),
     ],
     content,
