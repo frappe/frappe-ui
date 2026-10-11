@@ -1,0 +1,41 @@
+name: Release PR
+
+# Opens or updates the "chore(release): version packages" PR from the pending
+# changesets. Merging that PR changes the version, and publish.yml publishes
+# it. This workflow does not publish.
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.15.0
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+        env:
+          CYPRESS_INSTALL_BINARY: 0
+
+      - uses: changesets/action@3841a0683d3cfa6dae0f9bb335290003010fe3f0 # v1.9.0
+        with:
+          # Also gives create-frappe-ui the new version.
+          version: yarn version-packages
+          commit: 'chore(release): version packages'
+          title: 'chore(release): version packages'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
