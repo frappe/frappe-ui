@@ -100,9 +100,14 @@ const flush = () => new Promise((resolve) => setTimeout(resolve, 0))
 
 const FakeComponent = {} as never
 
+// The editor's DOM sits inside its own scroll container, as it does in an app
+// layout; rebuilt in `beforeEach`.
+let scroller: HTMLElement
+let editorDom: HTMLElement
+
 function makeProps(overrides: Partial<SuggestionProps> = {}): SuggestionProps {
   return {
-    editor: { appContext: {} },
+    editor: { appContext: {}, view: { dom: editorDom } },
     clientRect: () => ({ top: 0, left: 0, bottom: 0, right: 0 }) as DOMRect,
     ...overrides,
   } as unknown as SuggestionProps
@@ -131,6 +136,11 @@ describe('createSuggestionRenderer', () => {
   beforeEach(() => {
     instances.length = 0
     document.body.innerHTML = ''
+    scroller = document.createElement('div')
+    scroller.style.overflow = 'auto'
+    editorDom = document.createElement('div')
+    scroller.appendChild(editorDom)
+    document.body.appendChild(scroller)
     position.deferred = false
     position.resolvers.length = 0
     FakeResizeObserver.instances.length = 0
@@ -221,7 +231,7 @@ describe('createSuggestionRenderer', () => {
     expect(wrapper?.style.top).toBe('99px')
   })
 
-  it('repositions on popup resize and page scroll, and stops on exit', () => {
+  it('repositions on popup resize, editor scroll and window resize, and stops on exit', () => {
     const api = makeRenderer()
     api.onStart(makeProps())
 
@@ -232,12 +242,18 @@ describe('createSuggestionRenderer', () => {
     observer.callback([])
     expect(vi.mocked(computePosition).mock.calls.length).toBe(++calls)
 
-    window.dispatchEvent(new Event('scroll'))
+    // `scroll` does not bubble, so only a listener on the editor's own scroll
+    // container sees this.
+    scroller.dispatchEvent(new Event('scroll'))
+    expect(vi.mocked(computePosition).mock.calls.length).toBe(++calls)
+
+    window.dispatchEvent(new Event('resize'))
     expect(vi.mocked(computePosition).mock.calls.length).toBe(++calls)
 
     api.onExit()
     expect(observer.disconnect).toHaveBeenCalled()
-    window.dispatchEvent(new Event('scroll'))
+    scroller.dispatchEvent(new Event('scroll'))
+    window.dispatchEvent(new Event('resize'))
     expect(vi.mocked(computePosition).mock.calls.length).toBe(calls)
   })
 })
