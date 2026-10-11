@@ -7,7 +7,7 @@ on:
 
 permissions:
   id-token: write # Required for OIDC
-  contents: write # push the release tag
+  contents: write # push the release tag and create the GitHub release
 
 jobs:
   publish:
@@ -72,3 +72,28 @@ jobs:
             TAG=latest
           fi
           npm publish --tag "$TAG"
+
+      # The release notes are this version's section of CHANGELOG.md, without
+      # its heading. Runs last, so a failure here can't block either npm
+      # publish. Idempotent: skips if the release already exists.
+      - name: Create the GitHub release
+        if: steps.publish_tag.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.publish_tag.outputs.version }}
+          TAG: ${{ steps.publish_tag.outputs.tag }}
+        run: |
+          tag="v$VERSION"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "Release $tag already exists, skipping."
+            exit 0
+          fi
+          awk -v heading="## $VERSION" '
+            $0 == heading { found = 1; next }
+            found && /^## / { exit }
+            found { print }
+          ' CHANGELOG.md > release-notes.md
+          prerelease=()
+          if [ "$TAG" != latest ]; then prerelease=(--prerelease); fi
+          gh release create "$tag" --verify-tag --title "$tag" \
+            --notes-file release-notes.md "${prerelease[@]}"

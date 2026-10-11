@@ -6,7 +6,7 @@ pageClass: migration-page
 
 This guide moves an existing app onto `frappe-ui` v1. Work through one
 component family at a time. Each section starts with a before/after table. For
-the full list of changes, see the [changelog](/docs/changelog). For the reasons
+the full list of changes, see the [changelog](/docs/changelog/v0-to-v1). For the reasons
 behind each API, see the
 [v1 release specs](https://github.com/frappe/frappe-ui/tree/main/v1-release).
 
@@ -23,7 +23,7 @@ production. Each one is marked.
 
 **Loud breaks** are changes your build reports: an import that no longer
 resolves, or a type that no longer exists. They are listed in the
-[changelog](/docs/changelog), and appear here only when the replacement needs
+[changelog](/docs/changelog/v0-to-v1), and appear here only when the replacement needs
 explaining. If your build already names the file and the line, the changelog is
 faster to read.
 
