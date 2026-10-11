@@ -1,3 +1,15 @@
+<script setup>
+import { onMounted } from 'vue'
+import { withBase } from 'vitepress'
+
+// This page used to hold the whole v0 to v1 changelog. Old links to its
+// sections, such as #deprecation-log, are sent on to the page that holds them.
+onMounted(() => {
+  const { hash } = window.location
+  if (hash) window.location.replace(withBase('/docs/changelog/v0-to-v1') + hash)
+})
+</script>
+
 # Changelog
 
 frappe-ui keeps one changelog per major version.
