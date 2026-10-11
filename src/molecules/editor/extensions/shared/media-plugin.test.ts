@@ -51,15 +51,35 @@ const YSync = Extension.create({
   addProseMirrorPlugins: () => [new Plugin({ key: ySyncKey })],
 })
 
+// Appends a paragraph after a trailing image, as TrailingNode does
+const TrailingParagraph = Extension.create({
+  name: 'trailingParagraph',
+  addProseMirrorPlugins: () => [
+    new Plugin({
+      appendTransaction: (_transactions, _oldState, state) => {
+        const last = state.doc.lastChild
+        if (last?.type.name === 'paragraph') return null
+        return state.tr.insert(
+          state.doc.content.size,
+          state.schema.nodes.paragraph.create(),
+        )
+      },
+    }),
+  ],
+})
+
 const editors: Editor[] = []
 afterEach(() => {
   editors.splice(0).forEach((editor) => editor.destroy())
   probeDimensions.mockClear()
 })
 
-function makeEditor(content: string) {
+function makeEditor(content: string, extensions: Extension[] = []) {
   const editor = new Editor({
+    // Tiptap runs plugins in reverse extension order, so these append after
+    // the media plugin has already seen the transaction they respond to.
     extensions: [
+      ...extensions,
       Document,
       Paragraph,
       Text,
@@ -219,6 +239,31 @@ describe('media dimension back-fill', () => {
     editor.commands.undo()
     await settle()
 
+    expect(sizes(editor)).toEqual([[null, null]])
+    expect(probeDimensions).not.toHaveBeenCalled()
+  })
+
+  it('leaves an image loaded without an update event as it came when another plugin appends', async () => {
+    const editor = makeEditor('<p>x</p>', [TrailingParagraph])
+    editor.commands.setContent('<img src="/files/loaded.png">', {
+      emitUpdate: false,
+    })
+    await settle()
+
+    expect(editor.state.doc.lastChild?.type.name).toBe('paragraph')
+    expect(sizes(editor)).toEqual([[null, null]])
+    expect(probeDimensions).not.toHaveBeenCalled()
+  })
+
+  it('leaves an unsized image as it was when undo brings it back and another plugin appends', async () => {
+    const editor = makeEditor('<p>x</p><img src="/files/old.png">', [
+      TrailingParagraph,
+    ])
+    editor.commands.deleteRange({ from: 3, to: 4 })
+    editor.commands.undo()
+    await settle()
+
+    expect(editor.state.doc.lastChild?.type.name).toBe('paragraph')
     expect(sizes(editor)).toEqual([[null, null]])
     expect(probeDimensions).not.toHaveBeenCalled()
   })

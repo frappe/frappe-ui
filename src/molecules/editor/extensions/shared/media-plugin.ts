@@ -46,6 +46,19 @@ function collectFiles(
   return files
 }
 
+/** Whether a transaction loads content or undoes/redoes, not a person's edit. */
+function isLoadOrUndo(transaction: Transaction): boolean {
+  // A transaction another plugin appends (TrailingNode, ListJoin) carries no
+  // meta of its own. ProseMirror tags it with the root transaction that
+  // caused it, so ask that one too.
+  const root = transaction.getMeta('appendedTransaction') as
+    | Transaction
+    | undefined
+  return [transaction, root].some(
+    (tr) => tr && (tr.getMeta('preventUpdate') || isHistoryTransaction(tr)),
+  )
+}
+
 /**
  * Build the drop + paste + dimension-back-fill plugin for one media node type.
  *
@@ -95,12 +108,7 @@ export function createMediaPlugin(
     ): Transaction | null {
       if (!transactions.some((tr) => tr.docChanged)) return null
       if (isRemoteChange(transactions, newState)) return null
-      if (
-        transactions.some(
-          (tr) => tr.getMeta('preventUpdate') || isHistoryTransaction(tr),
-        )
-      )
-        return null
+      if (transactions.some(isLoadOrUndo)) return null
 
       const pending: number[] = []
       newState.doc.descendants((node, pos) => {
