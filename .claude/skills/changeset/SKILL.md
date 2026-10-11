@@ -29,12 +29,12 @@ Tests, stories, playgrounds and Markdown files do not count, even inside
 
 ## Choose the bump
 
-| Change | Bump |
-| --- | --- |
-| Bug fix, or a visual or behavior correction | `patch` |
-| New public API: a component, prop, slot, event, export or token | `minor` |
-| Deprecation of a public API | `minor` |
-| Breaking change | Stop. Ask a maintainer. v1 takes no major release from a PR. |
+| Change | Bump | Tag |
+| --- | --- | --- |
+| Bug fix, or a visual or behavior correction | `patch` | `fix` |
+| New public API: a component, prop, slot, event, export or token | `minor` | `additive` |
+| Deprecation of a public API | `minor` | `deprecation` |
+| Breaking change | Stop. Ask a maintainer. v1 takes no major release from a PR. | none |
 
 `minor` needs the `release:minor` label on the PR. A maintainer adds it.
 Without the label, the check fails. Say in the PR description why the change
@@ -58,16 +58,30 @@ changeset, because both packages share one version.
 
 ## Write the text
 
-Write for an app developer who reads the changelog. Match the style of
-`docs/content/docs/changelog.md`.
+Write for an app developer who reads the changelog. The text of each changeset
+becomes one line in `CHANGELOG.md`. Use this format:
 
-- Start with the component or area, then a colon.
+```md
+<Component or area>: <what changed for the app> (<tag>).
+```
+
+- Start with the component or area, such as `Combobox` or `Tailwind preset`.
 - Say what changed for the app, not how the code changed.
-- End the first sentence with the tag from the changelog's "How to read an
-  entry" table: `(fix)` or `(additive)`.
-- If the app must do something, add a second paragraph that says what.
+- End with the tag for the bump, from the table in "Choose the bump". There is
+  no breaking tag, because a PR cannot make a breaking change.
+- A `deprecation` line also says what to use instead.
+- If the app must do something, say what in the same line. Keep the text to
+  one line.
 - Use one changeset per change. A PR with two independent changes adds two
   files.
+
+Examples:
+
+```md
+Combobox: a picked option now commits before the popover closes (fix).
+Dialog: the new `size` prop sets the width of the dialog (additive).
+Badge: the `theme` prop is deprecated; use `variant` instead (deprecation).
+```
 
 ## Releases
 

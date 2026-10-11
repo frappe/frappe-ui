@@ -144,7 +144,7 @@
     },
     {
       "path": "docs/content/docs/changelog.md",
-      "description": "Consumer-facing changelog policy and existing entry style.",
+      "description": "Consumer-facing changelog policy and the 1.0.0 entries. Changeset text follows .claude/skills/changeset/SKILL.md.",
       "scope": ["docs/content/docs/changelog.md", "package.json"]
     }
   ]
