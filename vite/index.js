@@ -6,6 +6,7 @@ import { buildConfig } from './buildConfig.js'
 import { siteBanner } from './siteBanner.js'
 import { barrelImports } from './barrelImports.js'
 import { codeLanguages } from './codeLanguages.js'
+import { benchFiles } from './benchFiles.js'
 
 function frappeuiPlugin(options = {}) {
   let plugins = []
@@ -37,6 +38,7 @@ function frappeuiPlugin(options = {}) {
   const jinjaBootDataOpt = options.jinjaBootData ?? true
   const buildConfigOpt = options.buildConfig ?? true
 
+  plugins.push(benchFiles())
   if (lucideIconsOpt) {
     plugins.push(lucideIcons(lucideIconsOpt))
   }

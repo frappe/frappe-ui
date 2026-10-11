@@ -23,6 +23,12 @@ export function getCommonSiteConfig() {
 }
 
 export function findBenchPath() {
+  // Set by a bench manager when the app lives outside the bench and is linked
+  // into apps/, so no bench folder sits above it (for example `pilot dev`).
+  if (process.env.FRAPPE_BENCH_PATH) {
+    return path.resolve(process.env.FRAPPE_BENCH_PATH)
+  }
+
   let currentDir = path.resolve('.')
   while (currentDir !== '/') {
     if (
@@ -51,17 +57,30 @@ export function findAppName() {
     return null
   }
 
-  // Walk up from cwd until we find a directory whose parent is the apps folder
-  let currentDir = path.resolve('.')
-  while (currentDir !== '/') {
-    const parent = path.dirname(currentDir)
-    if (path.resolve(parent) === path.resolve(appsFolder)) {
-      return path.basename(currentDir)
+  // Walk up from cwd until we reach an app in the apps folder. Apps are matched
+  // by real path, so an app symlinked into apps/ from elsewhere is found too.
+  const apps = new Map(
+    fs
+      .readdirSync(appsFolder)
+      .map((name) => [realPath(path.join(appsFolder, name)), name]),
+  )
+  let currentDir = realPath(path.resolve('.'))
+  while (currentDir !== path.dirname(currentDir)) {
+    if (apps.has(currentDir)) {
+      return apps.get(currentDir)
     }
-    currentDir = parent
+    currentDir = path.dirname(currentDir)
   }
 
   return null
+}
+
+function realPath(filePath) {
+  try {
+    return fs.realpathSync(filePath)
+  } catch {
+    return filePath
+  }
 }
 
 export async function getInstalledAppSites(appName) {
