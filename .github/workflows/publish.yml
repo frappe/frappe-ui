@@ -33,8 +33,19 @@ jobs:
 
       - if: steps.publish_tag.outputs.changed == 'true'
         run: npm test
-      - if: steps.publish_tag.outputs.changed == 'true'
-        run: npm publish --tag ${{ steps.publish_tag.outputs.tag }}
+      # Skips if this version is already on npm, so a re-run can still reach
+      # the steps after it, for example to retry the GitHub release.
+      - name: Publish frappe-ui
+        if: steps.publish_tag.outputs.changed == 'true'
+        env:
+          VERSION: ${{ steps.publish_tag.outputs.version }}
+          TAG: ${{ steps.publish_tag.outputs.tag }}
+        run: |
+          if [ -n "$(npm view "frappe-ui@$VERSION" version 2>/dev/null)" ]; then
+            echo "frappe-ui@$VERSION is already on npm, skipping."
+            exit 0
+          fi
+          npm publish --tag "$TAG"
 
       # Tag the exact commit that was published (head_sha checked out above).
       # Idempotent: skips if the tag already exists, so workflow re-runs are safe.
@@ -60,13 +71,19 @@ jobs:
       # After that, both packages use the same tag.
       #
       # It runs after the tag, so a failure here can't leave frappe-ui's release
-      # untagged. To recover, publish by hand from packages/create-frappe-ui.
+      # untagged. Like frappe-ui, it skips a version that is already on npm, so
+      # re-running the workflow recovers from a failure here or later.
       - name: Publish create-frappe-ui
         if: steps.publish_tag.outputs.changed == 'true'
         working-directory: packages/create-frappe-ui
         env:
+          VERSION: ${{ steps.publish_tag.outputs.version }}
           TAG: ${{ steps.publish_tag.outputs.tag }}
         run: |
+          if [ -n "$(npm view "create-frappe-ui@$VERSION" version 2>/dev/null)" ]; then
+            echo "create-frappe-ui@$VERSION is already on npm, skipping."
+            exit 0
+          fi
           current=$(npm view create-frappe-ui dist-tags.latest 2>/dev/null || true)
           if [ "$TAG" != latest ] && { [ -z "$current" ] || [[ "$current" == *-* ]]; }; then
             TAG=latest
@@ -75,7 +92,9 @@ jobs:
 
       # The release notes are this version's section of CHANGELOG.md, without
       # its heading. Runs last, so a failure here can't block either npm
-      # publish. Idempotent: skips if the release already exists.
+      # publish or the tag. Idempotent: skips if the release already exists.
+      # To recover from a failure, re-run the workflow: every earlier step
+      # skips the work it already did.
       - name: Create the GitHub release
         if: steps.publish_tag.outputs.changed == 'true'
         env:
