@@ -139,8 +139,8 @@ axis is additive and can land in a 1.x minor.
 ## The template ref
 
 Every echarts-backed chart hands back one member, the echarts instance, as
-`chart`. `FunnelChart` and `NumberCard` draw no echarts plot and hand back
-nothing.
+`chart`. `FunnelChart`, `NumberCard` and `PercentageBarChart` draw no echarts plot
+and hand back nothing.
 
 It is the imperative half of the escape hatch `echartOptions` opens for options.
 Reach for it when an app needs an echarts call that no option key expresses — an
@@ -180,3 +180,22 @@ because only one component has the part:
 `ChartLegend` emits behavior names per P1:
 `change` when an entry flips a series' visibility, `highlight` when the
 highlighted series changes (`null` clears it) — not `toggle` or `hover`.
+
+Every chart names the mark it draws, and the name runs through its whole API:
+`DonutSlice`, `FunnelStage`, `HeatmapCell`, `SankeyLink`, `ScatterPoint`,
+`ChartDatapoint`. The cap on how many marks are drawn, and the list the legend
+has switched off, take that word too — `maxSeries` and `hiddenSeries` on the
+axis charts, `maxSlices` and `hiddenSlices` on the ones cut into slices.
+
+**Two charts that draw the same mark share the word.** `DonutChart` and
+`PercentageBarChart` read the same rows — `category` and `value`, one row per
+part — and cut them into the same parts; only the shape they are laid out in
+differs. So a slice is a slice in both, and a caller moving a breakdown from
+the ring to the bar carries `maxSlices` across with the data rather than
+learning a second word for one idea. That is convention 4 read at the level of
+vocabulary.
+
+Sharing the *props* is not on its own the reason. `FunnelChart` takes
+`category` and `value` as well and still draws stages, because a stage is a
+step in a process rather than a part of a total. The question is what the mark
+is, not what the props are called.

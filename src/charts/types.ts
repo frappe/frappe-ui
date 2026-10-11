@@ -276,6 +276,62 @@ export type DonutSliceEvent = {
   rows: Record<string, any>[]
 }
 
+export type PercentageBarChartConfig = {
+  data: Record<string, any>[]
+  /** Row key holding the slice name. */
+  categoryColumn: string
+  /** Row key holding the slice size. */
+  valueColumn: string
+  title?: string
+  subtitle?: string
+  /**
+   * How many slices the bar holds, "Others" included: past that it keeps the
+   * largest `maxSlices - 1` and sums the tail into "Others". A track a few
+   * hundred pixels wide runs out of room well before the palette does, so it
+   * defaults to 6.
+   */
+  maxSlices?: number
+  /**
+   * Ramp slice colors are drawn from. Defaults to `'categorical'`: the parts
+   * of a breakdown are unrelated categories, not steps of one magnitude.
+   */
+  palette?: ChartPalette
+  /** Forces layout direction; defaults to document.documentElement.dir */
+  dir?: ChartDir
+}
+
+/** One block of the bar, after "Others" grouping and color assignment. */
+export type PercentageBarSlice = {
+  /** Identity used by the legend and the tooltip. Unique within the bar. */
+  name: string
+  /** The category value as it should read; not unique. */
+  label: string
+  value: number
+  /** Share of the *visible* total, so hiding a slice re-percentages the rest. */
+  percent: number
+  /**
+   * What the slice is drawn at, as a percentage of the track. Equal to
+   * `percent` until a share is too small to see, at which point the bar widens
+   * it at the expense of the slices above the floor. Read `percent` for the
+   * number a reader is told; this one is geometry.
+   */
+  width: number
+  color: string
+  hidden: boolean
+  /** The row behind this slice, or every grouped row for "Others". */
+  rows: Record<string, any>[]
+  isOthers: boolean
+}
+
+export type PercentageBarSliceEvent = {
+  /** The slice as it reads, i.e. the category value or "Others". */
+  name: string
+  value: number
+  percent: number
+  /** One row, or every grouped row when the "Others" slice was clicked. */
+  rows: Record<string, any>[]
+}
+
 export type FunnelChartConfig = {
   /** One row per stage, in process order. Rows are drawn as they arrive. */
   data: Record<string, any>[]
@@ -929,6 +985,45 @@ export type DonutChartProps = ChartBaseProps & {
   echartOptions?: EchartOptionsOverride
 }
 
+export type PercentageBarChartProps = ChartBaseProps & {
+  /** The rows to draw. One row is one slice, before the "Others" grouping. */
+  data: Record<string, any>[]
+  /** Row key holding the slice name. */
+  category: string
+  /** Row key holding the slice size. */
+  value: string
+  /**
+   * How many slices the bar holds, "Others" included. Past that it keeps the
+   * largest `maxSlices - 1` and sums the tail into a single "Others" slice,
+   * named `OTHERS_KEY`. Same word and same behavior as `DonutChart`, so a
+   * breakdown carries it across when it moves from the ring to the bar.
+   * Defaults to 6 — a track runs out of readable width sooner than a ring,
+   * which defaults to 9.
+   */
+  maxSlices?: number
+  /**
+   * How thick the track is drawn: `'sm'` 8px, the default, for a strip under
+   * the number it breaks down; `'md'` 12px where the breakdown is itself what
+   * the card is about. The corner follows the thickness — the thinner track
+   * cannot carry the deeper one without rounding into capsules.
+   */
+  size?: 'sm' | 'md'
+  /**
+   * Slices the legend has switched off, by name. Bind it with
+   * `v-model:hiddenSlices` to drive the legend from the app, or to keep what
+   * a reader hid across a reload. Left unbound, the legend owns it.
+   *
+   * `DonutChart`'s word, because it is `DonutChart`'s mark: the two read the
+   * same rows into the same parts and differ only in the shape they lay them
+   * out in. `spec/charts.md` records the ruling.
+   */
+  hiddenSlices?: string[]
+  /** Prints every value the bar shows: the tooltip, and each slice's name. */
+  format?: ChartValueFormatter
+  /** Defaults to `'categorical'`: the parts are unrelated, not steps of a ramp. */
+  palette?: ChartPalette
+}
+
 export type FunnelChartProps = ChartBaseProps & {
   /** One row per stage, in process order. Rows are drawn as they arrive. */
   data: Record<string, any>[]
@@ -1170,8 +1265,8 @@ export type ChartStateSlots = {
   empty?: () => unknown
 }
 
-/** Controls at the top right of the card, e.g. a period Select or a Dropdown. */
 export type ChartActionsSlot = {
+  /** Controls at the top right of the card, e.g. a period Select or a Dropdown. */
   actions?: () => unknown
 }
 
@@ -1242,6 +1337,25 @@ export type DonutChartSlots = ChartActionsSlot &
     /**
      * Replaces the tooltip body. `items` holds the hovered slice alone. A named
      * slice carries one row, and the "Others" slice every row it collapsed.
+     */
+    tooltip?: (props: ChartTooltipSlotProps) => unknown
+  }
+
+export type PercentageBarChartEmits = {
+  /**
+   * A slice was selected, by click or by Enter on the keyboard. The "Others"
+   * slice carries every row it grouped, so a caller can drill into the tail
+   * as well as into a named part.
+   */
+  select: [event: PercentageBarSliceEvent]
+}
+
+export type PercentageBarChartSlots = ChartActionsSlot &
+  ChartTitleSuffixSlot &
+  ChartStateSlots & {
+    /**
+     * Replaces the tooltip body. `items` holds the hovered slice alone. A
+     * named slice carries one row, and "Others" every row it collapsed.
      */
     tooltip?: (props: ChartTooltipSlotProps) => unknown
   }
