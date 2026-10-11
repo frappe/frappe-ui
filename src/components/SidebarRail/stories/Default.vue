@@ -3,15 +3,22 @@ import { ref } from 'vue'
 import { SidebarRail, SidebarRailItem, Avatar } from 'frappe-ui'
 
 const active = ref('design')
-const communities = [
-  { id: 'design', label: 'Design', badge: 0 },
-  { id: 'engineering', label: 'Engineering', badge: 3 },
-  { id: 'marketing', label: 'Marketing', badge: 0 },
-]
 
 function logo(seed: string) {
   return `https://api.dicebear.com/9.x/shapes/svg?seed=${seed}`
 }
+
+const communities = [
+  { id: 'design', label: 'Design', badge: 0, image: logo('design') },
+  {
+    id: 'engineering',
+    label: 'Engineering',
+    badge: 3,
+    image: logo('engineering'),
+  },
+  { id: 'marketing', label: 'Marketing', badge: 0, image: logo('marketing') },
+  { id: 'sales', label: 'Sales', badge: 0, image: null },
+]
 </script>
 
 <template>
@@ -37,7 +44,17 @@ function logo(seed: string) {
           badge-style="dot"
           @click="active = c.id"
         >
-          <img :src="logo(c.id)" alt="" class="size-7 rounded-[7px]" />
+          <!-- The item paints no fill under an image. Initials sit on the
+               item's own fill. -->
+          <img
+            v-if="c.image"
+            :src="c.image"
+            alt=""
+            class="size-7 rounded-[7px]"
+          />
+          <span v-else class="text-2xs-medium uppercase text-ink-gray-5">
+            {{ c.label.slice(0, 2) }}
+          </span>
         </SidebarRailItem>
       </div>
 

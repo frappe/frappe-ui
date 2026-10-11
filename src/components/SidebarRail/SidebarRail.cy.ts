@@ -101,6 +101,35 @@ describe('<SidebarRailItem />', () => {
     cy.get('[data-slot=sidebar-rail-item]').should('have.class', 'shadow-sm')
   })
 
+  it('paints no fill behind an image, and keeps the indicator bar', () => {
+    const transparent = 'rgba(0, 0, 0, 0)'
+    const background = ($cell: JQuery<HTMLElement>) =>
+      getComputedStyle($cell[0]).backgroundColor
+
+    // Initials sit on the cell's own fill.
+    cy.mount(SidebarRailItem, {
+      props: { label: 'Design', active: true },
+      slots: { default: () => h('span', 'DE') },
+    })
+    cy.get('[data-slot=sidebar-rail-item]').should(($cell) =>
+      expect(background($cell)).to.not.equal(transparent),
+    )
+
+    // A fill under a rounded image would show at its corners as a gray rim.
+    for (const active of [true, false]) {
+      cy.mount(SidebarRailItem, {
+        props: { label: 'Design', active },
+        slots: { default: () => h('img', { alt: '' }) },
+      })
+      cy.get('[data-slot=sidebar-rail-item]').should(($cell) =>
+        expect(background($cell)).to.equal(transparent),
+      )
+      cy.get('[data-slot=sidebar-rail-item-indicator]').should(
+        active ? 'exist' : 'not.exist',
+      )
+    }
+  })
+
   it('derives active state from the current route', () => {
     const router = createTestRouter()
     cy.wrap(router.push('/search'))
