@@ -49,8 +49,8 @@
   "scripts": {
     "test": "vitest --run",
     "test:coverage": "vitest --run --coverage",
-    "test:cypress": "cypress run --component",
-    "test:cypress:coverage": "cross-env COVERAGE=true cypress run --component && nyc report",
+    "test:cypress": "cypress run --component --browser chrome",
+    "test:cypress:coverage": "cross-env COVERAGE=true cypress run --component --browser chrome && nyc report",
     "coverage": "yarn test:coverage && yarn test:cypress:coverage && yarn coverage:merge",
     "coverage:merge": "tsx .github/scripts/merge-coverage.ts",
     "type-check": "vue-tsc --noEmit -p tsconfig.app.json && vue-tsc --noEmit -p tsconfig.node.json",

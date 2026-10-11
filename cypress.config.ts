@@ -21,6 +21,7 @@ export default defineConfig({
       // The preset wraps `hover:` in `@media (hover: hover) and (pointer: fine)`.
       // Headless Chrome reports no pointing device, so that query never matches
       // and no hover style applies. Report a mouse, as a desktop browser would.
+      // Electron takes no switches here, so the scripts and CI run Chrome.
       on('before:browser:launch', (browser, launchOptions) => {
         if (browser.family === 'chromium' && browser.name !== 'electron') {
           launchOptions.args.push(
