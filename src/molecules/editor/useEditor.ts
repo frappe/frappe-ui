@@ -102,6 +102,9 @@ export function useEditor(
     autofocus: options.autofocus,
     editorProps: {
       handleDOMEvents: {
+        // ProseMirror's dragstart runs even when read-only and overwrites the drag
+        // data; claiming the event (without preventDefault) keeps the browser's
+        // native payload, such as a link URL.
         dragstart: (view) => !view.editable,
       },
     },

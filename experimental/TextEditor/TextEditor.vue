@@ -128,6 +128,9 @@ const editorProps = computed(() => {
       class: normalizeClass(['prose', props.editorClass]),
     },
     handleDOMEvents: {
+      // ProseMirror's dragstart runs even when read-only and overwrites the drag
+      // data; claiming the event (without preventDefault) keeps the browser's
+      // native payload, such as a link URL.
       dragstart: (view: EditorView) => !view.editable,
     },
   }
