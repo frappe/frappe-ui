@@ -135,8 +135,8 @@ const cellClasses = computed(() => [
   // button (rounded-4 = 8px).
   props.variant === 'subtle' ? 'rounded-[7px]' : 'rounded-4',
   // A `subtle` item paints no fill under an image. Two anti-aliased curves
-  // never cover each other exactly, so a fill under a rounded image leaks out
-  // at its corners as a gray rim.
+  // never cover each other exactly, so a fill under a rounded image shows at
+  // its corners as a gray rim.
   props.variant === 'subtle'
     ? [
         resolvedActive.value ? 'bg-surface-gray-4' : 'bg-surface-gray-3',

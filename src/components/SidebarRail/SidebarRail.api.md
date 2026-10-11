@@ -65,7 +65,7 @@
   },
   {
     name: 'variant',
-    description: 'Visual treatment.\n- `subtle` (default): a filled cell with a left indicator bar when active —\n  for image/avatar items like communities or workspaces. The cell paints\n  no fill when its content holds an `<img>`.\n- `ghost`: transparent until hovered, a raised highlight when active — for\n  icon shortcuts like Search or Notifications.',
+    description: 'Visual treatment.\n- `subtle` (default): a filled cell with a left indicator bar when active —\n  for image/avatar items like communities or workspaces. The cell paints\n  no fill when its default slot holds an `<img>`.\n- `ghost`: transparent until hovered, a raised highlight when active — for\n  icon shortcuts like Search or Notifications.',
     required: false,
     type: '"subtle" | "ghost"',
     default: '"subtle"'
