@@ -3133,6 +3133,18 @@ action mode the divider still reads as a separator for assistive technologies.
 
 **What to do:** depend on `grid-layout-plus` directly.
 
+#### SplitButton: a main action with a menu beside it (additive) {#splitbutton}
+
+`SplitButton` joins a `Button` for the main action to a chevron that opens a
+`Dropdown` of other ways to do it, like Publish with "Publish to staging".
+Apps have been building this by hand, each with a different divider, chevron
+width and focus ring, and often without a name on the chevron. It takes
+Button's `label`, `iconLeft`, `variant`, `size`, `loading` and `disabled`, and
+Dropdown's `options`. `menuLabel` names the chevron.
+
+**What to do:** nothing. To replace a hand-built split button, see
+[SplitButton](/docs/components/splitbutton).
+
 ### Lists
 
 #### List — select-all follows items that change in place (fix)
