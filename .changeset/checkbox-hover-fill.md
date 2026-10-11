@@ -3,4 +3,4 @@
 ---
 
 Checkbox: a checked or indeterminate checkbox now lightens on hover and press,
-and no longer shows a shadow on hover (fix).
+and checkboxes no longer show a shadow on hover (fix).
