@@ -1,5 +1,7 @@
 # frappe-ui
 
+Ship tier: prod
+
 Read [`CONTEXT.md`](./CONTEXT.md) for the repo map and vocabulary, and
 [`PHILOSOPHY.md`](./PHILOSOPHY.md) for API design rules.
 
