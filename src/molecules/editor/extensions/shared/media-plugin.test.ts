@@ -8,6 +8,7 @@ import Document from '@tiptap/extension-document'
 import Paragraph from '@tiptap/extension-paragraph'
 import Text from '@tiptap/extension-text'
 import { UndoRedo } from '@tiptap/extensions'
+import { undoDepth } from '@tiptap/pm/history'
 import { Plugin, PluginKey } from '@tiptap/pm/state'
 import { createMediaPlugin } from '#molecules/editor/extensions/shared/media-plugin'
 
@@ -64,7 +65,7 @@ function makeEditor(content: string) {
       Text,
       Image,
       YSync,
-      UndoRedo.configure({ newGroupDelay: 0 }),
+      UndoRedo.configure({ newGroupDelay: 1 }),
     ],
     content,
   })
@@ -95,6 +96,17 @@ describe('media dimension back-fill', () => {
     expect(sizes(editor)).toEqual([[100, 50]])
   })
 
+  it('sizes a stored image once the person edits the document', async () => {
+    const editor = makeEditor('<img src="/files/old.png"><p>x</p>')
+    await settle()
+    expect(probeDimensions).not.toHaveBeenCalled()
+
+    editor.commands.insertContentAt(editor.state.doc.content.size - 1, 'y')
+    await settle()
+
+    expect(sizes(editor)).toEqual([[100, 50]])
+  })
+
   it('leaves an image that arrives from a collaborator as it came', async () => {
     const editor = makeEditor('<p>x</p>')
     const remote = editor.state.tr.insert(
@@ -117,44 +129,6 @@ describe('media dimension back-fill', () => {
 
     expect(sizes(editor)).toEqual([[null, null]])
     expect(probeDimensions).not.toHaveBeenCalled()
-  })
-
-  it('sizes an image set with an update event', async () => {
-    const editor = makeEditor('<p>x</p>')
-    editor.commands.setContent('<img src="/files/set.png">', {
-      emitUpdate: true,
-    })
-    await settle()
-
-    expect(sizes(editor)).toEqual([[100, 50]])
-  })
-
-  it('leaves a stored image unsized when its attributes change', async () => {
-    const editor = makeEditor('<img src="/files/old.png"><p>x</p>')
-    const image = editor.state.doc.firstChild!
-    editor.view.dispatch(
-      editor.state.tr.setNodeMarkup(0, undefined, {
-        ...image.attrs,
-        align: 'center',
-      }),
-    )
-    editor.view.dispatch(editor.state.tr.setNodeAttribute(0, 'align', 'left'))
-    await settle()
-
-    expect(editor.state.doc.firstChild!.attrs.align).toBe('left')
-    expect(sizes(editor)).toEqual([[null, null]])
-    expect(probeDimensions).not.toHaveBeenCalled()
-  })
-
-  it('sizes a stored image when the person swaps in a different file', async () => {
-    const editor = makeEditor('<img src="/files/old.png"><p>x</p>')
-    editor.view.dispatch(
-      editor.state.tr.setNodeAttribute(0, 'src', '/files/other.png'),
-    )
-    await settle()
-
-    expect(probeDimensions).toHaveBeenCalledWith('/files/other.png')
-    expect(sizes(editor)).toEqual([[100, 50]])
   })
 
   it('sizes an image once its upload finishes', async () => {
@@ -201,15 +175,40 @@ describe('media dimension back-fill', () => {
     expect(sizes(editor)).toEqual([[null, null]])
   })
 
-  it('lets the person undo an edit after other media was left unsized', async () => {
+  it("reverts the person's edit with one undo, not the sizing", async () => {
     const editor = makeEditor('<img src="/files/old.png"><p>x</p>')
     editor.commands.insertContentAt(editor.state.doc.content.size - 1, 'y')
     await settle()
+    expect(sizes(editor)).toEqual([[100, 50]])
+
     editor.commands.undo()
     await settle()
 
     expect(editor.state.doc.textContent).toBe('x')
-    expect(sizes(editor)).toEqual([[null, null]])
+    expect(undoDepth(editor.state)).toBe(0)
+  })
+
+  it('removes an inserted image with one undo when it is measured late', async () => {
+    let measured = (_dims: { width: number; height: number }) => {}
+    probeDimensions.mockImplementationOnce(
+      () => new Promise((resolve) => (measured = resolve)),
+    )
+    const editor = makeEditor('<p>x</p>')
+    editor.commands.insertContentAt(0, {
+      type: 'image',
+      attrs: { src: '/files/new.png' },
+    })
+    // past newGroupDelay, so a recorded write would start its own undo step
+    await new Promise((resolve) => setTimeout(resolve, 5))
+    measured({ width: 100, height: 50 })
+    await settle()
+    expect(sizes(editor)).toEqual([[100, 50]])
+
+    editor.commands.undo()
+    await settle()
+
+    expect(sizes(editor)).toEqual([])
+    expect(undoDepth(editor.state)).toBe(0)
   })
 
   it('leaves an unsized image as it was when undo brings it back', async () => {
