@@ -134,10 +134,14 @@ const cellClasses = computed(() => [
   // `subtle` uses the community-tile radius; `ghost` mirrors frappe-ui's icon
   // button (rounded-4 = 8px).
   props.variant === 'subtle' ? 'rounded-[7px]' : 'rounded-4',
+  // A `subtle` item paints no fill under an image. Two anti-aliased curves
+  // never cover each other exactly, so a fill under a rounded image leaks out
+  // at its corners as a gray rim.
   props.variant === 'subtle'
-    ? resolvedActive.value
-      ? 'bg-surface-gray-4'
-      : 'bg-surface-gray-3'
+    ? [
+        resolvedActive.value ? 'bg-surface-gray-4' : 'bg-surface-gray-3',
+        'has-[img]:bg-transparent',
+      ]
     : resolvedActive.value
       ? 'text-ink-gray-8 !bg-surface-elevation-3 shadow-sm'
       : 'text-ink-gray-8 bg-transparent hover:bg-surface-gray-3',
