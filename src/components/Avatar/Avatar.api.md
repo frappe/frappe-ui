@@ -37,6 +37,13 @@
     required: false,
     type: 'AvatarTheme',
     default: '"gray"'
+  },
+  {
+    name: 'decorative',
+    description: 'Hides the avatar from screen readers. Set it when the person\'s name is\nalready visible next to the avatar, so the name isn\'t read twice.',
+    required: false,
+    type: 'boolean',
+    default: 'false'
   }
 ]
 

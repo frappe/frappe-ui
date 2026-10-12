@@ -43,6 +43,21 @@ describe('Breadcrumbs', () => {
     cy.get('[role=menuitem]').should('have.length', items.length - 2)
   })
 
+  it('Follows an href-only item from the overflow menu', () => {
+    // Hash links, so following one doesn't navigate the test page away.
+    const hrefItems = [
+      { label: 'Home', href: '#home' },
+      { label: 'Library', href: '#library' },
+      { label: 'Data', href: '#data' },
+      { label: 'Users', href: '#users' },
+    ]
+    cy.mount(Breadcrumbs, { props: { items: hrefItems, class: 'w-3' } })
+
+    cy.get('[aria-haspopup=menu]').click()
+    cy.get('[role=menuitem]').contains('Library').click()
+    cy.location('hash').should('eq', '#library')
+  })
+
   describe('Item with both href and onClick', () => {
     // reports what the component left on the event, see mountLinkItem()
     const report = { defaultPrevented: (_prevented: boolean) => {} }

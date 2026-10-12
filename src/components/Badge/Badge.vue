@@ -1,24 +1,29 @@
+<!-- Spans, not divs: a badge often sits inside running text, a heading or a
+     table cell, where a <div> is invalid HTML. The label has its own span so a
+     `max-w-*` class on the badge truncates it with an ellipsis. -->
 <template>
-  <div
+  <span
     class="inline-flex select-none items-center gap-1 overflow-clip rounded-full leading-tighter whitespace-nowrap"
     :class="classes"
   >
-    <div
+    <span
       v-if="$slots.prefix"
       class="inline-flex shrink-0 items-center justify-center"
       :class="iconSize"
     >
       <slot name="prefix"></slot>
-    </div>
-    <slot>{{ props.label?.toString() }}</slot>
-    <div
+    </span>
+    <span class="min-w-0 truncate"
+      ><slot>{{ props.label?.toString() }}</slot></span
+    >
+    <span
       v-if="$slots.suffix"
       class="inline-flex shrink-0 items-center justify-center"
       :class="iconSize"
     >
       <slot name="suffix"></slot>
-    </div>
-  </div>
+    </span>
+  </span>
 </template>
 
 <script lang="ts" setup>

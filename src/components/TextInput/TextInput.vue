@@ -84,6 +84,7 @@ import InputError from '../InputLabeling/InputError.vue'
 import LabelingWrapper from '../InputLabeling/LabelingWrapper.vue'
 import type { InputSize } from '../../composables/inputTypes'
 import type { TextInputEmits, TextInputExposed, TextInputProps } from './types'
+import { withInvalidBorder } from '../../utils/invalidBorder'
 
 defineOptions({
   inheritAttrs: false,
@@ -251,7 +252,9 @@ const inputClasses = computed(() => {
   return [
     sizeClasses,
     paddingClasses,
-    variantClasses,
+    typeof variantClasses === 'string'
+      ? withInvalidBorder(variantClasses, hasError.value)
+      : variantClasses,
     textColor.value,
     'leading-tighter transition-colors w-full dark:[color-scheme:dark]',
   ]
