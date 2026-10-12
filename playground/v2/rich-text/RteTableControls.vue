@@ -1578,13 +1578,15 @@ const px = (n: number) => `${n}px`
 </template>
 
 <style>
-/* a handle: the file's knob (32925:95940) — a 12×1 gray-500 line in a
-   2px white notch, on the edge's line (the file draws a 3×14 pill under
-   a 2px white stroke, which comes to the same). Hovered or open it is
-   the file's grip (32926:97027): a 10×20 (20×10 for a column) gray-500
-   pill on 4px corners with three 3px white dots 5px apart — drawn flat,
-   without the file's shadows. The pill is pinned so the handle placed
-   4px (or 6px) off a 1px line puts it exactly on that line */
+/* a handle: the file's knob (32925:95940) — a 3×14 gray-500 pill on
+   full corners under a 2px white stroke, straddling the edge's line: the
+   line runs through its middle, so it reads as a mark on the rule at any
+   zoom, where a 1px mark laid over the 1px rule from this layer would
+   round a device pixel off it. Hovered or open it is the file's grip
+   (32926:97027): a 10×20 (20×10 for a column) gray-500 pill on 4px
+   corners with three 3px white dots 5px apart — drawn flat, without the
+   file's shadows. The handle is placed 4px (or 6px) off a 1px line, so
+   inside its own 1px border the line's middle is 3.5px (5.5px) in */
 .rte-tc-handle {
   @apply pointer-events-auto fixed flex items-center justify-center rounded-[4px] border border-transparent transition-colors;
   overflow: visible;
@@ -1658,25 +1660,25 @@ body.rte-tc-dragging .rte-tc-handle {
 .rte-tc-pill {
   position: absolute;
   display: block;
-  border-radius: 4px;
+  border-radius: 9999px;
   background-color: var(--ink-gray-5);
   box-shadow: 0 0 0 2px var(--surface-elevation-2);
 }
-/* placed inside the handle's 1px transparent border: 3px in is 4px off
-   the handle's outer edge, which the handle puts on the table's rule — so
-   the pill lies on that line and its white notch over it, rather than a
-   pixel inside the table under a notch cut out of the rule */
 .rte-tc-handle.is-row .rte-tc-pill {
-  left: 3px;
-  top: 3px;
-  width: 1px;
-  height: 12px;
+  left: 2px;
+  top: 2px;
+  width: 3px;
+  height: 14px;
 }
 .rte-tc-handle.is-col .rte-tc-pill {
+  left: 2px;
+  top: 2px;
+  width: 14px;
+  height: 3px;
+}
+/* the cell's handle stands 6px off its ring's line, a pixel further in */
+.rte-tc-handle.is-row.is-cell .rte-tc-pill {
   left: 3px;
-  top: 3px;
-  width: 12px;
-  height: 1px;
 }
 .rte-tc-dots {
   position: absolute;
