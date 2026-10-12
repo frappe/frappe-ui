@@ -20,6 +20,9 @@ function frappeuiPlugin(options = {}) {
   const barrelImportsOpt = options.barrelImports ?? true
   const codeLanguagesOpt = options.codeLanguages ?? true
 
+  // Resolve `../…/sites/<file>` imports in the bench when they do not resolve
+  // in place, as for an app linked into apps/ from another folder.
+  plugins.push(benchFiles())
   if (codeLanguagesOpt) {
     // Stub the `@codemirror/lang-*` packages this app did not install, so
     // `frappe-ui/code-editor` builds with the languages it renders and no more.
@@ -38,7 +41,6 @@ function frappeuiPlugin(options = {}) {
   const jinjaBootDataOpt = options.jinjaBootData ?? true
   const buildConfigOpt = options.buildConfig ?? true
 
-  plugins.push(benchFiles())
   if (lucideIconsOpt) {
     plugins.push(lucideIcons(lucideIconsOpt))
   }

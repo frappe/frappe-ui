@@ -26,11 +26,11 @@ const warnedBenchPaths = new Set()
 
 export function findBenchPath() {
   let currentDir = path.resolve('.')
-  while (currentDir !== '/') {
+  while (currentDir !== path.dirname(currentDir)) {
     if (isBench(currentDir)) {
       return currentDir
     }
-    currentDir = path.resolve(currentDir, '..')
+    currentDir = path.dirname(currentDir)
   }
 
   // An app linked into apps/ from elsewhere has no bench above it. Tools that
@@ -65,7 +65,7 @@ export function findAppName() {
 
   // Walk up from cwd until we find a directory whose parent is the apps folder
   let currentDir = path.resolve('.')
-  while (currentDir !== '/') {
+  while (currentDir !== path.dirname(currentDir)) {
     const parent = path.dirname(currentDir)
     if (path.resolve(parent) === path.resolve(appsFolder)) {
       return path.basename(currentDir)
