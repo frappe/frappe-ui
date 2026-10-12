@@ -1,8 +1,13 @@
 <template>
   <div
     data-slot="mobile-shell"
-    class="fixed inset-0 flex touch-none flex-col overflow-hidden"
+    class="fixed inset-0 flex touch-none flex-col overflow-hidden [@media(display-mode:standalone)]:h-[100lvh]"
   >
+    <!-- In an installed PWA the shell takes its height from 100lvh, not the
+         viewport. iOS 26 sizes the viewport short by the status bar height, which
+         left a strip of page background under the tab bar (WebKit bug 301108).
+         Elsewhere 100lvh is the full screen in standalone mode. -->
+
     <!-- Pages teleport their headers here. Extra top padding clears the notch /
          status bar when running as an installed PWA (display-mode: standalone). -->
     <PageHeaderTarget

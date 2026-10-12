@@ -48,7 +48,8 @@ shell.
 
 The content area uses the browser's native scrolling, with momentum and
 overscroll. The header and the tab bar stay fixed to the edges. In an installed
-PWA, the header gets extra top padding to clear the status bar.
+PWA, the header gets extra top padding to clear the status bar, and the tab bar
+gets bottom padding to clear the home indicator.
 
 ### Desktop is a separate component
 
