@@ -1,5 +1,7 @@
 import { defineComponent, h, inject } from 'vue'
 import MobileShell from './MobileShell.vue'
+import MobileNav from '../MobileNav/MobileNav.vue'
+import MobileNavItem from '../MobileNav/MobileNavItem.vue'
 import PageHeader from '../PageHeader/PageHeader.vue'
 import { pageHeaderTargetKey } from '../PageHeader/target'
 import {
@@ -16,7 +18,10 @@ describe('<MobileShell />', () => {
       },
     })
     cy.get('[data-slot=mobile-shell]').should('exist')
-    cy.get('[data-slot=mobile-shell-scroll]').should('contain.text', 'page body')
+    cy.get('[data-slot=mobile-shell-scroll]').should(
+      'contain.text',
+      'page body',
+    )
     cy.get('[data-test=nav]').should('contain.text', 'tab bar')
   })
 
@@ -25,6 +30,108 @@ describe('<MobileShell />', () => {
     cy.get('[data-slot=mobile-shell-scroll]').should('exist')
     cy.then(() => {
       expect(shellScrollContainer.value).to.not.be.null
+    })
+  })
+
+  describe('in an installed PWA', () => {
+    let restoreStandaloneMedia: (() => void) | undefined
+
+    afterEach(() => {
+      restoreStandaloneMedia?.()
+      restoreStandaloneMedia = undefined
+      cy.then(() =>
+        Cypress.automation('remote:debugger:protocol', {
+          command: 'Emulation.setSafeAreaInsetsOverride',
+          params: { insets: {} },
+        }),
+      )
+    })
+
+    function mountNavigation() {
+      cy.mount(MobileShell, {
+        slots: {
+          default: () => h('div', 'page body'),
+          nav: () =>
+            h(MobileNav, null, {
+              default: () => [
+                h(MobileNavItem, { label: 'Home', icon: 'lucide-house' }),
+                h(MobileNavItem, { label: 'Search', icon: 'lucide-search' }),
+              ],
+            }),
+        },
+      })
+    }
+
+    function setSafeAreaInsets(top: number, bottom: number) {
+      cy.then(() =>
+        Cypress.automation('remote:debugger:protocol', {
+          command: 'Emulation.setSafeAreaInsetsOverride',
+          params: { insets: { top, bottom } },
+        }),
+      )
+    }
+
+    function enableStandaloneMedia(doc: Document) {
+      // Chrome cannot emulate standalone display mode, so enable its media rules here.
+      const changed: { media: MediaList; original: string }[] = []
+      for (const sheet of Array.from(doc.styleSheets)) {
+        try {
+          for (const rule of Array.from(sheet.cssRules)) {
+            const media = (rule as CSSMediaRule).media
+            if (media && /display-mode:\s*standalone/.test(media.mediaText)) {
+              changed.push({ media, original: media.mediaText })
+              media.mediaText = 'all'
+            }
+          }
+        } catch {
+          // Cross-origin stylesheets do not expose their rules.
+        }
+      }
+      expect(changed.length, 'standalone media rules').to.be.greaterThan(0)
+      return () =>
+        changed.forEach(({ media, original }) => (media.mediaText = original))
+    }
+
+    it('clears the home indicator and reaches the bottom edge on iPhone', () => {
+      setSafeAreaInsets(59, 34)
+      mountNavigation()
+      cy.document().then((doc) => {
+        restoreStandaloneMedia = enableStandaloneMedia(doc)
+      })
+      cy.get('[data-slot=mobile-nav]').should(($nav) => {
+        const nav = $nav[0]
+        const win = nav.ownerDocument.defaultView!
+        expect(win.getComputedStyle(nav).paddingBottom).to.equal('34px')
+        expect(nav.getBoundingClientRect().bottom).to.be.closeTo(
+          win.innerHeight,
+          0.5,
+        )
+      })
+    })
+
+    it('keeps one rem of bottom padding when there is no inset', () => {
+      setSafeAreaInsets(0, 0)
+      mountNavigation()
+      cy.document().then((doc) => {
+        restoreStandaloneMedia = enableStandaloneMedia(doc)
+      })
+      cy.get('[data-slot=mobile-nav]').should(($nav) => {
+        const nav = $nav[0]
+        expect(
+          nav.ownerDocument.defaultView!.getComputedStyle(nav).paddingBottom,
+        ).to.equal('16px')
+      })
+    })
+
+    it('leaves the nav unpadded in a browser tab', () => {
+      setSafeAreaInsets(59, 34)
+      mountNavigation()
+      cy.get('[data-slot=mobile-nav]').should(($nav) => {
+        const nav = $nav[0]
+        expect(
+          nav.ownerDocument.defaultView!.getComputedStyle(nav).paddingBottom,
+        ).to.equal('0px')
+      })
     })
   })
 
