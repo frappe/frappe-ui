@@ -1664,21 +1664,29 @@ body.rte-tc-dragging .rte-tc-handle {
   background-color: var(--ink-gray-5);
   box-shadow: 0 0 0 2px var(--surface-elevation-2);
 }
+/* on the table's edge the dash is a length of the edge itself: its 1px
+   gray-100 rule, on the rule's own pixel (3px into the handle's padding
+   box), parted from the rest of the line only by the gaps either side */
 .rte-tc-handle.is-row .rte-tc-pill {
-  left: 2px;
+  left: 3px;
   top: 2px;
-  width: 3px;
+  width: 1px;
   height: 14px;
+  background-color: var(--outline-gray-1);
 }
 .rte-tc-handle.is-col .rte-tc-pill {
   left: 2px;
-  top: 2px;
+  top: 3px;
   width: 14px;
-  height: 3px;
+  height: 1px;
+  background-color: var(--outline-gray-1);
 }
-/* the cell's handle stands 6px off its ring's line, a pixel further in */
+/* the cell's handle rides the selection's ring, 6px off its line: there
+   it stays the gray-500 pill, astride the ring */
 .rte-tc-handle.is-row.is-cell .rte-tc-pill {
   left: 3px;
+  width: 3px;
+  background-color: var(--ink-gray-5);
 }
 .rte-tc-dots {
   position: absolute;
