@@ -1662,15 +1662,19 @@ body.rte-tc-dragging .rte-tc-handle {
   background-color: var(--ink-gray-5);
   box-shadow: 0 0 0 2px var(--surface-elevation-2);
 }
+/* placed inside the handle's 1px transparent border: 3px in is 4px off
+   the handle's outer edge, which the handle puts on the table's rule — so
+   the pill lies on that line and its white notch over it, rather than a
+   pixel inside the table under a notch cut out of the rule */
 .rte-tc-handle.is-row .rte-tc-pill {
-  left: 4px;
+  left: 3px;
   top: 3px;
   width: 1px;
   height: 12px;
 }
 .rte-tc-handle.is-col .rte-tc-pill {
   left: 3px;
-  top: 4px;
+  top: 3px;
   width: 12px;
   height: 1px;
 }
