@@ -76,8 +76,7 @@ export function findAppName() {
   return findLinkedAppName(appsFolder)
 }
 
-// Matches apps by real path, so an app symlinked into apps/ from elsewhere is
-// found too.
+// Finds an app symlinked into apps/ from another folder by comparing real paths.
 function findLinkedAppName(appsFolder) {
   let names
   try {
