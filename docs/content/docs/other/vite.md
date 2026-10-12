@@ -273,3 +273,22 @@ frappeui({
   },
 })
 ```
+
+## Finding the bench
+
+The proxy port, the build paths, and type generation read the bench. The plugin
+finds it by walking up from the app's folder to the folder that holds `apps/`
+and `sites/`.
+
+An app can also live outside the bench, with a symlink in `apps/` that points to
+it. Walking up from its real folder never reaches the bench. When walking up
+finds no bench, the plugin uses the folder in `FRAPPE_BENCH_PATH`. Pilot sets it
+for `pilot dev`.
+
+```bash
+FRAPPE_BENCH_PATH=~/benches/dev-gameplan yarn build
+```
+
+The plugin then finds your app through its link in `apps/`, so `buildConfig` and
+the site banner work as usual. Relative imports into the bench, such as
+`'../../../../sites/common_site_config.json'`, also resolve.

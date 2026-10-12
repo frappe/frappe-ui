@@ -22,16 +22,28 @@ export function getCommonSiteConfig() {
   return null
 }
 
+const warnedBenchPaths = new Set()
+
 export function findBenchPath() {
   let currentDir = path.resolve('.')
-  while (currentDir !== '/') {
-    if (
-      fs.existsSync(path.join(currentDir, 'sites')) &&
-      fs.existsSync(path.join(currentDir, 'apps'))
-    ) {
+  while (currentDir !== path.dirname(currentDir)) {
+    if (isBench(currentDir)) {
       return currentDir
     }
-    currentDir = path.resolve(currentDir, '..')
+    currentDir = path.dirname(currentDir)
+  }
+
+  // An app linked into apps/ from elsewhere has no bench above it. Tools that
+  // link it, such as `pilot dev`, set FRAPPE_BENCH_PATH to the bench.
+  if (process.env.FRAPPE_BENCH_PATH) {
+    const benchPath = path.resolve(process.env.FRAPPE_BENCH_PATH)
+    if (!isBench(benchPath) && !warnedBenchPaths.has(benchPath)) {
+      warnedBenchPaths.add(benchPath)
+      console.warn(
+        `FRAPPE_BENCH_PATH is ${benchPath}, which has no apps/ and sites/ folders`,
+      )
+    }
+    return benchPath
   }
   return null
 }
@@ -53,7 +65,7 @@ export function findAppName() {
 
   // Walk up from cwd until we find a directory whose parent is the apps folder
   let currentDir = path.resolve('.')
-  while (currentDir !== '/') {
+  while (currentDir !== path.dirname(currentDir)) {
     const parent = path.dirname(currentDir)
     if (path.resolve(parent) === path.resolve(appsFolder)) {
       return path.basename(currentDir)
@@ -61,7 +73,45 @@ export function findAppName() {
     currentDir = parent
   }
 
+  return findLinkedAppName(appsFolder)
+}
+
+// Finds an app symlinked into apps/ from another folder by comparing real paths.
+function findLinkedAppName(appsFolder) {
+  let names
+  try {
+    names = fs.readdirSync(appsFolder)
+  } catch {
+    return null
+  }
+
+  const apps = new Map(
+    names.map((name) => [realPath(path.join(appsFolder, name)), name]),
+  )
+  let currentDir = realPath(path.resolve('.'))
+  while (currentDir !== path.dirname(currentDir)) {
+    if (apps.has(currentDir)) {
+      return apps.get(currentDir)
+    }
+    currentDir = path.dirname(currentDir)
+  }
+
   return null
+}
+
+function isBench(dir) {
+  return (
+    fs.existsSync(path.join(dir, 'sites')) &&
+    fs.existsSync(path.join(dir, 'apps'))
+  )
+}
+
+function realPath(filePath) {
+  try {
+    return fs.realpathSync(filePath)
+  } catch {
+    return filePath
+  }
 }
 
 export async function getInstalledAppSites(appName) {
