@@ -22,25 +22,28 @@ export function getCommonSiteConfig() {
   return null
 }
 
-export function findBenchPath() {
-  // Set by a bench manager when the app lives outside the bench and is linked
-  // into apps/, so no bench folder sits above it (for example `pilot dev`).
-  if (process.env.FRAPPE_BENCH_PATH) {
-    const benchPath = path.resolve(process.env.FRAPPE_BENCH_PATH)
-    if (!isBench(benchPath)) {
-      console.warn(
-        `FRAPPE_BENCH_PATH is ${benchPath}, which has no apps/ and sites/ folders`,
-      )
-    }
-    return benchPath
-  }
+const warnedBenchPaths = new Set()
 
+export function findBenchPath() {
   let currentDir = path.resolve('.')
   while (currentDir !== '/') {
     if (isBench(currentDir)) {
       return currentDir
     }
     currentDir = path.resolve(currentDir, '..')
+  }
+
+  // An app linked into apps/ from elsewhere has no bench above it. Tools that
+  // link it, such as `pilot dev`, set FRAPPE_BENCH_PATH to the bench.
+  if (process.env.FRAPPE_BENCH_PATH) {
+    const benchPath = path.resolve(process.env.FRAPPE_BENCH_PATH)
+    if (!isBench(benchPath) && !warnedBenchPaths.has(benchPath)) {
+      warnedBenchPaths.add(benchPath)
+      console.warn(
+        `FRAPPE_BENCH_PATH is ${benchPath}, which has no apps/ and sites/ folders`,
+      )
+    }
+    return benchPath
   }
   return null
 }
@@ -60,12 +63,31 @@ export function findAppName() {
     return null
   }
 
-  // Walk up from cwd until we reach an app in the apps folder. Apps are matched
-  // by real path, so an app symlinked into apps/ from elsewhere is found too.
+  // Walk up from cwd until we find a directory whose parent is the apps folder
+  let currentDir = path.resolve('.')
+  while (currentDir !== '/') {
+    const parent = path.dirname(currentDir)
+    if (path.resolve(parent) === path.resolve(appsFolder)) {
+      return path.basename(currentDir)
+    }
+    currentDir = parent
+  }
+
+  return findLinkedAppName(appsFolder)
+}
+
+// Matches apps by real path, so an app symlinked into apps/ from elsewhere is
+// found too.
+function findLinkedAppName(appsFolder) {
+  let names
+  try {
+    names = fs.readdirSync(appsFolder)
+  } catch {
+    return null
+  }
+
   const apps = new Map(
-    fs
-      .readdirSync(appsFolder)
-      .map((name) => [realPath(path.join(appsFolder, name)), name]),
+    names.map((name) => [realPath(path.join(appsFolder, name)), name]),
   )
   let currentDir = realPath(path.resolve('.'))
   while (currentDir !== path.dirname(currentDir)) {

@@ -55,6 +55,28 @@ describe('bench lookup', () => {
     expect(findAppName()).toBe('gameplan')
   })
 
+  it('prefers the bench above the app to FRAPPE_BENCH_PATH', () => {
+    mkdirSync(join(root, 'other-bench', 'apps', 'helpdesk'), {
+      recursive: true,
+    })
+    mkdirSync(join(root, 'other-bench', 'sites'))
+    vi.stubEnv('FRAPPE_BENCH_PATH', join(root, 'other-bench'))
+    runIn(join(root, 'bench', 'apps', 'helpdesk', 'frontend'))
+
+    expect(findBenchPath()).toBe(join(root, 'bench'))
+    expect(findAppName()).toBe('helpdesk')
+  })
+
+  it('warns once and finds no app when FRAPPE_BENCH_PATH is not a bench', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    vi.stubEnv('FRAPPE_BENCH_PATH', join(root, 'projects'))
+    runIn(join(root, 'projects', 'gameplan', 'frontend'))
+
+    expect(findBenchPath()).toBe(join(root, 'projects'))
+    expect(findAppName()).toBeNull()
+    expect(warn).toHaveBeenCalledTimes(1)
+  })
+
   it('finds nothing outside a bench', () => {
     runIn(join(root, 'projects', 'gameplan', 'frontend'))
 
