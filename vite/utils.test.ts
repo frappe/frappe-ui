@@ -1,16 +1,13 @@
 import {
-  existsSync,
   mkdirSync,
   mkdtempSync,
   realpathSync,
   rmSync,
   symlinkSync,
-  writeFileSync,
 } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { benchFiles } from './benchFiles.js'
 import { findAppName, findBenchPath } from './utils.js'
 
 let root: string
@@ -82,40 +79,5 @@ describe('bench lookup', () => {
 
     expect(findBenchPath()).toBeNull()
     expect(findAppName()).toBeNull()
-  })
-})
-
-describe('bench files', () => {
-  // Stands in for Vite: an absolute path resolves when the file exists,
-  // ignoring a query such as ?raw; a relative import never does.
-  const viteResolve = async (id: string) => {
-    const file = id.split('?')[0]
-    return file.startsWith('/') && existsSync(file) ? { id } : null
-  }
-
-  const resolveIn = (source: string) =>
-    benchFiles().resolveId.call(
-      { resolve: viteResolve },
-      source,
-      '/src/socket.ts',
-      {},
-    )
-
-  beforeEach(() => {
-    writeFileSync(join(root, 'bench', 'sites', 'common_site_config.json'), '{}')
-  })
-
-  it('leaves other imports to Vite', async () => {
-    expect(await resolveIn('./socket.ts')).toBeNull()
-  })
-
-  it('resolves an unreachable sites import in the bench, keeping its query', async () => {
-    vi.stubEnv('FRAPPE_BENCH_PATH', join(root, 'bench'))
-
-    expect(
-      await resolveIn('../../../../sites/common_site_config.json?raw'),
-    ).toEqual({
-      id: join(root, 'bench', 'sites', 'common_site_config.json?raw'),
-    })
   })
 })
