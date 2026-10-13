@@ -6,6 +6,7 @@ const people = [
   { label: 'Asar Khan' },
   { label: 'Sarah Connor' },
   { label: 'Emily Chen' },
+  { label: 'Sar' },
 ]
 
 describe('rankByQuery', () => {
@@ -15,8 +16,9 @@ describe('rankByQuery', () => {
     )
   })
 
-  it('puts values that start with the query first, then word starts', () => {
+  it('orders exact match, then prefix, then word start, then the rest', () => {
     expect(rankByQuery(people, 'sar', 'label').map((p) => p.label)).toEqual([
+      'Sar',
       'Sarah Connor',
       'Ritvik Sardana',
       'Asar Khan',
