@@ -210,8 +210,9 @@ const isDismissible = computed(() => props.dismissible !== false)
 
 // the editor's suggestion menus (@mention, /, #, :) live on <body>; picking from one isn't leaving the dialog
 function isEditorFloating(e: Event) {
-  const target = e.target
-  return target instanceof Element && !!target.closest('[data-editor-floating]')
+  return (
+    e.target instanceof Element && !!e.target.closest('[data-editor-floating]')
+  )
 }
 
 const sizeClass = computed(() => {
