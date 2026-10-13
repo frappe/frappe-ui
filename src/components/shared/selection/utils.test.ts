@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   inputFontSizeClasses,
+  rankByLabel,
   itemRootSizeClasses,
   readGroupOptions,
   toItemListSize,
@@ -89,5 +90,20 @@ describe('selection size maps', () => {
   it('hands ItemListRow a resolved size, not the raw one', () => {
     vi.spyOn(console, 'warn').mockImplementation(() => {})
     expect(toItemListSize('xl' as never)).toBe('sm')
+  })
+})
+
+describe('rankByLabel', () => {
+  const rank = (label: string, query: string) => rankByLabel({ label }, query)
+
+  it('puts an exact label first, then prefix, then word start, then the rest', () => {
+    expect(rank('App', 'app')).toBe(0)
+    expect(rank('Approximate No. of SKUs', 'app')).toBe(1)
+    expect(rank('Mobile app', 'app')).toBe(2)
+    expect(rank('Frappe HR', 'app')).toBe(3)
+  })
+
+  it('ignores case', () => {
+    expect(rank('Sarah Connor', 'SAR')).toBe(1)
   })
 })

@@ -37,6 +37,8 @@ export function useFilteredGroups<
   hasTypedSinceOpen: Ref<boolean>
   query: Ref<string>
   matches: (item: TItem, query: string) => boolean
+  /** Orders matches while typing, lower first; `null` keeps an item where it is. */
+  rank?: (item: TItem, query: string) => number | null
   alwaysMatch?: (item: TItem) => boolean
   /** Client-side query filtering. Defaults to `true`. */
   filterable?: MaybeRefOrGetter<boolean>
@@ -48,14 +50,40 @@ export function useFilteredGroups<
       filterable && source.open.value && source.hasTypedSinceOpen.value
 
     return source.groups.value
-      .map((group) => ({
-        ...group,
-        options: group.options.filter((item) => {
+      .map((group) => {
+        const options = group.options.filter((item) => {
           if (!alwaysMatch(item)) return false
           if (!filterByTypedQuery) return true
           return source.matches(item, source.query.value)
-        }),
-      }))
+        })
+        return {
+          ...group,
+          options:
+            filterByTypedQuery && source.rank
+              ? rankOptions(options, source.rank, source.query.value)
+              : options,
+        }
+      })
       .filter((group) => group.options.length > 0) as TGroup[]
   })
+}
+
+// sort the rankable items among themselves; unranked items (rank `null`) keep their slot
+function rankOptions<TItem>(
+  options: TItem[],
+  rank: (item: TItem, query: string) => number | null,
+  query: string,
+): TItem[] {
+  const ranks = options.map((item) => rank(item, query))
+  const ranked = options
+    .map((item, index) => ({ item, index, rank: ranks[index] }))
+    .filter(
+      (entry): entry is { item: TItem; index: number; rank: number } =>
+        entry.rank !== null,
+    )
+    .sort((a, b) => a.rank - b.rank || a.index - b.index)
+  let next = 0
+  return options.map((item, index) =>
+    ranks[index] === null ? item : ranked[next++].item,
+  )
 }

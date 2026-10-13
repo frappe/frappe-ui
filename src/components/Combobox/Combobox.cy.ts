@@ -252,6 +252,27 @@ describe('Combobox', () => {
         .and('contain.text', 'Design')
     })
 
+    it('lists the best matches first while typing', () => {
+      cy.mount(Combobox, {
+        props: {
+          open: true,
+          options: [
+            { label: 'Approximate No. of SKUs', value: 'skus' },
+            { label: 'Frappe HR', value: 'hrms' },
+            { label: 'App', value: 'app' },
+          ],
+        },
+      })
+      cy.get('[role="combobox"]').type('app')
+      cy.get('[role="option"]').then((options) => {
+        expect([...options].map((o) => o.innerText.trim())).to.deep.equal([
+          'App',
+          'Approximate No. of SKUs',
+          'Frappe HR',
+        ])
+      })
+    })
+
     it('accepts an external `query` (v-model:query)', () => {
       cy.mount(Combobox, {
         props: { open: true, options: fruits, query: 'ma' },

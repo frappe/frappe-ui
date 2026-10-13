@@ -138,6 +138,17 @@ export function matchesByLabelOrValue(
   )
 }
 
+/** How well a label matches the query, lower is better: exact, prefix, word start, then any other match. */
+export function rankByLabel(item: { label: string }, query: string): number {
+  const label = item.label.toLowerCase()
+  const normalizedQuery = query.toLowerCase()
+  if (!normalizedQuery || label === normalizedQuery) return 0
+  if (label.startsWith(normalizedQuery)) return 1
+  if (label.split(/[\s._-]+/).some((word) => word.startsWith(normalizedQuery)))
+    return 2
+  return 3
+}
+
 /**
  * Read a grouped option's children.
  *
