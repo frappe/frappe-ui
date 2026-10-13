@@ -1272,11 +1272,12 @@ function dayBand(label: string) {
   no space while they are still counted.
 */
 /*
-  A bar across days (a leave) has no accent line, so its title would start
-  4 in where an event's starts 12 in (2 for the line, then the gap). 8 more at
-  its start lines the two titles up on one edge (the user's call 2026-10-13).
+  A card with no accent line — a bar across days, an all-day event — would
+  start its title 4 in where an event's starts 12 in (2 for the line, then the
+  gap). 8 more at its start lines the titles up on one edge, in every view
+  (the user's call 2026-10-13).
 */
-:deep([data-week-row] > .absolute.event > div:first-child) {
+:deep(.event:not(:has(.event-border)) .relative.flex.h-full.min-w-0) {
   padding-left: 8px;
 }
 :deep([data-week-row] > div > .flex.flex-col.pb-1\.5) {
