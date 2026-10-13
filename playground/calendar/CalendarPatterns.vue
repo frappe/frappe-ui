@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
-import { Button, DatePicker, TabButtons, providePortalTarget } from '../../src'
+import { Button, Popover, TabButtons, providePortalTarget } from '../../src'
+import DatePickerPreview from '../date-picker/DatePickerPreview.vue'
 // The narrow path, not the `experimental` barrel: that one also pulls in
 // the editor and the charts, which drags tiptap and echarts into the page.
 import { Calendar } from '../../experimental/Calendar'
@@ -22,7 +23,6 @@ import {
   espressoAgendaPlain,
   espressoCalendar,
   espressoCardCopy,
-  espressoDatePicker,
   espressoMenuHeight,
   espressoGreyDraft,
   grid,
@@ -437,11 +437,11 @@ onMounted(() => nextTick(syncNowLine))
 
 const nowLineTop = computed(() => measuredTop.value ?? nowTop.value)
 
-// Every overlay on this page lands in `overlays` rather than on <body>, which
-// is the only way to reach the month picker's panel with a class — DatePicker
-// sizes it itself and takes no `portalTo`. The New menu names its own target
-// and is unaffected.
+// Every overlay on this page lands in `overlays` rather than on <body>, so the
+// page's menu rules reach the Selects' lists. The New menu names its own
+// target and is unaffected.
 const overlays = ref<HTMLElement | null>(null)
+const switcherOpen = ref(false)
 providePortalTarget(() => overlays.value ?? undefined)
 
 /**
@@ -591,11 +591,12 @@ function namesOf(e: CalendarEvent): string[] {
 }
 
 /**
- * The day's label, as "Thu 1 Oct": the weekday cut to three letters so every
- * day's label is close to the same width, where "Wednesday 30 Sep" ran twice
- * the length of "Friday 2 Oct". Today keeps its name in the weekday's place
- * — "Today 30 Sep" — the same two words wide as every other day, which is
- * what lets the gutter close in to the label.
+ * The day's label, as "1 Oct Thu": the date first and strong, the weekday
+ * after it in the quieter ink, cut to three letters so every day's label is
+ * close to the same width, where "Wednesday 30 Sep" ran twice the length of
+ * "Friday 2 Oct". Today keeps its name in the weekday's place — "30 Sep
+ * Today" — the same two words wide as every other day, which is what lets
+ * the gutter close in to the label.
  *
  * The label is drawn by the component and not slotted, so it is rewritten
  * in place: the two spans are found under each day and their text replaced,
@@ -641,9 +642,12 @@ function relabelDays(root: HTMLElement, on: boolean) {
     const when = new Date(y, m - 1, d)
     const today = row.hasAttribute('data-today')
     const weekday = dayNames[when.getDay()]
+    // the date leads, in the first span's weight and ink, and the weekday
+    // follows in the second's — the date is what the eye anchors on while
+    // the list scrolls (the user's call 2026-10-13)
     const wants: [HTMLElement, string][] = [
-      [name, today ? 'Today' : weekday],
-      [date, `${d} ${monthNames[when.getMonth()]}`],
+      [name, `${d} ${monthNames[when.getMonth()]}`],
+      [date, today ? 'Today' : weekday],
     ]
     for (const [el, want] of wants) {
       if ((el.textContent ?? '').trim() === want) continue
@@ -792,27 +796,39 @@ function dayBand(label: string) {
               calendar there through `onMonthYearChange`, which is the same
               hand-off the component's default header makes.
             -->
-                <DatePicker
-                  :model-value="selectedMonthDate"
-                  :clearable="false"
+                <!-- the Date picker pattern's own picker (the user's call
+                     2026-10-13), in a bare popover: its card, padding,
+                     month list and prev / today / next -->
+                <Popover
+                  v-model:open="switcherOpen"
                   align="start"
-                  class="[&_[data-slot=chevron]]:hidden"
-                  @update:model-value="onMonthYearChange"
+                  bare
+                  :auto-focus="false"
                 >
-                  <template #trigger="{ open, setOpen }">
+                  <template #trigger>
                     <button
                       type="button"
                       class="flex items-center gap-2 text-lg-medium text-ink-gray-7"
-                      @click="setOpen(!open)"
                     >
                       {{ monthYear(currentMonthYear, activeView) }}
                       <span
                         class="lucide-chevron-down size-4 text-ink-gray-5 transition-transform"
-                        :class="open && 'rotate-180'"
+                        :class="switcherOpen && 'rotate-180'"
                       />
                     </button>
                   </template>
-                </DatePicker>
+                  <DatePickerPreview
+                    variant="default"
+                    :model-value="selectedMonthDate"
+                    :hold-top="false"
+                    @update:model-value="
+                      (v) => {
+                        onMonthYearChange(v as string)
+                        switcherOpen = false
+                      }
+                    "
+                  />
+                </Popover>
 
                 <div class="ml-auto flex items-center gap-2">
                   <!--
@@ -970,11 +986,7 @@ function dayBand(label: string) {
         />
 
         <!-- Where every other overlay on the page lands; see `overlays`. -->
-        <div
-          ref="overlays"
-          class="cal-overlays"
-          :class="[espressoDatePicker, espressoMenuHeight]"
-        />
+        <div ref="overlays" :class="espressoMenuHeight" />
 
         <!--
         The span being drawn: a wash of `surface-gray-1` and no edge at all,
@@ -1561,70 +1573,5 @@ function dayBand(label: string) {
   --cal-gray-ink: var(--ink-gray-8);
   --cal-gray-bg: var(--surface-gray-2);
   --cal-gray-bg-active: var(--surface-gray-3);
-}
-</style>
-
-<style>
-/* The month picker's panel, as the Date picker pattern draws it (the user's
-   call 2026-10-13). The panel lands in `overlays`, out of this component's
-   scope, so these are plain rules under that target's class. */
-
-/* the pattern's card: the xl shadow alone — frappe-ui's popover adds the 2xl
-   shadow and a black ring, which read heavier than the pattern's */
-.cal-overlays .shadow-2xl:has(.select-none) {
-  @apply !shadow-xl !ring-0;
-}
-
-/* the month: 13 medium ink-gray-7, the file's small-down after it (small-up
-   while the month list is open) */
-.cal-overlays
-  .select-none
-  .p-2.pb-0
-  > button[aria-label='cycle-calendar-view'][aria-label] {
-  display: inline-flex !important;
-  align-items: center;
-  gap: 2px;
-  font-size: 13px !important;
-  font-weight: 500 !important;
-  letter-spacing: 0.02em;
-  color: var(--ink-gray-7);
-}
-.cal-overlays [aria-label='cycle-calendar-view']::after {
-  content: '';
-  width: 14px;
-  height: 14px;
-  background: currentColor;
-  -webkit-mask: url('../date-picker/icons/small-down.svg') center / contain
-    no-repeat;
-  mask: url('../date-picker/icons/small-down.svg') center / contain no-repeat;
-}
-.cal-overlays
-  .select-none:has([aria-label='Select month and year'])
-  [aria-label='cycle-calendar-view']::after {
-  -webkit-mask-image: url('../date-picker/icons/small-up.svg');
-  mask-image: url('../date-picker/icons/small-up.svg');
-}
-
-/* the month list: two columns 88 wide, 4 apart, rows 28 tall, 1 apart,
-   radius 8, 13 ink-gray-7, no scroll bar */
-.cal-overlays [aria-label='Select month and year'] {
-  width: 180px !important;
-  gap: 4px !important;
-}
-.cal-overlays [aria-label='Select month and year'] > div {
-  width: 88px !important;
-  gap: 1px !important;
-  padding: 0 !important;
-  scrollbar-width: none;
-}
-.cal-overlays [aria-label='Select month and year'] button {
-  height: 28px !important;
-  padding: 0 8px !important;
-  border-radius: 8px !important;
-  font-size: 13px !important;
-  color: var(--ink-gray-7) !important;
-}
-.cal-overlays [aria-label='Select month and year'] button[data-selected] {
-  background: var(--surface-gray-2);
 }
 </style>

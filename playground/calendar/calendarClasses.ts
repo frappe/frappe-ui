@@ -278,27 +278,6 @@ export const grid = {
 }
 
 /**
- * The file's month picker (node 35247:71977), cell by cell:
- *
- *   panel ······ 196 wide, radius 12, padding 8
- *   header ····· 24 tall — the month at 13/500 with a chevron, and three
- *                22x24 movers 4 apart
- *   grid ······· 180 wide, 6 to the header. Every cell 24 square, radius 5,
- *                2 apart both ways; the weekday letters 12/regular
- *                ink-gray-4, the dates 12/regular, the selected one filled
- *                ink-gray-8.
- *
- * 8 + 180 + 8 = 196 across. Down, the file's 200 is a five-row June; the
- * component always draws six, which is 8 + 24 + 6 + 180 + 8 = 226.
- *
- * frappe-ui's DatePicker draws this at a roomier size — 224 wide, every cell
- * 28 square on a radius of 8 — and exposes no way to size its panel, so the
- * panel is sent to a target this page owns and sized there. Everything hangs
- * off the calendar panel's own root, which the single picker and the range
- * picker are both built from: a Select's menu lands in the same target and
- * has none of it, so nothing else is touched.
- */
-/**
  * Eight rows of a Select's menu, and the rest scrolled to.
  *
  * Every quarter hour of the day is 96 rows, which drew a panel taller than
@@ -430,91 +409,4 @@ export const espressoMenuHeight = [
   '[&_[data-slot=content-body]]:!w-full',
   '[&_[role=listbox][data-slot=content]_[role=presentation]]:!w-full',
   '[&_[role=listbox][data-slot=content]_[role=option]]:!w-full',
-].join(' ')
-
-export const espressoDatePicker = [
-  // 196 wide (node 35247:71977). The single picker sets its own 224 on a
-  // wrapper and the range picker hugs its contents, so the width is put on
-  // the panel both of them are built from — and on that wrapper as well, or
-  // the panel would sit inside a box wider than itself.
-  '[&_.w-56]:!w-[196px]',
-  '[&_.select-none.text-ink-gray-9]:!w-[196px]',
-
-  // Every control in the header is an `xs` button, and they are all the
-  // same size and the same type — which is what puts their labels on one
-  // line. The component builds the row out of `sm`s and then overrides two
-  // of the three type scales by hand: the month at `text-sm-medium` (13/500)
-  // and Today at `text-xs` (12), on 28-tall buttons.
-  //
-  // frappe-ui's own `xs`: `h-6 text-xs px-1.5 rounded-3` with a label,
-  // `h-6 w-6 rounded-3` icon-only. Applied in that shape:
-  '[&_.select-none.text-ink-gray-9_.p-2.pb-0_button]:!h-6',
-  '[&_.select-none.text-ink-gray-9_.p-2.pb-0_button]:!rounded-3',
-  '[&_.select-none.text-ink-gray-9_.p-2.pb-0_button]:!text-xs',
-  // the two that carry a label take xs padding — the month, and Today,
-  // which is the one mover that is not an icon
-  '[&_.select-none.text-ink-gray-9_.p-2.pb-0>button]:!px-1.5',
-  '[&_.select-none.text-ink-gray-9_.p-2.pb-0>div>button:not(:first-child):not(:last-child)]:!px-1.5',
-  // and the two that carry a glyph are 24 square
-  '[&_.select-none.text-ink-gray-9_.p-2.pb-0>div>button:first-child]:!size-6',
-  '[&_.select-none.text-ink-gray-9_.p-2.pb-0>div>button:last-child]:!size-6',
-
-  // 6 between the header and the grid; the other three sides keep their 8.
-  '[&_.select-none.text-ink-gray-9_.p-2:not(.pb-0)]:!pt-1.5',
-
-  // Every cell — the weekday letters and the dates alike — 24 tall on a
-  // radius of 5, filling its column rather than standing 24 wide inside it.
-  //
-  // The width is what a range is drawn with: the file runs one unbroken band
-  // from the first day to the last with the two ends sitting on it as filled
-  // squares (node 35421:113510), and a cell narrower than its column leaves a
-  // gap at every date, so the band came out as a row of separate pills.
-  '[&_.select-none.text-ink-gray-9_.size-7]:!h-6',
-  '[&_.select-none.text-ink-gray-9_.size-7]:!w-full',
-  // …which means the 2px the component puts between the days of a week goes
-  // as well; the 2 between the weeks stays, which is the file's.
-  '[&_.select-none.text-ink-gray-9_.flex-col>.flex]:!gap-0',
-  '[&_.select-none.text-ink-gray-9_.size-7]:!rounded-2',
-
-  // …and the band itself: the days between the two ends carry no radius, so
-  // one runs into the next, in the file's #F7F7F7 rather than the component's
-  // gray-3, which is dark enough to read as a selection of its own.
-  // `.size-7` carried along so the radius outranks the one every cell takes
-  // above: a tie on specificity is broken by the order Tailwind writes its
-  // rules in, not the order they are named in here.
-  '[&_.select-none.text-ink-gray-9_.size-7.bg-surface-gray-3]:!rounded-none',
-  '[&_.select-none.text-ink-gray-9_.size-7.bg-surface-gray-3]:!bg-surface-gray-1',
-  '[&_.select-none.text-ink-gray-9_.size-7.bg-surface-gray-3]:hover:!bg-surface-gray-1',
-
-  // The month and year face fills the panel. The component builds it 208
-  // square inside a panel this file has brought down to 196, and its two
-  // columns are halves of that 208 — so they hung over the edge and were
-  // clipped, which left two lists the width of the words in them against a
-  // panel of white. Held to the panel, a half is 98 and each column fills
-  // what it is given.
-  '[&_.select-none.text-ink-gray-9_.h-52]:!w-full',
-
-  // 2 under the weekday letters, the same 2 that separates the weeks.
-  '[&_.select-none.text-ink-gray-9_.mb-1]:!mb-0.5',
-
-  // 12/regular throughout: the component sets the dates a size up and the
-  // weekday letters a weight up.
-  '[&_.select-none.text-ink-gray-9_.text-sm]:!text-xs',
-  '[&_.select-none.text-ink-gray-9_.text-xs-medium]:!text-xs',
-
-  // Only the weeks the month actually has. `generateWeeks` always emits six
-  // rows, on purpose — a constant height means the panel does not jiggle when
-  // you page between months, and in a dual-pane range picker the two panes
-  // line up. The file draws a five-row June, so the trailing row goes when
-  // every date in it belongs to the next month; the component marks those
-  // with `data-outside-view`, and a row with no cell lacking it is a row of
-  // nothing but spill-over. The panel then changes height between months —
-  // which is the thing the six were avoiding — but it hangs off a label at
-  // the top left and grows downwards, so what moves is its bottom edge.
-  '[&_.select-none.text-ink-gray-9_.flex-col>div:last-child:not(:has(button:not([data-outside-view])))]:!hidden',
-
-  // …and the dates in #383838, where the component sets ink-gray-8 (#171717).
-  // The weekday letters are ink-gray-4 already, which is the file's #999999,
-  // and the selected fill is surface-gray-9, which is the file's #383838.
-  '[&_.select-none.text-ink-gray-9_.size-7.text-ink-gray-8]:!text-ink-gray-7',
 ].join(' ')

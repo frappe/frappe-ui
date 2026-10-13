@@ -22,7 +22,9 @@
 //               up has its card there too, from the start — not in the area
 //               (the user's call 2026-10-13) — with a 4px Progress across
 //               its body, 8 under the line. An image shows as its own
-//               thumbnail in the glyph's 30x40 slot.
+//               thumbnail, 40 square on a radius of 6 (the user's call
+//               2026-10-13); the page glyph sits centred in the same 40,
+//               so the names keep one edge.
 //   horizontal  60x60 thumbnails, radius 10, 8 apart, 6 under the area; a
 //               14px white badge with the 10px close glyph 4 over the top,
 //               2 past the right; one going up wears a 63% black veil with a
@@ -249,16 +251,20 @@ function onDrop(e: DragEvent) {
           :src="item.url"
           alt=""
           data-slot="thumbnail"
-          class="h-10 w-[30px] shrink-0 rounded-2 object-cover ring-1 ring-inset ring-outline-gray-1"
+          class="size-10 shrink-0 rounded-3 object-cover"
         />
-        <span v-else class="fia-glyph">
-          <FileInputIcon
-            :name="glyphFor(item.name).icon"
-            class="fia-glyph-art"
-          />
-          <span v-if="glyphFor(item.name).label" class="fia-glyph-label">{{
-            glyphFor(item.name).label
-          }}</span>
+        <!-- the page glyph centred in the same 40 square, so every name in
+             the list starts on one edge -->
+        <span v-else class="flex w-10 shrink-0 justify-center">
+          <span class="fia-glyph">
+            <FileInputIcon
+              :name="glyphFor(item.name).icon"
+              class="fia-glyph-art"
+            />
+            <span v-if="glyphFor(item.name).label" class="fia-glyph-label">{{
+              glyphFor(item.name).label
+            }}</span>
+          </span>
         </span>
         <div class="flex min-w-0 flex-1 flex-col">
           <div class="flex gap-2">
@@ -344,17 +350,23 @@ function onDrop(e: DragEvent) {
               alt=""
               class="size-full object-cover"
             />
+            <!-- the page glyph in the middle of the tile (its own class
+                 keeps it in flow, so the tile centres it) -->
             <span
               v-else-if="item.status !== 'error'"
-              class="fia-glyph absolute inset-0 m-auto"
+              class="flex size-full items-center justify-center"
             >
-              <FileInputIcon
-                :name="glyphFor(item.name).icon"
-                class="fia-glyph-art"
-              />
-              <span v-if="glyphFor(item.name).label" class="fia-glyph-label">{{
-                glyphFor(item.name).label
-              }}</span>
+              <span class="fia-glyph">
+                <FileInputIcon
+                  :name="glyphFor(item.name).icon"
+                  class="fia-glyph-art"
+                />
+                <span
+                  v-if="glyphFor(item.name).label"
+                  class="fia-glyph-label"
+                  >{{ glyphFor(item.name).label }}</span
+                >
+              </span>
             </span>
             <!-- proposed: a failed upload retries from its tile -->
             <button

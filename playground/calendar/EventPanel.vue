@@ -3,7 +3,7 @@ import { computed, h, reactive, ref, watch } from 'vue'
 import {
   Avatar,
   Button,
-  DateRangePicker,
+  Popover,
   Dropdown,
   MultiSelect,
   Select,
@@ -17,6 +17,7 @@ import {
 import { faceFor, logos } from '../components/patterns/designAssets'
 import { colourValue, people } from './sampleCalendars'
 import DateIcon from './icons/DateIcon.vue'
+import DatePickerPreview from '../date-picker/DatePickerPreview.vue'
 // The v2 shell's own modal card, so this confirms the way Delete project does.
 import EspressoModal from '../v2/modals/EspressoModal.vue'
 import type { CalendarEvent } from '../../experimental/Calendar'
@@ -250,6 +251,7 @@ function setToTime(value: string) {
       : asClock(minutesOf(span.fromTime) + CLOCK_STEP)
   push()
 }
+const datesOpen = ref(false)
 function setDates(range: string[]) {
   const [from, to] = range ?? []
   if (!from) return
@@ -746,37 +748,52 @@ function todayIso() {
       -->
       <div class="flex h-10 items-center gap-3.5 px-5">
         <span class="w-[90px] shrink-0 text-base text-ink-gray-6">Date</span>
-        <DateRangePicker
-          :model-value="[span.fromDate, span.toDate]"
-          :clearable="false"
-          align="start"
-          :disabled="locked"
-          :class="field"
-          @update:model-value="setDates"
-        >
-          <template #trigger="{ open, setOpen }">
-            <button
-              type="button"
-              :disabled="locked"
-              aria-label="Date"
-              class="flex h-7 w-full items-center gap-2 rounded-4 pl-[9px] pr-2 text-base text-ink-gray-7 transition-colors hover:bg-surface-gray-2 disabled:hover:bg-transparent"
-              @click="setOpen(!open)"
-            >
-              <!-- Blank until a day is picked, in the placeholder's grey. -->
-              <span class="truncate" :class="!dateLabel && 'text-ink-gray-4'">{{
-                dateLabel || 'Pick a date'
-              }}</span>
-              <!--
+        <!-- the Date picker pattern's own picker, a range on one pane, in a
+             bare popover (the user's call 2026-10-13) -->
+        <div :class="field">
+          <Popover
+            v-model:open="datesOpen"
+            align="start"
+            bare
+            :auto-focus="false"
+          >
+            <template #trigger>
+              <button
+                type="button"
+                :disabled="locked"
+                aria-label="Date"
+                class="flex h-7 w-full items-center gap-2 rounded-4 pl-[9px] pr-2 text-base text-ink-gray-7 transition-colors hover:bg-surface-gray-2 disabled:hover:bg-transparent"
+              >
+                <!-- Blank until a day is picked, in the placeholder's grey. -->
+                <span
+                  class="truncate"
+                  :class="!dateLabel && 'text-ink-gray-4'"
+                  >{{ dateLabel || 'Pick a date' }}</span
+                >
+                <!--
                 The file's own calendar glyph rather than a chevron (node
                 35447:66251): a date field says what it opens by the thing it
                 opens, where every other row on the panel is a list and says
                 so with a chevron. 16 square in #999999, which is
                 `ink-gray-4` here.
               -->
-              <DateIcon class="ml-auto text-ink-gray-4" />
-            </button>
-          </template>
-        </DateRangePicker>
+                <DateIcon class="ml-auto text-ink-gray-4" />
+              </button>
+            </template>
+            <DatePickerPreview
+              variant="default"
+              range
+              :model-value="[span.fromDate, span.toDate]"
+              :hold-top="false"
+              @update:model-value="
+                (v) => {
+                  setDates(v as [string, string])
+                  datesOpen = false
+                }
+              "
+            />
+          </Popover>
+        </div>
       </div>
 
       <div v-if="!allDay" class="flex h-10 items-center gap-3.5 px-5">
@@ -1302,19 +1319,22 @@ function todayIso() {
    out 100.5 wide; the sliding highlight is placed from the pill's rounded
    width and offset, so on Free it ran 1.5px past the pill, onto the track's
    edge, and its right side was cut (the user's call 2026-10-13). Each pill
-   is the share rounded down — the pixel or two left over stays in the
-   track's right inset. */
+   but the last is the share rounded down; the last takes what is left, a
+   whole number too, so every track ends on the same 1px inset. */
 .ev-tabs [role='tablist'] > [role='tab'] {
   flex: none !important;
 }
+.ev-tabs [role='tablist'] > [role='tab']:last-of-type {
+  flex: 1 1 0 !important;
+}
 .ev-tabs
   [role='tablist']:has(> [role='tab']:nth-of-type(2):last-of-type)
-  > [role='tab'] {
+  > [role='tab']:not(:last-of-type) {
   width: round(down, calc((100% - 4px) / 2), 1px);
 }
 .ev-tabs
   [role='tablist']:has(> [role='tab']:nth-of-type(3):last-of-type)
-  > [role='tab'] {
+  > [role='tab']:not(:last-of-type) {
   width: round(down, calc((100% - 8px) / 3), 1px);
 }
 

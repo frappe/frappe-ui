@@ -47,14 +47,33 @@ import iconCalendar from './icons/calendar.svg?url'
 
 export type DatePickerVariant = 'default' | 'inline' | 'date-time'
 
-const props = defineProps<{
-  variant: DatePickerVariant
-  range: boolean
-  doublePane: boolean
-  header: boolean
-  footer: boolean
-  sidebar: boolean
-}>()
+const props = withDefaults(
+  defineProps<{
+    variant: DatePickerVariant
+    range?: boolean
+    doublePane?: boolean
+    header?: boolean
+    footer?: boolean
+    sidebar?: boolean
+    /** A date (`YYYY-MM-DD`) or a range, when the picker is put to use
+     * elsewhere — the calendar's month switcher and its event panel. Left
+     * out, the picker shows the file's own dates. */
+    modelValue?: string | DateRangeValue
+    /** Keep the top edge where it is when the month list opens (the page
+     * centres the picker); a picker in a popover hangs from its top anyway. */
+    holdTop?: boolean
+  }>(),
+  {
+    range: false,
+    doublePane: false,
+    header: false,
+    footer: false,
+    sidebar: false,
+    modelValue: undefined,
+    holdTop: true,
+  },
+)
+const emit = defineEmits<{ 'update:modelValue': [string | DateRangeValue] }>()
 
 // the file's dates: June 9, 2023; the range 5–11 June; double pane 26 June
 // to 4 July
@@ -62,12 +81,37 @@ const START_DATE = '2023-06-09'
 const startRange = (): DateRangeValue =>
   props.doublePane ? ['2023-06-26', '2023-07-04'] : ['2023-06-05', '2023-06-11']
 
-const date = ref(START_DATE)
-const range = ref<DateRangeValue>(startRange())
+const given = props.modelValue
+const date = ref(typeof given === 'string' ? given : START_DATE)
+const range = ref<DateRangeValue>(
+  Array.isArray(given) ? [...given] : startRange(),
+)
 watch(
   () => props.doublePane,
-  () => (range.value = startRange()),
+  () => given === undefined && (range.value = startRange()),
 )
+// in use: the value follows the owner's, and a pick goes back to it — a
+// range once both its ends are in
+watch(
+  () => props.modelValue,
+  (v) => {
+    if (typeof v === 'string') date.value = v
+    else if (Array.isArray(v)) range.value = [...v]
+  },
+)
+watch(date, (v) => {
+  if (typeof props.modelValue === 'string' && v && v !== props.modelValue)
+    emit('update:modelValue', v)
+})
+watch(range, (r) => {
+  const v = props.modelValue
+  if (Array.isArray(v) && r[0] && r[1] && (r[0] !== v[0] || r[1] !== v[1]))
+    emit('update:modelValue', [r[0], r[1]])
+})
+
+// the weekday letters follow the week's start: the file's Monday, or
+// Sunday where the page keeps dayjs's default (the calendar)
+const sundayFirst = (dayjs.Ls.en?.weekStart ?? 0) === 0
 
 // the file's time, 10:30 AM
 const hour = ref('10')
@@ -336,13 +380,14 @@ const icons = {
   <div
     ref="root"
     class="dp inline-flex flex-col"
-    :style="[icons, { marginBottom: `${pull}px` }]"
+    :style="[icons, holdTop && { marginBottom: `${pull}px` }]"
     :class="[
       variant === 'inline'
         ? 'dp--inline'
         : 'rounded-6 bg-surface-elevation-2 shadow-xl',
       isRange && doublePane && 'dp--double',
       isRange && range[0] && !range[1] && 'dp--picking',
+      sundayFirst && 'dp--sun',
     ]"
   >
     <!-- header: type a date -->
@@ -643,6 +688,39 @@ const icons = {
 .dp-cal :deep([role='grid'] > div:first-child > div:nth-child(7)::after) {
   content: 'S';
 }
+/* Sunday first (the calendar's week): S M T W T F S */
+.dp--sun
+  .dp-cal
+  :deep([role='grid'] > div:first-child > div:nth-child(1)::after),
+.dp--sun
+  .dp-cal
+  :deep([role='grid'] > div:first-child > div:nth-child(7)::after) {
+  content: 'S';
+}
+.dp--sun
+  .dp-cal
+  :deep([role='grid'] > div:first-child > div:nth-child(2)::after) {
+  content: 'M';
+}
+.dp--sun
+  .dp-cal
+  :deep([role='grid'] > div:first-child > div:nth-child(3)::after),
+.dp--sun
+  .dp-cal
+  :deep([role='grid'] > div:first-child > div:nth-child(5)::after) {
+  content: 'T';
+}
+.dp--sun
+  .dp-cal
+  :deep([role='grid'] > div:first-child > div:nth-child(4)::after) {
+  content: 'W';
+}
+.dp--sun
+  .dp-cal
+  :deep([role='grid'] > div:first-child > div:nth-child(6)::after) {
+  content: 'F';
+}
+
 /* only the weeks the month touches: the library always draws six */
 .dp-cal :deep([role='row']:not(:has(button:not([data-outside-view])))) {
   display: none;
