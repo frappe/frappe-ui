@@ -1,12 +1,8 @@
 <template>
   <div
     data-slot="mobile-shell"
-    class="fixed inset-0 flex touch-none flex-col overflow-hidden [@media(display-mode:standalone)]:h-[min(100lvh,100%_+_env(safe-area-inset-top))]"
+    class="fixed inset-0 flex touch-none flex-col overflow-hidden"
   >
-    <!-- 100lvh fills the short iOS 26 standalone viewport (WebKit 301108).
-         Cap growth at the top inset: with an opaque status bar, 100lvh can
-         exceed the visible viewport (WebKit 316008). -->
-
     <!-- Pages teleport their headers here. Extra top padding clears the notch /
          status bar when running as an installed PWA (display-mode: standalone). -->
     <PageHeaderTarget
