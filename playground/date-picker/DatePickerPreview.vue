@@ -183,24 +183,58 @@ onUnmounted(() => observer?.disconnect())
 // so a taller month list would push its top up; the difference is taken back
 // from the margin below, and the picker grows downward instead
 const root = ref<HTMLElement | null>(null)
-const pull = ref(0)
 let calendarHeight = 0
 let sizer: ResizeObserver | null = null
+let watcher: MutationObserver | null = null
+let watcher2: MutationObserver | null = null
+// set on the element directly and from a MutationObserver — it runs as the
+// month list goes in, before the frame is laid out and drawn — so no frame
+// shows the picker moved (a ResizeObserver alone let one through)
+function holdInPlace() {
+  fadeLists()
+  const el = root.value
+  if (!el || !props.holdTop) return
+  el.style.marginBottom = '0px'
+  const h = el.offsetHeight
+  if (el.querySelector('[aria-label="Select month and year"]'))
+    el.style.marginBottom = `${calendarHeight - h}px`
+  else calendarHeight = h
+}
+// ---- the month list's columns fade at an edge they can scroll past — the
+// 16px fade Agenda V2 hangs under its stuck week label — and stay crisp at
+// an edge they rest on (the user's call 2026-10-13)
+function fadeLists() {
+  root.value
+    ?.querySelectorAll<HTMLElement>(
+      '[aria-label="Select month and year"] > div',
+    )
+    .forEach((col) => {
+      const top = col.scrollTop > 0
+      const bottom = col.scrollTop + col.clientHeight < col.scrollHeight - 1
+      if (top !== col.hasAttribute('data-fade-top'))
+        col.toggleAttribute('data-fade-top', top)
+      if (bottom !== col.hasAttribute('data-fade-bottom'))
+        col.toggleAttribute('data-fade-bottom', bottom)
+    })
+}
 onMounted(() => {
-  sizer = new ResizeObserver(() => {
-    const el = root.value
-    if (!el) return
-    const h = el.offsetHeight
-    if (el.querySelector('[aria-label="Select month and year"]'))
-      pull.value = calendarHeight - h
-    else {
-      calendarHeight = h
-      pull.value = 0
-    }
-  })
-  if (root.value) sizer.observe(root.value)
+  if (!root.value) return
+  // scroll doesn't bubble: caught on the way down
+  root.value.addEventListener('scroll', fadeLists, true)
+  sizer = new ResizeObserver(holdInPlace)
+  sizer.observe(root.value)
+  watcher = new MutationObserver(holdInPlace)
+  watcher.observe(root.value, { childList: true, subtree: true })
+  // the library scrolls the current year into view after it opens
+  watcher2 = new MutationObserver(() => requestAnimationFrame(fadeLists))
+  watcher2.observe(root.value, { childList: true, subtree: true })
 })
-onUnmounted(() => sizer?.disconnect())
+onUnmounted(() => {
+  sizer?.disconnect()
+  watcher?.disconnect()
+  watcher2?.disconnect()
+  root.value?.removeEventListener('scroll', fadeLists, true)
+})
 
 // ---- header: type a date, Enter (or leaving the field) picks it
 // in plain language: see parseDate.ts for what it reads
@@ -380,7 +414,7 @@ const icons = {
   <div
     ref="root"
     class="dp inline-flex flex-col"
-    :style="[icons, holdTop && { marginBottom: `${pull}px` }]"
+    :style="icons"
     :class="[
       variant === 'inline'
         ? 'dp--inline'
@@ -877,6 +911,32 @@ const icons = {
 }
 .dp-cal :deep([aria-label='Select month and year'] button[data-selected]) {
   background: var(--surface-gray-2);
+}
+
+/* the fade: 16px at whichever edge has more list past it */
+.dp-cal :deep([aria-label='Select month and year'] > div) {
+  --fade-top: 0px;
+  --fade-bottom: 0px;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 var(--fade-top),
+    #000 calc(100% - var(--fade-bottom)),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 var(--fade-top),
+    #000 calc(100% - var(--fade-bottom)),
+    transparent 100%
+  );
+}
+.dp-cal :deep([aria-label='Select month and year'] > div[data-fade-top]) {
+  --fade-top: 16px;
+}
+.dp-cal :deep([aria-label='Select month and year'] > div[data-fade-bottom]) {
+  --fade-bottom: 16px;
 }
 
 /* the month list is the whole body: the time row steps aside */
