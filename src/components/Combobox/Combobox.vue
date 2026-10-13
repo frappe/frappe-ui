@@ -17,7 +17,7 @@ import { useReactiveSlots } from '../../composables/useReactiveSlots'
 import { usePortalTarget } from '../../composables/usePortalTarget'
 import { useEmptyValueMapping } from '../shared/selection/useEmptyValueMapping'
 import { useFilteredGroups } from '../shared/selection/useFilteredGroups'
-import { rankByLabel } from '../shared/selection/utils'
+import { rankMatch } from '../../utils/rankMatch'
 import { useIsModelBound } from '../shared/selection/useIsModelBound'
 import {
   InputDescription,
@@ -236,7 +236,7 @@ const filteredGroups = useFilteredGroups<NormalizedItem, NormalizedGroup>({
       ? matchesCustomOption(item, q)
       : matchesSelectableOption(item, q),
   // custom action rows keep their place; options rank by how well they match
-  rank: (item, q) => (item.type === 'custom' ? null : rankByLabel(item, q)),
+  rank: (item, q) => (item.type === 'custom' ? null : rankMatch(item.label, q)),
   // `alwaysMatch` carries consumer-declared visibility: a custom row's
   // `condition` is authoritative and runs even before the user types, so it
   // is deliberately unaffected by `filterable`.

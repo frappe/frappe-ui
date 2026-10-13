@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { ref } from 'vue'
 import { useFilteredGroups } from './useFilteredGroups'
-import { rankByLabel } from './utils'
+import { rankMatch } from '../../../utils/rankMatch'
 
 type Item = { label: string; custom?: boolean }
 
@@ -12,7 +12,7 @@ function filtered(options: Item[], query: string) {
     hasTypedSinceOpen: ref(true),
     query: ref(query),
     matches: (item, q) => item.label.toLowerCase().includes(q.toLowerCase()),
-    rank: (item, q) => (item.custom ? null : rankByLabel(item, q)),
+    rank: (item, q) => (item.custom ? null : rankMatch(item.label, q)),
   })
   return groups.value[0].options.map((item) => item.label)
 }
