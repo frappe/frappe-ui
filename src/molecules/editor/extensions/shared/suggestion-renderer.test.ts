@@ -160,13 +160,16 @@ describe('createSuggestionRenderer', () => {
     expect(renderer.el?.style.position).toBe('absolute')
   })
 
-  it('marks the popup so a modal Dialog lets it take clicks', () => {
+  it('lets the popup take clicks only when its editor is in a dialog', () => {
     const api = makeRenderer()
     api.onStart(makeProps())
+    expect(instances[0].el?.dataset.editorFloating).toBe('')
+    expect(instances[0].el?.style.pointerEvents).toBe('')
+    api.onExit()
 
-    const wrapper = instances[0].el
-    expect(wrapper?.dataset.editorFloating).toBe('')
-    expect(wrapper?.style.pointerEvents).toBe('auto')
+    scroller.setAttribute('role', 'dialog')
+    api.onStart(makeProps())
+    expect(instances[1].el?.style.pointerEvents).toBe('auto')
   })
 
   it('removes the wrapper and destroys the renderer on exit', () => {
