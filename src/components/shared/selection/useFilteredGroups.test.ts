@@ -5,16 +5,14 @@ import { rankByLabel } from './utils'
 
 type Item = { label: string; custom?: boolean }
 
-function filtered(options: Item[], query: string, withRank = true) {
+function filtered(options: Item[], query: string) {
   const groups = useFilteredGroups<Item, { options: Item[] }>({
     groups: ref([{ options }]),
     open: ref(true),
     hasTypedSinceOpen: ref(true),
     query: ref(query),
     matches: (item, q) => item.label.toLowerCase().includes(q.toLowerCase()),
-    rank: withRank
-      ? (item, q) => (item.custom ? null : rankByLabel(item, q))
-      : undefined,
+    rank: (item, q) => (item.custom ? null : rankByLabel(item, q)),
   })
   return groups.value[0].options.map((item) => item.label)
 }
@@ -33,15 +31,6 @@ describe('useFilteredGroups ranking', () => {
       'Approximate No. of SKUs',
       'Frappe HR',
       'Frappe CRM',
-    ])
-  })
-
-  it('keeps source order without a rank', () => {
-    expect(filtered(fields, 'app', false)).toEqual([
-      'Approximate No. of SKUs',
-      'Frappe HR',
-      'Frappe CRM',
-      'App',
     ])
   })
 
