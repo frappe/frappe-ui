@@ -380,6 +380,10 @@ export const espressoCardCopy = [
   '[&_.event-draft]:!outline-none',
   '[&_.event-draft]:![background-color:var(--bg)]',
   '[&_.event-title]:![color:var(--border)]',
+  // …and the time under it, the card's own ink at 70% — without it the
+  // copy's time fell back to the component's gray mid-drag (the user's call
+  // 2026-10-13)
+  '[&_.event-subtitle]:![color:color-mix(in_srgb,var(--border)_70%,transparent)]',
   '[&_.event_svg]:![color:var(--border)]',
   '[&_.event_svg]:!size-3.5',
   '[&_.event_svg]:!mt-px',
