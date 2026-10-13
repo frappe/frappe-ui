@@ -208,11 +208,9 @@ const slots = useReactiveSlots<DialogSlots>()
 
 const isDismissible = computed(() => props.dismissible !== false)
 
-// editor menus (@ mentions, slash commands) live on <body>; picking from one isn't leaving the dialog
+// the editor's suggestion menus (@mention, /, #, :) live on <body>; picking from one isn't leaving the dialog
 function isEditorFloating(e: Event) {
-  const original = (e as CustomEvent<{ originalEvent?: Event }>).detail
-    ?.originalEvent
-  const target = original?.target ?? e.target
+  const target = e.target
   return target instanceof Element && !!target.closest('[data-editor-floating]')
 }
 
