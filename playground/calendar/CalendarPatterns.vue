@@ -591,10 +591,11 @@ function namesOf(e: CalendarEvent): string[] {
 }
 
 /**
- * The day's label, as "1 Oct Thu": the date first and strong, the weekday
+ * The day's label, as "Oct 1 Thu" (month first, as the week titles read
+ * "Dec 6 – 12"): the date first and strong, the weekday
  * after it in the quieter ink, cut to three letters so every day's label is
  * close to the same width, where "Wednesday 30 Sep" ran twice the length of
- * "Friday 2 Oct". Today keeps its name in the weekday's place — "30 Sep
+ * "Friday 2 Oct". Today keeps its name in the weekday's place — "Sep 30
  * Today" — the same two words wide as every other day, which is what lets
  * the gutter close in to the label.
  *
@@ -646,7 +647,7 @@ function relabelDays(root: HTMLElement, on: boolean) {
     // follows in the second's — the date is what the eye anchors on while
     // the list scrolls (the user's call 2026-10-13)
     const wants: [HTMLElement, string][] = [
-      [name, `${d} ${monthNames[when.getMonth()]}`],
+      [name, `${monthNames[when.getMonth()]} ${d}`],
       [date, today ? 'Today' : weekday],
     ]
     for (const [el, want] of wants) {
