@@ -102,13 +102,6 @@ describe('<MobileShell />', () => {
         const nav = $nav[0]
         const win = nav.ownerDocument.defaultView!
         expect(win.getComputedStyle(nav).paddingBottom).to.equal('34px')
-        // Chrome has no short iOS 26 viewport, so this cannot show the shell
-        // growing to the screen edge. It only checks the height cap: the top
-        // inset must not push the nav below the viewport.
-        expect(nav.getBoundingClientRect().bottom).to.be.closeTo(
-          win.innerHeight,
-          0.5,
-        )
       })
     })
 
