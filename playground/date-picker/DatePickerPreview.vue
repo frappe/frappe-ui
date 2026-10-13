@@ -183,23 +183,40 @@ onUnmounted(() => observer?.disconnect())
 // so a taller month list would push its top up; the difference is taken back
 // from the margin below, and the picker grows downward instead
 const root = ref<HTMLElement | null>(null)
-let calendarHeight = 0
+// the height the picker was centred at: taken when a setting changes, and
+// held through everything that happens inside — the month list opening, or
+// a month of four, five or six weeks (the user's calls 2026-10-13)
+let anchorHeight: number | null = null
 let sizer: ResizeObserver | null = null
 let watcher: MutationObserver | null = null
 let watcher2: MutationObserver | null = null
 // set on the element directly and from a MutationObserver — it runs as the
-// month list goes in, before the frame is laid out and drawn — so no frame
-// shows the picker moved (a ResizeObserver alone let one through)
+// DOM changes, before the frame is laid out and drawn — so no frame shows
+// the picker moved (a ResizeObserver alone let one through)
 function holdInPlace() {
   fadeLists()
   const el = root.value
   if (!el || !props.holdTop) return
   el.style.marginBottom = '0px'
   const h = el.offsetHeight
-  if (el.querySelector('[aria-label="Select month and year"]'))
-    el.style.marginBottom = `${calendarHeight - h}px`
-  else calendarHeight = h
+  if (anchorHeight === null) anchorHeight = h
+  el.style.marginBottom = `${anchorHeight - h}px`
 }
+// a setting is a new picker: centre it afresh
+watch(
+  () => [
+    props.variant,
+    props.range,
+    props.doublePane,
+    props.header,
+    props.footer,
+    props.sidebar,
+  ],
+  () => {
+    anchorHeight = null
+    nextTick(holdInPlace)
+  },
+)
 // ---- the month list's columns fade at an edge they can scroll past — the
 // 16px fade Agenda V2 hangs under its stuck week label — and stay crisp at
 // an edge they rest on (the user's call 2026-10-13)
