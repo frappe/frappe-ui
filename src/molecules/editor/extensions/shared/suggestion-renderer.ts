@@ -96,6 +96,9 @@ export function createSuggestionRenderer(
 
     floatingEl = wrapper
     floatingEl.style.position = 'absolute'
+    // on <body>, so take clicks under a modal Dialog, which treats this as inside it
+    floatingEl.style.pointerEvents = 'auto'
+    floatingEl.dataset.editorFloating = ''
     document.body.appendChild(floatingEl)
     getReferenceClientRect = props.clientRect as () => DOMRect | null
 

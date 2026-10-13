@@ -49,6 +49,19 @@ export function filterByQuery<T>(items: T[], query: string, key: keyof T): T[] {
   })
 }
 
+/** `filterByQuery` ranked: values starting with the query, then a word starting with it, then the rest. */
+export function rankByQuery<T>(items: T[], query: string, key: keyof T): T[] {
+  const needle = query.toLowerCase()
+  const rank = (item: T) => {
+    const value = String(item[key]).toLowerCase()
+    if (value.startsWith(needle)) return 0
+    if (value.split(/[\s._-]+/).some((word) => word.startsWith(needle)))
+      return 1
+    return 2
+  }
+  return filterByQuery(items, query, key).sort((a, b) => rank(a) - rank(b))
+}
+
 /**
  * True when `pos` sits inside a code context — either a code-block node or text
  * carrying the inline `code` mark. Suggesters (`@`/`#`/`:`) use this to stay

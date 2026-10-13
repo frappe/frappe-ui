@@ -40,7 +40,7 @@
             "
             @interact-outside="
               (e: Event) => {
-                if (!isDismissible) e.preventDefault()
+                if (!isDismissible || isEditorFloating(e)) e.preventDefault()
               }
             "
           >
@@ -207,6 +207,14 @@ const portalTarget = usePortalTarget()
 const slots = useReactiveSlots<DialogSlots>()
 
 const isDismissible = computed(() => props.dismissible !== false)
+
+// editor menus (@ mentions, slash commands) live on <body>; picking from one isn't leaving the dialog
+function isEditorFloating(e: Event) {
+  const original = (e as CustomEvent<{ originalEvent?: Event }>).detail
+    ?.originalEvent
+  const target = original?.target ?? e.target
+  return target instanceof Element && !!target.closest('[data-editor-floating]')
+}
 
 const sizeClass = computed(() => {
   const map: Record<string, string> = {
