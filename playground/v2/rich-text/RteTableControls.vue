@@ -1662,7 +1662,9 @@ body.rte-tc-dragging .rte-tc-handle {
   display: block;
   border-radius: 9999px;
   background-color: var(--ink-gray-5);
-  box-shadow: 0 0 0 2px var(--surface-elevation-2);
+  /* the gaps either side are the editor's own ground, so they read as a
+     break in the line, not a chip, in either theme */
+  box-shadow: 0 0 0 2px var(--surface-base);
 }
 /* on the table's edge the dash is a 1px gray-900 length of the edge:
    on the rule's own pixel (3px into the handle's padding
@@ -1681,11 +1683,11 @@ body.rte-tc-dragging .rte-tc-handle {
   height: 1px;
   background-color: var(--ink-gray-9);
 }
-/* the cell's handle rides the selection's ring, 6px off its line: there
-   it stays the gray-500 pill, astride the ring */
+/* the cell's handle on the selection's ring is, like the edge's, a 1px
+   length of that ring: gray-500, on the ring's own pixel (4px into the
+   handle's padding box), parted from it only by the gaps either side */
 .rte-tc-handle.is-row.is-cell .rte-tc-pill {
-  left: 3px;
-  width: 3px;
+  left: 4px;
   background-color: var(--ink-gray-5);
 }
 .rte-tc-dots {
