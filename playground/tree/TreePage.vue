@@ -358,6 +358,26 @@ function onDrop(info: DropInfo | null) {
 
 const tree = ref<TreeExposed | null>(null)
 const expanded = ref<string[]>([])
+
+// Expand all (the user's call 2026-10-13): on while every row with children is
+// open — turning it on opens them all, off folds them all; folding one by hand
+// turns it off
+function collapsibleKeys(list: TreeNode[], out: string[] = []) {
+  for (const n of list)
+    if (n.children?.length) {
+      out.push(n.key as string)
+      collapsibleKeys(n.children, out)
+    }
+  return out
+}
+const expandAll = computed({
+  get: () => {
+    const open = new Set(expanded.value)
+    const keys = collapsibleKeys(nodes.value)
+    return keys.length > 0 && keys.every((k) => open.has(k))
+  },
+  set: (on) => (on ? tree.value?.expandAll() : tree.value?.collapseAll()),
+})
 onMounted(() => applyExample(example.value))
 </script>
 
@@ -536,6 +556,10 @@ onMounted(() => applyExample(example.value))
               aria-label="Indentation"
               :disabled="example === 'hierarchy'"
             />
+          </div>
+          <div class="flex h-7 items-center justify-between">
+            <span class="text-base text-ink-gray-7">Expand all</span>
+            <Switch v-model="expandAll" size="sm" aria-label="Expand all" />
           </div>
           <div class="flex h-7 items-center justify-between">
             <span class="text-base text-ink-gray-7">Full width</span>

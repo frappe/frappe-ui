@@ -755,4 +755,14 @@ const icons = {
   height: 28px !important;
   border-radius: 8px !important;
 }
+/* the row's content centred in the taller row */
+.dp-time-list [role='option'] {
+  display: flex;
+  align-items: center;
+}
+.dp-time-list [role='option'] > * {
+  flex: 1;
+  min-height: 0 !important;
+  height: auto !important;
+}
 </style>
