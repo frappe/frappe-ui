@@ -289,10 +289,10 @@ function reset() {
 
 onBeforeUnmount(reset)
 
-// ---- the lists' edges: where there is more to scroll, the cards fade out
-// under the head or into the foot rather than being cut flat
+// ---- the lists' top edge: scrolled, the cards fade out under the head
+// rather than being cut flat; the foot cuts them as they are
 const lists = new Map<number, HTMLElement>()
-const fades = ref(columns.value.map(() => ({ top: false, bottom: false })))
+const fades = ref(columns.value.map(() => false))
 
 function bindList(ci: number, el: unknown) {
   // the list is a TransitionGroup: its element is the instance's $el
@@ -308,9 +308,7 @@ function measureFade(ci: number) {
   const el = lists.get(ci)
   if (!el) return
   const top = el.scrollTop > 0
-  const bottom = el.scrollTop + el.clientHeight < el.scrollHeight - 1
-  const f = fades.value[ci]
-  if (f.top !== top || f.bottom !== bottom) fades.value[ci] = { top, bottom }
+  if (fades.value[ci] !== top) fades.value[ci] = top
 }
 
 function measureFades() {
@@ -380,10 +378,7 @@ watch(laid, () => nextTick(measureFades), { flush: 'post' })
           tag="div"
           name="kanban"
           class="kanban-list v2-scroll -mx-2 -my-1 flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto px-2 py-1"
-          :style="{
-            '--fade-top': fades[ci].top ? '24px' : '0px',
-            '--fade-bottom': fades[ci].bottom ? '24px' : '0px',
-          }"
+          :style="{ '--fade-top': fades[ci] ? '24px' : '0px' }"
           @scroll.passive="measureFade(ci)"
         >
           <div
@@ -435,23 +430,19 @@ watch(laid, () => nextTick(measureFades), { flush: 'post' })
 </template>
 
 <style>
-/* Where a list has more above or below, its edge fades over 24px instead
-   of cutting the cards flat. A mask, so the fade needs no colour of its
-   own and works over the column's wash. */
+/* Where a list has more above, its top edge fades over 24px instead of
+   cutting the cards flat; its foot has no fade. A mask, so the fade needs
+   no colour of its own and works over the column's wash. */
 .kanban-list {
   -webkit-mask-image: linear-gradient(
     to bottom,
     transparent 0,
-    #000 var(--fade-top, 0px),
-    #000 calc(100% - var(--fade-bottom, 0px)),
-    transparent 100%
+    #000 var(--fade-top, 0px)
   );
   mask-image: linear-gradient(
     to bottom,
     transparent 0,
-    #000 var(--fade-top, 0px),
-    #000 calc(100% - var(--fade-bottom, 0px)),
-    transparent 100%
+    #000 var(--fade-top, 0px)
   );
 }
 /* The file's wash on the column under the pointer: gray-50 at the head,
