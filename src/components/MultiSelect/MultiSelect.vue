@@ -16,6 +16,7 @@ import { useReactiveSlots } from '../../composables/useReactiveSlots'
 import { usePortalTarget } from '../../composables/usePortalTarget'
 import { useEmptyValueMapping } from '../shared/selection/useEmptyValueMapping'
 import { useFilteredGroups } from '../shared/selection/useFilteredGroups'
+import { rankMatch } from '../../utils/rankMatch'
 import { useIsModelBound } from '../shared/selection/useIsModelBound'
 import OptionIcon from '../shared/selection/OptionIcon.vue'
 import {
@@ -195,6 +196,7 @@ const filteredGroups = useFilteredGroups({
   hasTypedSinceOpen,
   query,
   matches: matchesOption,
+  rank: (item, q) => rankMatch(item.label, q),
   filterable: () => props.filterable ?? true,
 })
 
