@@ -10,8 +10,8 @@ const people = [
 
 describe('rankByQuery', () => {
   it('keeps the same matches as filterByQuery', () => {
-    expect(rankByQuery(people, 'sar', 'label')).toHaveLength(
-      filterByQuery(people, 'sar', 'label').length,
+    expect(new Set(rankByQuery(people, 'sar', 'label'))).toEqual(
+      new Set(filterByQuery(people, 'sar', 'label')),
     )
   })
 
