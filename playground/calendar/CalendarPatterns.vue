@@ -1271,6 +1271,14 @@ function dayBand(label: string) {
   not increment a counter — and `position: absolute` so the hidden ones take
   no space while they are still counted.
 */
+/*
+  A bar across days (a leave) has no accent line, so its title would start
+  4 in where an event's starts 12 in (2 for the line, then the gap). 8 more at
+  its start lines the two titles up on one edge (the user's call 2026-10-13).
+*/
+:deep([data-week-row] > .absolute.event > div:first-child) {
+  padding-left: 8px;
+}
 :deep([data-week-row] > div > .flex.flex-col.pb-1\.5) {
   counter-reset: espresso-more;
   position: relative;
