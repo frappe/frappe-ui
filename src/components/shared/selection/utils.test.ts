@@ -103,6 +103,11 @@ describe('rankByLabel', () => {
     expect(rank('Frappe HR', 'app')).toBe(3)
   })
 
+  it('counts a word after punctuation as a word start', () => {
+    expect(rank('Mobile (app)', 'app')).toBe(2)
+    expect(rank('Web/App', 'app')).toBe(2)
+  })
+
   it('ignores case', () => {
     expect(rank('Sarah Connor', 'SAR')).toBe(1)
   })

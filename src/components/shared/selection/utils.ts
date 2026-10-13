@@ -144,7 +144,7 @@ export function rankByLabel(item: { label: string }, query: string): number {
   const normalizedQuery = query.toLowerCase()
   if (!normalizedQuery || label === normalizedQuery) return 0
   if (label.startsWith(normalizedQuery)) return 1
-  if (label.split(/[\s._-]+/).some((word) => word.startsWith(normalizedQuery)))
+  if (label.split(/[^\p{L}\p{N}]+/u).some((word) => word.startsWith(normalizedQuery)))
     return 2
   return 3
 }
