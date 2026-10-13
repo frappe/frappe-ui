@@ -11,6 +11,7 @@
 //   compact  p 4, 4px gap: subtle input with a solid sm "Add embed"
 import { computed, ref } from 'vue'
 import { Button, TextInput } from '../../../src'
+import { useTabInk } from '../useTabInk'
 
 const emit = defineEmits<{
   embed: [url: string]
@@ -25,6 +26,9 @@ const TABS: { value: Tab; label: string }[] = [
   { value: 'library', label: 'Library' },
 ]
 const tab = ref<Tab>('link')
+// the selected tab's line, one for the row, sliding over the row's rule
+const tabRow = ref<HTMLElement | null>(null)
+const ink = useTabInk(tabRow, tab)
 
 interface Embed {
   url: string
@@ -109,7 +113,8 @@ function addCompact() {
       aria-label="Embed"
     >
       <div
-        class="flex h-7 items-end justify-between border-b border-outline-gray-1 pl-4 pr-2 dark:border-outline-gray-2"
+        ref="tabRow"
+        class="relative flex h-7 items-end justify-between border-b border-outline-gray-1 pl-4 pr-2 dark:border-outline-gray-2"
       >
         <div class="flex h-7 gap-6" role="tablist" aria-label="Embed from">
           <button
@@ -118,17 +123,23 @@ function addCompact() {
             type="button"
             role="tab"
             :aria-selected="tab === t.value"
-            class="-mb-px h-7 border-b pb-1.5 text-base transition-colors"
+            class="-mb-px h-7 border-b border-transparent pb-1.5 text-base transition-colors"
             :class="
               tab === t.value
-                ? 'border-current text-ink-gray-8'
-                : 'border-transparent text-ink-gray-5 hover:text-ink-gray-7'
+                ? 'text-ink-gray-8'
+                : 'text-ink-gray-5 hover:text-ink-gray-7'
             "
             @click="tab = t.value"
           >
             {{ t.label }}
           </button>
         </div>
+        <span
+          class="embed-tab-ink"
+          :class="ink.placed.value && 'is-placed'"
+          :style="ink.style.value"
+          aria-hidden="true"
+        />
         <Button
           variant="ghost"
           size="xs"
@@ -254,3 +265,26 @@ function addCompact() {
     </form>
   </div>
 </template>
+
+<style scoped>
+/* the selected tab's line: 2px ink-gray-8, its lower pixel on the row's
+   rule, sliding from tab to tab */
+.embed-tab-ink {
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  height: 2px;
+  background: var(--ink-gray-8);
+  pointer-events: none;
+}
+.embed-tab-ink.is-placed {
+  transition:
+    transform 200ms cubic-bezier(0.2, 0, 0, 1),
+    width 200ms cubic-bezier(0.2, 0, 0, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .embed-tab-ink.is-placed {
+    transition: none;
+  }
+}
+</style>
