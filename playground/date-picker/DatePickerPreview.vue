@@ -30,12 +30,13 @@
 //              and a solid xs button at the right
 //   sidebar    (optional) 122 wide, 4 in, a rule at its right: sm ghost
 //              buttons 28 tall, 1 apart — shortcuts that pick a date
-import { computed, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import dayjs from 'dayjs/esm'
 import { Button, Select, TextInput } from '../../src'
 import DateCalendar from '../../src/components/DatePicker/DateCalendar.vue'
 import DateRangeCalendar from '../../src/components/DatePicker/DateRangeCalendar.vue'
 import type { DateRangeValue } from '../../src/components/DatePicker/types'
+import { parseDate } from './parseDate'
 import iconLeft from './icons/small-left.svg?url'
 import iconRight from './icons/small-right.svg?url'
 import iconToday from './icons/tomorrow.svg?url'
@@ -78,19 +79,66 @@ const minutes = Array.from({ length: 12 }, (_, i) =>
 )
 const meridiems = ['AM', 'PM']
 
-// ---- header: type a date, Enter (or leaving the field) picks it
-const FORMATS = [
-  'YYYY-MM-DD',
-  'D MMM YYYY',
-  'MMM D YYYY',
-  'D/M/YYYY',
-  'D-M-YYYY',
-]
-const DISPLAY = 'D MMM YYYY'
-const parse = (text: string) => {
-  const d = dayjs(text.trim(), FORMATS)
-  return d.isValid() ? d.format('YYYY-MM-DD') : null
+// ---- the time lists open over their field, the current value sitting
+// exactly on it (the macOS way), six options tall, scrolling for the rest.
+// reka's own item-aligned placement does the first part but runs the list to
+// the window's edges; once it has placed the list, it is cut to six rows
+// around the current one and moved so that row stays on the field
+const ITEM = 28
+const ROWS = 6
+const PAD = 4
+let observer: MutationObserver | null = null
+function fitTimeList(viewport: HTMLElement) {
+  const trigger = document.querySelector<HTMLElement>(
+    '.dp-time button[aria-expanded="true"]',
+  )
+  const wrapper = viewport.closest<HTMLElement>(
+    '[data-slot="content"]',
+  )?.parentElement
+  if (!trigger || !wrapper) return
+  const options = [...viewport.querySelectorAll<HTMLElement>('[role="option"]')]
+  const k = options.findIndex((o) => o.getAttribute('data-state') === 'checked')
+  if (k < 0) return
+  const rows = Math.min(ROWS, options.length)
+  // the current row 4th from the top where the list allows (07 08 09 [10] 11 12)
+  const start = Math.max(0, Math.min(k - 3, options.length - rows))
+  const height = rows * ITEM + PAD * 2
+  const t = trigger.getBoundingClientRect()
+  const top = t.top + t.height / 2 - (PAD + (k - start) * ITEM + ITEM / 2)
+  const set = (prop: string, value: string) =>
+    wrapper.style.setProperty(prop, value, 'important')
+  set('top', `${Math.round(top)}px`)
+  set('bottom', 'auto')
+  set('margin', '0')
+  set('height', `${height}px`)
+  set('min-height', `${height}px`)
+  set('max-height', `${height}px`)
+  viewport.scrollTop = start * ITEM
 }
+onMounted(() => {
+  observer = new MutationObserver(() => {
+    const viewport = document.querySelector<HTMLElement>(
+      '[data-slot="content"] [data-reka-select-viewport]',
+    )
+    if (!viewport || viewport.dataset.dpFitted) return
+    if (!document.querySelector('.dp-time button[aria-expanded="true"]')) return
+    viewport.dataset.dpFitted = '1'
+    // marks the list as a time list, for its 28px rows (style below)
+    viewport.closest('[data-slot="content"]')?.classList.add('dp-time-list')
+    // after reka's own placement (it runs on the next frames)
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => fitTimeList(viewport)),
+    )
+  })
+  observer.observe(document.body, { childList: true, subtree: true })
+})
+onUnmounted(() => observer?.disconnect())
+
+// ---- header: type a date, Enter (or leaving the field) picks it
+// in plain language: see parseDate.ts for what it reads
+const DISPLAY = 'D MMM YYYY'
+const parse = (text: string) =>
+  parseDate(text, dayjs(), dayjs(date.value || range.value[0] || undefined))
 const show = (value: string) => (value ? dayjs(value).format(DISPLAY) : '')
 const typed = ref('')
 const typedFrom = ref('')
@@ -104,10 +152,13 @@ watch(
   },
   { immediate: true },
 )
+// after a commit the field always shows the date it picked, written out
+// (on the next tick: the field's own text has to land first, or setting it
+// back to the same formatted value is a no-op and the typed text stays)
 function commitTyped() {
   const v = parse(typed.value)
   if (v) date.value = v
-  else typed.value = show(date.value)
+  nextTick(() => (typed.value = show(date.value)))
 }
 // one pane, one field, shortened where the dates share a month or a year:
 // "5 – 11 Jun 2023", "26 Jun – 4 Jul 2023"
@@ -128,27 +179,27 @@ watch(range, (r) => (typedRange.value = showRange(r)), { immediate: true })
 function commitTypedRange() {
   const [a = '', b = ''] = typedRange.value.split(/\s+[–-]\s+|\s+to\s+/)
   const to = parse(b)
-  // the start borrows what it leaves out (month, year) from the end
+  // a bare start ("5 – 11 Jun") borrows its month and year from the end
   const parts = b.trim().split(/\s+/)
-  const from =
-    parse(a) ||
-    parse(`${a} ${parts.slice(-1)}`) ||
-    parse(`${a} ${parts.slice(-2).join(' ')}`)
+  const borrowed =
+    parse(`${a} ${parts.slice(-2).join(' ')}`) ||
+    parse(`${a} ${parts.slice(-1)}`)
+  const from = /^\d{1,2}$/.test(a.trim()) ? borrowed : parse(a) || borrowed
   if (from && to) range.value = from <= to ? [from, to] : [to, from]
-  else typedRange.value = showRange(range.value)
+  nextTick(() => (typedRange.value = showRange(range.value)))
 }
 function commitRange(which: 0 | 1) {
-  const text = which ? typedTo.value : typedFrom.value
-  const v = parse(text)
-  if (!v) {
+  const v = parse(which ? typedTo.value : typedFrom.value)
+  if (v) {
+    const next: DateRangeValue = [...range.value]
+    next[which] = v
+    if (next[0] && next[1] && next[0] > next[1]) next.reverse()
+    range.value = next
+  }
+  nextTick(() => {
     typedFrom.value = show(range.value[0])
     typedTo.value = show(range.value[1])
-    return
-  }
-  const next: DateRangeValue = [...range.value]
-  next[which] = v
-  if (next[0] && next[1] && next[0] > next[1]) next.reverse()
-  range.value = next
+  })
 }
 
 // ---- sidebar: shortcuts, counted back from today (the calendar moves to
@@ -178,6 +229,12 @@ const isRange = computed(() => props.range)
 // Today button picks today instead, so its click is taken here and the
 // calendar is stepped month by month with its own prev / next buttons
 const calendarKey = ref(0)
+// a fresh calendar on every variant change, so a month list left open in
+// Default doesn't carry into Inline (which has none)
+watch(
+  () => props.variant,
+  () => calendarKey.value++,
+)
 const MONTHS = [
   'Jan',
   'Feb',
@@ -356,8 +413,6 @@ const icons = {
         size="xs"
         variant="subtle"
         aria-label="Hour"
-        side="top"
-        :offset="4"
       />
       <Select
         v-model="minute"
@@ -365,8 +420,6 @@ const icons = {
         size="xs"
         variant="subtle"
         aria-label="Minute"
-        side="top"
-        :offset="4"
       />
       <Select
         v-model="meridiem"
@@ -374,8 +427,6 @@ const icons = {
         size="xs"
         variant="subtle"
         aria-label="AM or PM"
-        side="top"
-        :offset="4"
       />
     </div>
 
@@ -651,6 +702,11 @@ const icons = {
   background: var(--surface-gray-2);
 }
 
+/* the month list is the whole body: the time row steps aside */
+.dp:has([aria-label='Select month and year']) .dp-time {
+  display: none;
+}
+
 /* inline: the month is a plain label — no month list, so no chevron and no
    button look; the arrows still move between months */
 .dp--inline .dp-cal :deep([aria-label='cycle-calendar-view']) {
@@ -692,9 +748,11 @@ const icons = {
 </style>
 
 <style>
-/* the time selects' lists show six options and scroll for the rest; the
-   list is portalled out of the picker, so this is gated on the time row */
-body:has(.dp-time) [data-slot='content'] [data-reka-select-viewport] {
-  max-height: calc(6 * 24px + 8px);
+/* the time lists' options are the file's menu items: 28 tall, radius 8 (the
+   list is portalled out of the picker; the page marks it) */
+.dp-time-list [role='option'] {
+  min-height: 28px !important;
+  height: 28px !important;
+  border-radius: 8px !important;
 }
 </style>
