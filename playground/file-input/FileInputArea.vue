@@ -18,8 +18,11 @@
 //               glyph, 14, the name at 14/16 medium ink-gray-7 (tracked
 //               0.035em, like the title), 4, "1.5 MB • 100%" at 13/20
 //               (ink-gray-7, 5, a 4px gray-3 dot, 5, ink-green-7), the 16px
-//               close glyph at the right. While a file goes up its card sits
-//               inside the area, 34 under the title, a 4px Progress across the card's body, 8 under it.
+//               close glyph at the right as an xs ghost icon button. A file going
+//               up has its card there too, from the start — not in the area
+//               (the user's call 2026-10-13) — with a 4px Progress across
+//               its body, 8 under the line. An image shows as its own
+//               thumbnail in the glyph's 30x40 slot.
 //   horizontal  60x60 thumbnails, radius 10, 8 apart, 6 under the area; a
 //               14px white badge with the 10px close glyph 4 over the top,
 //               2 past the right; one going up wears a 63% black veil with a
@@ -133,19 +136,8 @@ watch(
   { immediate: true },
 )
 
-const uploading = computed(() =>
-  items.value.filter((i) => i.status === 'loading'),
-)
-const listed = computed(() =>
-  props.orientation === 'vertical'
-    ? items.value.filter((i) => i.status !== 'loading')
-    : items.value,
-)
+const listed = computed(() => items.value)
 const failed = computed(() => items.value.find((i) => i.status === 'error'))
-/** Vertical uploads show inside the area, in place of the button. */
-const inArea = computed(() =>
-  props.orientation === 'vertical' ? uploading.value : [],
-)
 
 function bytes(n: number) {
   if (n < 1024) return `${n} B`
@@ -199,11 +191,7 @@ function onDrop(e: DragEvent) {
       :tabindex="disabled ? -1 : 0"
       :aria-disabled="disabled || undefined"
       class="fia-area relative flex cursor-pointer flex-col items-center justify-center rounded-7 px-6 outline-none focus-visible:ring-2 focus-visible:ring-outline-gray-3"
-      :class="[
-        dragging && 'is-dragging',
-        'min-h-[174px]',
-        inArea.length ? 'justify-between py-6' : '',
-      ]"
+      :class="[dragging && 'is-dragging', 'min-h-[174px]']"
       @click="open"
       @keydown.enter.prevent="open"
       @keydown.space.prevent="open"
@@ -234,55 +222,6 @@ function onDrop(e: DragEvent) {
           </div>
         </div>
       </div>
-      <!-- a vertical upload in progress, in the area -->
-      <div v-if="inArea.length" class="mt-[34px] flex w-full flex-col gap-3">
-        <div
-          v-for="item in inArea"
-          :key="item.id"
-          data-slot="file"
-          class="flex w-full cursor-default gap-3.5 rounded-6 bg-surface-elevation-1 p-3.5 shadow-sm"
-          @click.stop
-        >
-          <span class="fia-glyph">
-            <FileInputIcon
-              :name="glyphFor(item.name).icon"
-              class="fia-glyph-art"
-            />
-            <span v-if="glyphFor(item.name).label" class="fia-glyph-label">{{
-              glyphFor(item.name).label
-            }}</span>
-          </span>
-          <div class="flex min-w-0 flex-1 flex-col">
-            <div class="flex gap-2">
-              <div class="flex min-w-0 flex-1 flex-col gap-1">
-                <p
-                  class="truncate text-base font-medium leading-[16px] tracking-[0.035em] text-ink-gray-7"
-                >
-                  {{ item.name }}
-                </p>
-                <p class="flex items-center gap-[5px] text-sm leading-[20px]">
-                  <span class="text-ink-gray-7">{{ bytes(item.size) }}</span>
-                  <span class="size-1 rounded-full bg-surface-gray-5" />
-                  <span class="text-ink-green-7">{{ item.progress }}%</span>
-                </p>
-              </div>
-              <button
-                type="button"
-                class="size-4 shrink-0 text-ink-gray-7"
-                aria-label="Cancel upload"
-                @click="remove(item)"
-              >
-                <FileInputIcon name="close" class="size-4" />
-              </button>
-            </div>
-            <Progress
-              :value="item.progress"
-              size="md"
-              class="mt-2 !w-[calc(100%-24px)]"
-            />
-          </div>
-        </div>
-      </div>
     </div>
 
     <!-- vertical: a card per file under the area -->
@@ -294,14 +233,25 @@ function onDrop(e: DragEvent) {
         v-for="item in listed"
         :key="item.id"
         data-slot="file"
-        class="flex h-[68px] w-full items-start gap-3.5 rounded-6 bg-surface-elevation-1 p-3.5"
+        class="flex w-full items-start gap-3.5 rounded-6 bg-surface-elevation-1 p-3.5"
         :class="
           item.status === 'error'
-            ? 'border border-outline-red-5 !p-[13px]'
-            : 'shadow-sm'
+            ? 'h-[68px] border border-outline-red-5 !p-[13px]'
+            : item.status === 'loading'
+              ? 'shadow-sm'
+              : 'h-[68px] shadow-sm'
         "
       >
-        <span class="fia-glyph">
+        <!-- an image shows itself; anything else, the file's page glyph
+             with its own format on it -->
+        <img
+          v-if="item.url && item.status !== 'error'"
+          :src="item.url"
+          alt=""
+          data-slot="thumbnail"
+          class="h-10 w-[30px] shrink-0 rounded-2 object-cover ring-1 ring-inset ring-outline-gray-1"
+        />
+        <span v-else class="fia-glyph">
           <FileInputIcon
             :name="glyphFor(item.name).icon"
             class="fia-glyph-art"
@@ -310,47 +260,63 @@ function onDrop(e: DragEvent) {
             glyphFor(item.name).label
           }}</span>
         </span>
-        <div class="flex min-w-0 flex-1 gap-2">
-          <div class="flex min-w-0 flex-1 flex-col gap-1">
-            <p
-              class="truncate text-base font-medium leading-[16px] tracking-[0.035em] text-ink-gray-7"
-            >
-              {{ item.name }}
-            </p>
-            <p
+        <div class="flex min-w-0 flex-1 flex-col">
+          <div class="flex gap-2">
+            <div class="flex min-w-0 flex-1 flex-col gap-1">
+              <p
+                class="truncate text-base font-medium leading-[16px] tracking-[0.035em] text-ink-gray-7"
+              >
+                {{ item.name }}
+              </p>
+              <p
+                v-if="item.status === 'error'"
+                class="truncate text-sm leading-[20px] text-ink-red-6"
+              >
+                Something went wrong
+              </p>
+              <p
+                v-else
+                class="flex items-center gap-[5px] text-sm leading-[20px]"
+              >
+                <span class="text-ink-gray-7">{{ bytes(item.size) }}</span>
+                <span class="size-1 rounded-full bg-surface-gray-5" />
+                <span class="text-ink-green-7">{{ item.progress }}%</span>
+              </p>
+            </div>
+            <Button
               v-if="item.status === 'error'"
-              class="truncate text-sm leading-[20px] text-ink-red-6"
+              size="sm"
+              variant="subtle"
+              theme="red"
+              class="shrink-0"
+              @click="retry(item)"
             >
-              Something went wrong
-            </p>
-            <p
+              Try again
+            </Button>
+            <!-- an icon-only ghost button: the 16 glyph stays where the
+                 file puts it, the 24 hover fill around it -->
+            <Button
               v-else
-              class="flex items-center gap-[5px] text-sm leading-[20px]"
+              variant="ghost"
+              size="xs"
+              class="-m-1 shrink-0 !text-ink-gray-7"
+              :aria-label="
+                item.status === 'loading' ? 'Cancel upload' : 'Remove file'
+              "
+              @click="remove(item)"
             >
-              <span class="text-ink-gray-7">{{ bytes(item.size) }}</span>
-              <span class="size-1 rounded-full bg-surface-gray-5" />
-              <span class="text-ink-green-7">100%</span>
-            </p>
+              <template #icon>
+                <FileInputIcon name="close" class="size-4" />
+              </template>
+            </Button>
           </div>
-          <Button
-            v-if="item.status === 'error'"
-            size="sm"
-            variant="subtle"
-            theme="red"
-            class="shrink-0"
-            @click="retry(item)"
-          >
-            Try again
-          </Button>
-          <button
-            v-else
-            type="button"
-            class="size-4 shrink-0 text-ink-gray-7"
-            aria-label="Remove file"
-            @click="remove(item)"
-          >
-            <FileInputIcon name="close" class="size-4" />
-          </button>
+          <!-- going up: a 4px Progress across the body, 8 under it -->
+          <Progress
+            v-if="item.status === 'loading'"
+            :value="item.progress"
+            size="md"
+            class="mt-2 !w-[calc(100%-24px)]"
+          />
         </div>
       </div>
     </div>

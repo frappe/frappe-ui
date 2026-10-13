@@ -134,11 +134,40 @@ onMounted(() => {
 })
 onUnmounted(() => observer?.disconnect())
 
+// ---- the month list opens in place: the picker's top edge stays where the
+// calendar's was (the user's call 2026-10-13). The page centres the picker,
+// so a taller month list would push its top up; the difference is taken back
+// from the margin below, and the picker grows downward instead
+const root = ref<HTMLElement | null>(null)
+const pull = ref(0)
+let calendarHeight = 0
+let sizer: ResizeObserver | null = null
+onMounted(() => {
+  sizer = new ResizeObserver(() => {
+    const el = root.value
+    if (!el) return
+    const h = el.offsetHeight
+    if (el.querySelector('[aria-label="Select month and year"]'))
+      pull.value = calendarHeight - h
+    else {
+      calendarHeight = h
+      pull.value = 0
+    }
+  })
+  if (root.value) sizer.observe(root.value)
+})
+onUnmounted(() => sizer?.disconnect())
+
 // ---- header: type a date, Enter (or leaving the field) picks it
 // in plain language: see parseDate.ts for what it reads
 const DISPLAY = 'D MMM YYYY'
-const parse = (text: string) =>
-  parseDate(text, dayjs(), dayjs(date.value || range.value[0] || undefined))
+const parse = (text: string, from?: string) =>
+  parseDate(
+    text,
+    dayjs(),
+    dayjs(date.value || range.value[0] || undefined),
+    from ? dayjs(from) : dayjs(),
+  )
 const show = (value: string) => (value ? dayjs(value).format(DISPLAY) : '')
 const typed = ref('')
 const typedFrom = ref('')
@@ -178,18 +207,22 @@ const typedRange = ref('')
 watch(range, (r) => (typedRange.value = showRange(r)), { immediate: true })
 function commitTypedRange() {
   const [a = '', b = ''] = typedRange.value.split(/\s+[–-]\s+|\s+to\s+/)
-  const to = parse(b)
   // a bare start ("5 – 11 Jun") borrows its month and year from the end
   const parts = b.trim().split(/\s+/)
   const borrowed =
     parse(`${a} ${parts.slice(-2).join(' ')}`) ||
     parse(`${a} ${parts.slice(-1)}`)
   const from = /^\d{1,2}$/.test(a.trim()) ? borrowed : parse(a) || borrowed
+  // the end counts from the start ("8 jun – 4 thursdays")
+  const to = parse(b, from || undefined)
   if (from && to) range.value = from <= to ? [from, to] : [to, from]
   nextTick(() => (typedRange.value = showRange(range.value)))
 }
 function commitRange(which: 0 | 1) {
-  const v = parse(which ? typedTo.value : typedFrom.value)
+  // the end, typed relatively, counts from the start already picked
+  const v = which
+    ? parse(typedTo.value, range.value[0] || undefined)
+    : parse(typedFrom.value)
   if (v) {
     const next: DateRangeValue = [...range.value]
     next[which] = v
@@ -301,14 +334,16 @@ const icons = {
 
 <template>
   <div
+    ref="root"
     class="dp inline-flex flex-col"
+    :style="[icons, { marginBottom: `${pull}px` }]"
     :class="[
       variant === 'inline'
         ? 'dp--inline'
         : 'rounded-6 bg-surface-elevation-2 shadow-xl',
       isRange && doublePane && 'dp--double',
+      isRange && range[0] && !range[1] && 'dp--picking',
     ]"
-    :style="icons"
   >
     <!-- header: type a date -->
     <div
@@ -674,6 +709,70 @@ const icons = {
     [role='row'] > button.bg-surface-gray-3 + button[aria-selected='true']
   ) {
   box-shadow: -2px 0 0 var(--surface-gray-1);
+}
+
+/* today inside the range keeps its own rounded ring (the user's call
+   2026-10-13): the bar runs on square behind it, the ring drawn over it */
+.dp-cal :deep([role='row'] > button.bg-surface-gray-3[aria-label$='(Today)']) {
+  position: relative;
+  box-shadow: -2px 0 0 var(--surface-gray-1);
+}
+.dp-cal
+  :deep(
+    [role='row'] > button.bg-surface-gray-3[aria-label$='(Today)']::before
+  ) {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 5px;
+  box-shadow: inset 0 0 0 1px var(--outline-gray-6);
+  pointer-events: none;
+}
+.dp-cal
+  :deep(
+    [role='row'] > button.bg-surface-gray-3:first-child[aria-label$='(Today)']
+  ),
+.dp-cal
+  :deep([role='row'] > div + button.bg-surface-gray-3[aria-label$='(Today)']) {
+  box-shadow: none;
+}
+
+/* while the end is being picked, the hovered day is the bar's end: it
+   rounds on its open side — the right, or the left when it comes before
+   the start */
+.dp--picking .dp-cal :deep([role='row'] > button.bg-surface-gray-3:hover) {
+  border-radius: 0 5px 5px 0;
+}
+.dp--picking
+  .dp-cal
+  :deep(
+    [role='row']
+      > button.bg-surface-gray-3:hover:is(
+        :has(+ button.bg-surface-gray-3),
+        :has(+ button[aria-selected='true'])
+      )
+  ) {
+  border-radius: 5px 0 0 5px;
+  box-shadow: none;
+}
+.dp--picking
+  .dp-cal
+  :deep(
+    [role='row']
+      > div
+      + button.bg-surface-gray-3:hover:not(
+        :has(+ button.bg-surface-gray-3)
+      ):not(:has(+ button[aria-selected='true']))
+  ),
+.dp--picking
+  .dp-cal
+  :deep(
+    [role='row']
+      > button.bg-surface-gray-3:first-child:hover:not(
+        :has(+ button.bg-surface-gray-3)
+      ):not(:has(+ button[aria-selected='true']))
+  ) {
+  border-radius: 5px;
 }
 
 /* the month list: two columns 88 wide, 4 apart, rows 28 tall, 1 apart; the

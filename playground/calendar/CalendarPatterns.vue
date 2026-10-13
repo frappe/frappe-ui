@@ -884,7 +884,7 @@ function dayBand(label: string) {
               -->
                   <span
                     v-if="band.today"
-                    class="ml-1 inline-flex h-6 w-[26px] items-center justify-center rounded-3 bg-surface-red-7 tabular-nums text-white"
+                    class="ml-1 inline-flex h-6 w-[26px] items-center justify-center rounded-3 bg-surface-red-7 text-white"
                   >
                     {{ band.date }}
                   </span>
@@ -970,7 +970,11 @@ function dayBand(label: string) {
         />
 
         <!-- Where every other overlay on the page lands; see `overlays`. -->
-        <div ref="overlays" :class="[espressoDatePicker, espressoMenuHeight]" />
+        <div
+          ref="overlays"
+          class="cal-overlays"
+          :class="[espressoDatePicker, espressoMenuHeight]"
+        />
 
         <!--
         The span being drawn: a wash of `surface-gray-1` and no edge at all,
@@ -1539,5 +1543,88 @@ function dayBand(label: string) {
     left 180ms ease-out,
     width 180ms ease-out,
     top 180ms ease-out !important;
+}
+</style>
+
+<style>
+/* the gray calendar's card (see sampleCalendars): the file's ink-gray-6 on
+   surface-gray-1 in light; in dark ink-gray-6 is the dimmed secondary ink, so
+   the card takes the step that reads as a colour, not as disabled — ink-gray-8
+   on surface-gray-2, a step up from the colours' -1 the way gray's own scale
+   sits darker than theirs */
+:root {
+  --cal-gray-ink: var(--ink-gray-6);
+  --cal-gray-bg: var(--surface-gray-1);
+  --cal-gray-bg-active: var(--surface-gray-2);
+}
+[data-theme='dark'] {
+  --cal-gray-ink: var(--ink-gray-8);
+  --cal-gray-bg: var(--surface-gray-2);
+  --cal-gray-bg-active: var(--surface-gray-3);
+}
+</style>
+
+<style>
+/* The month picker's panel, as the Date picker pattern draws it (the user's
+   call 2026-10-13). The panel lands in `overlays`, out of this component's
+   scope, so these are plain rules under that target's class. */
+
+/* the pattern's card: the xl shadow alone — frappe-ui's popover adds the 2xl
+   shadow and a black ring, which read heavier than the pattern's */
+.cal-overlays .shadow-2xl:has(.select-none) {
+  @apply !shadow-xl !ring-0;
+}
+
+/* the month: 13 medium ink-gray-7, the file's small-down after it (small-up
+   while the month list is open) */
+.cal-overlays
+  .select-none
+  .p-2.pb-0
+  > button[aria-label='cycle-calendar-view'][aria-label] {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 2px;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.02em;
+  color: var(--ink-gray-7);
+}
+.cal-overlays [aria-label='cycle-calendar-view']::after {
+  content: '';
+  width: 14px;
+  height: 14px;
+  background: currentColor;
+  -webkit-mask: url('../date-picker/icons/small-down.svg') center / contain
+    no-repeat;
+  mask: url('../date-picker/icons/small-down.svg') center / contain no-repeat;
+}
+.cal-overlays
+  .select-none:has([aria-label='Select month and year'])
+  [aria-label='cycle-calendar-view']::after {
+  -webkit-mask-image: url('../date-picker/icons/small-up.svg');
+  mask-image: url('../date-picker/icons/small-up.svg');
+}
+
+/* the month list: two columns 88 wide, 4 apart, rows 28 tall, 1 apart,
+   radius 8, 13 ink-gray-7, no scroll bar */
+.cal-overlays [aria-label='Select month and year'] {
+  width: 180px !important;
+  gap: 4px !important;
+}
+.cal-overlays [aria-label='Select month and year'] > div {
+  width: 88px !important;
+  gap: 1px !important;
+  padding: 0 !important;
+  scrollbar-width: none;
+}
+.cal-overlays [aria-label='Select month and year'] button {
+  height: 28px !important;
+  padding: 0 8px !important;
+  border-radius: 8px !important;
+  font-size: 13px !important;
+  color: var(--ink-gray-7) !important;
+}
+.cal-overlays [aria-label='Select month and year'] button[data-selected] {
+  background: var(--surface-gray-2);
 }
 </style>

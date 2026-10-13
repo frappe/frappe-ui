@@ -5,14 +5,16 @@
 //
 //   card       700 wide, white (surface-elevation-1), radius 12, the base
 //              shadow, no rules between chapters
-//   chapter    50 tall, 16 / 20 in, 12 apart: the file's chevron (16,
+//   chapter    50 tall, 16 / 20 in (14 at the left, so the chevron's ink
+//              sits 20 in, matching the right), 12 apart: the file's chevron (16,
 //              ink-gray-6) pointing right, turned down when open — first,
 //              where the library's own (last, hidden) would be — the title
 //              at 16 medium ink-gray-8, and at the right "5 lessons · 28 min"
 //              at 14 ink-gray-7, the dot between a 2px ink-gray-4 disc
 //              (the first chapter 20 / 12 in, the last 16 / 20 and 54 tall)
 //   lessons    straight under an open chapter: rows 42 tall, 42 apart,
-//              12 / 20 in, 12 apart — the file's lesson glyph (18,
+//              42 / 20 in — the glyph under the chapter's title (the user's
+//              call 2026-10-13; the file had it under the chevron), 12 apart — the file's lesson glyph (18,
 //              ink-gray-8), the title at 14 ink-gray-8 and its length at
 //              14 ink-gray-7; the next chapter follows the last directly
 import { Accordion } from '../../experimental/Accordion'
@@ -141,7 +143,7 @@ const chapterOf = (value: string) => chapters.find((c) => c.value === value)!
           <li
             v-for="lesson in chapterOf(item.value).items"
             :key="lesson.title"
-            class="course-lesson flex h-[42px] items-center gap-3 px-5"
+            class="course-lesson flex h-[42px] items-center gap-3 pl-[42px] pr-5"
           >
             <AccordionIcon name="lesson" class="size-[18px] text-ink-gray-8" />
             <span
@@ -167,7 +169,10 @@ const chapterOf = (value: string) => chapters.find((c) => c.value === value)!
 }
 .course :deep([data-slot='trigger']) {
   height: 50px;
-  padding: 16px 20px;
+  /* 14 at the left, not 20: the chevron's ink starts 5.6 into its 16 box,
+     so 14 puts it 20 from the card's edge — the same as the meta's at the
+     right (the user's call 2026-10-13) */
+  padding: 16px 20px 16px 14px;
   gap: 12px;
   border-radius: 0;
 }

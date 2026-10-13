@@ -64,11 +64,15 @@ const dayIndex = (word: string) =>
 const out = (d: Dayjs | null) =>
   d && d.isValid() ? d.format('YYYY-MM-DD') : null
 
-/** `anchor` is today; `shown` is the month on screen, for a bare day. */
+/** `anchor` is today; `shown` is the month on screen, for a bare day;
+ * `from` is what relative text counts from — a range's end counts from its
+ * start ("4 thursdays", "in 2 weeks", "next fri"), while today, tomorrow and
+ * yesterday stay today's. */
 export function parseDate(
   input: string,
   anchor: Dayjs = dayjs(),
   shown: Dayjs = anchor,
+  from: Dayjs = anchor,
 ): string | null {
   const text = input
     .trim()
@@ -78,16 +82,33 @@ export function parseDate(
     .replace(/\bof\b/g, ' ')
     .replace(/\s+/g, ' ')
   if (!text) return null
-  const today = anchor.startOf('day')
+  const now = anchor.startOf('day')
+  const today = from.startOf('day')
 
   // words
-  if (text === 'today' || text === 'now' || text === 'tod') return out(today)
+  if (text === 'today' || text === 'now' || text === 'tod') return out(now)
   if (text === 'tomorrow' || text === 'tmrw' || text === 'tom')
-    return out(today.add(1, 'day'))
+    return out(now.add(1, 'day'))
   if (text === 'yesterday' || text === 'yday')
-    return out(today.subtract(1, 'day'))
-  if (text === 'day after tomorrow') return out(today.add(2, 'day'))
-  if (text === 'day before yesterday') return out(today.subtract(2, 'day'))
+    return out(now.subtract(1, 'day'))
+  if (text === 'day after tomorrow') return out(now.add(2, 'day'))
+  if (text === 'day before yesterday') return out(now.subtract(2, 'day'))
+
+  // a count of weekdays: 4 thursdays · in 2 fridays · 3 mondays later ·
+  // 2 tuesdays ago — the nth one after (or before) the reference day
+  const w = text.match(
+    /^(?:in )?(\d+|a|an|one|two|three|four|five|six|seven|eight|nine|ten) ([a-z]+?)s?( ago| from now| later| before| after)?$/,
+  )
+  if (w && dayIndex(w[2]) >= 0 && monthIndex(w[2]) < 0 && !UNITS[w[2]]) {
+    const n = /\d/.test(w[1]) ? Number(w[1]) : WORD_NUMBERS[w[1]]
+    const target = dayIndex(w[2])
+    if (w[3] === ' ago' || w[3] === ' before') {
+      const back = (today.day() - target + 7) % 7 || 7
+      return out(today.subtract(back + (n - 1) * 7, 'day'))
+    }
+    const ahead = (target - today.day() + 7) % 7 || 7
+    return out(today.add(ahead + (n - 1) * 7, 'day'))
+  }
 
   // relative: in 3 days · 3 days ago · +3d · -2w · 3 days from now
   let m = text.match(
@@ -125,7 +146,7 @@ export function parseDate(
   // numeric, day first: 5/6/2024 · 5.6.24 · 5-6 (this year)
   m = text.match(/^(\d{1,2})[-/.](\d{1,2})(?:[-/.](\d{2}|\d{4}))?$/)
   if (m) {
-    const year = m[3] ? fullYear(+m[3]) : today.year()
+    const year = m[3] ? fullYear(+m[3]) : now.year()
     // day first; fall back to month first when the day-first reading fails
     return strict(year, +m[2] - 1, +m[1]) ?? strict(year, +m[1] - 1, +m[2])
   }
@@ -146,7 +167,7 @@ export function parseDate(
       continue // "fri 5 jun": the weekday is noise
     else return null
   }
-  if (month !== null) return strict(year ?? today.year(), month, day ?? 1)
+  if (month !== null) return strict(year ?? now.year(), month, day ?? 1)
   // a bare day: the shown month's
   if (day !== null && year === null)
     return strict(shown.year(), shown.month(), day)

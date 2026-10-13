@@ -1259,6 +1259,16 @@ const outlineTitle = computed(
 </template>
 
 <style>
+/* Switch's knob takes the file's shadow (node 23553:699) in both themes.
+   frappe-ui's `shadow` adds an inset highlight that, on the dark knob, reads
+   as a blurry inner ring the design doesn't have. */
+[role='switch'] > span[data-state] {
+  box-shadow:
+    0 0.25px 1px rgb(255 255 255 / 0.14),
+    0 0 2px rgb(0 0 0 / 0.1),
+    0 2px 4px rgb(0 0 0 / 0.16);
+}
+
 /* Page switch: fade and rise 4px. */
 .v2-page-enter-active,
 .v2-page-leave-active {

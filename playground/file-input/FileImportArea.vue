@@ -372,14 +372,17 @@ const isOpen = (name: string) =>
             {{ sizeLine }}
           </p>
         </div>
-        <button
-          type="button"
-          class="size-4 shrink-0 text-ink-gray-5"
+        <Button
+          variant="ghost"
+          size="xs"
+          class="-m-1 shrink-0 !text-ink-gray-5"
           aria-label="Cancel upload"
           @click="reset"
         >
-          <FileInputIcon name="close" class="size-4" />
-        </button>
+          <template #icon>
+            <FileInputIcon name="close" class="size-4" />
+          </template>
+        </Button>
       </div>
       <Progress :value="progress" size="md" />
     </div>
@@ -421,14 +424,19 @@ const isOpen = (name: string) =>
             {{ sizeLine }}
           </p>
         </div>
-        <button
-          type="button"
-          class="size-4 shrink-0 text-ink-red-5"
+        <!-- an icon-only ghost button: the 16 glyph where the file puts it,
+             the 24 hover fill around it -->
+        <Button
+          variant="ghost"
+          size="xs"
+          class="-m-1 shrink-0 !text-ink-red-5"
           aria-label="Remove file"
           @click="reset"
         >
-          <FileInputIcon name="delete" class="size-4" />
-        </button>
+          <template #icon>
+            <FileInputIcon name="delete" class="size-4" />
+          </template>
+        </Button>
       </div>
       <div class="flex items-stretch gap-4 px-2">
         <div class="flex flex-1 flex-col gap-0.5">

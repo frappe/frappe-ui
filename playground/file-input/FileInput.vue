@@ -321,8 +321,10 @@ watch(
               class="flex h-full items-center"
             >
               <template v-if="variant === 'outline'">
+                <!-- the rule stops 1px short of the field's edge, so it never
+                     draws over the outline (which darkens on hover) -->
                 <span
-                  class="relative flex h-full cursor-pointer items-center border-l border-outline-gray-2 text-ink-gray-7"
+                  class="relative flex h-full cursor-pointer items-center text-ink-gray-7 before:absolute before:inset-y-px before:left-0 before:w-px before:bg-[var(--outline-gray-2)]"
                   @click="open"
                   :class="
                     size === 'lg'

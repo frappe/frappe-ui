@@ -333,7 +333,11 @@ const tagOptions = [
   'Sales',
   'Research',
   'Urgent',
-].map((label, i) => ({ label, value: label.toLowerCase(), theme: TAG_THEMES[i] }))
+].map((label, i) => ({
+  label,
+  value: label.toLowerCase(),
+  theme: TAG_THEMES[i],
+}))
 
 /**
  * By place in the list, not by a hash of the letters: six tags against six
@@ -528,6 +532,8 @@ const tabField = [
   // leaves its content at the start; with every pill the same width that
   // read as four words hung off four left edges.
   '[&_[role=tab]]:!justify-center',
+  // …and each pill a whole number of pixels wide: see `.ev-tabs` below.
+  'ev-tabs',
 ].join(' ')
 
 /**
@@ -684,7 +690,11 @@ function todayIso() {
             >
               <span
                 class="block rounded-1"
-                :style="{ width: '12px', height: '12px', backgroundColor: dotFill }"
+                :style="{
+                  width: '12px',
+                  height: '12px',
+                  backgroundColor: dotFill,
+                }"
               />
             </Button>
           </template>
@@ -719,7 +729,9 @@ function todayIso() {
           @update:model-value="touch"
           class="[&_label]:!text-base [&>span]:!text-base"
         />
-        <span class="ml-auto flex items-center gap-1.5 text-base text-ink-gray-5">
+        <span
+          class="ml-auto flex items-center gap-1.5 text-base text-ink-gray-5"
+        >
           <span class="lucide-globe size-4 shrink-0" aria-hidden="true" />
           GMT+5:30
         </span>
@@ -751,11 +763,9 @@ function todayIso() {
               @click="setOpen(!open)"
             >
               <!-- Blank until a day is picked, in the placeholder's grey. -->
-              <span
-                class="truncate"
-                :class="!dateLabel && 'text-ink-gray-4'"
-                >{{ dateLabel || 'Pick a date' }}</span
-              >
+              <span class="truncate" :class="!dateLabel && 'text-ink-gray-4'">{{
+                dateLabel || 'Pick a date'
+              }}</span>
               <!--
                 The file's own calendar glyph rather than a chevron (node
                 35447:66251): a date field says what it opens by the thing it
@@ -811,11 +821,10 @@ function todayIso() {
     <!-- ── How it behaves ───────────────────────────────────────────────── -->
     <div class="flex flex-col py-2.5">
       <!-- Whoever it is on, with their own face beside the name. -->
-      <div
-        v-if="tab === 'Task'"
-        class="flex h-10 items-center gap-3.5 px-5"
-      >
-        <span class="w-[90px] shrink-0 text-base text-ink-gray-6">Assignee</span>
+      <div v-if="tab === 'Task'" class="flex h-10 items-center gap-3.5 px-5">
+        <span class="w-[90px] shrink-0 text-base text-ink-gray-6"
+          >Assignee</span
+        >
         <Select
           v-model="assignee"
           :options="assigneeOptions"
@@ -982,10 +991,7 @@ function todayIso() {
       </div>
 
       <!-- Organisation, with the file's own marks — as Link carries them. -->
-      <div
-        v-if="tab === 'Task'"
-        class="flex h-10 items-center gap-3.5 px-5"
-      >
+      <div v-if="tab === 'Task'" class="flex h-10 items-center gap-3.5 px-5">
         <span class="w-[90px] shrink-0 text-base text-ink-gray-6">
           Organisation
         </span>
@@ -1025,122 +1031,128 @@ function todayIso() {
       next one and read as a 2px line.
     -->
     <template v-if="tab === 'Event'">
-    <div class="mx-5 shrink-0 border-t border-outline-gray-1" />
+      <div class="mx-5 shrink-0 border-t border-outline-gray-1" />
 
-    <!-- ── What it is attached to ───────────────────────────────────────── -->
-    <div class="flex flex-col py-2.5">
-      <div class="flex h-10 items-center gap-3.5 px-5">
-        <span class="w-[90px] shrink-0 text-base text-ink-gray-6">Link</span>
-        <Select
-          v-model="link"
-          :options="linkOptions"
-          size="sm"
-          variant="ghost"
-          :disabled="locked"
-          :class="field"
-          @update:model-value="touch"
-          aria-label="Link"
-        >
-          <template v-if="linkLogo" #prefix>
-            <img
-              :src="linkLogo"
-              alt=""
-              class="size-4 shrink-0 rounded-1 object-cover"
-            />
-          </template>
-          <template #item-prefix="{ item }">
-            <img
-              v-if="(item as { logo?: string }).logo"
-              :src="(item as { logo?: string }).logo"
-              alt=""
-              class="size-4 shrink-0 rounded-1 object-cover"
-            />
-          </template>
-        </Select>
-      </div>
+      <!-- ── What it is attached to ───────────────────────────────────────── -->
+      <div class="flex flex-col py-2.5">
+        <div class="flex h-10 items-center gap-3.5 px-5">
+          <span class="w-[90px] shrink-0 text-base text-ink-gray-6">Link</span>
+          <Select
+            v-model="link"
+            :options="linkOptions"
+            size="sm"
+            variant="ghost"
+            :disabled="locked"
+            :class="field"
+            @update:model-value="touch"
+            aria-label="Link"
+          >
+            <template v-if="linkLogo" #prefix>
+              <img
+                :src="linkLogo"
+                alt=""
+                class="size-4 shrink-0 rounded-1 object-cover"
+              />
+            </template>
+            <template #item-prefix="{ item }">
+              <img
+                v-if="(item as { logo?: string }).logo"
+                :src="(item as { logo?: string }).logo"
+                alt=""
+                class="size-4 shrink-0 rounded-1 object-cover"
+              />
+            </template>
+          </Select>
+        </div>
 
-      <!--
+        <!--
         People, as the settings modal does it: frappe-ui's MultiSelect with
         Espresso's menu — a filled search at the top, 32px rows on a 10px
         radius, an avatar at the lead and a check on the chosen ones — and
         the picked people as tags inside the field rather than a list
         stacked under it.
       -->
-      <div class="flex min-h-10 items-start gap-3.5 px-5 py-1.5">
-        <span class="mt-1.5 w-[90px] shrink-0 text-base text-ink-gray-6">
-          People
-        </span>
-        <!--
+        <div class="flex min-h-10 items-start gap-3.5 px-5 py-1.5">
+          <span class="mt-1.5 w-[90px] shrink-0 text-base text-ink-gray-6">
+            People
+          </span>
+          <!--
           MultiSelect hugs its contents: its root is an unclassed wrapper and
           the class goes to the trigger inside it, so an empty field came to
           127 against the 211 the Link select above it takes and the two right
           edges disagreed. The wrapper is what has to fill the row, so it is
           given the width and the trigger told to fill it.
         -->
-        <div class="min-w-0 flex-1 [&>div]:w-full">
-        <MultiSelect
-          v-model="attendees"
-          :disabled="locked"
-          @update:model-value="touch"
-          class="h-auto min-h-7 w-full py-1 [&>button]:!w-full [&_[data-slot=item-prefix]>span>div:first-child]:hidden"
-          :class="attendees.length ? '!pl-1' : '!pl-2'"
-          size="sm"
-          variant="ghost"
-          placeholder="Add attendee"
-          :options="people"
-          hide-search
-          aria-label="Add attendee"
-        >
-          <template #prefix><span class="hidden" /></template>
-
-          <template #summary="{ selectedOptions }">
-            <span
-              v-if="!selectedOptions.length"
-              class="text-base text-ink-gray-4"
+          <div class="min-w-0 flex-1 [&>div]:w-full">
+            <MultiSelect
+              v-model="attendees"
+              :disabled="locked"
+              @update:model-value="touch"
+              class="h-auto min-h-7 w-full py-1 [&>button]:!w-full [&_[data-slot=item-prefix]>span>div:first-child]:hidden"
+              :class="attendees.length ? '!pl-1' : '!pl-2'"
+              size="sm"
+              variant="ghost"
+              placeholder="Add attendee"
+              :options="people"
+              hide-search
+              aria-label="Add attendee"
             >
-              Add attendee
-            </span>
-            <!-- 4 from the left edge, the same as from the top — by the
+              <template #prefix><span class="hidden" /></template>
+
+              <template #summary="{ selectedOptions }">
+                <span
+                  v-if="!selectedOptions.length"
+                  class="text-base text-ink-gray-4"
+                >
+                  Add attendee
+                </span>
+                <!-- 4 from the left edge, the same as from the top — by the
                  field's padding, as the tags above, for the same reason. -->
-            <span v-else class="flex min-w-0 flex-wrap items-center gap-1">
-              <span
-                v-for="option in selectedOptions"
-                :key="option.value"
-                class="flex h-6 shrink-0 items-center gap-1 rounded-3 bg-surface-gray-2 py-[4.5px] pl-1.5 pr-1 dark:bg-surface-gray-4"
-              >
+                <span v-else class="flex min-w-0 flex-wrap items-center gap-1">
+                  <span
+                    v-for="option in selectedOptions"
+                    :key="option.value"
+                    class="flex h-6 shrink-0 items-center gap-1 rounded-3 bg-surface-gray-2 py-[4.5px] pl-1.5 pr-1 dark:bg-surface-gray-4"
+                  >
+                    <Avatar
+                      size="xs"
+                      class="!size-3"
+                      :label="option.label"
+                      :image="faceFor(option.label)"
+                    />
+                    <span class="text-sm text-ink-gray-7">{{
+                      option.label
+                    }}</span>
+                    <span
+                      class="lucide-x size-3 cursor-pointer text-ink-gray-7 hover:text-ink-gray-8"
+                      role="presentation"
+                      @click.stop.prevent="removeAttendee(option.value)"
+                    />
+                  </span>
+                </span>
+              </template>
+
+              <template #footer><span /></template>
+
+              <template #item-prefix="{ item }">
                 <Avatar
                   size="xs"
-                  class="!size-3"
-                  :label="option.label"
-                  :image="faceFor(option.label)"
+                  :label="item.label"
+                  :image="faceFor(item.label)"
                 />
-                <span class="text-sm text-ink-gray-7">{{ option.label }}</span>
+              </template>
+
+              <template #item-suffix="{ selected }">
                 <span
-                  class="lucide-x size-3 cursor-pointer text-ink-gray-7 hover:text-ink-gray-8"
-                  role="presentation"
-                  @click.stop.prevent="removeAttendee(option.value)"
+                  v-if="selected"
+                  class="lucide-check size-4 text-ink-gray-6"
+                  aria-hidden="true"
                 />
-              </span>
-            </span>
-          </template>
-
-          <template #footer><span /></template>
-
-          <template #item-prefix="{ item }">
-            <Avatar size="xs" :label="item.label" :image="faceFor(item.label)" />
-          </template>
-
-          <template #item-suffix="{ selected }">
-            <span
-              v-if="selected"
-              class="lucide-check size-4 text-ink-gray-6"
-              aria-hidden="true"
-            />
-          </template>
-        </MultiSelect>
+              </template>
+            </MultiSelect>
+          </div>
         </div>
       </div>
-    </div>
     </template>
 
     <div class="mx-5 shrink-0 border-t border-outline-gray-1" />
@@ -1286,6 +1298,26 @@ function todayIso() {
   it goes to frappe-ui until the team has validated the menu and the tag.
 -->
 <style>
+/* The pills share the track in whole pixels. Split evenly, two of them came
+   out 100.5 wide; the sliding highlight is placed from the pill's rounded
+   width and offset, so on Free it ran 1.5px past the pill, onto the track's
+   edge, and its right side was cut (the user's call 2026-10-13). Each pill
+   is the share rounded down — the pixel or two left over stays in the
+   track's right inset. */
+.ev-tabs [role='tablist'] > [role='tab'] {
+  flex: none !important;
+}
+.ev-tabs
+  [role='tablist']:has(> [role='tab']:nth-of-type(2):last-of-type)
+  > [role='tab'] {
+  width: round(down, calc((100% - 4px) / 2), 1px);
+}
+.ev-tabs
+  [role='tablist']:has(> [role='tab']:nth-of-type(3):last-of-type)
+  > [role='tab'] {
+  width: round(down, calc((100% - 8px) / 3), 1px);
+}
+
 /* The row's checkbox: Espresso marks a chosen row with the trailing check. */
 [data-slot='content'][role='listbox']
   [data-slot='item-prefix']
