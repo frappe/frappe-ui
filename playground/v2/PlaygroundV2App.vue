@@ -35,6 +35,7 @@ import TreePage from '../tree/TreePage.vue'
 import FileInputPage from '../file-input/FileInputPage.vue'
 import AccordionPatterns from '../accordion/AccordionPatterns.vue'
 import DatePickerPage from '../date-picker/DatePickerPage.vue'
+import TagPage from '../tag/TagPage.vue'
 // Figma 35185:59381 — the app's own mark, in place of the Frappe logo
 import appLogo from './assets/app-logo.svg'
 import EIcon from '../espresso-sidebar/EIcon.vue'
@@ -75,6 +76,7 @@ import navTree from './assets/nav/tree.svg?raw'
 import navFileInput from './assets/nav/file-input.svg?raw'
 import navAccordion from './assets/nav/accordion.svg?raw'
 import navDatePicker from './assets/nav/date-picker.svg?raw'
+import navTag from './assets/nav/tag.svg?raw'
 import ApplicableCouponsModal from './modals/ApplicableCouponsModal.vue'
 import CallDetailsModal from './modals/CallDetailsModal.vue'
 import DeleteProjectModal from './modals/DeleteProjectModal.vue'
@@ -193,6 +195,7 @@ const pages = [
   'File input',
   'Accordion',
   'Date picker',
+  'Tag',
 ].map((label) => ({ id: label.toLowerCase().replace(/\W+/g, '-'), label }))
 
 // The app tray down the far left, as a Frappe app shows it: this playground
@@ -243,6 +246,7 @@ const NAV_ICONS: Record<string, string> = {
   'file-input': navFileInput,
   accordion: navAccordion,
   'date-picker': navDatePicker,
+  tag: navTag,
 }
 
 // Drives `<html data-theme>`, so every token on the page — and in the
@@ -416,6 +420,7 @@ const OWN_CRUMB = [
   'file-input',
   'accordion',
   'date-picker',
+  'tag',
 ]
 provide(
   pageCrumbKey,
@@ -1128,6 +1133,7 @@ const outlineTitle = computed(
               <TreePage v-else-if="page === 'tree'" />
               <FileInputPage v-else-if="page === 'file-input'" />
               <DatePickerPage v-else-if="page === 'date-picker'" />
+              <TagPage v-else-if="page === 'tag'" />
               <div
                 v-else-if="page === 'accordion'"
                 class="v2-scroll h-full overflow-y-auto"
