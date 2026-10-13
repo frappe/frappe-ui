@@ -1,7 +1,7 @@
 <template>
   <EHeader>
     <template #left>
-      <Breadcrumbs :items="[{ label: 'frappe' }]" />
+      <Breadcrumbs :items="crumbs" />
     </template>
     <template #middle>
       <div class="flex items-center gap-1.5">
@@ -44,6 +44,7 @@
 
 <script setup lang="ts">
 import { Breadcrumbs, Button } from '../../../src'
+import { useHeaderCrumbs } from '../crumbs'
 import EIcon from '../../espresso-sidebar/EIcon.vue'
 import EHeader from '../EHeader.vue'
 import VDivider from '../VDivider.vue'
@@ -56,4 +57,6 @@ const actions = [
   { icon: 'alert-circle', label: 'Details' },
   { icon: 'play', label: 'Present' },
 ]
+
+const crumbs = useHeaderCrumbs([{ label: 'frappe' }])
 </script>

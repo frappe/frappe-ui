@@ -5,6 +5,7 @@ import {
   nextTick,
   onMounted,
   onUnmounted,
+  provide,
   reactive,
   ref,
   watch,
@@ -14,6 +15,7 @@ import { Button, Popover, Tooltip, useColorScheme } from '../../src'
 import PreviewSelectRow from './PreviewSelectRow.vue'
 import PreviewSwitchRow from './PreviewSwitchRow.vue'
 import { headerTypes, subheaderTypes } from '../espresso-header/variants'
+import { headerCrumbsKey } from '../espresso-header/crumbs'
 import ListPage from './list/ListPage.vue'
 import PopoverPage from './popover/PopoverPage.vue'
 import CardsPage from './cards/CardsPage.vue'
@@ -208,6 +210,16 @@ const appScenario = computed(() =>
   app.value === 'components'
     ? undefined
     : scenarios.find((s) => s.id === app.value),
+)
+
+// the header's breadcrumb names where you are: the workspace, then the
+// page that is open
+provide(
+  headerCrumbsKey,
+  computed(() => [
+    { label: appTitle.value },
+    { label: pages.find((p) => p.id === page.value)?.label ?? '' },
+  ]),
 )
 
 // Figma 35143:169789 gives each row its 16px line icon. The icons for the

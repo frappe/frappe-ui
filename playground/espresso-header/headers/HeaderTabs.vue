@@ -1,7 +1,7 @@
 <template>
   <EHeader>
     <template #left>
-      <Breadcrumbs :items="[{ label: 'frappe' }]" />
+      <Breadcrumbs :items="crumbs" />
     </template>
     <template #middle>
       <TabButtons
@@ -48,6 +48,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { Badge, Breadcrumbs, Button, TabButtons } from '../../../src'
+import { useHeaderCrumbs } from '../crumbs'
 import EIcon from '../../espresso-sidebar/EIcon.vue'
 import EHeader from '../EHeader.vue'
 
@@ -64,6 +65,8 @@ const actions = [
   { icon: 'reload', label: 'Refresh' },
   { icon: 'placement', label: 'Apps' },
 ]
+
+const crumbs = useHeaderCrumbs([{ label: 'frappe' }])
 </script>
 
 <style scoped>
