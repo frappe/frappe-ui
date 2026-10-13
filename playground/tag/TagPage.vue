@@ -29,7 +29,7 @@ const prefix = ref(q.has('prefix'))
 const dismissible = ref(!q.has('plain'))
 const disabled = ref(q.has('disabled'))
 
-const variantTabs = [
+const variants = [
   { label: 'Solid', value: 'solid' },
   { label: 'Subtle', value: 'subtle' },
   { label: 'Outline', value: 'outline' },
@@ -107,13 +107,14 @@ watch(dismissible, (on) => !on && restore())
           Preview control
         </p>
         <div class="flex flex-col gap-3">
-          <div class="flex flex-col gap-2">
+          <div class="flex h-7 items-center justify-between">
             <span class="text-base text-ink-gray-7">Variant</span>
-            <TabButtons
+            <Select
               v-model="variant"
-              :options="variantTabs"
+              :options="variants"
               size="sm"
-              class="w-full"
+              variant="subtle"
+              class="w-[140px]"
               aria-label="Variant"
             />
           </div>

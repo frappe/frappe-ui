@@ -14,7 +14,7 @@
 //              outline-gray-3, outline and ghost on a white fill with no
 //              border); disabled at half opacity on the hover fill
 //   prefix     optional glyph before the label (the file's small-add, or
-//              anything in the slot — an avatar, say)
+//              anything in the slot — an avatar, say), in the label's ink
 //   suffix     the small-close: a dismissible tag removes itself with it,
 //              or with Backspace / Delete when focused; a tag without it is
 //              plain information (the file's "non dismissive" tags)
@@ -295,14 +295,8 @@ function onKey(e: KeyboardEvent) {
   width: 100%;
   height: 100%;
 }
-/* the file keeps the prefix glyph out of the theme: ink-gray-7, white on
-   solid */
-.tag-glyph--prefix {
-  color: var(--ink-gray-7);
-}
-.tag--solid .tag-glyph--prefix {
-  color: var(--ink-base);
-}
+/* the prefix glyph takes the label's ink, like the close glyph (the user's
+   call 2026-10-13 — the file left it gray on coloured tags) */
 .tag-close {
   padding: 0;
   border: 0;

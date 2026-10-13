@@ -564,8 +564,7 @@ function startsAt(e: CalendarEvent, date: Date): string {
 
 /** "1h 30m", or "3 days" — how long it runs, in the time's place on hover. */
 function lasts(e: CalendarEvent, date: Date): string {
-  const days =
-    e.fromDate && e.toDate ? daysAcross(e.fromDate, e.toDate) : 1
+  const days = e.fromDate && e.toDate ? daysAcross(e.fromDate, e.toDate) : 1
   if (days > 1) return `${days} days`
   if (e.isFullDay) return 'All day'
   const from = hhmm(e.segFromTime || e.fromTime)
@@ -607,11 +606,26 @@ function namesOf(e: CalendarEvent): string[] {
  * already right, which is what keeps it from answering its own mutations.
  */
 const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+const monthNames = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+]
 
 function relabelDays(root: HTMLElement, on: boolean) {
   for (const row of root.querySelectorAll<HTMLElement>('[data-strip-date]')) {
-    const spans = row.querySelectorAll<HTMLElement>('.calendar-day-header > span')
+    const spans = row.querySelectorAll<HTMLElement>(
+      '.calendar-day-header > span',
+    )
     if (spans.length < 2) continue
     const [name, date] = [spans[0], spans[1]]
     if (!on) {
@@ -914,7 +928,9 @@ function dayBand(label: string) {
               the hint is the shorter and the more useful of the two.
             -->
             <template #event-description="{ calendarEvent, description }">
-              <template v-if="agendaFlat && (noteOf(calendarEvent) || description)">
+              <template
+                v-if="agendaFlat && (noteOf(calendarEvent) || description)"
+              >
                 <span v-if="noteOf(calendarEvent)" class="min-w-0 truncate">
                   {{ noteOf(calendarEvent) }}
                 </span>
@@ -926,7 +942,9 @@ function dayBand(label: string) {
                   v-if="noteOf(calendarEvent) && description"
                   class="size-0.5 shrink-0 self-center rounded-full bg-current"
                 />
-                <span v-if="description" class="shrink-0">{{ description }}</span>
+                <span v-if="description" class="shrink-0">{{
+                  description
+                }}</span>
               </template>
             </template>
             <template #event-participant="{ calendarEvent }">
@@ -1123,7 +1141,12 @@ function dayBand(label: string) {
     right 180ms ease-out,
     height 180ms ease-out !important;
 }
-:deep(.is-landing [data-date-attr] .pointer-events-none.absolute.inset-0 > .bg-surface-base) {
+:deep(
+  .is-landing
+    [data-date-attr]
+    .pointer-events-none.absolute.inset-0
+    > .bg-surface-base
+) {
   animation: espresso-ring-in 180ms ease-out;
 }
 @keyframes espresso-ring-in {
@@ -1233,6 +1256,17 @@ function dayBand(label: string) {
   line saying how many it is not showing — so four events read as three and
   "1 more", and six as three and "3 more".
 
+  A bar that runs across days (a leave, a trip) counts as one of the three
+  (the user's call 2026-10-13): the component leaves a 32px spacer above the
+  day's own list for each such bar, so a day under one bar keeps two of its
+  own, under two keeps one, under three none.
+
+  And it all fits: a week is never shorter than a day with three rows and
+  the "N more" line (28 number + 3 × 28 rows + 3 × 4 gaps + the 28 line +
+  6 below, and its rule; the floor is set in calendarClasses) — on a short
+  window the month scrolls rather than letting the line spill into the week
+  below.
+
   `visibility` rather than `display`, because a box that is not generated does
   not increment a counter — and `position: absolute` so the hidden ones take
   no space while they are still counted.
@@ -1251,6 +1285,87 @@ function dayBand(label: string) {
   position: absolute;
   visibility: hidden;
 }
+/* under 1 bar: 2 of the day's own */
+:deep(
+  [data-week-row]
+    > div
+    > [style*='height: 32px']
+    + .flex.flex-col.pb-1\.5:has(> :nth-child(3))
+    > :nth-child(n + 3)
+) {
+  counter-increment: espresso-more;
+  position: absolute;
+  visibility: hidden;
+}
+:deep(
+  [data-week-row]
+    > div
+    > [style*='height: 32px']
+    + .flex.flex-col.pb-1\.5:has(> :nth-child(3))::after
+) {
+  content: counter(espresso-more) ' more';
+  display: flex;
+  align-items: center;
+  height: 28px;
+  padding-inline: 6px;
+  font-size: 12px;
+  color: var(--ink-gray-7);
+}
+
+/* under 2 bars: 1 of the day's own */
+:deep(
+  [data-week-row]
+    > div
+    > [style*='height: 64px']
+    + .flex.flex-col.pb-1\.5:has(> :nth-child(2))
+    > :nth-child(n + 2)
+) {
+  counter-increment: espresso-more;
+  position: absolute;
+  visibility: hidden;
+}
+:deep(
+  [data-week-row]
+    > div
+    > [style*='height: 64px']
+    + .flex.flex-col.pb-1\.5:has(> :nth-child(2))::after
+) {
+  content: counter(espresso-more) ' more';
+  display: flex;
+  align-items: center;
+  height: 28px;
+  padding-inline: 6px;
+  font-size: 12px;
+  color: var(--ink-gray-7);
+}
+
+/* under 3 bars: 0 of the day's own */
+:deep(
+  [data-week-row]
+    > div
+    > [style*='height: 96px']
+    + .flex.flex-col.pb-1\.5:has(> :nth-child(1))
+    > :nth-child(n + 1)
+) {
+  counter-increment: espresso-more;
+  position: absolute;
+  visibility: hidden;
+}
+:deep(
+  [data-week-row]
+    > div
+    > [style*='height: 96px']
+    + .flex.flex-col.pb-1\.5:has(> :nth-child(1))::after
+) {
+  content: counter(espresso-more) ' more';
+  display: flex;
+  align-items: center;
+  height: 28px;
+  padding-inline: 6px;
+  font-size: 12px;
+  color: var(--ink-gray-7);
+}
+
 :deep(
   [data-week-row] > div > .flex.flex-col.pb-1\.5:has(> :nth-child(4))::after
 ) {

@@ -175,7 +175,10 @@ export const espressoCalendar = [
   // A week's row is a fixed share of the strip, not its contents. The rows are
   // `flex-1 basis-0` already, but a flex item's `min-height` is `auto`, so a
   // day with six events on it grew its whole row and every other row shrank.
-  '[&_[data-week-row]]:!min-h-0',
+  // Its floor is a day at its fullest — three rows and the "N more" line (see
+  // CalendarPatterns' month overflow) — so on a short window the month
+  // scrolls instead of the line spilling into the next week.
+  '[&_[data-week-row]]:!min-h-[159px]',
 
   // …and the card a month drag leaves where it was picked up from, at the
   // weight the week's leaves: the component fades its own to a half, the
@@ -263,8 +266,7 @@ export const espressoCalendar = [
  * the colour is still the default, so the moment one is picked the event's
  * own ground takes over.
  */
-export const espressoGreyDraft =
-  '[&_.event.event-draft]:!bg-surface-gray-1'
+export const espressoGreyDraft = '[&_.event.event-draft]:!bg-surface-gray-1'
 
 export const grid = {
   hourHeight: 70,
