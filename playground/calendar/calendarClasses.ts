@@ -374,6 +374,8 @@ export const espressoAgendaFlat = [
   // state of the list, and a colour that changes with the row being pointed
   // at reads as the row saying something rather than as the pointer.
   '[&_.calendar-row:hover]:!bg-surface-gray-1',
+  // …and the faces' rings take the same fill, so they don't ring white on it
+  '[&_.calendar-row:hover]:[--stack-ring:var(--surface-gray-1)]',
   // …and the title in the page's own ink. With no fill behind it, a title in
   // the calendar's colour is the only coloured thing on a line of black
   // text, which puts the weight on what the event is called rather than on

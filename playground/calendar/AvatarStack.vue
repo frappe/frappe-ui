@@ -47,6 +47,8 @@ const more = computed(() => props.names.length - faces.value.length)
 
 <template>
   <div class="flex items-center -space-x-1">
+    <!-- the rings are the surface the stack sits on; a row that changes its
+         fill (an agenda row under the pointer) sets --stack-ring to match -->
     <Avatar
       v-for="(name, i) in faces"
       :key="name"
@@ -54,7 +56,7 @@ const more = computed(() => props.names.length - faces.value.length)
       :label="name"
       :image="portraitOf(name).image"
       :theme="portraitOf(name).theme"
-      class="ring-2 ring-[--surface-base]"
+      class="ring-2 ring-[var(--stack-ring,var(--surface-base))]"
       :style="{ zIndex: faces.length + 1 - i }"
     />
     <!--
@@ -65,7 +67,7 @@ const more = computed(() => props.names.length - faces.value.length)
     -->
     <span
       v-if="more"
-      class="inline-flex shrink-0 items-center justify-center rounded-full bg-surface-gray-3 text-xs text-ink-gray-7 ring-2 ring-[--surface-base]"
+      class="inline-flex shrink-0 items-center justify-center rounded-full bg-surface-gray-3 text-xs text-ink-gray-7 ring-2 ring-[var(--stack-ring,var(--surface-base))]"
       :class="size === 'sm' ? 'size-5' : 'size-6'"
       :title="`${more} more`"
     >

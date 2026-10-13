@@ -94,7 +94,7 @@ watch(dismissible, (on) => !on && restore())
             v-if="tags.length < ALL.length"
             variant="ghost"
             size="sm"
-            label="Bring them back"
+            label="Reset"
             @click="restore"
           />
         </div>
