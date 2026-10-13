@@ -21,6 +21,7 @@ import {
   validateIframeUrl,
 } from '../../../src/molecules/editor/extensions/iframe'
 import RteIcon from './RteIcon.vue'
+import { uploadsReady } from './devUpload'
 
 export interface LibraryFile {
   file_url: string
@@ -106,7 +107,10 @@ async function loadLibrary() {
   try {
     const list = props.library
       ? await props.library()
-      : ((await (await fetch('/__uploads')).json()) as LibraryFile[])
+      : await uploadsReady().then(
+          async () =>
+            (await (await fetch('/__uploads')).json()) as LibraryFile[],
+        )
     files.value = list
   } catch {
     files.value = []
