@@ -40,6 +40,8 @@ let dragging = false
 /** how far left of the document the grip still answers the pointer */
 const GUTTER = 72
 const SIZE = 24
+/** the grip is narrower than it is tall: the dots 4px from either side */
+const WIDTH = 16
 /** the gap between the grip and the block */
 const GAP = 6
 /** how far past a block's edge, into the gap around it, its grip still answers */
@@ -212,7 +214,8 @@ function place() {
   const edge = el.matches('li')
     ? (el.parentElement?.getBoundingClientRect().left ?? r.left)
     : r.left
-  left.value = edge - GAP - SIZE
+  // narrowed, it keeps its dots where the square grip had them
+  left.value = edge - GAP - (SIZE + WIDTH) / 2
 }
 function hide() {
   target.value = null
@@ -663,10 +666,10 @@ const px = (n: number) => `${n}px`
 </template>
 
 <style>
-/* the grip: 24px on 4px corners, gray-400 dots that darken on a gray-100
+/* the grip: 16×24 on 4px corners, gray-400 dots that darken on a gray-100
    ground under the pointer */
 .rte-bh-handle {
-  @apply pointer-events-auto fixed flex size-6 items-center justify-center rounded-[4px] text-ink-gray-4 transition-colors hover:bg-surface-gray-2 hover:text-ink-gray-6;
+  @apply pointer-events-auto fixed flex h-6 w-4 items-center justify-center rounded-[4px] text-ink-gray-4 transition-colors hover:bg-surface-gray-2 hover:text-ink-gray-6;
   cursor: grab;
 }
 .rte-bh-handle:active {
