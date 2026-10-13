@@ -13,7 +13,7 @@
 // uploaded already, newest first; the file draws no body for this tab, so
 // it is a plain list of rows.
 import { computed, ref, watch } from 'vue'
-import { Button, TextInput } from '../../../src'
+import { Button, TabList, Tabs, TabTrigger, TextInput } from '../../../src'
 import { pickFiles } from '../../../src/molecules/editor/extensions/shared/file-picker'
 import {
   processEmbedUrl,
@@ -21,7 +21,6 @@ import {
   validateIframeUrl,
 } from '../../../src/molecules/editor/extensions/iframe'
 import RteIcon from './RteIcon.vue'
-import { useTabInk } from '../useTabInk'
 
 export interface LibraryFile {
   file_url: string
@@ -52,9 +51,6 @@ const TABS: Array<{ key: Tab; label: string }> = [
   { key: 'library', label: 'Library' },
 ]
 const tab = ref<Tab>('link')
-// the selected tab's line, one for the row, sliding over the row's rule
-const tabRow = ref<HTMLElement | null>(null)
-const ink = useTabInk(tabRow, tab)
 
 const url = ref(props.initial ?? '')
 const error = ref('')
@@ -128,31 +124,27 @@ function pickFromLibrary(file: LibraryFile) {
   <div
     class="rte-source flex w-[380px] flex-col gap-4 rounded-6 bg-surface-elevation-2 pb-3.5 pt-2 shadow-xl"
   >
-    <div
-      ref="tabRow"
-      class="relative flex h-7 items-center gap-6 border-b border-outline-gray-1 px-4"
-    >
-      <button
-        v-for="t in TABS"
-        :key="t.key"
-        type="button"
-        class="rte-source-tab"
-        :class="tab === t.key ? 'is-on text-ink-gray-8' : 'text-ink-gray-5'"
-        :aria-selected="tab === t.key"
-        role="tab"
-        @click="tab = t.key"
-      >
-        {{ t.label }}
-      </button>
-      <span
-        class="rte-source-ink"
-        :class="ink.placed.value && 'is-placed'"
-        :style="ink.style.value"
-        aria-hidden="true"
-      />
+    <!-- the library's underline tabs, as the emoji picker's: their line
+         slides from tab to tab over the row's rule -->
+    <div class="flex h-7 items-end border-b border-outline-gray-1 px-4">
+      <Tabs v-model="tab">
+        <TabList
+          variant="underline"
+          size="sm"
+          class="h-7 !border-b-0"
+          aria-label="Embed from"
+        >
+          <TabTrigger
+            v-for="t in TABS"
+            :key="t.key"
+            :value="t.key"
+            :label="t.label"
+          />
+        </TabList>
+      </Tabs>
       <button
         type="button"
-        class="-mr-3 ml-auto flex size-5 items-center justify-center text-ink-gray-5 hover:text-ink-gray-7"
+        class="-mr-3 ml-auto flex size-5 self-center items-center justify-center text-ink-gray-5 hover:text-ink-gray-7"
         aria-label="Close"
         @click="emit('close')"
       >
@@ -245,33 +237,3 @@ function pickFromLibrary(file: LibraryFile) {
     </div>
   </div>
 </template>
-
-<style scoped>
-/* the tab in hand takes the rule's place: a 2px ink-gray-8 line the width
-   of the word, its lower pixel on the card's rule — one line for the row */
-.rte-source-tab {
-  position: relative;
-  height: 100%;
-  font-size: 14px;
-  line-height: 16px;
-}
-.rte-source-ink {
-  position: absolute;
-  left: 0;
-  bottom: -1px;
-  height: 2px;
-  background: var(--ink-gray-8);
-  pointer-events: none;
-}
-/* it slides from tab to tab */
-.rte-source-ink.is-placed {
-  transition:
-    transform 200ms cubic-bezier(0.2, 0, 0, 1),
-    width 200ms cubic-bezier(0.2, 0, 0, 1);
-}
-@media (prefers-reduced-motion: reduce) {
-  .rte-source-ink.is-placed {
-    transition: none;
-  }
-}
-</style>
