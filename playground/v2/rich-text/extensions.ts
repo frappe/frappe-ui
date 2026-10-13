@@ -811,7 +811,10 @@ export const TableRow = KitTableRow.extend({
 })
 
 export const playgroundExtensions = [
-  Table,
+  // the grip carries a table as one block, by selecting the table node; the
+  // table plugin turns such a selection into its every cell unless allowed,
+  // and the grip, taking that for selected text, would step aside mid-drag
+  Table.configure({ allowTableNodeSelection: true }),
   TableRow,
   TableCell,
   TableHeader,
