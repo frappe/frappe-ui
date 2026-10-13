@@ -101,8 +101,7 @@ const controlAttrs = computed(() =>
 )
 
 defineExpose<InputExposed>({
-  focus: (options?: FocusOptions) =>
-    switchRef.value?.$el?.focus(options),
+  focus: (options?: FocusOptions) => switchRef.value?.$el?.focus(options),
 })
 const slots = useReactiveSlots<typeof declaredSlots>()
 
@@ -150,9 +149,13 @@ const switchClasses = computed(() => {
   ]
 })
 
+// The knob's shadow is the espresso 2.0 switch's own (23553:497): three drop
+// shadows, a faint white rim under a soft black edge and lift. No elevation
+// token fits — each opens with an inset highlight, which on the dark knob
+// reads as a ring cut into it.
 const switchCircleClasses = computed(() => {
   return [
-    'pointer-events-none inline-block transform rounded-full bg-surface-base shadow ring-0 transition duration-100 ease-in-out',
+    'pointer-events-none inline-block transform rounded-full bg-surface-base shadow-[0_0.25px_1px_0_rgba(255,255,255,0.14),0_0_2px_0_rgba(0,0,0,0.1),0_2px_4px_0_rgba(0,0,0,0.16)] ring-0 transition duration-100 ease-in-out',
     props.size === 'md'
       ? 'h-3.5 w-3.5'
       : props.size === 'sm'
