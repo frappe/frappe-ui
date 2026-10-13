@@ -84,6 +84,7 @@ export {
   Tag,
   Emoji,
   SlashCommands,
+  getDefaultSlashCommands,
   // Clipboard
   ContentPaste,
   StyleClipboard,
@@ -92,6 +93,7 @@ export type {
   SuggestionExtensionOptions,
   SuggestionRange,
   MentionSuggestionItem,
+  MentionInviteHandler,
   TagSuggestionItem,
   StarterKitOptions,
   CommandItem,

@@ -331,15 +331,35 @@ function onTrackPointerUp() {
  */
 const SCRIM =
   'linear-gradient(to top, rgb(0 0 0 / 0.55) 0%, rgb(0 0 0 / 0.40) 20%, rgb(0 0 0 / 0.22) 45%, rgb(0 0 0 / 0.09) 70%, rgb(0 0 0 / 0) 100%)'
+
+/**
+ * The design's band (espresso-2.0, 31403-45434): 42px along the bottom of
+ * the frame. Its wash is black at half strength, run top to bottom: clear
+ * through the band's top sixth and 44% black at its bottom edge (the
+ * gradient's stops at 0.35 and 0.85 fall at 17% and past the edge of the
+ * band). Under it the footage is blurred progressively — nothing at the
+ * band's top, 12px by its bottom — which a backdrop blur masked by the same
+ * ramp reproduces: `BAND_BLUR` goes on a pseudo-element behind the row.
+ */
+const BAND =
+  'linear-gradient(to bottom, rgb(0 0 0 / 0) 0%, rgb(0 0 0 / 0) 17%, rgb(0 0 0 / 0.44) 100%)'
+const BAND_BLUR =
+  "before:pointer-events-none before:absolute before:inset-0 before:-z-10 before:backdrop-blur-[12px] before:content-[''] before:[mask-image:linear-gradient(to_bottom,transparent,black)]"
+
+/** A 28px ghost button of the design's, a 16px glyph in it, white on the footage. */
+const GHOST =
+  'flex size-7 shrink-0 items-center justify-center rounded-4 text-white transition-colors hover:bg-white-overlay-100 active:bg-white-overlay-200'
 </script>
 
 <template>
   <div
     v-if="videoEl && !hidden"
-    class="absolute inset-x-0 bottom-0 z-20 flex items-center gap-3 text-white transition-opacity [filter:drop-shadow(0_1px_2px_rgb(0_0_0/0.45))]"
-    :style="{ backgroundImage: SCRIM }"
+    class="absolute inset-x-0 bottom-0 z-20 flex items-center gap-2 text-white transition-opacity"
+    :style="{ backgroundImage: standardFullscreen ? SCRIM : BAND }"
     :class="[
-      standardFullscreen ? 'px-6 pt-16 pb-6' : 'rounded-b-4 px-3.5 pt-12 pb-3',
+      standardFullscreen
+        ? 'px-6 pt-16 pb-6 [filter:drop-shadow(0_1px_2px_rgb(0_0_0/0.45))]'
+        : ['isolate h-[42px] rounded-b-6 px-1.5 py-0.5', BAND_BLUR],
       playing && !scrubbing
         ? 'opacity-0 group-hover:opacity-100 focus-within:opacity-100'
         : 'opacity-100',
@@ -348,15 +368,18 @@ const SCRIM =
     @pointerdown.stop
     @dragstart.stop.prevent
   >
-    <Tooltip :text="playing ? 'Pause' : 'Play'" class="flex h-5">
+    <Tooltip
+      :text="playing ? 'Pause' : 'Play'"
+      class="flex size-[38px] shrink-0 items-center justify-center"
+    >
       <button
         type="button"
-        class="opacity-90 transition-opacity hover:opacity-100"
+        :class="GHOST"
         :aria-label="playing ? 'Pause' : 'Play'"
         @click="togglePlay"
       >
         <svg
-          class="size-5"
+          class="size-4"
           viewBox="0 0 24 24"
           fill="currentColor"
           aria-hidden="true"
@@ -386,7 +409,9 @@ const SCRIM =
       @pointerup="onTrackPointerUp"
       @pointercancel="onTrackPointerUp"
     >
-      <div class="h-[3px] w-full overflow-hidden rounded-full bg-white/30">
+      <div
+        class="h-[2px] w-full overflow-hidden rounded-full bg-white-overlay-100"
+      >
         <div
           class="h-full rounded-full bg-white"
           :class="gliding && 'transition-[width] duration-200 ease-out'"
@@ -394,7 +419,7 @@ const SCRIM =
         />
       </div>
       <span
-        class="pointer-events-none absolute size-3.5 -translate-x-1/2 rounded-full bg-white"
+        class="pointer-events-none absolute size-3.5 -translate-x-1/2 rounded-full bg-white shadow-[0_2px_5px_rgb(0_0_0/0.14),0_0_1.5px_rgb(0_0_0/0.16)]"
         :class="[
           scrubbing ? 'scale-125' : 'group-hover/track:scale-110',
           gliding
@@ -405,55 +430,64 @@ const SCRIM =
       />
     </div>
 
-    <span class="text-sm font-medium tabular-nums select-none">
+    <span
+      class="shrink-0 text-[13px] leading-[1.15] tracking-[0.02em] tabular-nums select-none"
+    >
       {{ formatTime(currentTime) }} / {{ formatTime(duration) }}
     </span>
 
-    <Tooltip :text="muted ? 'Unmute' : 'Mute'" class="flex h-5">
-      <button
-        type="button"
-        class="opacity-90 transition-opacity hover:opacity-100"
-        :aria-label="muted ? 'Unmute' : 'Mute'"
-        @click="toggleMute"
-      >
-        <svg class="size-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path
-            fill="currentColor"
-            d="M11.4 3.86a1 1 0 0 1 .6.92v14.44a1 1 0 0 1-1.66.75L6.02 16H3.6A1.6 1.6 0 0 1 2 14.4V9.6A1.6 1.6 0 0 1 3.6 8h2.42l4.32-4.02a1 1 0 0 1 1.06-.12Z"
-          />
-          <path
-            v-if="muted"
-            stroke="currentColor"
-            stroke-width="1.75"
-            stroke-linecap="round"
-            d="m16 9.5 5 5m0-5-5 5"
-          />
-          <path
-            v-else
-            stroke="currentColor"
-            stroke-width="1.75"
-            stroke-linecap="round"
-            d="M15.8 9.2a4 4 0 0 1 0 5.6M18.8 6.2a8 8 0 0 1 0 11.6"
-          />
-        </svg>
-      </button>
-    </Tooltip>
+    <div class="flex shrink-0 items-center gap-1.5">
+      <Tooltip :text="muted ? 'Unmute' : 'Mute'" class="flex">
+        <button
+          type="button"
+          :class="GHOST"
+          :aria-label="muted ? 'Unmute' : 'Mute'"
+          @click="toggleMute"
+        >
+          <svg
+            class="size-4"
+            viewBox="0 0 24 24"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path
+              fill="currentColor"
+              d="M11.4 3.86a1 1 0 0 1 .6.92v14.44a1 1 0 0 1-1.66.75L6.02 16H3.6A1.6 1.6 0 0 1 2 14.4V9.6A1.6 1.6 0 0 1 3.6 8h2.42l4.32-4.02a1 1 0 0 1 1.06-.12Z"
+            />
+            <path
+              v-if="muted"
+              stroke="currentColor"
+              stroke-width="1.75"
+              stroke-linecap="round"
+              d="m16 9.5 5 5m0-5-5 5"
+            />
+            <path
+              v-else
+              stroke="currentColor"
+              stroke-width="1.75"
+              stroke-linecap="round"
+              d="M15.8 9.2a4 4 0 0 1 0 5.6M18.8 6.2a8 8 0 0 1 0 11.6"
+            />
+          </svg>
+        </button>
+      </Tooltip>
 
-    <Tooltip
-      :text="fullscreen ? 'Exit fullscreen' : 'Fullscreen'"
-      class="flex h-5"
-    >
-      <button
-        type="button"
-        class="opacity-90 transition-opacity hover:opacity-100"
-        :aria-label="fullscreen ? 'Exit fullscreen' : 'Fullscreen'"
-        @click="toggleFullscreen"
+      <Tooltip
+        :text="fullscreen ? 'Exit fullscreen' : 'Fullscreen'"
+        class="flex"
       >
-        <span
-          :class="fullscreen ? 'lucide-minimize-2' : 'lucide-maximize-2'"
-          class="size-5"
-        />
-      </button>
-    </Tooltip>
+        <button
+          type="button"
+          :class="GHOST"
+          :aria-label="fullscreen ? 'Exit fullscreen' : 'Fullscreen'"
+          @click="toggleFullscreen"
+        >
+          <span
+            :class="fullscreen ? 'lucide-minimize-2' : 'lucide-maximize-2'"
+            class="size-4"
+          />
+        </button>
+      </Tooltip>
+    </div>
   </div>
 </template>

@@ -524,6 +524,22 @@ describe('bar chart option series', () => {
     expect(radiiOf(option.series[2])[0]).toEqual([0, 0, 4, 4])
   })
 
+  it('draws the radius the series asked for, over the one it would pick', () => {
+    const option = build({
+      stacked: true,
+      data: [{ month: 'Jan', sales: 10, refunds: 4 }],
+      series: [
+        { name: 'sales', echartOptions: { itemStyle: { borderRadius: 0 } } },
+        { name: 'refunds', echartOptions: { itemStyle: { borderRadius: 0 } } },
+      ],
+    })
+    // `refunds` tops the stack and would carry the crown; both are square
+    // because the caller said so, and a data item's own radius would otherwise
+    // win over the one set on the series.
+    expect(radiiOf(option.series[0])).toEqual([0])
+    expect(radiiOf(option.series[1])).toEqual([0])
+  })
+
   it('rounds row by row, so a stack that flips sign flips its tip', () => {
     const option = build({
       stacked: true,

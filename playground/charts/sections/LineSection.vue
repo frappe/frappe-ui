@@ -1,0 +1,304 @@
+<script setup lang="ts">
+// The file's "Line chart" row (Figma 1GDS12ys41lxeG3wQpNq41, 1356:68175,
+// 68378, 68437, 68269, 68212), by the library's LineChart: one 1.5px line of
+// sales; the same with its values printed over every point; four stepped
+// lines of four categories over a year, with the legend under them; sales and
+// orders as two lines, which the file leaves unnamed; and the line with a 6px
+// dot at every reading. Every card drops the file's hairline through the
+// reading under the pointer and reads it out in the file's own tooltip.
+import { computed } from 'vue'
+import { LineChart } from '../../../src/charts'
+import Card from '../components/Card.vue'
+import ChartTip from '../components/ChartTip.vue'
+import { monthly, year } from '../chartData'
+import {
+  bubbleAxis,
+  count,
+  monthAxis,
+  salesAxis,
+  thousands,
+  yearAxis,
+  FILE_BOX,
+  endLabels,
+  fileCrosshair,
+  filePlot,
+} from '../chartAxes'
+import type { ChartTooltipItem } from '../../../src/charts/types'
+import type { ThemeColors } from '../useChartTheme'
+
+const props = defineProps<{ theme: ThemeColors }>()
+
+const line = computed(() => [props.theme.one('line')])
+const markers = computed(() => [props.theme.one('markers')])
+const lines = computed(() => props.theme.colors('lines', 2))
+const steps = computed(() => props.theme.colors('steps', 4))
+
+const crosshair = computed(() => fileCrosshair(props.theme.t))
+
+/**
+ * The stepped card gives its legend the room instead: the file closes that
+ * plot at 278 rather than 318 and opens it at 62 (1356:68437), which is 40
+ * less at the foot and 13 more at the head.
+ */
+const stepsPlot = {
+  grid: { ...FILE_BOX, left: 1, top: '11.07%', bottom: 10 },
+}
+
+const lineOptions = computed(() => ({
+  ...crosshair.value,
+  ...filePlot,
+}))
+const stepsOptions = computed(() => ({
+  ...crosshair.value,
+  ...stepsPlot,
+  xAxis: endLabels,
+}))
+
+/**
+ * A line as the file strokes it: 1.5 for a plain line, 1 for a step (1356:68175
+ * "Vector 434" against 1356:68437 "Vector 449"), where the library's own
+ * default is 2. `symbol: 'none'` is what keeps a card that draws no markers
+ * from growing one under the pointer: echarts hides a line's symbols but
+ * brings back the active one, and the file draws no dot on any card but the
+ * markers card — the crosshair and the tooltip are its whole hover.
+ */
+const stroke = (width: number) => ({
+  echartOptions: { lineStyle: { width }, symbol: 'none' },
+})
+/** the markers card keeps its symbols, so only the width is named */
+const marked = { echartOptions: { lineStyle: { width: 1.5 } } }
+
+/**
+ * The printed values, as the file sets them (1356:68378). Two things it does
+ * that the library does not.
+ *
+ * It strokes every label in the card's own surface — a 1px halo — which is how
+ * its labels stay readable where the line runs under them, and the card is
+ * thick with them: twenty-five readings across 592 leaves 24 between, so a
+ * label and the line will meet. The token is read rather than written white,
+ * so the halo is the card's ground in either mode.
+ *
+ * And it pulls the first and last label inside the plot rather than centring
+ * them on readings that sit on its edges: the file's own first label opens at
+ * 45.5 against a line starting at 51.5. Centred, ours ran into the y axis at
+ * one end and off the canvas at the other.
+ */
+const LAST = monthly.length - 1
+const valueLabels = computed(() => ({
+  label: {
+    textBorderColor: props.theme.t('surface-elevation-2'),
+    textBorderWidth: 1,
+  },
+  labelLayout: (p: { dataIndex: number }) => ({
+    hideOverlap: true,
+    dx: p.dataIndex === 0 ? 14 : p.dataIndex === LAST ? -14 : 0,
+  }),
+}))
+
+/**
+ * The file's four categories, lightest line highest: Toys runs along the
+ * bottom at about 3k and Odd equipment along the top at about 12k
+ * (1356:68437's tooltip reads 3,600 / 8,958 / 10,345 / 12,344 at July, and
+ * its vectors sit in that order). The palette runs darkest first, so Toys
+ * takes Ocean 900 and Odd equipment Ocean 600, which is the file's own.
+ */
+const stepped = year.map((row, i) => ({
+  month: row.month,
+  toys: Math.round(row.sales * 0.26 + (i % 3) * 120),
+  apparel: Math.round(row.sales * 0.62 + (i % 4) * 200),
+  sports: Math.round(row.sales * 0.78 + (i % 2) * 260),
+  odd: Math.round(row.sales * 0.9 + (i % 5) * 180),
+}))
+
+/**
+ * The file's own second line, read off the drawing. "Vector 435" of 1356:68269
+ * is a 23-point polyline sitting 252 down a plot that runs 75 to 318 for 0 to
+ * 24k, so each of its vertices is a reading: 4,346 then 4,691, down to 593,
+ * up to 5,284, and so on to the 6,519 it peaks at. The page's shared `orders`
+ * sits flat around 2k and covers a tenth of the plot the file gives this line,
+ * so the card carries the file's rather than moving a reading the bar row
+ * plots on its own axis. Our months run two past the file's vertices, which
+ * close on readings it already draws.
+ */
+const FILE_ORDERS = [
+  4346, 4691, 1827, 593, 5284, 938, 5284, 3852, 5284, 1827, 2864, 1136, 1136,
+  2864, 5284, 938, 2864, 1136, 3852, 2864, 5827, 6519, 3852, 2864, 1827,
+]
+const twoLines = monthly.map((row, i) => ({
+  month: row.month,
+  sales: row.sales,
+  orders: FILE_ORDERS[i] ?? row.orders,
+}))
+
+/** step-after at 1px, as the file draws every stepped series */
+const step = {
+  echartOptions: { step: 'end', lineStyle: { width: 1 }, symbol: 'none' },
+}
+const stepConfig = {
+  toys: { label: 'Toys', ...step },
+  apparel: { label: 'Apparel', ...step },
+  sports: { label: 'Sports Goods', ...step },
+  odd: { label: 'Odd equipment', ...step },
+}
+
+/**
+ * The file reads the four steps out in the order it names them — Toys,
+ * Apparel, Sports Goods, Odd equipment, which is the legend's order below
+ * (1356:68437). The library hands a tooltip its rows biggest first, which is
+ * the right default where a reader is looking for the largest share and the
+ * wrong one where the rows are a fixed list they have already read once.
+ */
+const STEP_ORDER = Object.keys(stepConfig)
+const inOrder = (items: ChartTooltipItem[]) =>
+  [...items].sort(
+    (a, b) => STEP_ORDER.indexOf(a.name) - STEP_ORDER.indexOf(b.name),
+  )
+</script>
+
+<template>
+  <Card class="line-card">
+    <LineChart
+      title="Line chart"
+      :data="monthly"
+      x="month"
+      y="sales"
+      :series-config="{ sales: { label: 'Sales', ...stroke(1.5) } }"
+      :x-axis="yearAxis"
+      :y-axis="salesAxis"
+      :palette="line"
+      :echart-options="lineOptions"
+    >
+      <template #tooltip="tip">
+        <ChartTip
+          :label="tip.label"
+          :items="tip.items"
+          :rows="tip.rows"
+          :value="count"
+        />
+      </template>
+    </LineChart>
+  </Card>
+  <Card class="line-card">
+    <LineChart
+      title="Value label"
+      :data="monthly"
+      x="month"
+      y="sales"
+      show-data-labels
+      :series-config="{
+        sales: {
+          label: 'Sales',
+          format: thousands,
+          echartOptions: { lineStyle: { width: 1.5 }, ...valueLabels },
+        },
+      }"
+      :x-axis="yearAxis"
+      :y-axis="salesAxis"
+      :palette="line"
+      :echart-options="lineOptions"
+    >
+      <template #tooltip="tip">
+        <ChartTip
+          :label="tip.label"
+          :items="tip.items"
+          :rows="tip.rows"
+          :value="count"
+        />
+      </template>
+    </LineChart>
+  </Card>
+  <Card>
+    <LineChart
+      title="Multi-series line with steps"
+      :data="stepped"
+      x="month"
+      :y="['toys', 'apparel', 'sports', 'odd']"
+      :series-config="stepConfig"
+      :x-axis="monthAxis"
+      :y-axis="bubbleAxis"
+      :palette="steps"
+      :echart-options="stepsOptions"
+    >
+      <template #tooltip="tip">
+        <ChartTip
+          :items="inOrder(tip.items)"
+          :rows="tip.rows"
+          :value="count"
+          bare
+          mark="square"
+        />
+      </template>
+    </LineChart>
+  </Card>
+  <Card class="line-card line-card--no-legend">
+    <LineChart
+      title="Multi Line Chart"
+      :data="twoLines"
+      x="month"
+      :y="['sales', 'orders']"
+      :series-config="{
+        sales: { label: 'Sales', ...stroke(1.5) },
+        orders: { label: 'Orders', ...stroke(1.5) },
+      }"
+      :x-axis="yearAxis"
+      :y-axis="salesAxis"
+      :palette="lines"
+      :echart-options="lineOptions"
+    >
+      <template #tooltip="tip">
+        <ChartTip
+          :label="tip.label"
+          :items="tip.items"
+          :rows="tip.rows"
+          :value="count"
+          mark="dot"
+        />
+      </template>
+    </LineChart>
+  </Card>
+  <Card class="line-card">
+    <LineChart
+      title="Line chart with markers"
+      :data="monthly"
+      x="month"
+      y="sales"
+      show-data-points
+      :series-config="{ sales: { label: 'Sales', ...marked } }"
+      :x-axis="yearAxis"
+      :y-axis="salesAxis"
+      :palette="markers"
+      :echart-options="lineOptions"
+    >
+      <template #tooltip="tip">
+        <ChartTip
+          :label="tip.label"
+          :items="tip.items"
+          :rows="tip.rows"
+          :value="count"
+        />
+      </template>
+    </LineChart>
+  </Card>
+</template>
+
+<style scoped>
+/* The file names neither line on this card — its plot runs the full height of
+   the card, exactly as the single-line card's does (1356:68269 opens at 75 and
+   closes at 318, against the stepped card's 62 and 278, which gives its legend
+   the room). The bottom pad is the one `ChartContainer` drops in for a card
+   with no legend, put back by hand because the legend above is hidden rather
+   than absent. */
+.line-card--no-legend :deep([data-slot='chart-legend']) {
+  display: none;
+}
+
+/* The foot the file leaves under the x axis. `ChartContainer` holds back 12
+   below a plot with no legend, which puts this row's month labels about six
+   pixels higher in the card than 1356:68175 puts them; six is the half of it
+   that lands the last gridline on the file's. The card with the hidden legend
+   has to be told, since the container counts the slot as filled. */
+.line-card :deep([data-slot='chart-plot']),
+.line-card--no-legend :deep([data-slot='chart-plot']) {
+  padding-bottom: 6px;
+}
+</style>

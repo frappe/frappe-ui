@@ -1,0 +1,12 @@
+/* The list card's shell (espresso-2.0 › card › type=list, variant=outline):
+   a raised surface behind a 1px outline-gray-1 hairline, one step lower in
+   dark. `--card-surface` follows it, so an avatar group on the card punches
+   the card's own colour. Shared by the Cards page and the kanban board. */
+.espresso-list-card {
+  --card-surface: var(--surface-elevation-2);
+  background-color: var(--card-surface);
+  @apply flex flex-col overflow-hidden border border-outline-gray-1;
+}
+[data-theme='dark'] .espresso-list-card {
+  --card-surface: var(--surface-elevation-1);
+}

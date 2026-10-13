@@ -217,7 +217,7 @@ describe('VideoControls fullscreen', () => {
   it('keeps inline spacing for native fullscreen', () => {
     const native = mount(fakeVideo(), { fullscreen: true })
 
-    expect(native.controls().classList).toContain('rounded-b-4')
+    expect(native.controls().classList).toContain('rounded-b-6')
     expect(native.controls().classList).not.toContain('px-6')
     expect(
       native.root.querySelector('[aria-label="Exit fullscreen"]'),

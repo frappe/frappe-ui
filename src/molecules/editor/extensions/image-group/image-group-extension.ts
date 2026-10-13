@@ -41,6 +41,12 @@ export const ImageGroup = Node.create<ImageGroupOptions>({
   content: 'image+', // one or more images
   selectable: true,
   draggable: true,
+  // The view draws its pictures itself from the node, and they change only
+  // through the gallery's dialog and commands: an atom to ProseMirror, which
+  // then never reads the view's DOM back. Not one, a press on the gallery's
+  // ⋯ put the DOM selection inside it, ProseMirror took that for typing in
+  // its content and re-parsed the pictures — into one image with no source.
+  atom: true,
   isolating: true,
 
   addOptions() {

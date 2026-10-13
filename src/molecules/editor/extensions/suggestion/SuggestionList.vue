@@ -3,24 +3,27 @@
     <EditorPopover
       v-if="items.length || showNoResults"
       dialog-label="Suggestions"
+      variant="menu"
       :autofocus="false"
       :trapped="false"
       :loop="false"
       :content-class="[
-        'relative max-h-[300px] min-w-40 overflow-y-auto rounded-6 p-1 text-base',
+        'relative max-h-[300px] min-w-40 divide-y divide-outline-elevation-2 overflow-y-auto rounded-6 text-base',
         containerClass,
       ]"
     >
+      <!-- Laid out as the Dropdown's menu is (`menuClasses`): each group in
+           its own 6px-padded block, a hairline between groups, the label in
+           the group label's idiom — and marked with the same data-slots
+           (group, item, item-prefix) the Dropdown's markup carries. -->
       <template v-if="items.length">
-        <template
+        <div
           v-for="(group, groupIndex) in groupedItems"
           :key="group.label ?? groupIndex"
+          data-slot="group"
+          :class="menuClasses.group"
         >
-          <!-- Same idiom as the Dropdown group label (`dropdownClasses.groupLabel`). -->
-          <div
-            v-if="group.label"
-            class="flex h-7 items-center px-2 text-sm-medium text-ink-gray-4"
-          >
+          <div v-if="group.label" :class="menuClasses.groupLabel">
             {{ group.label }}
           </div>
           <SuggestionListItem
@@ -44,9 +47,11 @@
               </slot>
             </template>
           </SuggestionListItem>
-        </template>
+        </div>
       </template>
-      <div v-else class="px-3 py-1.5 text-sm text-ink-gray-5">No results</div>
+      <div v-else :class="menuClasses.group">
+        <div class="px-2 py-1.5 text-base text-ink-gray-5">No results</div>
+      </div>
     </EditorPopover>
   </div>
 </template>
@@ -65,6 +70,7 @@ import type { BaseSuggestionItem } from '#molecules/editor/extensions/shared/sug
 import { useSuggestionList } from '#molecules/editor/composables/useSuggestionList'
 import SuggestionListItem from './SuggestionListItem.vue'
 import EditorPopover from '#molecules/editor/components/EditorPopover.vue'
+import { menuClasses } from '#components/Menu/utils'
 
 const props = defineProps({
   items: {

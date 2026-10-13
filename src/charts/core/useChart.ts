@@ -132,11 +132,22 @@ export function useChart({
 
   const width = ref(0)
 
+  // The size the plot was last laid out at. A ResizeObserver reports every
+  // element once as soon as it starts watching, whether or not anything moved,
+  // and that report lands while the entry animation is still running: re-laying
+  // the plot then restarted the entry from wherever it had got to, so every
+  // chart grew halfway, stalled and grew again. Only a real change re-lays it.
+  let laidOut = { width: 0, height: 0 }
+  const sizeChanged = (el: HTMLElement) =>
+    el.clientWidth !== laidOut.width || el.clientHeight !== laidOut.height
+
   // Sizes decided in pixels — the cap on a horizontal chart's label column —
   // are built into the option, so a resize has to re-run the builder as well as
   // re-lay the plot. Publishing the width here is what makes it re-run.
   const resize = () => {
-    width.value = container.value?.clientWidth ?? 0
+    const el = container.value
+    if (el) laidOut = { width: el.clientWidth, height: el.clientHeight }
+    width.value = el?.clientWidth ?? 0
     // The plot slides to its new size, unless the reader has asked for less
     // movement — a whole chart re-laying itself is a large piece of motion.
     chart.value?.resize({
@@ -168,6 +179,7 @@ export function useChart({
     const instance = init(el, undefined, { renderer: 'svg' })
     chart.value = instance
     width.value = el.clientWidth
+    laidOut = { width: el.clientWidth, height: el.clientHeight }
 
     for (const [name, handler] of Object.entries(events ?? {})) {
       instance.on(name, handler)
@@ -184,8 +196,8 @@ export function useChart({
     initChart()
 
     resizeObserver = new ResizeObserver(() => {
-      if (chart.value) debouncedResize()
-      else initChart()
+      if (!chart.value) initChart()
+      else if (sizeChanged(el)) debouncedResize()
     })
     resizeObserver.observe(el)
   })

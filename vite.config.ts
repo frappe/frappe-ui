@@ -5,12 +5,14 @@ import istanbul from 'vite-plugin-istanbul'
 // Through the entry, not the bare `.js` sub-plugin: `vite/index.d.ts` is the
 // only typed surface here, so a deep import lands on an untyped module.
 import { lucideIcons } from './vite/index.js'
+import { playgroundUploads } from './playground/dev-uploads'
 
 const coverageEnabled = process.env.COVERAGE === 'true'
 
 export default defineConfig({
   plugins: [
     vue(),
+    playgroundUploads(),
     lucideIcons({
       componentGlobs: [
         'src/components/**/*.vue',

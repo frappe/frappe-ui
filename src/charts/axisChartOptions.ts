@@ -424,6 +424,14 @@ function buildBarSeries(entry: PlottedSeries, ctx: SeriesContext) {
   const { series } = entry
   const { rows, horizontal, isRTL, color, tokens, carriesTip, yAxisIndex } = ctx
 
+  // A radius set on the series through the escape hatch is the radius every
+  // bar draws. The rounding below is the library reading where each bar's tip
+  // is, and a caller who has named a radius has already answered that — left
+  // to the data items, their radius would quietly win over the one asked for,
+  // since echarts reads a data item's itemStyle over the series'. Same
+  // precedence as an `axisLabel.formatter` over an axis `format`.
+  const asked = series.echartOptions?.itemStyle?.borderRadius
+
   const data = rows.map((row, index) => {
     const at = ctx.xValue(row)
     const value = ctx.share ? ctx.share[index] : toNumber(row[series.name])
@@ -434,7 +442,10 @@ function buildBarSeries(entry: PlottedSeries, ctx: SeriesContext) {
         : 0
     // Per point rather than per series: the rounding follows each bar's own
     // sign, and echarts reads a data item's own itemStyle over the series'.
-    return { value: point, itemStyle: { borderRadius: rounded } }
+    return {
+      value: point,
+      itemStyle: { borderRadius: asked === undefined ? rounded : asked },
+    }
   })
 
   const position = barLabelPosition(entry, horizontal, isRTL)

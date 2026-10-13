@@ -75,6 +75,21 @@ declare module '@tiptap/core' {
   }
 }
 
+/**
+ * A `<video>` playback flag is a boolean attribute: there when on, absent
+ * when off. Left to the default handling, an off flag was written out as
+ * `autoplay="false"` — which is "on" to a browser, and read back as on the
+ * next time the document was opened.
+ */
+function playbackFlag(name: 'autoplay' | 'loop' | 'muted') {
+  return {
+    default: false,
+    parseHTML: (element: HTMLElement) => element.hasAttribute(name),
+    renderHTML: (attributes: Record<string, unknown>) =>
+      attributes[name] ? { [name]: '' } : {},
+  }
+}
+
 /** Matches markdown-style video syntax (custom): `!video[alt](src "title")`. */
 const inputRegex =
   /(?:^|\s)(!video\[([^\]]*)]\((\S+)(?:(?:\s+)["'](\S+)["'])?\))$/
@@ -102,9 +117,9 @@ export const VideoExtension = NodeExtension.create<VideoExtensionOptions>({
       title: { default: null },
       width: { default: null },
       height: { default: null },
-      autoplay: { default: false },
-      loop: { default: false },
-      muted: { default: false },
+      autoplay: playbackFlag('autoplay'),
+      loop: playbackFlag('loop'),
+      muted: playbackFlag('muted'),
       loading: {
         default: false,
         parseHTML: () => false,

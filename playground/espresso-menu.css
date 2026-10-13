@@ -1,0 +1,50 @@
+/*
+ * Espresso 2.0 dropdown & nested dropdown (Figma "Dropdown — image menu +
+ * submenu", node 34335:46098), applied to frappe-ui's Dropdown in this
+ * playground. frappe-ui exposes no props for the surface or spacing, so these
+ * rules target the menu's own data-slot markup and leave the library as is.
+ *
+ *   surface   10px radius, layered shadow, no ring
+ *   padding   4px around the items, 1px between them
+ *   item      28px row, 8px sides, 8px radius; icon 16px, 6px before label
+ *   hover     surface-gray-2
+ *   submenu   1px beside its menu, first item level with the trigger
+ */
+
+.menu-content[data-slot='content'] {
+  border-radius: 10px !important;
+  box-shadow:
+    inset 0 0.25px 1.5px 0 rgb(255 255 255 / 0.1),
+    0 24px 30px -8px rgb(0 0 0 / 0.1),
+    0 0 10px 2px rgb(0 0 0 / 0.04),
+    0 0 1px 0 rgb(0 0 0 / 0.2) !important;
+}
+
+.menu-content [data-slot='group'] {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 4px !important;
+}
+
+/* frappe-ui spaces the icon 8px from the label; Espresso uses 6px. */
+.menu-content [data-slot='item-prefix'] {
+  margin-right: -2px;
+}
+
+.menu-content [data-slot='item'][data-highlighted],
+.menu-content [data-slot='item']:focus,
+.menu-content [data-slot='item'][data-state='open'] {
+  background-color: var(--surface-gray-2) !important;
+}
+
+/*
+ * Submenus are the menu contents without the root Dropdown's
+ * `data-motion`. frappe-ui opens them 4px past the trigger row and level
+ * with its top; Espresso sits them 1px past the menu's edge (the row ends 4px
+ * inside it) and 3px higher, so the first item lines up with the trigger.
+ */
+.menu-content[data-slot='content']:not([data-motion]) {
+  margin-left: 1px;
+  margin-top: -3px;
+}

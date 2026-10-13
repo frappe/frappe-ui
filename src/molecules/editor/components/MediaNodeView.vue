@@ -24,6 +24,8 @@ import {
   containerClasses,
   aspectRatioFrom,
   heightOverWidth,
+  SELECTED_MEDIA_RING,
+  SELECTED_IMAGE_RING,
   type MediaAlign,
 } from './media-node-view-utils'
 import {
@@ -33,6 +35,10 @@ import {
   selectMedia as selectMediaCmd,
   setMediaAlign,
   handleCaptionKeydown,
+  removeMedia as removeMediaCmd,
+  duplicateMedia,
+  downloadMedia as downloadMediaFile,
+  copyImageToClipboard,
 } from './media-node-view-controller'
 const props = defineProps(nodeViewProps)
 
@@ -158,13 +164,62 @@ watch(nodeKey, () => {
   isFreshInsert.value = Boolean(props.node.attrs.uploadId)
 })
 
+/**
+ * The Autoplay switch starts the footage. The `autoplay` attribute only acts
+ * while a video loads: set on one already loaded it changes nothing, which
+ * left the switch on and the video still. So the view plays the video
+ * itself — when the switch goes on, and when a video opens with it on — and
+ * pauses it when the switch goes off. A browser may refuse sound without a
+ * gesture; the video then plays muted, as autoplaying video always has.
+ */
+function applyAutoplay(on: boolean) {
+  const el = mediaRef.value
+  if (!(el instanceof HTMLVideoElement)) return
+  if (!on) {
+    if (!el.paused) el.pause()
+    return
+  }
+  if (!el.paused) return
+  try {
+    Promise.resolve(el.play())
+      .catch(() => {
+        el.muted = true
+        return el.play()
+      })
+      .catch(() => {})
+  } catch {
+    // jsdom has no playback
+  }
+}
+
+watch(
+  () => Boolean(props.node.attrs.autoplay),
+  (on) => applyAutoplay(on),
+)
+// A video opening with the switch on — the element arrives after the attrs
+watch(mediaRef, (el) => {
+  if (el instanceof HTMLVideoElement && props.node.attrs.autoplay)
+    applyAutoplay(true)
+})
+
 const { isResizing, startResize } = useNodeViewResize(editor, {
   mediaEl: () => mediaRef.value,
   containerEl: () => containerRef.value,
   getAspectRatio: () => mediaIntrinsicAspect(),
   getPos: () => props.getPos(),
-  onCommit: ({ width, height }) => props.updateAttributes({ width, height }),
+  onCommit: ({ width, height }) => commitSize(width, height),
 })
+
+/**
+ * The size written, and the media selected again: a node view's attribute
+ * update replaces the node, and ProseMirror maps a node selection off a
+ * replaced node, which would drop the pills and the menu after every
+ * resize — the next drag needing a click first.
+ */
+function commitSize(width: number, height: number) {
+  props.updateAttributes({ width, height })
+  selectMedia()
+}
 
 /** height / width from the stored attrs, falling back to the rendered media. */
 function mediaIntrinsicAspect(): number {
@@ -215,7 +270,7 @@ function resizeBy(delta: number) {
     Number(props.node.attrs.width) || mediaRef.value?.offsetWidth || 320
   const width = Math.max(50, currentWidth + delta)
   const height = Math.round(width * mediaIntrinsicAspect())
-  props.updateAttributes({ width, height })
+  commitSize(width, height)
 }
 
 // Up/Down match what the corner handle now does with a vertical drag; the
@@ -273,26 +328,63 @@ function cancelUpload() {
 }
 
 function removeMedia() {
-  const pos = safeGetPos(() => props.getPos())
-  if (pos === null) return
-  const node = editor.view.state.doc.nodeAt(pos)
-  if (!node) return
-  editor.view.dispatch(editor.view.state.tr.delete(pos, pos + node.nodeSize))
+  removeMediaCmd(editor, () => props.getPos())
 }
 
+function duplicate() {
+  duplicateMedia(editor, () => props.getPos())
+}
+
+/**
+ * The media at a share of the width there is for it: the wrapper is the
+ * block the media stands in, so its width is what "full" means here. The
+ * ratio is kept, as the grip keeps it.
+ */
+function resizeTo(fraction: number) {
+  selectMedia()
+  const host = containerRef.value?.parentElement
+  const available =
+    host?.clientWidth ||
+    mediaRef.value?.offsetWidth ||
+    Number(props.node.attrs.width) ||
+    320
+  const width = Math.max(50, Math.round(available * fraction))
+  const height = Math.round(width * mediaIntrinsicAspect())
+  commitSize(width, height)
+}
+
+function openMedia() {
+  const src = props.node.attrs.src as string | null
+  if (src) window.open(src, '_blank', 'noopener')
+}
+
+function copyMedia() {
+  const src = props.node.attrs.src as string | null
+  if (src) void copyImageToClipboard(src)
+}
+
+function downloadMedia() {
+  const src = props.node.attrs.src as string | null
+  if (src) void downloadMediaFile(src, isVideo.value ? 'video' : 'image')
+}
+
+/**
+ * An image's replacement is the image command's to find — with no file in
+ * hand it asks, and a host may have its own way of asking. A video is
+ * picked here, as it always was.
+ */
 async function replaceMedia() {
-  const files = await pickFiles({
-    accept: isVideo.value ? 'video/*' : 'image/*',
-  })
+  if (!isVideo.value) {
+    const pos = safeGetPos(() => props.getPos())
+    if (pos !== null) editor.commands.replaceImage(pos)
+    return
+  }
+  const files = await pickFiles({ accept: 'video/*' })
   const file = files[0]
   if (!file) return
   const pos = safeGetPos(() => props.getPos())
   if (pos === null) return
-  if (isVideo.value) {
-    editor.commands.replaceVideo(pos, file)
-  } else {
-    editor.commands.replaceImage(pos, file)
-  }
+  editor.commands.replaceVideo(pos, file)
 }
 
 function setVideoOptions(options: {
@@ -312,12 +404,17 @@ function setVideoOptions(options: {
   >
     <div
       ref="containerRef"
-      class="group relative isolate overflow-hidden not-prose rounded-4"
-      :class="
+      class="group relative isolate overflow-hidden not-prose"
+      :class="[
+        isVideo ? 'rounded-6' : 'rounded-4',
         isStandardFullscreen
           ? 'flex items-center justify-center bg-black'
-          : containerClasses(node.attrs, selected)
-      "
+          : containerClasses(
+              node.attrs,
+              selected,
+              isVideo ? SELECTED_MEDIA_RING : SELECTED_IMAGE_RING,
+            ),
+      ]"
       :style="{ width: node.attrs.width ? `${node.attrs.width}px` : 'auto' }"
       data-video-fullscreen-root
     >
@@ -343,7 +440,7 @@ function setVideoOptions(options: {
         <img
           v-else-if="isVideo && !isUploaded && videoPoster"
           ref="mediaRef"
-          class="rounded-4"
+          class="rounded-6"
           :src="videoPoster"
           :alt="node.attrs.alt || 'Video preview'"
           :width="node.attrs.width"
@@ -353,7 +450,7 @@ function setVideoOptions(options: {
         <video
           v-else-if="isVideo"
           ref="mediaRef"
-          class="rounded-4"
+          class="rounded-6"
           :class="[
             !isUploaded && 'opacity-40',
             // Fill the screen (aspect preserved) rather than staying at the
@@ -390,16 +487,21 @@ function setVideoOptions(options: {
           :show-caption="showCaption"
           @toggle-caption="toggleCaptions"
           @set-align="onSetAlign"
+          @resize="resizeTo"
           @replace="replaceMedia"
+          @duplicate="duplicate"
+          @open="openMedia"
+          @copy="copyMedia"
+          @download="downloadMedia"
+          @remove="removeMedia"
           @set-video-options="setVideoOptions"
         />
 
-        <!-- A video's playback bar owns the bottom of the frame, so it keeps
-             the edge pills; everything else gets the corner grip. -->
+        <!-- The design's edge pills, on a picture and a video alike -->
         <MediaResizeHandle
           v-if="selected && isEditable && isUploaded && !isFullscreen"
           label="Resize media"
-          :placement="isVideo ? 'edges' : 'corner'"
+          placement="edges"
           @resize-start="startResizeFromHandle"
           @resize-keydown="onResizeKeydown"
         />
@@ -466,7 +568,7 @@ function setVideoOptions(options: {
            edit the document. -->
       <div
         v-if="showCaptionText"
-        class="w-full px-1 pt-1 text-center text-sm text-ink-gray-6"
+        class="w-full px-1 pt-2.5 text-center text-[13px] leading-[1.5] tracking-[0.015em] text-ink-gray-5"
       >
         {{ node.attrs.caption }}
       </div>
@@ -480,7 +582,7 @@ function setVideoOptions(options: {
         v-else-if="showCaptionField"
         data-media-text-field
         draggable="false"
-        class="w-full"
+        class="w-full pt-1.5"
         @pointerdown.stop
         @mousedown.stop
         @dragstart.stop.prevent
@@ -491,7 +593,7 @@ function setVideoOptions(options: {
         <input
           v-model="caption"
           draggable="false"
-          class="w-full text-center bg-transparent text-sm text-ink-gray-6 h-7 border-none focus:ring-0 placeholder-ink-gray-4"
+          class="h-7 w-full border-none bg-transparent text-center text-[13px] leading-[1.5] tracking-[0.015em] text-ink-gray-5 placeholder-ink-gray-4 focus:ring-0"
           placeholder="Add a caption"
           aria-label="Caption"
           @blur="commitCaption"

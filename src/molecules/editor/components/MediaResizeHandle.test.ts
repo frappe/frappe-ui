@@ -1,9 +1,8 @@
 /**
  * @vitest-environment jsdom
  *
- * The two placements of the resize handle. Images and embeds get the corner
- * grip; videos keep the edge pills, because their playback bar owns the bottom
- * of the frame.
+ * The two placements of the resize handle. Images and videos get the edge
+ * pills, as the design draws them on a picture; embeds keep the corner grip.
  */
 import { describe, it, expect } from 'vitest'
 import { createApp, h } from 'vue'

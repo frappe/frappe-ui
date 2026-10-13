@@ -31,6 +31,7 @@ export default {
   content: [
     './index.html',
     './App.vue',
+    './playground/**/*.{vue,js,ts}',
     './src/**/*.{vue,js,ts,jsx,tsx}',
     './experimental/**/*.{vue,js,ts,jsx,tsx}',
     './docs/**/*.{vue,js,ts,md}',
@@ -48,7 +49,17 @@ export default {
     './icons/**/*.{vue,js,ts,jsx,tsx}',
   ],
   theme: {
-    extend: {},
+    extend: {
+      // Espresso 2.0's `shadow/light/xs` (the alert card, 31304:58510):
+      // 0 0.5 3 at 6% · 0 0 1 at 27% · an inner white 0 0.25 1.5 at 8%.
+      // The library's shadow scale starts at `sm` — its Figma export has
+      // no xs step — so the playground carries it here, composed the way
+      // tokens.js composes the others (front-to-back, Figma's stack
+      // reversed), until the export brings it in.
+      boxShadow: {
+        xs: 'inset 0px 0.25px 1.5px 0px #ffffff14, 0px 0px 1px 0px #00000045, 0px 0.5px 3px 0px #0000000f',
+      },
+    },
   },
   plugins: [],
 }

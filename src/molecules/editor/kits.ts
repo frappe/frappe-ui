@@ -61,6 +61,7 @@ import {
   EditorDropcursor,
   type StarterKitOptions,
   type MentionSuggestionItem,
+  type MentionInviteHandler,
   type TagSuggestionItem,
 } from './extensions'
 
@@ -82,6 +83,8 @@ type MentionMember =
   | {
       items?: MaybeRefOrGetter<MentionSuggestionItem[]> | null
       nodeView?: Component
+      /** where an invitation goes when the name typed matches nobody */
+      onInvite?: MentionInviteHandler | null
     }
   | false
 type TagMember =
@@ -340,11 +343,7 @@ export const InlineKit = Extension.create<InlineKitOptions>({
     const options = this.options
     const list: Extensions = []
     if (options.starterKit !== false) {
-      list.push(
-        OneLineDocument,
-        Text,
-        Paragraph,
-      )
+      list.push(OneLineDocument, Text, Paragraph)
       if (options.starterKit.bold !== false) list.push(Bold)
       if (options.starterKit.italic !== false) list.push(Italic)
       if (options.starterKit.strike !== false) list.push(Strike)

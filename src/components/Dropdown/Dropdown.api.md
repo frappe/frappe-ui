@@ -57,6 +57,12 @@
     description: 'Teleport target for dropdown portal content. Unset, an embedding host\'s target is used, else `body`.',
     required: false,
     type: 'PortalTarget'
+  },
+  {
+    name: 'modal',
+    description: 'Whether the open menu is modal (the rest of the page hidden from assistive tech, outside pointer events blocked). Off, the page stays live around the menu — for a trigger inside editable content. Defaults to `true`.',
+    required: false,
+    type: 'boolean'
   }
 ]
 
