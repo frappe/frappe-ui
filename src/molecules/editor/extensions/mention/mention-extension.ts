@@ -17,7 +17,7 @@ import SuggestionList from '../suggestion/SuggestionList.vue'
 import { warnRemoved } from '#utils/warnDeprecated'
 import {
   insertSuggestionNode,
-  filterByQuery,
+  rankByQuery,
   getSuggestionOptions,
 } from '#molecules/editor/extensions/shared/suggestion-helpers'
 import './style.css'
@@ -168,7 +168,7 @@ const MentionSuggestionExtension =
 
       // The matched items are passed through as they came in, so the item
       // slot receives the caller's own object, extra fields and all.
-      return filterByQuery(mentions, query, 'label').slice(0, 10)
+      return rankByQuery(mentions, query, 'label').slice(0, 10)
     },
 
     command: ({ editor, range, props }) => {

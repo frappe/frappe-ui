@@ -160,6 +160,18 @@ describe('createSuggestionRenderer', () => {
     expect(renderer.el?.style.position).toBe('absolute')
   })
 
+  it('lets the popup take clicks only when its editor is in a dialog', () => {
+    const api = makeRenderer()
+    api.onStart(makeProps())
+    expect(instances[0].el?.dataset.editorFloating).toBe('')
+    expect(instances[0].el?.style.pointerEvents).toBe('')
+    api.onExit()
+
+    scroller.setAttribute('role', 'dialog')
+    api.onStart(makeProps())
+    expect(instances[1].el?.style.pointerEvents).toBe('auto')
+  })
+
   it('removes the wrapper and destroys the renderer on exit', () => {
     const api = makeRenderer()
     api.onStart(makeProps())

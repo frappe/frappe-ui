@@ -96,6 +96,12 @@ export function createSuggestionRenderer(
 
     floatingEl = wrapper
     floatingEl.style.position = 'absolute'
+    // A modal Dialog lets this <body> popup take clicks when the editor is
+    // inside it. A popup left open in an editor behind the Dialog stays
+    // unclickable, so it can't insert into that editor.
+    if (props.editor.view.dom.closest('[role=dialog]'))
+      floatingEl.style.pointerEvents = 'auto'
+    floatingEl.dataset.editorFloating = ''
     document.body.appendChild(floatingEl)
     getReferenceClientRect = props.clientRect as () => DOMRect | null
 
