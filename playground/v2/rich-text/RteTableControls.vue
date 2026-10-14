@@ -1426,6 +1426,17 @@ const px = (n: number) => `${n}px`
           <span class="rte-tc-pill" aria-hidden="true" />
           <span class="rte-tc-dots" aria-hidden="true" />
         </button>
+        <!-- the dash, drawn as a length of the table's own left rule: the
+             same edge and the same 1px border, so the browser rounds it
+             onto the same device pixels at any zoom -->
+        <span
+          class="rte-tc-edge is-row"
+          :style="{
+            left: px(tableBox.left),
+            top: px(rowBox.top + rowBox.height / 2 - 7),
+          }"
+          aria-hidden="true"
+        />
       </template>
 
       <!-- the column handle, at the top edge of the caret's column -->
@@ -1473,6 +1484,16 @@ const px = (n: number) => `${n}px`
           <span class="rte-tc-pill" aria-hidden="true" />
           <span class="rte-tc-dots" aria-hidden="true" />
         </button>
+        <!-- the dash, a length of the table's own top rule, as the row's -->
+        <span
+          v-if="tableBox"
+          class="rte-tc-edge is-col"
+          :style="{
+            left: px(colBox.left + colBox.width / 2 - 7),
+            top: px(tableBox.top),
+          }"
+          aria-hidden="true"
+        />
       </template>
 
       <!-- the cell handle, at the right edge of the selected cell or run:
@@ -1666,24 +1687,39 @@ body.rte-tc-dragging .rte-tc-handle {
      break in the line, not a chip, in either theme */
   box-shadow: 0 0 0 2px var(--surface-base);
 }
-/* on the table's edge the dash is a 2px gray-900 length of the edge:
-   the rule's own pixel (3px into the handle's padding box) and the cell's
-   first pixel inside it, where a selected cell's ring and a filled cell's
-   colour begin — so it sits on whichever of the two is the line the eye
-   reads — parted from the rest of the line only by the gaps either side */
+/* on the table's edge the dash is drawn by .rte-tc-edge, not the pill */
+.rte-tc-handle.is-row:not(.is-cell) .rte-tc-pill,
+.rte-tc-handle.is-col .rte-tc-pill {
+  display: none;
+}
+/* the edge's dash: a 1px gray-900 length of the table's rule, laid on the
+   wrapper's own edge with the wrapper's own 1px border, so it lands on
+   the rule's device pixels at any zoom; parted from the rest of the line
+   only by the gaps either side, in the editor's ground */
+.rte-tc-edge {
+  position: fixed;
+  pointer-events: none;
+  box-shadow: 0 0 0 2px var(--surface-base);
+}
+.rte-tc-edge.is-row {
+  width: 0;
+  height: 14px;
+  border-left: 1px solid var(--ink-gray-9);
+}
+.rte-tc-edge.is-col {
+  width: 14px;
+  height: 0;
+  border-top: 1px solid var(--ink-gray-9);
+}
+.rte-tc-handle:hover + .rte-tc-edge,
+.rte-tc-handle.is-open + .rte-tc-edge {
+  display: none;
+}
 .rte-tc-handle.is-row .rte-tc-pill {
   left: 3px;
   top: 2px;
-  width: 2px;
+  width: 1px;
   height: 14px;
-  background-color: var(--ink-gray-9);
-}
-.rte-tc-handle.is-col .rte-tc-pill {
-  left: 2px;
-  top: 3px;
-  width: 14px;
-  height: 2px;
-  background-color: var(--ink-gray-9);
 }
 /* the cell's handle on the selection's ring is, like the edge's, a 1px
    length of that ring: gray-500, on the ring's own pixel (4px into the
@@ -1742,7 +1778,19 @@ body.rte-tc-dragging .rte-tc-handle {
 }
 /* the Colour submenu: Default and the palette, 24px on 8px corners */
 .rte-tc-swatches {
-  @apply grid grid-cols-6 gap-1.5 p-1;
+  @apply grid gap-1.5 p-1;
+  /* six 24px columns spread edge to edge, so the swatches sit evenly in
+     the card rather than leaning left in wider columns */
+  grid-template-columns: repeat(6, 24px);
+  justify-content: space-between;
+}
+/* the grid is a row of the menu, but its swatches are what take the
+   pointer and the focus: the row itself never lights up */
+.rte-tc-swatches,
+.rte-tc-swatches:focus,
+.rte-tc-swatches[data-highlighted] {
+  background-color: transparent !important;
+  outline: none;
 }
 .rte-tc-swatch {
   @apply flex size-6 items-center justify-center rounded-4 border border-outline-gray-2 text-base leading-none text-ink-gray-7 transition-shadow;
