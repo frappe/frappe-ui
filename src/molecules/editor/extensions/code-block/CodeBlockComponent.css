@@ -6,9 +6,12 @@
  * variants that can't be expressed as element-level utility classes. */
 
 /* ── pre shell ────────────────────────────────────────────────── */
+/* the ground and the plain text are espresso's, so the block sits on the
+   page as the callout does in either theme: surface-gray-1 under ink-gray-8
+   on an outline-gray-2 rule; only the syntax colours below are GitHub's */
 .ProseMirror pre {
-  background: #f6f8fa;
-  color: #24292e;
+  background: var(--surface-gray-1);
+  color: var(--ink-gray-8);
   font-family:
     ui-monospace, Menlo, Monaco, 'Cascadia Mono', 'Segoe UI Mono',
     'Roboto Mono', 'Oxygen Mono', 'Ubuntu Mono', 'Source Code Pro', 'Fira Mono',
@@ -18,7 +21,7 @@
   padding: 0.75rem 1rem;
   border-radius: 0.75rem;
   border: 1px solid var(--outline-gray-2);
-  caret-color: #24292e;
+  caret-color: var(--ink-gray-9);
 }
 
 .ProseMirror pre code {
@@ -94,7 +97,7 @@
 }
 
 .ProseMirror pre .hljs-subst {
-  color: #24292e;
+  color: inherit;
 }
 .ProseMirror pre .hljs-section {
   color: #005cc5;
@@ -104,11 +107,11 @@
   color: #735c0f;
 }
 .ProseMirror pre .hljs-emphasis {
-  color: #24292e;
+  color: inherit;
   font-style: italic;
 }
 .ProseMirror pre .hljs-strong {
-  color: #24292e;
+  color: inherit;
   font-weight: 700;
 }
 .ProseMirror pre .hljs-addition {
@@ -118,13 +121,6 @@
 .ProseMirror pre .hljs-deletion {
   color: #b31d28;
   background-color: #ffeef0;
-}
-
-/* ── pre shell — dark mode ───────────────────────────────────── */
-[data-theme='dark'] .ProseMirror pre {
-  background: #0d1117;
-  color: #c9d1d9;
-  caret-color: #c9d1d9;
 }
 
 /* ── highlight.js — GitHub dark ──────────────────────────────── */
@@ -183,7 +179,7 @@
 }
 
 [data-theme='dark'] .ProseMirror pre .hljs-subst {
-  color: #c9d1d9;
+  color: inherit;
 }
 [data-theme='dark'] .ProseMirror pre .hljs-section {
   color: #1f6feb;
@@ -193,11 +189,11 @@
   color: #f2cc60;
 }
 [data-theme='dark'] .ProseMirror pre .hljs-emphasis {
-  color: #c9d1d9;
+  color: inherit;
   font-style: italic;
 }
 [data-theme='dark'] .ProseMirror pre .hljs-strong {
-  color: #c9d1d9;
+  color: inherit;
   font-weight: 700;
 }
 [data-theme='dark'] .ProseMirror pre .hljs-addition {
