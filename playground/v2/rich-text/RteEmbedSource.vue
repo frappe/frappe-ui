@@ -130,7 +130,7 @@ function pickFromLibrary(file: LibraryFile) {
   >
     <!-- the library's underline tabs, as the emoji picker's: their line
          slides from tab to tab over the row's rule -->
-    <div class="flex h-7 items-end border-b border-outline-gray-1 px-4">
+    <div class="flex h-7 items-end border-b border-outline-elevation-2 px-4">
       <Tabs v-model="tab">
         <TabList
           variant="underline"
@@ -146,9 +146,11 @@ function pickFromLibrary(file: LibraryFile) {
           />
         </TabList>
       </Tabs>
+      <!-- the cross's own 7px lines end on the content's right edge, 16px
+           in, where the field below ends -->
       <button
         type="button"
-        class="-mr-3 ml-auto flex size-5 self-center items-center justify-center text-ink-gray-5 hover:text-ink-gray-7"
+        class="-mr-1.5 ml-auto flex size-5 self-center items-center justify-center text-ink-gray-5 hover:text-ink-gray-7"
         aria-label="Close"
         @click="emit('close')"
       >

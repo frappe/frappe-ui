@@ -112,7 +112,7 @@ function addCompact() {
            slides from tab to tab over the row's rule. The rule is the
            row's, so it runs under the close button too -->
       <div
-        class="flex h-7 items-end justify-between border-b border-outline-gray-1 pl-4 pr-2 dark:border-outline-gray-2"
+        class="flex h-7 items-end justify-between border-b border-outline-elevation-2 pl-4 pr-2"
       >
         <Tabs v-model="tab">
           <TabList
