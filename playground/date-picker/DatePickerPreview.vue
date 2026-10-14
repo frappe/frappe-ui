@@ -43,7 +43,7 @@ import iconToday from './icons/tomorrow.svg?url'
 import iconDown from './icons/small-down.svg?url'
 import iconUp from './icons/small-up.svg?url'
 import iconSelect from './icons/small-select.svg?url'
-import iconCalendar from './icons/calendar.svg?url'
+import calendarSvg from './icons/calendar.svg?raw'
 
 export type DatePickerVariant = 'default' | 'inline' | 'date-time'
 
@@ -444,7 +444,7 @@ const icons = {
     <!-- header: type a date -->
     <div
       v-if="header"
-      class="flex w-0 min-w-full gap-2 border-b border-outline-gray-1 p-2 pb-[7px]"
+      class="flex w-0 min-w-full gap-2 border-b border-[var(--outline-elevation-2)] p-2 pb-[7px]"
     >
       <template v-if="isRange && doublePane">
         <TextInput
@@ -461,7 +461,11 @@ const icons = {
           @blur="commitRange(i)"
         >
           <template #prefix>
-            <img :src="iconCalendar" alt="" class="dp-glyph size-3.5" />
+            <span
+              class="dp-glyph size-3.5 text-ink-gray-7"
+              aria-hidden="true"
+              v-html="calendarSvg"
+            />
           </template>
         </TextInput>
       </template>
@@ -477,7 +481,11 @@ const icons = {
         @blur="commitTypedRange"
       >
         <template #prefix>
-          <img :src="iconCalendar" alt="" class="dp-glyph size-3.5" />
+          <span
+            class="dp-glyph size-3.5 text-ink-gray-7"
+            aria-hidden="true"
+            v-html="calendarSvg"
+          />
         </template>
       </TextInput>
       <TextInput
@@ -497,7 +505,7 @@ const icons = {
       <!-- sidebar: shortcuts -->
       <div
         v-if="sidebar"
-        class="flex w-[122px] shrink-0 flex-col gap-px p-1 shadow-[inset_-1px_0_0_var(--outline-gray-1)]"
+        class="flex w-[122px] shrink-0 flex-col gap-px p-1 shadow-[inset_-1px_0_0_var(--outline-elevation-2)]"
         aria-label="Shortcuts"
       >
         <Button
@@ -536,7 +544,7 @@ const icons = {
     <!-- date & time: hour, minute, AM/PM -->
     <div
       v-if="variant === 'date-time'"
-      class="dp-time flex w-0 min-w-full gap-1 border-t border-outline-gray-1 p-2 pt-[7px]"
+      class="dp-time flex w-0 min-w-full gap-1 border-t border-[var(--outline-elevation-2)] p-2 pt-[7px]"
     >
       <Select
         v-model="hour"
@@ -564,7 +572,7 @@ const icons = {
     <!-- footer -->
     <div
       v-if="footer"
-      class="flex w-0 min-w-full items-center justify-between border-t border-outline-gray-1 p-2 pt-[7px]"
+      class="flex w-0 min-w-full items-center justify-between border-t border-[var(--outline-elevation-2)] p-2 pt-[7px]"
     >
       <Button
         variant="ghost"
@@ -588,8 +596,14 @@ const icons = {
 </template>
 
 <style scoped>
+/* the calendar glyph, drawn in the field's ink so it follows the theme
+   (as an <img> it was always black) */
 .dp-glyph {
-  filter: none;
+  display: inline-flex;
+}
+.dp-glyph :deep(svg) {
+  width: 100%;
+  height: 100%;
 }
 
 /* the shortcuts: menu items, 13 regular ink-gray-6 (node 35942:69507) */
@@ -792,6 +806,13 @@ const icons = {
   color: var(--ink-gray-4);
 }
 
+/* no fade between a day's fills: the library eases every cell's colour
+   over 100ms, so moving along a range showed each cell's own grey square
+   for a moment before the bar's fill took over — the flicker */
+.dp-cal :deep([role='row'] > *) {
+  transition: none !important;
+}
+
 /* the date states (node 23667:9349): hover surface-gray-3; today a 1px
    outline-gray-6 ring, regular weight, ink-gray-7; disabled ink-gray-3 at
    full opacity (the library bolds today and fades disabled days) */
@@ -970,9 +991,12 @@ const icons = {
   display: none;
 }
 
+/* rules on the card: outline-elevation-2 — the same #ededed as
+   outline-gray-1 in light, where outline-gray-1 in dark is the card's own
+   fill (#242424) and vanished */
 /* ---- double pane: a rule between, the month centred, no Today ---- */
 .dp--double .dp-cal :deep(.divide-x > * + *) {
-  border-color: var(--outline-gray-1);
+  border-color: var(--outline-elevation-2);
 }
 .dp--double .dp-cal :deep(.select-none > div:first-child > button) {
   height: 24px;
