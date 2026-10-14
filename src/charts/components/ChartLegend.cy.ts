@@ -314,6 +314,23 @@ describe('ChartLegend', () => {
         .and('have.attr', 'aria-pressed', 'true')
     })
 
+    // A click opens the panel and the panel focuses its first row: that focus
+    // is not the reader pointing at a series.
+    it('highlights nothing when a click opens the popover', () => {
+      mountMany(12, { onHighlight: cy.spy().as('onHighlight') })
+      more().click()
+      rows().first().should('have.focus')
+      cy.get('@onHighlight').should('not.have.been.calledWith', 's11')
+    })
+
+    it('highlights a popover row the keyboard reaches', () => {
+      mountMany(12, { onHighlight: cy.spy().as('onHighlight') })
+      more().click()
+      rows().first().should('have.focus')
+      cy.press(Cypress.Keyboard.Keys.TAB)
+      cy.get('@onHighlight').should('have.been.calledWith', 's10')
+    })
+
     it('lists every series in the popover, heaviest first, with its value', () => {
       mountMany(12)
       more().click()

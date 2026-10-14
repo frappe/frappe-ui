@@ -50,6 +50,8 @@
             variant="ghost"
             size="xs"
             :label="`Show ${items.length - shown.length} more series`"
+            @pointerdown="openedBy(true)"
+            @keydown="openedBy(false)"
           >
             <span class="tabular-nums text-ink-gray-6">
               {{ moreText(items.length - shown.length) }}
@@ -62,6 +64,7 @@
           data-slot="chart-legend-list"
           :dir="dir"
           class="flex max-h-80 w-72 flex-col gap-1 p-1.5"
+          @focusin="openedBy(false)"
         >
           <TextInput
             v-if="items.length > SEARCH_AFTER"
@@ -89,7 +92,7 @@
               @click="emit('change', item.name)"
               @mouseenter="emit('highlight', item.name)"
               @mouseleave="emit('highlight', null)"
-              @focus="emit('highlight', item.name)"
+              @focus="rowFocus(item.name)"
               @blur="emit('highlight', null)"
             >
               <template #prefix>
@@ -260,6 +263,18 @@ watch(open, (value) => {
   // focus never reports leaving.
   emit('highlight', null)
 })
+
+// The panel focuses what it opens on. Opened by a click, that focus is not the
+// reader pointing at a series, so the row it lands on stays quiet. The panel's
+// `focusin` runs after the row's `focus`, which is what spends the flag on the
+// first focus alone.
+let openedByPointer = false
+function openedBy(pointer: boolean) {
+  openedByPointer = pointer
+}
+function rowFocus(name: string) {
+  if (!openedByPointer) emit('highlight', name)
+}
 
 function moreText(count: number) {
   return `+${count} more`
