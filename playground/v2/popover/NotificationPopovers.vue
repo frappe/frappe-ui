@@ -264,21 +264,16 @@ const comments = [
           </Button>
         </div>
 
-        <!-- the library's subtle tabs, sm: their raised pill slides from
-             tab to tab; stretched so the two halves split the row -->
+        <!-- the library's subtle tabs, sm, as tab new draws them
+             (espresso-2.0, 23608:8541): each tab hugs its label, the raised
+             pill sliding from tab to tab over the gray-2 track -->
         <Tabs v-model="tab">
-          <TabList
-            variant="subtle"
-            size="sm"
-            class="!flex w-full dark:bg-surface-gray-1"
-            aria-label="Notification filter"
-          >
+          <TabList variant="subtle" size="sm" aria-label="Notification filter">
             <TabTrigger
               v-for="t in TABS"
               :key="t.value"
               :value="t.value"
               :label="t.label"
-              class="flex-1 [&>span]:w-full"
             />
           </TabList>
         </Tabs>
