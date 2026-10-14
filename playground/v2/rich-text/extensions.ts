@@ -29,7 +29,7 @@ import AudioNodeView from './AudioNodeView.vue'
 import DetailsNodeView from './DetailsNodeView.vue'
 import RteImageSlotView from './RteImageSlot.vue'
 import RteEmbedSlotView from './RteEmbedSlot.vue'
-import { openEmbedSourcePopup } from './rteEmbedPopup'
+import { freshEmbedSlot, openEmbedSourcePopup } from './rteEmbedPopup'
 import { openRemoveEmbedModal } from './rteRemoveEmbed'
 
 declare module '@tiptap/core' {
@@ -427,8 +427,13 @@ export const EmbedSlot = Node.create({
     return {
       insertEmbedSlot:
         () =>
-        ({ commands }) =>
-          commands.insertContent({ type: this.name }),
+        ({ commands }) => {
+          freshEmbedSlot.pending = true
+          const done = commands.insertContent({ type: this.name })
+          // the slot mounts on Vue's next tick; should none take it, it lapses
+          setTimeout(() => (freshEmbedSlot.pending = false), 300)
+          return done
+        },
       replaceIframe:
         (pos: number) =>
         ({ editor }) => {

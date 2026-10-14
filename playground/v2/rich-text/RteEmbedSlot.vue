@@ -8,13 +8,13 @@
 // uploaded or picked from the library, and already read — takes the
 // slot's own place in one step, laid the width of the column in its
 // platform's shape.
-import { toRaw } from 'vue'
+import { onMounted, ref, toRaw } from 'vue'
 import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3'
 import { Popover } from '../../../src'
 import { useNodeViewEditable } from '../../../src/molecules/editor/composables/useNodeViewEditable'
 import { getIframeAllowlist } from '../../../src/molecules/editor/extensions/iframe'
 import RteEmbedSource from './RteEmbedSource.vue'
-import { embedUploader } from './rteEmbedPopup'
+import { embedUploader, freshEmbedSlot } from './rteEmbedPopup'
 
 const props = defineProps(nodeViewProps)
 
@@ -23,6 +23,14 @@ const editor = toRaw(props.editor)
 const editable = useNodeViewEditable(editor)
 const allowlist = getIframeAllowlist(editor)
 const upload = embedUploader(editor)
+
+// just laid down: its card comes up with it
+const open = ref(false)
+onMounted(() => {
+  if (!freshEmbedSlot.pending || !editable.value) return
+  freshEmbedSlot.pending = false
+  open.value = true
+})
 
 /** the slot's own range, or null once it has gone from the document */
 function range() {
@@ -52,7 +60,7 @@ function takeLink(embed: { src: string; aspectRatio: number }) {
     data-type="embed-slot"
     contenteditable="false"
   >
-    <Popover side="bottom" align="start" :offset="6" bare>
+    <Popover v-model:open="open" side="bottom" align="start" :offset="6" bare>
       <template #trigger="{ open }">
         <button
           type="button"

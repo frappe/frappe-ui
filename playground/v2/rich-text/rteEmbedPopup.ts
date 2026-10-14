@@ -16,6 +16,14 @@ import {
 } from '../../../src/molecules/editor/extensions/shared/media-upload-engine'
 import RteEmbedSource from './RteEmbedSource.vue'
 
+/**
+ * An embed slot laid down by the toolbar or /embed raises its card at
+ * once, as Notion's does; one already in the document (loaded, undone
+ * back, carried by its grip) waits for a press. The command sets this and
+ * the slot it mounts takes it.
+ */
+export const freshEmbedSlot = { pending: false }
+
 /** the card's Upload tab, sent through the editor's own upload */
 export function embedUploader(editor: Editor): (file: File) => Promise<string> {
   const options = resolveUploadOptions({ editor })

@@ -12,7 +12,7 @@
 // back as — a PDF, which a browser shows in a frame. Library: what has been
 // uploaded already, newest first; the file draws no body for this tab, so
 // it is a plain list of rows.
-import { computed, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { Button, TabList, Tabs, TabTrigger, TextInput } from '../../../src'
 import { pickFiles } from '../../../src/molecules/editor/extensions/shared/file-picker'
 import {
@@ -62,6 +62,15 @@ const HINT =
 const hint = computed(() => error.value || HINT)
 
 watch(tab, () => (error.value = ''))
+
+// the popover gives its first stop, the tab, the focus as it opens; the
+// link is what the card is for, so the caret goes there, ready to paste
+const root = ref<HTMLElement | null>(null)
+onMounted(() =>
+  setTimeout(() =>
+    root.value?.querySelector<HTMLInputElement>('input')?.focus(),
+  ),
+)
 
 /** the link, read: off to the editor if it will take it, else the word why */
 function take(raw: string): boolean {
@@ -126,6 +135,7 @@ function pickFromLibrary(file: LibraryFile) {
 
 <template>
   <div
+    ref="root"
     class="rte-source relative flex w-[380px] flex-col gap-4 rounded-6 bg-surface-elevation-2 pb-3.5 pt-2 shadow-xl"
   >
     <!-- the library's underline tabs, as the emoji picker's: their line

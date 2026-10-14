@@ -18,14 +18,7 @@ import {
   watch,
   type Component,
 } from 'vue'
-import {
-  Button,
-  Dialog,
-  Dropdown,
-  Popover,
-  TextInput,
-  Tooltip,
-} from '../../../src'
+import { Button, Dropdown, Popover, TextInput, Tooltip } from '../../../src'
 import type { DropdownOptions } from '../../../src/components/Dropdown/types'
 import { useResolvedEditor } from '../../../src/molecules/editor/editor-context'
 import {
@@ -44,6 +37,7 @@ import {
 } from './rteBlocks'
 import RteColorPanel from './RteColorPanel.vue'
 import EmojiPicker from '../popover/EmojiPicker.vue'
+import EspressoModal from '../modals/EspressoModal.vue'
 
 const emit = defineEmits<{
   /** the comment button: a thread on the selection */
@@ -203,13 +197,12 @@ const spacingOptions = computed<DropdownOptions>(() => [
 // ---- media: from the disk through the library's pickers, or by URL
 // a picture is the one medium that does not come through here: its slot
 // carries its own card, with the link on a tab of it (RteImageSlot)
-type UrlKind = 'video' | 'audio' | 'file' | 'embed'
+type UrlKind = 'video' | 'audio' | 'file'
 const urlDialog = ref<{ kind: UrlKind; url: string; name: string } | null>(null)
 const URL_TITLES: Record<UrlKind, string> = {
   video: 'Insert video',
   audio: 'Insert audio',
   file: 'Attach file',
-  embed: 'Insert Link',
 }
 function askUrl(kind: UrlKind) {
   urlDialog.value = { kind, url: '', name: '' }
@@ -222,7 +215,6 @@ function insertUrl() {
   const c = chain()
   if (d.kind === 'video') c.setVideo({ src: url }).run()
   else if (d.kind === 'audio') c.setAudio({ src: url }).run()
-  else if (d.kind === 'embed') c.insertIframeURL(url).run()
   else
     c.setAttachment({
       src: url,
@@ -306,7 +298,10 @@ const insertOptions = computed<DropdownOptions>(() => [
       {
         label: 'Embed',
         icon: lucide('gallery-vertical'),
-        onClick: () => askUrl('embed'),
+        // the file's embed card, as /embed raises it — once the menu has
+        // shut: shutting, it hands focus back to its trigger, and the card,
+        // raised already, would take that as a press outside and shut too
+        onClick: () => setTimeout(() => chain().insertEmbedSlot().run(), 200),
       },
     ],
   },
@@ -852,41 +847,42 @@ function onFocusIn(e: FocusEvent) {
       @change="takeAudio"
     />
 
-    <!-- by URL -->
-    <Dialog
-      :model-value="!!urlDialog"
-      :options="{
-        title: urlDialog ? URL_TITLES[urlDialog.kind] : '',
-        size: 'sm',
-      }"
-      @update:model-value="(v: boolean) => !v && (urlDialog = null)"
+    <!-- by URL: the espresso modal every v2 modal is, its title, the
+         field, and the action across the foot -->
+    <EspressoModal
+      :open="!!urlDialog"
+      :title="urlDialog ? URL_TITLES[urlDialog.kind] : ''"
+      @update:open="(v: boolean) => !v && (urlDialog = null)"
     >
-      <template #body-content>
-        <form
-          v-if="urlDialog"
-          class="flex flex-col gap-3"
-          @submit.prevent="insertUrl"
+      <form
+        v-if="urlDialog"
+        class="flex flex-col gap-3"
+        @submit.prevent="insertUrl"
+      >
+        <TextInput
+          v-model="urlDialog.url"
+          label="URL"
+          placeholder="https://"
+          autofocus
+        />
+        <TextInput
+          v-if="urlDialog.kind === 'file'"
+          v-model="urlDialog.name"
+          label="File name"
+          placeholder="report.pdf"
+        />
+      </form>
+      <template #footer>
+        <Button
+          variant="solid"
+          class="w-full"
+          :disabled="!urlDialog?.url.trim()"
+          @click="insertUrl"
         >
-          <TextInput
-            v-model="urlDialog.url"
-            label="URL"
-            placeholder="https://"
-            autofocus
-          />
-          <TextInput
-            v-if="urlDialog.kind === 'file'"
-            v-model="urlDialog.name"
-            label="File name"
-            placeholder="report.pdf"
-          />
-        </form>
-      </template>
-      <template #actions>
-        <Button variant="solid" class="w-full" @click="insertUrl">
-          {{ urlDialog?.kind === 'embed' ? 'Add link' : 'Insert' }}
+          {{ urlDialog?.kind === 'file' ? 'Attach' : 'Insert' }}
         </Button>
       </template>
-    </Dialog>
+    </EspressoModal>
   </div>
 </template>
 
