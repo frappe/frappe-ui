@@ -1036,6 +1036,13 @@ const icons = {
   --dp-range: var(--surface-gray-2);
 }
 
+/* the time lists are the picker's own popovers: surface-elevation-1, as
+   the picker (the user's call 2026-10-14) — Select draws its menu on
+   elevation-2 */
+.dp-time-list > .bg-surface-elevation-2 {
+  background: var(--surface-elevation-1);
+}
+
 /* the time lists' options are the file's menu items: 28 tall, radius 8 (the
    list is portalled out of the picker; the page marks it) */
 .dp-time-list [role='option'] {
