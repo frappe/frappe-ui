@@ -659,12 +659,12 @@ export const Details = Node.create({
     return {
       'Alt-ArrowUp': () => this.editor.commands.moveDetails(-1),
       'Alt-ArrowDown': () => this.editor.commands.moveDetails(1),
-      // Enter on the summary goes into the toggle, never past it: the
-      // toggle opens and what follows the caret starts its body (left to
-      // the editor, the summary can't split, so the toggle itself did, and
-      // every Enter laid down a new empty toggle); on a toggle with nothing
-      // in it, Enter turns it back into a plain line, as on an empty list
-      // item
+      // Enter on the summary, as Notion's toggle takes it: on an open
+      // toggle the caret goes into its body, what followed it starting the
+      // body's first line; on a closed one a new closed toggle follows,
+      // titled with what followed the caret — only its title showing; on
+      // a toggle with nothing in it, the toggle turns back into a plain
+      // line, as on an empty list item
       Enter: ({ editor }) => {
         const { state } = editor
         const { $from, $to } = state.selection
@@ -689,7 +689,22 @@ export const Details = Node.create({
         }
         const rest = $from.parent.content.cut($to.parentOffset)
         tr.delete($from.pos, $from.end())
-        tr.setNodeMarkup(pos, undefined, { ...details.attrs, open: true })
+        if (!details.attrs.open) {
+          const after = pos + tr.doc.nodeAt(pos)!.nodeSize
+          tr.insert(
+            after,
+            this.type.create({ open: false }, [
+              summaryType.create(null, rest),
+              state.schema.nodes.detailsContent.create(
+                null,
+                paragraph.create(),
+              ),
+            ]),
+          )
+          tr.setSelection(TextSelection.create(tr.doc, after + 2))
+          editor.view.dispatch(tr.scrollIntoView())
+          return true
+        }
         // the body's first line, after the summary as the delete left it
         const mapped = tr.doc.nodeAt(pos)!
         const bodyStart = pos + 1 + mapped.child(0).nodeSize + 1
@@ -738,7 +753,7 @@ export const Details = Node.create({
         ({ commands }) =>
           commands.insertContent({
             type: this.name,
-            attrs: { open: true },
+            attrs: { open: false },
             content: [
               { type: 'detailsSummary' },
               {
@@ -748,8 +763,8 @@ export const Details = Node.create({
             ],
           }),
       // the select's "Toggle list", a block style like a heading is: the
-      // line the caret is in becomes a toggle's summary, open, with an
-      // empty line to fill under it; picked again on a summary, the toggle
+      // line the caret is in becomes a toggle's summary, closed as Notion's
+      // starts, with an empty line folded under it; picked again on a summary, the toggle
       // comes apart — the summary a paragraph, what it held set down after
       setToggleList:
         () =>
@@ -785,7 +800,7 @@ export const Details = Node.create({
           if (!block.isTextblock) return false
           if (!dispatch) return true
           const pos = $from.before(depth)
-          const details = this.type.create({ open: true }, [
+          const details = this.type.create({ open: false }, [
             summaryType.create(null, block.content),
             contentType.create(null, paragraph.create()),
           ])
