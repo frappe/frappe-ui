@@ -423,8 +423,62 @@ function onCardUp(e: PointerEvent) {
   })
 }
 
+/**
+ * Hovering one piece of an event that runs across weeks (Month) or past
+ * midnight (Week, Day) lights every piece of it, as opening it already
+ * marks every piece (the user's call 2026-10-14). The pieces carry no id, so
+ * they are walked from the hovered one: the same title and fill, each
+ * running on from the last — a piece cut square on its trailing side
+ * followed by one cut square on its leading side.
+ */
+const HOVER_GROUP = 'data-hover-group'
+function piecesOf(pill: HTMLElement) {
+  const month = !!pill.closest('[data-week-row]')
+  const scope = month ? '[data-week-row] .event' : '[data-time-grid] .event'
+  const [lead, trail] = month
+    ? ['rounded-l-none', 'rounded-r-none']
+    : ['rounded-t-none', 'rounded-b-none']
+  const title = (el: HTMLElement) => el.innerText.trim().split('\n')[0]
+  const bg = pill.style.getPropertyValue('--bg')
+  const same = [
+    ...(calendarEl.value?.querySelectorAll<HTMLElement>(scope) ?? []),
+  ].filter(
+    (el) =>
+      title(el) === title(pill) && el.style.getPropertyValue('--bg') === bg,
+  )
+  const at = same.indexOf(pill)
+  if (at < 0) return [pill]
+  const group = [pill]
+  for (let i = at; i > 0; i--) {
+    if (!same[i].classList.contains(lead)) break
+    if (!same[i - 1].classList.contains(trail)) break
+    group.push(same[i - 1])
+  }
+  for (let i = at; i < same.length - 1; i++) {
+    if (!same[i].classList.contains(trail)) break
+    if (!same[i + 1].classList.contains(lead)) break
+    group.push(same[i + 1])
+  }
+  return group
+}
+function clearHoverGroup() {
+  for (const el of calendarEl.value?.querySelectorAll(`[${HOVER_GROUP}]`) ?? [])
+    el.removeAttribute(HOVER_GROUP)
+}
+function onCardOver(e: PointerEvent) {
+  const pill = (e.target as HTMLElement).closest<HTMLElement>('.event')
+  if (pill?.hasAttribute(HOVER_GROUP)) return
+  clearHoverGroup()
+  if (!pill || pill.closest('.calendar-row')) return
+  const group = piecesOf(pill)
+  if (group.length < 2) return
+  for (const el of group) el.setAttribute(HOVER_GROUP, '')
+}
+
 onMounted(() => {
   calendarEl.value?.addEventListener('pointerdown', onCardDown, true)
+  calendarEl.value?.addEventListener('pointerover', onCardOver)
+  calendarEl.value?.addEventListener('pointerleave', clearHoverGroup)
   calendarEl.value?.addEventListener('dragstart', noAgendaDrag, true)
   // Capture: a scroll does not bubble, but it can be heard on the way down.
   calendarEl.value?.addEventListener('scroll', onAnyScroll, true)
@@ -435,6 +489,8 @@ onMounted(() => {
   monthEdges.attach(calendarEl.value)
 })
 onUnmounted(() => {
+  calendarEl.value?.removeEventListener('pointerover', onCardOver)
+  calendarEl.value?.removeEventListener('pointerleave', clearHoverGroup)
   calendarEl.value?.removeEventListener('pointerdown', onCardDown, true)
   calendarEl.value?.removeEventListener('dragstart', noAgendaDrag, true)
   calendarEl.value?.removeEventListener('scroll', onAnyScroll, true)

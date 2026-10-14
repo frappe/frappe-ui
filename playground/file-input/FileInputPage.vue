@@ -80,8 +80,11 @@ const DESCRIPTION =
 </script>
 
 <template>
-  <div class="flex h-full items-center justify-center px-5 py-10">
-    <div class="flex items-start gap-10">
+  <!-- the page scrolls once the area's files run past the window; `m-auto`
+       keeps it centred until then (a centred flex child that overflows is
+       cut off at the top instead) -->
+  <div class="flex h-full overflow-y-auto px-5 py-10">
+    <div class="m-auto flex items-start gap-10">
       <!-- one box for both input types, so switching between them moves
            nothing: the controller stays put, the field and the area share a
            left edge, 272 in (where the field sits after the preview card);

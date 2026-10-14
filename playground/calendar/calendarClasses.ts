@@ -261,6 +261,9 @@ export const espressoCalendar = [
   // …and Month's: every week's piece of a bar whose edge is being pulled —
   // see `markPieces` — and each of them resting once it is let go.
   '[&_[data-week-row]_.event[data-pulled]]:![background-color:var(--bg-active)]',
+  // …and every piece of an event hovered on any one of them — see
+  // `piecesOf`. Below the rested rule: a piece just let go of stays at rest.
+  '[&_.event[data-hover-group]:not(.active):not([data-rested])]:![background-color:var(--bg-active)]',
   '[&_[data-week-row]_.event[data-rested]:not(.active)]:![background-color:var(--bg)]',
   // …and the white ring a pill wears where it lies on another comes in by
   // the same pixel top and bottom, or it reads 3 there against 2 at the

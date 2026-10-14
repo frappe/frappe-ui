@@ -949,15 +949,27 @@ export function useMonthResize(
       else bar.removeAttribute(HELD_BAR)
     }
   }
-  /** Let go of: every piece rests until the pointer next leaves it. */
+  /**
+   * Let go of: every piece rests until the pointer is off the bar — off all
+   * of its pieces, not each in turn, or a week the pointer never went back to
+   * would stay at rest and miss the hover the rest of the bar then shows.
+   */
   function restPieces() {
-    for (const bar of root.value?.querySelectorAll<HTMLElement>(`[${HELD_BAR}]`) ?? []) {
+    const pieces = [
+      ...(root.value?.querySelectorAll<HTMLElement>(`[${HELD_BAR}]`) ?? []),
+    ]
+    for (const bar of pieces) {
       bar.removeAttribute(HELD_BAR)
       bar.setAttribute('data-rested', '')
-      bar.addEventListener('pointerleave', () => bar.removeAttribute('data-rested'), {
-        once: true,
-      })
     }
+    const wake = (e: PointerEvent) => {
+      const on = (e.target as HTMLElement | null)?.closest('[data-rested]')
+      if (on) return
+      for (const bar of root.value?.querySelectorAll('[data-rested]') ?? [])
+        bar.removeAttribute('data-rested')
+      window.removeEventListener('pointermove', wake)
+    }
+    window.addEventListener('pointermove', wake)
   }
 
   function barAt(e: PointerEvent) {

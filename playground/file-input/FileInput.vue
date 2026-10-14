@@ -256,11 +256,24 @@ watch(
       tabindex="-1"
       @change="onPick"
     />
-    <!-- the preview card -->
+    <!-- the preview card: a way in as well, like the field — a click opens
+         the picker and a file dropped on it is taken (the user's call
+         2026-10-14). Not while it is uploading. -->
     <div
       v-if="preview"
       data-slot="preview"
-      class="relative h-[140px] w-[260px] shrink-0 overflow-hidden rounded-4 border border-outline-gray-1 bg-surface-elevation-1"
+      :role="phase === 'loading' ? undefined : 'button'"
+      :tabindex="disabled || phase === 'loading' ? -1 : 0"
+      :aria-label="phase === 'loading' ? undefined : 'Choose file'"
+      class="relative h-[140px] w-[260px] shrink-0 overflow-hidden rounded-4 border border-outline-gray-1 bg-surface-elevation-1 outline-none focus-visible:ring-2 focus-visible:ring-outline-gray-3"
+      :class="!disabled && phase !== 'loading' && 'cursor-pointer'"
+      @click="phase !== 'loading' && open()"
+      @keydown.enter.prevent="phase !== 'loading' && open()"
+      @keydown.space.prevent="phase !== 'loading' && open()"
+      @dragenter.prevent="dragging = true"
+      @dragover.prevent="dragging = true"
+      @dragleave="dragging = false"
+      @drop.prevent="onDrop"
     >
       <template v-if="phase === 'filled' && imageUrl">
         <img :src="imageUrl" alt="" class="size-full object-cover" />
@@ -270,7 +283,7 @@ watch(
           class="absolute right-1 top-1"
           aria-label="Remove file"
           :disabled="disabled"
-          @click="clear"
+          @click.stop="clear"
         >
           <template #icon>
             <FileInputIcon name="close" class="size-4 text-ink-gray-7" />
