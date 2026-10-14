@@ -40,6 +40,11 @@ const onMedia = ref(false)
 // not reactive: a re-render of the grip while it is the source of a drag
 // makes the browser end the drag, so a drag leaves the grip's DOM alone
 let dragging = false
+// pressed and not yet dragging: the browser starts a drag only a few
+// pixels into the move, and a move that reached the grip's tracking first
+// would carry the grip off to the block now under the pointer — taking the
+// drag's source out from under the press, and the drag never starts
+let pressed = false
 
 /** how far left of the document the grip still answers the pointer */
 const GUTTER = 72
@@ -209,7 +214,7 @@ function selectingText() {
   )
 }
 function place() {
-  if (dragging) return
+  if (dragging || pressed) return
   if (selectingText()) {
     hide()
     return
@@ -252,7 +257,7 @@ function hide() {
 }
 
 function onMove(e: MouseEvent) {
-  if (dragging) return
+  if (dragging || pressed) return
   const ed = editor.value
   if (!ed || ed.isDestroyed || !ed.isEditable || selectingText()) {
     hide()
@@ -721,8 +726,19 @@ function dropBeside(
   }
   return tr
 }
+function onPress() {
+  pressed = true
+  window.addEventListener('pointerup', release, true)
+  window.addEventListener('pointercancel', release, true)
+}
+function release() {
+  pressed = false
+  window.removeEventListener('pointerup', release, true)
+  window.removeEventListener('pointercancel', release, true)
+}
 function finishDrag() {
   const ed = editor.value
+  release()
   if (ed && source?.run) carried(ed, source.run.doms, false)
   dragging = false
   source = null
@@ -793,6 +809,7 @@ const px = (n: number) => `${n}px`
           :style="{ left: px(left), top: px(top) }"
           draggable="true"
           aria-label="Drag to move"
+          @pointerdown="onPress"
           @dragstart="onDragStart"
           @dragend="onDragEnd"
           @click="onClick"
