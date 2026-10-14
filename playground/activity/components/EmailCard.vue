@@ -143,13 +143,14 @@ const quoteOpen = ref(!props.quoteFolded)
     />
 
     <!-- The quoted thread: the "…" control, then the message it hides. An
-         xs subtle Button with the old badge's fully round ends (the user's
-         call 2026-10-14); it folds the quote away and opens it again. -->
+         xs subtle Button cut to the old badge's exact shape — 28 × 16 at
+         its 8px corners (the user's call 2026-10-14); it folds the quote
+         away and opens it again. -->
     <Button
       v-if="thread || quoted"
       size="xs"
       variant="subtle"
-      class="self-start !rounded-full"
+      class="self-start !h-4 !w-7 !min-w-0 !rounded-4 !p-0"
       :aria-label="quoteOpen ? 'Hide quoted text' : 'Show quoted text'"
       :aria-expanded="props.quoted ? quoteOpen : undefined"
       @click="quoteOpen = !quoteOpen"
