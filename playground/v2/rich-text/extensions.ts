@@ -659,6 +659,50 @@ export const Details = Node.create({
     return {
       'Alt-ArrowUp': () => this.editor.commands.moveDetails(-1),
       'Alt-ArrowDown': () => this.editor.commands.moveDetails(1),
+      // Enter on the summary goes into the toggle, never past it: the
+      // toggle opens and what follows the caret starts its body (left to
+      // the editor, the summary can't split, so the toggle itself did, and
+      // every Enter laid down a new empty toggle); on a toggle with nothing
+      // in it, Enter turns it back into a plain line, as on an empty list
+      // item
+      Enter: ({ editor }) => {
+        const { state } = editor
+        const { $from, $to } = state.selection
+        const summaryType = state.schema.nodes.detailsSummary
+        const paragraph = state.schema.nodes.paragraph
+        if ($from.parent.type !== summaryType || !$from.sameParent($to))
+          return false
+        const details = $from.node(-1)
+        const pos = $from.before(-1)
+        const body = details.child(1)
+        const tr = state.tr
+        if (
+          !$from.parent.content.size &&
+          body.childCount === 1 &&
+          body.firstChild!.isTextblock &&
+          !body.firstChild!.content.size
+        ) {
+          tr.replaceWith(pos, pos + details.nodeSize, paragraph.create())
+          tr.setSelection(TextSelection.create(tr.doc, pos + 1))
+          editor.view.dispatch(tr.scrollIntoView())
+          return true
+        }
+        const rest = $from.parent.content.cut($to.parentOffset)
+        tr.delete($from.pos, $from.end())
+        tr.setNodeMarkup(pos, undefined, { ...details.attrs, open: true })
+        // the body's first line, after the summary as the delete left it
+        const mapped = tr.doc.nodeAt(pos)!
+        const bodyStart = pos + 1 + mapped.child(0).nodeSize + 1
+        const first = mapped.child(1).firstChild
+        if (!rest.size && first?.isTextblock && !first.content.size) {
+          tr.setSelection(TextSelection.create(tr.doc, bodyStart + 1))
+        } else {
+          tr.insert(bodyStart, paragraph.create(null, rest))
+          tr.setSelection(TextSelection.create(tr.doc, bodyStart + 1))
+        }
+        editor.view.dispatch(tr.scrollIntoView())
+        return true
+      },
     }
   },
   addCommands() {
