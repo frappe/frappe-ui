@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { Button, Divider } from '../../../src'
 import FileIcon from './FileIcon.vue'
 
@@ -8,7 +9,7 @@ export type Attachment = {
   type: 'zip' | 'pdf' | 'doc'
 }
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     /** Sender and their address, as the design prints them. */
     name: string
@@ -33,6 +34,9 @@ withDefaults(
   }>(),
   { attachments: () => [] },
 )
+
+/** The quoted thread shows until the "…" folds it away (and back). */
+const quoteOpen = ref(true)
 </script>
 
 <template>
@@ -136,20 +140,29 @@ withDefaults(
       label="Reply"
     />
 
-    <!-- The quoted thread: the "…" control, then the message it hides. -->
-    <span
+    <!-- The quoted thread: the "…" control, then the message it hides. An
+         xs subtle Button at the pill's own 8px corners (the user's call
+         2026-10-14); it folds the quote away and opens it again. -->
+    <Button
       v-if="thread || quoted"
-      class="inline-flex h-4 w-7 items-center justify-center rounded-4 bg-surface-gray-2"
+      size="xs"
+      variant="subtle"
+      class="self-start !rounded-4"
+      :aria-label="quoteOpen ? 'Hide quoted text' : 'Show quoted text'"
+      :aria-expanded="props.quoted ? quoteOpen : undefined"
+      @click="quoteOpen = !quoteOpen"
     >
-      <span
-        class="lucide-more-horizontal size-4 text-ink-gray-6"
-        aria-hidden="true"
-      />
-    </span>
+      <template #icon>
+        <span
+          class="lucide-more-horizontal size-4 text-ink-gray-6"
+          aria-hidden="true"
+        />
+      </template>
+    </Button>
 
     <!-- 14px from the rule to the quoted text, as the divider's own gap. -->
     <div
-      v-if="quoted"
+      v-if="quoted && quoteOpen"
       class="flex flex-col gap-4 border-l border-outline-gray-1 pl-3.5"
     >
       <p class="text-p-base text-ink-gray-7">{{ quotedFrom }}</p>
