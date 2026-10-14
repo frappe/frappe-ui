@@ -217,7 +217,7 @@ function resolve() {
     <!-- the thread beside the run: the file's comment card -->
     <div
       v-if="current"
-      class="rte-thread absolute right-6 z-20 flex w-[300px] flex-col gap-3.5 rounded-6 bg-surface-elevation-2 pb-2.5 shadow-xl"
+      class="rte-thread absolute right-6 z-20 flex w-[300px] flex-col gap-3.5 rounded-6 bg-surface-elevation-2 pb-2.5 shadow-xl dark:[--surface-base:var(--surface-elevation-2)]"
       :style="{ top: `${Math.max(48, threadTop - 8)}px` }"
       role="dialog"
       aria-label="Comment thread"
@@ -296,7 +296,10 @@ function resolve() {
           </p>
         </div>
 
-        <!-- the reply field: 24px avatar, 8, the library's subtle input -->
+        <!-- the reply field: 24px avatar, 8, the library's subtle input.
+             Focused, the input takes the page's ground; on this raised card
+             that ground is the card's own (the dark: rule on the card), as
+             the form popovers have it, not a darker well cut into it -->
         <form class="flex items-center gap-2" @submit.prevent="send">
           <Avatar
             label="You"

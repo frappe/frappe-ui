@@ -98,7 +98,7 @@ const commentActions = (c: Comment) => [
 
 <template>
   <div
-    class="flex w-[300px] flex-col gap-3.5 rounded-6 bg-surface-elevation-2 pb-2.5 shadow-lg"
+    class="flex w-[300px] flex-col gap-3.5 rounded-6 bg-surface-elevation-2 pb-2.5 shadow-lg dark:[--surface-base:var(--surface-elevation-2)]"
     role="dialog"
     aria-label="Comment"
   >
