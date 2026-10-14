@@ -76,8 +76,14 @@ const opened = ref<string | null>(null)
       -->
       <template #cell="{ item, row, column }">
         <span
-          class="flex min-w-0 items-center gap-2"
-          :class="column.key === 'actions' ? 'w-full justify-end' : ''"
+          class="flex min-w-0 items-center"
+          :class="
+            column.key === 'actions'
+              ? 'w-full justify-end gap-2'
+              : column.key === 'date'
+                ? ''
+                : 'gap-2'
+          "
         >
           <!--
             The file's own preview is the title cell's prefix, at the size the
@@ -97,12 +103,24 @@ const opened = ref<string | null>(null)
             alt=""
           />
 
-          <!-- Date and time, split by the design's middle dot. -->
+          <!--
+            Date and time, split by the file's `icon/line/dot` (node
+            36241:128850): a 4px disc centred in a 16px box, in #E2E2E2 —
+            gray/300, `ink-gray-2` — with no gap either side; the box is the
+            space.
+          -->
           <template v-else-if="column.key === 'date'">
             <span class="truncate text-base text-ink-gray-6">
               {{ (row as FileRow).date }}
             </span>
-            <span class="text-base text-ink-gray-4" aria-hidden="true">·</span>
+            <svg
+              viewBox="0 0 16 16"
+              class="size-4 shrink-0 text-ink-gray-2"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <circle cx="8" cy="8" r="2" />
+            </svg>
             <span class="truncate text-base text-ink-gray-6">
               {{ (row as FileRow).time }}
             </span>
