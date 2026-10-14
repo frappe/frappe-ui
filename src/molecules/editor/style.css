@@ -100,12 +100,48 @@ img.ProseMirror-selectednode {
     margin: 0;
   }
 
+  /* the task's box is the Checkbox component's (Checkbox.vue, size sm), in
+     either theme: a surface-base fill on an outline-gray-4 border, 5 under
+     the pointer and 6 pressed; checked, the fill is surface-gray-10 (9
+     under the pointer, 8 pressed), drawn through currentColor as the forms
+     plugin paints it, and the dark theme's tick comes from the preset
+     (tailwind/plugin.js) */
   input[type='checkbox'] {
     cursor: pointer;
     width: 14px;
     height: 14px;
     border-radius: 4px;
-    color: var(--ink-gray-9);
+    background-color: var(--surface-base);
+    border-color: var(--outline-gray-4);
+    color: var(--surface-gray-10);
+    transition:
+      border-color 150ms,
+      box-shadow 150ms,
+      color 150ms;
+  }
+  input[type='checkbox']:hover {
+    border-color: var(--outline-gray-5);
+  }
+  input[type='checkbox']:active {
+    border-color: var(--outline-gray-6);
+  }
+  input[type='checkbox']:checked {
+    background-color: currentColor;
+    border-color: transparent;
+  }
+  input[type='checkbox']:checked:hover {
+    color: var(--surface-gray-9);
+  }
+  input[type='checkbox']:checked:active {
+    color: var(--surface-gray-8);
+  }
+  input[type='checkbox']:focus {
+    box-shadow: none;
+    outline: none;
+  }
+  input[type='checkbox']:focus-visible {
+    outline: 2px solid var(--outline-gray-3);
+    outline-offset: 2px;
   }
 }
 
