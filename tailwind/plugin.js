@@ -181,20 +181,38 @@ let componentStyles = {
   },
 }
 
-// The dark-theme checkmark and dash the forms plugin draws in the light ink.
-// These live in the base layer, not in `addComponents`, because their keys are
-// attribute selectors: Tailwind v4 reads a v3 preset through `@config` and
-// rejects any `addComponents` key that is not a single class name, which fails
-// the whole build. The cascade is unchanged either way. The selector is
-// (0,3,0), above both the forms base rule `input:where([type='checkbox'])
-// :checked` (0,1,1) and the forms class rule `.form-checkbox:checked` (0,2,0).
-// So the rules still win in v3, and the v4 `@config` path still builds.
-let darkCheckboxStyles = {
+// The checkbox's check and dash are espresso's own (checkbox new,
+// 23513:153494): the 12px icon/line/check and icon/line/dash, a 1px
+// round-capped line set 2px into the 16px box — not the forms plugin's
+// bolder 2px marks. They are drawn in ink/base, white on the light theme's
+// gray-900 fill and #171717 (oklch 0.205) on the dark theme's near-white
+// one; a data URI cannot read a CSS variable, so each theme writes its own.
+// These live in the base layer, not in `addComponents`, because their keys
+// are attribute selectors: Tailwind v4 reads a v3 preset through `@config`
+// and rejects any `addComponents` key that is not a single class name,
+// which fails the whole build. Each selector is (0,3,0), above both the
+// forms base rule `input:where([type='checkbox']):checked` (0,1,1) and the
+// forms class rule `.form-checkbox:checked` (0,2,0); the dark rules come
+// after the light ones at the same weight, so they win on the dark theme.
+const CHECK_PATH =
+  'M9.71757 2.45503C9.89809 2.24626 10.2137 2.22384 10.4226 2.40425C10.6314 2.58477 10.6548 2.9004 10.4744 3.10933L4.91581 9.54487C4.82201 9.65322 4.68608 9.71626 4.54276 9.71773C4.39936 9.71911 4.26176 9.65928 4.16581 9.55269L1.533 6.6269C1.34863 6.42176 1.36527 6.10554 1.5701 5.92085C1.77536 5.73612 2.09241 5.75271 2.27714 5.95796L4.52909 8.46089L9.71757 2.45503Z'
+const DASH_PATH =
+  'M9 5.49994C9.27614 5.49994 9.49999 5.72381 9.5 5.99994C9.5 6.27608 9.27614 6.49994 9 6.49994H3C2.72386 6.49994 2.5 6.27608 2.5 5.99994C2.50001 5.72381 2.72386 5.49994 3 5.49994H9Z'
+const checkboxMark = (path, fill) =>
+  `url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='${fill}' xmlns='http://www.w3.org/2000/svg'%3e%3cpath transform='translate(2 2)' d='${path}'/%3e%3c/svg%3e")`
+
+let checkboxMarkStyles = {
+  ":root [type='checkbox']:checked": {
+    'background-image': checkboxMark(CHECK_PATH, 'white'),
+  },
+  ":root [type='checkbox']:indeterminate": {
+    'background-image': checkboxMark(DASH_PATH, 'white'),
+  },
   "[data-theme='dark'] [type='checkbox']:checked": {
-    'background-image': `url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='%230F0F0F' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e")`,
+    'background-image': checkboxMark(CHECK_PATH, '%23171717'),
   },
   "[data-theme='dark'] [type='checkbox']:indeterminate": {
-    'background-image': `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 16 16'%3e%3cpath stroke='%230F0F0F' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M4 8h8'/%3e%3c/svg%3e")`,
+    'background-image': checkboxMark(DASH_PATH, '%23171717'),
   },
 }
 
@@ -211,7 +229,7 @@ export default plugin(
     // breakpoints, so list tracks and `md:hidden` cells switch at the same
     // width. See tailwind/listColumns.js.
     addBase(listColumnRules(theme('screens')))
-    addBase(darkCheckboxStyles)
+    addBase(checkboxMarkStyles)
     addComponents(componentStyles)
     addComponents(buildTextStyleUtilities())
     addComponents(buildFocusRingUtilities())
