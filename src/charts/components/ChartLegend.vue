@@ -86,7 +86,7 @@
               :key="item.name"
               variant="ghost"
               size="sm"
-              class="w-full"
+              class="w-full !justify-start"
               :aria-pressed="!item.hidden"
               :label="toggleLabel(item)"
               @click="emit('change', item.name)"
