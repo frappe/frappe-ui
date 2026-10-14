@@ -26,7 +26,9 @@ import { faceFor } from '../components/patterns/designAssets'
  * floating 24 in from the stage's bottom-right corner.
  *
  *   radius 16 · surface-elevation-1 · the 2xl elevation
- *   header     48 — surface-gray-1, 16 left / 12 right, the title, then two
+ *   header     48 — on the window's own surface-elevation-1 (the user's call
+ *              2026-10-14; the file had surface-gray-1), 16 left / 12 right,
+ *              the title, then two
  *              24px ghost buttons 4 apart (pop out, close)
  *   To         41 — 6 above and below a 28px ghost field (8 in, a 16px glyph,
  *              8, then the chips and the caret), Cc and Bcc at the right
@@ -446,9 +448,7 @@ const root = ref<HTMLElement | null>(null)
     aria-label="New message"
   >
     <!-- the header: the title, then pop out and close -->
-    <header
-      class="flex h-12 shrink-0 items-center justify-between bg-surface-gray-1 pl-4 pr-2.5"
-    >
+    <header class="flex h-12 shrink-0 items-center justify-between pl-4 pr-2.5">
       <h2 class="text-lg-medium text-ink-gray-8">New message</h2>
       <div class="flex items-center gap-1">
         <Button
