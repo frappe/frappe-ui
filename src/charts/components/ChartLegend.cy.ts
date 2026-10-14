@@ -24,7 +24,9 @@ function mountLegend(props: Record<string, any> = {}) {
   )
 }
 
-const entries = () => cy.get('[data-slot="chart-legend"] button')
+// `aria-pressed` marks an entry. The legend also holds the "+N more" trigger,
+// and copies of every entry it measures and hides.
+const entries = () => cy.get('[data-slot="chart-legend"] [aria-pressed]')
 
 describe('ChartLegend', () => {
   // v-model is N/A: the legend owns nothing. It is handed the entries and
@@ -279,6 +281,15 @@ describe('ChartLegend', () => {
           trigger.attr('id'),
         )
       })
+    })
+
+    // The legend measures hidden copies of its entries. A search by text
+    // has to land on the one a reader sees.
+    it('finds the real entry first by its label', () => {
+      mountMany(30)
+      cy.contains('button', 'Series 29')
+        .should('be.visible')
+        .and('have.attr', 'aria-pressed', 'true')
     })
 
     it('lists every series in the popover, largest first, with its total', () => {

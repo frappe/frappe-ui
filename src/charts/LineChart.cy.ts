@@ -202,7 +202,10 @@ describe('LineChart', () => {
       // The rule takes its ink from the theme, not from the palette, so the
       // hex-stroked paths are still the two series.
       lines().should('have.length', 2)
-      cy.get('[data-slot="chart-legend"] button').should('have.length', 2)
+      cy.get('[data-slot="chart-legend"] [aria-pressed]').should(
+        'have.length',
+        2,
+      )
     })
 
     it('reads a y2 line against the second axis', () => {

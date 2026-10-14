@@ -131,7 +131,10 @@ describe('BarChart', () => {
       it('draws no mark and takes no legend entry', () => {
         mountWithExtra()
         bars().should('have.length', data.length * 2)
-        cy.get('[data-slot="chart-legend"] button').should('have.length', 2)
+        cy.get('[data-slot="chart-legend"] [aria-pressed]').should(
+          'have.length',
+          2,
+        )
         cy.get('[data-slot="chart-legend"]').should(
           'not.contain.text',
           'Orders',
@@ -152,7 +155,10 @@ describe('BarChart', () => {
   describe('legend', () => {
     it('lists one entry per series, named as the chrome names them', () => {
       mountChart()
-      cy.get('[data-slot="chart-legend"] button').should('have.length', 2)
+      cy.get('[data-slot="chart-legend"] [aria-pressed]').should(
+        'have.length',
+        2,
+      )
       cy.get('[aria-label="Hide Sales"]').should(
         'have.attr',
         'aria-pressed',
@@ -215,7 +221,10 @@ describe('BarChart', () => {
 
     it('keeps a line series in the legend, and hides it like any other', () => {
       mountChart({ seriesConfig: { refunds: { type: 'line' } } })
-      cy.get('[data-slot="chart-legend"] button').should('have.length', 2)
+      cy.get('[data-slot="chart-legend"] [aria-pressed]').should(
+        'have.length',
+        2,
+      )
       cy.get('[aria-label="Hide Refunds"]').click()
       lines().should('not.exist')
       bars().should('have.length', data.length)
@@ -357,7 +366,7 @@ describe('BarChart', () => {
         splitBy: 'region',
         maxSeries: 3,
       })
-      cy.get('[data-slot="chart-legend"] button')
+      cy.get('[data-slot="chart-legend"] [aria-pressed]')
         .should('have.length', 3)
         .last()
         .should('contain.text', 'Others')
@@ -403,7 +412,10 @@ describe('BarChart', () => {
         'Target',
       )
       // An annotation, not a series: the legend still lists the two columns.
-      cy.get('[data-slot="chart-legend"] button').should('have.length', 2)
+      cy.get('[data-slot="chart-legend"] [aria-pressed]').should(
+        'have.length',
+        2,
+      )
       bars().should('have.length', data.length * 2)
     })
 

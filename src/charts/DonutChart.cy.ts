@@ -86,7 +86,7 @@ describe('DonutChart', () => {
 
   it('lists the slices in the legend with their share', () => {
     mountChart()
-    cy.get('[data-slot="chart-legend"] button').should('have.length', 3)
+    cy.get('[data-slot="chart-legend"] [aria-pressed]').should('have.length', 3)
     cy.get('[data-slot="chart-legend"]').should('contain.text', '50%')
   })
 

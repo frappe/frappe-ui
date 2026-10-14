@@ -3,7 +3,7 @@
        plot's height, and the plot is what the chart is for. The largest series
        stay on the row and the rest wait behind "+N more", where every name is
        one press away rather than behind a scroll nobody makes. -->
-  <div class="relative shrink-0">
+  <div data-slot="chart-legend" class="relative min-w-0 shrink-0">
     <DefineEntry v-slot="{ item }">
       <span class="flex items-center gap-1.5">
         <span
@@ -22,35 +22,7 @@
       </span>
     </DefineEntry>
 
-    <!-- Every entry and the trigger at their natural widths, so the fit is
-         measured rather than guessed. Clipped to nothing: left at full width
-         it overflows the card, and the browser scrolls the card sideways to
-         reach whatever takes focus. -->
-    <div
-      aria-hidden="true"
-      inert
-      class="invisible absolute h-0 w-0 overflow-hidden"
-    >
-      <div ref="rulerEl" class="flex w-max gap-x-1">
-        <Button
-          v-for="item in ranked"
-          :key="item.name"
-          variant="ghost"
-          size="xs"
-        >
-          <ReuseEntry :item="item" />
-        </Button>
-        <Button variant="ghost" size="xs">
-          <span class="text-ink-gray-6">{{ moreText(items.length) }}</span>
-        </Button>
-      </div>
-    </div>
-
-    <div
-      ref="rowEl"
-      data-slot="chart-legend"
-      class="flex items-center justify-center gap-x-1"
-    >
+    <div ref="rowEl" class="flex min-w-0 items-center justify-center gap-x-1">
       <Button
         v-for="item in shown"
         :key="item.name"
@@ -152,6 +124,31 @@
           </div>
         </div>
       </Popover>
+    </div>
+
+    <!-- Every entry and the trigger at their natural widths, so the fit is
+         measured rather than guessed. After the row, so a search by text finds
+         the real entry first. Clipped to nothing: left at full width it
+         overflows the card, and the browser scrolls the card sideways to reach
+         whatever takes focus. -->
+    <div
+      aria-hidden="true"
+      inert
+      class="invisible absolute h-0 w-0 overflow-hidden"
+    >
+      <div ref="rulerEl" class="flex w-max gap-x-1">
+        <Button
+          v-for="item in ranked"
+          :key="item.name"
+          variant="ghost"
+          size="xs"
+        >
+          <ReuseEntry :item="item" />
+        </Button>
+        <Button variant="ghost" size="xs">
+          <span class="text-ink-gray-6">{{ moreText(items.length) }}</span>
+        </Button>
+      </div>
     </div>
   </div>
 </template>
