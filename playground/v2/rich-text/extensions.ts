@@ -4,9 +4,10 @@
 // button lays on a selection. Each is a small tiptap extension on top of the
 // kit, so everything else — text, lists, links, images, tables, code, colour,
 // highlight, mentions, embeds — stays the library's.
-import { Mark, Node, mergeAttributes } from '@tiptap/core'
+import { Mark, Node, getMarkRange, mergeAttributes } from '@tiptap/core'
 import type { Node as PMNode } from '@tiptap/pm/model'
 import { Plugin, PluginKey, TextSelection } from '@tiptap/pm/state'
+import { Decoration, DecorationSet } from '@tiptap/pm/view'
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
 import { imageEngine } from '../../../src/molecules/editor/extensions/image/image-engine'
 import { resolveUploadOptions } from '../../../src/molecules/editor/extensions/shared/media-upload-engine'
@@ -209,6 +210,30 @@ export const Link = KitLink.extend({
       ...this.parent?.(),
       openLinkEditor: buildOpenRteLinkEditor(this.type),
     }
+  },
+  // the link the caret is in, or the one its card has selected to edit,
+  // is drawn as the file's Selected and Edit Link states (32467:13501): on
+  // a gray-100 ground, 22px tall on 4px corners (.rte-link-on)
+  addProseMirrorPlugins() {
+    const type = this.type
+    return [
+      ...(this.parent?.() ?? []),
+      new Plugin({
+        key: new PluginKey('rteLinkOn'),
+        props: {
+          decorations(state) {
+            const { from, to, $from } = state.selection
+            const range = getMarkRange($from, type)
+            if (!range || from < range.from || to > range.to) return null
+            return DecorationSet.create(state.doc, [
+              Decoration.inline(range.from, range.to, {
+                class: 'rte-link-on',
+              }),
+            ])
+          },
+        },
+      }),
+    ]
   },
 })
 

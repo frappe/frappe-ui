@@ -389,13 +389,41 @@ function resolve() {
 .rte-doc.prose-v3 th {
   border-color: var(--outline-gray-1);
 }
-/* a mention: gray-100 chip, as the file marks a person */
+/* a mention (32467:13501): a 22px gray-100 chip on 6px corners, the
+   name in medium gray-600; under the pointer or picked, gray-700 */
 .rte-doc .mention {
   background: var(--surface-gray-2);
-  border-radius: 4px;
+  border-radius: 6px;
   padding: 0 3px;
-  font-weight: 420;
+  line-height: 22px;
+  font-weight: 500;
+  color: var(--ink-gray-6);
+}
+.rte-doc .mention:hover,
+.rte-doc .mention.ProseMirror-selectednode {
+  background: var(--surface-gray-2);
+  color: var(--ink-gray-7);
+}
+/* a link (32467:13501): medium gray-700 on its rule, gray-800 under the
+   pointer; the one the caret is in, or its card is editing, sits on a
+   22px gray-100 ground on 4px corners (the Link extension's .rte-link-on) */
+.rte-doc.prose-v3 a:not(.rte-attachment > a) {
+  color: var(--ink-gray-7);
+  font-weight: 500;
+}
+.rte-doc.prose-v3 a:not(.rte-attachment > a):hover {
   color: var(--ink-gray-8);
+}
+.rte-doc .rte-link-on {
+  color: var(--ink-gray-8);
+  background: var(--surface-gray-2);
+  border-radius: 4px;
+  padding: 1.5px 0;
+  box-shadow:
+    -2px 0 0 var(--surface-gray-2),
+    2px 0 0 var(--surface-gray-2);
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
 }
 
 /* the audio player (31403:45371): a 42px bar, and its slider drawn to the
