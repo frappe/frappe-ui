@@ -384,7 +384,47 @@ function noAgendaDrag(e: DragEvent) {
   e.stopImmediatePropagation()
 }
 
+/**
+ * A card let go of after a drag or a stretch goes back to its resting fill,
+ * even with the pointer still on it (the user's call 2026-10-14: hover fill
+ * while it is held, the default the moment it is released). The hover fill
+ * returns once the pointer has left it and come back. A plain click changes
+ * nothing.
+ */
+let pressed: HTMLElement | null = null
+let pressedAt = { x: 0, y: 0 }
+function onCardDown(e: PointerEvent) {
+  const pill = (e.target as HTMLElement).closest<HTMLElement>(
+    '[data-time-grid] .event',
+  )
+  pill?.removeAttribute('data-rested')
+  pressed = pill
+  pressedAt = { x: e.clientX, y: e.clientY }
+  if (pill) window.addEventListener('pointerup', onCardUp, { once: true })
+}
+function onCardUp(e: PointerEvent) {
+  const pill = pressed
+  pressed = null
+  if (!pill) return
+  const moved =
+    Math.abs(e.clientX - pressedAt.x) + Math.abs(e.clientY - pressedAt.y) > 2
+  if (!moved) return
+  // On the next frame: the component re-lays the card on release, and the
+  // mark goes on whichever element then carries this event.
+  requestAnimationFrame(() => {
+    const at = document.elementFromPoint(e.clientX, e.clientY)
+    const now = at?.closest<HTMLElement>('[data-time-grid] .event') ?? pill
+    now.setAttribute('data-rested', '')
+    now.addEventListener(
+      'pointerleave',
+      () => now.removeAttribute('data-rested'),
+      { once: true },
+    )
+  })
+}
+
 onMounted(() => {
+  calendarEl.value?.addEventListener('pointerdown', onCardDown, true)
   calendarEl.value?.addEventListener('dragstart', noAgendaDrag, true)
   // Capture: a scroll does not bubble, but it can be heard on the way down.
   calendarEl.value?.addEventListener('scroll', onAnyScroll, true)
@@ -395,6 +435,7 @@ onMounted(() => {
   monthEdges.attach(calendarEl.value)
 })
 onUnmounted(() => {
+  calendarEl.value?.removeEventListener('pointerdown', onCardDown, true)
   calendarEl.value?.removeEventListener('dragstart', noAgendaDrag, true)
   calendarEl.value?.removeEventListener('scroll', onAnyScroll, true)
   detach(calendarEl.value)
@@ -1073,17 +1114,20 @@ function dayBand(label: string) {
         blank slot is for.
       -->
         <!--
-        In its hover fill from lift to landing: the card was under the
-        pointer when it was picked up, and a copy that never takes :hover
-        (it lets the pointer through) dropped to the resting fill the moment
-        it moved — the flicker the user saw (2026-10-14).
+        In its hover fill while it is held: the card was under the pointer
+        when it was picked up, and a copy that never takes :hover (it lets
+        the pointer through) dropped to the resting fill the moment it moved
+        — the flicker the user saw (2026-10-14). Let go of, it eases back to
+        the resting fill on its way to the slot, as the card it becomes rests.
       -->
         <div
           v-if="heldCard"
           aria-hidden="true"
           :class="[
-            `pointer-events-none fixed z-30 rounded-4 shadow-md ${espressoCardCopy} [&>.event]:![background-color:var(--bg-active)]`,
-            heldLanding && 'transition-all duration-[180ms] ease-out',
+            `pointer-events-none fixed z-30 rounded-4 shadow-md ${espressoCardCopy}`,
+            heldLanding
+              ? 'transition-all duration-[180ms] ease-out'
+              : '[&>.event]:![background-color:var(--bg-active)]',
           ]"
           :style="{
             left: `${heldCard.rect.left}px`,

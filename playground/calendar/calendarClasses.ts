@@ -250,6 +250,14 @@ export const espressoCalendar = [
   // bars are a row of a list, not a span of hours.
   '[&_[data-time-grid]_.event]:!my-px',
   '[&_[data-time-grid]_.event]:!h-[calc(100%-2px)]',
+  // A card held by its edge is in its hover fill the whole stretch. The
+  // pointer runs off the card's end between one 15-minute step and the
+  // next, so :hover alone flickered it to the resting fill and back at every
+  // step. The component lifts the box it is stretching to z-index 100 for
+  // as long as it is held, and nothing else then.
+  '[&_[data-time-grid]_[style*="z-index:_100"]>.event]:![background-color:var(--bg-active)]',
+  // …and let go of, it rests until the pointer leaves it — see `onCardUp`.
+  '[&_[data-time-grid]_.event[data-rested]:not(.active)]:![background-color:var(--bg)]',
   // …and the white ring a pill wears where it lies on another comes in by
   // the same pixel top and bottom, or it reads 3 there against 2 at the
   // sides. A transparent border on its border-box, its fill clipped inside.
