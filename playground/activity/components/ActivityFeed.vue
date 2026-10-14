@@ -31,8 +31,14 @@ function measure() {
     .map((node) => {
       const box = node.getBoundingClientRect()
       const clip = node.closest('[data-clip]')?.getBoundingClientRect()
+      // a mark counts while its middle is drawn — the line ends there. A
+      // folded month keeps a sliver of its run (3px), and the first mark's
+      // top pixel in it used to pull a stub of line out under the chip
+      const middle = box.top + box.height / 2
       const showing = clip
-        ? Math.min(box.bottom, clip.bottom) - Math.max(box.top, clip.top)
+        ? middle >= clip.top && middle <= clip.bottom
+          ? 1
+          : 0
         : box.height
       return { cap: node.hasAttribute('data-rail-cap'), box, showing }
     })
