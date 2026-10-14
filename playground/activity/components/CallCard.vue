@@ -3,12 +3,14 @@ import { computed } from 'vue'
 import { Badge, Button } from '../../../src'
 import AvatarStack from './AvatarStack.vue'
 import CallRecording from './CallRecording.vue'
+import ActivityIcon from './ActivityIcon.vue'
+import type { ActivityIconName } from './ActivityIcon.vue'
 
 /** What the call was: a date, a duration. Read-only, so a Badge. */
-export type CallFact = { icon: string; label: string }
+export type CallFact = { icon: ActivityIconName; label: string }
 
 /** What you can do with it: listen, read the notes. Pressed, so a Button. */
-export type CallAction = { icon: string; label: string }
+export type CallAction = { icon: ActivityIconName; label: string }
 
 const props = withDefaults(
   defineProps<{
@@ -32,9 +34,10 @@ const props = withDefaults(
 /**
  * An action is a Button so it can be pressed, wearing the badge's clothes so
  * the row reads as one set of pills: the badge's corners, its 8px sides and
- * its 13px label, none of which `xs` gives you.
+ * its 13px label and the 4 between its icon and its label (the file's
+ * badge, node 34950:117301), none of which `xs` gives you.
  */
-const actionClasses = '!rounded-full !px-2 !text-sm !text-ink-gray-6'
+const actionClasses = '!gap-1 !rounded-full !px-2 !text-sm !text-ink-gray-6'
 
 /**
  * The card's four gaps have to *look* the same, which isn't the same as
@@ -92,10 +95,7 @@ const tailTrim = computed(() =>
           size="lg"
         >
           <template #prefix>
-            <span
-              :class="[fact.icon, 'size-3 text-ink-gray-5']"
-              aria-hidden="true"
-            />
+            <ActivityIcon :name="fact.icon" class="size-3 text-ink-gray-4" />
           </template>
           {{ fact.label }}
         </Badge>
@@ -108,10 +108,7 @@ const tailTrim = computed(() =>
           :class="actionClasses"
         >
           <template #prefix>
-            <span
-              :class="[action.icon, 'size-3 text-ink-gray-5']"
-              aria-hidden="true"
-            />
+            <ActivityIcon :name="action.icon" class="size-3 text-ink-gray-4" />
           </template>
           {{ action.label }}
         </Button>
