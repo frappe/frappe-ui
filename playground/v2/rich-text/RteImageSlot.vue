@@ -62,7 +62,8 @@ function takeLink(image: { src: string; width: number; height: number }) {
     data-type="image-slot"
     contenteditable="false"
   >
-    <Popover side="bottom" align="start" :offset="6" bare>
+    <!-- opens as the file draws it, no tab taking a focus ring -->
+    <Popover :auto-focus="false" side="bottom" align="start" :offset="6" bare>
       <template #trigger="{ open }">
         <button
           type="button"
