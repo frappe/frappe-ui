@@ -335,9 +335,10 @@ const insertOptions = computed<DropdownOptions>(() => [
         onClick: () => chain().setCallout().run(),
       },
       {
-        label: 'Expand / collapse',
+        // the select's and the / menu's Toggle list, under its one name
+        label: 'Toggle list',
         icon: lucide('chevron-right'),
-        onClick: () => chain().insertDetails().run(),
+        onClick: () => applyBlock(chain(), 'details'),
       },
     ],
   },

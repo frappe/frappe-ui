@@ -73,7 +73,12 @@ const extensions = [
     tag: { items: tags },
     // the "/" menu offers the blocks the toolbar's Text select offers, from
     // the select's own list and running the select's own command
-    slashCommands: { items: rteSlashCommands() },
+    slashCommands: {
+      items: rteSlashCommands(),
+      // as Notion's: a name of more than one word is found typed in full,
+      // "/to-do list", "/2 image columns"
+      suggestion: { allowSpaces: true },
+    },
     // the attachment node comes from ./extensions, drawn as the file's row
     attachment: false,
     // and the link mark, raising the file's card in place of the popup
