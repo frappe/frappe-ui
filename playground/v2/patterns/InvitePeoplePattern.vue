@@ -117,9 +117,12 @@ function remove(value: string | number) {
       · `#item-suffix` puts a check on the chosen rows, and the menu's own
         leading checkbox is hidden, so the menu reads as the design draws it.
     -->
+    <!-- 3 above and below, not 4: a 24px chip row plus the 1px border then
+         comes to the empty field's 32, so adding people never grows it (the
+         user's call 2026-10-14) -->
     <MultiSelect
       v-model="invitees"
-      class="h-auto min-h-8 w-full py-1 !pl-1"
+      class="h-auto min-h-8 w-full py-[3px] !pl-1"
       :class="pending.multiSelectMenu"
       size="md"
       placeholder="Add people or emails"
