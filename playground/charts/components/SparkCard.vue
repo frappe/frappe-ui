@@ -202,6 +202,17 @@ function track(event: MouseEvent) {
   const count = readings.value.length
   if (!el || count < 2) return
   const rect = el.getBoundingClientRect()
+  // the reading answers the plot alone: over the card's words, or anywhere
+  // off the trend's own box, there is no reading and no tooltip
+  if (
+    event.clientX < rect.left ||
+    event.clientX > rect.right ||
+    event.clientY < rect.top ||
+    event.clientY > rect.bottom
+  ) {
+    at.value = null
+    return
+  }
   const share = (event.clientX - rect.left) / rect.width
   if (props.path) {
     let nearest = 0
