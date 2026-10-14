@@ -258,6 +258,10 @@ export const espressoCalendar = [
   '[&_[data-time-grid]_[style*="z-index:_100"]>.event]:![background-color:var(--bg-active)]',
   // …and let go of, it rests until the pointer leaves it — see `onCardUp`.
   '[&_[data-time-grid]_.event[data-rested]:not(.active)]:![background-color:var(--bg)]',
+  // …and Month's: every week's piece of a bar whose edge is being pulled —
+  // see `markPieces` — and each of them resting once it is let go.
+  '[&_[data-week-row]_.event[data-pulled]]:![background-color:var(--bg-active)]',
+  '[&_[data-week-row]_.event[data-rested]:not(.active)]:![background-color:var(--bg)]',
   // …and the white ring a pill wears where it lies on another comes in by
   // the same pixel top and bottom, or it reads 3 there against 2 at the
   // sides. A transparent border on its border-box, its fill clipped inside.

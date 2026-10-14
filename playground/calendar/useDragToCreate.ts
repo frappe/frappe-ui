@@ -917,6 +917,48 @@ export function useMonthResize(
     to: string
     edge: MonthEdge
   } | null = null
+  /** The pulled bar's own fill, which with its title picks out its pieces. */
+  let pulledBg = ''
+
+  /**
+   * Every piece of the bar being pulled, in its hover fill for as long as it
+   * is held (the user's call 2026-10-14). Pulled into another week the bar is
+   * drawn as one piece per row, and :hover only ever lit the piece under the
+   * pointer, so the weeks already covered sat in the resting fill. The pieces
+   * are new elements after every step, so they are found again each time: the
+   * same title and fill, on days inside the span being drawn.
+   */
+  const HELD_BAR = 'data-pulled'
+  function markPieces(span: [string, string] | null) {
+    const bars = root.value?.querySelectorAll<HTMLElement>('[data-week-row] .event')
+    for (const bar of bars ?? []) {
+      const row = bar.closest<HTMLElement>('[data-week-row]')
+      let on = false
+      if (span && row && pulling) {
+        const rect = bar.getBoundingClientRect()
+        const cell = row.getBoundingClientRect().width / 7
+        const first = dayAt(row, rect.left + cell / 2)
+        const last = dayAt(row, rect.right - cell / 2)
+        on =
+          bar.innerText.trim().split('\n')[0] === pulling.title &&
+          bar.style.getPropertyValue('--bg') === pulledBg &&
+          first >= span[0] &&
+          last <= span[1]
+      }
+      if (on) bar.setAttribute(HELD_BAR, '')
+      else bar.removeAttribute(HELD_BAR)
+    }
+  }
+  /** Let go of: every piece rests until the pointer next leaves it. */
+  function restPieces() {
+    for (const bar of root.value?.querySelectorAll<HTMLElement>(`[${HELD_BAR}]`) ?? []) {
+      bar.removeAttribute(HELD_BAR)
+      bar.setAttribute('data-rested', '')
+      bar.addEventListener('pointerleave', () => bar.removeAttribute('data-rested'), {
+        once: true,
+      })
+    }
+  }
 
   function barAt(e: PointerEvent) {
     const el = e.target as HTMLElement | null
@@ -991,6 +1033,8 @@ export function useMonthResize(
       to: addDays(row.dataset.stripDate ?? '', Math.max(col(rect.right) - 1, 0)),
       edge: armed.edge,
     }
+    pulledBg = bar.style.getPropertyValue('--bg')
+    markPieces([pulling.from, pulling.to])
     window.addEventListener('pointermove', onPull)
     window.addEventListener('pointerup', onDrop, { once: true })
     window.addEventListener('pointercancel', onDrop, { once: true })
@@ -1004,13 +1048,22 @@ export function useMonthResize(
       under?.closest<HTMLElement>('[data-week-row]') ??
       armed?.bar.closest<HTMLElement>('[data-week-row]')
     if (!row) return
-    onResize({ ...pulling, date: dayAt(row, e.clientX) })
+    const date = dayAt(row, e.clientX)
+    onResize({ ...pulling, date })
+    // After the calendar has drawn the new span.
+    const p = pulling
+    const span: [string, string] =
+      p.edge === 'end'
+        ? [p.from, date < p.from ? p.from : date]
+        : [date > p.to ? p.to : date, p.to]
+    requestAnimationFrame(() => pulling === p && markPieces(span))
   }
 
   function onDrop() {
     window.removeEventListener('pointermove', onPull)
     window.removeEventListener('pointerup', onDrop)
     window.removeEventListener('pointercancel', onDrop)
+    if (pulling) restPieces()
     pulling = null
     disarm()
   }
