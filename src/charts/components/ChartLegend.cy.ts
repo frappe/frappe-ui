@@ -242,8 +242,8 @@ describe('ChartLegend', () => {
       inline().last().should('have.attr', 'aria-label', 'Hide Series 2')
     })
 
-    it('fits again once the row has the room', () => {
-      cy.mount(
+    function mountResizable() {
+      return cy.mount(
         defineComponent({
           setup() {
             const width = ref(240)
@@ -254,6 +254,11 @@ describe('ChartLegend', () => {
                   { id: 'widen', onClick: () => (width.value = 1400) },
                   'Widen',
                 ),
+                h(
+                  'button',
+                  { id: 'narrow', onClick: () => (width.value = 240) },
+                  'Narrow',
+                ),
                 h('div', { style: `width: ${width.value}px` }, [
                   h(ChartLegend, { items: many(8) }),
                 ]),
@@ -261,10 +266,27 @@ describe('ChartLegend', () => {
           },
         }),
       )
+    }
+
+    it('fits again once the row has the room', () => {
+      mountResizable()
       more().should('exist')
       cy.get('#widen').click()
       more().should('not.exist')
       inline().should('have.length', 8)
+    })
+
+    // The panel goes with its trigger, rather than coming back on its own
+    // the next time the row overflows.
+    it('closes the popover once every entry fits', () => {
+      mountResizable()
+      more().click()
+      list().should('be.visible')
+      cy.get('#widen').click({ force: true })
+      more().should('not.exist')
+      cy.get('#narrow').click({ force: true })
+      more().should('exist').and('have.attr', 'aria-expanded', 'false')
+      list().should('not.exist')
     })
 
     it('names the trigger by what it opens, and the panel after it', () => {

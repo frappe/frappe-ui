@@ -218,6 +218,9 @@ function measure() {
     (hidden) => triggers[String(hidden).length - 1] ?? 0,
     gap,
   )
+  // The panel goes with its trigger. Left open, it would come back on its own
+  // the next time the row overflows.
+  if (fit.value >= props.items.length) open.value = false
 }
 
 // The row follows the card's width and the ruler follows the labels and the
