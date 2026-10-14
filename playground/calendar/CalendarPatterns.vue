@@ -4,7 +4,7 @@ import { Button, Popover, TabButtons, providePortalTarget } from '../../src'
 import DatePickerPreview from '../date-picker/DatePickerPreview.vue'
 // The narrow path, not the `experimental` barrel: that one also pulls in
 // the editor and the charts, which drags tiptap and echarts into the page.
-import { Calendar } from '../../experimental/Calendar'
+import { Calendar, CalendarActiveEvent } from '../../experimental/Calendar'
 import type { CalendarEvent } from '../../experimental/Calendar'
 import AppHeader from './AppHeader.vue'
 import DayIcon from './icons/DayIcon.vue'
@@ -94,6 +94,15 @@ const panel = ref<{
 } | null>(null)
 const openEvent = ({ calendarEvent }: { calendarEvent: CalendarEvent }) =>
   (panel.value = { event: calendarEvent, draft: null, kind: 'Event' })
+// The event is marked open for as long as its panel is (the component marks
+// it on the click); the panel closed — by its ×, a delete or anything else —
+// the mark goes too, or the card kept its open fill with nothing open.
+watch(
+  () => panel.value?.event ?? null,
+  (event) => {
+    if (!event) CalendarActiveEvent.value = ''
+  },
+)
 // New → Event / New → Task, from the header's menu: the same panel, opened on
 // the face the menu picked and on no particular hour.
 const openNewOf = (kind: 'Event' | 'Task') => {
