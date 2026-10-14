@@ -18,10 +18,11 @@ const props = defineProps(nodeViewProps)
 // frame: the glyph would be torn down and remade under the pointer, and a
 // press that begins on one glyph and ends on its replacement is no click at
 // all — the pause button would not answer.
+// in the file's ink/gray-7, a step lighter than the ghost button's own
 const icon =
   (name: string): Component =>
   () =>
-    h(RteIcon, { name })
+    h(RteIcon, { name, class: 'text-ink-gray-7' })
 const playIcon = icon('play')
 const pauseIcon = icon('pause')
 const volumeIcon = icon('volume-min')
