@@ -422,6 +422,33 @@ const OWN_CRUMB = [
   'date-picker',
   'tag',
 ]
+// The checkbox's tick as the design system draws it (node 23513:153494,
+// `icon/line/check new`) on every page from Settings modal to Tag — and in
+// the modals they open, which are teleported out of the stage, hence a mark
+// on <html> rather than a class here. frappe-ui's own Checkbox is left as is.
+const ESPRESSO_CHECK_PAGES = [
+  'settings-modal',
+  'table',
+  'activity',
+  'calendar',
+  'email-composer',
+  'tree',
+  'file-input',
+  'accordion',
+  'date-picker',
+  'tag',
+]
+watch(
+  page,
+  (id) => {
+    const root = document.documentElement
+    if (ESPRESSO_CHECK_PAGES.includes(id)) root.dataset.espressoChecks = ''
+    else delete root.dataset.espressoChecks
+  },
+  { immediate: true },
+)
+onUnmounted(() => delete document.documentElement.dataset.espressoChecks)
+
 provide(
   pageCrumbKey,
   computed(() => (OWN_CRUMB.includes(page.value) ? current.value.label : null)),
@@ -1267,6 +1294,21 @@ const outlineTitle = computed(
     0 0.25px 1px rgb(255 255 255 / 0.14),
     0 0 2px rgb(0 0 0 / 0.1),
     0 2px 4px rgb(0 0 0 / 0.16);
+}
+
+/* The design system's tick (node 23513:153494, `icon/line/check new`): a
+   12px mark in the 16px box, 10 in the 14 — 2px in from every side — in the
+   same white, and on dark the same #0F0F0F, that frappe-ui's own tick uses.
+   Only on the pages that set the mark above; the library is untouched. */
+:root[data-espresso-checks] [type='checkbox']:checked {
+  background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 12 12' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M9.71757 2.45503C9.89809 2.24626 10.2137 2.22384 10.4226 2.40425C10.6314 2.58477 10.6548 2.9004 10.4744 3.10933L4.91581 9.54487C4.82201 9.65322 4.68608 9.71626 4.54276 9.71773C4.39936 9.71911 4.26176 9.65928 4.16581 9.55269L1.533 6.6269C1.34863 6.42176 1.36527 6.10554 1.5701 5.92085C1.77536 5.73612 2.09241 5.75271 2.27714 5.95796L4.52909 8.46089L9.71757 2.45503Z'/%3e%3c/svg%3e");
+  background-size: calc(100% - 4px) calc(100% - 4px);
+  background-position: center;
+  background-repeat: no-repeat;
+}
+:root[data-espresso-checks][data-theme='dark'] [type='checkbox']:checked,
+:root[data-espresso-checks] [data-theme='dark'] [type='checkbox']:checked {
+  background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 12 12' fill='%230F0F0F' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M9.71757 2.45503C9.89809 2.24626 10.2137 2.22384 10.4226 2.40425C10.6314 2.58477 10.6548 2.9004 10.4744 3.10933L4.91581 9.54487C4.82201 9.65322 4.68608 9.71626 4.54276 9.71773C4.39936 9.71911 4.26176 9.65928 4.16581 9.55269L1.533 6.6269C1.34863 6.42176 1.36527 6.10554 1.5701 5.92085C1.77536 5.73612 2.09241 5.75271 2.27714 5.95796L4.52909 8.46089L9.71757 2.45503Z'/%3e%3c/svg%3e");
 }
 
 /* Page switch: fade and rise 4px. */
