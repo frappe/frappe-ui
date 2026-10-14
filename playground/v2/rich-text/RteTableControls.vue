@@ -1666,13 +1666,15 @@ body.rte-tc-dragging .rte-tc-handle {
      break in the line, not a chip, in either theme */
   box-shadow: 0 0 0 2px var(--surface-base);
 }
-/* on the table's edge the dash is a 1px gray-900 length of the edge:
-   on the rule's own pixel (3px into the handle's padding
-   box), parted from the rest of the line only by the gaps either side */
+/* on the table's edge the dash is a 2px gray-900 length of the edge:
+   the rule's own pixel (3px into the handle's padding box) and the cell's
+   first pixel inside it, where a selected cell's ring and a filled cell's
+   colour begin — so it sits on whichever of the two is the line the eye
+   reads — parted from the rest of the line only by the gaps either side */
 .rte-tc-handle.is-row .rte-tc-pill {
   left: 3px;
   top: 2px;
-  width: 1px;
+  width: 2px;
   height: 14px;
   background-color: var(--ink-gray-9);
 }
@@ -1680,7 +1682,7 @@ body.rte-tc-dragging .rte-tc-handle {
   left: 2px;
   top: 3px;
   width: 14px;
-  height: 1px;
+  height: 2px;
   background-color: var(--ink-gray-9);
 }
 /* the cell's handle on the selection's ring is, like the edge's, a 1px
@@ -1688,6 +1690,7 @@ body.rte-tc-dragging .rte-tc-handle {
    handle's padding box), parted from it only by the gaps either side */
 .rte-tc-handle.is-row.is-cell .rte-tc-pill {
   left: 4px;
+  width: 1px;
   background-color: var(--ink-gray-5);
 }
 .rte-tc-dots {
