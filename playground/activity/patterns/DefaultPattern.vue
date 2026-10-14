@@ -221,6 +221,9 @@ const timelessChanges = [
           time="19 Jun"
           :body="jitMail"
           thread
+          quoted-from="On June 26, 2024 at 3:56 PM GMT+5:30 shariq@frappe.io wrote:"
+          :quoted="turnoverMail"
+          quote-folded
         />
       </ActivityEntry>
 

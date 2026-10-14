@@ -31,12 +31,14 @@ const props = withDefaults(
     /** The quoted thread itself, when it is opened out. */
     quotedFrom?: string
     quoted?: string
+    /** Starts with the quote folded away behind the "…". */
+    quoteFolded?: boolean
   }>(),
   { attachments: () => [] },
 )
 
 /** The quoted thread shows until the "…" folds it away (and back). */
-const quoteOpen = ref(true)
+const quoteOpen = ref(!props.quoteFolded)
 </script>
 
 <template>
@@ -141,13 +143,13 @@ const quoteOpen = ref(true)
     />
 
     <!-- The quoted thread: the "…" control, then the message it hides. An
-         xs subtle Button at the pill's own 8px corners (the user's call
-         2026-10-14); it folds the quote away and opens it again. -->
+         xs subtle Button with the old badge's fully round ends (the user's
+         call 2026-10-14); it folds the quote away and opens it again. -->
     <Button
       v-if="thread || quoted"
       size="xs"
       variant="subtle"
-      class="self-start !rounded-4"
+      class="self-start !rounded-full"
       :aria-label="quoteOpen ? 'Hide quoted text' : 'Show quoted text'"
       :aria-expanded="props.quoted ? quoteOpen : undefined"
       @click="quoteOpen = !quoteOpen"
@@ -160,15 +162,28 @@ const quoteOpen = ref(true)
       </template>
     </Button>
 
-    <!-- 14px from the rule to the quoted text, as the divider's own gap. -->
+    <!-- 14px from the rule to the quoted text, as the divider's own gap.
+         Folded as the feed folds a month (ActivityRun): the row eases from
+         `0fr` to `1fr` and fades, and the card's 14 gap is taken back on the
+         way out, so the "…" ends the card with nothing hanging under it. -->
     <div
-      v-if="quoted && quoteOpen"
-      class="flex flex-col gap-4 border-l border-outline-gray-1 pl-3.5"
+      v-if="quoted"
+      class="grid transition-[grid-template-rows,margin-top,opacity] duration-200 ease-out motion-reduce:transition-none"
+      :class="
+        quoteOpen
+          ? 'grid-rows-[1fr] opacity-100'
+          : '-mt-3.5 grid-rows-[0fr] opacity-0'
+      "
+      :aria-hidden="!quoteOpen || undefined"
     >
-      <p class="text-p-base text-ink-gray-7">{{ quotedFrom }}</p>
-      <p class="whitespace-pre-line text-p-base text-ink-gray-7">
-        {{ quoted }}
-      </p>
+      <div class="overflow-hidden">
+        <div class="flex flex-col gap-4 border-l border-outline-gray-1 pl-3.5">
+          <p class="text-p-base text-ink-gray-7">{{ quotedFrom }}</p>
+          <p class="whitespace-pre-line text-p-base text-ink-gray-7">
+            {{ quoted }}
+          </p>
+        </div>
+      </div>
     </div>
   </div>
 </template>
