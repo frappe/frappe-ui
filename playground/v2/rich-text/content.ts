@@ -164,7 +164,7 @@ welcome("jacob@frappe.in")</code></pre>
 <p></p>
 <p>This balance creates a collaborative environment where business teams and developers can work together to continuously improve processes and adapt systems as requirements evolve. <s>Instead of viewing software as a fixed product</s>, organizations can treat it as a platform for ongoing innovation.</p>
 <p></p>
-<blockquote><p><em>“The success of Frappe is closely tied to its global community. Thousands of contributors across different countries actively participate in the ecosystem by developing applications, improving documentation, sharing best practices, organizing events, and supporting other users.”</em></p><blockquote><p><em>The ecosystem is further strengthened by implementation partners and consultants who help businesses deploy solutions</em></p></blockquote></blockquote>
+<blockquote><p><em>“The success of Frappe is closely tied to its global community. Thousands of contributors across different countries actively participate in the ecosystem by developing applications, improving documentation, sharing best practices, organizing events, and supporting other users.”</em></p><p><em>The ecosystem is further strengthened by implementation partners and consultants who help businesses deploy solutions</em></p></blockquote>
 <hr>
 <h2>Callouts</h2>
 <div data-type="callout" data-emoji="💡"><p><strong>Tip</strong></p><p>Frappe applications are highly customisable. Before creating custom features, explore existing workflows, custom fields, and automation tools to avoid unnecessary development effort.</p></div>
