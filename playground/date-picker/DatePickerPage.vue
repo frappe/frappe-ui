@@ -55,9 +55,10 @@ watch(range, (on) => !on && (doublePane.value = false))
     <div class="flex items-start gap-10">
       <!-- one box, the size of the largest picker (sidebar, two months,
            header, time and footer), so the controller never moves; the picker
-           sits in its middle (the user's call 2026-10-09 — a single pane
-           pinned top-left looked off) -->
-      <div class="flex h-[400px] w-[560px] items-center justify-center">
+           sits in its middle across (the user's call 2026-10-09 — a single
+           pane pinned top-left looked off) and at its top, level with the
+           controller's, so no variant moves its top edge (2026-10-14) -->
+      <div class="flex h-[346px] w-[514px] items-start justify-center">
         <DatePickerPreview
           :variant="variant"
           :range="range"

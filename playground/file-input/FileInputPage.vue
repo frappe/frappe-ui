@@ -133,7 +133,7 @@ const DESCRIPTION =
               :options="inputTypes"
               size="sm"
               variant="subtle"
-              class="w-[140px]"
+              class="w-[164px]"
               aria-label="Input type"
             />
           </div>
@@ -148,6 +148,7 @@ const DESCRIPTION =
               :options="variantTabs"
               size="sm"
               aria-label="Variant"
+              class="w-[164px] [&>div]:w-full [&_button]:flex-1 [&_button]:basis-0 [&_button>span]:w-full"
             />
           </div>
           <div
@@ -160,6 +161,7 @@ const DESCRIPTION =
               :options="orientationTabs"
               size="sm"
               aria-label="Orientation"
+              class="w-[164px] [&>div]:w-full [&_button]:flex-1 [&_button]:basis-0 [&_button>span]:w-full"
             />
           </div>
           <div
@@ -172,6 +174,7 @@ const DESCRIPTION =
               :options="sizeTabs"
               size="sm"
               aria-label="Size"
+              class="w-[164px] [&>div]:w-full [&_button]:flex-1 [&_button]:basis-0 [&_button>span]:w-full"
             />
           </div>
           <div
