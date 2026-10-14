@@ -88,6 +88,10 @@ const colBox = ref<Box | null>(null)
 const cellBox = ref<Box | null>(null)
 /** the cell handle's edge is within the card's visible span */
 const cellKnobOn = ref(false)
+/** the selection's ring runs along the table's top (left) edge under the
+ * column's (row's) dash: there the ring is the line the dash marks */
+const ringTop = ref(false)
+const ringLeft = ref(false)
 /** an x within the card, the table's viewport, which clips what it holds */
 function inCard(x: number): boolean {
   const t = tableBox.value
@@ -180,6 +184,30 @@ function measure() {
       : null
   } else colBox.value = null
   const selected = w.querySelectorAll<HTMLElement>('.selectedCell')
+  // on the table's own edge the ring keeps to the cell's edge, a pixel
+  // inside the rule (RichTextEditor.vue)
+  const colMid = colBox.value && colBox.value.left + colBox.value.width / 2
+  const rowMid = rowBox.value && rowBox.value.top + rowBox.value.height / 2
+  ringTop.value = false
+  ringLeft.value = false
+  selected.forEach((el) => {
+    const b = el.getBoundingClientRect()
+    const tr = el.parentElement
+    if (
+      colMid !== null &&
+      tr === tr?.parentElement?.firstElementChild &&
+      colMid >= b.left &&
+      colMid <= b.right
+    )
+      ringTop.value = true
+    if (
+      rowMid !== null &&
+      el === tr?.firstElementChild &&
+      rowMid >= b.top &&
+      rowMid <= b.bottom
+    )
+      ringLeft.value = true
+  })
   if (selected.length) {
     let left = Infinity
     let top = Infinity
@@ -1432,7 +1460,7 @@ const px = (n: number) => `${n}px`
         <span
           class="rte-tc-edge is-row"
           :style="{
-            left: px(tableBox.left),
+            left: px(tableBox.left + (ringLeft ? 1 : 0)),
             top: px(rowBox.top + rowBox.height / 2 - 7),
           }"
           aria-hidden="true"
@@ -1490,7 +1518,7 @@ const px = (n: number) => `${n}px`
           class="rte-tc-edge is-col"
           :style="{
             left: px(colBox.left + colBox.width / 2 - 7),
-            top: px(tableBox.top),
+            top: px(tableBox.top + (ringTop ? 1 : 0)),
           }"
           aria-hidden="true"
         />
@@ -1692,9 +1720,10 @@ body.rte-tc-dragging .rte-tc-handle {
 .rte-tc-handle.is-col .rte-tc-pill {
   display: none;
 }
-/* the edge's dash: a 1px gray-900 length of the table's rule, laid on the
-   wrapper's own edge with the wrapper's own 1px border, so it lands on
-   the rule's device pixels at any zoom; parted from the rest of the line
+/* the edge's dash: a 1px gray-500 length of the table's rule — the
+   selection's own colour — laid on the wrapper's own edge with the
+   wrapper's own 1px border, so it lands on the rule's device pixels at any
+   zoom, or a pixel in, on the ring, where the ring runs along that edge; parted from the rest of the line
    only by the gaps either side, in the editor's ground */
 .rte-tc-edge {
   position: fixed;
@@ -1704,12 +1733,12 @@ body.rte-tc-dragging .rte-tc-handle {
 .rte-tc-edge.is-row {
   width: 0;
   height: 14px;
-  border-left: 1px solid var(--ink-gray-9);
+  border-left: 1px solid var(--ink-gray-5);
 }
 .rte-tc-edge.is-col {
   width: 14px;
   height: 0;
-  border-top: 1px solid var(--ink-gray-9);
+  border-top: 1px solid var(--ink-gray-5);
 }
 .rte-tc-handle:hover + .rte-tc-edge,
 .rte-tc-handle.is-open + .rte-tc-edge {
