@@ -95,7 +95,7 @@ const tailTrim = computed(() =>
           size="lg"
         >
           <template #prefix>
-            <ActivityIcon :name="fact.icon" class="size-3 text-ink-gray-4" />
+            <ActivityIcon :name="fact.icon" class="size-3" />
           </template>
           {{ fact.label }}
         </Badge>
@@ -108,7 +108,7 @@ const tailTrim = computed(() =>
           :class="actionClasses"
         >
           <template #prefix>
-            <ActivityIcon :name="action.icon" class="size-3 text-ink-gray-4" />
+            <ActivityIcon :name="action.icon" class="size-3" />
           </template>
           {{ action.label }}
         </Button>

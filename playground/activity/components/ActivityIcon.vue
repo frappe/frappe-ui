@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 
 /**
  * The Espresso file's own line icons for the call card and its player
@@ -7,7 +7,8 @@ import { computed } from 'vue'
  * stood in for by lucide: the badges' 12px `icon/line/calender`, `time`,
  * `play` and `notes`, and the player's 16px `pause`, `volume` and
  * `dot-horizontal`. The player's play is `icon/line/play` at 16 from the
- * same set. Each takes the ink of whatever it sits in.
+ * same set. Each takes the ink of whatever it sits in, so a pill's icon is
+ * always its label's colour (the file binds both to one token).
  */
 export type ActivityIconName =
   | 'calendar'
@@ -56,10 +57,49 @@ const ICONS: Record<ActivityIconName, { box: number; d: string }> = {
 
 const props = defineProps<{ name: ActivityIconName }>()
 const icon = computed(() => ICONS[props.name])
+
+/**
+ * Held to whole device pixels. The pills' labels are fractional widths and
+ * the feed sits a fraction down the page, so a 12px glyph of 1px lines landed
+ * on a third of a pixel and drew soft — the user saw it as pixelated. It is
+ * nudged by whatever fraction it is off, after layout and on resize.
+ */
+const el = ref<SVGSVGElement | null>(null)
+// Written straight onto the element, not through a ref: the old nudge has to
+// be off before the icon is measured, and a reactive style comes off a tick
+// too late.
+function snap() {
+  const svg = el.value
+  if (!svg) return
+  svg.style.transform = ''
+  const r = svg.getBoundingClientRect()
+  const dpr = window.devicePixelRatio || 1
+  const dx = Math.round(r.left * dpr) / dpr - r.left
+  const dy = Math.round(r.top * dpr) / dpr - r.top
+  svg.style.transform = dx || dy ? `translate(${dx}px, ${dy}px)` : ''
+}
+const resnap = () => requestAnimationFrame(snap)
+let ro: ResizeObserver | null = null
+onMounted(() => {
+  nextTick(resnap)
+  // the labels' web font lands after mount and moves everything after it
+  document.fonts?.ready.then(resnap)
+  window.addEventListener('resize', resnap)
+  // anything above that changes height moves it: watch the feed it sits in
+  ro = new ResizeObserver(resnap)
+  ro.observe(document.body)
+  const host = el.value?.closest('.flex-col')
+  if (host) ro.observe(host)
+})
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', resnap)
+  ro?.disconnect()
+})
 </script>
 
 <template>
   <svg
+    ref="el"
     :viewBox="`0 0 ${icon.box} ${icon.box}`"
     fill="currentColor"
     xmlns="http://www.w3.org/2000/svg"
