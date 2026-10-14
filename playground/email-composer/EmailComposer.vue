@@ -445,13 +445,13 @@ const root = ref<HTMLElement | null>(null)
     ]"
     aria-label="New message"
   >
-    <!-- the header: the title, then pop out and close, on surface-alpha-gray-1
-         (the user's call 2026-10-14). A fill paints over its window's inset
+    <!-- the header: the title, then pop out and close, on surface-gray-1 with
+         an outline-gray-1 rule under it (the user's call 2026-10-14). A fill paints over its window's inset
          shadow, so the window draws its shadow-2xl once more on a layer above
          everything (the `after:` above); the window's own clip cuts that
          copy's outer layers away and leaves only the inner edge, unhidden. -->
     <header
-      class="flex h-12 shrink-0 items-center justify-between bg-surface-alpha-gray-1 pl-4 pr-2.5"
+      class="flex h-12 shrink-0 items-center justify-between border-b border-outline-gray-1 bg-surface-gray-1 pl-4 pr-2.5"
     >
       <h2 class="text-lg-medium text-ink-gray-8">New message</h2>
       <div class="flex items-center gap-1">
