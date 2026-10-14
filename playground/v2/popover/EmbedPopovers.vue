@@ -104,16 +104,14 @@ function addCompact() {
   <div class="flex flex-col items-center gap-10">
     <!-- default -->
     <div
-      class="flex w-[380px] flex-col gap-4 rounded-6 bg-surface-elevation-2 pb-3.5 pt-2 shadow-lg"
+      class="relative flex w-[380px] flex-col gap-4 rounded-6 bg-surface-elevation-2 pb-3.5 pt-2 shadow-lg"
       role="dialog"
       aria-label="Embed"
     >
       <!-- the library's underline tabs, as the emoji picker's: their line
            slides from tab to tab over the row's rule. The rule is the
            row's, so it runs under the close button too -->
-      <div
-        class="flex h-7 items-end justify-between border-b border-outline-elevation-2 pl-4 pr-2"
-      >
+      <div class="flex h-7 items-end border-b border-outline-elevation-2 px-4">
         <Tabs v-model="tab">
           <TabList
             variant="underline"
@@ -129,11 +127,12 @@ function addCompact() {
             />
           </TabList>
         </Tabs>
+        <!-- pinned 4px from the card's corner, as the file has it -->
         <Button
           variant="ghost"
           size="xs"
           label="Close"
-          class="mb-1.5"
+          class="absolute right-1 top-1"
           @click="emit('close')"
         >
           <template #icon

@@ -35,7 +35,12 @@ function save(close: () => void) {
 </script>
 
 <template>
-  <EspressoModal v-model:open="open" title="Edit General" variant="form">
+  <EspressoModal
+    v-model:open="open"
+    title="Edit General"
+    variant="form"
+    close-placement="popup"
+  >
     <div class="flex flex-col gap-5">
       <!-- 32px outline icon button · 8px · input -->
       <ModalField label="Category name">

@@ -46,7 +46,12 @@ const barStyle = computed(() => ({
 </script>
 
 <template>
-  <EspressoModal v-model:open="open" title="Streak" variant="form">
+  <EspressoModal
+    v-model:open="open"
+    title="Streak"
+    variant="form"
+    close-placement="inline"
+  >
     <div class="flex flex-col items-center pb-[21px]">
       <StreakHero class="mt-4" :days="streak" />
 

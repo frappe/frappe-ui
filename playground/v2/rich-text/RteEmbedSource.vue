@@ -126,7 +126,7 @@ function pickFromLibrary(file: LibraryFile) {
 
 <template>
   <div
-    class="rte-source flex w-[380px] flex-col gap-4 rounded-6 bg-surface-elevation-2 pb-3.5 pt-2 shadow-xl"
+    class="rte-source relative flex w-[380px] flex-col gap-4 rounded-6 bg-surface-elevation-2 pb-3.5 pt-2 shadow-xl"
   >
     <!-- the library's underline tabs, as the emoji picker's: their line
          slides from tab to tab over the row's rule -->
@@ -146,16 +146,19 @@ function pickFromLibrary(file: LibraryFile) {
           />
         </TabList>
       </Tabs>
-      <!-- the cross's own 7px lines end on the content's right edge, 16px
-           in, where the field below ends -->
-      <button
-        type="button"
-        class="-mr-1.5 ml-auto flex size-5 self-center items-center justify-center text-ink-gray-5 hover:text-ink-gray-7"
-        aria-label="Close"
+      <!-- the file's close (31845:37452): an xs ghost button, its 14px
+           cross in gray-700, pinned 4px from the card's corner -->
+      <Button
+        variant="ghost"
+        size="xs"
+        label="Close"
+        class="absolute right-1 top-1"
         @click="emit('close')"
       >
-        <RteIcon name="small-close" class="size-4" />
-      </button>
+        <template #icon>
+          <RteIcon name="small-close" class="size-3.5 text-ink-gray-7" />
+        </template>
+      </Button>
     </div>
 
     <form

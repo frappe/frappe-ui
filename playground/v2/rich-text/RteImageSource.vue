@@ -60,10 +60,10 @@ async function embed() {
 
 <template>
   <div
-    class="rte-source flex w-[380px] flex-col gap-4 rounded-6 bg-surface-elevation-2 pb-3.5 pt-2 shadow-xl"
+    class="rte-source relative flex w-[380px] flex-col gap-4 rounded-6 bg-surface-elevation-2 pb-3.5 pt-2 shadow-xl"
   >
     <div
-      class="flex h-7 items-center gap-6 border-b border-outline-gray-1 px-4"
+      class="flex h-7 items-center gap-6 border-b border-outline-elevation-2 px-4"
     >
       <button
         v-for="t in ['upload', 'link'] as const"
@@ -77,14 +77,19 @@ async function embed() {
       >
         {{ t === 'upload' ? 'Upload' : 'Link' }}
       </button>
-      <button
-        type="button"
-        class="-mr-3 ml-auto flex size-5 items-center justify-center text-ink-gray-5 hover:text-ink-gray-7"
-        aria-label="Close"
+      <!-- the file's close (31845:37452): an xs ghost button, its 14px
+           cross in gray-700, pinned 4px from the card's corner -->
+      <Button
+        variant="ghost"
+        size="xs"
+        label="Close"
+        class="absolute right-1 top-1"
         @click="emit('close')"
       >
-        <RteIcon name="small-close" class="size-4" />
-      </button>
+        <template #icon>
+          <RteIcon name="small-close" class="size-3.5 text-ink-gray-7" />
+        </template>
+      </Button>
     </div>
 
     <div v-if="tab === 'upload'" class="px-4">

@@ -108,9 +108,7 @@ const tagOptions = computed(() =>
     switch: true as const,
     switchValue: task.tags.includes(tag),
     onClick: (on: boolean) => {
-      task.tags = on
-        ? [...task.tags, tag]
-        : task.tags.filter((t) => t !== tag)
+      task.tags = on ? [...task.tags, tag] : task.tags.filter((t) => t !== tag)
     },
   })),
 )
@@ -136,6 +134,7 @@ function create(close: () => void) {
     title="New task"
     variant="form"
     width="600"
+    close-placement="popup"
   >
     <div class="flex flex-col gap-5">
       <ModalField label="Title">

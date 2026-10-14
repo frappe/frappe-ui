@@ -10,9 +10,13 @@
 //   form     20px title · 20px to the body · 32px to the footer
 //   list     17px title · 16px to the body · 24px to the footer
 //
-// closePlacement="inline" is the espresso "popup" header instead: 20px padding all
-// round, and a 16px close glyph centred on the title row, 20px from the
-// right edge.
+// closePlacement="inline" (Learning consistency 34953:131529, Streak
+// 34953:131620): 20px padding all round, and a bare 16px gray-800 close
+// glyph 23.5px from the top and 20px from the right edge — the title
+// cell's suffix. closePlacement="popup" (the "popup" frames, e.g.
+// 34953:131929): an sm ghost close, 28px, its 16px gray-700 glyph, 20px
+// from the top and 24px from the right edge. Each is pinned to the card,
+// so the title's own line height never moves it.
 import { computed } from 'vue'
 import { Button, Dialog } from '../../../src'
 import './modal.css'
@@ -22,7 +26,7 @@ const props = withDefaults(
     title?: string
     variant?: 'default' | 'dialog' | 'form' | 'list'
     shadow?: 'xl' | '2xl'
-    closePlacement?: 'corner' | 'inline'
+    closePlacement?: 'corner' | 'inline' | 'popup'
     width?: '360' | '440' | '600' | '720'
   }>(),
   {
@@ -57,7 +61,7 @@ const open = defineModel<boolean>('open', { default: false })
         class="espresso-modal relative flex flex-col px-5 pb-5"
         :class="[
           spacing.card,
-          closePlacement === 'inline' ? 'pt-5' : 'pt-[18px]',
+          closePlacement === 'corner' ? 'pt-[18px]' : 'pt-5',
           {
             'espresso-modal--2xl': shadow === '2xl',
             'espresso-modal--360': width === '360',
@@ -70,7 +74,7 @@ const open = defineModel<boolean>('open', { default: false })
           <!-- header cell: optional prefix, 8px gap, semibold title -->
           <div
             class="flex min-h-[21px] items-center gap-2"
-            :class="{ 'pr-6': closePlacement === 'corner' }"
+            :class="closePlacement === 'popup' ? 'pr-8' : 'pr-6'"
           >
             <slot name="prefix" />
             <slot name="title">
@@ -78,19 +82,6 @@ const open = defineModel<boolean>('open', { default: false })
                 {{ title }}
               </h3>
             </slot>
-            <!-- 24px hit area; the glyph lands 20px from the card edge -->
-            <Button
-              v-if="closePlacement === 'inline'"
-              class="-my-1 -mr-1 shrink-0"
-              variant="ghost"
-              size="xs"
-              label="Close"
-              @click="close"
-            >
-              <template #icon>
-                <span class="lucide-x size-4 text-ink-gray-9" />
-              </template>
-            </Button>
           </div>
 
           <slot :close="close" />
@@ -101,8 +92,34 @@ const open = defineModel<boolean>('open', { default: false })
           <slot name="footer" :close="close" />
         </div>
 
+        <!-- inline: a 24px hit area round the 16px glyph, which lands
+             23.5px down and 20px in -->
         <Button
-          v-if="closePlacement === 'corner'"
+          v-if="closePlacement === 'inline'"
+          class="absolute right-4 top-[19.5px]"
+          variant="ghost"
+          size="xs"
+          label="Close"
+          @click="close"
+        >
+          <template #icon>
+            <span class="lucide-x size-4 text-ink-gray-8" />
+          </template>
+        </Button>
+        <Button
+          v-else-if="closePlacement === 'popup'"
+          class="absolute right-6 top-5"
+          variant="ghost"
+          size="sm"
+          label="Close"
+          @click="close"
+        >
+          <template #icon>
+            <span class="lucide-x size-4 text-ink-gray-7" />
+          </template>
+        </Button>
+        <Button
+          v-else
           class="absolute right-2 top-2"
           variant="ghost"
           size="xs"

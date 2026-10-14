@@ -83,10 +83,12 @@ function sendComment() {
 <template>
   <Dialog v-model:open="open" size="4xl" bare>
     <template #default="{ close }">
-      <div class="espresso-modal espresso-modal--960 espresso-modal--2xl flex h-[591px] max-h-[85vh] flex-col">
+      <div
+        class="espresso-modal espresso-modal--960 espresso-modal--2xl flex h-[591px] max-h-[85vh] flex-col"
+      >
         <!-- header -->
         <div
-          class="flex h-12 shrink-0 items-center justify-between border-b border-outline-gray-1 p-2.5"
+          class="flex h-[49px] shrink-0 items-center justify-between border-b border-outline-gray-1 p-2.5"
         >
           <Select
             v-model="note.project"
@@ -100,25 +102,62 @@ function sendComment() {
           </Select>
 
           <div class="flex items-center gap-1.5">
-            <Button variant="ghost" size="sm" label="Previous" @click="emit('previous')">
-              <template #icon><span class="lucide-chevron-left size-4 text-ink-gray-7" /></template>
+            <Button
+              variant="ghost"
+              size="sm"
+              label="Previous"
+              @click="emit('previous')"
+            >
+              <template #icon
+                ><span class="lucide-chevron-left size-4 text-ink-gray-7"
+              /></template>
             </Button>
-            <Button variant="ghost" size="sm" label="Next" @click="emit('next')">
-              <template #icon><span class="lucide-chevron-right size-4 text-ink-gray-7" /></template>
+            <Button
+              variant="ghost"
+              size="sm"
+              label="Next"
+              @click="emit('next')"
+            >
+              <template #icon
+                ><span class="lucide-chevron-right size-4 text-ink-gray-7"
+              /></template>
             </Button>
             <Divider orientation="vertical" class="!h-5" />
-            <Button variant="ghost" size="sm" label="Duplicate" @click="emit('duplicate')">
-              <template #icon><span class="lucide-copy size-4 text-ink-gray-7" /></template>
+            <Button
+              variant="ghost"
+              size="sm"
+              label="Duplicate"
+              @click="emit('duplicate')"
+            >
+              <template #icon
+                ><span class="lucide-copy size-4 text-ink-gray-7"
+              /></template>
             </Button>
-            <Button variant="ghost" size="sm" label="Share" @click="emit('share')">
-              <template #icon><span class="lucide-forward size-4 text-ink-gray-7" /></template>
+            <Button
+              variant="ghost"
+              size="sm"
+              label="Share"
+              @click="emit('share')"
+            >
+              <template #icon
+                ><span class="lucide-forward size-4 text-ink-gray-7"
+              /></template>
             </Button>
-            <Button variant="ghost" size="sm" label="Details" @click="emit('details')">
-              <template #icon><span class="lucide-square-menu size-4 text-ink-gray-7" /></template>
+            <Button
+              variant="ghost"
+              size="sm"
+              label="Details"
+              @click="emit('details')"
+            >
+              <template #icon
+                ><span class="lucide-square-menu size-4 text-ink-gray-7"
+              /></template>
             </Button>
             <Divider orientation="vertical" class="!h-5" />
             <Button variant="ghost" size="sm" label="Close" @click="close">
-              <template #icon><span class="lucide-x size-4 text-ink-gray-7" /></template>
+              <template #icon
+                ><span class="lucide-x size-4 text-ink-gray-7"
+              /></template>
             </Button>
           </div>
         </div>
@@ -166,7 +205,11 @@ function sendComment() {
               <div class="quick-row">
                 <dt>Member</dt>
                 <dd>
-                  <Select v-model="note.member" variant="ghost" :options="people">
+                  <Select
+                    v-model="note.member"
+                    variant="ghost"
+                    :options="people"
+                  >
                     <template #prefix>
                       <Avatar
                         class="size-4"
@@ -183,7 +226,11 @@ function sendComment() {
               <div class="quick-row">
                 <dt>Customer</dt>
                 <dd>
-                  <Select v-model="note.customer" variant="ghost" :options="people">
+                  <Select
+                    v-model="note.customer"
+                    variant="ghost"
+                    :options="people"
+                  >
                     <template #prefix>
                       <Avatar
                         class="size-4"
@@ -205,7 +252,9 @@ function sendComment() {
               </div>
             </dl>
 
-            <p class="text-sm text-ink-gray-6">Created on 24 May, 2023 by Sandeep</p>
+            <p class="text-sm text-ink-gray-6">
+              Created on 24 May, 2023 by Sandeep
+            </p>
           </div>
         </div>
       </div>

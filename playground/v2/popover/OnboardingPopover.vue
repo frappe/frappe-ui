@@ -40,22 +40,45 @@ const STEPS: Step[] = [
   { id: 'password', label: 'Setup your password', icon: 'lucide-lock' },
   { id: 'lead', label: 'Create your first lead', icon: 'lucide-users' },
   { id: 'invite', label: 'Invite your team', icon: 'lucide-circle-user-round' },
-  { id: 'convert', label: 'Convert lead to deal', icon: 'lucide-refresh-cw', after: 'lead' },
+  {
+    id: 'convert',
+    label: 'Convert lead to deal',
+    icon: 'lucide-refresh-cw',
+    after: 'lead',
+  },
   { id: 'task', label: 'Create your first task', icon: 'lucide-circle-check' },
   { id: 'note', label: 'Create your first note', icon: 'lucide-file-text' },
-  { id: 'comment', label: 'Add your first comment', icon: 'lucide-message-circle', after: 'note' },
-  { id: 'email', label: 'Send email', icon: 'lucide-mail-open', after: 'invite' },
-  { id: 'status', label: 'Change deal status', icon: 'lucide-shapes', after: 'convert' },
+  {
+    id: 'comment',
+    label: 'Add your first comment',
+    icon: 'lucide-message-circle',
+    after: 'note',
+  },
+  {
+    id: 'email',
+    label: 'Send email',
+    icon: 'lucide-mail-open',
+    after: 'invite',
+  },
+  {
+    id: 'status',
+    label: 'Change deal status',
+    icon: 'lucide-shapes',
+    after: 'convert',
+  },
 ]
 
 const done = ref(new Set<string>(['password']))
 
 const isDone = (s: Step) => done.value.has(s.id)
-const isLocked = (s: Step) => !!s.after && !done.value.has(s.after) && !isDone(s)
+const isLocked = (s: Step) =>
+  !!s.after && !done.value.has(s.after) && !isDone(s)
 const next = computed(() => STEPS.find((s) => !isDone(s) && !isLocked(s)))
 
 const doneCount = computed(() => done.value.size)
-const percent = computed(() => Math.round((doneCount.value / STEPS.length) * 100))
+const percent = computed(() =>
+  Math.round((doneCount.value / STEPS.length) * 100),
+)
 const allDone = computed(() => doneCount.value === STEPS.length)
 
 function complete(s: Step) {
@@ -74,7 +97,10 @@ function skipAll() {
 }
 
 // ---- shortcuts
-const SHORTCUTS: { title: string; items: { label: string; keys: string[] }[] }[] = [
+const SHORTCUTS: {
+  title: string
+  items: { label: string; keys: string[] }[]
+}[] = [
   {
     title: 'General',
     items: [
@@ -124,10 +150,12 @@ const keyName = (k: string) => (k === '⌘' ? 'Command' : k)
       variant="ghost"
       size="xs"
       label="Close"
-      class="absolute right-3 top-3 z-10"
+      class="absolute right-2 top-2 z-10"
       @click="emit('close')"
     >
-      <template #icon><span class="lucide-x size-3.5 text-ink-gray-7" /></template>
+      <template #icon
+        ><span class="lucide-x size-3.5 text-ink-gray-7"
+      /></template>
     </Button>
 
     <Transition :name="view === 'shortcuts' ? 'onb-forward' : 'onb-back'">
@@ -141,7 +169,9 @@ const keyName = (k: string) => (k === '⌘' ? 'Command' : k)
           <div class="flex w-full flex-col items-center gap-4">
             <img :src="helpdeskLogo" alt="" class="size-8" />
             <div class="text-center">
-              <p class="text-base-medium text-ink-gray-9">Welcome to Frappe Helpdesk</p>
+              <p class="text-base-medium text-ink-gray-9">
+                Welcome to Frappe Helpdesk
+              </p>
               <p class="text-p-base text-ink-gray-6">
                 {{ doneCount }}/{{ STEPS.length }} Steps completed
               </p>
@@ -150,7 +180,11 @@ const keyName = (k: string) => (k === '⌘' ? 'Command' : k)
 
           <div class="flex w-full flex-col gap-4">
             <div class="flex h-6 items-center justify-between pl-0.5">
-              <Badge :theme="allDone ? 'green' : 'amber'" variant="subtle" size="md">
+              <Badge
+                :theme="allDone ? 'green' : 'amber'"
+                variant="subtle"
+                size="md"
+              >
                 {{ allDone ? 'All done' : `${percent}% completed` }}
               </Badge>
               <Button
@@ -180,7 +214,11 @@ const keyName = (k: string) => (k === '⌘' ? 'Command' : k)
                   class="flex min-w-0 flex-1 items-center gap-2 text-left"
                   :disabled="isLocked(s)"
                   :aria-pressed="isDone(s)"
-                  :title="isLocked(s) ? 'Finish the step before this first' : undefined"
+                  :title="
+                    isLocked(s)
+                      ? 'Finish the step before this first'
+                      : undefined
+                  "
                   @click="complete(s)"
                 >
                   <span :class="s.icon" class="size-4 shrink-0" />
@@ -202,11 +240,23 @@ const keyName = (k: string) => (k === '⌘' ? 'Command' : k)
         </div>
 
         <div class="flex flex-col gap-1.5">
-          <Button variant="ghost" size="sm" class="onb-footer-link" @click="emit('helpCentre')">
-            <template #prefix><span class="lucide-circle-help size-4" /></template>
+          <Button
+            variant="ghost"
+            size="sm"
+            class="onb-footer-link"
+            @click="emit('helpCentre')"
+          >
+            <template #prefix
+              ><span class="lucide-circle-help size-4"
+            /></template>
             Help centre
           </Button>
-          <Button variant="ghost" size="sm" class="onb-footer-link" @click="view = 'shortcuts'">
+          <Button
+            variant="ghost"
+            size="sm"
+            class="onb-footer-link"
+            @click="view = 'shortcuts'"
+          >
             <template #prefix><span class="lucide-command size-4" /></template>
             Keyboard shortcuts
           </Button>
@@ -231,9 +281,17 @@ const keyName = (k: string) => (k === '⌘' ? 'Command' : k)
 
           <div class="-mr-2 flex min-h-0 flex-col gap-3.5 overflow-y-auto pr-2">
             <template v-for="(section, i) in SHORTCUTS" :key="section.title">
-              <hr v-if="i > 0" class="border-outline-gray-1 dark:border-outline-gray-2" />
-              <section class="flex flex-col gap-1.5" :aria-label="section.title">
-                <p class="flex h-7 items-center text-base-medium text-ink-gray-9">
+              <hr
+                v-if="i > 0"
+                class="border-outline-gray-1 dark:border-outline-gray-2"
+              />
+              <section
+                class="flex flex-col gap-1.5"
+                :aria-label="section.title"
+              >
+                <p
+                  class="flex h-7 items-center text-base-medium text-ink-gray-9"
+                >
                   {{ section.title }}
                 </p>
                 <dl class="flex flex-col gap-1.5">
@@ -242,8 +300,13 @@ const keyName = (k: string) => (k === '⌘' ? 'Command' : k)
                     :key="item.label"
                     class="flex h-7 items-center justify-between gap-2"
                   >
-                    <dt class="truncate text-base text-ink-gray-6">{{ item.label }}</dt>
-                    <dd class="flex shrink-0 gap-1" :aria-label="item.keys.map(keyName).join(' + ')">
+                    <dt class="truncate text-base text-ink-gray-6">
+                      {{ item.label }}
+                    </dt>
+                    <dd
+                      class="flex shrink-0 gap-1"
+                      :aria-label="item.keys.map(keyName).join(' + ')"
+                    >
                       <kbd
                         v-for="k in item.keys"
                         :key="k"
@@ -262,11 +325,23 @@ const keyName = (k: string) => (k === '⌘' ? 'Command' : k)
         </div>
 
         <div class="flex flex-col gap-1.5">
-          <Button variant="ghost" size="sm" class="onb-footer-link" @click="emit('helpCentre')">
-            <template #prefix><span class="lucide-circle-help size-4" /></template>
+          <Button
+            variant="ghost"
+            size="sm"
+            class="onb-footer-link"
+            @click="emit('helpCentre')"
+          >
+            <template #prefix
+              ><span class="lucide-circle-help size-4"
+            /></template>
             Help centre
           </Button>
-          <Button variant="ghost" size="sm" class="onb-footer-link" aria-current="page">
+          <Button
+            variant="ghost"
+            size="sm"
+            class="onb-footer-link"
+            aria-current="page"
+          >
             <template #prefix><span class="lucide-command size-4" /></template>
             Keyboard shortcuts
           </Button>

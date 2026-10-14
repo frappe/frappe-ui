@@ -71,6 +71,7 @@ function create(close: () => void) {
     title="New contact"
     variant="form"
     width="600"
+    close-placement="popup"
   >
     <div class="flex flex-col gap-5">
       <ModalField label="Salutation">

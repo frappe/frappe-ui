@@ -17,7 +17,11 @@ export interface Coupon {
 
 withDefaults(defineProps<{ coupons?: Coupon[] }>(), {
   coupons: () => [
-    { code: 'LMS40', description: 'Use code “LMS40” & get 40% OFF', hint: 'New' },
+    {
+      code: 'LMS40',
+      description: 'Use code “LMS40” & get 40% OFF',
+      hint: 'New',
+    },
     { code: 'LEARN50', description: 'Use code “LEARN50” & get 50% OFF' },
   ],
 })
@@ -41,7 +45,12 @@ function apply(value: string, close: () => void) {
 </script>
 
 <template>
-  <EspressoModal v-model:open="open" title="Applicable coupons" variant="form">
+  <EspressoModal
+    v-model:open="open"
+    title="Applicable coupons"
+    variant="form"
+    close-placement="popup"
+  >
     <template #default="{ close }">
       <div class="flex flex-col gap-5">
         <!-- field · 10px · Apply, bottom-aligned -->
@@ -71,14 +80,18 @@ function apply(value: string, close: () => void) {
         >
           <img :src="lmsLogo" alt="" class="size-7 shrink-0 rounded-3" />
           <div class="flex min-w-0 flex-1 flex-col gap-1">
-            <p class="flex items-baseline gap-1 text-base-medium text-ink-gray-7">
+            <p
+              class="flex items-baseline gap-1 text-base-medium text-ink-gray-7"
+            >
               {{ coupon.code }}
               <span v-if="coupon.hint" class="text-base text-ink-gray-5">
                 · {{ coupon.hint }}
               </span>
             </p>
             <div class="flex flex-col gap-2">
-              <p class="text-p-base text-ink-gray-6">{{ coupon.description }}</p>
+              <p class="text-p-base text-ink-gray-6">
+                {{ coupon.description }}
+              </p>
               <button
                 type="button"
                 class="self-start text-p-base text-ink-gray-6 hover:text-ink-gray-8"
