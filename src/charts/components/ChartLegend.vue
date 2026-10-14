@@ -51,7 +51,7 @@
             size="xs"
             :label="`Show ${items.length - shown.length} more series`"
           >
-            <span class="text-ink-gray-6">
+            <span class="tabular-nums text-ink-gray-6">
               {{ moreText(items.length - shown.length) }}
             </span>
           </Button>
@@ -145,8 +145,18 @@
         >
           <ReuseEntry :item="item" />
         </Button>
-        <Button variant="ghost" size="xs">
-          <span class="text-ink-gray-6">{{ moreText(items.length) }}</span>
+        <!-- One trigger per digit count the hidden count can have: the
+             digits are tabular, so the count's length is all that moves the
+             width. -->
+        <Button
+          v-for="digits in String(items.length).length"
+          :key="`more-${digits}`"
+          variant="ghost"
+          size="xs"
+        >
+          <span class="tabular-nums text-ink-gray-6">
+            {{ moreText(Number('8'.repeat(digits))) }}
+          </span>
         </Button>
       </div>
     </div>
@@ -199,9 +209,15 @@ function measure() {
     ruler.children,
     (child) => child.getBoundingClientRect().width,
   )
-  const more = widths.pop() ?? 0
+  // The triggers follow the entries, one per digit count.
+  const triggers = widths.splice(ranked.value.length)
   const gap = parseFloat(getComputedStyle(ruler).columnGap) || 0
-  fit.value = legendFit(widths, row.getBoundingClientRect().width, more, gap)
+  fit.value = legendFit(
+    widths,
+    row.getBoundingClientRect().width,
+    (hidden) => triggers[String(hidden).length - 1] ?? 0,
+    gap,
+  )
 }
 
 // The row follows the card's width and the ruler follows the labels and the

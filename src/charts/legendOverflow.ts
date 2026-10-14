@@ -15,12 +15,12 @@ export function rankLegendItems(items: ChartLegendItem[]): ChartLegendItem[] {
 /**
  * How many entries fit on the row, given each entry's width in ranked order.
  * All of them when they fit as they are; otherwise as many as fit beside the
- * "+N more" trigger, which takes `more` of the room.
+ * "+N more" trigger, whose width `more` gives for the count it hides.
  */
 export function legendFit(
   widths: number[],
   room: number,
-  more: number,
+  more: (hidden: number) => number,
   gap: number,
 ): number {
   const all =
@@ -28,12 +28,13 @@ export function legendFit(
     gap * Math.max(0, widths.length - 1)
   if (all <= room) return widths.length
 
-  let used = more
-  let count = 0
-  for (const width of widths) {
-    if (used + gap + width > room) break
-    used += gap + width
-    count++
+  // Every candidate is tried rather than stopping at the first miss: one more
+  // entry can shorten the trigger by a digit and fit where one fewer did not.
+  let fit = 0
+  let used = 0
+  for (let count = 0; count < widths.length && used <= room; count++) {
+    if (used + more(widths.length - count) <= room) fit = count
+    used += widths[count] + gap
   }
-  return count
+  return fit
 }

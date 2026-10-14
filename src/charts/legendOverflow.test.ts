@@ -59,27 +59,36 @@ describe('rankLegendItems', () => {
 
 describe('legendFit', () => {
   it('fits every entry that fits as it is', () => {
-    expect(legendFit([40, 40, 40], 128, 60, 4)).toBe(3)
+    expect(legendFit([40, 40, 40], 128, () => 60, 4)).toBe(3)
   })
 
   it('makes room for the trigger once the entries overflow', () => {
     // 60 + 4 + 40 = 104, and a second entry would reach 148.
-    expect(legendFit([40, 40, 40], 120, 60, 4)).toBe(1)
+    expect(legendFit([40, 40, 40], 120, () => 60, 4)).toBe(1)
   })
 
   it('stops at the first entry that does not fit', () => {
-    expect(legendFit([30, 100, 10], 120, 50, 4)).toBe(1)
+    expect(legendFit([30, 100, 10], 120, () => 50, 4)).toBe(1)
   })
 
   it('shows only the trigger when no entry fits beside it', () => {
-    expect(legendFit([90, 90], 120, 60, 4)).toBe(0)
+    expect(legendFit([90, 90], 120, () => 60, 4)).toBe(0)
   })
 
   it('fits nothing in a row with no room', () => {
-    expect(legendFit([40], 0, 60, 4)).toBe(0)
+    expect(legendFit([40], 0, () => 60, 4)).toBe(0)
   })
 
   it('fits an empty legend', () => {
-    expect(legendFit([], 0, 60, 4)).toBe(0)
+    expect(legendFit([], 0, () => 60, 4)).toBe(0)
+  })
+
+  it('sizes the trigger for the count it hides', () => {
+    // Eleven 30px entries in 120px: beside "+10 more" (60) one fits, beside
+    // "+9 more" (52) two do. Sizing for the full count would stop at one.
+    const more = (hidden: number) => (hidden >= 10 ? 60 : 52)
+    const widths = Array.from({ length: 11 }, () => 30)
+    expect(legendFit(widths, 120, more, 4)).toBe(2)
+    expect(legendFit(widths, 120, () => 60, 4)).toBe(1)
   })
 })
