@@ -17,8 +17,12 @@
 // its own next to it — and what it leaves closes up: an emptied cell goes,
 // a row of one dissolves. Every block in a row's cell has its own grip. A
 // click selects the block.
+//
+// A selection that runs over several blocks is carried whole, as Notion
+// carries one: the grip stays up beside them, and from any of them it
+// picks up the lot, drawn together in the copy and set down together.
 import { ref, shallowRef, watch } from 'vue'
-import { NodeSelection } from '@tiptap/pm/state'
+import { NodeSelection, TextSelection } from '@tiptap/pm/state'
 import { Tooltip } from '../../../src'
 import { useResolvedEditor } from '../../../src/molecules/editor/editor-context'
 import type { TiptapEditor } from '../../../src/molecules/editor'
@@ -173,10 +177,36 @@ function posOf(view: View, el: HTMLElement): number | null {
   return null
 }
 
-/** text is selected: the formatting bar is up, and the grip steps aside */
+/**
+ * The run of sibling blocks a selection covers, when it covers more than
+ * one: their positions and the elements that draw them
+ */
+function selectedRun() {
+  const ed = editor.value
+  if (!ed || ed.isDestroyed) return null
+  const sel = ed.state.selection
+  if (sel.empty || sel instanceof NodeSelection) return null
+  const range = sel.$from.blockRange(sel.$to)
+  if (!range || range.endIndex - range.startIndex < 2) return null
+  const doms: HTMLElement[] = []
+  let pos = range.start
+  for (let i = range.startIndex; i < range.endIndex; i++) {
+    const dom = ed.view.nodeDOM(pos)
+    if (dom instanceof HTMLElement) doms.push(dom)
+    pos += range.parent.child(i).nodeSize
+  }
+  return { from: range.start, to: range.end, doms }
+}
+const inRun = (run: { doms: HTMLElement[] }, el: Element) =>
+  run.doms.some((d) => d === el || d.contains(el))
+
+/** text is selected: the formatting bar is up, and the grip steps aside —
+ * unless the selection runs over whole blocks, which the grip carries */
 function selectingText() {
   const sel = editor.value?.state.selection
-  return !!sel && !sel.empty && !(sel instanceof NodeSelection)
+  return (
+    !!sel && !sel.empty && !(sel instanceof NodeSelection) && !selectedRun()
+  )
 }
 function place() {
   if (dragging) return
@@ -252,7 +282,12 @@ function selectBlock(): NodeSelection | null {
 
 // ---- the drag: the block picked up, the copy that follows the pointer,
 // the line at the edge it would land on
-let source: { el: HTMLElement; pos: number } | null = null
+let source: {
+  el: HTMLElement
+  pos: number
+  /** a run of blocks carried together: where it ends, what draws it */
+  run?: { to: number; doms: HTMLElement[] }
+} | null = null
 let grab = { dx: 0, dy: 0 }
 let ghost: HTMLElement | null = null
 let line: HTMLElement | null = null
@@ -270,6 +305,11 @@ blank.src =
 function onDragStart(e: DragEvent) {
   const ed = editor.value
   const el = target.value
+  const run = selectedRun()
+  if (ed && el && run && inRun(run, el) && e.dataTransfer) {
+    startRunDrag(e, ed, run)
+    return
+  }
   const sel = selectBlock()
   if (!ed || !el || !sel || !e.dataTransfer) {
     e.preventDefault()
@@ -313,6 +353,87 @@ function onDragStart(e: DragEvent) {
   document.addEventListener('dragenter', onDragOver, true)
   document.addEventListener('drop', onDrop, true)
 }
+/** the drag of a run of blocks: the same copy and line, all of them in it */
+function startRunDrag(
+  e: DragEvent,
+  ed: TiptapEditor,
+  run: { from: number; to: number; doms: HTMLElement[] },
+) {
+  const first = run.doms[0]
+  const last = run.doms[run.doms.length - 1]
+  const r0 = first.getBoundingClientRect()
+  const r1 = last.getBoundingClientRect()
+  source = { el: first, pos: run.from, run: { to: run.to, doms: run.doms } }
+  grab = { dx: e.clientX - r0.left, dy: e.clientY - r0.top }
+  const slice = ed.state.doc.slice(run.from, run.to)
+  ed.view.dragging = { slice, move: true }
+  const dt = e.dataTransfer!
+  dt.effectAllowed = 'move'
+  dt.clearData()
+  dt.setData('text/html', run.doms.map((d) => d.outerHTML).join(''))
+  dt.setData('text/plain', run.doms.map((d) => d.textContent).join('\n'))
+  dt.setDragImage(blank, 0, 0)
+  dragging = true
+  ;(e.currentTarget as HTMLElement | null)?.classList.add('is-dragging')
+  ed.view.dom.classList.add('rte-dragging')
+  document.body.classList.add('rte-block-drag')
+  carried(ed, run.doms, true)
+  ghost = document.createElement('div')
+  ghost.className = 'rte-bh-ghost'
+  ghost.style.width = `${Math.max(r0.width, r1.width)}px`
+  const doc = document.createElement('div')
+  doc.className = ed.view.dom.className
+    .replace(/\bProseMirror-\S+/g, '')
+    .replace('rte-dragging', '')
+  for (const d of run.doms) {
+    const copy = d.cloneNode(true) as HTMLElement
+    copy.classList.remove('ProseMirror-selectednode', 'rte-bh-carried')
+    doc.appendChild(copy)
+  }
+  ghost.appendChild(doc)
+  document.body.appendChild(ghost)
+  moveGhost(e.clientX, e.clientY)
+  line = document.createElement('div')
+  line.className = 'rte-bh-line'
+  line.hidden = true
+  document.body.appendChild(line)
+  document.addEventListener('dragover', onDragOver, true)
+  document.addEventListener('dragenter', onDragOver, true)
+  document.addEventListener('drop', onDrop, true)
+}
+/**
+ * The run's blocks dimmed while carried, as a carried block is. The class
+ * is set past ProseMirror's watch on its DOM, which would otherwise read it
+ * as an edit and redraw a paragraph without it.
+ */
+function carried(ed: TiptapEditor, doms: HTMLElement[], on: boolean) {
+  const observer = (
+    ed.view as unknown as { domObserver?: { stop(): void; start(): void } }
+  ).domObserver
+  observer?.stop()
+  doms.forEach((d) => d.classList.toggle('rte-bh-carried', on))
+  observer?.start()
+}
+/** a run set down at `edge`, taken from where it was, and still selected */
+function dropRun(ed: TiptapEditor, from: number, to: number, edge: number) {
+  if (edge >= from && edge <= to) return
+  const { state } = ed.view
+  const tr = state.tr
+  tr.insert(edge, state.doc.slice(from, to).content)
+  const placed = tr.steps.length
+  const start = tr.mapping.map(edge, -1)
+  const end = tr.mapping.map(edge, 1)
+  tr.delete(tr.mapping.map(from), tr.mapping.map(to))
+  const after = tr.mapping.slice(placed)
+  tr.setSelection(
+    TextSelection.between(
+      tr.doc.resolve(after.map(start, 1)),
+      tr.doc.resolve(after.map(end, -1)),
+    ),
+  )
+  ed.view.dispatch(tr.scrollIntoView())
+  ed.view.focus()
+}
 function moveGhost(x: number, y: number) {
   if (ghost)
     ghost.style.transform = `translate(${x - grab.dx}px, ${y - grab.dy}px)`
@@ -341,12 +462,14 @@ function landingAt(x: number, y: number) {
   if (!ed || ed.isDestroyed || !source) return null
   const el = blockAt(ed.view, x, y, true)
   if (!el || el === source.el || source.el.contains(el)) return null
+  // a run lands outside itself, and only above or below a block
+  if (source.run && inRun(source.run, el)) return null
   const pos = posOf(ed.view, el)
   if (pos === null) return null
   const r = el.getBoundingClientRect()
   const zone = Math.min(SIDE_ZONE, r.width / 4)
   let side: Side = null
-  if (sideable(el) && !swapsWith(source.el, el)) {
+  if (!source.run && sideable(el) && !swapsWith(source.el, el)) {
     if (x >= r.left + SIDE_INSET && x < r.left + SIDE_INSET + zone)
       side = 'left'
     else if (x > r.right - zone) side = 'right'
@@ -408,6 +531,15 @@ function onDrop(e: DragEvent) {
   const node = state.doc.nodeAt(from.pos)
   const beside = state.doc.nodeAt(at.pos)
   if (!node || !beside) return
+  if (from.run) {
+    dropRun(
+      ed,
+      from.pos,
+      from.run.to,
+      at.before ? at.pos : at.pos + beside.nodeSize,
+    )
+    return
+  }
   if (at.side) {
     const tr = dropBeside(state, from.pos, at.pos, at.side)
     if (tr) {
@@ -591,6 +723,7 @@ function dropBeside(
 }
 function finishDrag() {
   const ed = editor.value
+  if (ed && source?.run) carried(ed, source.run.doms, false)
   dragging = false
   source = null
   landing = null
@@ -614,6 +747,12 @@ function onDragEnd(e: DragEvent) {
 }
 function onClick() {
   const ed = editor.value
+  // on a run of selected blocks a click keeps the run
+  const run = selectedRun()
+  if (run && target.value && inRun(run, target.value)) {
+    ed?.view.focus()
+    return
+  }
   if (selectBlock() && ed) ed.view.focus()
 }
 
@@ -714,6 +853,10 @@ const px = (n: number) => `${n}px`
   border-radius: 6px;
   background-color: transparent;
   box-shadow: 0 0 0 2px var(--surface-gray-10, #383838);
+}
+/* the blocks of a run while they are carried, as a carried block is */
+.rte-doc .rte-bh-carried {
+  opacity: 0.4;
 }
 /* the library's drop cursor stands down while the grip's line is up */
 body.rte-block-drag .editor-drop-cursor {
