@@ -330,7 +330,7 @@ const legendItems = computed<ChartLegendItem[]>(() =>
     hidden: slice.hidden,
     // A hidden slice has no share of the visible total, so it shows none.
     hint: slice.hidden ? undefined : formatPercent(slice.percent),
-    value: slice.value,
+    weight: slice.value,
     formattedValue: formatMeasure(slice.value),
   })),
 )

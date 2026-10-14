@@ -17,7 +17,7 @@ import { pruneHiddenSeries, toggleHiddenSeries } from '../hiddenSeries'
 import { buildTooltipItems } from '../tooltipItems'
 import {
   seriesLabel,
-  seriesTotal,
+  seriesWeights,
   type AxisChartFormatters,
   type ResolvedTooltipColumn,
 } from '../seriesData'
@@ -202,19 +202,25 @@ export function useAxisChart<C extends AxisChartConfig>(
     instance.setOption({ [valueAxis]: [{ max }] })
   }
 
+  // Apart from the legend entries, which rebuild on every toggle: hiding a
+  // series does not change its weight.
+  const weights = computed(() =>
+    seriesWeights(
+      rows.value,
+      config.value.series.map((series) => series.name),
+    ),
+  )
+
+  // No number is printed beside an axis series: a sum is wrong for a rate or
+  // an average, and the chart cannot tell which one it was handed.
   const legendItems = computed<ChartLegendItem[]>(() =>
-    config.value.series.map((series) => {
-      const value = seriesTotal(rows.value, series.name)
-      return {
-        name: series.name,
-        label: seriesLabel(series),
-        color: seriesColors.value[series.name],
-        hidden: hiddenSeries.value.includes(series.name),
-        value,
-        formattedValue:
-          value === undefined ? undefined : formatSeriesValue(series, value),
-      }
-    }),
+    config.value.series.map((series) => ({
+      name: series.name,
+      label: seriesLabel(series),
+      color: seriesColors.value[series.name],
+      hidden: hiddenSeries.value.includes(series.name),
+      weight: weights.value[series.name],
+    })),
   )
 
   function formatSeriesValue(series: AxisChartSeriesConfig, value: number) {

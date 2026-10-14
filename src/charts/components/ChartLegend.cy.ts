@@ -187,7 +187,7 @@ describe('ChartLegend', () => {
         label: `Series ${i}`,
         color: '#318AD8',
         hidden: false,
-        value: (i + 1) * 10,
+        weight: (i + 1) * 10,
         formattedValue: `${(i + 1) * 10} kg`,
       }))
 
@@ -292,7 +292,7 @@ describe('ChartLegend', () => {
         .and('have.attr', 'aria-pressed', 'true')
     })
 
-    it('lists every series in the popover, largest first, with its total', () => {
+    it('lists every series in the popover, heaviest first, with its value', () => {
       mountMany(12)
       more().click()
       rows().should('have.length', 12)
@@ -329,12 +329,12 @@ describe('ChartLegend', () => {
       )
     })
 
-    it('prints no total for a series that has none', () => {
+    it('prints no number for a series that has none', () => {
       mountMany(12, {
-        items: many(12).map(({ value, formattedValue, ...item }) => item),
+        items: many(12).map(({ formattedValue, ...item }) => item),
       })
       more().click()
-      rows().first().should('have.text', 'Series 0')
+      rows().first().should('have.text', 'Series 11')
     })
 
     it('offers no search for a short list', () => {

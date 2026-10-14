@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { normalizeAxisChartProps, seriesTotal } from './seriesData'
+import { normalizeAxisChartProps, seriesWeights } from './seriesData'
 import { hasSecondaryValueAxis, resolveSeriesColors } from './axisChartCommon'
 import type { ChartTokens } from './tokens'
 import type { AxisChartConfig, AxisChartProps, SeriesStyle } from './types'
@@ -635,20 +635,13 @@ describe('normalizeAxisChartProps: maxSeries', () => {
   })
 })
 
-describe('seriesTotal', () => {
-  it('adds up the series across the rows', () => {
-    expect(seriesTotal(wideRows, 'sales')).toBe(30)
-  })
-
-  it('keeps the sign', () => {
-    expect(seriesTotal([{ net: 5 }, { net: -12 }], 'net')).toBe(-7)
-  })
-
-  it('skips a missing cell rather than reading it as zero', () => {
-    expect(seriesTotal([{ net: 5 }, { net: null }, {}], 'net')).toBe(5)
-  })
-
-  it('has no total for a series no row holds a number for', () => {
-    expect(seriesTotal([{ net: null }, {}], 'net')).toBeUndefined()
+describe('seriesWeights', () => {
+  it('weighs each series by the size of its values', () => {
+    expect(
+      seriesWeights(
+        [{ net: 5, gross: 1 }, { net: -12, gross: null }, {}],
+        ['net', 'gross'],
+      ),
+    ).toEqual({ net: 17, gross: 1 })
   })
 })

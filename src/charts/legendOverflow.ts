@@ -2,17 +2,13 @@ import type { ChartLegendItem } from './types'
 import { OTHERS_KEY } from './utils'
 
 /**
- * The entries largest first, which is the order the legend falls back to when
- * they do not fit on one row. Magnitude rather than signed value, the way
- * `maxSeries` weighs a series: one that runs large and negative carries the
- * chart as much as one that runs large. An entry with no value, and "Others",
- * keep their given place after the ranked ones — a remainder reads at the end.
+ * The entries heaviest first, which is the order the legend falls back to when
+ * they do not fit on one row. An entry with no weight, and "Others", keep their
+ * given place after the ranked ones — a remainder reads at the end.
  */
 export function rankLegendItems(items: ChartLegendItem[]): ChartLegendItem[] {
   const weight = (item: ChartLegendItem) =>
-    item.name === OTHERS_KEY || item.value === undefined
-      ? -1
-      : Math.abs(item.value)
+    item.name === OTHERS_KEY || item.weight === undefined ? -1 : item.weight
   return [...items].sort((a, b) => weight(b) - weight(a))
 }
 

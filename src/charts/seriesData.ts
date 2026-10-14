@@ -334,10 +334,11 @@ function capSeries(pivoted: Pivoted, maxSeries?: number): Pivoted {
 
 /**
  * What each series is worth across the whole chart, which is what decides who
- * survives the cap. Magnitude rather than signed total: a series that runs
- * large and negative carries the chart as much as one that runs large.
+ * survives the cap and who keeps a place on an overflowing legend row.
+ * Magnitude rather than signed total: a series that runs large and negative
+ * carries the chart as much as one that runs large.
  */
-function seriesWeights(rows: Record<string, any>[], names: string[]) {
+export function seriesWeights(rows: Record<string, any>[], names: string[]) {
   const weights: Record<string, number> = {}
   for (const name of names) weights[name] = 0
   for (const row of rows) {
@@ -346,23 +347,6 @@ function seriesWeights(rows: Record<string, any>[], names: string[]) {
     }
   }
   return weights
-}
-
-/**
- * What one series adds up to across the rows, signed, which is what the legend
- * prints beside it. Undefined when no row holds a number for it: a series with
- * nothing to add has no total, not a total of zero.
- */
-export function seriesTotal(
-  rows: Record<string, any>[],
-  name: string,
-): number | undefined {
-  let total: number | undefined
-  for (const row of rows) {
-    const value = toNumber(row[name])
-    if (value !== null) total = (total ?? 0) + value
-  }
-  return total
 }
 
 function toValueAxis(

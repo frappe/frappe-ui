@@ -595,11 +595,15 @@ export type ChartLegendItem = {
   /** Muted note after the label, e.g. a donut slice's share of the total. */
   hint?: string
   /**
-   * What the series adds up to across the chart. Ranks the entries when they
-   * do not fit on one row; left out, the entry keeps its given place.
+   * What the series is worth across the chart, e.g. the sum of its values'
+   * magnitudes, which is what `maxSeries` caps by. Ranks the entries when
+   * they do not fit on one row; left out, the entry keeps its given place.
    */
-  value?: number
-  /** `value` as the series formats it, printed in the "+N more" list. */
+  weight?: number
+  /**
+   * The series' value as the chart formats it, printed in the "+N more" list,
+   * e.g. a donut slice's measure. Left out, the row prints no number.
+   */
   formattedValue?: string
 }
 
@@ -1131,7 +1135,7 @@ export type ChartContainerProps = {
 export type ChartLegendProps = {
   /**
    * One entry per series, in the order they are drawn. Entries that do not fit
-   * on one row go behind "+N more", ranked by `value`.
+   * on one row go behind "+N more", ranked by `weight`.
    */
   items: ChartLegendItem[]
 }

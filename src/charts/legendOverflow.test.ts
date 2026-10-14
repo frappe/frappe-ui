@@ -2,18 +2,18 @@ import { describe, expect, it } from 'vitest'
 import { legendFit, rankLegendItems } from './legendOverflow'
 import { OTHERS_KEY } from './utils'
 
-const entry = (name: string, value?: number) => ({
+const entry = (name: string, weight?: number) => ({
   name,
   label: name,
   color: '#000',
   hidden: false,
-  value,
+  weight,
 })
 
 const names = (items: { name: string }[]) => items.map((item) => item.name)
 
 describe('rankLegendItems', () => {
-  it('puts the largest value first', () => {
+  it('puts the heaviest first', () => {
     const ranked = rankLegendItems([
       entry('a', 1),
       entry('b', 30),
@@ -22,12 +22,7 @@ describe('rankLegendItems', () => {
     expect(names(ranked)).toEqual(['b', 'c', 'a'])
   })
 
-  it('ranks a negative value by its size', () => {
-    const ranked = rankLegendItems([entry('a', 10), entry('b', -40)])
-    expect(names(ranked)).toEqual(['b', 'a'])
-  })
-
-  it('keeps the given order for equal values', () => {
+  it('keeps the given order for equal weights', () => {
     const ranked = rankLegendItems([
       entry('a', 5),
       entry('b', 5),
@@ -36,12 +31,12 @@ describe('rankLegendItems', () => {
     expect(names(ranked)).toEqual(['c', 'a', 'b'])
   })
 
-  it('keeps the given order when nothing has a value', () => {
+  it('keeps the given order when nothing has a weight', () => {
     const ranked = rankLegendItems([entry('a'), entry('b'), entry('c')])
     expect(names(ranked)).toEqual(['a', 'b', 'c'])
   })
 
-  it('puts entries with no value after the ranked ones', () => {
+  it('puts entries with no weight after the ranked ones', () => {
     const ranked = rankLegendItems([entry('a'), entry('b', 2), entry('c', 0)])
     expect(names(ranked)).toEqual(['b', 'c', 'a'])
   })

@@ -117,10 +117,10 @@ describe('LineChart', () => {
       lines().should('have.length', 1)
     })
 
-    // Thirty series cannot share one row in a 480px card. The ones that add up
-    // to most stay on it, and the popover prints each total the way the
-    // tooltip prints a value.
-    it('ranks the series by total, formatted as the axis formats them', () => {
+    // Thirty series cannot share one row in a 480px card. The ones that weigh
+    // most stay on it. The popover prints no number: a sum is wrong for a rate
+    // or an average, and the chart cannot tell which one it was handed.
+    it('ranks the series by weight, and prints no total', () => {
       const long = ['Jan', 'Feb'].flatMap((month) =>
         Array.from({ length: 30 }, (_, i) => ({
           month,
@@ -128,21 +128,16 @@ describe('LineChart', () => {
           amount: i + 1,
         })),
       )
-      mountChart({
-        data: long,
-        y: 'amount',
-        splitBy: 'region',
-        yAxis: { format: (value: number) => `$${value}` },
-      })
+      mountChart({ data: long, y: 'amount', splitBy: 'region' })
 
       cy.get('[data-slot="chart-legend"] [aria-pressed]')
         .first()
         .should('have.attr', 'aria-label', 'Hide Region 29')
-      cy.contains('[data-slot="chart-legend"] button', 'more').click()
+      cy.get('[data-slot="chart-legend"] [aria-label$="more series"]').click()
       cy.get('[data-slot="chart-legend-list"] [aria-pressed]')
         .should('have.length', 30)
         .first()
-        .should('contain.text', '$60')
+        .should('have.text', 'Region 29')
       lines().should('have.length', 30)
       cy.get(
         '[data-slot="chart-legend-list"] [aria-label="Hide Region 0"]',
