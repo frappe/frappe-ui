@@ -7,8 +7,8 @@
 // below; what the library can't be made to do from outside is listed in
 // the page's report.
 //
-//   card       196 wide (392 double), radius 12, the xl shadow, on the
-//              raised surface; `inline` drops the card
+//   card       196 wide (392 double), radius 12, the xl shadow, on
+//              surface-elevation-1 (the file's, measured in dark); `inline` drops the card
 //   calendar   8 in, 6 between the month row and the grid; the month row
 //              24 tall: the month as a ghost xs button, 13 medium
 //              ink-gray-7, the file's small-down after it (small-up when the
@@ -19,7 +19,8 @@
 //              ink-gray-4, days 12 ink-gray-7 (outside the month
 //              ink-gray-4), radius 5; the picked day surface-gray-9 with
 //              white text; only the weeks the month touches
-//   range      the days between on surface-gray-1, one bar from end to end
+//   range      the days between on surface-gray-1 (gray-2 in dark), one bar
+//              from end to end
 //   months     two lists 88 wide, 4 apart, rows 28 tall, 1 apart, 8 in,
 //              left aligned; the current year and month on surface-gray-2
 //   time       (date & time) under the calendar, a rule, 8 in: three xs
@@ -435,7 +436,7 @@ const icons = {
     :class="[
       variant === 'inline'
         ? 'dp--inline'
-        : 'rounded-6 bg-surface-elevation-2 shadow-xl',
+        : 'rounded-6 bg-surface-elevation-1 shadow-xl',
       isRange && doublePane && 'dp--double',
       isRange && range[0] && !range[1] && 'dp--picking',
       sundayFirst && 'dp--sun',
@@ -444,7 +445,7 @@ const icons = {
     <!-- header: type a date -->
     <div
       v-if="header"
-      class="flex w-0 min-w-full gap-2 border-b border-[var(--outline-elevation-2)] p-2 pb-[7px]"
+      class="flex w-0 min-w-full gap-2 border-b border-outline-gray-1 p-2 pb-[7px]"
     >
       <template v-if="isRange && doublePane">
         <TextInput
@@ -505,7 +506,7 @@ const icons = {
       <!-- sidebar: shortcuts -->
       <div
         v-if="sidebar"
-        class="flex w-[122px] shrink-0 flex-col gap-px p-1 shadow-[inset_-1px_0_0_var(--outline-elevation-2)]"
+        class="flex w-[122px] shrink-0 flex-col gap-px p-1 shadow-[inset_-1px_0_0_var(--outline-gray-1)]"
         aria-label="Shortcuts"
       >
         <Button
@@ -544,7 +545,7 @@ const icons = {
     <!-- date & time: hour, minute, AM/PM -->
     <div
       v-if="variant === 'date-time'"
-      class="dp-time flex w-0 min-w-full gap-1 border-t border-[var(--outline-elevation-2)] p-2 pt-[7px]"
+      class="dp-time flex w-0 min-w-full gap-1 border-t border-outline-gray-1 p-2 pt-[7px]"
     >
       <Select
         v-model="hour"
@@ -572,7 +573,7 @@ const icons = {
     <!-- footer -->
     <div
       v-if="footer"
-      class="flex w-0 min-w-full items-center justify-between border-t border-[var(--outline-elevation-2)] p-2 pt-[7px]"
+      class="flex w-0 min-w-full items-center justify-between border-t border-outline-gray-1 p-2 pt-[7px]"
     >
       <Button
         variant="ghost"
@@ -834,11 +835,13 @@ const icons = {
   color: var(--ink-gray-3);
 }
 
-/* the range: one surface-gray-1 bar from end to end */
+/* the range: one bar from end to end — surface-gray-1 in light, and
+   surface-gray-2 in dark, where gray-1 is the card's own #1f1f1f and the
+   file's bar reads #2b2b2b */
 .dp-cal :deep([role='row'] > button.bg-surface-gray-3) {
-  background: var(--surface-gray-1);
+  background: var(--dp-range);
   border-radius: 0;
-  box-shadow: -2px 0 0 var(--surface-gray-1);
+  box-shadow: -2px 0 0 var(--dp-range);
 }
 .dp-cal :deep([role='row'] > button.bg-surface-gray-3:first-child),
 .dp-cal :deep([role='row'] > div + button.bg-surface-gray-3) {
@@ -858,14 +861,14 @@ const icons = {
   :deep(
     [role='row'] > button.bg-surface-gray-3 + button[aria-selected='true']
   ) {
-  box-shadow: -2px 0 0 var(--surface-gray-1);
+  box-shadow: -2px 0 0 var(--dp-range);
 }
 
 /* today inside the range keeps its own rounded ring (the user's call
    2026-10-13): the bar runs on square behind it, the ring drawn over it */
 .dp-cal :deep([role='row'] > button.bg-surface-gray-3[aria-label$='(Today)']) {
   position: relative;
-  box-shadow: -2px 0 0 var(--surface-gray-1);
+  box-shadow: -2px 0 0 var(--dp-range);
 }
 .dp-cal
   :deep(
@@ -991,12 +994,11 @@ const icons = {
   display: none;
 }
 
-/* rules on the card: outline-elevation-2 — the same #ededed as
-   outline-gray-1 in light, where outline-gray-1 in dark is the card's own
-   fill (#242424) and vanished */
+/* rules on the card: outline-gray-1, on the file's elevation-1 card (in
+   dark #242424 on #1f1f1f — subtle, as the file draws them) */
 /* ---- double pane: a rule between, the month centred, no Today ---- */
 .dp--double .dp-cal :deep(.divide-x > * + *) {
-  border-color: var(--outline-elevation-2);
+  border-color: var(--outline-gray-1);
 }
 .dp--double .dp-cal :deep(.select-none > div:first-child > button) {
   height: 24px;
@@ -1026,6 +1028,14 @@ const icons = {
 </style>
 
 <style>
+/* the range bar's fill (see the range rules above) */
+.dp {
+  --dp-range: var(--surface-gray-1);
+}
+[data-theme='dark'] .dp {
+  --dp-range: var(--surface-gray-2);
+}
+
 /* the time lists' options are the file's menu items: 28 tall, radius 8 (the
    list is portalled out of the picker; the page marks it) */
 .dp-time-list [role='option'] {
