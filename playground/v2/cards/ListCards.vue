@@ -170,9 +170,13 @@ const xlRows = [
             </p>
             <div class="flex flex-col gap-1">
               <p class="flex h-[23px] items-center gap-2">
-                <!-- one struck run in the file: the price with its /mo tail -->
-                <span class="text-3xl-semibold text-ink-gray-7 line-through">
-                  ₹1,999<span class="text-sm text-ink-gray-5">/mo</span>
+                <!-- one struck run in the file: the price with its /mo tail.
+                     Each part carries its own strike: one decoration over
+                     both is drawn at the price's height, which on the
+                     baseline-set /mo falls along its foot, an underline -->
+                <span class="text-3xl-semibold text-ink-gray-7">
+                  <span class="line-through">₹1,999</span
+                  ><span class="text-sm text-ink-gray-5 line-through">/mo</span>
                 </span>
                 <Badge theme="amber" variant="subtle" size="md"
                   >Free trial</Badge
