@@ -438,20 +438,23 @@ const root = ref<HTMLElement | null>(null)
 <template>
   <section
     ref="root"
-    class="email-composer absolute bottom-6 right-6 z-20 flex flex-col overflow-hidden rounded-7 bg-surface-elevation-1 shadow-2xl after:pointer-events-none after:absolute after:inset-0 after:z-10 after:rounded-[inherit] after:shadow-2xl"
+    class="email-composer absolute bottom-6 right-6 z-20 flex flex-col overflow-hidden rounded-7 bg-surface-elevation-1 shadow-2xl before:pointer-events-none before:absolute before:inset-0 before:-z-10 before:bg-surface-elevation-1 after:pointer-events-none after:absolute after:inset-0 after:z-10 after:rounded-[inherit] after:shadow-2xl"
     :class="[
       expanded ? 'left-6 top-6' : 'h-[540px] w-[600px]',
       quiet && 'is-quiet',
     ]"
     aria-label="New message"
   >
-    <!-- the header: the title, then pop out and close, on surface-gray-1 with
-         an outline-gray-1 rule under it (the user's call 2026-10-14). A fill paints over its window's inset
+    <!-- the header: the title, then pop out and close, on surface-gray-1,
+         no rule under it (the user's calls 2026-10-14). A fill paints over its window's inset
          shadow, so the window draws its shadow-2xl once more on a layer above
          everything (the `after:` above); the window's own clip cuts that
-         copy's outer layers away and leaves only the inner edge, unhidden. -->
+         copy's outer layers away and leaves only the inner edge, unhidden.
+         Its own inner edge is covered by a fill just under its contents (the
+         `before:`), or the edge showed twice over the body and once over the
+         header. -->
     <header
-      class="flex h-12 shrink-0 items-center justify-between border-b border-outline-gray-1 bg-surface-gray-1 pl-4 pr-2.5"
+      class="flex h-12 shrink-0 items-center justify-between bg-surface-gray-1 pl-4 pr-2.5"
     >
       <h2 class="text-lg-medium text-ink-gray-8">New message</h2>
       <div class="flex items-center gap-1">
