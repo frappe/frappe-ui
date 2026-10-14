@@ -1,5 +1,9 @@
 <script setup lang="ts">
-// Figma: espresso-2.0 › Embed (32354:128183) — the card an embed slot
+// Figma: espresso-2.0 › Popover › embed link (30878:37810), the card at
+// rest: elevation-1, 8px over its tab row and 14 under its hint, 16
+// between; the sm subtle field ("Paste in https://"), the sm solid button,
+// the 13/20 gray-600 hint 8px under it. It opens as drawn, nothing focused.
+// Also espresso-2.0 › Embed (32354:128183) — the card an embed slot
 // raises, and the pencil and "Replace" on an embed's menu (embed-link new,
 // 32354:128789): 380 across on a 12px radius under the xl shadow, 8px over
 // its tab row and 14 under its last line, 16 between, 16 in from either
@@ -12,7 +16,7 @@
 // back as — a PDF, which a browser shows in a frame. Library: what has been
 // uploaded already, newest first; the file draws no body for this tab, so
 // it is a plain list of rows.
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { Button, TabList, Tabs, TabTrigger, TextInput } from '../../../src'
 import { pickFiles } from '../../../src/molecules/editor/extensions/shared/file-picker'
 import {
@@ -62,15 +66,6 @@ const HINT =
 const hint = computed(() => error.value || HINT)
 
 watch(tab, () => (error.value = ''))
-
-// the popover gives its first stop, the tab, the focus as it opens; the
-// link is what the card is for, so the caret goes there, ready to paste
-const root = ref<HTMLElement | null>(null)
-onMounted(() =>
-  setTimeout(() =>
-    root.value?.querySelector<HTMLInputElement>('input')?.focus(),
-  ),
-)
 
 /** the link, read: off to the editor if it will take it, else the word why */
 function take(raw: string): boolean {
@@ -135,8 +130,7 @@ function pickFromLibrary(file: LibraryFile) {
 
 <template>
   <div
-    ref="root"
-    class="rte-source relative flex w-[380px] flex-col gap-4 rounded-6 bg-surface-elevation-2 pb-3.5 pt-2 shadow-xl"
+    class="rte-source relative flex w-[380px] flex-col gap-4 rounded-6 bg-surface-elevation-1 pb-3.5 pt-2 shadow-xl"
   >
     <!-- the library's underline tabs, as the emoji picker's: their line
          slides from tab to tab over the row's rule -->
@@ -178,18 +172,17 @@ function pickFromLibrary(file: LibraryFile) {
     >
       <TextInput
         v-model="url"
-        placeholder="https://www.youtube.com/@frappetech"
+        placeholder="Paste in https://"
         aria-label="Embed link"
-        autofocus
         @input="error = ''"
         @keydown.enter.prevent="embed"
       />
       <div class="flex flex-col gap-2">
-        <Button type="submit" variant="solid" size="md" class="w-full">
+        <Button type="submit" variant="solid" size="sm" class="w-full">
           Embed link
         </Button>
         <p
-          class="text-center text-[13px] leading-[1.5] tracking-[0.015em]"
+          class="text-center text-[13px] leading-5 tracking-[0.015em]"
           :class="error ? 'text-ink-red-4' : 'text-ink-gray-6'"
           :role="error ? 'alert' : undefined"
         >
@@ -201,14 +194,14 @@ function pickFromLibrary(file: LibraryFile) {
     <div v-else-if="tab === 'upload'" class="flex flex-col gap-2 px-4">
       <Button
         variant="solid"
-        size="md"
+        size="sm"
         class="w-full"
         label="Upload file"
         :loading="uploading"
         @click="chooseFile"
       />
       <p
-        class="text-center text-[13px] leading-[1.5] tracking-[0.015em]"
+        class="text-center text-[13px] leading-5 tracking-[0.015em]"
         :class="error ? 'text-ink-red-4' : 'text-ink-gray-6'"
         :role="error ? 'alert' : undefined"
       >
@@ -247,7 +240,7 @@ function pickFromLibrary(file: LibraryFile) {
       </ul>
       <p
         v-else
-        class="px-2 py-3 text-center text-[13px] leading-[1.5] tracking-[0.015em]"
+        class="px-2 py-3 text-center text-[13px] leading-5 tracking-[0.015em]"
         :class="error ? 'text-ink-red-4' : 'text-ink-gray-6'"
         :role="error ? 'alert' : undefined"
       >

@@ -104,7 +104,7 @@ function addCompact() {
   <div class="flex flex-col items-center gap-10">
     <!-- default -->
     <div
-      class="relative flex w-[380px] flex-col gap-4 rounded-6 bg-surface-elevation-2 pb-3.5 pt-2 shadow-lg"
+      class="relative flex w-[380px] flex-col gap-4 rounded-6 bg-surface-elevation-1 pb-3.5 pt-2 shadow-lg"
       role="dialog"
       aria-label="Embed"
     >
@@ -162,7 +162,7 @@ function addCompact() {
           <Button
             type="submit"
             variant="solid"
-            size="md"
+            size="sm"
             class="w-full !text-base"
           >
             <template v-if="justEmbedded" #prefix
