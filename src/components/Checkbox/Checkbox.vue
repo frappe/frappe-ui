@@ -9,7 +9,10 @@
     :style="attrs.style as any"
     @click="onContainerClick"
   >
-    <div class="inline-flex items-center gap-2 rounded-4 transition">
+    <div
+      class="inline-flex items-center rounded-4 transition"
+      :class="props.size === 'xs' ? 'gap-1.5' : 'gap-2'"
+    >
       <input
         ref="inputRef"
         class="rounded-1 mt-[1px]"
@@ -142,9 +145,18 @@ const {
   hasDescriptionSlot: () => Boolean(slots.description),
 })
 
+// The label follows the box's size, as checkbox new (espresso-2.0,
+// 23513:153494) sets it: 16px medium beside the 16px box, 14px and 13px
+// regular beside the 14px and 13px ones. InputLabel's own type is a fixed
+// 13px for every control; a checkbox's label is read as part of the control.
 const labelClasses = computed(() => {
   return [
     'select-none',
+    props.size === 'md'
+      ? '!text-lg-medium'
+      : props.size === 'sm'
+        ? '!text-base'
+        : '!text-sm',
     props.disabled ? 'cursor-not-allowed' : 'cursor-pointer',
   ]
 })
@@ -162,7 +174,7 @@ const containerClasses = computed(() => {
       ? 'px-3 py-2'
       : 'px-1.5 py-1.5'
     : props.size === 'md'
-      ? 'h-8 px-3'
+      ? 'h-8 px-2'
       : props.size === 'sm'
         ? 'h-7 px-1.5'
         : 'h-6 px-1.5'
@@ -199,14 +211,17 @@ const inputClasses = computed(() => {
   // colour (as the original did with `text-ink-gray-9`) rather than fighting
   // forms' `:checked:focus` rule with `checked:bg-*`. currentColor points at the
   // Switch "on" tokens (10 / 9 / 8) via CSS vars — `surface-*` isn't a text
-  // utility in this preset. Unchecked shows a surface-base fill + outline border;
-  // forms clears the border on checked so the fill defines the box. The check/
-  // dash glyph colour comes from the dark-mode preset override.
+  // utility in this preset. Unchecked is an outline over the ground, as the
+  // file draws it (no fill; surface-base under the pointer); forms clears the
+  // border on checked so the fill defines the box. The check and dash are the
+  // preset's (tailwind/plugin.js), in ink/base, and ink/gray-4 disabled.
   if (props.disabled) {
     return [
       sizeClasses,
-      'cursor-not-allowed bg-surface-base border-outline-gray-3',
-      'text-[color:var(--surface-gray-5)]',
+      // the file's disabled box: surface-gray-1 on an outline-gray-3 rule,
+      // checked a surface-gray-3 fill under a gray-400 mark
+      'cursor-not-allowed bg-surface-gray-1 border-outline-gray-3',
+      'text-[color:var(--surface-gray-3)]',
       'hover:shadow-none focus:ring-0 focus:ring-offset-0',
     ]
   }
@@ -216,8 +231,9 @@ const inputClasses = computed(() => {
   return [
     sizeClasses,
     'cursor-pointer transition focus:ring-0 focus:ring-offset-0',
-    // Unchecked — surface-base fill, outline scale: default 4 / hover 5 / active 6.
-    'bg-surface-base border-outline-gray-4',
+    // Unchecked — no fill, outline scale: default 4 / hover 5 / active 6, and
+    // 7 under keyboard focus.
+    'bg-transparent border-outline-gray-4 focus-visible:border-outline-gray-7',
     // Checked fill (via currentColor): default 10 / hover 9 / active 8.
     'text-[color:var(--surface-gray-10)]',
     // Non-padded shows the global espresso ring on keyboard focus. forms sets a
@@ -225,8 +241,8 @@ const inputClasses = computed(() => {
     // so re-assert it with the themed `focus-ring` utility. (Padded shows the ring
     // on the row instead, via `[&:has(:focus-visible)]` on the container.)
     padded
-      ? 'group-hover:border-outline-gray-5 checked:group-hover:text-[color:var(--surface-gray-9)]'
-      : 'hover:border-outline-gray-5 hover:shadow-sm active:border-outline-gray-6 focus-visible:focus-ring checked:hover:text-[color:var(--surface-gray-9)] checked:active:text-[color:var(--surface-gray-8)]',
+      ? 'group-hover:border-outline-gray-5 group-active:border-outline-gray-6 group-has-[:focus-visible]:border-outline-gray-7 checked:group-hover:text-[color:var(--surface-gray-9)] checked:group-active:text-[color:var(--surface-gray-8)]'
+      : 'hover:border-outline-gray-5 hover:bg-surface-base hover:shadow-sm active:border-outline-gray-6 focus-visible:focus-ring checked:hover:text-[color:var(--surface-gray-9)] checked:active:text-[color:var(--surface-gray-8)]',
   ]
 })
 </script>

@@ -214,6 +214,19 @@ let checkboxMarkStyles = {
   "[data-theme='dark'] [type='checkbox']:indeterminate": {
     'background-image': checkboxMark(DASH_PATH, '%23171717'),
   },
+  // disabled, the mark is ink/gray-4: #999999, and #7A7A7A on dark
+  ":root [type='checkbox']:disabled:checked": {
+    'background-image': checkboxMark(CHECK_PATH, '%23999999'),
+  },
+  ":root [type='checkbox']:disabled:indeterminate": {
+    'background-image': checkboxMark(DASH_PATH, '%23999999'),
+  },
+  "[data-theme='dark'] [type='checkbox']:disabled:checked": {
+    'background-image': checkboxMark(CHECK_PATH, '%237A7A7A'),
+  },
+  "[data-theme='dark'] [type='checkbox']:disabled:indeterminate": {
+    'background-image': checkboxMark(DASH_PATH, '%237A7A7A'),
+  },
 }
 
 export default plugin(

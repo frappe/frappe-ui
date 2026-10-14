@@ -100,18 +100,19 @@ img.ProseMirror-selectednode {
     margin: 0;
   }
 
-  /* the task's box is the Checkbox component's (Checkbox.vue, size sm), in
-     either theme: a surface-base fill on an outline-gray-4 border, 5 under
-     the pointer and 6 pressed; checked, the fill is surface-gray-10 (9
-     under the pointer, 8 pressed), drawn through currentColor as the forms
-     plugin paints it, and the dark theme's tick comes from the preset
-     (tailwind/plugin.js) */
+  /* the task's box is the Checkbox component's (Checkbox.vue, size md) and
+     the file's checkbox new (espresso-2.0, 23513:153494), in either theme:
+     no fill on an outline-gray-4 rule, surface-base and the sm shadow under
+     the pointer with the rule at 5, 6 pressed, 7 under keyboard focus;
+     checked, the fill is surface-gray-10 (9 under the pointer, 8 pressed),
+     drawn through currentColor as the forms plugin paints it, under the
+     preset's ink/base mark (tailwind/plugin.js) */
   input[type='checkbox'] {
     cursor: pointer;
-    width: 14px;
-    height: 14px;
+    width: 16px;
+    height: 16px;
     border-radius: 4px;
-    background-color: var(--surface-base);
+    background-color: transparent;
     border-color: var(--outline-gray-4);
     color: var(--surface-gray-10);
     transition:
@@ -121,6 +122,12 @@ img.ProseMirror-selectednode {
   }
   input[type='checkbox']:hover {
     border-color: var(--outline-gray-5);
+    background-color: var(--surface-base);
+    /* the sm shadow (tailwind/tokens/effects.js), which has no variable */
+    box-shadow:
+      inset 0 0.25px 1.5px #ffffff29,
+      0 0 1px #00000033,
+      0 1px 3px #00000024;
   }
   input[type='checkbox']:active {
     border-color: var(--outline-gray-6);
@@ -128,6 +135,7 @@ img.ProseMirror-selectednode {
   input[type='checkbox']:checked {
     background-color: currentColor;
     border-color: transparent;
+    box-shadow: none;
   }
   input[type='checkbox']:checked:hover {
     color: var(--surface-gray-9);
@@ -140,8 +148,9 @@ img.ProseMirror-selectednode {
     outline: none;
   }
   input[type='checkbox']:focus-visible {
-    outline: 2px solid var(--outline-gray-3);
-    outline-offset: 2px;
+    border-color: var(--outline-gray-7);
+    outline: var(--focus-outline-default, 2px solid var(--outline-gray-3));
+    outline-offset: 0;
   }
 }
 
@@ -269,4 +278,14 @@ img.ProseMirror-selectednode {
    default hairline. Width/color are set via EditorDropcursor in extensions.ts. */
 .editor-drop-cursor {
   border-radius: 9999px;
+}
+
+[data-theme='dark']
+  .ProseMirror
+  ul[data-type='taskList']
+  input[type='checkbox']:not(:checked):hover {
+  box-shadow:
+    inset 0 0.5px 0.5px 0.5px #ffffff08,
+    0 0 14px #0000002e,
+    0 1px 3px #000000b2;
 }
