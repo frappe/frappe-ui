@@ -114,7 +114,7 @@ watch(dismissible, (on) => !on && restore())
               :options="variants"
               size="sm"
               variant="subtle"
-              class="w-[140px]"
+              class="w-[116px]"
               aria-label="Variant"
             />
           </div>
@@ -125,7 +125,7 @@ watch(dismissible, (on) => !on && restore())
               :options="sizeTabs"
               size="sm"
               aria-label="Size"
-              class="w-[140px] [&>div]:w-full [&_button]:flex-1 [&_button]:basis-0 [&_button>span]:w-full"
+              class="w-[116px] [&>div]:w-full [&_button]:flex-1 [&_button]:basis-0 [&_button>span]:w-full"
             />
           </div>
           <div class="flex h-7 items-center justify-between">
@@ -135,7 +135,7 @@ watch(dismissible, (on) => !on && restore())
               :options="themes"
               size="sm"
               variant="subtle"
-              class="w-[140px]"
+              class="w-[116px]"
               aria-label="Theme"
             />
           </div>

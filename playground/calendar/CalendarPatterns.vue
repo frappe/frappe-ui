@@ -1072,11 +1072,17 @@ function dayBand(label: string) {
         the pointer rather than the grid. The grid's snapping is what the
         blank slot is for.
       -->
+        <!--
+        In its hover fill from lift to landing: the card was under the
+        pointer when it was picked up, and a copy that never takes :hover
+        (it lets the pointer through) dropped to the resting fill the moment
+        it moved — the flicker the user saw (2026-10-14).
+      -->
         <div
           v-if="heldCard"
           aria-hidden="true"
           :class="[
-            `pointer-events-none fixed z-30 rounded-4 shadow-md ${espressoCardCopy}`,
+            `pointer-events-none fixed z-30 rounded-4 shadow-md ${espressoCardCopy} [&>.event]:![background-color:var(--bg-active)]`,
             heldLanding && 'transition-all duration-[180ms] ease-out',
           ]"
           :style="{

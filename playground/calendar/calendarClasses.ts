@@ -250,6 +250,11 @@ export const espressoCalendar = [
   // bars are a row of a list, not a span of hours.
   '[&_[data-time-grid]_.event]:!my-px',
   '[&_[data-time-grid]_.event]:!h-[calc(100%-2px)]',
+  // …and the white ring a pill wears where it lies on another comes in by
+  // the same pixel top and bottom, or it reads 3 there against 2 at the
+  // sides. A transparent border on its border-box, its fill clipped inside.
+  '[&_[data-time-grid]_[style*=clip-path]>div]:![border-block:1px_solid_transparent]',
+  '[&_[data-time-grid]_[style*=clip-path]>div]:![background-clip:padding-box]',
 
   // Event cards: the file draws a tinted block with a 2px bar down its lead
   // edge, sitting 2px in from the column's left and 1px from the others.
