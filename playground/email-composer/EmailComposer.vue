@@ -438,7 +438,7 @@ const root = ref<HTMLElement | null>(null)
 <template>
   <section
     ref="root"
-    class="email-composer absolute bottom-6 right-6 z-20 flex flex-col overflow-hidden rounded-7 bg-surface-elevation-1 shadow-2xl dark:shadow-[inset_0_0.5px_1.5px_0.5px_#ffffff0f,0_0_14px_10px_#0000001f,0_44px_52px_-4px_#0000006b]"
+    class="email-composer absolute bottom-6 right-6 z-20 flex flex-col overflow-hidden rounded-7 bg-surface-elevation-1 shadow-2xl"
     :class="[
       expanded ? 'left-6 top-6' : 'h-[540px] w-[600px]',
       quiet && 'is-quiet',
