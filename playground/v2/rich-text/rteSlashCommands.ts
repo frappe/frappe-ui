@@ -120,5 +120,16 @@ export function rteSlashCommands(): CommandItem[] {
     command: ({ editor, range }) =>
       editor.chain().focus().deleteRange(range).insertEmbedSlot().run(),
   }
-  return [...blockItems(), ...rest, embed]
+  // the playground's callout (extensions.ts), which the registry does not
+  // know: the line it is typed on, wrapped in the tinted, emoji-led block,
+  // as the toolbar's Insert menu lays it
+  const callout: CommandItem = {
+    title: 'Callout',
+    icon: 'lucide-lightbulb',
+    group: 'Insert',
+    isAvailable: (editor) => !!editor.schema.nodes.callout,
+    command: ({ editor, range }) =>
+      editor.chain().focus().deleteRange(range).setCallout().run(),
+  }
+  return [...blockItems(), ...rest, callout, embed]
 }
