@@ -24,14 +24,32 @@ One `ChartLegendItem` per series, in the order the series are drawn:
 | `color` | The color the series is drawn in. |
 | `hidden` | Whether the series is hidden. |
 | `hint` | A muted note after the label, e.g. a donut slice's share. |
+| `value` | What the series adds up to. Ranks the entries that do not fit. |
+| `formattedValue` | `value` as the series formats it, printed in the "+N more" list. |
 
 A hidden entry keeps its place in the row and dims: the swatch fades and the
 label turns gray. If the entry left the row, there would be no way to show the
 series again.
 
-The row wraps and never scrolls. It takes as many lines as it needs and the plot
-gets shorter, which the chart's resize observer picks up. A scrolling legend
-would hide series names that most users never scroll to.
+## Many series
+
+The legend takes one row at most. When every entry fits, the row shows them in
+the order the series are drawn. When they do not, the row shows the entries
+with the largest `value`, as many as fit, and then a "+N more" button. A legend
+that wrapped would take the plot's height, and one that scrolled would hide
+series names that most users never scroll to.
+
+"+N more" opens a list of every entry, largest `value` first, each with its
+`formattedValue`. Its rows toggle and highlight a series the way the entries on
+the row do. Past 15 entries, the list has a search field.
+
+Ranking is by size, so a large negative total ranks as high as a large positive
+one. An entry with no `value` keeps its given place after the ranked ones, and
+so does "Others". The built-in charts pass each series' total across the
+chart, formatted the way the tooltip formats a value. `ScatterChart` passes
+none, so its groups keep their order.
+
+<ComponentPreview name="Charts-LineManySeries" csr="true" self-layout />
 
 ## Toggling
 

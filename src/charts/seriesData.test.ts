@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { normalizeAxisChartProps } from './seriesData'
+import { normalizeAxisChartProps, seriesTotal } from './seriesData'
 import { hasSecondaryValueAxis, resolveSeriesColors } from './axisChartCommon'
 import type { ChartTokens } from './tokens'
 import type { AxisChartConfig, AxisChartProps, SeriesStyle } from './types'
@@ -632,5 +632,23 @@ describe('normalizeAxisChartProps: maxSeries', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     normalize()
     expect(warn).not.toHaveBeenCalled()
+  })
+})
+
+describe('seriesTotal', () => {
+  it('adds up the series across the rows', () => {
+    expect(seriesTotal(wideRows, 'sales')).toBe(30)
+  })
+
+  it('keeps the sign', () => {
+    expect(seriesTotal([{ net: 5 }, { net: -12 }], 'net')).toBe(-7)
+  })
+
+  it('skips a missing cell rather than reading it as zero', () => {
+    expect(seriesTotal([{ net: 5 }, { net: null }, {}], 'net')).toBe(5)
+  })
+
+  it('has no total for a series no row holds a number for', () => {
+    expect(seriesTotal([{ net: null }, {}], 'net')).toBeUndefined()
   })
 })

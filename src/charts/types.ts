@@ -594,6 +594,13 @@ export type ChartLegendItem = {
   hidden: boolean
   /** Muted note after the label, e.g. a donut slice's share of the total. */
   hint?: string
+  /**
+   * What the series adds up to across the chart. Ranks the entries when they
+   * do not fit on one row; left out, the entry keeps its given place.
+   */
+  value?: number
+  /** `value` as the series formats it, printed in the "+N more" list. */
+  formattedValue?: string
 }
 
 export type ChartTooltipItem = {
@@ -1122,7 +1129,10 @@ export type ChartContainerProps = {
 }
 
 export type ChartLegendProps = {
-  /** One entry per series, in the order they are drawn. */
+  /**
+   * One entry per series, in the order they are drawn. Entries that do not fit
+   * on one row go behind "+N more", ranked by `value`.
+   */
   items: ChartLegendItem[]
 }
 

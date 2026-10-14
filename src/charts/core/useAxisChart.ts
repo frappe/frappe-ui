@@ -17,6 +17,7 @@ import { pruneHiddenSeries, toggleHiddenSeries } from '../hiddenSeries'
 import { buildTooltipItems } from '../tooltipItems'
 import {
   seriesLabel,
+  seriesTotal,
   type AxisChartFormatters,
   type ResolvedTooltipColumn,
 } from '../seriesData'
@@ -202,12 +203,18 @@ export function useAxisChart<C extends AxisChartConfig>(
   }
 
   const legendItems = computed<ChartLegendItem[]>(() =>
-    config.value.series.map((series) => ({
-      name: series.name,
-      label: seriesLabel(series),
-      color: seriesColors.value[series.name],
-      hidden: hiddenSeries.value.includes(series.name),
-    })),
+    config.value.series.map((series) => {
+      const value = seriesTotal(rows.value, series.name)
+      return {
+        name: series.name,
+        label: seriesLabel(series),
+        color: seriesColors.value[series.name],
+        hidden: hiddenSeries.value.includes(series.name),
+        value,
+        formattedValue:
+          value === undefined ? undefined : formatSeriesValue(series, value),
+      }
+    }),
   )
 
   function formatSeriesValue(series: AxisChartSeriesConfig, value: number) {

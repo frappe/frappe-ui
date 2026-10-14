@@ -348,6 +348,23 @@ function seriesWeights(rows: Record<string, any>[], names: string[]) {
   return weights
 }
 
+/**
+ * What one series adds up to across the rows, signed, which is what the legend
+ * prints beside it. Undefined when no row holds a number for it: a series with
+ * nothing to add has no total, not a total of zero.
+ */
+export function seriesTotal(
+  rows: Record<string, any>[],
+  name: string,
+): number | undefined {
+  let total: number | undefined
+  for (const row of rows) {
+    const value = toNumber(row[name])
+    if (value !== null) total = (total ?? 0) + value
+  }
+  return total
+}
+
 function toValueAxis(
   options?: ChartValueAxisOptions,
 ): ChartYAxisConfig | undefined {

@@ -175,4 +175,171 @@ describe('ChartLegend', () => {
       cy.get('@onChange').should('have.been.calledOnceWith', 'refunds')
     })
   })
+
+  describe('overflow', () => {
+    // Named so the largest totals sit at the end of the given order: ranking
+    // has to move them to the front for a test to tell the two orders apart.
+    const many = (count: number) =>
+      Array.from({ length: count }, (_, i) => ({
+        name: `s${i}`,
+        label: `Series ${i}`,
+        color: '#318AD8',
+        hidden: false,
+        value: (i + 1) * 10,
+        formattedValue: `${(i + 1) * 10} kg`,
+      }))
+
+    function mountMany(
+      count: number,
+      props: Record<string, any> = {},
+      width = 320,
+    ) {
+      return cy.mount(
+        defineComponent({
+          setup() {
+            return () =>
+              h('div', { style: `width: ${width}px` }, [
+                h(ChartLegend, { items: many(count), ...props }),
+              ])
+          },
+        }),
+      )
+    }
+
+    const inline = () => cy.get('[data-slot="chart-legend"] [aria-pressed]')
+    const more = () => cy.contains('[data-slot="chart-legend"] button', 'more')
+    const list = () => cy.get('[data-slot="chart-legend-list"]')
+    const rows = () => list().find('[aria-pressed]')
+
+    it('keeps to one row and puts the rest behind "+N more"', () => {
+      mountMany(30)
+      more().should('be.visible')
+      inline().then((entries) => {
+        const tops = new Set(
+          [...entries].map((entry) => entry.getBoundingClientRect().top),
+        )
+        expect(tops.size).to.equal(1)
+        more().should('have.text', `+${30 - entries.length} more`)
+      })
+      cy.get('[data-slot="chart-legend"]')
+        .invoke('outerHeight')
+        .should('be.lessThan', 30)
+    })
+
+    it('keeps the largest series on the row', () => {
+      mountMany(30)
+      inline().first().should('have.attr', 'aria-label', 'Hide Series 29')
+      inline().eq(1).should('have.attr', 'aria-label', 'Hide Series 28')
+    })
+
+    it('keeps the given order when every entry fits', () => {
+      mountMany(3, {}, 800)
+      more().should('not.exist')
+      inline().first().should('have.attr', 'aria-label', 'Hide Series 0')
+      inline().last().should('have.attr', 'aria-label', 'Hide Series 2')
+    })
+
+    it('fits again once the row has the room', () => {
+      cy.mount(
+        defineComponent({
+          setup() {
+            const width = ref(240)
+            return () =>
+              h('div', [
+                h(
+                  'button',
+                  { id: 'widen', onClick: () => (width.value = 1400) },
+                  'Widen',
+                ),
+                h('div', { style: `width: ${width.value}px` }, [
+                  h(ChartLegend, { items: many(8) }),
+                ]),
+              ])
+          },
+        }),
+      )
+      more().should('exist')
+      cy.get('#widen').click()
+      more().should('not.exist')
+      inline().should('have.length', 8)
+    })
+
+    it('lists every series in the popover, largest first, with its total', () => {
+      mountMany(12)
+      more().click()
+      rows().should('have.length', 12)
+      rows().first().should('contain.text', 'Series 11')
+      rows().first().should('contain.text', '120 kg')
+      rows().last().should('contain.text', 'Series 0')
+      rows().last().should('contain.text', '10 kg')
+    })
+
+    it('toggles a series from the popover', () => {
+      mountMany(12, { onChange: cy.spy().as('onChange') })
+      more().click()
+      rows().last().click()
+      cy.get('@onChange').should('have.been.calledOnceWith', 's0')
+    })
+
+    it('highlights the series under a popover row', () => {
+      mountMany(12, { onHighlight: cy.spy().as('onHighlight') })
+      more().click()
+      rows().eq(2).trigger('mouseenter')
+      cy.get('@onHighlight').should('have.been.calledWith', 's9')
+      rows().eq(2).trigger('mouseleave')
+      cy.get('@onHighlight').should('have.been.calledWith', null)
+    })
+
+    it('clears the highlight when the popover closes', () => {
+      mountMany(12, { onHighlight: cy.spy().as('onHighlight') })
+      more().click()
+      rows().eq(2).trigger('mouseenter')
+      cy.get('body').type('{esc}')
+      list().should('not.exist')
+      cy.get('@onHighlight').should((spy: any) =>
+        expect(spy.lastCall.args[0]).to.equal(null),
+      )
+    })
+
+    it('prints no total for a series that has none', () => {
+      mountMany(12, {
+        items: many(12).map(({ value, formattedValue, ...item }) => item),
+      })
+      more().click()
+      rows().first().should('have.text', 'Series 0')
+    })
+
+    it('offers no search for a short list', () => {
+      mountMany(12)
+      more().click()
+      list().find('input').should('not.exist')
+    })
+
+    it('finds a series by its label past fifteen', () => {
+      mountMany(30)
+      more().click()
+      list().find('input').type('series 2')
+      // Series 2 and Series 20 to 29.
+      rows().should('have.length', 11)
+      rows().first().should('contain.text', 'Series 29')
+      list().find('input').clear().type('nothing like it')
+      rows().should('not.exist')
+      list().should('contain.text', 'No series match')
+    })
+
+    it('lays the popover out right to left inside an rtl chart', () => {
+      cy.mount(
+        defineComponent({
+          setup() {
+            return () =>
+              h('div', { dir: 'rtl', style: 'width: 320px' }, [
+                h(ChartLegend, { items: many(12) }),
+              ])
+          },
+        }),
+      )
+      more().click()
+      list().should('have.attr', 'dir', 'rtl')
+    })
+  })
 })
