@@ -74,7 +74,11 @@
         align="end"
       >
         <template #trigger>
-          <Button variant="ghost" size="xs">
+          <Button
+            variant="ghost"
+            size="xs"
+            :label="`Show ${items.length - shown.length} more series`"
+          >
             <span class="text-ink-gray-6">
               {{ moreText(items.length - shown.length) }}
             </span>

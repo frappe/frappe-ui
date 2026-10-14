@@ -207,7 +207,8 @@ describe('ChartLegend', () => {
     }
 
     const inline = () => cy.get('[data-slot="chart-legend"] [aria-pressed]')
-    const more = () => cy.contains('[data-slot="chart-legend"] button', 'more')
+    const more = () =>
+      cy.get('[data-slot="chart-legend"] [aria-label$="more series"]')
     const list = () => cy.get('[data-slot="chart-legend-list"]')
     const rows = () => list().find('[aria-pressed]')
 
@@ -262,6 +263,22 @@ describe('ChartLegend', () => {
       cy.get('#widen').click()
       more().should('not.exist')
       inline().should('have.length', 8)
+    })
+
+    it('names the trigger by what it opens, and the panel after it', () => {
+      mountMany(30)
+      more().then((trigger) => {
+        const hidden = trigger.text().trim().match(/\d+/)![0]
+        expect(trigger.attr('aria-label')).to.equal(
+          `Show ${hidden} more series`,
+        )
+        trigger.trigger('click')
+        cy.get('[role="dialog"]').should(
+          'have.attr',
+          'aria-labelledby',
+          trigger.attr('id'),
+        )
+      })
     })
 
     it('lists every series in the popover, largest first, with its total', () => {
