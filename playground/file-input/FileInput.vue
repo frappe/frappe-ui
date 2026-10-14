@@ -172,6 +172,20 @@ const shownName = computed(() => {
   }
   return stem.slice(0, lo).trimEnd() + '…' + ext
 })
+/**
+ * The placeholder, cut to the same room with an ellipsis at its end. The
+ * browser's own `text-overflow` lets go of the ellipsis while the field is
+ * focused or pressed, so the text is cut here instead and holds in every
+ * state.
+ */
+const PLACEHOLDER = 'Choose file or drag here'
+const shownPlaceholder = computed(() => {
+  if (!room.value || measure(PLACEHOLDER) <= room.value) return PLACEHOLDER
+  let n = PLACEHOLDER.length
+  while (n > 0 && measure(PLACEHOLDER.slice(0, n).trimEnd() + '…') > room.value)
+    n--
+  return PLACEHOLDER.slice(0, n).trimEnd() + '…'
+})
 function readRoom() {
   const el = control.value
   if (!el) return
@@ -303,7 +317,7 @@ watch(
           :variant="variant"
           :model-value="shownName"
           :title="fileName || undefined"
-          placeholder="Choose file or drag here"
+          :placeholder="shownPlaceholder"
           readonly
           :aria-disabled="disabled || undefined"
           :tabindex="disabled ? -1 : 0"

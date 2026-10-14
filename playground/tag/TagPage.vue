@@ -125,6 +125,7 @@ watch(dismissible, (on) => !on && restore())
               :options="sizeTabs"
               size="sm"
               aria-label="Size"
+              class="w-[140px] [&>div]:w-full [&_button]:flex-1 [&_button]:basis-0 [&_button>span]:w-full"
             />
           </div>
           <div class="flex h-7 items-center justify-between">

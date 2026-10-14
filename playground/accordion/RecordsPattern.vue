@@ -149,7 +149,15 @@ const recordOf = (value: string) => records.find((r) => r.value === value)!
         </span>
       </template>
       <template #item-suffix>
-        <Badge size="lg" variant="subtle" theme="gray" label="Organisation">
+        <!-- text/sm/regular, as the file has it: the trigger's medium weight
+             would otherwise carry into the badge -->
+        <Badge
+          size="lg"
+          variant="subtle"
+          theme="gray"
+          label="Organisation"
+          class="!text-sm"
+        >
           <template #prefix>
             <AccordionIcon name="org" class="size-3" />
           </template>
