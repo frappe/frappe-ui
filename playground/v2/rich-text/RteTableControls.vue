@@ -1786,9 +1786,10 @@ body.rte-tc-dragging .rte-tc-handle {
 }
 /* the grid is a row of the menu, but its swatches are what take the
    pointer and the focus: the row itself never lights up */
-.rte-tc-swatches,
-.rte-tc-swatches:focus,
-.rte-tc-swatches[data-highlighted] {
+.menu-content .rte-tc-swatches[data-slot='item'],
+.menu-content .rte-tc-swatches[data-slot='item']:focus,
+.menu-content .rte-tc-swatches[data-slot='item'][data-highlighted],
+.menu-content .rte-tc-swatches[data-slot='item'][data-state='open'] {
   background-color: transparent !important;
   outline: none;
 }
