@@ -157,9 +157,7 @@ const isEmpty = computed(() =>
 
 // The y-axis title is chrome rather than an echarts axis name, so it lines up
 // with the chart title above the plot. The x-axis title is drawn on its axis.
-const yAxisTitle = computed(() =>
-  props.yAxis?.title ? formatLabel(props.yAxis.title) : undefined,
-)
+const yAxisTitle = computed(() => props.yAxis?.title || undefined)
 
 // A malformed config throws while building the option; surfacing it as an error
 // state beats letting it bubble out of a render and blank the whole page.

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { normalizeAxisChartProps } from './seriesData'
+import { normalizeAxisChartProps, seriesLabel } from './seriesData'
 import { hasSecondaryValueAxis, resolveSeriesColors } from './axisChartCommon'
 import type { ChartTokens } from './tokens'
 import type { AxisChartConfig, AxisChartProps, SeriesStyle } from './types'
@@ -32,6 +32,32 @@ afterEach(() => {
 })
 
 describe('normalizeAxisChartProps', () => {
+  it('prints a splitBy value as given', () => {
+    const { config } = normalize({
+      data: [
+        { month: 'Jan', device: 'eno1 rx errors', sessions: 3 },
+        { month: 'Jan', device: 'iOS', sessions: 5 },
+        { month: 'Jan', device: 'snake_case', sessions: 1 },
+      ],
+      y: 'sessions',
+      splitBy: 'device',
+    })
+    expect(config.series.map(seriesLabel)).toEqual([
+      'eno1 rx errors',
+      'iOS',
+      'snake_case',
+    ])
+  })
+
+  it('humanizes a column key that has no label', () => {
+    const { config } = normalize({
+      data: [{ month: 'Jan', total_sales: 3, rate: 1 }],
+      y: 'total_sales',
+      y2: 'rate',
+    })
+    expect(config.series.map(seriesLabel)).toEqual(['Total Sales', 'Rate'])
+  })
+
   it('reads a single y column as one series', () => {
     const { config } = normalize({ y: 'sales' })
     expect(namesOf(config)).toEqual(['sales'])
@@ -297,8 +323,8 @@ describe('normalizeAxisChartProps: the second value axis', () => {
       splitBy: 'region',
     })
     expect(config.series).toEqual([
-      { name: 'East' },
-      { name: 'West' },
+      { name: 'East', label: 'East' },
+      { name: 'West', label: 'West' },
       { name: 'rate', axis: 'y2' },
     ])
     expect(config.data).toEqual([

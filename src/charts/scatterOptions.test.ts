@@ -100,6 +100,18 @@ describe('buildScatterSeries', () => {
     expect(built[1].points.map((point) => point.x)).toEqual([200, 700])
   })
 
+  it('prints a grouping value as given', () => {
+    const built = series({
+      splitByColumn: 'os',
+      data: [
+        { spend: 1, revenue: 2, os: 'iOS' },
+        { spend: 1, revenue: 2, os: 'eno1 rx errors' },
+      ],
+    })
+
+    expect(built.map((entry) => entry.label)).toEqual(['iOS', 'eno1 rx errors'])
+  })
+
   it('reads a blank grouping value as (Blank)', () => {
     const built = series({
       splitByColumn: 'region',
@@ -335,13 +347,13 @@ describe('buildScatterOption', () => {
     expect(option.yAxis.min).toBe(100)
   })
 
-  it('draws the x axis title on the axis and leaves the y title to the chrome', () => {
+  it('draws the x axis title on the axis, as given, and leaves the y title to the chrome', () => {
     const option = build({
-      xAxis: { title: 'ad_spend' },
+      xAxis: { title: 'requests/s' },
       yAxis: { title: 'revenue' },
     })
 
-    expect(option.xAxis.name).toBe('Ad Spend')
+    expect(option.xAxis.name).toBe('requests/s')
     expect(option.xAxis.nameLocation).toBe('end')
     expect(option.yAxis.name).toBeUndefined()
   })

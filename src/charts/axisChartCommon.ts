@@ -2,7 +2,6 @@ import { dayjs } from '#utils/dayjs'
 import {
   estimateTextWidth,
   formatAxisValue,
-  formatLabel,
   formatTimeAxisLabel,
   formatValue,
   inferTimeGrain,
@@ -425,7 +424,7 @@ export function buildXAxis(
     // like the time axis' is out: echarts rounds a category `min` and `max`.
     ...(type === 'category' ? { data: categories, boundaryGap: true } : {}),
     ...(inset ? inset.extent : {}),
-    name: config.xAxis.title ? formatLabel(config.xAxis.title) : undefined,
+    name: config.xAxis.title || undefined,
     nameLocation: 'end',
     nameGap: 8,
     nameTextStyle: { color: tokens.axisTitle, fontSize: AXIS_LABEL_FONT_SIZE },

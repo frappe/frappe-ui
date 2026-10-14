@@ -20,7 +20,7 @@ import {
   type AxisChartFormatters,
   type ResolvedTooltipColumn,
 } from '../seriesData'
-import { formatAxisValue, formatLabel, formatValue } from '../format'
+import { formatAxisValue, formatValue } from '../format'
 import { useChartTokens } from '../tokens'
 import { documentDir, markName, plotReading } from '../utils'
 import type {
@@ -106,15 +106,11 @@ export function useAxisChart<C extends AxisChartConfig>(
   const axisTitlePlacement = computed<AxisTitlePlacement>(() =>
     horizontal.value ? 'bottom' : 'top',
   )
-  const yAxisTitle = computed(() =>
-    config.value.yAxis?.title
-      ? formatLabel(config.value.yAxis.title)
-      : undefined,
-  )
+  const yAxisTitle = computed(() => config.value.yAxis?.title || undefined)
   const y2AxisTitle = computed(() =>
     config.value.y2Axis?.title &&
     hasSecondaryValueAxis(config.value, horizontal.value)
-      ? formatLabel(config.value.y2Axis.title)
+      ? config.value.y2Axis.title
       : undefined,
   )
 
