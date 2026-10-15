@@ -8,6 +8,7 @@
 import { getMarkRange, type Editor } from '@tiptap/core'
 import type { MarkType } from '@tiptap/pm/model'
 import { Plugin, PluginKey } from '@tiptap/pm/state'
+import { ref } from 'vue'
 import {
   useFloatingPopup,
   type FloatingPopupHandle,
@@ -79,6 +80,7 @@ function openRteLinkPopup(args: {
   const anchor = editor.view.dom
   const unlockScroll = args.hover ? () => {} : lockScroll(scrollParent(anchor))
   openCards++
+  linkCardOpen.value = true
   return new Promise<string | null>((resolve) => {
     let settled = false
     const settle = (value: string | null) => {
@@ -116,6 +118,7 @@ function openRteLinkPopup(args: {
       if (!gone) {
         gone = true
         openCards--
+        linkCardOpen.value = openCards > 0
       }
       unlockScroll()
       settle(null)
@@ -131,6 +134,9 @@ function openRteLinkPopup(args: {
 
 /** how many link cards are up; the pointer raises none over another */
 let openCards = 0
+/** a link card is up: the floating bar stands down while it is, so the
+ *  card takes its place rather than landing on top of it */
+export const linkCardOpen = ref(false)
 
 // ---- hover: the file's Hover and Selected states (32467:13501). Over a
 // link the pointer is the hand; resting there a moment, or pressing the

@@ -13,6 +13,7 @@
 // selected block, where there is no text to set.
 import { computed, h, ref, watch } from 'vue'
 import { BubbleMenu } from '@tiptap/vue-3/menus'
+import { linkCardOpen } from './rteLinkPopup'
 import { Dropdown, Popover, Tooltip } from '../../../src'
 import type { DropdownOptions } from '../../../src/components/Dropdown/types'
 import { useResolvedEditor } from '../../../src/molecules/editor/editor-context'
@@ -143,7 +144,9 @@ const shouldShow: InstanceType<typeof BubbleMenu>['$props']['shouldShow'] = ({
 </script>
 
 <template>
-  <!-- above the block grip's layer (z-55, RteBlockHandle), which otherwise
+  <!-- hidden while a link card is up (rteLinkPopup.ts): the card takes
+       the bar's place over the selection.
+       Above the block grip's layer (z-55, RteBlockHandle), which otherwise
        drew its six dots over the bar's buttons -->
   <BubbleMenu
     v-if="editor"
@@ -152,7 +155,12 @@ const shouldShow: InstanceType<typeof BubbleMenu>['$props']['shouldShow'] = ({
     :options="{ placement: 'top' }"
     class="z-[60]"
   >
-    <div class="rte-bubble" role="toolbar" aria-label="Text formatting">
+    <div
+      class="rte-bubble"
+      :class="linkCardOpen && 'invisible'"
+      role="toolbar"
+      aria-label="Text formatting"
+    >
       <!-- the block style: "Text ⌄", its menu 10px beneath, flush with the
            bar's left edge -->
       <Dropdown
