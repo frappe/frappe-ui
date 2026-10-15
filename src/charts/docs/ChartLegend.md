@@ -39,9 +39,12 @@ with the largest `weight`, as many as fit, and then a "+N more" button. A legend
 that wrapped would take the plot's height, and one that scrolled would hide
 series names that most users never scroll to.
 
-"+N more" opens a list of every entry, largest `weight` first. Its rows toggle
-and highlight a series the way the entries on the row do. Past 15 entries, the
-list has a search field.
+"+N more" opens a [MultiSelect](/docs/components/multiselect) list of every
+entry, largest `weight` first, with the drawn series checked. Checking or
+unchecking a row emits `change` the way pressing an entry on the row does. The
+arrow keys move through the list and Enter toggles a row. Past 15 entries, the
+list has a search field, and matches keep the same order. The rows do not emit
+`highlight`: only the entries on the row do.
 
 An entry with no `weight` keeps its given place after the ranked ones, and so
 does "Others". The line, area and bar charts weigh a series by the sum of its

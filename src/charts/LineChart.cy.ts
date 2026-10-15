@@ -134,14 +134,12 @@ describe('LineChart', () => {
         .first()
         .should('have.attr', 'aria-label', 'Hide Region 29')
       cy.get('[data-slot="chart-legend"] [aria-label$="more series"]').click()
-      cy.get('[data-slot="chart-legend-list"] [aria-pressed]')
+      cy.get('[role="listbox"] [role="option"]')
         .should('have.length', 30)
         .first()
         .should('have.text', 'Region 29')
       lines().should('have.length', 30)
-      cy.get(
-        '[data-slot="chart-legend-list"] [aria-label="Hide Region 0"]',
-      ).click()
+      cy.contains('[role="listbox"] [role="option"]', /^Region 0$/).click()
       lines().should('have.length', 29)
     })
   })

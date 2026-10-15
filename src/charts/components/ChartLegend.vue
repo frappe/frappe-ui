@@ -39,95 +39,60 @@
         <ReuseEntry :item="item" />
       </Button>
 
-      <Popover
+      <!-- The model is the visible series, so a checked row is a drawn one.
+           Ranked rather than matched while searching: the list reads largest
+           first whatever is typed. -->
+      <MultiSelect
         v-if="shown.length < items.length"
         v-model:open="open"
+        v-model:query="query"
+        :model-value="visible"
+        :options="options"
+        :filterable="false"
+        :hide-search="items.length <= SEARCH_AFTER"
+        placeholder="Search series"
+        empty-text="No series match"
         side="top"
         align="end"
+        :portal-to="portalEl"
+        @update:model-value="showOnly"
       >
-        <template #trigger>
+        <template #trigger="{ open: isOpen }">
           <Button
             variant="ghost"
             size="xs"
+            aria-haspopup="listbox"
+            :aria-expanded="isOpen"
             :label="`Show ${items.length - shown.length} more series`"
-            @pointerdown="openedBy(true)"
-            @keydown="openedBy(false)"
           >
             <span class="tabular-nums text-ink-gray-6">
               {{ moreText(items.length - shown.length) }}
             </span>
           </Button>
         </template>
-        <!-- The panel is portalled out of the chart, so it takes the
-             direction the row was laid out in rather than the body's. -->
-        <div
-          data-slot="chart-legend-list"
-          :dir="dir"
-          class="flex max-h-80 w-72 flex-col gap-1 p-1.5"
-          @focusin="openedBy(false)"
-        >
-          <TextInput
-            v-if="items.length > SEARCH_AFTER"
-            v-model="query"
-            size="sm"
-            placeholder="Search series"
-            aria-label="Search series"
-          >
-            <template #prefix>
-              <span
-                aria-hidden="true"
-                class="lucide-search size-4 text-ink-gray-5"
-              />
-            </template>
-          </TextInput>
-          <div class="min-h-0 overflow-y-auto">
-            <Button
-              v-for="item in matches"
-              :key="item.name"
-              variant="ghost"
-              size="sm"
-              class="w-full !justify-start"
-              :aria-pressed="!item.hidden"
-              :label="toggleLabel(item)"
-              @click="emit('change', item.name)"
-              @mouseenter="emit('highlight', item.name)"
-              @mouseleave="emit('highlight', null)"
-              @focus="rowFocus(item.name)"
-              @blur="emit('highlight', null)"
-            >
-              <template #prefix>
-                <span
-                  class="size-2 shrink-0 rounded-full"
-                  :class="{ 'opacity-30': item.hidden }"
-                  :style="{ backgroundColor: item.color }"
-                />
-              </template>
-              <span
-                :class="item.hidden ? 'text-ink-gray-4' : 'text-ink-gray-7'"
-              >
-                {{ item.label }}
-              </span>
-              <!-- The auto margin takes the slack, so the label holds the
-                   start and the value the end. -->
-              <template #suffix>
-                <span
-                  v-if="item.formattedValue"
-                  class="ms-auto tabular-nums text-ink-gray-5"
-                >
-                  {{ item.formattedValue }}
-                </span>
-              </template>
-            </Button>
-            <p
-              v-if="!matches.length"
-              class="px-2 py-1.5 text-p-sm text-ink-gray-5"
-            >
-              No series match
-            </p>
-          </div>
-        </div>
-      </Popover>
+        <template #item-prefix="{ item }">
+          <span
+            class="size-2 shrink-0 rounded-full"
+            :class="{ 'opacity-30': item.hidden }"
+            :style="{ backgroundColor: item.color }"
+          />
+        </template>
+        <template #item-suffix="{ item }">
+          <span v-if="item.formattedValue" class="tabular-nums text-ink-gray-5">
+            {{ item.formattedValue }}
+          </span>
+        </template>
+        <!-- Clear All would hide every series, which the chart refuses, and
+             Select All is one more control than a legend has ever had. -->
+        <template #footer />
+      </MultiSelect>
     </div>
+
+    <!-- The list is portalled out of the chart, so it would lay out in the
+         page's direction. This holder carries the row's instead. -->
+    <Teleport v-if="shown.length < items.length" :to="portalTarget ?? 'body'">
+      <div ref="portalEl" :dir="dir" />
+    </Teleport>
 
     <!-- Every entry and the trigger at their natural widths, so the fit is
          measured rather than guessed. After the row, so a search by text finds
@@ -170,8 +135,8 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { createReusableTemplate } from '@vueuse/core'
 import Button from '#components/Button/Button.vue'
-import Popover from '#components/Popover/Popover.vue'
-import TextInput from '#components/TextInput/TextInput.vue'
+import MultiSelect from '#components/MultiSelect/MultiSelect.vue'
+import { usePortalTarget } from '#composables/usePortalTarget'
 import { legendFit, rankLegendItems } from '../legendOverflow'
 import type {
   ChartLegendEmits,
@@ -243,38 +208,35 @@ watch(ranked, measure, { flush: 'post' })
 const open = ref(false)
 const query = ref('')
 const dir = ref<string>()
+const portalTarget = usePortalTarget()
+const portalEl = ref<HTMLElement>()
 
-const matches = computed(() => {
+const visible = computed(() =>
+  props.items.filter((item) => !item.hidden).map((item) => item.name),
+)
+
+const options = computed(() => {
   const text = query.value.trim().toLowerCase()
-  return text
-    ? ranked.value.filter((item) => item.label.toLowerCase().includes(text))
-    : ranked.value
+  return ranked.value
+    .filter((item) => !text || item.label.toLowerCase().includes(text))
+    .map((item) => ({ ...item, value: item.name }))
 })
 
-watch(open, (value) => {
-  if (value) {
-    dir.value = rowEl.value
-      ? getComputedStyle(rowEl.value).direction
-      : undefined
-    return
+// Each series whose checkbox moved is one `change`, the same press an entry on
+// the row makes. The chart may refuse it, as it refuses hiding the last visible
+// series, and then the model it hands back leaves the row checked.
+function showOnly(names: Array<string | number>) {
+  const next = new Set(names)
+  for (const item of props.items) {
+    if (next.has(item.name) === item.hidden) emit('change', item.name)
   }
-  query.value = ''
-  // The rows unmount with the panel, so the one under the pointer or with
-  // focus never reports leaving.
-  emit('highlight', null)
-})
+}
 
-// The panel focuses what it opens on. Opened by a click, that focus is not the
-// reader pointing at a series, so the row it lands on stays quiet. The panel's
-// `focusin` runs after the row's `focus`, which is what spends the flag on the
-// first focus alone.
-let openedByPointer = false
-function openedBy(pointer: boolean) {
-  openedByPointer = pointer
-}
-function rowFocus(name: string) {
-  if (!openedByPointer) emit('highlight', name)
-}
+// The query is bound, so the list never clears it on its own.
+watch(open, (value) => {
+  query.value = ''
+  if (value && rowEl.value) dir.value = getComputedStyle(rowEl.value).direction
+})
 
 function moreText(count: number) {
   return `+${count} more`

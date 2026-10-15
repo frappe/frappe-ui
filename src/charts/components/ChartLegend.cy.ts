@@ -1,5 +1,6 @@
 import { defineComponent, h, ref } from 'vue'
 import ChartLegend from './ChartLegend.vue'
+import { toggleHiddenSeries } from '../hiddenSeries'
 import '../style.css'
 
 const items = [
@@ -211,8 +212,32 @@ describe('ChartLegend', () => {
     const inline = () => cy.get('[data-slot="chart-legend"] [aria-pressed]')
     const more = () =>
       cy.get('[data-slot="chart-legend"] [aria-label$="more series"]')
-    const list = () => cy.get('[data-slot="chart-legend-list"]')
-    const rows = () => list().find('[aria-pressed]')
+    const list = () => cy.get('[data-slot="content"][role="listbox"]')
+    const rows = () => list().find('[role="option"]')
+
+    // A parent that owns the hidden set the way a chart does, refusals
+    // included.
+    function mountOwned(count: number) {
+      return cy.mount(
+        defineComponent({
+          setup() {
+            const hidden = ref<string[]>([])
+            return () =>
+              h('div', { style: 'width: 320px' }, [
+                h(ChartLegend, {
+                  items: many(count).map((item) => ({
+                    ...item,
+                    hidden: hidden.value.includes(item.name),
+                  })),
+                  onChange: (name: string) => {
+                    hidden.value = toggleHiddenSeries(hidden.value, name, count)
+                  },
+                }),
+              ])
+          },
+        }),
+      )
+    }
 
     it('keeps to one row and puts the rest behind "+N more"', () => {
       mountMany(30)
@@ -289,20 +314,19 @@ describe('ChartLegend', () => {
       list().should('not.exist')
     })
 
-    it('names the trigger by what it opens, and the panel after it', () => {
+    it('names the trigger by what it opens', () => {
       mountMany(30)
       more().then((trigger) => {
         const hidden = trigger.text().trim().match(/\d+/)![0]
         expect(trigger.attr('aria-label')).to.equal(
           `Show ${hidden} more series`,
         )
-        trigger.trigger('click')
-        cy.get('[role="dialog"]').should(
-          'have.attr',
-          'aria-labelledby',
-          trigger.attr('id'),
-        )
       })
+      more()
+        .should('have.attr', 'aria-haspopup', 'listbox')
+        .and('have.attr', 'aria-expanded', 'false')
+        .click()
+      more().should('have.attr', 'aria-expanded', 'true')
     })
 
     // The legend measures hidden copies of its entries. A search by text
@@ -312,23 +336,6 @@ describe('ChartLegend', () => {
       cy.contains('button', 'Series 29')
         .should('be.visible')
         .and('have.attr', 'aria-pressed', 'true')
-    })
-
-    // A click opens the panel and the panel focuses its first row: that focus
-    // is not the reader pointing at a series.
-    it('highlights nothing when a click opens the popover', () => {
-      mountMany(12, { onHighlight: cy.spy().as('onHighlight') })
-      more().click()
-      rows().first().should('have.focus')
-      cy.get('@onHighlight').should('not.have.been.calledWith', 's11')
-    })
-
-    it('highlights a popover row the keyboard reaches', () => {
-      mountMany(12, { onHighlight: cy.spy().as('onHighlight') })
-      more().click()
-      rows().first().should('have.focus')
-      cy.press(Cypress.Keyboard.Keys.TAB)
-      cy.get('@onHighlight').should('have.been.calledWith', 's10')
     })
 
     it('lists every series in the popover, heaviest first, with its value', () => {
@@ -341,6 +348,18 @@ describe('ChartLegend', () => {
       rows().last().should('contain.text', '10 kg')
     })
 
+    it('checks the rows whose series are drawn', () => {
+      mountMany(12, {
+        items: many(12).map((item) => ({
+          ...item,
+          hidden: item.name === 's0',
+        })),
+      })
+      more().click()
+      rows().first().should('have.attr', 'aria-selected', 'true')
+      rows().last().should('have.attr', 'aria-selected', 'false')
+    })
+
     it('toggles a series from the popover', () => {
       mountMany(12, { onChange: cy.spy().as('onChange') })
       more().click()
@@ -348,24 +367,51 @@ describe('ChartLegend', () => {
       cy.get('@onChange').should('have.been.calledOnceWith', 's0')
     })
 
-    it('highlights the series under a popover row', () => {
-      mountMany(12, { onHighlight: cy.spy().as('onHighlight') })
+    it('shows a hidden series again from the popover', () => {
+      mountOwned(12)
       more().click()
-      rows().eq(2).trigger('mouseenter')
-      cy.get('@onHighlight').should('have.been.calledWith', 's9')
-      rows().eq(2).trigger('mouseleave')
-      cy.get('@onHighlight').should('have.been.calledWith', null)
+      rows().last().click()
+      rows().last().should('have.attr', 'aria-selected', 'false')
+      rows().last().click()
+      rows().last().should('have.attr', 'aria-selected', 'true')
     })
 
-    it('clears the highlight when the popover closes', () => {
-      mountMany(12, { onHighlight: cy.spy().as('onHighlight') })
-      more().click()
-      rows().eq(2).trigger('mouseenter')
-      cy.get('body').type('{esc}')
-      list().should('not.exist')
-      cy.get('@onHighlight').should((spy: any) =>
-        expect(spy.lastCall.args[0]).to.equal(null),
+    // The chart refuses to hide its last visible series, and the row has to
+    // say so rather than show a box the plot does not agree with.
+    it('keeps the last visible series checked', () => {
+      cy.mount(
+        defineComponent({
+          setup() {
+            const hidden = ref<string[]>(['s0', 's1'])
+            return () =>
+              h('div', { style: 'width: 120px' }, [
+                h(ChartLegend, {
+                  items: many(3).map((item) => ({
+                    ...item,
+                    hidden: hidden.value.includes(item.name),
+                  })),
+                  onChange: (name: string) => {
+                    hidden.value = toggleHiddenSeries(hidden.value, name, 3)
+                  },
+                }),
+              ])
+          },
+        }),
       )
+      more().click()
+      list().contains('[role="option"]', 'Series 2').click()
+      list()
+        .contains('[role="option"]', 'Series 2')
+        .should('have.attr', 'aria-selected', 'true')
+    })
+
+    it('walks the list with the arrow keys and toggles with Enter', () => {
+      mountMany(30, { onChange: cy.spy().as('onChange') })
+      more().click()
+      list().find('[data-slot="input"]').should('have.focus')
+      cy.press(Cypress.Keyboard.Keys.DOWN)
+      cy.focused().type('{enter}')
+      cy.get('@onChange').should('have.been.calledOnceWith', 's28')
     })
 
     it('prints no number for a series that has none', () => {
@@ -379,19 +425,33 @@ describe('ChartLegend', () => {
     it('offers no search for a short list', () => {
       mountMany(12)
       more().click()
-      list().find('input').should('not.exist')
+      rows().should('have.length', 12)
+      list().find('[data-slot="input"]').should('not.exist')
     })
 
-    it('finds a series by its label past fifteen', () => {
+    it('finds a series by its label past fifteen, keeping the ranking', () => {
       mountMany(30)
       more().click()
-      list().find('input').type('series 2')
-      // Series 2 and Series 20 to 29.
+      list().find('[data-slot="input"]').type('series 2')
+      // Series 2 and Series 20 to 29, heaviest first rather than closest
+      // match first.
       rows().should('have.length', 11)
       rows().first().should('contain.text', 'Series 29')
-      list().find('input').clear().type('nothing like it')
+      rows().last().should('contain.text', 'Series 2')
+      list().find('[data-slot="input"]').clear().type('nothing like it')
       rows().should('not.exist')
       list().should('contain.text', 'No series match')
+    })
+
+    it('starts the next search empty', () => {
+      mountMany(30)
+      more().click()
+      list().find('[data-slot="input"]').type('series 2')
+      cy.get('body').type('{esc}')
+      list().should('not.exist')
+      more().click()
+      list().find('[data-slot="input"]').should('have.value', '')
+      rows().should('have.length', 30)
     })
 
     it('lays the popover out right to left inside an rtl chart', () => {
@@ -406,7 +466,9 @@ describe('ChartLegend', () => {
         }),
       )
       more().click()
-      list().should('have.attr', 'dir', 'rtl')
+      list().should(($list) =>
+        expect(getComputedStyle($list[0]).direction).to.equal('rtl'),
+      )
     })
   })
 })
