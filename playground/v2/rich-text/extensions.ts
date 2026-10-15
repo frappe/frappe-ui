@@ -925,9 +925,8 @@ export const PictureParagraph = Extension.create({
         },
         props: {
           // the caret beside a picture would be drawn on the collapsed
-          // line, a dot-high sliver; Notion shows none there and marks the
-          // picture instead, so the paragraph the caret is in says so
-          // (.is-caret) and the picture takes its selected ring
+          // line, a dot-high sliver; the paragraph the caret is in says so
+          // (.is-caret), and its line is given back while it is
           decorations: (state) => {
             const set = key.getState(state)
             const { selection } = state

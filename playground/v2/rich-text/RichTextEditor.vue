@@ -575,9 +575,11 @@ function resolve() {
 .rte-doc p.rte-pic-para > .ProseMirror-trailingBreak {
   display: none;
 }
-/* the caret beside the picture: none drawn on the collapsed line, the
-   picture ringed as when it is selected (media-node-view-utils'
-   SELECTED_IMAGE_RING: 1px gray-600, 4px off) */
+/* the caret beside the picture: at rest the paragraph's line is
+   collapsed, which would draw the caret a dot high, so it is hidden; when
+   the caret is in it (.is-caret, extensions.ts) the line comes back at
+   its full 24px under the picture, and the caret blinks there at its full
+   height, where typing goes on */
 .rte-doc p.rte-pic-para {
   caret-color: transparent;
 }
@@ -585,13 +587,9 @@ function resolve() {
 .rte-doc p.rte-pic-para > [data-node-view-wrapper] {
   caret-color: var(--ink-gray-9);
 }
-.rte-doc.ProseMirror-focused
-  p.rte-pic-para.is-caret
-  > [data-node-view-wrapper]
-  > .group {
-  box-shadow:
-    0 0 0 4px var(--surface-base),
-    0 0 0 5px var(--ink-gray-6);
+.rte-doc.ProseMirror-focused p.rte-pic-para.is-caret {
+  line-height: 24px;
+  caret-color: var(--ink-gray-9);
 }
 
 /* expand / collapse: a 16px chevron before the summary, the content
