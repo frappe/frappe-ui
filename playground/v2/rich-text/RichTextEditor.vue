@@ -76,7 +76,7 @@ const extensions = [
     slashCommands: {
       items: rteSlashCommands(),
       // as Notion's: a name of more than one word is found typed in full,
-      // "/to-do list", "/2 image columns"
+      // "/to-do list", "/2 columns"
       suggestion: { allowSpaces: true },
     },
     // the attachment node comes from ./extensions, drawn as the file's row

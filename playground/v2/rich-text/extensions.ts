@@ -65,8 +65,6 @@ declare module '@tiptap/core' {
     rteImageSlot: {
       /** lay an empty image slot down, to be filled by file or by link */
       insertImageSlot: () => ReturnType
-      /** a row of empty slots, one per column — one column is a bare slot */
-      insertImageColumns: (count?: number) => ReturnType
     }
     rteDetails: {
       insertDetails: () => ReturnType
@@ -504,21 +502,6 @@ export const ImageSlot = Node.create({
         () =>
         ({ commands }) =>
           commands.insertContent({ type: this.name }),
-      // one slot per column; a single column is no grid at all, so it is
-      // just the slot across the document
-      insertImageColumns:
-        (count = 2) =>
-        ({ commands }) =>
-          count < 2
-            ? commands.insertContent({ type: this.name })
-            : commands.insertContent({
-                type: 'columns',
-                attrs: { count, media: true },
-                content: Array.from({ length: count }, () => ({
-                  type: 'column',
-                  content: [{ type: this.name }],
-                })),
-              }),
       // the library's picker goes to the disk the moment it is called. The
       // file asks first, so every way in — /image, the + menu, the toolbar
       // — lays the slot down and lets the card do the asking.

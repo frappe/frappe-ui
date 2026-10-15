@@ -258,21 +258,13 @@ const mediaOptions = (kind: UrlKind, fromDisk: () => void): DropdownOptions => [
   { label: 'Insert via URL', icon: icon('link'), onClick: () => askUrl(kind) },
 ]
 // a picture starts as an empty slot in the document, and the slot's own
-// card asks for the file or the link (RteImageSlot). The columns rows lay
-// one slot per column, so a row of pictures is filled cell by cell.
+// card asks for the file or the link (RteImageSlot). Pictures side by side
+// are the Columns block with a picture in each.
 const imageOptions: DropdownOptions = [
   {
     label: 'Add image',
     icon: icon('image'),
     onClick: () => chain().insertImageSlot().run(),
-  },
-  {
-    label: 'Image columns',
-    icon: icon('grid-3'),
-    submenu: [1, 2, 3].map((n) => ({
-      label: n === 1 ? '1 column' : `${n} columns`,
-      onClick: () => chain().insertImageColumns(n).run(),
-    })),
   },
 ]
 const videoOptions = mediaOptions('video', () =>
@@ -292,14 +284,6 @@ const insertOptions = computed<DropdownOptions>(() => [
         label: 'Image',
         icon: icon('image'),
         onClick: () => chain().insertImageSlot().run(),
-      },
-      {
-        label: 'Image columns',
-        icon: icon('grid-3'),
-        submenu: [1, 2, 3].map((n) => ({
-          label: n === 1 ? '1 column' : `${n} columns`,
-          onClick: () => chain().insertImageColumns(n).run(),
-        })),
       },
       {
         label: 'Video',

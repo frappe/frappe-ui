@@ -122,16 +122,6 @@ export function rteSlashCommands(): CommandItem[] {
       command: ({ editor, range }) =>
         editor.chain().focus().deleteRange(range).insertImageSlot().run(),
     },
-    ...([1, 2, 3] as const).map(
-      (n): CommandItem => ({
-        title: n === 1 ? '1 image column' : `${n} image columns`,
-        icon: 'lucide-layout-grid',
-        group: 'Media',
-        isAvailable: (editor) => !!editor.schema.nodes.columns,
-        command: ({ editor, range }) =>
-          editor.chain().focus().deleteRange(range).insertImageColumns(n).run(),
-      }),
-    ),
     {
       title: 'Video',
       icon: 'lucide-square-play',
