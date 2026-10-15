@@ -915,11 +915,13 @@ function dayBand(label: string) {
                   <template #trigger>
                     <button
                       type="button"
-                      class="flex items-center gap-2 text-lg-medium text-ink-gray-7"
+                      class="group flex items-center gap-2 text-lg-medium text-ink-gray-7 transition-colors hover:text-ink-gray-6"
                     >
+                      <!-- Hovered, the word and its chevron each go a token
+                           lighter, as Invite people's back does (2026-10-15) -->
                       {{ monthYear(currentMonthYear, activeView) }}
                       <span
-                        class="lucide-chevron-down size-4 text-ink-gray-5 transition-transform"
+                        class="lucide-chevron-down size-4 text-ink-gray-5 transition-[color,transform] group-hover:text-ink-gray-4"
                         :class="switcherOpen && 'rotate-180'"
                       />
                     </button>
