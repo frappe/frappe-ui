@@ -128,17 +128,38 @@ const fontOptions = computed<DropdownOptions>(() =>
   })),
 )
 
-const DEFAULT_SIZE = 14
+const DEFAULT_SIZE = 15
+/** the size the block draws its text at with no size of its own: body
+ *  copy is 15px (the doc's --prose-font-size), a heading its own step */
+function naturalSize(ed: TiptapEditor): number {
+  const { $from } = ed.state.selection
+  if ($from.depth < 1) return DEFAULT_SIZE
+  // the editor's view is not there until it has mounted; reading it
+  // before then throws
+  let dom: Node | null = null
+  try {
+    dom = ed.view.nodeDOM($from.before($from.depth))
+  } catch {
+    return DEFAULT_SIZE
+  }
+  const n =
+    dom instanceof HTMLElement
+      ? parseFloat(getComputedStyle(dom).fontSize)
+      : NaN
+  return Number.isFinite(n) ? Math.round(n) : DEFAULT_SIZE
+}
 const fontSize = computed(() =>
   live((ed) => {
     const raw = ed.getAttributes('textStyle').fontSize as string | undefined
     const n = raw ? parseInt(raw, 10) : NaN
-    return Number.isFinite(n) ? n : DEFAULT_SIZE
+    return Number.isFinite(n) ? n : naturalSize(ed)
   }, DEFAULT_SIZE),
 )
 function stepSize(delta: number) {
   const next = Math.min(72, Math.max(8, fontSize.value + delta))
-  if (next === DEFAULT_SIZE) chain().unsetFontSize().run()
+  // back at the block's own size, the mark is dropped rather than kept
+  if (editor.value && next === naturalSize(editor.value))
+    chain().unsetFontSize().run()
   else chain().setFontSize(`${next}px`).run()
 }
 
