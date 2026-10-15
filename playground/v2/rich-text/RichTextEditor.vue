@@ -560,6 +560,22 @@ function resolve() {
   display: none;
 }
 
+/* a paragraph of pictures alone (.rte-pic-para, extensions.ts) has no
+   empty line under them: the line ProseMirror's caret targets make is
+   collapsed, and the picture's own line height (its caption's) is given
+   back; the picture keeps only its top margin, so stacked pictures sit
+   8px apart rather than 8 above and 8 below */
+.rte-doc p.rte-pic-para {
+  line-height: 0;
+}
+.rte-doc p.rte-pic-para > [data-node-view-wrapper] {
+  line-height: 24px;
+  margin-bottom: 0;
+}
+.rte-doc p.rte-pic-para > .ProseMirror-trailingBreak {
+  display: none;
+}
+
 /* expand / collapse: a 16px chevron before the summary, the content
    indented under it and folded away when closed */
 .rte-details {

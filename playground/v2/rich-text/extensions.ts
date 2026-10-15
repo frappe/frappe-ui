@@ -4,7 +4,13 @@
 // button lays on a selection. Each is a small tiptap extension on top of the
 // kit, so everything else — text, lists, links, images, tables, code, colour,
 // highlight, mentions, embeds — stays the library's.
-import { Mark, Node, getMarkRange, mergeAttributes } from '@tiptap/core'
+import {
+  Extension,
+  Mark,
+  Node,
+  getMarkRange,
+  mergeAttributes,
+} from '@tiptap/core'
 import type { Node as PMNode } from '@tiptap/pm/model'
 import { Plugin, PluginKey, TextSelection } from '@tiptap/pm/state'
 import { Decoration, DecorationSet } from '@tiptap/pm/view'
@@ -884,6 +890,47 @@ export const TableRow = KitTableRow.extend({
   },
 })
 
+// ---- a paragraph that holds only pictures: ProseMirror closes a run
+// ending in an inline node with a separator and a break, its caret
+// targets, and those draw an empty line under the picture — and the
+// separator is drawn `display: inline !important` by ProseMirror itself,
+// so no rule can take it away. Such paragraphs are marked here
+// (.rte-pic-para), and their line is collapsed (RichTextEditor.vue), so
+// stacked pictures sit their own margin apart, as Notion's do.
+const pictureParagraphs = (doc: PMNode) => {
+  const decos: Decoration[] = []
+  doc.descendants((node, pos) => {
+    if (node.type.name !== 'paragraph') return true
+    if (
+      node.childCount > 0 &&
+      node.content.content.every((c) => c.type.name === 'image')
+    )
+      decos.push(
+        Decoration.node(pos, pos + node.nodeSize, { class: 'rte-pic-para' }),
+      )
+    return false
+  })
+  return DecorationSet.create(doc, decos)
+}
+export const PictureParagraph = Extension.create({
+  name: 'rtePictureParagraph',
+  addProseMirrorPlugins() {
+    const key = new PluginKey<DecorationSet>('rtePictureParagraph')
+    return [
+      new Plugin({
+        key,
+        state: {
+          init: (_, state) => pictureParagraphs(state.doc),
+          apply: (tr, set) => (tr.docChanged ? pictureParagraphs(tr.doc) : set),
+        },
+        props: {
+          decorations: (state) => key.getState(state),
+        },
+      }),
+    ]
+  },
+})
+
 export const playgroundExtensions = [
   // the grip carries a table as one block, by selecting the table node; the
   // table plugin turns such a selection into its every cell unless allowed,
@@ -907,6 +954,7 @@ export const playgroundExtensions = [
   Column,
   Columns,
   ImageSlot,
+  PictureParagraph,
   EmbedSlot,
   DetailsSummary,
   DetailsContent,
