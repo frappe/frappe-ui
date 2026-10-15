@@ -176,6 +176,9 @@ function buildSeries(
   // column that is no longer selected is expected, not an error.
   const style = props.seriesConfig?.[name]
   return {
+    // A `splitBy` name is a value read from the data, so it prints as given
+    // instead of going through `formatLabel`, which is for column keys.
+    ...(props.splitBy && axis === 'y' ? { label: name } : {}),
     // The collapsed tail has no column behind it, so its label comes from here
     // rather than from the data. Ahead of the style: a `seriesConfig` entry for
     // the reserved key renames and colors it like any other series.

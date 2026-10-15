@@ -136,13 +136,19 @@ describe('ScatterChart', () => {
     cy.get('[data-slot="chart-tooltip"]').should('contain.text', '$400')
   })
 
-  it('heads the plot with the y axis title and puts the x title on its axis', () => {
+  it('heads the plot with the y axis title and puts the x title on its axis, as given', () => {
     mountChart({
-      xAxis: { title: 'spend' },
-      yAxis: { title: 'revenue' },
+      xAxis: { title: 'requests/s' },
+      yAxis: { title: 'net_revenue' },
     })
-    cy.get('[data-slot="chart-container"]').should('contain.text', 'Revenue')
-    cy.get('[data-slot="chart-plot"] svg text').should('contain.text', 'Spend')
+    cy.get('[data-slot="chart-container"]').should(
+      'contain.text',
+      'net_revenue',
+    )
+    cy.get('[data-slot="chart-plot"] svg text').should(
+      'contain.text',
+      'requests/s',
+    )
   })
 
   describe('point labels', () => {
