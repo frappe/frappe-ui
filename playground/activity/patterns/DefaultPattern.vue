@@ -221,6 +221,9 @@ const timelessChanges = [
           time="19 Jun"
           :body="jitMail"
           thread
+          quoted-from="On June 26, 2024 at 3:56 PM GMT+5:30 shariq@frappe.io wrote:"
+          :quoted="turnoverMail"
+          quote-folded
         />
       </ActivityEntry>
 
@@ -265,12 +268,12 @@ const timelessChanges = [
           <CallCard
             title="Outbound Call"
             :facts="[
-              { icon: 'lucide-calendar', label: 'May 16, Friday' },
-              { icon: 'lucide-clock', label: '32:48' },
+              { icon: 'calendar', label: 'May 16, Friday' },
+              { icon: 'time', label: '32:48' },
             ]"
             :actions="[
-              { icon: 'lucide-play', label: 'Listen' },
-              { icon: 'lucide-file-text', label: 'Note' },
+              { icon: 'play', label: 'Listen' },
+              { icon: 'notes', label: 'Note' },
             ]"
             :people="['Sammy Well', 'Eleanor Pena']"
           />
@@ -288,10 +291,10 @@ const timelessChanges = [
             player
             title="Outbound call"
             :facts="[
-              { icon: 'lucide-calendar', label: 'May 18, Wednesday' },
-              { icon: 'lucide-clock', label: '32:48' },
+              { icon: 'calendar', label: 'May 18, Wednesday' },
+              { icon: 'time', label: '32:48' },
             ]"
-            :actions="[{ icon: 'lucide-play', label: 'Listen' }]"
+            :actions="[{ icon: 'play', label: 'Listen' }]"
             :people="['Emily Taylor', 'Sammy Well', 'Eleanor Pena']"
             :initials="['N']"
           />

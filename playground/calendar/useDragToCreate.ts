@@ -84,7 +84,9 @@ export function useDragToCreate(
     const attr =
       col.getAttribute('data-date-attr') ??
       col.closest('[data-date-attr]')?.getAttribute('data-date-attr') ??
-      root.value?.querySelector('[data-date-attr]')?.getAttribute('data-date-attr')
+      root.value
+        ?.querySelector('[data-date-attr]')
+        ?.getAttribute('data-date-attr')
     return isoDay(String(attr ?? ''))
   }
 
@@ -99,11 +101,17 @@ export function useDragToCreate(
       return e.clientX >= r.left && e.clientX < r.right
     })
     if (!col) {
-      col = e.clientX < cols[0]!.getBoundingClientRect().left ? cols[0]! : cols[cols.length - 1]!
+      col =
+        e.clientX < cols[0]!.getBoundingClientRect().left
+          ? cols[0]!
+          : cols[cols.length - 1]!
     }
     const r = col.getBoundingClientRect()
     const minutes = ((e.clientY - r.top) / hourHeight) * 60
-    const snapped = Math.max(0, Math.min(24 * 60, Math.round(minutes / SNAP) * SNAP))
+    const snapped = Math.max(
+      0,
+      Math.min(24 * 60, Math.round(minutes / SNAP) * SNAP),
+    )
     return { date: dateOf(col), minutes: snapped, rect: r, col }
   }
 
@@ -137,7 +145,8 @@ export function useDragToCreate(
       return
     // The column's own parent, whichever view drew it — and nothing at all
     // when the pointer is in the all-day band or the header.
-    grid = target.closest<HTMLElement>('[data-time-grid]')?.parentElement ?? null
+    grid =
+      target.closest<HTMLElement>('[data-time-grid]')?.parentElement ?? null
     if (!grid) return
 
     const at = read(e)
@@ -235,8 +244,7 @@ export function useMonthDragToCreate(
   let active = false
   let startIso = ''
 
-  const cellsOf = (row: HTMLElement) =>
-    [...row.children] as HTMLElement[]
+  const cellsOf = (row: HTMLElement) => [...row.children] as HTMLElement[]
 
   /** The day a month cell stands for: its week's first day, plus its column. */
   function dayOf(cell: HTMLElement): string {
@@ -253,7 +261,10 @@ export function useMonthDragToCreate(
   }
 
   const cellAt = (e: PointerEvent) => {
-    const el = document.elementFromPoint(e.clientX, e.clientY) as HTMLElement | null
+    const el = document.elementFromPoint(
+      e.clientX,
+      e.clientY,
+    ) as HTMLElement | null
     const row = el?.closest<HTMLElement>('[data-week-row]')
     if (!row) return null
     return cellsOf(row).find((c) => c.contains(el!)) ?? null
@@ -266,7 +277,9 @@ export function useMonthDragToCreate(
     const d = new Date(from)
     const end = new Date(to)
     while (d <= end) {
-      out.push(`${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`)
+      out.push(
+        `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`,
+      )
       d.setDate(d.getDate() + 1)
     }
     return out
@@ -368,6 +381,34 @@ export function useMonthDragToCreate(
 }
 
 /**
+ * The pill a copy is standing in for, held out of sight.
+ *
+ * By an attribute and a rule rather than an inline `opacity: 0`: the
+ * component writes `transition: all 0.1s` on a pill at rest, so an opacity
+ * set inline faded over 100ms instead of vanishing — the real pill sat
+ * half-there under the copy as it set off, and faded back up as the copy
+ * went, which read as a flicker on every landing. The rule (in the page's
+ * style) turns the transition off while the mark is on, and hides the pill.
+ *
+ * Letting go is two steps, since a property that changes in the same breath
+ * as its transition comes back animates under the new transition: first the
+ * mark is set to `done`, which keeps the transition off and lets the opacity
+ * snap; a frame later it comes off, and the transition returns to a pill
+ * that has nothing left to animate.
+ */
+const HELD = 'data-landing'
+function hold(el: HTMLElement) {
+  el.setAttribute(HELD, '')
+}
+function release(root: ParentNode, ...more: HTMLElement[]) {
+  const els = [...root.querySelectorAll<HTMLElement>(`[${HELD}]`), ...more]
+  for (const el of els) el.setAttribute(HELD, 'done')
+  requestAnimationFrame(() => {
+    for (const el of els) el.removeAttribute(HELD)
+  })
+}
+
+/**
  * The three parts of a card being moved in Week or Day view.
  *
  * The same picture the month view gets, built by hand because the time grid
@@ -433,6 +474,10 @@ export function useDragShadow(root: Ref<HTMLElement | null>) {
     // pointer event after `dragstart` — including the `pointerup` that would
     // clear these. `useMonthDragSkeleton` covers that view instead.
     if (pill.closest('[data-week-row]')) return
+    // An agenda row is never picked up: the list is read and clicked, not
+    // rearranged (the user's call 2026-10-07 — dragging makes no sense
+    // there). It still opens its event on a click.
+    if (pill.closest('.calendar-row')) return
     watching = pill
     origin = rectOf(pill)
     grabX = e.clientX - origin.left
@@ -477,7 +522,10 @@ export function useDragShadow(root: Ref<HTMLElement | null>) {
     })
     const drift = (scroller?.scrollTop ?? 0) - scrolledFrom
     if (ghost.value)
-      ghost.value = { ...ghost.value, rect: { ...origin, top: origin.top - drift } }
+      ghost.value = {
+        ...ghost.value,
+        rect: { ...origin, top: origin.top - drift },
+      }
     if (carrying.value)
       carrying.value = {
         ...carrying.value,
@@ -503,6 +551,10 @@ export function useDragShadow(root: Ref<HTMLElement | null>) {
    * animate: the browser compares against a style that had no transition.
    */
   const LANDING = 180
+  // …and a frame over it before the swap, so the copy has surely arrived
+  // before the pill takes its place. Swapped on the clock's own tick, the
+  // copy could go a frame before it stopped, and the pill appeared a step
+  // from where the eye had left the card.
 
   function onUp() {
     window.removeEventListener('pointermove', onFirstMove)
@@ -520,15 +572,55 @@ export function useDragShadow(root: Ref<HTMLElement | null>) {
       return
     }
     landing.value = true
-    held.style.opacity = '0'
-    requestAnimationFrame(() => {
-      if (carrying.value) carrying.value = { ...carrying.value, rect: to }
-      setTimeout(() => {
-        carrying.value = null
-        landing.value = false
-        held.style.opacity = ''
-      }, LANDING)
-    })
+    const name = held.textContent?.trim() ?? ''
+    hold(held)
+
+    // The pill that lands is looked for again on every frame rather than
+    // taken to be the one let go of: the week keys a pill on its day, so a
+    // move across days takes the old pill out and puts a new one in, and
+    // the one held out of sight was the one that had just gone.
+    let started = 0
+    const step = () => {
+      const landed = landedIn(name, to)
+      if (landed) hold(landed)
+      if (!started) {
+        // The clock starts here rather than at the drop, and the card is
+        // sent to where the pill actually is rather than where the slot
+        // said: the component settles overlaps on the drop, and a pill can
+        // land a column's width from where it was snapped.
+        started = performance.now()
+        const dest = landed ? rectOf(landed) : to
+        if (carrying.value) carrying.value = { ...carrying.value, rect: dest }
+        requestAnimationFrame(step)
+        return
+      }
+      if (performance.now() - started < LANDING + 16) {
+        requestAnimationFrame(step)
+        return
+      }
+      carrying.value = null
+      landing.value = false
+      release(root.value ?? document, held)
+    }
+    requestAnimationFrame(step)
+  }
+
+  /** The pill of that name nearest where the drop was going. */
+  function landedIn(name: string, near: DragBand): HTMLElement | null {
+    const box = root.value
+    if (!box) return null
+    let best: HTMLElement | null = null
+    let closest = Infinity
+    for (const el of box.querySelectorAll<HTMLElement>('.event')) {
+      if ((el.textContent?.trim() ?? '') !== name) continue
+      const r = el.getBoundingClientRect()
+      const off = Math.abs(r.top - near.top) + Math.abs(r.left - near.left)
+      if (off < closest) {
+        closest = off
+        best = el
+      }
+    }
+    return best
   }
 
   function attach(el: HTMLElement | null) {
@@ -706,7 +798,7 @@ export function useMonthDragSkeleton(root: Ref<HTMLElement | null>) {
     let started = 0
     const step = () => {
       const landed = landedAt(cx, cy, hint)
-      if (landed) landed.style.opacity = '0'
+      if (landed) hold(landed)
       if (!started) {
         // The clock starts here rather than at the drop: a frame that comes
         // late would otherwise spend the whole landing before the card has
@@ -714,20 +806,20 @@ export function useMonthDragSkeleton(root: Ref<HTMLElement | null>) {
         started = performance.now()
         const to = landed ? rectOf(landed) : hint
         if (carrying.value)
-          carrying.value = { ...carrying.value, rect: { ...to, width: held.rect.width } }
+          carrying.value = {
+            ...carrying.value,
+            rect: { ...to, width: held.rect.width },
+          }
         requestAnimationFrame(step)
         return
       }
-      if (performance.now() - started < LANDING) {
+      if (performance.now() - started < LANDING + 16) {
         requestAnimationFrame(step)
         return
       }
-      for (const el of document.querySelectorAll<HTMLElement>(
-        '[data-week-row] .event',
-      ))
-        if (el.style.opacity === '0') el.style.opacity = ''
       carrying.value = null
       landing.value = false
+      release(root.value ?? document)
     }
     requestAnimationFrame(step)
   }
@@ -844,6 +936,62 @@ export function useMonthResize(
     to: string
     edge: MonthEdge
   } | null = null
+  /** The pulled bar's own fill, which with its title picks out its pieces. */
+  let pulledBg = ''
+
+  /**
+   * Every piece of the bar being pulled, in its hover fill for as long as it
+   * is held (the user's call 2026-10-14). Pulled into another week the bar is
+   * drawn as one piece per row, and :hover only ever lit the piece under the
+   * pointer, so the weeks already covered sat in the resting fill. The pieces
+   * are new elements after every step, so they are found again each time: the
+   * same title and fill, on days inside the span being drawn.
+   */
+  const HELD_BAR = 'data-pulled'
+  function markPieces(span: [string, string] | null) {
+    const bars = root.value?.querySelectorAll<HTMLElement>(
+      '[data-week-row] .event',
+    )
+    for (const bar of bars ?? []) {
+      const row = bar.closest<HTMLElement>('[data-week-row]')
+      let on = false
+      if (span && row && pulling) {
+        const rect = bar.getBoundingClientRect()
+        const cell = row.getBoundingClientRect().width / 7
+        const first = dayAt(row, rect.left + cell / 2)
+        const last = dayAt(row, rect.right - cell / 2)
+        on =
+          bar.innerText.trim().split('\n')[0] === pulling.title &&
+          bar.style.getPropertyValue('--bg') === pulledBg &&
+          first >= span[0] &&
+          last <= span[1]
+      }
+      if (on) bar.setAttribute(HELD_BAR, '')
+      else bar.removeAttribute(HELD_BAR)
+    }
+  }
+  /**
+   * Let go of: every piece rests until the pointer is off the bar — off all
+   * of its pieces, not each in turn, or a week the pointer never went back to
+   * would stay at rest and miss the hover the rest of the bar then shows.
+   */
+  function restPieces() {
+    const pieces = [
+      ...(root.value?.querySelectorAll<HTMLElement>(`[${HELD_BAR}]`) ?? []),
+    ]
+    for (const bar of pieces) {
+      bar.removeAttribute(HELD_BAR)
+      bar.setAttribute('data-rested', '')
+    }
+    const wake = (e: PointerEvent) => {
+      const on = (e.target as HTMLElement | null)?.closest('[data-rested]')
+      if (on) return
+      for (const bar of root.value?.querySelectorAll('[data-rested]') ?? [])
+        bar.removeAttribute('data-rested')
+      window.removeEventListener('pointermove', wake)
+    }
+    window.addEventListener('pointermove', wake)
+  }
 
   function barAt(e: PointerEvent) {
     const el = e.target as HTMLElement | null
@@ -915,9 +1063,14 @@ export function useMonthResize(
     pulling = {
       title: bar.innerText.trim().split('\n')[0] ?? '',
       from: dayAt(row, rect.left + cell / 2),
-      to: addDays(row.dataset.stripDate ?? '', Math.max(col(rect.right) - 1, 0)),
+      to: addDays(
+        row.dataset.stripDate ?? '',
+        Math.max(col(rect.right) - 1, 0),
+      ),
       edge: armed.edge,
     }
+    pulledBg = bar.style.getPropertyValue('--bg')
+    markPieces([pulling.from, pulling.to])
     window.addEventListener('pointermove', onPull)
     window.addEventListener('pointerup', onDrop, { once: true })
     window.addEventListener('pointercancel', onDrop, { once: true })
@@ -931,13 +1084,22 @@ export function useMonthResize(
       under?.closest<HTMLElement>('[data-week-row]') ??
       armed?.bar.closest<HTMLElement>('[data-week-row]')
     if (!row) return
-    onResize({ ...pulling, date: dayAt(row, e.clientX) })
+    const date = dayAt(row, e.clientX)
+    onResize({ ...pulling, date })
+    // After the calendar has drawn the new span.
+    const p = pulling
+    const span: [string, string] =
+      p.edge === 'end'
+        ? [p.from, date < p.from ? p.from : date]
+        : [date > p.to ? p.to : date, p.to]
+    requestAnimationFrame(() => pulling === p && markPieces(span))
   }
 
   function onDrop() {
     window.removeEventListener('pointermove', onPull)
     window.removeEventListener('pointerup', onDrop)
     window.removeEventListener('pointercancel', onDrop)
+    if (pulling) restPieces()
     pulling = null
     disarm()
   }

@@ -14,6 +14,7 @@ import {
 import { Button, Popover, Tooltip, useColorScheme } from '../../src'
 import PreviewSelectRow from './PreviewSelectRow.vue'
 import PreviewSwitchRow from './PreviewSwitchRow.vue'
+import { pageCrumbKey } from '../espresso-header/pageCrumb'
 import { headerTypes, subheaderTypes } from '../espresso-header/variants'
 import { headerCrumbsKey } from '../espresso-header/crumbs'
 import ListPage from './list/ListPage.vue'
@@ -32,6 +33,12 @@ import TablePatterns from '../components/TablePatterns.vue'
 import ActivityPatterns from '../activity/ActivityPatterns.vue'
 import CalendarPatterns from '../calendar/CalendarPatterns.vue'
 import ChartsPatterns from '../charts/ChartsPatterns.vue'
+import EmailComposerPage from '../email-composer/EmailComposerPage.vue'
+import TreePage from '../tree/TreePage.vue'
+import FileInputPage from '../file-input/FileInputPage.vue'
+import AccordionPatterns from '../accordion/AccordionPatterns.vue'
+import DatePickerPage from '../date-picker/DatePickerPage.vue'
+import TagPage from '../tag/TagPage.vue'
 // Figma 35185:59381 — the app's own mark, in place of the Frappe logo
 import appLogo from './assets/app-logo.svg'
 import EIcon from '../espresso-sidebar/EIcon.vue'
@@ -69,6 +76,12 @@ import navSettingsModal from './assets/nav/settings-modal.svg?raw'
 import navTable from './assets/nav/table.svg?raw'
 import navActivity from './assets/nav/activity.svg?raw'
 import navCalendar from './assets/nav/calendar.svg?raw'
+import navEmailComposer from './assets/nav/email-composer.svg?raw'
+import navTree from './assets/nav/tree.svg?raw'
+import navFileInput from './assets/nav/file-input.svg?raw'
+import navAccordion from './assets/nav/accordion.svg?raw'
+import navDatePicker from './assets/nav/date-picker.svg?raw'
+import navTag from './assets/nav/tag.svg?raw'
 import ApplicableCouponsModal from './modals/ApplicableCouponsModal.vue'
 import CallDetailsModal from './modals/CallDetailsModal.vue'
 import DeleteProjectModal from './modals/DeleteProjectModal.vue'
@@ -184,6 +197,12 @@ const pages = [
   'Table',
   'Activity',
   'Calendar',
+  'Email composer',
+  'Tree',
+  'File input',
+  'Accordion',
+  'Date picker',
+  'Tag',
 ].map((label) => ({ id: label.toLowerCase().replace(/\W+/g, '-'), label }))
 
 // The app tray down the far left, as a Frappe app shows it: this playground
@@ -244,6 +263,12 @@ const NAV_ICONS: Record<string, string> = {
   table: navTable,
   activity: navActivity,
   calendar: navCalendar,
+  'email-composer': navEmailComposer,
+  tree: navTree,
+  'file-input': navFileInput,
+  accordion: navAccordion,
+  'date-picker': navDatePicker,
+  tag: navTag,
 }
 
 // Drives `<html data-theme>`, so every token on the page — and in the
@@ -334,11 +359,20 @@ const patternTray = ref(true)
 // Sidebar & Header page's default and waits for the preview control
 // elsewhere: each page arrives with its own default, and the control takes
 // it from there. Off, nothing sits above the stage.
-const showHeader = ref(true)
+// …except over the Calendar, which draws its own 48px header — title,
+// faces, Share, New — as its file does (node 35208:100256), and over the
+// Email composer, whose header carries the Compose button. Two headers
+// stacked read as the app's and then the page's; the page's is the one that
+// belongs to it.
+const OWN_HEADER = ['calendar', 'email-composer']
+const showHeader = ref(!OWN_HEADER.includes(page.value))
 const headerType = ref(headerTypes[0].value)
 const showSubheader = ref(page.value === 'sidebar-header')
 const subheaderType = ref(subheaderTypes[0].value)
-watch(page, (p) => (showSubheader.value = p === 'sidebar-header'))
+watch(page, (p) => {
+  showSubheader.value = p === 'sidebar-header'
+  showHeader.value = !OWN_HEADER.includes(p)
+})
 
 const headerComponent = computed(
   () => headerTypes.find((v) => v.value === headerType.value)!.component,
@@ -398,6 +432,49 @@ const cellClass = computed(() => [
 ])
 
 const current = computed(() => pages.find((p) => p.id === page.value)!)
+// Pages that aren't about the header show one crumb, their own name, in
+// place of the header pattern's sample crumbs.
+const OWN_CRUMB = [
+  'settings-modal',
+  'table',
+  'activity',
+  'tree',
+  'file-input',
+  'accordion',
+  'date-picker',
+  'tag',
+]
+// The checkbox's tick as the design system draws it (node 23513:153494,
+// `icon/line/check new`) on every page from Settings modal to Tag — and in
+// the modals they open, which are teleported out of the stage, hence a mark
+// on <html> rather than a class here. frappe-ui's own Checkbox is left as is.
+const ESPRESSO_CHECK_PAGES = [
+  'settings-modal',
+  'table',
+  'activity',
+  'calendar',
+  'email-composer',
+  'tree',
+  'file-input',
+  'accordion',
+  'date-picker',
+  'tag',
+]
+watch(
+  page,
+  (id) => {
+    const root = document.documentElement
+    if (ESPRESSO_CHECK_PAGES.includes(id)) root.dataset.espressoChecks = ''
+    else delete root.dataset.espressoChecks
+  },
+  { immediate: true },
+)
+onUnmounted(() => delete document.documentElement.dataset.espressoChecks)
+
+provide(
+  pageCrumbKey,
+  computed(() => (OWN_CRUMB.includes(page.value) ? current.value.label : null)),
+)
 
 const open = reactive<Record<string, boolean>>(
   Object.fromEntries(modals.map((m) => [m.id, m.id === initial])),
@@ -1175,6 +1252,17 @@ const outlineTitle = computed(
                 <ActivityPatterns />
               </div>
               <CalendarPatterns v-else-if="page === 'calendar'" />
+              <EmailComposerPage v-else-if="page === 'email-composer'" />
+              <TreePage v-else-if="page === 'tree'" />
+              <FileInputPage v-else-if="page === 'file-input'" />
+              <DatePickerPage v-else-if="page === 'date-picker'" />
+              <TagPage v-else-if="page === 'tag'" />
+              <div
+                v-else-if="page === 'accordion'"
+                class="v2-scroll h-full overflow-y-auto"
+              >
+                <AccordionPatterns />
+              </div>
 
               <div
                 v-else
@@ -1294,6 +1382,31 @@ const outlineTitle = computed(
 </template>
 
 <style>
+/* Switch's knob takes the file's shadow (node 23553:699) in both themes.
+   frappe-ui's `shadow` adds an inset highlight that, on the dark knob, reads
+   as a blurry inner ring the design doesn't have. */
+[role='switch'] > span[data-state] {
+  box-shadow:
+    0 0.25px 1px rgb(255 255 255 / 0.14),
+    0 0 2px rgb(0 0 0 / 0.1),
+    0 2px 4px rgb(0 0 0 / 0.16);
+}
+
+/* The design system's tick (node 23513:153494, `icon/line/check new`): a
+   12px mark in the 16px box, 10 in the 14 — 2px in from every side — in the
+   same white, and on dark the same #0F0F0F, that frappe-ui's own tick uses.
+   Only on the pages that set the mark above; the library is untouched. */
+:root[data-espresso-checks] [type='checkbox']:checked {
+  background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 12 12' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M9.71757 2.45503C9.89809 2.24626 10.2137 2.22384 10.4226 2.40425C10.6314 2.58477 10.6548 2.9004 10.4744 3.10933L4.91581 9.54487C4.82201 9.65322 4.68608 9.71626 4.54276 9.71773C4.39936 9.71911 4.26176 9.65928 4.16581 9.55269L1.533 6.6269C1.34863 6.42176 1.36527 6.10554 1.5701 5.92085C1.77536 5.73612 2.09241 5.75271 2.27714 5.95796L4.52909 8.46089L9.71757 2.45503Z'/%3e%3c/svg%3e");
+  background-size: calc(100% - 4px) calc(100% - 4px);
+  background-position: center;
+  background-repeat: no-repeat;
+}
+:root[data-espresso-checks][data-theme='dark'] [type='checkbox']:checked,
+:root[data-espresso-checks] [data-theme='dark'] [type='checkbox']:checked {
+  background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 12 12' fill='%230F0F0F' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M9.71757 2.45503C9.89809 2.24626 10.2137 2.22384 10.4226 2.40425C10.6314 2.58477 10.6548 2.9004 10.4744 3.10933L4.91581 9.54487C4.82201 9.65322 4.68608 9.71626 4.54276 9.71773C4.39936 9.71911 4.26176 9.65928 4.16581 9.55269L1.533 6.6269C1.34863 6.42176 1.36527 6.10554 1.5701 5.92085C1.77536 5.73612 2.09241 5.75271 2.27714 5.95796L4.52909 8.46089L9.71757 2.45503Z'/%3e%3c/svg%3e");
+}
+
 /* Page switch: fade and rise 4px. */
 .v2-page-enter-active,
 .v2-page-leave-active {

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { Button, Slider } from '../../../src'
+import ActivityIcon from './ActivityIcon.vue'
 
 const props = withDefaults(
   defineProps<{
@@ -59,10 +60,13 @@ const clock = (seconds: number) =>
     <Button
       variant="ghost"
       size="sm"
-      :icon="playing ? 'lucide-pause' : 'lucide-play'"
       :aria-label="playing ? 'Pause' : 'Play'"
       @click="playing = !playing"
-    />
+    >
+      <template #icon>
+        <ActivityIcon :name="playing ? 'pause' : 'play-16'" class="size-4" />
+      </template>
+    </Button>
 
     <Slider
       v-model="position"
@@ -78,16 +82,20 @@ const clock = (seconds: number) =>
     <Button
       variant="ghost"
       size="sm"
-      :icon="muted ? 'lucide-volume-x' : 'lucide-volume-2'"
+      :icon="muted ? 'lucide-volume-x' : undefined"
       :aria-label="muted ? 'Unmute' : 'Mute'"
       @click="muted = !muted"
-    />
+    >
+      <!-- The file draws no muted glyph; lucide's crossed speaker stands in -->
+      <template v-if="!muted" #icon>
+        <ActivityIcon name="volume" class="size-4" />
+      </template>
+    </Button>
     <!-- Pulled out by the difference between the card's sides and its top. -->
-    <Button
-      variant="ghost"
-      size="sm"
-      icon="lucide-more-horizontal"
-      class="-mr-0.5"
-    />
+    <Button variant="ghost" size="sm" aria-label="More" class="-mr-0.5">
+      <template #icon>
+        <ActivityIcon name="dots" class="size-4" />
+      </template>
+    </Button>
   </div>
 </template>

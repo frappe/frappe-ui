@@ -288,7 +288,7 @@ const rows: Row[] = [
               v-for="column in columns"
               :key="column.key"
               :item="column"
-              :class="column.key === 'no' ? 'justify-center' : ''"
+              :class="column.key === 'no' ? '!justify-center' : ''"
             />
           </ListHeader>
           <ListRows />

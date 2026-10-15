@@ -82,8 +82,13 @@ export const espressoCalendar = [
   '[&_.grid-cols-7>span>span.bg-surface-gray-10]:!text-white',
   '[&_.grid-cols-7>span>span.bg-surface-gray-10]:!rounded-3',
   '[&_.grid-cols-7>span>span.bg-surface-gray-10]:!h-6',
-  '[&_.grid-cols-7>span>span.bg-surface-gray-10]:!w-auto',
-  '[&_.grid-cols-7>span>span.bg-surface-gray-10]:!px-[5px]',
+  // One box for every date: 26 wide whether the day has one digit or two —
+  // the tag does not hug a "7" (the user's call 2026-10-07); the numeral
+  // centred in it, in the font's own figures — tabular ones set a "1" in a
+  // full-width slot, which opened a gap inside "13" (the user's call
+  // 2026-10-13).
+  '[&_.grid-cols-7>span>span.bg-surface-gray-10]:!w-[26px]',
+  '[&_.grid-cols-7>span>span.bg-surface-gray-10]:!px-0',
 
   // The all-day band: 34 in the file with nothing in it. A floor, not a
   // height — a week with bars in the row still gets its lanes.
@@ -142,6 +147,18 @@ export const espressoCalendar = [
   // overlap by one and read as one mark.
   // …and today's line above the hairline, so the pale one does not show as a
   // stripe down the middle of it.
+  // ── "All day" on the hours' own edge ─────────────────────────────────────
+  //
+  // The hours are already pinned by their right edge, 10 clear of the rule
+  // (the `::before` rules above). "All day" is one more label in that column
+  // and was centred across the gutter instead, which put it 6px short of
+  // every hour under it. `ml-auto` in a flex box is what moves it over.
+  '[&_.calendar-all-day-label]:!ml-auto',
+  // 9 and not 10: the rule is a border inside this cell's box, so the label's
+  // margin is measured from inside it, where the hours' 10 is measured from
+  // the line itself. Measured 330 for both, in Day and in Week.
+  '[&_.calendar-all-day-label]:!mr-[9px]',
+
   '[&_.current-time]:!z-20',
   '[&_.current-time]:!ml-[2px]',
   // …and the same air at the other end. The segment is a block, so it ran to
@@ -159,7 +176,10 @@ export const espressoCalendar = [
   // A week's row is a fixed share of the strip, not its contents. The rows are
   // `flex-1 basis-0` already, but a flex item's `min-height` is `auto`, so a
   // day with six events on it grew its whole row and every other row shrank.
-  '[&_[data-week-row]]:!min-h-0',
+  // Its floor is a day at its fullest — three rows and the "N more" line (see
+  // CalendarPatterns' month overflow) — so on a short window the month
+  // scrolls instead of the line spilling into the next week.
+  '[&_[data-week-row]]:!min-h-[159px]',
 
   // …and the card a month drag leaves where it was picked up from, at the
   // weight the week's leaves: the component fades its own to a half, the
@@ -230,6 +250,26 @@ export const espressoCalendar = [
   // bars are a row of a list, not a span of hours.
   '[&_[data-time-grid]_.event]:!my-px',
   '[&_[data-time-grid]_.event]:!h-[calc(100%-2px)]',
+  // A card held by its edge is in its hover fill the whole stretch. The
+  // pointer runs off the card's end between one 15-minute step and the
+  // next, so :hover alone flickered it to the resting fill and back at every
+  // step. The component lifts the box it is stretching to z-index 100 for
+  // as long as it is held, and nothing else then.
+  '[&_[data-time-grid]_[style*="z-index:_100"]>.event]:![background-color:var(--bg-active)]',
+  // …and let go of, it rests until the pointer leaves it — see `onCardUp`.
+  '[&_[data-time-grid]_.event[data-rested]:not(.active)]:![background-color:var(--bg)]',
+  // …and Month's: every week's piece of a bar whose edge is being pulled —
+  // see `markPieces` — and each of them resting once it is let go.
+  '[&_[data-week-row]_.event[data-pulled]]:![background-color:var(--bg-active)]',
+  // …and every piece of an event hovered on any one of them — see
+  // `piecesOf`. Below the rested rule: a piece just let go of stays at rest.
+  '[&_.event[data-hover-group]:not(.active):not([data-rested])]:![background-color:var(--bg-active)]',
+  '[&_[data-week-row]_.event[data-rested]:not(.active)]:![background-color:var(--bg)]',
+  // …and the white ring a pill wears where it lies on another comes in by
+  // the same pixel top and bottom, or it reads 3 there against 2 at the
+  // sides. A transparent border on its border-box, its fill clipped inside.
+  '[&_[data-time-grid]_[style*=clip-path]>div]:![border-block:1px_solid_transparent]',
+  '[&_[data-time-grid]_[style*=clip-path]>div]:![background-clip:padding-box]',
 
   // Event cards: the file draws a tinted block with a 2px bar down its lead
   // edge, sitting 2px in from the column's left and 1px from the others.
@@ -247,8 +287,7 @@ export const espressoCalendar = [
  * the colour is still the default, so the moment one is picked the event's
  * own ground takes over.
  */
-export const espressoGreyDraft =
-  '[&_.event.event-draft]:!bg-surface-gray-1'
+export const espressoGreyDraft = '[&_.event.event-draft]:!bg-surface-gray-1'
 
 export const grid = {
   hourHeight: 70,
@@ -258,27 +297,6 @@ export const grid = {
   allDayHeight: 34,
 }
 
-/**
- * The file's month picker (node 35247:71977), cell by cell:
- *
- *   panel ······ 196 wide, radius 12, padding 8
- *   header ····· 24 tall — the month at 13/500 with a chevron, and three
- *                22x24 movers 4 apart
- *   grid ······· 180 wide, 6 to the header. Every cell 24 square, radius 5,
- *                2 apart both ways; the weekday letters 12/regular
- *                ink-gray-4, the dates 12/regular, the selected one filled
- *                ink-gray-8.
- *
- * 8 + 180 + 8 = 196 across. Down, the file's 200 is a five-row June; the
- * component always draws six, which is 8 + 24 + 6 + 180 + 8 = 226.
- *
- * frappe-ui's DatePicker draws this at a roomier size — 224 wide, every cell
- * 28 square on a radius of 8 — and exposes no way to size its panel, so the
- * panel is sent to a target this page owns and sized there. Everything hangs
- * off the calendar panel's own root, which the single picker and the range
- * picker are both built from: a Select's menu lands in the same target and
- * has none of it, so nothing else is touched.
- */
 /**
  * Eight rows of a Select's menu, and the rest scrolled to.
  *
@@ -306,9 +324,13 @@ export const grid = {
  * where the grids take it from the calendar the event belongs to.
  */
 export const espressoAgenda = [
-  // The 20 either side the sub-header and the grid both keep, and the same
-  // again at the foot so a scroll does not end on a card's border.
-  '[&_.overflow-y-auto.bg-surface-base]:!px-5',
+  // 20 on either side — the page's own margin, the same the sub-header's
+  // controls keep on the right — and 20 again at the foot so a scroll does
+  // not end on a card's border. The list, the month label and the Day band
+  // all sat on 14 for a while, the line the app header's title starts on;
+  // read as a body, 14 against the 20 on the right was simply uneven.
+  '[&_.overflow-y-auto.bg-surface-base]:!pl-5',
+  '[&_.overflow-y-auto.bg-surface-base]:!pr-5',
   '[&_.overflow-y-auto.bg-surface-base]:!pb-5',
 
   // An event reads as the card it is in the grids: the same 8px corner…
@@ -316,14 +338,23 @@ export const espressoAgenda = [
   // …and the same ink, which is the calendar's own rather than the page's.
   '[&_.calendar-row-title]:![color:var(--border)]',
 
-  // …and no list of who is on it. The row keeps a block for the people an
-  // event is with, and with no faces to put there it falls back to the
-  // string the panel wrote — every address in full, in the calendar's own
-  // colour, which read as a second title rather than as a detail. Who is
-  // coming is what the card opens to say; the line a day is scanned down is
-  // not the place for it.
-  '[&_.calendar-row-participant]:!hidden',
+  // …and nothing where a description would go when there is none. The row
+  // draws the block whenever a slot is offered for it, and this page offers
+  // one; empty, it still took its 8px of gap after the title.
+  '[&_.calendar-row-description:empty]:!hidden',
 ].join(' ')
+
+/**
+ * The first agenda alone: no list of who is on an event.
+ *
+ * The row keeps a block for the people an event is with, and with no faces
+ * to put there it falls back to the string the panel wrote — every address
+ * in full, in the calendar's own colour, which read as a second title rather
+ * than as a detail. Who is coming is what the card opens to say; the line a
+ * day is scanned down is not the place for it. The second agenda fills the
+ * block with faces, so the rule is this one's alone.
+ */
+export const espressoAgendaPlain = '[&_.calendar-row-participant]:!hidden'
 
 /**
  * The agenda again, with the fill held back until the pointer arrives.
@@ -343,6 +374,8 @@ export const espressoAgendaFlat = [
   // state of the list, and a colour that changes with the row being pointed
   // at reads as the row saying something rather than as the pointer.
   '[&_.calendar-row:hover]:!bg-surface-gray-1',
+  // …and the faces' rings take the same fill, so they don't ring white on it
+  '[&_.calendar-row:hover]:[--stack-ring:var(--surface-gray-1)]',
   // …and the title in the page's own ink. With no fill behind it, a title in
   // the calendar's colour is the only coloured thing on a line of black
   // text, which puts the weight on what the event is called rather than on
@@ -353,6 +386,12 @@ export const espressoAgendaFlat = [
   // quieter again. It is the least of the three things on the line, and in
   // the calendar's colour it was reading as loud as the bar.
   '[&_.calendar-row_.calendar-row-description]:!text-ink-gray-5',
+  // …at the title's own size and weight. Here it is what the event is about
+  // — "Frontend, round two" after "Interview" — and a note read straight on
+  // from the title is set like the title, told apart by ink alone. A step
+  // smaller it read as a caption to the line rather than the rest of it.
+  '[&_.calendar-row_.calendar-row-description]:!text-sm',
+  '[&_.calendar-row_.calendar-row-description]:!leading-5',
 ].join(' ')
 
 export const espressoCardCopy = [
@@ -361,6 +400,10 @@ export const espressoCardCopy = [
   '[&_.event-draft]:!outline-none',
   '[&_.event-draft]:![background-color:var(--bg)]',
   '[&_.event-title]:![color:var(--border)]',
+  // …and the time under it, the card's own ink at 70% — without it the
+  // copy's time fell back to the component's gray mid-drag (the user's call
+  // 2026-10-13)
+  '[&_.event-subtitle]:![color:color-mix(in_srgb,var(--border)_70%,transparent)]',
   '[&_.event_svg]:![color:var(--border)]',
   '[&_.event_svg]:!size-3.5',
   '[&_.event_svg]:!mt-px',
@@ -390,91 +433,4 @@ export const espressoMenuHeight = [
   '[&_[data-slot=content-body]]:!w-full',
   '[&_[role=listbox][data-slot=content]_[role=presentation]]:!w-full',
   '[&_[role=listbox][data-slot=content]_[role=option]]:!w-full',
-].join(' ')
-
-export const espressoDatePicker = [
-  // 196 wide (node 35247:71977). The single picker sets its own 224 on a
-  // wrapper and the range picker hugs its contents, so the width is put on
-  // the panel both of them are built from — and on that wrapper as well, or
-  // the panel would sit inside a box wider than itself.
-  '[&_.w-56]:!w-[196px]',
-  '[&_.select-none.text-ink-gray-9]:!w-[196px]',
-
-  // Every control in the header is an `xs` button, and they are all the
-  // same size and the same type — which is what puts their labels on one
-  // line. The component builds the row out of `sm`s and then overrides two
-  // of the three type scales by hand: the month at `text-sm-medium` (13/500)
-  // and Today at `text-xs` (12), on 28-tall buttons.
-  //
-  // frappe-ui's own `xs`: `h-6 text-xs px-1.5 rounded-3` with a label,
-  // `h-6 w-6 rounded-3` icon-only. Applied in that shape:
-  '[&_.select-none.text-ink-gray-9_.p-2.pb-0_button]:!h-6',
-  '[&_.select-none.text-ink-gray-9_.p-2.pb-0_button]:!rounded-3',
-  '[&_.select-none.text-ink-gray-9_.p-2.pb-0_button]:!text-xs',
-  // the two that carry a label take xs padding — the month, and Today,
-  // which is the one mover that is not an icon
-  '[&_.select-none.text-ink-gray-9_.p-2.pb-0>button]:!px-1.5',
-  '[&_.select-none.text-ink-gray-9_.p-2.pb-0>div>button:not(:first-child):not(:last-child)]:!px-1.5',
-  // and the two that carry a glyph are 24 square
-  '[&_.select-none.text-ink-gray-9_.p-2.pb-0>div>button:first-child]:!size-6',
-  '[&_.select-none.text-ink-gray-9_.p-2.pb-0>div>button:last-child]:!size-6',
-
-  // 6 between the header and the grid; the other three sides keep their 8.
-  '[&_.select-none.text-ink-gray-9_.p-2:not(.pb-0)]:!pt-1.5',
-
-  // Every cell — the weekday letters and the dates alike — 24 tall on a
-  // radius of 5, filling its column rather than standing 24 wide inside it.
-  //
-  // The width is what a range is drawn with: the file runs one unbroken band
-  // from the first day to the last with the two ends sitting on it as filled
-  // squares (node 35421:113510), and a cell narrower than its column leaves a
-  // gap at every date, so the band came out as a row of separate pills.
-  '[&_.select-none.text-ink-gray-9_.size-7]:!h-6',
-  '[&_.select-none.text-ink-gray-9_.size-7]:!w-full',
-  // …which means the 2px the component puts between the days of a week goes
-  // as well; the 2 between the weeks stays, which is the file's.
-  '[&_.select-none.text-ink-gray-9_.flex-col>.flex]:!gap-0',
-  '[&_.select-none.text-ink-gray-9_.size-7]:!rounded-2',
-
-  // …and the band itself: the days between the two ends carry no radius, so
-  // one runs into the next, in the file's #F7F7F7 rather than the component's
-  // gray-3, which is dark enough to read as a selection of its own.
-  // `.size-7` carried along so the radius outranks the one every cell takes
-  // above: a tie on specificity is broken by the order Tailwind writes its
-  // rules in, not the order they are named in here.
-  '[&_.select-none.text-ink-gray-9_.size-7.bg-surface-gray-3]:!rounded-none',
-  '[&_.select-none.text-ink-gray-9_.size-7.bg-surface-gray-3]:!bg-surface-gray-1',
-  '[&_.select-none.text-ink-gray-9_.size-7.bg-surface-gray-3]:hover:!bg-surface-gray-1',
-
-  // The month and year face fills the panel. The component builds it 208
-  // square inside a panel this file has brought down to 196, and its two
-  // columns are halves of that 208 — so they hung over the edge and were
-  // clipped, which left two lists the width of the words in them against a
-  // panel of white. Held to the panel, a half is 98 and each column fills
-  // what it is given.
-  '[&_.select-none.text-ink-gray-9_.h-52]:!w-full',
-
-  // 2 under the weekday letters, the same 2 that separates the weeks.
-  '[&_.select-none.text-ink-gray-9_.mb-1]:!mb-0.5',
-
-  // 12/regular throughout: the component sets the dates a size up and the
-  // weekday letters a weight up.
-  '[&_.select-none.text-ink-gray-9_.text-sm]:!text-xs',
-  '[&_.select-none.text-ink-gray-9_.text-xs-medium]:!text-xs',
-
-  // Only the weeks the month actually has. `generateWeeks` always emits six
-  // rows, on purpose — a constant height means the panel does not jiggle when
-  // you page between months, and in a dual-pane range picker the two panes
-  // line up. The file draws a five-row June, so the trailing row goes when
-  // every date in it belongs to the next month; the component marks those
-  // with `data-outside-view`, and a row with no cell lacking it is a row of
-  // nothing but spill-over. The panel then changes height between months —
-  // which is the thing the six were avoiding — but it hangs off a label at
-  // the top left and grows downwards, so what moves is its bottom edge.
-  '[&_.select-none.text-ink-gray-9_.flex-col>div:last-child:not(:has(button:not([data-outside-view])))]:!hidden',
-
-  // …and the dates in #383838, where the component sets ink-gray-8 (#171717).
-  // The weekday letters are ink-gray-4 already, which is the file's #999999,
-  // and the selected fill is surface-gray-9, which is the file's #383838.
-  '[&_.select-none.text-ink-gray-9_.size-7.text-ink-gray-8]:!text-ink-gray-7',
 ].join(' ')

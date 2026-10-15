@@ -96,8 +96,10 @@ const channels = reactive(
       rule between rows where V1's list draws none, so 12 each side would come
       to 25 — 62 puts the gap back on 24.
     -->
+    <!-- No left inset: the label and every row's title start on the rules'
+         own left end (the user's call 2026-10-14); the right keeps its 8 -->
     <ListView
-      :class="`!w-full ${espressoListViewStatic}`"
+      :class="`!w-full ${espressoListViewStatic} [&_.grid]:!pl-0`"
       :columns="columns"
       :rows="rows"
       row-key="id"

@@ -26,16 +26,86 @@ const columns = [
 ]
 
 const files: FileRow[] = [
-  { id: 1, title: 'Youtube-thumbnail.png', size: '1.6 MB', type: 'PNG image', date: 'Yesterday', time: '11:32 PM' },
-  { id: 2, title: 'Socials-final.png', size: '2.4 MB', type: 'PNG image', date: 'Apr 12, 2026', time: '11:32 AM' },
-  { id: 3, title: 'leading-craft.pdf', size: '12 MB', type: 'PDF', date: 'Apr 12, 2026', time: '12:44 AM' },
-  { id: 4, title: 'Why-frappe.png', size: '1.6 MB', type: 'PNG image', date: 'Apr 16, 2026', time: '9:53 AM' },
-  { id: 5, title: 'golf-together.png', size: '1.8 MB', type: 'PNG image', date: 'Apr 17, 2026', time: '2:16 PM' },
-  { id: 6, title: 'Fsuite-case-study.pdf', size: '19 MB', type: 'PDF', date: 'Apr 18, 2026', time: '12:32 PM' },
-  { id: 7, title: 'Thumbnail-draft.png', size: '1.6 MB', type: 'PNG image', date: 'Apr 20, 2026', time: '4:55 PM' },
-  { id: 8, title: 'Branding-inspi.png', size: '1.6 MB', type: 'PNG image', date: 'Apr 24, 2026', time: '11:32 PM' },
-  { id: 9, title: 'ticket-helpdesk.html', size: '12 MB', type: 'HTML file', date: 'Apr 29, 2026', time: '6:44 PM' },
-  { id: 10, title: 'geist-font-v1.7.0.zip', size: '235 KB', type: 'ZIP folder', date: 'May 1, 2026', time: '10:32 AM' },
+  {
+    id: 1,
+    title: 'Youtube-thumbnail.png',
+    size: '1.6 MB',
+    type: 'PNG image',
+    date: 'Yesterday',
+    time: '11:32 PM',
+  },
+  {
+    id: 2,
+    title: 'Socials-final.png',
+    size: '2.4 MB',
+    type: 'PNG image',
+    date: 'Apr 12, 2026',
+    time: '11:32 AM',
+  },
+  {
+    id: 3,
+    title: 'leading-craft.pdf',
+    size: '12 MB',
+    type: 'PDF',
+    date: 'Apr 12, 2026',
+    time: '12:44 AM',
+  },
+  {
+    id: 4,
+    title: 'Why-frappe.png',
+    size: '1.6 MB',
+    type: 'PNG image',
+    date: 'Apr 16, 2026',
+    time: '9:53 AM',
+  },
+  {
+    id: 5,
+    title: 'golf-together.png',
+    size: '1.8 MB',
+    type: 'PNG image',
+    date: 'Apr 17, 2026',
+    time: '2:16 PM',
+  },
+  {
+    id: 6,
+    title: 'Fsuite-case-study.pdf',
+    size: '19 MB',
+    type: 'PDF',
+    date: 'Apr 18, 2026',
+    time: '12:32 PM',
+  },
+  {
+    id: 7,
+    title: 'Thumbnail-draft.png',
+    size: '1.6 MB',
+    type: 'PNG image',
+    date: 'Apr 20, 2026',
+    time: '4:55 PM',
+  },
+  {
+    id: 8,
+    title: 'Branding-inspi.png',
+    size: '1.6 MB',
+    type: 'PNG image',
+    date: 'Apr 24, 2026',
+    time: '11:32 PM',
+  },
+  {
+    id: 9,
+    title: 'ticket-helpdesk.html',
+    size: '12 MB',
+    type: 'HTML file',
+    date: 'Apr 29, 2026',
+    time: '6:44 PM',
+  },
+  {
+    id: 10,
+    title: 'geist-font-v1.7.0.zip',
+    size: '235 KB',
+    type: 'ZIP folder',
+    date: 'May 1, 2026',
+    time: '10:32 AM',
+  },
 ]
 
 // `name` mirrors the id — ListView finds a selected row's neighbours by `name`.
@@ -76,8 +146,14 @@ const opened = ref<string | null>(null)
       -->
       <template #cell="{ item, row, column }">
         <span
-          class="flex min-w-0 items-center gap-2"
-          :class="column.key === 'actions' ? 'w-full justify-end' : ''"
+          class="flex min-w-0 items-center"
+          :class="
+            column.key === 'actions'
+              ? 'w-full justify-end gap-2'
+              : column.key === 'date'
+                ? ''
+                : 'gap-2'
+          "
         >
           <!--
             The file's own preview is the title cell's prefix, at the size the
@@ -97,12 +173,24 @@ const opened = ref<string | null>(null)
             alt=""
           />
 
-          <!-- Date and time, split by the design's middle dot. -->
+          <!--
+            Date and time, split by the file's `icon/line/dot` (node
+            36241:128850): a 4px disc centred in a 16px box, in #E2E2E2 —
+            gray/300, `ink-gray-2` — with no gap either side; the box is the
+            space.
+          -->
           <template v-else-if="column.key === 'date'">
             <span class="truncate text-base text-ink-gray-6">
               {{ (row as FileRow).date }}
             </span>
-            <span class="text-base text-ink-gray-4" aria-hidden="true">·</span>
+            <svg
+              viewBox="0 0 16 16"
+              class="size-4 shrink-0 text-ink-gray-2"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <circle cx="8" cy="8" r="2" />
+            </svg>
             <span class="truncate text-base text-ink-gray-6">
               {{ (row as FileRow).time }}
             </span>
@@ -114,13 +202,35 @@ const opened = ref<string | null>(null)
             data-row-actions
             class="flex items-center gap-1 opacity-0 transition-opacity"
           >
-            <Button variant="ghost" size="sm" icon="lucide-download" aria-label="Download" @click.stop />
-            <Button variant="ghost" size="sm" icon="lucide-forward" aria-label="Share" @click.stop />
-            <Button variant="ghost" size="sm" icon="lucide-ellipsis" aria-label="More" @click.stop />
+            <Button
+              variant="ghost"
+              size="sm"
+              icon="lucide-download"
+              aria-label="Download"
+              @click.stop
+            />
+            <Button
+              variant="ghost"
+              size="sm"
+              icon="lucide-forward"
+              aria-label="Share"
+              @click.stop
+            />
+            <Button
+              variant="ghost"
+              size="sm"
+              icon="lucide-ellipsis"
+              aria-label="More"
+              @click.stop
+            />
           </span>
 
           <span
-            v-if="column.key === 'title' || column.key === 'size' || column.key === 'type'"
+            v-if="
+              column.key === 'title' ||
+              column.key === 'size' ||
+              column.key === 'type'
+            "
             class="truncate"
             :class="
               column.key === 'title'

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { Button, Divider } from '../../../src'
 import FileIcon from './FileIcon.vue'
 
@@ -8,7 +9,7 @@ export type Attachment = {
   type: 'zip' | 'pdf' | 'doc'
 }
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     /** Sender and their address, as the design prints them. */
     name: string
@@ -30,9 +31,14 @@ withDefaults(
     /** The quoted thread itself, when it is opened out. */
     quotedFrom?: string
     quoted?: string
+    /** Starts with the quote folded away behind the "…". */
+    quoteFolded?: boolean
   }>(),
   { attachments: () => [] },
 )
+
+/** The quoted thread shows until the "…" folds it away (and back). */
+const quoteOpen = ref(!props.quoteFolded)
 </script>
 
 <template>
@@ -136,26 +142,50 @@ withDefaults(
       label="Reply"
     />
 
-    <!-- The quoted thread: the "…" control, then the message it hides. -->
-    <span
+    <!-- The quoted thread: the "…" control, then the message it hides. An
+         xs subtle Button cut to the old badge's exact shape — 28 × 16 at
+         its 8px corners (the user's call 2026-10-14); it folds the quote
+         away and opens it again. Filled (subtle) only while the quote shows;
+         folded, it is ghost — no fill until hovered. -->
+    <Button
       v-if="thread || quoted"
-      class="inline-flex h-4 w-7 items-center justify-center rounded-4 bg-surface-gray-2"
+      size="xs"
+      :variant="quoteOpen && props.quoted ? 'subtle' : 'ghost'"
+      class="self-start !h-4 !w-7 !min-w-0 !rounded-4 !p-0"
+      :aria-label="quoteOpen ? 'Hide quoted text' : 'Show quoted text'"
+      :aria-expanded="props.quoted ? quoteOpen : undefined"
+      @click="quoteOpen = !quoteOpen"
     >
-      <span
-        class="lucide-more-horizontal size-4 text-ink-gray-6"
-        aria-hidden="true"
-      />
-    </span>
+      <template #icon>
+        <span
+          class="lucide-more-horizontal size-4 text-ink-gray-6"
+          aria-hidden="true"
+        />
+      </template>
+    </Button>
 
-    <!-- 14px from the rule to the quoted text, as the divider's own gap. -->
+    <!-- 14px from the rule to the quoted text, as the divider's own gap.
+         Folded as the feed folds a month (ActivityRun): the row eases from
+         `0fr` to `1fr` and fades, and the card's 14 gap is taken back on the
+         way out, so the "…" ends the card with nothing hanging under it. -->
     <div
       v-if="quoted"
-      class="flex flex-col gap-4 border-l border-outline-gray-1 pl-3.5"
+      class="grid transition-[grid-template-rows,margin-top,opacity] duration-200 ease-out motion-reduce:transition-none"
+      :class="
+        quoteOpen
+          ? 'grid-rows-[1fr] opacity-100'
+          : '-mt-3.5 grid-rows-[0fr] opacity-0'
+      "
+      :aria-hidden="!quoteOpen || undefined"
     >
-      <p class="text-p-base text-ink-gray-7">{{ quotedFrom }}</p>
-      <p class="whitespace-pre-line text-p-base text-ink-gray-7">
-        {{ quoted }}
-      </p>
+      <div class="overflow-hidden">
+        <div class="flex flex-col gap-4 border-l border-outline-gray-1 pl-3.5">
+          <p class="text-p-base text-ink-gray-7">{{ quotedFrom }}</p>
+          <p class="whitespace-pre-line text-p-base text-ink-gray-7">
+            {{ quoted }}
+          </p>
+        </div>
+      </div>
     </div>
   </div>
 </template>

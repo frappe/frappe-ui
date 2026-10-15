@@ -3,7 +3,7 @@ import { computed, h, reactive, ref, watch } from 'vue'
 import {
   Avatar,
   Button,
-  DateRangePicker,
+  Popover,
   Dropdown,
   MultiSelect,
   Select,
@@ -15,8 +15,11 @@ import {
   Textarea,
 } from '../../src'
 import { faceFor, logos } from '../components/patterns/designAssets'
-import { colourValue } from './sampleCalendars'
+import { colourValue, people } from './sampleCalendars'
 import DateIcon from './icons/DateIcon.vue'
+import DatePickerPreview from '../date-picker/DatePickerPreview.vue'
+// The v2 shell's own modal card, so this confirms the way Delete project does.
+import EspressoModal from '../v2/modals/EspressoModal.vue'
 import type { CalendarEvent } from '../../experimental/Calendar'
 
 const props = defineProps<{
@@ -59,30 +62,24 @@ const emit = defineEmits<{
 const creating = computed(() => !props.event)
 
 /**
- * An event opened from the grid is read first and changed second. The fields
- * are the same either way — what changes is whether they take a hand — so
- * Edit unlocks them rather than swapping the panel for another one.
+ * An event opened from the grid is live the moment it opens. There is no
+ * Edit to press and no Save to remember: every field takes a hand, and each
+ * change goes straight to the calendar, the way Notion Calendar does it. A
+ * panel closed is a panel whose changes are already kept.
  *
- * `dirty` is what Save waits on: a panel opened to read and closed again has
- * nothing to save, and a button that can be pressed to no effect is a button
- * that has to be explained.
+ * Every field runs through `touch`, so nothing can be changed unnoticed —
+ * and, on an event that exists, nothing can be changed without being saved.
  */
-const editing = ref(false)
-const dirty = ref(false)
-watch(
-  () => props.event,
-  () => {
-    editing.value = false
-    dirty.value = false
-  },
-)
-/** Every field runs through here, so nothing can be changed unnoticed. */
 const touch = () => {
-  if (editing.value) dirty.value = true
+  if (!creating.value) save()
 }
-/** Read-only until Edit is pressed — a made event, not being changed. */
-const locked = computed(() => !creating.value && !editing.value)
+/** Nothing is read-only any more; the name stays so the bindings read. */
+const locked = false
 const tab = ref<string>(props.kind ?? 'Event')
+/** The delete dialog is up. */
+const confirmingDelete = ref(false)
+/** What the delete modal calls the thing: a task or an event. */
+const kind = computed(() => (props.event?.type === 'task' ? 'task' : 'event'))
 watch(
   () => props.kind,
   (k) => (tab.value = k ?? 'Event'),
@@ -114,6 +111,14 @@ const clock = (t?: string) =>
         .toLowerCase()
     : ''
 
+/**
+ * A time as the menu's values spell it, `HH:MM`. The calendar hands an event
+ * back with seconds on its times, and a value with seconds matches none of
+ * the ninety-six the menu offers — so the field showed its placeholder over
+ * an event that plainly had a time.
+ */
+const hhmm = (t?: unknown) => (t ? String(t).slice(0, 5) : '')
+
 const source = computed(() =>
   props.event
     ? {
@@ -139,34 +144,46 @@ watch(source, (s) => (allDay.value = !!s?.allDay), { immediate: true })
 const span = reactive({
   fromDate: '',
   toDate: '',
-  fromTime: '09:00',
-  toTime: '10:00',
+  fromTime: '',
+  toTime: '',
 })
+/**
+ * Seeded from whatever opened the panel, and from nothing when nothing did:
+ * a New pressed in the header has no day or hour in mind, so the rows wait
+ * with their placeholders rather than guessing today at nine. A drag on the
+ * grid or a click on an event brings its own span in.
+ */
 watch(
   source,
   (s) => {
-    span.fromDate = s?.fromDate || todayIso()
-    span.toDate = s?.toDate || s?.fromDate || todayIso()
-    span.fromTime = s?.fromTime || '09:00'
-    span.toTime = s?.toTime || '10:00'
+    span.fromDate = s?.fromDate || ''
+    span.toDate = s?.toDate || s?.fromDate || ''
+    span.fromTime = hhmm(s?.fromTime)
+    span.toTime = hhmm(s?.toTime)
   },
   { immediate: true },
 )
 
-/** Changing either row moves the block drawn on the grid with it. */
+/**
+ * Changing either row moves the block drawn on the grid with it — once there
+ * is a day to draw it on. A panel opened blank has none until the date is
+ * picked, and a draft on no day is nothing the grid can place.
+ */
 function push() {
   touch()
-  emit('update:draft', { ...span, allDay: allDay.value })
+  if (span.fromDate) emit('update:draft', { ...span, allDay: allDay.value })
 }
-watch(allDay, () => emit('update:draft', { ...span, allDay: allDay.value }))
+watch(allDay, () => {
+  if (span.fromDate) emit('update:draft', { ...span, allDay: allDay.value })
+})
 
 const dateLabel = computed(() =>
   span.toDate && span.toDate !== span.fromDate
     ? `${pretty(span.fromDate)} – ${pretty(span.toDate)}`
     : pretty(span.fromDate),
 )
-const fromLabel = computed(() => clock(span.fromTime) || '9:00 am')
-const toLabel = computed(() => clock(span.toTime) || '10:00 am')
+const fromLabel = computed(() => clock(span.fromTime))
+const toLabel = computed(() => clock(span.toTime))
 
 /**
  * Every quarter hour of the day, which is the grid's own step: a drag snaps
@@ -234,6 +251,7 @@ function setToTime(value: string) {
       : asClock(minutesOf(span.fromTime) + CLOCK_STEP)
   push()
 }
+const datesOpen = ref(false)
 function setDates(range: string[]) {
   const [from, to] = range ?? []
   if (!from) return
@@ -272,7 +290,7 @@ const title = computed({
  */
 const behaviour = reactive<Record<string, string>>({
   Repeat: 'None',
-  Alert: '10 min before',
+  Alert: 'None',
   Occupancy: 'Busy',
   Visibility: 'Default',
 })
@@ -317,7 +335,11 @@ const tagOptions = [
   'Sales',
   'Research',
   'Urgent',
-].map((label, i) => ({ label, value: label.toLowerCase(), theme: TAG_THEMES[i] }))
+].map((label, i) => ({
+  label,
+  value: label.toLowerCase(),
+  theme: TAG_THEMES[i],
+}))
 
 /**
  * By place in the list, not by a hash of the letters: six tags against six
@@ -345,6 +367,12 @@ const orgLogo = computed(
   () => orgOptions.find((o) => o.value === organisation.value)?.logo,
 )
 
+/**
+ * The rows drawn as tabs rather than as a menu. Both are a small closed set
+ * where the answer not chosen is worth seeing; the other two are lists.
+ */
+const asTabs = ['Occupancy', 'Visibility']
+
 const behaviourOptions: Record<string, string[]> = {
   Repeat: ['None', 'Daily', 'Weekly', 'Monthly'],
   Alert: ['None', '10 min before', '30 min before', '1 hour before'],
@@ -368,14 +396,8 @@ const location = ref('')
 const description = ref('')
 const meet = ref('')
 
-const people = [
-  { label: 'Faris Ansari', value: 'faris@timeless.co' },
-  { label: 'Rubini Raman', value: 'rubini@timeless.co' },
-  { label: 'Gowtham Sivakumar', value: 'gowtham@timeless.co' },
-  { label: 'Shariq Ansari', value: 'shariq@timeless.co' },
-  { label: 'Sally Potter', value: 'sally@timeless.co' },
-  { label: 'Emily Taylor', value: 'emily@timeless.co' },
-]
+// `people` comes from the sample data, so the rows and the panel agree on
+// who is who.
 /** The assignee picks from the same list the attendees do. */
 const assigneeOptions = people
 
@@ -482,6 +504,41 @@ const colourOptions = computed(() =>
 const field = '!h-7 w-full'
 
 /**
+ * The three fields that stand alone in their sections, on the labels' line.
+ *
+ * A ghost field carries 8px of its own before its first mark, so the video
+ * and pin glyphs and the description's first letter all began 8 right of
+ * "Link" and "People" above them. The field is pulled back by that 8 and
+ * made 8 wider, so its right edge stays where every other field's is and
+ * only its ink moves. The hover fill follows it out into the margin by the
+ * same 8, which is the fill saying where the field really starts.
+ */
+const flush = '-ml-2 w-[calc(100%+0.5rem)]'
+
+/**
+ * The tab rows, as wide as the fields above them and split evenly.
+ *
+ * The list takes the field's whole width — the same 207 every menu's box has
+ * — and every choice takes an equal share of it, so two answers are two
+ * halves and three are three thirds. The subtle variant draws the track,
+ * which is what makes that width visible.
+ */
+const tabField = [
+  'w-full',
+  '[&_[role=tablist]]:!flex',
+  '[&_[role=tablist]]:!w-full',
+  // The track's own padding and gap, untouched: the kit's numbers are the
+  // field's. What changes is only that the pills share the width.
+  '[&_[role=tab]]:!flex-1',
+  // A pill's word in the middle of its pill. The trigger is a flex box that
+  // leaves its content at the start; with every pill the same width that
+  // read as four words hung off four left edges.
+  '[&_[role=tab]]:!justify-center',
+  // …and each pill a whole number of pixels wide: see `.ev-tabs` below.
+  'ev-tabs',
+].join(' ')
+
+/**
  * A ghost field that cannot be typed in should still be a ghost field.
  * TextInput and Textarea wash themselves in `surface-gray-1` when disabled —
  * Select does not — so a panel opened to read had two of its rows filled and
@@ -553,21 +610,14 @@ function todayIso() {
       <h2 class="mr-2 min-w-0 flex-1 truncate text-lg-medium text-ink-gray-7">
         {{ creating ? `New ${tab}` : 'Event detail' }}
       </h2>
-      <Button
-        v-if="!creating && !editing"
-        size="sm"
-        variant="ghost"
-        icon="lucide-pencil"
-        aria-label="Edit event"
-        @click="editing = true"
-      />
+      <!-- No pencil: the fields below are already live. -->
       <Button
         v-if="!creating"
         size="sm"
         variant="ghost"
         icon="lucide-trash-2"
         aria-label="Delete event"
-        @click="$emit('delete', event?.id)"
+        @click="confirmingDelete = true"
       />
       <Button
         size="sm"
@@ -583,8 +633,20 @@ function todayIso() {
       Inset 20, like the header above and the rules below. `!px-5` on
       `TabList` never landed — the padding is on the element it renders
       inside itself, so the class has to reach it from the root.
+
+      `mt-px` puts the rule under these tabs on the calendar's own first rule.
+      The two run at each other across the panel's edge and were a pixel
+      apart — the header above is an even 54 and the calendar's box begins on
+      an odd line — which at that length reads as a step rather than a line.
+
+      `gap-4` where `TabList` ships `gap-6`: 24 is the width of the panel's
+      own margin, so two words that far apart stopped reading as a pair. 16
+      is what the user set.
     -->
-    <Tabs v-model="tab" class="shrink-0 [&_[role=tablist]]:!px-5">
+    <Tabs
+      v-model="tab"
+      class="mt-px shrink-0 [&_[role=tablist]]:!gap-4 [&_[role=tablist]]:!px-5"
+    >
       <TabList>
         <TabTrigger value="Event">Event</TabTrigger>
         <TabTrigger value="Task">Task</TabTrigger>
@@ -630,7 +692,11 @@ function todayIso() {
             >
               <span
                 class="block rounded-1"
-                :style="{ width: '12px', height: '12px', backgroundColor: dotFill }"
+                :style="{
+                  width: '12px',
+                  height: '12px',
+                  backgroundColor: dotFill,
+                }"
               />
             </Button>
           </template>
@@ -665,7 +731,9 @@ function todayIso() {
           @update:model-value="touch"
           class="[&_label]:!text-base [&>span]:!text-base"
         />
-        <span class="ml-auto flex items-center gap-1.5 text-base text-ink-gray-5">
+        <span
+          class="ml-auto flex items-center gap-1.5 text-base text-ink-gray-5"
+        >
           <span class="lucide-globe size-4 shrink-0" aria-hidden="true" />
           GMT+5:30
         </span>
@@ -680,34 +748,52 @@ function todayIso() {
       -->
       <div class="flex h-10 items-center gap-3.5 px-5">
         <span class="w-[90px] shrink-0 text-base text-ink-gray-6">Date</span>
-        <DateRangePicker
-          :model-value="[span.fromDate, span.toDate]"
-          :clearable="false"
-          align="start"
-          :disabled="locked"
-          :class="field"
-          @update:model-value="setDates"
-        >
-          <template #trigger="{ open, setOpen }">
-            <button
-              type="button"
-              :disabled="locked"
-              aria-label="Date"
-              class="flex h-7 w-full items-center gap-2 rounded-4 pl-[9px] pr-2 text-base text-ink-gray-7 transition-colors hover:bg-surface-gray-2 disabled:hover:bg-transparent"
-              @click="setOpen(!open)"
-            >
-              <span class="truncate">{{ dateLabel }}</span>
-              <!--
+        <!-- the Date picker pattern's own picker, a range on one pane, in a
+             bare popover (the user's call 2026-10-13) -->
+        <div :class="field">
+          <Popover
+            v-model:open="datesOpen"
+            align="start"
+            bare
+            :auto-focus="false"
+          >
+            <template #trigger>
+              <button
+                type="button"
+                :disabled="locked"
+                aria-label="Date"
+                class="flex h-7 w-full items-center gap-2 rounded-4 pl-[9px] pr-2 text-base text-ink-gray-7 transition-colors hover:bg-surface-gray-2 disabled:hover:bg-transparent"
+              >
+                <!-- Blank until a day is picked, in the placeholder's grey. -->
+                <span
+                  class="truncate"
+                  :class="!dateLabel && 'text-ink-gray-4'"
+                  >{{ dateLabel || 'Pick a date' }}</span
+                >
+                <!--
                 The file's own calendar glyph rather than a chevron (node
                 35447:66251): a date field says what it opens by the thing it
                 opens, where every other row on the panel is a list and says
                 so with a chevron. 16 square in #999999, which is
                 `ink-gray-4` here.
               -->
-              <DateIcon class="ml-auto text-ink-gray-4" />
-            </button>
-          </template>
-        </DateRangePicker>
+                <DateIcon class="ml-auto text-ink-gray-4" />
+              </button>
+            </template>
+            <DatePickerPreview
+              variant="default"
+              range
+              :model-value="[span.fromDate, span.toDate]"
+              :hold-top="false"
+              @update:model-value="
+                (v) => {
+                  setDates(v as [string, string])
+                  datesOpen = false
+                }
+              "
+            />
+          </Popover>
+        </div>
       </div>
 
       <div v-if="!allDay" class="flex h-10 items-center gap-3.5 px-5">
@@ -725,6 +811,7 @@ function todayIso() {
             :offset="menuOffset"
             :disabled="locked"
             class="!h-7 min-w-0 flex-1"
+            placeholder="Start"
             aria-label="Start time"
             @update:model-value="setFromTime"
           />
@@ -738,6 +825,7 @@ function todayIso() {
             :offset="menuOffset"
             :disabled="locked"
             class="!h-7 min-w-0 flex-1"
+            placeholder="End"
             aria-label="End time"
             @update:model-value="setToTime"
           />
@@ -750,11 +838,10 @@ function todayIso() {
     <!-- ── How it behaves ───────────────────────────────────────────────── -->
     <div class="flex flex-col py-2.5">
       <!-- Whoever it is on, with their own face beside the name. -->
-      <div
-        v-if="tab === 'Task'"
-        class="flex h-10 items-center gap-3.5 px-5"
-      >
-        <span class="w-[90px] shrink-0 text-base text-ink-gray-6">Assignee</span>
+      <div v-if="tab === 'Task'" class="flex h-10 items-center gap-3.5 px-5">
+        <span class="w-[90px] shrink-0 text-base text-ink-gray-6"
+          >Assignee</span
+        >
         <Select
           v-model="assignee"
           :options="assigneeOptions"
@@ -803,7 +890,8 @@ function todayIso() {
           <MultiSelect
             v-model="tags"
             :disabled="locked"
-            class="!h-auto !min-h-7 w-full !py-[3px] !pl-2"
+            class="!h-auto !min-h-7 w-full !py-[3px]"
+            :class="tags.length ? '!pl-[3px]' : '!pl-2'"
             size="sm"
             variant="ghost"
             placeholder="Add tags"
@@ -820,6 +908,13 @@ function todayIso() {
               >
                 Add tags
               </span>
+              <!-- The chips sit 3 from the left edge, as from the top: the
+                   field's own padding drops from 8 to 3 while there are chips
+                   in it (`:class` above), and goes back to 8 for the
+                   placeholder, which stays on the line of every other field.
+                   The padding, not a negative margin on this row: the field
+                   clips its contents, so a row pulled left of the padding lost
+                   its first 4px and its left corners with them. -->
               <span v-else class="flex min-w-0 flex-wrap items-center gap-1">
                 <span
                   v-for="option in selectedOptions"
@@ -866,7 +961,41 @@ function todayIso() {
         <span class="w-[90px] shrink-0 text-base text-ink-gray-6">
           {{ label }}
         </span>
+        <!--
+          Two of these rows are a choice between named states rather than a
+          list to go looking in — free or busy, who can see it — so they are
+          drawn as tabs, where every answer is on screen and the one in force
+          is the one lit. The rest stay menus: a repeat rule and an alert have
+          more answers than a row can hold. Subtle, as the user set it.
+
+          `variant` on `TabList`, not on `Tabs`: on the parent it only reaches
+          the `tabs` shorthand, and a composed list silently falls back to the
+          underline.
+        -->
+        <Tabs
+          v-if="asTabs.includes(label as string)"
+          :model-value="behaviour[label]"
+          :class="tabField"
+          @update:model-value="
+            (v) => {
+              behaviour[label] = v as string
+              touch()
+            }
+          "
+        >
+          <TabList variant="subtle" size="sm">
+            <TabTrigger
+              v-for="option in options"
+              :key="option"
+              :value="option"
+              :disabled="locked"
+            >
+              {{ option }}
+            </TabTrigger>
+          </TabList>
+        </Tabs>
         <Select
+          v-else
           v-model="(tab === 'Task' ? taskFields : behaviour)[label]"
           :options="options"
           size="sm"
@@ -879,10 +1008,7 @@ function todayIso() {
       </div>
 
       <!-- Organisation, with the file's own marks — as Link carries them. -->
-      <div
-        v-if="tab === 'Task'"
-        class="flex h-10 items-center gap-3.5 px-5"
-      >
+      <div v-if="tab === 'Task'" class="flex h-10 items-center gap-3.5 px-5">
         <span class="w-[90px] shrink-0 text-base text-ink-gray-6">
           Organisation
         </span>
@@ -922,119 +1048,128 @@ function todayIso() {
       next one and read as a 2px line.
     -->
     <template v-if="tab === 'Event'">
-    <div class="mx-5 shrink-0 border-t border-outline-gray-1" />
+      <div class="mx-5 shrink-0 border-t border-outline-gray-1" />
 
-    <!-- ── What it is attached to ───────────────────────────────────────── -->
-    <div class="flex flex-col py-2.5">
-      <div class="flex h-10 items-center gap-3.5 px-5">
-        <span class="w-[90px] shrink-0 text-base text-ink-gray-6">Link</span>
-        <Select
-          v-model="link"
-          :options="linkOptions"
-          size="sm"
-          variant="ghost"
-          :disabled="locked"
-          :class="field"
-          @update:model-value="touch"
-          aria-label="Link"
-        >
-          <template v-if="linkLogo" #prefix>
-            <img
-              :src="linkLogo"
-              alt=""
-              class="size-4 shrink-0 rounded-1 object-cover"
-            />
-          </template>
-          <template #item-prefix="{ item }">
-            <img
-              v-if="(item as { logo?: string }).logo"
-              :src="(item as { logo?: string }).logo"
-              alt=""
-              class="size-4 shrink-0 rounded-1 object-cover"
-            />
-          </template>
-        </Select>
-      </div>
+      <!-- ── What it is attached to ───────────────────────────────────────── -->
+      <div class="flex flex-col py-2.5">
+        <div class="flex h-10 items-center gap-3.5 px-5">
+          <span class="w-[90px] shrink-0 text-base text-ink-gray-6">Link</span>
+          <Select
+            v-model="link"
+            :options="linkOptions"
+            size="sm"
+            variant="ghost"
+            :disabled="locked"
+            :class="field"
+            @update:model-value="touch"
+            aria-label="Link"
+          >
+            <template v-if="linkLogo" #prefix>
+              <img
+                :src="linkLogo"
+                alt=""
+                class="size-4 shrink-0 rounded-1 object-cover"
+              />
+            </template>
+            <template #item-prefix="{ item }">
+              <img
+                v-if="(item as { logo?: string }).logo"
+                :src="(item as { logo?: string }).logo"
+                alt=""
+                class="size-4 shrink-0 rounded-1 object-cover"
+              />
+            </template>
+          </Select>
+        </div>
 
-      <!--
+        <!--
         People, as the settings modal does it: frappe-ui's MultiSelect with
         Espresso's menu — a filled search at the top, 32px rows on a 10px
         radius, an avatar at the lead and a check on the chosen ones — and
         the picked people as tags inside the field rather than a list
         stacked under it.
       -->
-      <div class="flex min-h-10 items-start gap-3.5 px-5 py-1.5">
-        <span class="mt-1.5 w-[90px] shrink-0 text-base text-ink-gray-6">
-          People
-        </span>
-        <!--
+        <div class="flex min-h-10 items-start gap-3.5 px-5 py-1.5">
+          <span class="mt-1.5 w-[90px] shrink-0 text-base text-ink-gray-6">
+            People
+          </span>
+          <!--
           MultiSelect hugs its contents: its root is an unclassed wrapper and
           the class goes to the trigger inside it, so an empty field came to
           127 against the 211 the Link select above it takes and the two right
           edges disagreed. The wrapper is what has to fill the row, so it is
           given the width and the trigger told to fill it.
         -->
-        <div class="min-w-0 flex-1 [&>div]:w-full">
-        <MultiSelect
-          v-model="attendees"
-          :disabled="locked"
-          @update:model-value="touch"
-          class="h-auto min-h-7 w-full py-1 !pl-2 [&>button]:!w-full [&_[data-slot=item-prefix]>span>div:first-child]:hidden"
-          size="sm"
-          variant="ghost"
-          placeholder="Add attendee"
-          :options="people"
-          hide-search
-          aria-label="Add attendee"
-        >
-          <template #prefix><span class="hidden" /></template>
-
-          <template #summary="{ selectedOptions }">
-            <span
-              v-if="!selectedOptions.length"
-              class="text-base text-ink-gray-4"
+          <div class="min-w-0 flex-1 [&>div]:w-full">
+            <MultiSelect
+              v-model="attendees"
+              :disabled="locked"
+              @update:model-value="touch"
+              class="h-auto min-h-7 w-full py-1 [&>button]:!w-full [&_[data-slot=item-prefix]>span>div:first-child]:hidden"
+              :class="attendees.length ? '!pl-1' : '!pl-2'"
+              size="sm"
+              variant="ghost"
+              placeholder="Add attendee"
+              :options="people"
+              hide-search
+              aria-label="Add attendee"
             >
-              Add attendee
-            </span>
-            <span v-else class="flex min-w-0 flex-wrap items-center gap-1">
-              <span
-                v-for="option in selectedOptions"
-                :key="option.value"
-                class="flex h-6 shrink-0 items-center gap-1 rounded-3 bg-surface-gray-2 py-[4.5px] pl-1.5 pr-1 dark:bg-surface-gray-4"
-              >
+              <template #prefix><span class="hidden" /></template>
+
+              <template #summary="{ selectedOptions }">
+                <span
+                  v-if="!selectedOptions.length"
+                  class="text-base text-ink-gray-4"
+                >
+                  Add attendee
+                </span>
+                <!-- 4 from the left edge, the same as from the top — by the
+                 field's padding, as the tags above, for the same reason. -->
+                <span v-else class="flex min-w-0 flex-wrap items-center gap-1">
+                  <span
+                    v-for="option in selectedOptions"
+                    :key="option.value"
+                    class="flex h-6 shrink-0 items-center gap-1 rounded-3 bg-surface-gray-2 py-[4.5px] pl-1.5 pr-1 dark:bg-surface-gray-4"
+                  >
+                    <Avatar
+                      size="xs"
+                      class="!size-3"
+                      :label="option.label"
+                      :image="faceFor(option.label)"
+                    />
+                    <span class="text-sm text-ink-gray-7">{{
+                      option.label
+                    }}</span>
+                    <span
+                      class="lucide-x size-3 cursor-pointer text-ink-gray-7 hover:text-ink-gray-8"
+                      role="presentation"
+                      @click.stop.prevent="removeAttendee(option.value)"
+                    />
+                  </span>
+                </span>
+              </template>
+
+              <template #footer><span /></template>
+
+              <template #item-prefix="{ item }">
                 <Avatar
                   size="xs"
-                  class="!size-3"
-                  :label="option.label"
-                  :image="faceFor(option.label)"
+                  :label="item.label"
+                  :image="faceFor(item.label)"
                 />
-                <span class="text-sm text-ink-gray-7">{{ option.label }}</span>
+              </template>
+
+              <template #item-suffix="{ selected }">
                 <span
-                  class="lucide-x size-3 cursor-pointer text-ink-gray-7 hover:text-ink-gray-8"
-                  role="presentation"
-                  @click.stop.prevent="removeAttendee(option.value)"
+                  v-if="selected"
+                  class="lucide-check size-4 text-ink-gray-6"
+                  aria-hidden="true"
                 />
-              </span>
-            </span>
-          </template>
-
-          <template #footer><span /></template>
-
-          <template #item-prefix="{ item }">
-            <Avatar size="xs" :label="item.label" :image="faceFor(item.label)" />
-          </template>
-
-          <template #item-suffix="{ selected }">
-            <span
-              v-if="selected"
-              class="lucide-check size-4 text-ink-gray-6"
-              aria-hidden="true"
-            />
-          </template>
-        </MultiSelect>
+              </template>
+            </MultiSelect>
+          </div>
         </div>
       </div>
-    </div>
     </template>
 
     <div class="mx-5 shrink-0 border-t border-outline-gray-1" />
@@ -1059,12 +1194,15 @@ function todayIso() {
         placeholder="Add video conference"
         size="sm"
         variant="ghost"
-        class="!h-7 w-full"
+        :class="`!h-7 ${flush}`"
         aria-label="Video conference"
       >
         <template #prefix>
+          <!-- `-ml-px`: Select sets its prefix a pixel further in than
+               TextInput does, and the camera sat 1750 over the pin's 1749.
+               Both on 1749 now, with "Link" and "People" above them. -->
           <span
-            class="lucide-video size-4 shrink-0 text-ink-gray-5"
+            class="lucide-video -ml-px size-4 shrink-0 text-ink-gray-5"
             aria-hidden="true"
           />
         </template>
@@ -1075,7 +1213,7 @@ function todayIso() {
         size="sm"
         variant="ghost"
         :disabled="locked"
-        :class="`!h-7 w-full ${readable}`"
+        :class="`!h-7 ${flush} ${readable}`"
         @update:model-value="touch"
         placeholder="Add location"
       >
@@ -1098,29 +1236,75 @@ function todayIso() {
         :disabled="locked"
         @update:model-value="touch"
         :rows="2"
-        :class="`w-full ${readable}`"
+        :class="`${flush} ${readable}`"
         placeholder="Add description"
       />
     </div>
 
     <!--
-      The file's footer: one solid button, full width, always in view. Making
-      and changing are the same panel, so it is the same button — "Create" on
-      a new one, "Save changes" on one being edited, and nothing at all on one
-      only being read.
+      The file's footer: one solid button, full width, always in view — on a
+      new one only. An event that exists saves itself as it is changed, so it
+      has nothing to press.
     -->
     <div
-      v-if="creating || editing"
+      v-if="creating"
       class="mt-auto shrink-0 border-t border-outline-gray-1 p-5"
     >
       <Button
         variant="solid"
         class="w-full"
-        :disabled="editing && !dirty"
-        :label="creating ? `Create ${tab.toLowerCase()}` : 'Save changes'"
-        @click="creating ? submit() : save()"
+        :label="`Create ${tab.toLowerCase()}`"
+        @click="submit()"
       />
     </div>
+
+    <!--
+      Deleting asks first. A delete that happens on the click is a delete that
+      happens on the slip, and there is no undo on this calendar.
+    -->
+    <EspressoModal
+      v-model:open="confirmingDelete"
+      :title="`Delete ${kind}`"
+      variant="dialog"
+      shadow="2xl"
+    >
+      <!-- 20px badge: 3px inset, 4px radius, 14px icon — the Delete project
+           modal's own mark. -->
+      <template #prefix>
+        <div
+          class="flex size-5 shrink-0 items-center justify-center rounded-1 bg-surface-red-2"
+        >
+          <span
+            class="lucide-trash-2 size-3.5 text-ink-red-7"
+            aria-hidden="true"
+          />
+        </div>
+      </template>
+
+      <p class="text-p-base text-ink-gray-6">
+        This will permanently remove the {{ kind }}. This action cannot be
+        undone.
+      </p>
+
+      <template #footer="{ close }">
+        <Button variant="subtle" theme="gray" size="sm" @click="close">
+          Cancel
+        </Button>
+        <Button
+          variant="solid"
+          theme="red"
+          size="sm"
+          @click="
+            () => {
+              close()
+              $emit('delete', event?.id)
+            }
+          "
+        >
+          Delete
+        </Button>
+      </template>
+    </EspressoModal>
   </aside>
 </template>
 
@@ -1131,6 +1315,29 @@ function todayIso() {
   it goes to frappe-ui until the team has validated the menu and the tag.
 -->
 <style>
+/* The pills share the track in whole pixels. Split evenly, two of them came
+   out 100.5 wide; the sliding highlight is placed from the pill's rounded
+   width and offset, so on Free it ran 1.5px past the pill, onto the track's
+   edge, and its right side was cut (the user's call 2026-10-13). Each pill
+   but the last is the share rounded down; the last takes what is left, a
+   whole number too, so every track ends on the same 1px inset. */
+.ev-tabs [role='tablist'] > [role='tab'] {
+  flex: none !important;
+}
+.ev-tabs [role='tablist'] > [role='tab']:last-of-type {
+  flex: 1 1 0 !important;
+}
+.ev-tabs
+  [role='tablist']:has(> [role='tab']:nth-of-type(2):last-of-type)
+  > [role='tab']:not(:last-of-type) {
+  width: round(down, calc((100% - 4px) / 2), 1px);
+}
+.ev-tabs
+  [role='tablist']:has(> [role='tab']:nth-of-type(3):last-of-type)
+  > [role='tab']:not(:last-of-type) {
+  width: round(down, calc((100% - 8px) / 3), 1px);
+}
+
 /* The row's checkbox: Espresso marks a chosen row with the trailing check. */
 [data-slot='content'][role='listbox']
   [data-slot='item-prefix']

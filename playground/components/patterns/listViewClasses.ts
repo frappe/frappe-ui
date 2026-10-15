@@ -65,7 +65,6 @@ const base = [
   // on, so it frees itself rather than a descendant.
   '!overflow-visible',
 
-
   // A selected row is treated the same way as a hovered one: it lifts out of
   // the list, so the rules that would cut it off disappear — the one it draws
   // under itself, and the one belonging to the row above it. A run of selected
@@ -179,10 +178,13 @@ export const espressoStaticOptions = {
  *   and below still apply and push the content to 33, half a pixel out of the
  *   row at each end. Its padding goes, and the row centres the line itself.
  *
- * - **The chevron sits where the checkbox sits** — 8px in — with the label 8
- *   after it. ListView's `ms-[3px] me-[11px]` puts the glyph at 7 and leaves
- *   12, so both margins go to 4: the button is 24 wide around a 16px glyph,
- *   which is 4 of padding on each side.
+ * - **The chevron centres on the checkbox** — the 14px box sits 8 in, so its
+ *   middle is at 15 — with the label 8 after the button. The glyph's
+ *   triangle is not centred in its 16px box (it spans 3.9–11.7, middle 7.8),
+ *   so with the button 24 wide around it, `ms-[3px]` lands the triangle's
+ *   middle at 15.0 (measured; `ms-1` put it a pixel right, which the user
+ *   saw). ListView's own `me-[11px]` becomes 5 so the label still starts at
+ *   32, 8 after the button.
  *
  * - **Nothing between the header and the first row**, 20 to the next group.
  *   ListView puts both on the rows themselves (`mt-2 mb-5`), so the 20 goes
@@ -208,8 +210,8 @@ export const espressoListViewGroups = [
   '[&_.border-outline-elevation-2]:!-mt-px',
   '[&_.border-outline-elevation-2]:!border-outline-gray-1',
 
-  '[&_.overflow-y-auto>div>.flex.items-center>button]:!ms-1',
-  '[&_.overflow-y-auto>div>.flex.items-center>button]:!me-1',
+  '[&_.overflow-y-auto>div>.flex.items-center>button]:!ms-[3px]',
+  '[&_.overflow-y-auto>div>.flex.items-center>button]:!me-[5px]',
   '[&_.overflow-y-auto>div>.flex.items-center>button>svg]:!text-ink-gray-9',
 
   '[&_.mb-5]:!mt-0',
