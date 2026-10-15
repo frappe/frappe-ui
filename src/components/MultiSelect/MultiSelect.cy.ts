@@ -91,6 +91,17 @@ describe('MultiSelect', () => {
     ])
   })
 
+  it('leaves a checked row unfilled', () => {
+    cy.mount(MultiSelect, {
+      props: { options, modelValue: ['apple', 'banana'] },
+    })
+
+    cy.get('[data-slot="trigger"]').click()
+    cy.get(
+      '[role=option][data-state="checked"]:not([data-highlighted])',
+    ).should('have.css', 'background-color', 'rgba(0, 0, 0, 0)')
+  })
+
   it('supports numeric option values', () => {
     cy.mount(MultiSelect, {
       props: {
