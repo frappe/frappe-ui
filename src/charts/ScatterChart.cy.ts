@@ -68,7 +68,7 @@ describe('ScatterChart', () => {
   it('splits the rows into groups the legend names', () => {
     mountChart({ splitBy: 'region' })
     points().should('have.length', data.length)
-    cy.get('[data-slot="chart-legend"] button')
+    cy.get('[data-slot="chart-legend"] [aria-pressed]')
       .should('have.length', 2)
       .and('contain.text', 'EU')
     cy.get('[data-slot="chart-legend"]').should('contain.text', 'US')
@@ -85,7 +85,7 @@ describe('ScatterChart', () => {
   it('takes a group out of the plot when its legend entry is pressed', () => {
     mountChart({ splitBy: 'region' })
     points().should('have.length', 4)
-    cy.get('[data-slot="chart-legend"] button').first().click()
+    cy.get('[data-slot="chart-legend"] [aria-pressed]').first().click()
     points().should('have.length', 2)
   })
 
@@ -186,7 +186,10 @@ describe('ScatterChart', () => {
         'Target',
       )
       // An annotation, not a series: the legend still lists the two groups.
-      cy.get('[data-slot="chart-legend"] button').should('have.length', 2)
+      cy.get('[data-slot="chart-legend"] [aria-pressed]').should(
+        'have.length',
+        2,
+      )
       points().should('have.length', data.length)
     })
 
@@ -208,7 +211,7 @@ describe('ScatterChart', () => {
         splitBy: 'region',
         referenceLines: [{ value: 1000, label: 'Target' }],
       })
-      cy.get('[data-slot="chart-legend"] button').first().click()
+      cy.get('[data-slot="chart-legend"] [aria-pressed]').first().click()
       points().should('have.length', 2)
       cy.get('[data-slot="chart-plot"] svg text').should(
         'contain.text',

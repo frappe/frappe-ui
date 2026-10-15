@@ -337,10 +337,11 @@ function capSeries(pivoted: Pivoted, maxSeries?: number): Pivoted {
 
 /**
  * What each series is worth across the whole chart, which is what decides who
- * survives the cap. Magnitude rather than signed total: a series that runs
- * large and negative carries the chart as much as one that runs large.
+ * survives the cap and who keeps a place on an overflowing legend row.
+ * Magnitude rather than signed total: a series that runs large and negative
+ * carries the chart as much as one that runs large.
  */
-function seriesWeights(rows: Record<string, any>[], names: string[]) {
+export function seriesWeights(rows: Record<string, any>[], names: string[]) {
   const weights: Record<string, number> = {}
   for (const name of names) weights[name] = 0
   for (const row of rows) {

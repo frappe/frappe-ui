@@ -1,5 +1,9 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { normalizeAxisChartProps, seriesLabel } from './seriesData'
+import {
+  normalizeAxisChartProps,
+  seriesLabel,
+  seriesWeights,
+} from './seriesData'
 import { hasSecondaryValueAxis, resolveSeriesColors } from './axisChartCommon'
 import type { ChartTokens } from './tokens'
 import type { AxisChartConfig, AxisChartProps, SeriesStyle } from './types'
@@ -658,5 +662,16 @@ describe('normalizeAxisChartProps: maxSeries', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     normalize()
     expect(warn).not.toHaveBeenCalled()
+  })
+})
+
+describe('seriesWeights', () => {
+  it('weighs each series by the size of its values', () => {
+    expect(
+      seriesWeights(
+        [{ net: 5, gross: 1 }, { net: -12, gross: null }, {}],
+        ['net', 'gross'],
+      ),
+    ).toEqual({ net: 17, gross: 1 })
   })
 })

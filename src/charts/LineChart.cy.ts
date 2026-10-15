@@ -116,6 +116,32 @@ describe('LineChart', () => {
         .then(() => expect(hidden.value).to.deep.equal(['refunds']))
       lines().should('have.length', 1)
     })
+
+    // Thirty series cannot share one row in a 480px card. The ones that weigh
+    // most stay on it. The popover prints no number: a sum is wrong for a rate
+    // or an average, and the chart cannot tell which one it was handed.
+    it('ranks the series by weight, and prints no total', () => {
+      const long = ['Jan', 'Feb'].flatMap((month) =>
+        Array.from({ length: 30 }, (_, i) => ({
+          month,
+          region: `Region ${i}`,
+          amount: i + 1,
+        })),
+      )
+      mountChart({ data: long, y: 'amount', splitBy: 'region' })
+
+      cy.get('[data-slot="chart-legend"] [aria-pressed]')
+        .first()
+        .should('have.attr', 'aria-label', 'Hide Region 29')
+      cy.get('[data-slot="chart-legend"] [aria-label$="more series"]').click()
+      cy.get('[role="listbox"] [role="option"]')
+        .should('have.length', 30)
+        .first()
+        .should('have.text', 'Region 29')
+      lines().should('have.length', 30)
+      cy.contains('[role="listbox"] [role="option"]', /^Region 0$/).click()
+      lines().should('have.length', 29)
+    })
   })
 
   describe('combo series', () => {
@@ -169,7 +195,10 @@ describe('LineChart', () => {
       // The rule takes its ink from the theme, not from the palette, so the
       // hex-stroked paths are still the two series.
       lines().should('have.length', 2)
-      cy.get('[data-slot="chart-legend"] button').should('have.length', 2)
+      cy.get('[data-slot="chart-legend"] [aria-pressed]').should(
+        'have.length',
+        2,
+      )
     })
 
     it('reads a y2 line against the second axis', () => {
