@@ -309,6 +309,24 @@ describe('LineChart', () => {
       .and('contain.text', 'Refunds')
   })
 
+  it('prints a value axis title and a splitBy value as given', () => {
+    mountChart({
+      data: [
+        { month: 'Jan', device: 'eno1 rx errors', sessions: 3 },
+        { month: 'Jan', device: 'iOS', sessions: 5 },
+        { month: 'Feb', device: 'eno1 rx errors', sessions: 4 },
+        { month: 'Feb', device: 'iOS', sessions: 2 },
+      ],
+      y: 'sessions',
+      splitBy: 'device',
+      yAxis: { title: 'requests/s' },
+    })
+    cy.get('[data-slot="chart-container"]').should('contain.text', 'requests/s')
+    cy.get('[data-slot="chart-legend"]')
+      .should('contain.text', 'eno1 rx errors')
+      .and('contain.text', 'iOS')
+  })
+
   describe('states', () => {
     /** The state an app styles the card from, without tracking it itself. */
     const container = () => cy.get('[data-slot="chart-container"]')

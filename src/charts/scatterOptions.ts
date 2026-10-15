@@ -104,7 +104,8 @@ export function buildScatterSeries(
 
   return names.map((name, index) => ({
     name,
-    label: formatLabel(name),
+    // A group's name is a value read from the data, which prints as given.
+    label: config.splitByColumn ? name : formatLabel(name),
     color: colors[index],
     points: grouped.get(name)!.map((point) => ({
       ...point,
@@ -348,7 +349,7 @@ function valueAxis(
       boundaryGap: [AXIS_INSET, AXIS_INSET],
       ...(name
         ? {
-            name: formatLabel(name),
+            name,
             nameLocation: 'end',
             nameGap: 8,
             nameTextStyle: {

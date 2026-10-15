@@ -389,6 +389,11 @@ describe('line chart option chrome', () => {
     ).toBe(8)
   })
 
+  it('draws the x-axis title as given', () => {
+    const option = build({ xAxis: { key: 'month', title: 'requests/s' } })
+    expect(option.xAxis.name).toBe('requests/s')
+  })
+
   it('leaves the y-axis title to the chrome above the plot', () => {
     const option = build({ yAxis: { title: 'amount' } })
     expect(option.yAxis.name).toBeUndefined()
