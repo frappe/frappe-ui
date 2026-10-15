@@ -924,7 +924,28 @@ export const PictureParagraph = Extension.create({
           apply: (tr, set) => (tr.docChanged ? pictureParagraphs(tr.doc) : set),
         },
         props: {
-          decorations: (state) => key.getState(state),
+          // the caret beside a picture would be drawn on the collapsed
+          // line, a dot-high sliver; Notion shows none there and marks the
+          // picture instead, so the paragraph the caret is in says so
+          // (.is-caret) and the picture takes its selected ring
+          decorations: (state) => {
+            const set = key.getState(state)
+            const { selection } = state
+            if (!set || !selection.empty) return set
+            const { $from } = selection
+            if ($from.parent.type.name !== 'paragraph' || $from.depth < 1)
+              return set
+            const pos = $from.before()
+            const own = set
+              .find(pos, pos + $from.parent.nodeSize)
+              .some((d) => d.from === pos)
+            if (!own) return set
+            return set.add(state.doc, [
+              Decoration.node(pos, pos + $from.parent.nodeSize, {
+                class: 'is-caret',
+              }),
+            ])
+          },
         },
       }),
     ]

@@ -575,6 +575,24 @@ function resolve() {
 .rte-doc p.rte-pic-para > .ProseMirror-trailingBreak {
   display: none;
 }
+/* the caret beside the picture: none drawn on the collapsed line, the
+   picture ringed as when it is selected (media-node-view-utils'
+   SELECTED_IMAGE_RING: 1px gray-600, 4px off) */
+.rte-doc p.rte-pic-para {
+  caret-color: transparent;
+}
+/* the caption's field is the picture's own, and keeps its caret */
+.rte-doc p.rte-pic-para > [data-node-view-wrapper] {
+  caret-color: var(--ink-gray-9);
+}
+.rte-doc.ProseMirror-focused
+  p.rte-pic-para.is-caret
+  > [data-node-view-wrapper]
+  > .group {
+  box-shadow:
+    0 0 0 4px var(--surface-base),
+    0 0 0 5px var(--ink-gray-6);
+}
 
 /* expand / collapse: a 16px chevron before the summary, the content
    indented under it and folded away when closed */
