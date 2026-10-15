@@ -1163,7 +1163,7 @@ function dayBand(label: string) {
         <div
           v-if="carried.ghost.value"
           aria-hidden="true"
-          :class="`pointer-events-none fixed z-[25] opacity-40 ${espressoCardCopy}`"
+          :class="`pointer-events-none fixed z-[25] opacity-40 ${espressoCardCopy} [&>.event]:!mx-0`"
           :style="{
             left: `${carried.ghost.value.rect.left}px`,
             top: `${carried.ghost.value.rect.top}px`,
@@ -1189,7 +1189,11 @@ function dayBand(label: string) {
           v-if="heldCard"
           aria-hidden="true"
           :class="[
-            `pointer-events-none fixed z-30 rounded-4 shadow-md ${espressoCardCopy}`,
+            // `!mx-0`: the copy is placed by the card's own box, and the
+            // card's 1px side margins pushed it a pixel right of its frame —
+            // where the frame's shadow-md showed its inner white edge as a
+            // line down the card's left side (the user's call 2026-10-15).
+            `pointer-events-none fixed z-30 rounded-4 shadow-md ${espressoCardCopy} [&>.event]:!mx-0`,
             heldLanding
               ? 'transition-all duration-[180ms] ease-out'
               : '[&>.event]:![background-color:var(--bg-active)]',
