@@ -9,7 +9,11 @@
 // glyph · 8px · the 14 gray-600 value — for the date, the email, the owner
 // (a 16px avatar, a photo or the initial on gray-100, · 8px · the name) and
 // the phone, with 12px under. Icons are the file's own.
-// In dark the card takes the first elevation, so it stands off the board.
+// In dark the card takes the second elevation under the library's dark sm
+// shadow (its top highlight and deep drop), its head ruled in
+// outline-elevation-1: the first elevation is the column's own hover wash
+// (gray-1), and the light shadow draws no edge on a dark board, so the two
+// ran together.
 import { Avatar } from '../../../src'
 import EIcon from '../../espresso-sidebar/EIcon.vue'
 import calendarIcon from '../assets/cards/icons/calendar.svg?raw'
@@ -28,11 +32,11 @@ const logo = (file: string) => logos[`../assets/kanban/${file}`]
 
 <template>
   <article
-    class="flex w-[268px] flex-col gap-2.5 rounded-7 bg-surface-elevation-1 pb-3 shadow-[0_1px_3px_rgba(0,0,0,0.14),0_0_1px_rgba(0,0,0,0.14)]"
+    class="flex w-[268px] flex-col gap-2.5 rounded-7 bg-surface-elevation-1 pb-3 shadow-[0_1px_3px_rgba(0,0,0,0.14),0_0_1px_rgba(0,0,0,0.14)] dark:bg-surface-elevation-2 dark:shadow-sm"
     :aria-label="deal.org"
   >
     <header
-      class="flex h-11 items-center gap-2 border-b border-outline-gray-1 px-3.5"
+      class="flex h-11 items-center gap-2 border-b border-outline-gray-1 px-3.5 dark:border-outline-elevation-1"
     >
       <img
         :src="logo(deal.logo)"
