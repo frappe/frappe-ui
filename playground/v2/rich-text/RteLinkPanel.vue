@@ -2,10 +2,11 @@
 // Figma: espresso-2.0 › embed-link (31823:54797, 31823:54816). A 36px card
 // on a 12px radius, 4px in, under the xl shadow: the library's subtle
 // input at 28px — the globe, 8, the address — and a 28px ghost
-// button beside it. Over a link the address is read and the button is
-// the pencil; editing, the address is live and the button unlinks. A new
-// link opens straight into editing with no button: Enter sets it, Escape
-// leaves. The same rules as the library's popup: a bare host gets https,
+// buttons beside it, as the file's Link states draw them (32467:13501).
+// Over a link the address is read — a press on it opens the link — beside
+// copy and the pencil; editing, the address is live beside unlink and the
+// tick. A new link opens straight into editing with the tick alone: Enter
+// or the tick sets it, Escape leaves. The same rules as the library's popup: a bare host gets https,
 // and an address that is not one shakes the field and stays.
 import {
   h,
@@ -27,6 +28,8 @@ const props = defineProps<{
 const emit = defineEmits<{
   updateHref: [href: string]
   close: []
+  /** the card has gone from reading the link to editing it */
+  editing: []
 }>()
 
 const ALLOWED_SCHEMES = ['http', 'https', 'mailto', 'tel']
@@ -38,6 +41,27 @@ const shake = ref(false)
 
 const editIcon = () => h(RteIcon, { name: 'edit' })
 const unlinkIcon = () => h(RteIcon, { name: 'link-broken' })
+const copyIcon = () => h(RteIcon, { name: 'copy' })
+const checkIcon = () => h(RteIcon, { name: 'check' })
+
+// read, the address is the way through: a press on it opens the link
+function openLink() {
+  if (edit.value || !props.href) return
+  window.open(props.href, '_blank', 'noopener,noreferrer')
+}
+
+const copied = ref(false)
+let copiedTimer: ReturnType<typeof setTimeout> | undefined
+async function copyLink() {
+  try {
+    await navigator.clipboard.writeText(props.href)
+  } catch {
+    return
+  }
+  copied.value = true
+  clearTimeout(copiedTimer)
+  copiedTimer = setTimeout(() => (copied.value = false), 1200)
+}
 
 const normalize = (raw: string) => {
   const trimmed = raw.trim()
@@ -78,6 +102,7 @@ async function focusInput() {
 }
 function startEdit() {
   edit.value = true
+  emit('editing')
   focusInput()
 }
 
@@ -98,7 +123,10 @@ onMounted(() => {
   document.addEventListener('keydown', onKeydown, true)
   if (edit.value) focusInput()
 })
-onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown, true))
+onBeforeUnmount(() => {
+  document.removeEventListener('keydown', onKeydown, true)
+  clearTimeout(copiedTimer)
+})
 </script>
 
 <template>
@@ -109,8 +137,10 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown, true))
   >
     <div
       class="w-[276px]"
-      :class="shake && 'rte-link-shake'"
+      :class="[shake && 'rte-link-shake', !edit && 'rte-link-read']"
+      :title="edit ? undefined : 'Open link'"
       @animationend="shake = false"
+      @click="openLink"
     >
       <TextInput
         ref="input"
@@ -129,22 +159,45 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown, true))
         </template>
       </TextInput>
     </div>
-    <Button
-      v-if="!edit"
-      variant="ghost"
-      size="sm"
-      :icon="editIcon"
-      label="Edit link"
-      @click="startEdit"
-    />
-    <Button
-      v-else-if="href"
-      variant="ghost"
-      size="sm"
-      :icon="unlinkIcon"
-      label="Remove link"
-      @click="emit('updateHref', '')"
-    />
+    <!-- the file's states (32467:13501): read, copy and the pencil; editing
+         a link, unlink and the tick; a new one, the tick alone -->
+    <template v-if="!edit">
+      <Button
+        variant="ghost"
+        size="sm"
+        :icon="copied ? checkIcon : copyIcon"
+        :label="copied ? 'Copied' : 'Copy link'"
+        :title="copied ? 'Copied' : 'Copy link'"
+        @click="copyLink"
+      />
+      <Button
+        variant="ghost"
+        size="sm"
+        :icon="editIcon"
+        label="Edit link"
+        title="Edit link"
+        @click="startEdit"
+      />
+    </template>
+    <template v-else>
+      <Button
+        v-if="href"
+        variant="ghost"
+        size="sm"
+        :icon="unlinkIcon"
+        label="Remove link"
+        title="Remove link"
+        @click="emit('updateHref', '')"
+      />
+      <Button
+        variant="ghost"
+        size="sm"
+        :icon="checkIcon"
+        label="Save link"
+        title="Save link"
+        @click="submit"
+      />
+    </template>
   </div>
 </template>
 
@@ -156,6 +209,10 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown, true))
   background-color: var(--surface-gray-2);
   border-color: var(--surface-gray-2);
   box-shadow: none;
+}
+.rte-link-read,
+.rte-link-read input {
+  cursor: pointer;
 }
 .rte-link-shake {
   animation: rte-link-shake 160ms ease-in-out;

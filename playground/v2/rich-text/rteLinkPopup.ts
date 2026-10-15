@@ -7,8 +7,10 @@
 // card settles later and the document may have moved underneath it.
 import { getMarkRange, type Editor } from '@tiptap/core'
 import type { MarkType } from '@tiptap/pm/model'
+import { Plugin, PluginKey } from '@tiptap/pm/state'
 import {
   useFloatingPopup,
+  type FloatingPopupHandle,
   type VirtualReference,
 } from '../../../src/molecules/editor/composables/useFloatingPopup'
 import { mapStoredRange } from '../../../src/molecules/editor/extensions/shared/node-view'
@@ -66,10 +68,17 @@ function openRteLinkPopup(args: {
   href: string | null
   startInEdit: boolean
   range: Range
+  /** raised by the pointer resting on a link: the page keeps scrolling,
+   *  and a press in the editor is the hover controller's to judge */
+  hover?: {
+    onOpen: (popup: FloatingPopupHandle) => void
+    onEditing: () => void
+  }
 }): Promise<string | null> {
   const { editor } = args
   const anchor = editor.view.dom
-  const unlockScroll = lockScroll(scrollParent(anchor))
+  const unlockScroll = args.hover ? () => {} : lockScroll(scrollParent(anchor))
+  openCards++
   return new Promise<string | null>((resolve) => {
     let settled = false
     const settle = (value: string | null) => {
@@ -80,7 +89,7 @@ function openRteLinkPopup(args: {
     const popup = useFloatingPopup({
       anchor,
       component: RteLinkPanel,
-      closeOnAnchorPointerDown: true,
+      closeOnAnchorPointerDown: !args.hover,
       // the card owns Escape: editing steps back to reading first
       closeOnEscape: false,
       virtualReference: selectionReference(editor, args.range),
@@ -98,18 +107,172 @@ function openRteLinkPopup(args: {
           settle(href)
           popup.destroy()
         },
+        onEditing: () => args.hover?.onEditing(),
       },
     })
     const destroy = popup.destroy
+    let gone = false
     popup.destroy = () => {
+      if (!gone) {
+        gone = true
+        openCards--
+      }
       unlockScroll()
       settle(null)
       destroy()
     }
     if (!popup.floating) {
-      unlockScroll()
-      settle(null)
+      popup.destroy()
+      return
     }
+    args.hover?.onOpen(popup)
+  })
+}
+
+/** how many link cards are up; the pointer raises none over another */
+let openCards = 0
+
+// ---- hover: the file's Hover and Selected states (32467:13501). Over a
+// link the pointer is the hand; resting there a moment, or pressing the
+// link, raises the card read — the address (a press on it opens the link),
+// copy and the pencil. It stays while the pointer is on the link or the
+// card, and goes a beat after it leaves both; once the pencil is pressed
+// it is an edit like any other, and stays until it is done.
+const SHOW_DELAY = 300
+const HIDE_DELAY = 250
+
+export function rteLinkHoverPlugin(editor: Editor, markType: MarkType) {
+  return new Plugin({
+    key: new PluginKey('rteLinkHover'),
+    view(view) {
+      let link: HTMLAnchorElement | null = null
+      let popup: FloatingPopupHandle | null = null
+      let editing = false
+      let showTimer: ReturnType<typeof setTimeout> | undefined
+      let hideTimer: ReturnType<typeof setTimeout> | undefined
+
+      const linkAt = (target: EventTarget | null) => {
+        const el = target instanceof Element ? target : null
+        const a = el?.closest<HTMLAnchorElement>('a[href]')
+        if (!a || !view.dom.contains(a)) return null
+        // a link inside a node view (an attachment row) is that view's own
+        if (a.closest('[contenteditable="false"]')) return null
+        return a
+      }
+      const inCard = (target: EventTarget | null) =>
+        !!popup?.floating &&
+        target instanceof Node &&
+        popup.floating.contains(target)
+
+      const close = () => {
+        clearTimeout(showTimer)
+        clearTimeout(hideTimer)
+        popup?.destroy()
+        popup = null
+        link = null
+        editing = false
+      }
+      const scheduleHide = () => {
+        if (editing || !popup) return
+        clearTimeout(hideTimer)
+        hideTimer = setTimeout(close, HIDE_DELAY)
+      }
+      const open = (a: HTMLAnchorElement) => {
+        if (editor.isDestroyed || !editor.isEditable) return
+        if (popup && link === a) return
+        if (popup && editing) return
+        close()
+        // another card (the toolbar's, ⌘K) is up: leave it be
+        if (openCards > 0) return
+        const href = a.getAttribute('href')
+        if (!href) return
+        let range: Range | null = null
+        try {
+          const pos = view.posAtDOM(a, 0)
+          const markRange =
+            getMarkRange(view.state.doc.resolve(pos), markType) ??
+            getMarkRange(view.state.doc.resolve(pos + 1), markType)
+          if (markRange) range = { from: markRange.from, to: markRange.to }
+        } catch {
+          range = null
+        }
+        if (!range) return
+        const stored = range
+        link = a
+        void openRteLinkPopup({
+          editor,
+          href,
+          startInEdit: false,
+          range: stored,
+          hover: {
+            onOpen: (handle) => {
+              popup = handle
+              handle.floating?.addEventListener('mouseenter', () =>
+                clearTimeout(hideTimer),
+              )
+              handle.floating?.addEventListener('mouseleave', scheduleHide)
+            },
+            onEditing: () => {
+              editing = true
+              clearTimeout(hideTimer)
+            },
+          },
+        }).then((next) => {
+          popup = null
+          link = null
+          editing = false
+          if (next === null || editor.isDestroyed) return
+          applyLink(editor, stored, next)
+        })
+      }
+
+      const onOver = (e: MouseEvent) => {
+        const a = linkAt(e.target)
+        if (!a) return
+        if (a === link) {
+          clearTimeout(hideTimer)
+          return
+        }
+        clearTimeout(showTimer)
+        showTimer = setTimeout(() => open(a), SHOW_DELAY)
+      }
+      const onOut = (e: MouseEvent) => {
+        const a = linkAt(e.target)
+        if (!a) return
+        // still on the same link, or gone onto its card
+        if (a.contains(e.relatedTarget as Node | null)) return
+        clearTimeout(showTimer)
+        if (a === link && !inCard(e.relatedTarget)) scheduleHide()
+      }
+      const onDown = (e: PointerEvent) => {
+        const a = linkAt(e.target)
+        // a press on the link the card is for keeps it; anywhere else in
+        // the editor puts it away
+        if (popup && a !== link) close()
+      }
+      const onClick = (e: MouseEvent) => {
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
+        const a = linkAt(e.target)
+        if (a) {
+          clearTimeout(showTimer)
+          open(a)
+        }
+      }
+
+      view.dom.addEventListener('mouseover', onOver)
+      view.dom.addEventListener('mouseout', onOut)
+      view.dom.addEventListener('pointerdown', onDown)
+      view.dom.addEventListener('click', onClick)
+      return {
+        destroy() {
+          view.dom.removeEventListener('mouseover', onOver)
+          view.dom.removeEventListener('mouseout', onOut)
+          view.dom.removeEventListener('pointerdown', onDown)
+          view.dom.removeEventListener('click', onClick)
+          close()
+        },
+      }
+    },
   })
 }
 

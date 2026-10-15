@@ -25,7 +25,7 @@ import {
   TableSelectionOverlay,
 } from '../../../src/molecules/editor'
 import AttachmentNodeView from './AttachmentNodeView.vue'
-import { buildOpenRteLinkEditor } from './rteLinkPopup'
+import { buildOpenRteLinkEditor, rteLinkHoverPlugin } from './rteLinkPopup'
 import AudioNodeView from './AudioNodeView.vue'
 import DetailsNodeView from './DetailsNodeView.vue'
 import RteImageSlotView from './RteImageSlot.vue'
@@ -218,6 +218,8 @@ export const Link = KitLink.extend({
     const type = this.type
     return [
       ...(this.parent?.() ?? []),
+      // the pointer's card: the hand over a link, and its card on a rest
+      rteLinkHoverPlugin(this.editor, type),
       new Plugin({
         key: new PluginKey('rteLinkOn'),
         props: {

@@ -404,8 +404,8 @@ function resolve() {
   background: var(--surface-gray-2);
   color: var(--ink-gray-7);
 }
-/* a link (32467:13501): medium gray-700 on its rule, gray-800 under the
-   pointer; the one the caret is in, or its card is editing, sits on a
+/* a link (32467:13501): medium gray-700 on its rule, gray-800 and the hand
+   under the pointer (its card follows on a rest, rteLinkPopup.ts); the one the caret is in, or its card is editing, sits on a
    22px gray-100 ground on 4px corners (the Link extension's .rte-link-on) */
 .rte-doc.prose-v3 a:not(.rte-attachment > a) {
   color: var(--ink-gray-7);
@@ -413,6 +413,7 @@ function resolve() {
 }
 .rte-doc.prose-v3 a:not(.rte-attachment > a):hover {
   color: var(--ink-gray-8);
+  cursor: pointer;
 }
 .rte-doc .rte-link-on {
   color: var(--ink-gray-8);
