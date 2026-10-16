@@ -64,6 +64,19 @@ function updateActive() {
       current = pattern.id
     }
   }
+  // the last patterns may be shorter than the view, so their tops never
+  // reach the line: at the foot of the page, the last one is in view
+  const atFoot =
+    scroller instanceof Window
+      ? window.scrollY + window.innerHeight >=
+        document.documentElement.scrollHeight - 2
+      : scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 2
+  const canScroll =
+    scroller instanceof Window
+      ? document.documentElement.scrollHeight > window.innerHeight
+      : scroller.scrollHeight > scroller.clientHeight
+  if (atFoot && canScroll)
+    current = props.patterns[props.patterns.length - 1]?.id ?? current
   active.value = current
 }
 
@@ -140,6 +153,8 @@ onBeforeUnmount(() => {
             </a>
           </li>
         </ul>
+        <!-- the page's own controls, for the pattern in view -->
+        <slot name="rail" :active="active" />
       </nav>
     </aside>
   </div>
