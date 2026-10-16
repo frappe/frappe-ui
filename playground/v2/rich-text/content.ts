@@ -153,7 +153,7 @@ welcome("jacob@frappe.in")</code></pre>
 <h2>Designed for Modern Organizations</h2>
 <p>Modern organizations require software that can evolve alongside their business. Growth often introduces new processes, larger teams, additional compliance requirements, and more complex operational challenges. Frappe products are designed with scalability in mind, ensuring organizations can start small and expand their systems as requirements change.</p>
 <p></p>
-<iframe src="https://www.youtube.com/embed/aqz-KE-bpKQ" title="Big Buck Bunny"></iframe>
+<iframe src="https://www.youtube.com/embed/aqz-KE-bpKQ" title="Big Buck Bunny" data-interactive="true"></iframe>
 <p></p>
 <a data-attachment href="#" data-file-name="Default ticket type" data-file-size="12288" data-mime-type="text/plain">Default ticket type</a>
 <a data-attachment href="#" data-file-name="Supply_update.doc" data-file-size="49152" data-mime-type="application/msword">Supply_update.doc</a>

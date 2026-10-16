@@ -47,7 +47,9 @@ function takeLink(embed: { src: string; aspectRatio: number }) {
     .focus()
     .insertContentAt(r, {
       type: 'iframe',
-      attrs: { ...embed, width: null, height: null },
+      // live from the start, as Notion's: a press plays the video or
+      // scrolls the map, and the chrome comes up under the pointer
+      attrs: { ...embed, width: null, height: null, interactive: true },
     })
     .run()
 }

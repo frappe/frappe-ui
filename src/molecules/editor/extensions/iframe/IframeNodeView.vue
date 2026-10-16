@@ -57,8 +57,20 @@ const frameStyle = computed(() => ({
 
 const sandbox = computed<string>(() => IFRAME_SANDBOX)
 
+/**
+ * The chrome — the toolbar and the side handles — comes up under the
+ * pointer as well as on selection, as Notion's embed does: an interactive
+ * embed takes its clicks for itself (a video plays), so a press would never
+ * select it, and the way to its menu is the hover. The selected ring stays
+ * the selection's alone.
+ */
+const hovered = ref(false)
+
 const isInteractive = computed<boolean>(() => !!props.node.attrs.interactive)
 const overlayActive = computed(() => isEditable.value && !isInteractive.value)
+const chromeShown = computed(
+  () => props.selected || hovered.value || isResizing.value,
+)
 
 /**
  * The design's "Preview failed": a frame that reports an error, or says
@@ -105,7 +117,7 @@ watch(
 )
 onBeforeUnmount(() => clearTimeout(loadTimer))
 
-const { startResize } = useNodeViewResize(editor, {
+const { startResize, isResizing } = useNodeViewResize(editor, {
   mediaEl: () => iframeRef.value,
   containerEl: () => containerRef.value,
   getAspectRatio: () => aspectRatio.value,
@@ -273,6 +285,8 @@ function commitCaption(event: Event): void {
       tabindex="0"
       data-embed-root
       @keydown="handleKeydown"
+      @pointerenter="hovered = true"
+      @pointerleave="hovered = false"
     >
       <div
         class="group relative overflow-hidden rounded-4"
@@ -341,7 +355,7 @@ function commitCaption(event: Event): void {
           :node="node"
           media-type="embed"
           :is-editable="isEditable"
-          :selected="selected"
+          :selected="chromeShown"
           :show-caption="showCaption"
           @toggle-caption="toggleCaption"
           @set-align="setAlignment"
@@ -353,7 +367,7 @@ function commitCaption(event: Event): void {
         />
 
         <MediaResizeHandle
-          v-if="selected && isEditable && !showFailed"
+          v-if="chromeShown && isEditable && !showFailed"
           label="Resize embed"
           placement="edges"
           @resize-start="onResizeStart"
