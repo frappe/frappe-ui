@@ -2,7 +2,7 @@
   <!-- The dialog grid is a workbench, not a 1:1 preview: cells get gaps and
        rounding so each image reads as a manipulable object. The inserted
        gallery node keeps its tight gap-px collage look. -->
-  <div class="grid gap-2 mb-4" :style="gridStyle">
+  <div class="grid gap-px mb-4" :style="gridStyle">
     <div
       v-for="(item, idx) in images"
       :key="item.id"
