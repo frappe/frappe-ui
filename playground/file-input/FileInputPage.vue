@@ -26,7 +26,7 @@ const patterns: Pattern[] = [
     width="700px"
     centered
     hide-titles
-    gap="128px"
+    gap="192px"
     :patterns="patterns"
   />
 </template>
