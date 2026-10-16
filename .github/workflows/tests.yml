@@ -93,6 +93,30 @@ jobs:
         working-directory: packages/create-frappe-ui
         run: npm test
 
+  # frappe-ui builds on Vite 7, but apps may run Vite 8, which pre-bundles with
+  # Rolldown instead of esbuild.
+  vite-8:
+    runs-on: ubuntu-latest
+    name: Vite plugin tests (Vite 8)
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'yarn'
+
+      - name: Install dependencies with Vite 8
+        run: |
+          npm pkg set resolutions.vite=^8.2.0 devDependencies.vite=^8.2.0 devDependencies.vitest=^4.1.10
+          yarn install --non-interactive
+        env:
+          CYPRESS_INSTALL_BINARY: 0
+
+      - name: Run the Vite plugin tests
+        run: yarn vitest --run vite/
+
   component-test:
     runs-on: ubuntu-latest
     name: Component Tests (Cypress) - ${{ matrix.containers }}

@@ -64,7 +64,8 @@ window.bench = { config, apps }`,
     const code = output[0].output[0].code
 
     // ?raw keeps the file as a string; the extensionless import finds apps.json.
-    expect(code).toContain(`const config = '{"socketio_port": 9123}'`)
+    // Rollup and Rolldown quote that string differently.
+    expect(code).toMatch(/socketio_port\\?": 9123/)
     expect(code).toContain('"linked-app"')
   })
 })
