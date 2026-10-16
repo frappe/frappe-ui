@@ -25,11 +25,11 @@
  *
  * The same job has to be done twice. `resolveId` covers the Rollup graph, which
  * is the production build and every dev request the server transforms. It
- * cannot cover Vite's dependency pre-bundling: that step is esbuild, and it
- * resolves through `vite:resolve` alone, with no user plugin hooks. `frappe-ui`
- * is a bare specifier, so `frappe-ui/code-editor` is pre-bundled, and an absent
- * language there does not degrade — esbuild fails the optimize step and the dev
- * server exits:
+ * cannot cover Vite's dependency pre-bundling: that step is a separate esbuild
+ * or Rolldown build, and it runs no user plugin hooks. `frappe-ui` is a bare
+ * specifier, so `frappe-ui/code-editor` is pre-bundled, and an absent language
+ * there does not degrade. Before Vite 8, esbuild fails the optimize step and
+ * the dev server exits:
  *
  *     Error during dependency optimization:
  *     ✘ [ERROR] Could not resolve "@codemirror/lang-json"
@@ -110,8 +110,9 @@ export function codeLanguages() {
 
 /**
  * Stub a language package that does not resolve, but only for frappe-ui's own
- * `languages` module. Rollup and Rolldown share these hooks, so the build and
- * Vite 8's pre-bundling each get a fresh copy.
+ * `languages` module. Rollup and Rolldown share these hooks, so Vite 8's
+ * pre-bundling reuses them. It gets its own copy because `languagesModule` is
+ * cached per build.
  */
 function stubPlugin() {
   // `frappe-ui/code-editor`'s own directory, resolved once per build. A path
