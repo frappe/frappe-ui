@@ -31,7 +31,11 @@ import {
   TableSelectionOverlay,
 } from '../../../src/molecules/editor'
 import AttachmentNodeView from './AttachmentNodeView.vue'
-import { buildOpenRteLinkEditor, rteLinkHoverPlugin } from './rteLinkPopup'
+import {
+  buildOpenRteLinkEditor,
+  rteLinkHoverPlugin,
+  rteLinkPendingPlugin,
+} from './rteLinkPopup'
 import AudioNodeView from './AudioNodeView.vue'
 import DetailsNodeView from './DetailsNodeView.vue'
 import RteImageSlotView from './RteImageSlot.vue'
@@ -224,6 +228,8 @@ export const Link = KitLink.extend({
       ...(this.parent?.() ?? []),
       // the pointer's card: the hand over a link, and its card on a rest
       rteLinkHoverPlugin(this.editor, type),
+      // the run a card is for stays marked while its field has the focus
+      rteLinkPendingPlugin(),
       new Plugin({
         key: new PluginKey('rteLinkOn'),
         props: {

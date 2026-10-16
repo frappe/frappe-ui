@@ -8,6 +8,7 @@
 import { getMarkRange, type Editor } from '@tiptap/core'
 import type { MarkType } from '@tiptap/pm/model'
 import { Plugin, PluginKey } from '@tiptap/pm/state'
+import { Decoration, DecorationSet } from '@tiptap/pm/view'
 import { ref } from 'vue'
 import {
   useFloatingPopup,
@@ -117,6 +118,7 @@ function openRteLinkPopup(args: {
     popup.destroy = () => {
       if (!gone) {
         gone = true
+        markPending(editor, null)
         openCards--
         linkCardOpen.value = openCards > 0
       }
@@ -128,8 +130,51 @@ function openRteLinkPopup(args: {
       popup.destroy()
       return
     }
+    // a frame on: the card may be raised from inside a command, and a
+    // transaction of its own mid-command would be one too many
+    requestAnimationFrame(() => {
+      if (!gone) markPending(editor, mapStoredRange(editor.state, args.range))
+    })
     args.hover?.onOpen(popup)
   })
+}
+
+// ---- the run a card is for stays marked while it is up: the card's field
+// takes the focus, and with it the browser stops drawing the selection, so
+// the text being linked would be lost to sight. It is drawn as the file's
+// Edit Link state (32467:13501), the gray-100 ground of .rte-link-on.
+type Pending = Range | null
+const pendingKey = new PluginKey<Pending>('rteLinkPending')
+
+export function rteLinkPendingPlugin() {
+  return new Plugin<Pending>({
+    key: pendingKey,
+    state: {
+      init: () => null,
+      apply(tr, value) {
+        const meta = tr.getMeta(pendingKey) as Pending | undefined
+        if (meta !== undefined) return meta
+        if (!value || !tr.docChanged) return value
+        const from = tr.mapping.map(value.from, 1)
+        const to = tr.mapping.map(value.to, -1)
+        return from < to ? { from, to } : null
+      },
+    },
+    props: {
+      decorations(state) {
+        const range = pendingKey.getState(state)
+        if (!range) return null
+        return DecorationSet.create(state.doc, [
+          Decoration.inline(range.from, range.to, { class: 'rte-link-on' }),
+        ])
+      },
+    },
+  })
+}
+
+function markPending(editor: Editor, range: Pending) {
+  if (editor.isDestroyed) return
+  editor.view.dispatch(editor.state.tr.setMeta(pendingKey, range))
 }
 
 /** how many link cards are up; the pointer raises none over another */
