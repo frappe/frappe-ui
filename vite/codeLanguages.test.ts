@@ -218,10 +218,12 @@ describe('codeLanguages', () => {
  * from Vite 8 on.
  */
 describe('codeLanguages in dependency pre-bundling', () => {
+  const CODE_EDITOR = 'frappe-ui/code-editor'
+
   async function optimize(
     root: string,
     plugins = [codeLanguages()],
-    dep = 'frappe-ui/code-editor',
+    dep = CODE_EDITOR,
   ) {
     const config = await resolveConfig(
       {
@@ -247,7 +249,7 @@ describe('codeLanguages in dependency pre-bundling', () => {
    */
   function optimized(
     metadata: Awaited<ReturnType<typeof optimizeDeps>>,
-    dep = 'frappe-ui/code-editor',
+    dep = CODE_EDITOR,
   ) {
     const dir = dirname(metadata.optimized[dep].file)
     return readdirSync(dir)
@@ -263,9 +265,11 @@ describe('codeLanguages in dependency pre-bundling', () => {
    * with `Failed to resolve import "@codemirror/lang-json"`.
    */
   async function expectUnstubbed(
-    pending: ReturnType<typeof optimizeDeps>,
-    dep = 'frappe-ui/code-editor',
+    root: string,
+    plugins: Parameters<typeof optimize>[1],
+    dep = CODE_EDITOR,
   ) {
+    const pending = optimize(root, plugins, dep)
     if (!('rolldownVersion' in vite)) {
       await expect(pending).rejects.toThrow(
         /Could not resolve "@codemirror\/lang-json"/,
@@ -291,7 +295,7 @@ describe('codeLanguages in dependency pre-bundling', () => {
   it('is the reason dev works', async () => {
     const root = project(FRAPPE_UI)
 
-    await expectUnstubbed(optimize(root, []))
+    await expectUnstubbed(root, [])
   }, 30000)
 
   it('leaves an installed package alone', async () => {
@@ -331,9 +335,6 @@ describe('codeLanguages in dependency pre-bundling', () => {
       'node_modules/other-ui/src/molecules/code-editor/languages.js': LANGUAGES,
     })
 
-    await expectUnstubbed(
-      optimize(root, [codeLanguages()], 'other-ui/code-editor'),
-      'other-ui/code-editor',
-    )
+    await expectUnstubbed(root, [codeLanguages()], 'other-ui/code-editor')
   }, 30000)
 })
