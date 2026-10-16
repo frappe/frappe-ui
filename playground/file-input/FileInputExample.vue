@@ -11,7 +11,8 @@
 // 2026-10-06): hover under the pointer, focus from the keyboard, filled and
 // loading from a chosen or dropped file. With Preview it is the file's cell,
 // 700x140, the field's foot on the cell's foot after the card and its 12
-// gap; without, the field alone, in the middle of the page.
+// gap; without, the field alone, in the middle of the page — and of the
+// same 140 box, so a size grows it about its middle and moves nothing below.
 //
 // File input area — the drop area, node 35825:65914 — with its own Variant,
 // Orientation (how the files under it sit: cards down, or thumbnails
@@ -72,8 +73,10 @@ const DESCRIPTION =
       v-model:error="error"
       :disabled="disabled"
     />
-    <!-- the area; the files it takes grow it downward -->
-    <div v-else-if="inputType === 'area'">
+    <!-- the area, in a box as tall as its tallest option makes it (Error's
+         files, 270), so an option never moves what's below; files dropped
+         in grow it downward -->
+    <div v-else-if="inputType === 'area'" class="min-h-[270px]">
       <FileInputArea
         v-model:error="error"
         :variant="variant"
@@ -83,8 +86,8 @@ const DESCRIPTION =
     </div>
     <div
       v-else
-      class="flex"
-      :class="preview ? 'h-[140px] w-[700px] items-end' : 'justify-center'"
+      class="flex h-[140px]"
+      :class="preview ? 'w-[700px] items-end' : 'items-center justify-center'"
     >
       <FileInput
         :variant="variant"
