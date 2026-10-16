@@ -1,15 +1,15 @@
 <script setup lang="ts">
 // Figma: espresso-2.0 › References › modal (34953:130721) — "modal new",
-// variant form. Two sm outline selects; Delete left, Cancel/Save right.
+// variant form. Two sm subtle selects, as the form modal draws its fields (30884:48978); Delete left, Cancel/Save right.
 import { ref, watch } from 'vue'
 import { Button, Select } from '../../../src'
 import EspressoModal from './EspressoModal.vue'
 import ModalField from './ModalField.vue'
 
-const props = withDefaults(
-  defineProps<{ status?: string; sla?: string }>(),
-  { status: 'resolved', sla: 'fulfilled' },
-)
+const props = withDefaults(defineProps<{ status?: string; sla?: string }>(), {
+  status: 'resolved',
+  sla: 'fulfilled',
+})
 
 const open = defineModel<boolean>('open', { default: false })
 
@@ -56,10 +56,20 @@ function remove(close: () => void) {
   <EspressoModal v-model:open="open" title="Edit" variant="form">
     <div class="flex flex-col gap-4">
       <ModalField label="Status">
-        <Select v-model="status" variant="outline" :options="statuses" />
+        <Select
+          v-model="status"
+          variant="subtle"
+          size="sm"
+          :options="statuses"
+        />
       </ModalField>
       <ModalField label="SLA behaviour">
-        <Select v-model="sla" variant="outline" :options="slaBehaviours" />
+        <Select
+          v-model="sla"
+          variant="subtle"
+          size="sm"
+          :options="slaBehaviours"
+        />
       </ModalField>
     </div>
 

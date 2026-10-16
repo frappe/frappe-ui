@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // Figma: espresso-2.0 › References › modal (34953:131928) — "popup",
-// single-field. Laid out on the shared form card; fields are md outline
+// single-field. Laid out on the shared form card; fields are sm subtle
 // controls, 20px apart.
 import { ref, watch } from 'vue'
 import { Button, Radio, RadioGroup, TextInput } from '../../../src'
@@ -42,25 +42,20 @@ function save(close: () => void) {
     close-placement="popup"
   >
     <div class="flex flex-col gap-5">
-      <!-- 32px outline icon button · 8px · input -->
+      <!-- 28px subtle icon button · 8px · the sm subtle input -->
       <ModalField label="Category name">
         <div class="flex items-center gap-2">
           <Button
             class="shrink-0"
-            variant="outline"
-            size="md"
+            variant="subtle"
+            size="sm"
             label="Category icon"
           >
             <template #icon>
               <span class="lucide-settings size-[18px] text-ink-gray-6" />
             </template>
           </Button>
-          <TextInput
-            v-model="name"
-            class="flex-1"
-            size="md"
-            variant="outline"
-          />
+          <TextInput v-model="name" class="flex-1" size="sm" variant="subtle" />
         </div>
       </ModalField>
 

@@ -140,8 +140,8 @@ function create(close: () => void) {
       <ModalField label="Title">
         <TextInput
           v-model="task.title"
-          size="md"
-          variant="outline"
+          size="sm"
+          variant="subtle"
           placeholder="Landing page - Hash"
         />
       </ModalField>
@@ -149,8 +149,8 @@ function create(close: () => void) {
       <ModalField label="Description">
         <Textarea
           v-model="task.description"
-          size="md"
-          variant="outline"
+          size="sm"
+          variant="subtle"
           :rows="3"
           placeholder="Hash is a global branding and digital design agency building products, services, and eCommerce experiences that turn cultural values into company value."
         />
