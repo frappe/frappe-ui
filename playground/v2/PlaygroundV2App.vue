@@ -1163,7 +1163,12 @@ const outlineTitle = computed(
               >
                 <TreePage />
               </div>
-              <FileInputPage v-else-if="page === 'file-input'" />
+              <div
+                v-else-if="page === 'file-input'"
+                class="v2-scroll h-full overflow-y-auto"
+              >
+                <FileInputPage />
+              </div>
               <div
                 v-else-if="page === 'date-picker'"
                 class="v2-scroll h-full overflow-y-auto"
