@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, provide, ref } from 'vue'
 import type { Component } from 'vue'
+import { PATTERNS_ACTIVE } from './patternsRail'
 
 export type Pattern = {
   id: string
@@ -37,6 +38,9 @@ const sectionId = (id: string) => `pattern-${id}`
 // reading line a quarter of the way down the scroller. A scroll listener rather
 // than an IntersectionObserver, which doesn't fire on these pages.
 const active = ref(props.patterns[0]?.id ?? '')
+// a pattern that keeps its own controls teleports them under the outline
+// (`#patterns-rail`) while it is the one in view
+provide(PATTERNS_ACTIVE, active)
 
 // The page scrolls in whatever its shell gives it: the document, or — in the
 // v2 shell, where every page owns its `overflow-y-auto` box — the nearest
@@ -54,6 +58,23 @@ function findScroller(el: HTMLElement | null): HTMLElement | Window {
     if (overflowY === 'auto' || overflowY === 'scroll') return n
   }
   return window
+}
+
+// Room after the last pattern, so that even a short one can be scrolled up
+// to the top of the view — where the outline marks it, and where a click on
+// its outline row takes it — rather than the page ending first.
+const tail = ref(0)
+function sizeTail() {
+  const last = props.patterns[props.patterns.length - 1]
+  const section = last && document.getElementById(sectionId(last.id))
+  if (!section) return
+  const view =
+    scroller instanceof Window
+      ? window.innerHeight
+      : scroller.getBoundingClientRect().height
+  // the view less the section, the column's 48 of top margin and its 48 of
+  // bottom padding
+  tail.value = Math.max(0, Math.round(view - section.offsetHeight - 96))
 }
 
 function updateActive() {
@@ -85,16 +106,22 @@ function updateActive() {
   active.value = current
 }
 
+function onResize() {
+  sizeTail()
+  updateActive()
+}
+
 onMounted(() => {
   scroller = findScroller(root.value)
+  sizeTail()
   updateActive()
   scroller.addEventListener('scroll', updateActive, { passive: true })
-  window.addEventListener('resize', updateActive)
+  window.addEventListener('resize', onResize)
 })
 
 onBeforeUnmount(() => {
   scroller.removeEventListener('scroll', updateActive)
-  window.removeEventListener('resize', updateActive)
+  window.removeEventListener('resize', onResize)
 })
 </script>
 
@@ -133,6 +160,8 @@ onBeforeUnmount(() => {
           <component :is="pattern.component" v-bind="pattern.props" />
         </section>
 
+        <div v-if="tail" aria-hidden="true" :style="{ height: `${tail}px` }" />
+
         <p v-if="!patterns.length" class="text-p-base text-ink-gray-5">
           No patterns here yet.
         </p>
@@ -169,6 +198,7 @@ onBeforeUnmount(() => {
         </ul>
         <!-- the page's own controls, for the pattern in view -->
         <slot name="rail" :active="active" />
+        <div id="patterns-rail" />
       </nav>
     </aside>
   </div>

@@ -1157,7 +1157,12 @@ const outlineTitle = computed(
               </div>
               <CalendarPatterns v-else-if="page === 'calendar'" />
               <EmailComposerPage v-else-if="page === 'email-composer'" />
-              <TreePage v-else-if="page === 'tree'" />
+              <div
+                v-else-if="page === 'tree'"
+                class="v2-scroll h-full overflow-y-auto"
+              >
+                <TreePage />
+              </div>
               <FileInputPage v-else-if="page === 'file-input'" />
               <div
                 v-else-if="page === 'date-picker'"
@@ -1165,7 +1170,12 @@ const outlineTitle = computed(
               >
                 <DatePickerPage />
               </div>
-              <TagPage v-else-if="page === 'tag'" />
+              <div
+                v-else-if="page === 'tag'"
+                class="v2-scroll h-full overflow-y-auto"
+              >
+                <TagPage />
+              </div>
               <div
                 v-else-if="page === 'accordion'"
                 class="v2-scroll h-full overflow-y-auto"
