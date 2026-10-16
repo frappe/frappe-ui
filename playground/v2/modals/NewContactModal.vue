@@ -1,7 +1,8 @@
 <script setup lang="ts">
 // Figma: espresso-2.0 › References › modal 600 (34961:139269) — "popup",
-// New contact. md outline fields, 20px apart; two-column rows split with a
-// 20px gutter; a full-width solid md Create 32px below.
+// New contact, its fields as the form modal draws them (30884:48978): sm
+// subtle fields under the 14px gray-500 label, 16px apart, two-column rows
+// split by the same 16px; a full-width solid md Create below.
 import { computed, reactive, watch } from 'vue'
 import { Button, Select, TextInput } from '../../../src'
 import EspressoModal from './EspressoModal.vue'
@@ -73,31 +74,31 @@ function create(close: () => void) {
     width="600"
     close-placement="popup"
   >
-    <div class="flex flex-col gap-5">
+    <div class="flex flex-col gap-4">
       <ModalField label="Salutation">
         <Select
           v-model="contact.salutation"
-          size="md"
-          variant="outline"
+          size="sm"
+          variant="subtle"
           placeholder="Select"
           :options="salutations"
         />
       </ModalField>
 
-      <div class="grid grid-cols-2 gap-5">
+      <div class="grid grid-cols-2 gap-4">
         <ModalField label="First name">
           <TextInput
             v-model="contact.firstName"
-            size="md"
-            variant="outline"
+            size="sm"
+            variant="subtle"
             placeholder="Input text"
           />
         </ModalField>
         <ModalField label="Last name">
           <TextInput
             v-model="contact.lastName"
-            size="md"
-            variant="outline"
+            size="sm"
+            variant="subtle"
             placeholder="Input text"
           />
         </ModalField>
@@ -107,27 +108,27 @@ function create(close: () => void) {
         <TextInput
           v-model="contact.email"
           type="email"
-          size="md"
-          variant="outline"
+          size="sm"
+          variant="subtle"
           placeholder="Add email address"
         />
       </ModalField>
 
-      <div class="grid grid-cols-2 gap-5">
+      <div class="grid grid-cols-2 gap-4">
         <ModalField label="Phone number">
           <TextInput
             v-model="contact.phone"
             type="tel"
-            size="md"
-            variant="outline"
+            size="sm"
+            variant="subtle"
             placeholder="Add phone number"
           />
         </ModalField>
         <ModalField label="Gender">
           <Select
             v-model="contact.gender"
-            size="md"
-            variant="outline"
+            size="sm"
+            variant="subtle"
             placeholder="Select"
             :options="genders"
           />
@@ -137,8 +138,8 @@ function create(close: () => void) {
       <ModalField label="Organisation">
         <Select
           v-model="contact.organisation"
-          size="md"
-          variant="outline"
+          size="sm"
+          variant="subtle"
           placeholder="Select organisation"
           :options="organisations"
         />
@@ -147,8 +148,8 @@ function create(close: () => void) {
       <ModalField label="Designation">
         <Select
           v-model="contact.designation"
-          size="md"
-          variant="outline"
+          size="sm"
+          variant="subtle"
           placeholder="Select designation"
           :options="designations"
         />
@@ -157,8 +158,8 @@ function create(close: () => void) {
       <ModalField label="Address">
         <TextInput
           v-model="contact.address"
-          size="md"
-          variant="outline"
+          size="sm"
+          variant="subtle"
           placeholder="Address"
         />
       </ModalField>
