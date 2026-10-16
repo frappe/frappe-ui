@@ -108,7 +108,7 @@ const DESCRIPTION =
         <!-- CSV files has one look -->
         <div
           v-if="inputType !== 'sources'"
-          class="flex h-7 items-center justify-between"
+          class="flex h-7 items-center justify-between gap-3"
         >
           <span class="text-base text-ink-gray-7">Variant</span>
           <TabButtons
@@ -116,12 +116,12 @@ const DESCRIPTION =
             :options="variantTabs"
             size="sm"
             aria-label="Variant"
-            class="w-[148px] [&>div]:w-full [&_button]:flex-1 [&_button]:basis-0 [&_button>span]:w-full"
+            class="w-[134px] [&>div]:w-full [&_button]:flex-1 [&_button]:basis-0 [&_button>span]:w-full"
           />
         </div>
         <div
           v-if="inputType === 'area'"
-          class="flex h-7 items-center justify-between"
+          class="flex h-7 items-center justify-between gap-3"
         >
           <span class="text-base text-ink-gray-7">Orientation</span>
           <TabButtons
@@ -129,12 +129,12 @@ const DESCRIPTION =
             :options="orientationTabs"
             size="sm"
             aria-label="Orientation"
-            class="w-[148px] [&>div]:w-full [&_button]:flex-1 [&_button>span]:w-full"
+            class="w-[134px] [&>div]:w-full [&_button]:flex-1 [&_button>span]:w-full [&_button>span]:px-[5px]"
           />
         </div>
         <div
           v-if="inputType === 'field'"
-          class="flex h-7 items-center justify-between"
+          class="flex h-7 items-center justify-between gap-3"
         >
           <span class="text-base text-ink-gray-7">Size</span>
           <TabButtons
@@ -142,21 +142,21 @@ const DESCRIPTION =
             :options="sizeTabs"
             size="sm"
             aria-label="Size"
-            class="w-[148px] [&>div]:w-full [&_button]:flex-1 [&_button]:basis-0 [&_button]:min-w-0 [&_button>span]:min-w-0 [&_button>span]:px-0 [&_button>span]:w-full"
+            class="w-[134px] [&>div]:w-full [&_button]:flex-1 [&_button]:basis-0 [&_button]:min-w-0 [&_button>span]:min-w-0 [&_button>span]:px-0 [&_button>span]:w-full"
           />
         </div>
         <div
           v-if="inputType === 'field'"
-          class="flex h-7 items-center justify-between"
+          class="flex h-7 items-center justify-between gap-3"
         >
           <span class="text-base text-ink-gray-7">Preview</span>
           <Switch v-model="preview" size="sm" aria-label="Preview" />
         </div>
-        <div class="flex h-7 items-center justify-between">
+        <div class="flex h-7 items-center justify-between gap-3">
           <span class="text-base text-ink-gray-7">Error</span>
           <Switch v-model="error" size="sm" aria-label="Error" />
         </div>
-        <div class="flex h-7 items-center justify-between">
+        <div class="flex h-7 items-center justify-between gap-3">
           <span class="text-base text-ink-gray-7">Disabled</span>
           <Switch v-model="disabled" size="sm" aria-label="Disabled" />
         </div>
