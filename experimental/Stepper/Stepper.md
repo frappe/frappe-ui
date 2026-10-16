@@ -2,6 +2,16 @@
 
 Shows where a person or a process is in an ordered sequence of steps.
 
+> **Experimental** — `Stepper` ships from
+> [`frappe-ui/experimental`](/docs/experimental) while its API is reviewed and
+> refined, so it is exempt from the usual deprecation policy and can change
+> shape or disappear in any release.
+
+```ts
+import { Stepper } from 'frappe-ui/experimental'
+import type { StepItem, StepperProps } from 'frappe-ui/experimental'
+```
+
 <ComponentPlayground name="Stepper" />
 
 ## Examples

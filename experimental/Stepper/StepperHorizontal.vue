@@ -43,7 +43,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Progress } from '../Progress'
+import { Progress } from '../../src/components/Progress'
 import StepIndicator from './StepIndicator.vue'
 import { isPassed } from './resolve'
 import type { ResolvedStep, StepState, StepValue, StepperSize } from './types'
