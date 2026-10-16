@@ -59,11 +59,16 @@ watch(dismissible, (on) => !on && restore())
 
 <template>
   <div>
-    <!-- one box, tall enough for the tags at lg and the Reset under them, so
-         nothing below moves; the tags wrap in a column of 320, the width the
-         file's usage gives them -->
-    <div class="flex h-[160px] w-[320px] flex-col items-center gap-4">
-      <div class="flex flex-wrap justify-center gap-1.5">
+    <!-- one box, half the view less the page's 64 between variants, so two
+         variants fill the view at a time; the tags stand in its middle, so a
+         change of size grows them about it and nothing below moves. They
+         wrap in a column of 320, the width the file's usage gives them -->
+    <div
+      class="flex h-[calc(50dvh-64px)] min-h-[160px] w-[320px] flex-col items-center justify-center"
+    >
+      <!-- Reset hangs 16 under the tags, out of the flow, so it never
+           moves them -->
+      <div class="relative flex flex-wrap justify-center gap-1.5">
         <Tag
           v-for="t in tags"
           :key="t.label"
@@ -76,20 +81,21 @@ watch(dismissible, (on) => !on && restore())
           :disabled="disabled"
           @dismiss="remove(t.label)"
         />
+        <Button
+          v-if="tags.length < ALL.length"
+          variant="ghost"
+          size="sm"
+          label="Reset"
+          class="absolute left-1/2 top-full mt-4 -translate-x-1/2"
+          @click="restore"
+        />
       </div>
-      <Button
-        v-if="tags.length < ALL.length"
-        variant="ghost"
-        size="sm"
-        label="Reset"
-        @click="restore"
-      />
     </div>
 
     <!-- the controls, under the page's outline while this variant is in view -->
     <Teleport v-if="inView" defer to="#patterns-rail">
       <div class="mt-10 text-base-medium text-ink-gray-8">Options</div>
-      <div class="mt-3 flex flex-col gap-1">
+      <div class="mt-3 flex flex-col gap-3">
         <div class="flex h-7 items-center justify-between">
           <span class="text-base text-ink-gray-7">Size</span>
           <TabButtons

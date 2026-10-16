@@ -26,8 +26,10 @@ const props = withDefaults(
     /** Keep the pattern titles for screen readers only — the outline
      * already names the one in view. */
     hideTitles?: boolean
+    /** Space between one pattern and the next (default 64px). */
+    gap?: string
   }>(),
-  { width: '700px', centered: false, hideTitles: false },
+  { width: '700px', centered: false, hideTitles: false, gap: '64px' },
 )
 
 // Namespaced: the lucide sprite puts <symbol id="table"> and <symbol id="list">
@@ -73,8 +75,11 @@ function sizeTail() {
       ? window.innerHeight
       : scroller.getBoundingClientRect().height
   // the view less the section, the column's 48 of top margin and its 48 of
-  // bottom padding
-  tail.value = Math.max(0, Math.round(view - section.offsetHeight - 96))
+  // bottom padding, and the gap the spacer itself stands after
+  tail.value = Math.max(
+    0,
+    Math.round(view - section.offsetHeight - 96 - parseFloat(props.gap)),
+  )
 }
 
 function updateActive() {
@@ -133,7 +138,7 @@ onBeforeUnmount(() => {
   -->
   <div ref="root" class="flex min-h-full bg-surface-base">
     <div class="flex min-w-0 flex-1 justify-center px-6 py-12">
-      <div class="flex max-w-full flex-col gap-16" :style="{ width }">
+      <div class="flex max-w-full flex-col" :style="{ width, rowGap: gap }">
         <header
           class="flex min-w-0 flex-col gap-1"
           :class="centered && 'self-center'"

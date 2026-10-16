@@ -521,7 +521,7 @@ onMounted(() => applyExample(example.value))
       -->
       <Teleport v-if="inView" defer to="#patterns-rail">
         <div class="mt-10 text-base-medium text-ink-gray-8">Options</div>
-        <div class="mt-3 flex flex-col gap-1">
+        <div class="mt-3 flex flex-col gap-3">
           <div class="flex h-7 items-center justify-between">
             <span class="text-base text-ink-gray-7">Indentation</span>
             <Select

@@ -88,7 +88,7 @@ const pickerOf = (id: string) => PICKERS.find((p) => p.kind === id)
     <template #rail="{ active }">
       <template v-if="pickerOf(active)?.options.length">
         <div class="mt-10 text-base-medium text-ink-gray-8">Options</div>
-        <div class="mt-3 flex flex-col gap-1">
+        <div class="mt-3 flex flex-col gap-3">
           <label
             v-for="key in pickerOf(active)!.options"
             :key="`${active}-${key}`"
