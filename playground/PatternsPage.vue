@@ -6,6 +6,8 @@ export type Pattern = {
   id: string
   title: string
   component: Component
+  /** Props handed to the component, when one component draws several. */
+  props?: Record<string, unknown>
 }
 
 const props = withDefaults(
@@ -101,7 +103,7 @@ onBeforeUnmount(() => {
           class="flex scroll-mt-12 flex-col gap-6"
         >
           <h2 class="text-3xl-semibold text-ink-gray-8">{{ pattern.title }}</h2>
-          <component :is="pattern.component" />
+          <component :is="pattern.component" v-bind="pattern.props" />
         </section>
 
         <p v-if="!patterns.length" class="text-p-base text-ink-gray-5">

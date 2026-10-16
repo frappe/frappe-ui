@@ -1159,7 +1159,12 @@ const outlineTitle = computed(
               <EmailComposerPage v-else-if="page === 'email-composer'" />
               <TreePage v-else-if="page === 'tree'" />
               <FileInputPage v-else-if="page === 'file-input'" />
-              <DatePickerPage v-else-if="page === 'date-picker'" />
+              <div
+                v-else-if="page === 'date-picker'"
+                class="v2-scroll h-full overflow-y-auto"
+              >
+                <DatePickerPage />
+              </div>
               <TagPage v-else-if="page === 'tag'" />
               <div
                 v-else-if="page === 'accordion'"
