@@ -143,7 +143,12 @@ onBeforeUnmount(() => {
           class="flex min-w-0 flex-col gap-1"
           :class="centered && 'self-center'"
         >
-          <h1 class="text-4xl-semibold text-ink-gray-9">{{ title }}</h1>
+          <!-- 32 tall, not the type's 32.4: a fractional title put every
+               pattern under it off the pixel grid, and a 1px rule there
+               (the Tree's hierarchy dividers) smeared across two -->
+          <h1 class="text-4xl-semibold leading-8 text-ink-gray-9">
+            {{ title }}
+          </h1>
           <p v-if="description" class="text-p-base text-ink-gray-6">
             {{ description }}
           </p>
