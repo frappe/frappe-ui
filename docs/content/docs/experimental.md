@@ -27,6 +27,7 @@ Each export is here for one of two reasons:
 | [`ListView`](#listview) | Parked | [`frappe-ui/list`](/docs/molecules/list) reaching parity |
 | [`MultiEmailInput`](#multiemailinput) | Incubating | Its API settling |
 | [`PickerShell`](#pickershell) | Incubating | Its API settling |
+| [`Stepper`](#stepper) | Incubating | Its API being reviewed and refined |
 | [Sprite icons](#sprite-icons) | Parked | Apps moving to `lucide-*` classes |
 | [`ThemeSwitcher`](#themeswitcher) | Parked | Apps moving to `Select` plus `useColorScheme` |
 | [TextEditor (v0)](#texteditor-v0) | Parked | Apps moving to [`frappe-ui/editor`](/docs/molecules/editor) |
@@ -274,6 +275,17 @@ import { Icon as SpriteIcon, IconPicker, spritePlugin } from 'frappe-ui/experime
 
 The named icon components (`CircleCheckIcon`, `HelpIcon`, …) stay in
 `frappe-ui/icons`.
+
+## Stepper
+
+Progress through ordered steps, with sub-steps, skipped steps, and a running or
+failed current step. Incubating.
+
+```ts
+import { Stepper } from 'frappe-ui/experimental'
+```
+
+See the [Stepper page](/docs/experimental/stepper) for examples and the API.
 
 ## ThemeSwitcher
 
