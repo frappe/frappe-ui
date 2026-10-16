@@ -60,6 +60,11 @@ const CELL_INSET = 6
 
 /** what carries a block's first line of text */
 const FIRST_LINE = 'p, h1, h2, h3, h4, h5, h6, summary, pre'
+/** a block drawn as a single bar, with no line of text to centre on — the
+ *  audio player, an attachment's row, an empty slot: its grip is centred
+ *  on the bar itself */
+const BAR =
+  '[data-type="audio"], [data-type="attachment"], [data-type="embed-slot"], [data-type="image-slot"]'
 /** what the editor draws at the top level that is not a block */
 const SKIP =
   '.ProseMirror-gapcursor, .ProseMirror-widget, .ProseMirror-separator, br'
@@ -238,13 +243,17 @@ function place() {
   // not on the block's box, which margins and padding push away from the
   // line; a block shorter than a line (a rule) has the grip centred on
   // itself
-  const first = el.matches(FIRST_LINE)
-    ? el
-    : (el.querySelector(FIRST_LINE) ?? el)
-  const fr = first.getBoundingClientRect()
-  const lineHeight = parseFloat(getComputedStyle(first).lineHeight) || SIZE
-  const line = Math.min(lineHeight, fr.height)
-  top.value = fr.top + (line - SIZE) / 2
+  if (el.matches(BAR) || el.querySelector(`:scope > :is(${BAR})`)) {
+    top.value = r.top + (r.height - SIZE) / 2
+  } else {
+    const first = el.matches(FIRST_LINE)
+      ? el
+      : (el.querySelector(FIRST_LINE) ?? el)
+    const fr = first.getBoundingClientRect()
+    const lineHeight = parseFloat(getComputedStyle(first).lineHeight) || SIZE
+    const line = Math.min(lineHeight, fr.height)
+    top.value = fr.top + (line - SIZE) / 2
+  }
   // an item's grip sits before its marker, at its list's edge
   const edge = el.matches('li')
     ? (el.parentElement?.getBoundingClientRect().left ?? r.left)
