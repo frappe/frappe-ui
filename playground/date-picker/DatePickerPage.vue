@@ -4,8 +4,8 @@
 // the right. Under the outline, as the Charts page has its controls, the
 // options of the picker in view — the parts its kind has in the file:
 // inline has none; date & time a header and a sidebar but no footer; the
-// rest all three; and the single-month pickers the month list (the file's
-// month-picker interaction).
+// rest all three. The month list (the file's month-picker interaction)
+// opens from the picker's own month button.
 //
 // The file's weeks start on Monday; frappe-ui's calendar takes its week
 // start from dayjs's locale, so the page sets it while it's open and puts
@@ -33,17 +33,17 @@ const PICKERS: Array<{
   {
     kind: 'default',
     title: 'Default',
-    options: ['header', 'sidebar', 'footer', 'monthPicker'],
+    options: ['header', 'sidebar', 'footer'],
   },
   {
     kind: 'date-time',
     title: 'Date-time',
-    options: ['header', 'sidebar', 'monthPicker'],
+    options: ['header', 'sidebar'],
   },
   {
     kind: 'range',
     title: 'Date range - single pane',
-    options: ['header', 'sidebar', 'footer', 'monthPicker'],
+    options: ['header', 'sidebar', 'footer'],
   },
   {
     kind: 'range-double',
@@ -55,7 +55,6 @@ const LABELS: Record<keyof DatePickerOptions, string> = {
   header: 'Header',
   sidebar: 'Sidebar',
   footer: 'Footer',
-  monthPicker: 'Month picker',
 }
 
 // each picker keeps its own options
@@ -63,7 +62,7 @@ const state = reactive(
   Object.fromEntries(
     PICKERS.map((p) => [
       p.kind,
-      { header: false, sidebar: false, footer: false, monthPicker: false },
+      { header: false, sidebar: false, footer: false },
     ]),
   ) as Record<DatePickerKind, DatePickerOptions>,
 )

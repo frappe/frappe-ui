@@ -63,9 +63,6 @@ const props = withDefaults(
     /** Keep the top edge where it is when the month list opens (the page
      * centres the picker); a picker in a popover hangs from its top anyway. */
     holdTop?: boolean
-    /** The month list open in place of the days (the file's month-picker
-     * interaction); `v-model:month-picker` follows the month button too. */
-    monthPicker?: boolean
   }>(),
   {
     range: false,
@@ -75,13 +72,9 @@ const props = withDefaults(
     sidebar: false,
     modelValue: undefined,
     holdTop: true,
-    monthPicker: false,
   },
 )
-const emit = defineEmits<{
-  'update:modelValue': [string | DateRangeValue]
-  'update:monthPicker': [boolean]
-}>()
+const emit = defineEmits<{ 'update:modelValue': [string | DateRangeValue] }>()
 
 // the file's dates: June 9, 2023; the range 5–11 June; double pane 26 June
 // to 4 July
@@ -202,7 +195,6 @@ let watcher2: MutationObserver | null = null
 // DOM changes, before the frame is laid out and drawn — so no frame shows
 // the picker moved (a ResizeObserver alone let one through)
 function holdInPlace() {
-  reportMonthList()
   fadeLists()
   const el = root.value
   if (!el || !props.holdTop) return
@@ -226,30 +218,6 @@ watch(
     nextTick(holdInPlace)
   },
 )
-// ---- the month list open or shut from outside (`monthPicker`): the
-// library keeps that state to itself, so its own month button is pressed.
-// Opened or shut from the button, the change goes back out
-const listShown = () =>
-  !!root.value?.querySelector('[aria-label="Select month and year"]')
-let listOpen = false
-function syncMonthList() {
-  if (props.variant === 'inline' || listShown() === props.monthPicker) return
-  root.value
-    ?.querySelector<HTMLElement>('[aria-label="cycle-calendar-view"]')
-    ?.click()
-}
-function reportMonthList() {
-  const open = listShown()
-  if (open === listOpen) return
-  listOpen = open
-  if (open !== props.monthPicker) emit('update:monthPicker', open)
-}
-watch(
-  () => [props.monthPicker, props.variant, props.range, props.doublePane],
-  () => nextTick(syncMonthList),
-)
-onMounted(syncMonthList)
-
 // ---- the month list's columns fade at an edge they can scroll past — the
 // 16px fade Agenda V2 hangs under its stuck week label — and stay crisp at
 // an edge they rest on (the user's call 2026-10-13)

@@ -16,7 +16,6 @@ export type DatePickerOptions = {
   header: boolean
   sidebar: boolean
   footer: boolean
-  monthPicker: boolean
 }
 
 const props = defineProps<{
@@ -49,7 +48,6 @@ const STAGE: Record<DatePickerKind, string> = {
 <template>
   <div class="flex items-start" :class="STAGE[kind]">
     <DatePickerPreview
-      v-model:month-picker="options.monthPicker"
       :variant="variant"
       :range="range"
       :double-pane="doublePane"
