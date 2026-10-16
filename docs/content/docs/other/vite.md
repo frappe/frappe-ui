@@ -125,8 +125,8 @@ Error during dependency optimization:
 
 The plugin replaces each missing package with a stub that throws when
 `loadLanguage` reaches it. It does this for the build (a Rollup hook) and for
-pre-bundling (an esbuild plugin). Both then succeed, and the error names the
-package to install:
+pre-bundling (an esbuild plugin, or a Rolldown plugin on Vite 8). Both then
+succeed, and the error names the package to install:
 
 ```
 [frappe-ui] loadLanguage('sql') could not load @codemirror/lang-sql: Cannot find module '@codemirror/lang-sql'. If it is not installed: yarn add @codemirror/lang-sql
