@@ -82,6 +82,7 @@ const pickerOf = (id: string) => PICKERS.find((p) => p.kind === id)
     title="Date picker patterns"
     description="The date pickers in the Frappe apps, each with the parts it can take."
     width="700px"
+    centered
     :patterns="patterns"
   >
     <template #rail="{ active }">

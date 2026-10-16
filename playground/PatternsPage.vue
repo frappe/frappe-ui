@@ -20,8 +20,10 @@ const props = withDefaults(
     patterns: Pattern[]
     /** Width of the content column. Patterns set their own widths inside it. */
     width?: string
+    /** Centre the title, the headings and the patterns in the column. */
+    centered?: boolean
   }>(),
-  { width: '700px' },
+  { width: '700px', centered: false },
 )
 
 // Namespaced: the lucide sprite puts <symbol id="table"> and <symbol id="list">
@@ -102,7 +104,10 @@ onBeforeUnmount(() => {
   <div ref="root" class="flex min-h-full bg-surface-base">
     <div class="flex min-w-0 flex-1 justify-center px-6 py-12">
       <div class="flex max-w-full flex-col gap-16" :style="{ width }">
-        <header class="flex min-w-0 flex-col gap-1">
+        <header
+          class="flex min-w-0 flex-col gap-1"
+          :class="centered && 'items-center text-center'"
+        >
           <h1 class="text-4xl-semibold text-ink-gray-9">{{ title }}</h1>
           <p v-if="description" class="text-p-base text-ink-gray-6">
             {{ description }}
@@ -114,6 +119,7 @@ onBeforeUnmount(() => {
           :id="sectionId(pattern.id)"
           :key="pattern.id"
           class="flex scroll-mt-12 flex-col gap-6"
+          :class="centered && 'items-center'"
         >
           <h2 class="text-3xl-semibold text-ink-gray-8">{{ pattern.title }}</h2>
           <component :is="pattern.component" v-bind="pattern.props" />
