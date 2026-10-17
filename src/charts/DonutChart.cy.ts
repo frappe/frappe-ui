@@ -172,6 +172,28 @@ describe('DonutChart', () => {
     )
   })
 
+  it('keeps a slice in an oklch variable filled while it is highlighted', () => {
+    cy.document().then((doc) =>
+      doc.documentElement.style.setProperty(
+        '--overdue',
+        'oklch(0.628 0.2577 29.23)',
+      ),
+    )
+    mountChart({ colors: { Search: 'var(--overdue)' } })
+    slices().should('have.length', data.length)
+    // Focus lands on the first slice, Search, and highlights it.
+    cy.get('[data-slot="chart-plot"] [role="img"]').focus()
+    cy.get('[data-slot="chart-tooltip"]').should('contain.text', 'Search')
+    // echarts writes a highlighted fill back as rgb(), and an oklch one, which
+    // it cannot parse, as none.
+    cy.get('[data-slot="chart-plot"] svg path[fill="rgb(255,0,0)"]').should(
+      'exist',
+    )
+    cy.document().then((doc) =>
+      doc.documentElement.style.removeProperty('--overdue'),
+    )
+  })
+
   it('folds the tail into one slice past maxSlices', () => {
     mountChart({ maxSlices: 2 })
     slices().should('have.length', 2)

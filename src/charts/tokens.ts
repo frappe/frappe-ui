@@ -3,6 +3,7 @@ import {
   getResolvedColorScheme,
   type ResolvedColorScheme,
 } from '../composables/useColorScheme'
+import { oklchCssToSrgb } from './colorMath'
 import { documentAttributes } from './utils'
 import type { ChartPalette, ChartPaletteName } from './types'
 
@@ -257,7 +258,9 @@ const CSS_VARIABLE = /var\(\s*(--[\w-]+)\s*(?:,([^()]*))?\)/g
 /**
  * `value` with every `var(--name)` in its strings swapped for what `el`
  * computes for that name, so a caller's own colors reach echarts as concrete
- * values, the way the tokens above do. Read off `el` rather than the document
+ * values, the way the tokens above do. An `oklch()` value comes back as sRGB:
+ * echarts cannot parse it, and a color it cannot parse paints nothing once it
+ * derives a hover color from it. Read off `el` rather than the document
  * root, so a variable defined on a card or inside a shadow root resolves. A name
  * `el` does not define takes the fallback, else stays as written. Walks arrays
  * and plain objects, and returns the parts it changed nothing in as they were.
@@ -265,8 +268,12 @@ const CSS_VARIABLE = /var\(\s*(--[\w-]+)\s*(?:,([^()]*))?\)/g
 export function resolveCssVariables<T>(value: T, el?: Element | null): T {
   if (!el || typeof getComputedStyle !== 'function') return value
   let styles: CSSStyleDeclaration | undefined
-  const read = (name: string) =>
-    (styles ??= getComputedStyle(el)).getPropertyValue(name).trim()
+  const read = (name: string) => {
+    const value = (styles ??= getComputedStyle(el))
+      .getPropertyValue(name)
+      .trim()
+    return oklchCssToSrgb(value) ?? value
+  }
 
   return mapStrings(value, (text) =>
     text.includes('var(')
