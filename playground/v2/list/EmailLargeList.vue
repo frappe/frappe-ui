@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // Figma: espresso-2.0 › List › Email large (34984:224989). A 788px column of
 // mail rows, ruled beneath:
-//   row    py 16, 32px avatar · 8px · body
+//   row    px 20 (as the medium list's) · py 16, 32px avatar · 8px · body
 //   body   14 medium gray-900 subject + 14 gray-500 date on the right
 //          · 4px · 14/21 "To: …" · 4px · 14/21 one-line preview (gray-700)
 import { ref } from 'vue'
@@ -81,7 +81,7 @@ const mails = ref<LargeMail[]>([
     <li
       v-for="mail in mails"
       :key="mail.id"
-      class="flex cursor-pointer gap-2 border-b border-outline-gray-1 py-4 transition-colors last:border-b-0 hover:bg-surface-gray-1 dark:border-outline-gray-2 dark:hover:bg-surface-gray-2"
+      class="flex cursor-pointer gap-2 border-b border-outline-gray-1 px-5 py-4 transition-colors last:border-b-0 hover:bg-surface-gray-1 dark:border-outline-gray-2 dark:hover:bg-surface-gray-2"
       @click="emit('open', mail)"
     >
       <Avatar size="xl" shape="circle" :image="mail.avatar" :label="mail.sender" />
