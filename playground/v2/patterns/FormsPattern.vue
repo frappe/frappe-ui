@@ -77,13 +77,13 @@ const useIMAP = ref(false)
 
     <div class="flex flex-col gap-2">
       <div class="flex items-center gap-3">
-        <!-- the label stays 13px regular: the merged Checkbox makes an md
+        <!-- the label is text/base/regular: the merged Checkbox makes an md
              box's label 16 medium (the user's call 2026-10-17) -->
         <Checkbox
           v-model="useSSL"
           size="md"
           label="Connect with SSL/TLS Encryption"
-          class="[&_label]:!text-sm [&_label]:!leading-tighter"
+          class="[&_label]:!text-base"
         />
         <Badge theme="violet" variant="subtle" size="lg">
           <template #prefix>
@@ -96,7 +96,7 @@ const useIMAP = ref(false)
         v-model="useIMAP"
         size="md"
         label="Use IMAP"
-        class="[&_label]:!text-sm [&_label]:!leading-tighter"
+        class="[&_label]:!text-base"
       />
     </div>
   </div>
