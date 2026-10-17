@@ -242,7 +242,9 @@ const inputClasses = computed(() => {
     // on the row instead, via `[&:has(:focus-visible)]` on the container.)
     padded
       ? 'group-hover:border-outline-gray-5 group-active:border-outline-gray-6 group-has-[:focus-visible]:border-outline-gray-7 checked:group-hover:text-[color:var(--surface-gray-9)] checked:group-active:text-[color:var(--surface-gray-8)]'
-      : 'hover:border-outline-gray-5 hover:bg-surface-base hover:shadow-sm active:border-outline-gray-6 focus-visible:focus-ring checked:hover:text-[color:var(--surface-gray-9)] checked:active:text-[color:var(--surface-gray-8)]',
+      : // the sm shadow lifts the empty box under the pointer only: on the
+        // filled one its inner highlight and drop read as a bevel
+        'hover:border-outline-gray-5 hover:bg-surface-base hover:shadow-sm checked:hover:shadow-none indeterminate:hover:shadow-none active:border-outline-gray-6 focus-visible:focus-ring checked:hover:text-[color:var(--surface-gray-9)] checked:active:text-[color:var(--surface-gray-8)]',
   ]
 })
 </script>
