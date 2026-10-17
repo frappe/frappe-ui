@@ -1,5 +1,41 @@
 # frappe-ui
 
+## 1.1.0
+
+### Minor Changes
+
+- Charts: the legend now takes one row at most; when the series do not fit, it
+  shows the largest ones and a "+N more" button that lists every series, largest
+  first, with a search field past 15 (feat).
+  [#1294](https://github.com/frappe/frappe-ui/pull/1294)
+- MultiSelect: the new `highlight` event reports the highlighted option, or
+  `null` once the popover closes (additive).
+  [#1298](https://github.com/frappe/frappe-ui/pull/1298)
+- Stepper: the new `Stepper` component shows progress through ordered steps,
+  with sub-steps, skipped steps, and a running or failed current step. It ships
+  from `frappe-ui/experimental` while its API is refined (additive).
+  [#1276](https://github.com/frappe/frappe-ui/pull/1276)
+
+### Patch Changes
+
+- Charts: series named by a `splitBy` value and axis titles now print as given,
+  without capitalizing (fix).
+  [#1293](https://github.com/frappe/frappe-ui/pull/1293)
+- Vite plugin: `codeLanguages` now works on Vite 8, where the dev server's
+  dependency scan failed with `Not implemented` (fix).
+  [#1301](https://github.com/frappe/frappe-ui/pull/1301)
+- Editor: content set from outside through `v-model` no longer adds an undo
+  step, so undo cannot wipe a document that loaded after the editor mounted
+  (fix). [#1299](https://github.com/frappe/frappe-ui/pull/1299)
+- Dropdown, ContextMenu: a menu taller than the space on screen now scrolls
+  instead of running off the edge (fix).
+  [#1300](https://github.com/frappe/frappe-ui/pull/1300)
+- MultiSelect: a checked row is no longer filled grey; its checkbox shows the
+  state (fix). [#1298](https://github.com/frappe/frappe-ui/pull/1298)
+- MultiSelect: attributes such as `aria-label` reach the trigger, as on Select,
+  and the list takes its name from `label` or `aria-label` (fix).
+  [#1298](https://github.com/frappe/frappe-ui/pull/1298)
+
 ## 1.0.2
 
 ### Patch Changes
