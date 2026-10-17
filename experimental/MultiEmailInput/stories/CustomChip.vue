@@ -20,7 +20,7 @@ const options = [
     <MultiEmailInput v-model="emails" :options="options">
       <template #tag="{ value, option, removeTag }">
         <Avatar
-          class="size-3"
+          class="size-3 [&>div]:text-[8px]"
           :image="option?.avatar"
           :label="option?.label ?? value"
           size="xs"

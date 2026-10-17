@@ -201,9 +201,16 @@ and `#item-suffix` slots, or replace a chip with `#tag`:
 ```vue
 <MultiEmailInput v-model="emails" :options="options">
   <template #tag="{ value, option, removeTag }">
-    <Avatar :image="option?.avatar" :label="option?.label ?? value" size="xs" />
-    <span>{{ option?.label ?? value }}</span>
-    <button :aria-label="`Remove ${value}`" @click="removeTag">✕</button>
+    <Avatar
+      class="size-3 [&>div]:text-[8px]"
+      :image="option?.avatar"
+      :label="option?.label ?? value"
+      size="xs"
+    />
+    <span class="truncate">{{ option?.label ?? value }}</span>
+    <button :aria-label="`Remove ${value}`" @click="removeTag">
+      <span class="lucide-x size-3" />
+    </button>
   </template>
 </MultiEmailInput>
 ```

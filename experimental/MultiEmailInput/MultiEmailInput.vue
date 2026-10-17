@@ -200,7 +200,7 @@ const boxClasses = computed(() => [
 ])
 
 // Matches the design system's tag: 20px tall, padded 3px 4px 3px 6px, a 12px
-// avatar and close icon. The padding is 1px less on each side for the border.
+// avatar (8px initials, as the xs avatar's would overflow) and close icon. The padding is 1px less on each side for the border.
 const chipClasses =
   'inline-flex h-5 max-w-full items-center gap-1 rounded-2 border border-outline-gray-1 bg-surface-base py-0.5 pl-[5px] pr-[3px] text-xs leading-[1.15] text-ink-gray-7 transition-colors data-[disabled]:opacity-60 aria-[current=true]:ring-2 aria-[current=true]:ring-outline-gray-3'
 
@@ -352,7 +352,7 @@ defineSlots<MultiEmailInputSlots>()
               :remove-tag="() => removeAt(chip.index)"
             >
               <Avatar
-                class="size-3"
+                class="size-3 [&>div]:text-[8px]"
                 :image="chip.option?.avatar"
                 :label="chip.label"
                 size="xs"
