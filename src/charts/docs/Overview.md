@@ -12,7 +12,9 @@ import { BarChart, LineChart } from 'frappe-ui/charts'
 Importing the subpath also loads the `--chart-*` color tokens. See
 [Chart colors](/docs/charts/colors) for the three ramps and how to change
 them. The `palette` prop picks a ramp by name (`categorical`, `sequential` or
-`diverging`) or takes a list of colors.
+`diverging`) or takes a list of colors. Any color a chart takes can be a CSS
+variable such as `var(--brand)`. It resolves against the chart's own element,
+and again when the theme changes.
 
 Each echarts chart registers only the echarts modules it needs, so importing
 `DonutChart` loads only the pie module. The three axis charts share the bar and

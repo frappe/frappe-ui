@@ -251,6 +251,52 @@ export function resolveChartTokens(el?: HTMLElement | null): ChartTokens {
   }
 }
 
+/** `var(--name)` or `var(--name, fallback)`, the fallback without nested parentheses. */
+const CSS_VARIABLE = /var\(\s*(--[\w-]+)\s*(?:,([^()]*))?\)/g
+
+/**
+ * `value` with every `var(--name)` in its strings swapped for what `el`
+ * computes for that name, so a caller's own colors reach echarts as concrete
+ * values, the way the tokens above do. Read off `el` rather than the document
+ * root, so a variable defined on a card or inside a shadow root resolves. A name
+ * `el` does not define takes the fallback, else stays as written. Walks arrays
+ * and plain objects, and returns the parts it changed nothing in as they were.
+ */
+export function resolveCssVariables<T>(value: T, el?: Element | null): T {
+  if (!el || typeof getComputedStyle !== 'function') return value
+  let styles: CSSStyleDeclaration | undefined
+  const read = (name: string) =>
+    (styles ??= getComputedStyle(el)).getPropertyValue(name).trim()
+
+  return mapStrings(value, (text) =>
+    text.includes('var(')
+      ? text.replace(
+          CSS_VARIABLE,
+          (match, name, fallback) => read(name) || fallback?.trim() || match,
+        )
+      : text,
+  )
+}
+
+function mapStrings(value: any, map: (text: string) => string): any {
+  if (typeof value === 'string') return map(value)
+  if (Array.isArray(value)) {
+    const next = value.map((item) => mapStrings(item, map))
+    return next.some((item, index) => item !== value[index]) ? next : value
+  }
+  if (!value || typeof value !== 'object') return value
+  const prototype = Object.getPrototypeOf(value)
+  // A `Date` on a time axis, an echarts graphic: not ours to rebuild.
+  if (prototype !== Object.prototype && prototype !== null) return value
+  let next: Record<string, any> | undefined
+  for (const key of Object.keys(value)) {
+    const mapped = mapStrings(value[key], map)
+    if (mapped === value[key]) continue
+    next = { ...(next ?? value), [key]: mapped }
+  }
+  return next ?? value
+}
+
 export function pickSeriesColor(ramp: string[], index: number) {
   if (!ramp.length) return FALLBACK_CATEGORICAL.light[0]
   return ramp[index % ramp.length]
