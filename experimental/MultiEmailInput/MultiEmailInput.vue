@@ -182,8 +182,9 @@ const boxClasses = computed(() => [
   props.disabled && 'cursor-not-allowed bg-surface-gray-1',
 ])
 
+// Matches the design system's tag: 20px tall, a 12px avatar and close icon.
 const chipClasses =
-  'inline-flex items-center gap-1 rounded-4 border border-outline-gray-1 bg-surface-base px-1.5 py-0.5 text-sm text-ink-gray-7 transition-colors data-[disabled]:opacity-60 aria-[current=true]:ring-2 aria-[current=true]:ring-outline-gray-3'
+  'inline-flex h-5 max-w-full items-center gap-1 rounded-2 bg-surface-gray-2 pl-1.5 pr-1 text-xs text-ink-gray-7 transition-colors data-[disabled]:opacity-60 aria-[current=true]:ring-2 aria-[current=true]:ring-outline-gray-3'
 
 const inputClasses = computed(() => [
   'min-w-[6rem] flex-1 border-0 bg-transparent p-0.5 text-ink-gray-8 outline-none ring-0 placeholder:text-ink-gray-4 focus:ring-0 disabled:cursor-not-allowed',
@@ -328,6 +329,7 @@ defineSlots<MultiEmailInputSlots>()
               :remove-tag="() => removeAt(chip.index)"
             >
               <Avatar
+                class="size-3"
                 :image="chip.option?.avatar"
                 :label="chip.label"
                 size="xs"
@@ -335,7 +337,7 @@ defineSlots<MultiEmailInputSlots>()
               <span class="truncate">{{ chip.label }}</span>
               <TagsInputItemDelete
                 :aria-label="`Remove ${chip.value}`"
-                class="-mr-0.5 inline-flex items-center justify-center rounded-1 p-0.5 text-ink-gray-5 opacity-70 transition hover:text-ink-gray-7 hover:opacity-100"
+                class="inline-flex shrink-0 items-center justify-center rounded-1 text-ink-gray-7 transition hover:text-ink-gray-9"
               >
                 <span class="lucide-x size-3" />
               </TagsInputItemDelete>
