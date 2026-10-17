@@ -287,6 +287,43 @@ describe('buildDonutChartOption', () => {
     expect(build({ dir: 'rtl' }).series[0].clockwise).toBe(false)
   })
 
+  describe('zero slices', () => {
+    const lone = {
+      data: [
+        { channel: 'Search', visits: 100 },
+        { channel: 'Direct', visits: 0 },
+        { channel: 'Email', visits: 0 },
+      ],
+    }
+
+    it('leaves them off the ring, and in the legend', () => {
+      expect(build(lone).series[0].data.map((d: any) => d.name)).toEqual([
+        'Search',
+      ])
+      expect(slices(lone).map((s) => s.name)).toEqual([
+        'Search',
+        'Direct',
+        'Email',
+      ])
+    })
+
+    it('closes the ring around a lone slice', () => {
+      expect(build(lone).series[0].padAngle).toBe(0)
+      expect(build({}, ['Direct', 'Email']).series[0].padAngle).toBe(0)
+    })
+
+    it('draws a blank ring when every slice is zero', () => {
+      const series = build({
+        data: [
+          { channel: 'Search', visits: 0 },
+          { channel: 'Direct', visits: 0 },
+        ],
+      }).series[0]
+      expect(series.data).toEqual([])
+      expect(series.emptyCircleStyle.color).toBe('outline-1')
+    })
+  })
+
   describe('half variant', () => {
     it('sweeps the top half only, opening downward', () => {
       const series = build({ variant: 'half' }).series[0]

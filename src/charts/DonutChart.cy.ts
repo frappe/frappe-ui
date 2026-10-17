@@ -149,6 +149,17 @@ describe('DonutChart', () => {
     cy.get('[data-slot="chart-plot"]').should('contain.text', '100')
   })
 
+  it('draws a lone non-zero slice alone, keeping the zero ones in the legend', () => {
+    const lone = [
+      { source: 'Search', visits: 100 },
+      { source: 'Direct', visits: 0 },
+      { source: 'Email', visits: 0 },
+    ]
+    mountChart({ data: lone })
+    slices().should('have.length', 1)
+    cy.get('[data-slot="chart-legend"] [aria-pressed]').should('have.length', 3)
+  })
+
   it('pins a color to a category, CSS variable or not, in the ring and the legend', () => {
     cy.document().then((doc) =>
       doc.documentElement.style.setProperty('--overdue', '#ff0000'),

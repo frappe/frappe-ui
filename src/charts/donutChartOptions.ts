@@ -155,7 +155,8 @@ export function buildDonutChartOption(
   const { tokens } = context
   const isRTL = config.dir === 'rtl'
   const slices = buildDonutSlices(config, context)
-  const visible = slices.filter((slice) => !slice.hidden)
+  // Echarts pads a zero slice like any other. The legend still lists it.
+  const plotted = slices.filter((slice) => !slice.hidden && slice.value > 0)
   const labels = new Map(slices.map((slice) => [slice.name, slice.label]))
 
   const isHalf = config.variant === 'half'
@@ -189,7 +190,8 @@ export function buildDonutChartOption(
             ? { startAngle: 0, endAngle: 180 }
             : { startAngle: 180, endAngle: 0 }
           : null),
-        padAngle: SLICE_PAD_ANGLE,
+        // A lone slice is the whole ring: padding it opens a gap at the top.
+        padAngle: plotted.length > 1 ? SLICE_PAD_ANGLE : 0,
         itemStyle: { borderRadius: SLICE_RADIUS, borderWidth: 0 },
         avoidLabelOverlap: true,
         label: {
@@ -222,7 +224,9 @@ export function buildDonutChartOption(
           label: { opacity: BLUR_OPACITY },
           labelLine: { opacity: BLUR_OPACITY },
         },
-        data: visible.map((slice) => ({
+        // Drawn when every visible slice is zero.
+        emptyCircleStyle: { color: tokens.gridline },
+        data: plotted.map((slice) => ({
           name: slice.name,
           value: slice.value,
           itemStyle: { color: slice.color },
