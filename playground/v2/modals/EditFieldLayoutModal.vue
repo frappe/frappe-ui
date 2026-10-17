@@ -139,9 +139,13 @@ function save(close: () => void) {
             <div v-for="section in sections" :key="section.id" class="flex flex-col gap-1.5">
               <!-- section header: 28px, surface-gray-2 -->
               <div class="flex h-7 items-center gap-1 rounded-4 bg-surface-gray-1 pl-1 pr-1 dark:bg-surface-gray-2">
+                <!-- the header's buttons are 20px, so they sit 4px in from
+                     every edge of the 28px row, as the remove does in a
+                     field row (3px inside its 1px rule) -->
                 <Button
                   variant="ghost"
                   size="xs"
+                  class="!size-5"
                   :label="section.collapsed ? 'Expand section' : 'Collapse section'"
                   @click="section.collapsed = !section.collapsed"
                 >
@@ -160,6 +164,7 @@ function save(close: () => void) {
                 <Button
                   variant="ghost"
                   size="xs"
+                  class="!size-5"
                   label="Remove section"
                   @click="sections = sections.filter((s) => s !== section)"
                 >
@@ -173,7 +178,7 @@ function save(close: () => void) {
                   v-for="(field, i) in section.fields"
                   :key="field"
                   draggable="true"
-                  class="flex h-7 cursor-grab items-center gap-1 rounded-4 border border-outline-gray-1 bg-surface-base pl-1 pr-1 active:cursor-grabbing"
+                  class="flex h-7 cursor-grab items-center gap-1 rounded-4 border border-outline-gray-1 bg-surface-base pl-1 pr-[3px] active:cursor-grabbing"
                   :class="{ 'opacity-50': dragging?.section === section.id && dragging.index === i }"
                   @dragstart="dragging = { section: section.id, index: i }"
                   @dragend="dragging = null"
@@ -185,6 +190,7 @@ function save(close: () => void) {
                   <Button
                     variant="ghost"
                     size="xs"
+                    class="!size-5"
                     :label="`Remove ${field}`"
                     @click="section.fields.splice(i, 1)"
                   >
