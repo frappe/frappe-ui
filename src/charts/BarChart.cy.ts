@@ -493,6 +493,16 @@ describe('BarChart', () => {
       labelInsideCanvas('Goal')
     })
 
+    // 0 to 30 ticks every 5. Raised to 35, echarts would pick a step of 10 for
+    // the new span and leave 35 hanging off a 30 tick.
+    it('keeps the tick step when the axis goes up for a label', () => {
+      mountChart({ referenceLines: [{ value: 30, label: 'Goal' }] })
+      cy.get('[data-slot="chart-plot"] svg text')
+        .should('contain.text', '35')
+        .and('contain.text', '25')
+      labelInsideCanvas('Goal')
+    })
+
     it('keeps the label of a rule at the end of a row chart on the canvas', () => {
       mountChart({
         horizontal: true,

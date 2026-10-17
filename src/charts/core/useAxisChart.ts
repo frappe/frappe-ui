@@ -2,7 +2,7 @@ import { computed, reactive, ref, watch, type Ref } from 'vue'
 import type { EChartsCoreOption } from 'echarts/core'
 import {
   dataLabelOverflow,
-  nextAxisMax,
+  nextAxisTick,
   referenceLabelOverflow,
 } from './dataLabelFit'
 import { useChart } from './useChart'
@@ -200,10 +200,10 @@ export function useAxisChart<C extends AxisChartConfig>(
     )
     if (overflow <= 0) return
 
-    const max = nextAxisMax(instance, valueAxis)
-    if (max === null) return
+    const tick = nextAxisTick(instance, valueAxis)
+    if (tick === null) return
     raisedFor = option
-    instance.setOption({ [valueAxis]: [{ max }] })
+    instance.setOption({ [valueAxis]: [tick] })
   }
 
   // Apart from the legend entries, which rebuild on every toggle: hiding a

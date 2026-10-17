@@ -7,19 +7,21 @@ export type DataLabelSide = 'top' | 'right' | 'left'
 const DEFAULT_LABEL_DISTANCE = 5
 
 /**
- * The axis end one tick past the current one, or `null` when echarts has drawn
- * fewer than two ticks to read a step from. Read off the ticks rather than the
- * scale's extent, because the ticks are what the reader sees and what a label
- * has to clear.
+ * The axis end one tick past the current one and the step that reaches it, or
+ * `null` when echarts has drawn fewer than two ticks to read a step from. Read
+ * off the ticks rather than the scale's extent, because the ticks are what the
+ * reader sees and what a label has to clear. The step is pinned too: left to
+ * echarts, the longer span can get a coarser step the new end is not on.
  */
-export function nextAxisMax(chart: ECharts, axis: 'xAxis' | 'yAxis') {
+export function nextAxisTick(chart: ECharts, axis: 'xAxis' | 'yAxis') {
   const ticks = (chart as any)
     .getModel()
     .getComponent(axis, 0)
     ?.axis?.scale?.getTicks?.()
   if (!ticks || ticks.length < 2) return null
   const last = ticks[ticks.length - 1].value
-  return last + (last - ticks[ticks.length - 2].value)
+  const interval = last - ticks[ticks.length - 2].value
+  return { max: last + interval, interval }
 }
 
 /**
