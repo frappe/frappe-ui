@@ -93,6 +93,39 @@ describe('buildDonutSlices', () => {
     ])
   })
 
+  it('pins a color to a category, the rest keeping their palette slot', () => {
+    expect(
+      slices({ colors: { Direct: '#ff0000' } }).map((s) => s.color),
+    ).toEqual(['#111111', '#ff0000', '#333333'])
+  })
+
+  it('pins "Others" by the reserved key, and ignores a pin folded into it', () => {
+    const built = slices({
+      maxSlices: 2,
+      colors: { [OTHERS_KEY]: '#999999', Email: '#ff0000' },
+    })
+    expect(built.map((s) => [s.name, s.color])).toEqual([
+      ['Search', '#111111'],
+      [OTHERS_KEY, '#999999'],
+    ])
+  })
+
+  it('pins a repeated category on every slice it names', () => {
+    const built = slices({
+      data: [
+        { channel: 'Search', visits: 50 },
+        { channel: 'Search', visits: 30 },
+      ],
+      colors: { Search: '#ff0000' },
+    })
+    expect(built.map((s) => s.color)).toEqual(['#ff0000', '#ff0000'])
+  })
+
+  it('plots a pinned slice in its pinned color', () => {
+    const option = build({ colors: { Direct: '#ff0000' } })
+    expect(option.series[0].data[1].itemStyle.color).toBe('#ff0000')
+  })
+
   it('skips rows with a missing, non-numeric or negative value', () => {
     expect(
       slices({

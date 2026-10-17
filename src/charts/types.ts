@@ -232,6 +232,11 @@ export type DonutChartConfig = {
    */
   palette?: ChartPalette
   /**
+   * Pins a color to a slice, keyed by its category value, or by `OTHERS_KEY`
+   * for "Others". The rest take the palette, as if none were pinned.
+   */
+  colors?: Record<string, string>
+  /**
    * Prints each slice's name and share next to the ring. Off by default: the
    * legend carries the same information without the leader lines.
    */
@@ -1046,6 +1051,13 @@ export type DonutChartProps = ChartBaseProps & {
   format?: ChartValueFormatter
   /** Defaults to `'categorical'`: slices are unrelated categories, not steps. */
   palette?: ChartPalette
+  /**
+   * Pins a color to a slice, keyed by its category value, e.g. `{ Overdue:
+   * 'var(--ink-red-5)' }`. `OTHERS_KEY` pins "Others". A category grouped into
+   * "Others" takes that slice's color. The other slices keep the palette color
+   * they would have had.
+   */
+  colors?: Record<string, string>
   /** Escape hatch: deep-merged into the echarts option the props built. */
   echartOptions?: EchartOptionsOverride
 }

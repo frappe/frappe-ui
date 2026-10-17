@@ -23,6 +23,19 @@ with no "Others" slice. `select` reports the data rows behind the slice, and for
 
 <ComponentPreview name="Charts-DonutOthers" csr="true" self-layout />
 
+## Pinning a color
+
+`colors` pins a color to a category, so a slice keeps its meaning whatever its size. Key it by the category value, and by `OTHERS_KEY` for "Others". A category grouped into "Others" takes that slice's color. The other slices keep the palette colors they would have had. A color can be a CSS variable, such as `var(--ink-red-5)`.
+
+```vue
+<DonutChart
+  :data="invoices"
+  category="status"
+  value="count"
+  :colors="{ Overdue: 'var(--ink-red-5)', Paid: 'var(--ink-green-5)' }"
+/>
+```
+
 ## Half ring
 
 `variant="half"` draws the ring as a semicircle, which fits a short card.
