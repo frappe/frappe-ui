@@ -373,6 +373,11 @@ watch(page, (p) => {
   showSubheader.value = p === 'sidebar-header'
   showHeader.value = !OWN_HEADER.includes(p)
 })
+// a subheader sits under a header, never alone: the header going takes it
+// with it, and its switch waits for the header to come back
+watch(showHeader, (on) => {
+  if (!on) showSubheader.value = false
+})
 
 const headerComponent = computed(
   () => headerTypes.find((v) => v.value === headerType.value)!.component,
@@ -820,7 +825,7 @@ const outlineTitle = computed(
                 <PreviewSwitchRow
                   v-model="showSubheader"
                   label="Subheader"
-                  :disabled="inSettings"
+                  :disabled="inSettings || !showHeader"
                 />
                 <PreviewSelectRow
                   v-if="showHeader"
@@ -1153,7 +1158,7 @@ const outlineTitle = computed(
       <component :is="headerComponent" v-if="showHeader" :key="headerType" />
       <component
         :is="subheaderComponent"
-        v-if="showSubheader"
+        v-if="showHeader && showSubheader"
         :key="subheaderType"
       />
 
