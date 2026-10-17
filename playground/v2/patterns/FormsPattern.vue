@@ -75,11 +75,14 @@ const useIMAP = ref(false)
       </div>
     </div>
 
+    <!-- the file sets these labels in text/base/regular (14px, 420), not
+         the md box's own 16px medium -->
     <div class="flex flex-col gap-2">
       <div class="flex items-center gap-3">
         <Checkbox
           v-model="useSSL"
           size="md"
+          class="[&_[data-slot=label]]:!text-base"
           label="Connect with SSL/TLS Encryption"
         />
         <Badge theme="violet" variant="subtle" size="lg">
@@ -89,7 +92,12 @@ const useIMAP = ref(false)
           Enable enhanced security
         </Badge>
       </div>
-      <Checkbox v-model="useIMAP" size="md" label="Use IMAP" />
+      <Checkbox
+        v-model="useIMAP"
+        size="md"
+        class="[&_[data-slot=label]]:!text-base"
+        label="Use IMAP"
+      />
     </div>
   </div>
 </template>
