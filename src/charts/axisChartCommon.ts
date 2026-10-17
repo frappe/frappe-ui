@@ -475,7 +475,35 @@ export function buildXAxis(
     },
   }
 
-  return mergeDeep(axis, config.xAxis.echartOptions)
+  return withShortenedFormat(
+    mergeDeep(axis, config.xAxis.echartOptions),
+    config,
+    type,
+    labelWidth,
+  )
+}
+
+/**
+ * An axis `format` reaches echarts as an `axisLabel.formatter` and replaces the
+ * one built here, which would leave its labels to echarts' end ellipsis. The
+ * caller's text is kept and shortened the way the built one is.
+ */
+function withShortenedFormat<A extends { axisLabel: Record<string, any> }>(
+  axis: A,
+  config: AxisChartBaseConfig,
+  type: ResolvedXAxis['type'],
+  labelWidth: number | undefined,
+): A {
+  const formatter = config.xAxis.echartOptions?.axisLabel?.formatter
+  if (type !== 'category' || !labelWidth || typeof formatter !== 'function')
+    return axis
+  const label = drawnLabel(config, type)
+  return mergeDeep(axis, {
+    axisLabel: {
+      formatter: (value: any, index: number) =>
+        categoryLabel(label(value, index), labelWidth),
+    },
+  })
 }
 
 /**
