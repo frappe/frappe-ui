@@ -50,6 +50,39 @@ const MARKS = '[data-slot="chart-plot"] svg > g'
 const lines = () => cy.get(`${MARKS} path[stroke^="#"]:not([d=""])`)
 
 describe('LineChart', () => {
+  describe('colors named by a CSS variable', () => {
+    beforeEach(() => {
+      cy.document().then((doc) => {
+        const style = doc.createElement('style')
+        style.id = 'brand-colors'
+        style.textContent = `:root { --brand: #ff0000; --goal: #0000ff }
+          [data-theme='dark'] { --brand: #00ff00 }`
+        doc.head.appendChild(style)
+      })
+    })
+    afterEach(() => {
+      cy.document().then((doc) => {
+        doc.getElementById('brand-colors')?.remove()
+        doc.documentElement.removeAttribute('data-theme')
+      })
+    })
+
+    it('draws in the value the variable holds, again after a theme flip', () => {
+      mountChart({
+        seriesConfig: { sales: { color: 'var(--brand)' } },
+        referenceLines: [{ value: 12, color: 'var(--goal)' }],
+      })
+      cy.get(`${MARKS} path[stroke="#ff0000"]`).should('exist')
+      cy.get(`${MARKS} path[stroke="#0000ff"]`).should('exist')
+      cy.get(`${MARKS} path[stroke^="var("]`).should('not.exist')
+      cy.document().then((doc) =>
+        doc.documentElement.setAttribute('data-theme', 'dark'),
+      )
+      cy.get(`${MARKS} path[stroke="#00ff00"]`).should('exist')
+      cy.get(`${MARKS} path[stroke="#ff0000"]`).should('not.exist')
+    })
+  })
+
   it('draws one line per series, through every category', () => {
     mountChart()
     lines().should('have.length', 2)
@@ -219,9 +252,6 @@ describe('LineChart', () => {
     // as empty as the plot gets from here. An all-hidden plot has no scale to
     // place the rule on, which is its own question.
     it('leaves the rule in place while a series is switched off', () => {
-      // Inside refunds' own range, so the rule stays on the scale the plot
-      // settles at: a line off the end of the axis is not drawn, which would
-      // pass this test for the wrong reason.
       mountChart({ referenceLines: [{ value: 5, label: 'Target' }] })
       cy.get('[aria-label="Hide Sales"]').click()
       lines().should('have.length', 1)

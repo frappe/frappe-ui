@@ -673,17 +673,39 @@ describe('reference lines against the rest of the scatter', () => {
     expect(host.markLine.symbol).toBe('none')
   })
 
-  it('leaves the points and the scales exactly as they were', () => {
+  it('leaves the points alone and stretches each scale to its lines', () => {
     const bare = build({ splitByColumn: 'region' })
     const annotated = build({
       splitByColumn: 'region',
-      // A target far outside the data does not stretch the scale: it would
-      // flatten the cloud it is meant to be read against.
-      referenceLines: [{ value: 100000 }],
+      referenceLines: [{ value: 100000 }, { value: 50, axis: 'x' }],
     })
 
     expect(annotated.series.slice(0, 2)).toEqual(bare.series)
+    expect(annotated.yAxis).toMatchObject({ dataMin: 100000, dataMax: 100000 })
+    expect(annotated.xAxis).toMatchObject({ dataMin: 50, dataMax: 50 })
     expect(annotated.yAxis.max).toBeUndefined()
-    expect(annotated.xAxis.max).toBeUndefined()
+  })
+})
+
+describe('scatter value axes of whole numbers', () => {
+  it('ticks each axis in whole numbers when its column holds them', () => {
+    const option = build({
+      data: [
+        { spend: 1, revenue: 0.5 },
+        { spend: 2, revenue: 1.5 },
+      ],
+    })
+    expect(option.xAxis.minInterval).toBe(1)
+    expect(option.yAxis.minInterval).toBeUndefined()
+  })
+
+  it('takes `integer` over what the column says', () => {
+    const option = build({
+      xAxis: { integer: false },
+      yAxis: { integer: true },
+      data: [{ spend: 1, revenue: 0.5 }],
+    })
+    expect(option.xAxis.minInterval).toBeUndefined()
+    expect(option.yAxis.minInterval).toBe(1)
   })
 })

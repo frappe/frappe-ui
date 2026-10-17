@@ -4,7 +4,7 @@
 import { createApp, defineComponent, h, nextTick, ref, type Ref } from 'vue'
 import { afterEach, describe, expect, it } from 'vitest'
 import { useAxisChart } from './useAxisChart'
-import { buildAxisChartOption } from '../axisChartOptions'
+import { buildAxisChartOption, buildStackShares } from '../axisChartOptions'
 import type { AxisChartFormatters } from '../seriesData'
 import type { AxisChartConfig, ChartDatapointEvent } from '../types'
 
@@ -29,6 +29,8 @@ function setup(
           buildOption: buildAxisChartOption,
           format: () => format ?? {},
           hiddenSeries,
+          stackShares: () =>
+            buildStackShares(config, hiddenSeries?.value ?? []),
           onSelect: (event) => selected.push(event),
         })
         return () => h('div')
@@ -112,6 +114,61 @@ describe('tooltip', () => {
       plot.chart.tooltip.items.map((item) => [item.name, item.formattedValue]),
     )
     expect(printed).toEqual({ revenue: '$10', orders: '4 orders' })
+  })
+})
+
+describe('legend', () => {
+  /** Payments split by party type: one column, the way a percentage chart draws it. */
+  const shares = (overrides: Partial<AxisChartConfig> = {}) =>
+    config({
+      type: 'bar',
+      stacked: 'normalized',
+      data: [{ month: 'All', customer: 65, supplier: 35 }],
+      series: [{ name: 'customer' }, { name: 'supplier' }],
+      ...overrides,
+    })
+  const hints = (plot: ReturnType<typeof setup>) =>
+    plot.chart.legendItems.value.map((item) => item.hint)
+
+  it('prints each series’ share beside it on a 100% stack of one column', () => {
+    expect(hints(setup(shares()))).toEqual(['65%', '35%'])
+  })
+
+  it('re-shares what is left once the legend hides a series', () => {
+    const hidden = ref(['supplier'])
+    // A lone series has no whole to be part of, so it prints no share.
+    expect(hints(setup(shares(), hidden))).toEqual([undefined, undefined])
+
+    const three = shares({
+      data: [{ month: 'All', customer: 50, supplier: 30, employee: 20 }],
+      series: [
+        { name: 'customer' },
+        { name: 'supplier' },
+        { name: 'employee' },
+      ],
+    })
+    expect(hints(setup(three, ref(['employee'])))).toEqual([
+      '63%',
+      '38%',
+      undefined,
+    ])
+  })
+
+  it('prints no share across several columns, no one share holding for all', () => {
+    const months = shares({
+      data: [
+        { month: 'Jan', customer: 65, supplier: 35 },
+        { month: 'Feb', customer: 10, supplier: 90 },
+      ],
+    })
+    expect(hints(setup(months))).toEqual([undefined, undefined])
+  })
+
+  it('prints no share on a stack that is not normalized', () => {
+    expect(hints(setup(shares({ stacked: true })))).toEqual([
+      undefined,
+      undefined,
+    ])
   })
 })
 

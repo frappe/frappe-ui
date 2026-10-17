@@ -149,6 +149,62 @@ describe('DonutChart', () => {
     cy.get('[data-slot="chart-plot"]').should('contain.text', '100')
   })
 
+  it('draws a lone non-zero slice alone, keeping the zero ones in the legend', () => {
+    const lone = [
+      { source: 'Search', visits: 100 },
+      { source: 'Direct', visits: 0 },
+      { source: 'Email', visits: 0 },
+    ]
+    mountChart({ data: lone })
+    slices().should('have.length', 1)
+    cy.get('[data-slot="chart-legend"] [aria-pressed]').should('have.length', 3)
+  })
+
+  it('pins a color to a category, CSS variable or not, in the ring and the legend', () => {
+    cy.document().then((doc) =>
+      doc.documentElement.style.setProperty('--overdue', '#ff0000'),
+    )
+    mountChart({ colors: { Direct: 'var(--overdue)', Email: '#00ff00' } })
+    cy.get('[data-slot="chart-plot"] svg path[fill="#ff0000"]').should(
+      'have.length',
+      1,
+    )
+    cy.get('[data-slot="chart-plot"] svg path[fill="#00ff00"]').should(
+      'have.length',
+      1,
+    )
+    cy.get('[data-slot="chart-legend"] [style*="--overdue"]').should(
+      'have.css',
+      'background-color',
+      'rgb(255, 0, 0)',
+    )
+    cy.document().then((doc) =>
+      doc.documentElement.style.removeProperty('--overdue'),
+    )
+  })
+
+  it('keeps a slice in an oklch variable filled while it is highlighted', () => {
+    cy.document().then((doc) =>
+      doc.documentElement.style.setProperty(
+        '--overdue',
+        'oklch(0.628 0.2577 29.23)',
+      ),
+    )
+    mountChart({ colors: { Search: 'var(--overdue)' } })
+    slices().should('have.length', data.length)
+    // Focus lands on the first slice, Search, and highlights it.
+    cy.get('[data-slot="chart-plot"] [role="img"]').focus()
+    cy.get('[data-slot="chart-tooltip"]').should('contain.text', 'Search')
+    // echarts writes a highlighted fill back as rgb(), and an oklch one, which
+    // it cannot parse, as none.
+    cy.get('[data-slot="chart-plot"] svg path[fill="rgb(255,0,0)"]').should(
+      'exist',
+    )
+    cy.document().then((doc) =>
+      doc.documentElement.style.removeProperty('--overdue'),
+    )
+  })
+
   it('folds the tail into one slice past maxSlices', () => {
     mountChart({ maxSlices: 2 })
     slices().should('have.length', 2)

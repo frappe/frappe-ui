@@ -93,6 +93,39 @@ describe('buildDonutSlices', () => {
     ])
   })
 
+  it('pins a color to a category, the rest keeping their palette slot', () => {
+    expect(
+      slices({ colors: { Direct: '#ff0000' } }).map((s) => s.color),
+    ).toEqual(['#111111', '#ff0000', '#333333'])
+  })
+
+  it('pins "Others" by the reserved key, and ignores a pin folded into it', () => {
+    const built = slices({
+      maxSlices: 2,
+      colors: { [OTHERS_KEY]: '#999999', Email: '#ff0000' },
+    })
+    expect(built.map((s) => [s.name, s.color])).toEqual([
+      ['Search', '#111111'],
+      [OTHERS_KEY, '#999999'],
+    ])
+  })
+
+  it('pins a repeated category on every slice it names', () => {
+    const built = slices({
+      data: [
+        { channel: 'Search', visits: 50 },
+        { channel: 'Search', visits: 30 },
+      ],
+      colors: { Search: '#ff0000' },
+    })
+    expect(built.map((s) => s.color)).toEqual(['#ff0000', '#ff0000'])
+  })
+
+  it('plots a pinned slice in its pinned color', () => {
+    const option = build({ colors: { Direct: '#ff0000' } })
+    expect(option.series[0].data[1].itemStyle.color).toBe('#ff0000')
+  })
+
   it('skips rows with a missing, non-numeric or negative value', () => {
     expect(
       slices({
@@ -252,6 +285,43 @@ describe('buildDonutChartOption', () => {
   it('runs the ring counter-clockwise in RTL', () => {
     expect(build().series[0].clockwise).toBe(true)
     expect(build({ dir: 'rtl' }).series[0].clockwise).toBe(false)
+  })
+
+  describe('zero slices', () => {
+    const lone = {
+      data: [
+        { channel: 'Search', visits: 100 },
+        { channel: 'Direct', visits: 0 },
+        { channel: 'Email', visits: 0 },
+      ],
+    }
+
+    it('leaves them off the ring, and in the legend', () => {
+      expect(build(lone).series[0].data.map((d: any) => d.name)).toEqual([
+        'Search',
+      ])
+      expect(slices(lone).map((s) => s.name)).toEqual([
+        'Search',
+        'Direct',
+        'Email',
+      ])
+    })
+
+    it('closes the ring around a lone slice', () => {
+      expect(build(lone).series[0].padAngle).toBe(0)
+      expect(build({}, ['Direct', 'Email']).series[0].padAngle).toBe(0)
+    })
+
+    it('draws a blank ring when every slice is zero', () => {
+      const series = build({
+        data: [
+          { channel: 'Search', visits: 0 },
+          { channel: 'Direct', visits: 0 },
+        ],
+      }).series[0]
+      expect(series.data).toEqual([])
+      expect(series.emptyCircleStyle.color).toBe('outline-1')
+    })
   })
 
   describe('half variant', () => {

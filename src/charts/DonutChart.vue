@@ -166,6 +166,7 @@ const config = computed<DonutChartConfig>(() => ({
   centerLabel: props.centerLabel,
   variant: props.variant,
   palette: props.palette,
+  colors: props.colors,
   dir: dir.value,
   echartOptions: props.echartOptions,
 }))

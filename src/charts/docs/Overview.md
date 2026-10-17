@@ -1,6 +1,6 @@
 # Charts
 
-Nine chart components in the `frappe-ui/charts` subpath, drawn with
+Ten chart components in the `frappe-ui/charts` subpath, drawn with
 [echarts](https://echarts.apache.org). Props are flat and name the columns of
 your data (`x`, `y`, `y2`, `splitBy`, `category`, `value`), so you can save a
 chart as one typed object and render it with `v-bind="savedChart"`.
@@ -12,7 +12,9 @@ import { BarChart, LineChart } from 'frappe-ui/charts'
 Importing the subpath also loads the `--chart-*` color tokens. See
 [Chart colors](/docs/charts/colors) for the three ramps and how to change
 them. The `palette` prop picks a ramp by name (`categorical`, `sequential` or
-`diverging`) or takes a list of colors.
+`diverging`) or takes a list of colors. Any color a chart takes can be a CSS
+variable such as `var(--brand)`. It resolves against the chart's own element,
+and again when the theme changes.
 
 Each echarts chart registers only the echarts modules it needs, so importing
 `DonutChart` loads only the pie module. The three axis charts share the bar and
@@ -43,6 +45,7 @@ Use it for a combo chart, or to fill one line of a `LineChart`.
 | [DonutChart](/docs/charts/donutchart) | Share of a total |
 | [FunnelChart](/docs/charts/funnelchart) | Drop-off from stage to stage |
 | [HeatmapChart](/docs/charts/heatmapchart) | Size of a value across two dimensions |
+| [CalendarHeatmapChart](/docs/charts/calendarheatmapchart) | A value for each day |
 | [ScatterChart](/docs/charts/scatterchart) | Two measures against each other |
 | [SankeyChart](/docs/charts/sankeychart) | Flow from a source to a target |
 | [NumberCard](/docs/charts/numbercard) | One number and its change |

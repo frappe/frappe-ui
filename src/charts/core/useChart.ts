@@ -12,7 +12,8 @@ import { SVGRenderer } from 'echarts/renderers'
 import type { ECharts, EChartsCoreOption } from 'echarts/core'
 import debounce from '#utils/debounce'
 import { installTextMeasurer } from '../measureText'
-import { prefersReducedMotion } from '../utils'
+import { resolveCssVariables } from '../tokens'
+import { documentAttributes, prefersReducedMotion } from '../utils'
 
 // SVG only: it keeps text selectable and crisp at any DPI, and the canvas
 // renderer is a large slice of echarts we would pay for on every page.
@@ -50,6 +51,8 @@ export type UseChartReturn = {
   resize: () => void
   /** Measured plot width, 0 until the container has one. Follows resizes. */
   width: Ref<number>
+  /** Measured plot height, as `width`. */
+  height: Ref<number>
 }
 
 const RESIZE_DEBOUNCE_MS = 100
@@ -121,7 +124,9 @@ export function useChart({
   watchEffect(() => {
     const instance = chart.value
     if (!instance) return
-    const nextOption = option()
+    // Read so a theme flip re-resolves the `var(--…)` colors below.
+    documentAttributes()
+    const nextOption = resolveCssVariables(option(), container.value)
     if (!nextOption) return
     instance.setOption(
       drawn ? { ...nextOption, animationDuration: 0 } : nextOption,
@@ -131,12 +136,14 @@ export function useChart({
   })
 
   const width = ref(0)
+  const height = ref(0)
 
   // Sizes decided in pixels — the cap on a horizontal chart's label column —
   // are built into the option, so a resize has to re-run the builder as well as
   // re-lay the plot. Publishing the width here is what makes it re-run.
   const resize = () => {
     width.value = container.value?.clientWidth ?? 0
+    height.value = container.value?.clientHeight ?? 0
     // The plot slides to its new size, unless the reader has asked for less
     // movement — a whole chart re-laying itself is a large piece of motion.
     chart.value?.resize({
@@ -168,6 +175,7 @@ export function useChart({
     const instance = init(el, undefined, { renderer: 'svg' })
     chart.value = instance
     width.value = el.clientWidth
+    height.value = el.clientHeight
 
     for (const [name, handler] of Object.entries(events ?? {})) {
       instance.on(name, handler)
@@ -202,5 +210,5 @@ export function useChart({
   const dispatch = (payload: Record<string, any>) =>
     chart.value?.dispatchAction(payload as any)
 
-  return { chart, dispatch, resize, width }
+  return { chart, dispatch, resize, width, height }
 }

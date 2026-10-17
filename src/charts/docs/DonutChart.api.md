@@ -98,6 +98,12 @@
     type: 'ChartPalette'
   },
   {
+    name: 'colors',
+    description: 'Pins a color to a slice, keyed by its category value, e.g. `{ Overdue:\n\'var(--ink-red-5)\' }`. `OTHERS_KEY` pins "Others". A category grouped into\n"Others" takes that slice\'s color. The other slices keep the palette color\nthey would have had.',
+    required: false,
+    type: 'Record<string, string>'
+  },
+  {
     name: 'echartOptions',
     description: 'Escape hatch: deep-merged into the echarts option the props built.',
     required: false,

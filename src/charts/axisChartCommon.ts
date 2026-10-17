@@ -22,6 +22,7 @@ import type {
   ChartPalette,
   ChartPaletteName,
   ChartYAxisConfig,
+  ReferenceLine,
 } from './types'
 
 export type AxisChartOptionContext = {
@@ -408,14 +409,22 @@ export function buildXAxis(
     type === 'time' && opts.inset
       ? timeInset(config, categories, width)
       : undefined
-  const { rotate, labelWidth } = categoryLabelFit(config, { ...opts, type })
+  const { rotate, labelWidth, step } = categoryLabelFit(config, {
+    ...opts,
+    type,
+  })
 
   const axis = {
     type,
     // A quantity read along the plot is a position, not a magnitude: there is
     // no baseline to anchor to, so the scale follows the data the way both of
     // a scatter's do.
-    ...(type === 'value' ? { scale: true } : {}),
+    ...(type === 'value'
+      ? {
+          scale: true,
+          ...referenceLineExtent(config.referenceLines, 'x', false),
+        }
+      : {}),
     // RTL reads right-to-left along the horizontal axis; the vertical axis of a
     // horizontal bar chart is inverted so the first category sits on top.
     inverse: horizontal ? true : isRTL,
@@ -456,6 +465,7 @@ export function buildXAxis(
       // Left out entirely when the labels fit, so a flat axis carries no
       // rotation key at all.
       ...(rotate ? { rotate } : {}),
+      ...(step ? { interval: thinnedInterval(categories.length, step) } : {}),
       ...xAxisLabelFormat(type, {
         tokens,
         timeGrain,
@@ -465,7 +475,35 @@ export function buildXAxis(
     },
   }
 
-  return mergeDeep(axis, config.xAxis.echartOptions)
+  return withShortenedFormat(
+    mergeDeep(axis, config.xAxis.echartOptions),
+    config,
+    type,
+    labelWidth,
+  )
+}
+
+/**
+ * An axis `format` reaches echarts as an `axisLabel.formatter` and replaces the
+ * one built here, which would leave its labels to echarts' end ellipsis. The
+ * caller's text is kept and shortened the way the built one is.
+ */
+function withShortenedFormat<A extends { axisLabel: Record<string, any> }>(
+  axis: A,
+  config: AxisChartBaseConfig,
+  type: ResolvedXAxis['type'],
+  labelWidth: number | undefined,
+): A {
+  const formatter = config.xAxis.echartOptions?.axisLabel?.formatter
+  if (type !== 'category' || !labelWidth || typeof formatter !== 'function')
+    return axis
+  const label = drawnLabel(config, type)
+  return mergeDeep(axis, {
+    axisLabel: {
+      formatter: (value: any, index: number) =>
+        categoryLabel(label(value, index), labelWidth),
+    },
+  })
 }
 
 /**
@@ -557,6 +595,8 @@ type CategoryLabelFit = {
   rotate: number
   /** What a label is shortened to, when anything caps it. */
   labelWidth?: number
+  /** Every how many categories a label is drawn. Unset labels every one. */
+  step?: number
 }
 
 /**
@@ -569,8 +609,13 @@ type CategoryLabelFit = {
  * whichever layout carries more text: flat and shortened to the slot, or
  * tilted, which trades the slot for the depth below the axis. Wide slots keep
  * flat labels, because reading across beats reading up a diagonal; crowded ones
- * tilt, where a flat label would be down to a syllable. Whatever still collides
- * after that is thinned out by `hideOverlap`, as it always was.
+ * tilt, where a flat label would be down to a syllable.
+ *
+ * A tilt is bought to name every category, so it is only spent when it does:
+ * the slot has to hold a tilted line and the same clear air a flat label keeps.
+ * Past that, labels are dropped whichever way they lie, and a thinned axis
+ * reads better flat. It then labels every few categories from the first to
+ * the last, each label whole up to what a tilted one could carry.
  *
  * The whole axis takes one layout. Labels leaning two ways read as two axes.
  */
@@ -599,21 +644,60 @@ function categoryLabelFit(
   if (horizontal) return { rotate: 0, labelWidth: categoryLabelWidth(width) }
 
   const slot = categorySlotWidth(config, opts)
-  if (!slot || fitsFlat(opts.categories, drawnLabel(config, type), slot))
-    return { rotate: 0 }
+  const label = drawnLabel(config, type)
+  if (!slot || fitsFlat(opts.categories, label, slot)) return { rotate: 0 }
 
   const flat = Math.floor(slot - CATEGORY_LABEL_GAP)
   const tilted = tiltedLabelWidth()
   if (flat >= tilted) return { rotate: 0, labelWidth: flat }
 
-  return {
-    // The tilt leans towards the value axis. Its column of ticks is width the
-    // grid holds open, and nothing occupies it below the plot — which is
-    // exactly where a tilted label reaches. RTL puts that column on the other
-    // side, so the labels lean the other way.
-    rotate: isRTL ? -TILT_ANGLE : TILT_ANGLE,
-    labelWidth: tilted,
+  // Tilted labels run parallel, so what separates two of them is the slot
+  // measured across the diagonal.
+  if (slot * TILT_SIN >= LABEL_LINE_HEIGHT + CATEGORY_LABEL_GAP) {
+    return {
+      // The tilt leans towards the value axis. Its column of ticks is width the
+      // grid holds open, and nothing occupies it below the plot — which is
+      // exactly where a tilted label reaches. RTL puts that column on the other
+      // side, so the labels lean the other way.
+      rotate: isRTL ? -TILT_ANGLE : TILT_ANGLE,
+      labelWidth: tilted,
+    }
   }
+
+  const widest = opts.categories.reduce(
+    (max: number, value, index) =>
+      Math.max(
+        max,
+        estimateTextWidth(label(value, index), AXIS_LABEL_FONT_SIZE),
+      ),
+    0,
+  )
+  const drawn = Math.min(widest, tilted)
+  // The labels at either end reach past their slots by half a label less half
+  // a slot, and echarts narrows the plot to keep them on the canvas. Measured
+  // against the slot before that, neighbours would collide and echarts would
+  // drop the first label.
+  const narrowed = slot - Math.max(0, drawn - slot) / opts.categories.length
+  return {
+    rotate: 0,
+    labelWidth: widest > tilted ? tilted : undefined,
+    step: Math.ceil((drawn + CATEGORY_LABEL_GAP) / narrowed),
+  }
+}
+
+/**
+ * Which categories a thinned axis labels: the first, the last, and as many as
+ * fit between them at least a step apart, spread evenly. echarts' own
+ * `interval` counts from the first and leaves the last to chance, which reads
+ * as a clipped axis, and pinning the last to it leaves a hole before it.
+ */
+function thinnedInterval(count: number, step: number) {
+  const last = count - 1
+  const gaps = Math.max(1, Math.floor(last / step))
+  const labelled = new Set(
+    Array.from({ length: gaps + 1 }, (_, i) => Math.round((i * last) / gaps)),
+  )
+  return (index: number) => labelled.has(index)
 }
 
 /** The room the x axis has: the chart less its edge pad and the value axes. */
@@ -795,12 +879,21 @@ export function buildValueAxes(
   const onY2 = (series: AxisChartSeriesConfig) =>
     secondary && series.axis === 'y2'
 
+  const lines = (axis: 'y' | 'y2') =>
+    referenceLineExtent(config.referenceLines, axis, secondary)
+
   const primary = buildValueAxis(config.yAxis, tokens, {
     ...opts,
+    lines: lines('y'),
+    integer: holdsWholeNumbers(
+      config.data ?? [],
+      config.series.filter((s) => !onY2(s)).map((s) => s.name),
+    ),
     empty: emptyAxisExtent(
       config,
       config.series.filter((s) => !onY2(s)),
       hidden,
+      lines('y'),
     ),
   })
   if (!secondary) return primary
@@ -809,7 +902,17 @@ export function buildValueAxes(
     buildValueAxis(config.y2Axis, tokens, {
       ...opts,
       secondary: true,
-      empty: emptyAxisExtent(config, config.series.filter(onY2), hidden),
+      lines: lines('y2'),
+      integer: holdsWholeNumbers(
+        config.data ?? [],
+        config.series.filter(onY2).map((s) => s.name),
+      ),
+      empty: emptyAxisExtent(
+        config,
+        config.series.filter(onY2),
+        hidden,
+        lines('y2'),
+      ),
     }),
   ]
 }
@@ -831,16 +934,69 @@ function emptyAxisExtent(
   config: AxisChartBaseConfig,
   series: AxisChartSeriesConfig[],
   hidden: string[],
+  lines: { dataMin?: number; dataMax?: number },
 ): ValueExtent | null {
   if (!series.length) return null
   if (series.some((one) => !hidden.includes(one.name))) return null
   const { min, max } = valueExtent(config.data ?? [], series)
   // A value axis holds 0 unless told to `scale`, and none of these are, so the
   // ends have to reach it the way the live axis did.
-  return niceExtent(Math.min(0, min), Math.max(0, max))
+  return niceExtent(
+    Math.min(0, min, lines.dataMin ?? 0),
+    Math.max(0, max, lines.dataMax ?? 0),
+  )
 }
 
 export type ValueExtent = { min: number; max: number }
+
+/**
+ * Whether every value in these columns is a whole number: a count, which an
+ * axis should not split into halves. Read over every series rather than the
+ * visible ones, so switching one off in the legend does not re-tick the axis.
+ */
+export function holdsWholeNumbers(
+  rows: Record<string, any>[],
+  keys: string[],
+): boolean {
+  return rows.every((row) =>
+    keys.every((key) => {
+      const value = toNumber(row[key])
+      return value === null || Number.isInteger(value)
+    }),
+  )
+}
+
+/**
+ * The axis a reference line is read against. `'y2'` falls back to `'y'` on a
+ * chart that draws one value axis, the same rule a series follows.
+ */
+export function referenceLineAxis(
+  line: ReferenceLine,
+  hasSecondaryValueAxis: boolean,
+): 'x' | 'y' | 'y2' {
+  if (line.axis === 'x') return 'x'
+  return hasSecondaryValueAxis && line.axis === 'y2' ? 'y2' : 'y'
+}
+
+/**
+ * The span the reference lines on one axis reach, as echarts' `dataMin` and
+ * `dataMax`. echarts unions both into the extent the data reaches, so the axis
+ * stretches to every line and still rounds its ends as it does for data.
+ */
+export function referenceLineExtent(
+  lines: ReferenceLine[] | undefined,
+  axis: 'x' | 'y' | 'y2',
+  hasSecondaryValueAxis: boolean,
+): { dataMin?: number; dataMax?: number } {
+  const values: number[] = []
+  for (const line of lines ?? []) {
+    if (referenceLineAxis(line, hasSecondaryValueAxis) !== axis) continue
+    const value = toNumber(line.value)
+    if (value !== null) values.push(value)
+  }
+  if (!values.length) return {}
+  return { dataMin: Math.min(...values), dataMax: Math.max(...values) }
+}
 
 /**
  * The low and the high a set of series reaches across the rows. Rows with
@@ -905,10 +1061,15 @@ export function buildValueAxis(
     secondary?: boolean
     /** The ends to pin it to while nothing is drawn on it. See `emptyAxisExtent`. */
     empty?: ValueExtent | null
+    /** The span its reference lines reach. See `referenceLineExtent`. */
+    lines?: { dataMin?: number; dataMax?: number }
+    /** Whether the values plotted on it are whole numbers. See `holdsWholeNumbers`. */
+    integer?: boolean
   },
 ) {
   const { horizontal, isRTL, empty } = opts
   const secondary = Boolean(opts.secondary)
+  const integer = axisConfig?.integer ?? opts.integer
 
   const axis = {
     type: 'value',
@@ -922,6 +1083,10 @@ export function buildValueAxis(
     // title whichever way the bars run.
     min: axisConfig?.min ?? empty?.min,
     max: axisConfig?.max ?? empty?.max,
+    ...opts.lines,
+    // A floor on the tick interval, so it only reaches a scale echarts would
+    // otherwise split below one.
+    ...(integer ? { minInterval: 1 } : {}),
     // Gridlines carry the reading of the plot; the axis line itself is noise.
     // Only the primary draws them: with aligned ticks the second set lands on
     // the same rows, so it adds nothing but a doubled line.

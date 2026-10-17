@@ -3,6 +3,7 @@ import {
   getResolvedColorScheme,
   type ResolvedColorScheme,
 } from '../composables/useColorScheme'
+import { oklchCssToSrgb } from './colorMath'
 import { documentAttributes } from './utils'
 import type { ChartPalette, ChartPaletteName } from './types'
 
@@ -249,6 +250,58 @@ export function resolveChartTokens(el?: HTMLElement | null): ChartTokens {
     insideLabel: read(TOKENS.insideLabel) || fallbacks.insideLabel,
     backdrop: read(TOKENS.backdrop) || backdropColor(el) || fallbacks.backdrop,
   }
+}
+
+/** `var(--name)` or `var(--name, fallback)`, the fallback without nested parentheses. */
+const CSS_VARIABLE = /var\(\s*(--[\w-]+)\s*(?:,([^()]*))?\)/g
+
+/**
+ * `value` with every `var(--name)` in its strings swapped for what `el`
+ * computes for that name, so a caller's own colors reach echarts as concrete
+ * values, the way the tokens above do. An `oklch()` value comes back as sRGB:
+ * echarts cannot parse it, and a color it cannot parse paints nothing once it
+ * derives a hover color from it. Read off `el` rather than the document
+ * root, so a variable defined on a card or inside a shadow root resolves. A name
+ * `el` does not define takes the fallback, else stays as written. Walks arrays
+ * and plain objects, and returns the parts it changed nothing in as they were.
+ */
+export function resolveCssVariables<T>(value: T, el?: Element | null): T {
+  if (!el || typeof getComputedStyle !== 'function') return value
+  let styles: CSSStyleDeclaration | undefined
+  const read = (name: string) => {
+    const value = (styles ??= getComputedStyle(el))
+      .getPropertyValue(name)
+      .trim()
+    return oklchCssToSrgb(value) ?? value
+  }
+
+  return mapStrings(value, (text) =>
+    text.includes('var(')
+      ? text.replace(
+          CSS_VARIABLE,
+          (match, name, fallback) => read(name) || fallback?.trim() || match,
+        )
+      : text,
+  )
+}
+
+function mapStrings(value: any, map: (text: string) => string): any {
+  if (typeof value === 'string') return map(value)
+  if (Array.isArray(value)) {
+    const next = value.map((item) => mapStrings(item, map))
+    return next.some((item, index) => item !== value[index]) ? next : value
+  }
+  if (!value || typeof value !== 'object') return value
+  const prototype = Object.getPrototypeOf(value)
+  // A `Date` on a time axis, an echarts graphic: not ours to rebuild.
+  if (prototype !== Object.prototype && prototype !== null) return value
+  let next: Record<string, any> | undefined
+  for (const key of Object.keys(value)) {
+    const mapped = mapStrings(value[key], map)
+    if (mapped === value[key]) continue
+    next = { ...(next ?? value), [key]: mapped }
+  }
+  return next ?? value
 }
 
 export function pickSeriesColor(ramp: string[], index: number) {
