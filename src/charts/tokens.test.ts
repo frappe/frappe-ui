@@ -88,6 +88,11 @@ describe('CSS variables in a caller’s colors', () => {
     })
   })
 
+  it('hands an oklch() value over as sRGB, which echarts can parse', () => {
+    const el = chartWith({ '--overdue': 'oklch(1 0 0)' })
+    expect(resolveCssVariables('var(--overdue)', el)).toBe('#ffffff')
+  })
+
   it('takes the fallback for a name the element does not define, else leaves it', () => {
     const el = chartWith({})
     expect(
