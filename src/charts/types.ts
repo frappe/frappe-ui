@@ -407,6 +407,117 @@ export type HeatmapCellEvent = {
   row: Record<string, any>
 }
 
+/** The weekday each column of a calendar heatmap starts on. */
+export type CalendarHeatmapWeekStart =
+  | 'sunday'
+  | 'monday'
+  | 'tuesday'
+  | 'wednesday'
+  | 'thursday'
+  | 'friday'
+  | 'saturday'
+
+export type CalendarHeatmapChartConfig = {
+  /** One row per day. Of two on the same day, the later one is drawn. */
+  data: Record<string, any>[]
+  /**
+   * Row key holding the day: a `Date`, or an ISO string such as `2024-03-01`.
+   * A time or offset after the date is ignored.
+   */
+  dateColumn: string
+  /** Row key holding the magnitude the day is colored by. */
+  valueColumn: string
+  title?: string
+  subtitle?: string
+  /** As on `HeatmapChartConfig`. */
+  palette?: HeatmapPalette
+  /**
+   * Bottom of the color scale. Defaults to 0 when no day is negative, else to
+   * the smallest day in the range.
+   */
+  min?: number
+  /**
+   * Top of the color scale. Defaults to the largest day in the range. Days
+   * above it draw in the deepest color, and the scale reads `≥ max`.
+   */
+  max?: number
+  /**
+   * First day drawn. Defaults to the first of the month the data starts in.
+   * Given with `end`, the range is drawn even with no data in it.
+   */
+  start?: string | Date
+  /** Last day drawn. Defaults to the last of the month the data ends in. */
+  end?: string | Date
+  /** Defaults to the dayjs locale's week start, else `'sunday'`. */
+  weekStart?: CalendarHeatmapWeekStart
+  echartOptions?: EchartOptionsOverride
+}
+
+/** One day that has data, after color assignment. */
+export type CalendarHeatmapCell = {
+  /** The day, as `YYYY-MM-DD`. */
+  date: string
+  value: number
+  color: string
+  /** The row drawn for the day. */
+  row: Record<string, any>
+}
+
+/** One day drawn, with data or without, and the mark echarts draws it as. */
+export type CalendarHeatmapDay = {
+  /** The day, as `YYYY-MM-DD`. */
+  date: string
+  /** The band the day is drawn in. */
+  band: number
+  /** The day's data, or none for a day with no row. */
+  cell?: CalendarHeatmapCell
+  /** The series that draws the day: its band's data series, or its empty one. */
+  seriesIndex: number
+  /** The day's place in that series. */
+  dataIndex: number
+}
+
+/** One row of weeks. A range longer than a year draws one per twelve months. */
+export type CalendarHeatmapBand = {
+  /** First day drawn in the band, as `YYYY-MM-DD`. */
+  start: string
+  /** Last day drawn in the band, as `YYYY-MM-DD`. */
+  end: string
+  /**
+   * First and last day the band lays out. Past a year, a whole twelve months
+   * from the range's first month, so months line up from band to band.
+   */
+  span: [string, string]
+  /** Week columns the band spans. */
+  weeks: number
+  /** The band's days that have data, in date order. */
+  cells: CalendarHeatmapCell[]
+}
+
+/** The calendar as the plot, the tooltip and the ramp scale all read it. */
+export type CalendarHeatmapGrid = {
+  /** None when there is nothing to draw. */
+  bands: CalendarHeatmapBand[]
+  /** Every day that has data, in date order. */
+  cells: CalendarHeatmapCell[]
+  /** Every day drawn, in date order. */
+  days: CalendarHeatmapDay[]
+  /** Bottom of the color scale, config or data. */
+  min: number
+  /** Top of the color scale, config or data. */
+  max: number
+  /** The ramp the scale runs along, low end first. */
+  stops: string[]
+}
+
+export type CalendarHeatmapCellEvent = {
+  /** The day, as `YYYY-MM-DD`. */
+  date: string
+  value: number
+  /** The row drawn for the day. */
+  row: Record<string, any>
+}
+
 export type NumberCardConfig = {
   title: string
   /** Null renders the empty state; a KPI with no number is not a zero. */
@@ -986,6 +1097,50 @@ export type HeatmapChartProps = ChartBaseProps & {
   echartOptions?: EchartOptionsOverride
 }
 
+export type CalendarHeatmapChartProps = ChartBaseProps & {
+  /** The rows to plot, one per day. Of two on the same day, the later one is drawn. */
+  data: Record<string, any>[]
+  /**
+   * Row key holding the day: a `Date`, or an ISO string such as `2024-03-01`.
+   * A time or offset after the date is ignored.
+   */
+  date: string
+  /** Row key holding the magnitude the day is colored by. */
+  value: string
+  /**
+   * First day drawn, as a `Date` or an ISO string. Defaults to the first of the
+   * month the data starts in. Given with `end`, the range is drawn even with no
+   * data in it.
+   */
+  start?: string | Date
+  /** Last day drawn. Defaults to the last of the month the data ends in. */
+  end?: string | Date
+  /**
+   * The weekday at the top of each column. Defaults to the week start of the
+   * dayjs locale, and to `'sunday'` when the locale names none.
+   */
+  weekStart?: CalendarHeatmapWeekStart
+  /**
+   * Bottom of the color scale. Defaults to 0 when no day is negative, else to
+   * the smallest day in the range.
+   */
+  min?: number
+  /**
+   * Top of the color scale. Defaults to the largest day in the range. Days
+   * above it draw in the deepest color, and the scale reads `≥ max`.
+   */
+  max?: number
+  /** Prints every number the calendar shows: the scale ends and the tooltip. */
+  format?: ChartValueFormatter
+  /**
+   * Ramp days are colored from. Defaults to `'sequential'`; `'diverging'` is
+   * for signed data and centers on zero.
+   */
+  palette?: HeatmapPalette
+  /** Escape hatch: deep-merged into the echarts option the props built. */
+  echartOptions?: EchartOptionsOverride
+}
+
 export type SankeyChartProps = ChartBaseProps & {
   /** One row per flow, i.e. one band from a source node to a target node. */
   data: Record<string, any>[]
@@ -1294,6 +1449,24 @@ export type HeatmapChartSlots = ChartActionsSlot &
     /**
      * Replaces the tooltip body. `items` holds the hovered cell alone, and
      * `rows` the row behind it, so a body can read a column the grid never drew.
+     */
+    tooltip?: (props: ChartTooltipSlotProps) => unknown
+  }
+
+export type CalendarHeatmapChartEmits = {
+  /**
+   * A day with data was selected, by click or by Enter on the keyboard cursor.
+   * Carries the day, its value and the row behind it.
+   */
+  select: [event: CalendarHeatmapCellEvent]
+}
+
+export type CalendarHeatmapChartSlots = ChartActionsSlot &
+  ChartTitleSuffixSlot &
+  ChartStateSlots & {
+    /**
+     * Replaces the tooltip body. `items` holds the hovered day alone, and
+     * `rows` the row behind it. A day with no row reads `No data`, with no row.
      */
     tooltip?: (props: ChartTooltipSlotProps) => unknown
   }

@@ -97,7 +97,7 @@ const MIN_CATEGORY_LABEL_WIDTH = 56
 const TILT_ANGLE = 45
 const TILT_SIN = Math.sin((TILT_ANGLE * Math.PI) / 180)
 /** Clear air either side of a flat label, under which two of them read as one. */
-const CATEGORY_LABEL_GAP = 8
+export const CATEGORY_LABEL_GAP = 8
 /**
  * How far below its tick a tilted label may reach, which is how much plot height
  * the axis is allowed to spend on saying more.

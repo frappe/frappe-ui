@@ -85,6 +85,10 @@ function buildSidebar(): SidebarSection[] {
         { text: 'DonutChart', link: '/docs/charts/donutchart' },
         { text: 'FunnelChart', link: '/docs/charts/funnelchart' },
         { text: 'HeatmapChart', link: '/docs/charts/heatmapchart' },
+        {
+          text: 'CalendarHeatmapChart',
+          link: '/docs/charts/calendarheatmapchart',
+        },
         { text: 'ScatterChart', link: '/docs/charts/scatterchart' },
         { text: 'SankeyChart', link: '/docs/charts/sankeychart' },
         { text: 'NumberCard', link: '/docs/charts/numbercard' },
