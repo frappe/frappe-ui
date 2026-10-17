@@ -68,9 +68,14 @@ export function buildDonutSlices(
 
   return grouped.map((slice, index) => {
     const hidden = hiddenSlices.includes(slice.name)
+    // Keyed by what the caller wrote, not by the unique name: `Others` is
+    // keyed by `OTHERS_KEY`, and a repeated category shares its pin.
+    const key = slice.isOthers ? OTHERS_KEY : slice.label
     return {
       ...slice,
-      color: colors[index],
+      // A pinned slice still spends its palette slot, as a pinned series does,
+      // so pinning one never recolors the others.
+      color: config.colors?.[key] || colors[index],
       hidden,
       percent: hidden || !visibleTotal ? 0 : (slice.value / visibleTotal) * 100,
     }

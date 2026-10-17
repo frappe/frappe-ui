@@ -149,6 +149,29 @@ describe('DonutChart', () => {
     cy.get('[data-slot="chart-plot"]').should('contain.text', '100')
   })
 
+  it('pins a color to a category, CSS variable or not, in the ring and the legend', () => {
+    cy.document().then((doc) =>
+      doc.documentElement.style.setProperty('--overdue', '#ff0000'),
+    )
+    mountChart({ colors: { Direct: 'var(--overdue)', Email: '#00ff00' } })
+    cy.get('[data-slot="chart-plot"] svg path[fill="#ff0000"]').should(
+      'have.length',
+      1,
+    )
+    cy.get('[data-slot="chart-plot"] svg path[fill="#00ff00"]').should(
+      'have.length',
+      1,
+    )
+    cy.get('[data-slot="chart-legend"] [style*="--overdue"]').should(
+      'have.css',
+      'background-color',
+      'rgb(255, 0, 0)',
+    )
+    cy.document().then((doc) =>
+      doc.documentElement.style.removeProperty('--overdue'),
+    )
+  })
+
   it('folds the tail into one slice past maxSlices', () => {
     mountChart({ maxSlices: 2 })
     slices().should('have.length', 2)
