@@ -49,7 +49,6 @@ const props = withDefaults(defineProps<MultiEmailInputProps>(), {
   loading: false,
   size: 'sm',
   placeholder: 'Add email…',
-  emptyText: 'No results',
   loadingText: 'Loading...',
   disabled: false,
   side: 'bottom',
@@ -162,8 +161,26 @@ const showCreateOption = computed(() => {
   return !suggestions.value.some((o) => o.value.toLowerCase() === lc)
 })
 
+// Most typing here is a new address, so an unmatched query shows nothing
+// unless the host asked for an empty state.
 const showEmpty = computed(
-  () => !props.loading && !suggestions.value.length && !showCreateOption.value,
+  () =>
+    Boolean(query.value.trim() && (props.emptyText || slots.empty)) &&
+    !props.loading &&
+    !suggestions.value.length &&
+    !showCreateOption.value,
+)
+
+// The spinner only for a typed query: the fetch primed on focus opens the
+// list once it has results, rather than flashing a spinner over nothing.
+const showLoading = computed(() => props.loading && Boolean(query.value.trim()))
+
+// The list opens only when it has something to show.
+const hasContent = computed(
+  () =>
+    showLoading.value ||
+    (!props.loading && (suggestions.value.length > 0 || showCreateOption.value)) ||
+    showEmpty.value,
 )
 
 // Avatar has its own scale (`xs` 16px, `sm` 20px, `md` 24px), and the option
@@ -184,7 +201,7 @@ const boxClasses = computed(() => [
 
 // Matches the design system's tag: 20px tall, a 12px avatar and close icon.
 const chipClasses =
-  'inline-flex h-5 max-w-full items-center gap-1 rounded-2 bg-surface-gray-2 pl-1.5 pr-1 text-xs text-ink-gray-7 transition-colors data-[disabled]:opacity-60 aria-[current=true]:ring-2 aria-[current=true]:ring-outline-gray-3'
+  'inline-flex h-5 max-w-full items-center gap-1 rounded-2 border border-outline-gray-1 bg-surface-base pl-1.5 pr-1 text-xs text-ink-gray-7 transition-colors data-[disabled]:opacity-60 aria-[current=true]:ring-2 aria-[current=true]:ring-outline-gray-3'
 
 const inputClasses = computed(() => [
   'min-w-[6rem] flex-1 border-0 bg-transparent p-0.5 text-ink-gray-8 outline-none ring-0 placeholder:text-ink-gray-4 focus:ring-0 disabled:cursor-not-allowed',
@@ -224,6 +241,11 @@ function onFocus(event: FocusEvent) {
   open.value = true
   // prime suggestions on first focus when the host hasn't fetched anything yet
   if (!props.options.length && !query.value) emit('update:query', '')
+}
+
+// Focus opens the list once; a click reopens it after a pick or Escape.
+function onClick() {
+  if (!props.disabled) open.value = true
 }
 
 function onEnter() {
@@ -294,7 +316,7 @@ defineSlots<MultiEmailInputSlots>()
       v-model="model"
       multiple
       ignore-filter
-      :open="open"
+      :open="open && hasContent"
       :disabled="disabled"
       class="relative"
       @update:open="open = $event"
@@ -356,6 +378,7 @@ defineSlots<MultiEmailInputSlots>()
               @keydown.enter.prevent="onEnter"
               @paste="onPaste"
               @focus="onFocus"
+              @click="onClick"
               @blur="emit('blur', $event)"
             />
           </ComboboxInput>
@@ -375,7 +398,7 @@ defineSlots<MultiEmailInputSlots>()
         >
           <ComboboxViewport class="max-h-60 overflow-auto p-1">
             <div
-              v-if="loading"
+              v-if="showLoading"
               data-slot="loading"
               class="flex items-center gap-2 px-2 py-1.5 text-base text-ink-gray-5"
             >

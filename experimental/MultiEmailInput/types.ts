@@ -61,7 +61,10 @@ export interface MultiEmailInputProps extends InputLabelingProps {
   /** Placeholder shown when there are no chips. */
   placeholder?: string
 
-  /** Empty-state copy shown when there are no suggestions. */
+  /**
+   * Copy shown when a typed query matches nothing. Unset by default: the list
+   * stays closed instead, since most typing here is a new address.
+   */
   emptyText?: string
 
   /** Shown beside the spinner while `loading`. */

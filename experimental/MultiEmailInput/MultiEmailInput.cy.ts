@@ -144,6 +144,36 @@ describe('MultiEmailInput', () => {
     cy.get('[data-slot="item"]').should('contain.text', 'Grace Hopper')
   })
 
+  it('opens the suggestions on focus', () => {
+    cy.mount(host())
+    cy.get('[data-slot="input"]').focus()
+    cy.get('[data-slot="item"]').should('have.length', 2)
+  })
+
+  it('keeps the list closed on focus when there is nothing to suggest', () => {
+    cy.mount(host({ suggestions: [] }))
+    cy.get('[data-slot="input"]').focus()
+    cy.get('[data-slot="content"]').should('not.exist')
+  })
+
+  it('keeps the list closed while a typed address matches nothing', () => {
+    cy.mount(host({ suggestions: [] }))
+    cy.get('[data-slot="input"]').type('new@')
+    cy.get('[data-slot="content"]').should('not.exist')
+    cy.get('[data-slot="input"]').type('person.com')
+    cy.get('[data-create="true"]').should('exist')
+  })
+
+  it('reopens the list on click after Escape', () => {
+    cy.mount(host())
+    cy.get('[data-slot="input"]').focus()
+    cy.get('[data-slot="item"]').should('have.length', 2)
+    cy.get('[data-slot="input"]').type('{esc}')
+    cy.get('[data-slot="content"]').should('not.exist')
+    cy.get('[data-slot="input"]').click()
+    cy.get('[data-slot="item"]').should('have.length', 2)
+  })
+
   it('renders the error region and marks the input invalid', () => {
     cy.mount(host({ error: 'Something went wrong' }))
     cy.get('[data-slot="error"]').should('contain.text', 'Something went wrong')
