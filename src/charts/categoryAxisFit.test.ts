@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { buildAxisChartOption } from './axisChartOptions'
+import { applyAxisFormatters } from './axisFormat'
 import { AXIS_LABEL_FONT_SIZE } from './axisChartCommon'
 import { estimateTextWidth, formatValue } from './format'
 import type { ChartTokens } from './tokens'
@@ -339,6 +340,69 @@ describe('the slot a label is measured against', () => {
     })
     expect(labelsOf(shortened).rotate).toBeUndefined()
     expect(labelsOf(shortened).width).toBeUndefined()
+  })
+})
+
+describe('category labels printed by an axis format', () => {
+  /** The chart as the components build it: `xAxis.format` applied. */
+  function formatted(
+    categories: string[],
+    format: (value: any) => string,
+    overrides: Partial<AxisChartConfig> = {},
+  ) {
+    const config: AxisChartConfig = {
+      type: 'bar',
+      data: categories.map((month) => ({ month, sales: VALUE })),
+      xAxis: { key: 'month', type: 'category' },
+      series: [{ name: 'sales' }],
+      ...overrides,
+    }
+    return buildAxisChartOption(applyAxisFormatters(config, { x: format }), {
+      tokens,
+      width: WIDTH,
+    }) as any
+  }
+
+  const customer = (value: string) => `${value} Industrial Supplies Ltd.`
+
+  it('middle-truncates a formatted label on a tilted axis', () => {
+    const { formatter, width, rotate } = labelsOf(
+      formatted(repeat(8, 20), customer),
+    )
+    expect(rotate).toBe(45)
+    const label = formatter('Grant Plastics')
+    expect(label).toMatch(/^Grant.*….*Ltd\.$/)
+    expect(estimateTextWidth(label, AXIS_LABEL_FONT_SIZE)).toBeLessThanOrEqual(
+      width - 1,
+    )
+  })
+
+  it('middle-truncates a formatted label down a row chart', () => {
+    const option = formatted(repeat(8, 20), customer, { horizontal: true })
+    expect(labelsOf(option, true).formatter('Grant Plastics')).toMatch(
+      /^Grant.*….*Ltd\.$/,
+    )
+  })
+
+  it('passes a formatted label that fits through as the format printed it', () => {
+    const short = labelsOf(formatted(repeat(8, 20), (value) => `#${value}`))
+    expect(short.formatter('Jan')).toBe('#Jan')
+  })
+
+  it('leaves an axis that fits to the format alone', () => {
+    const { formatter } = labelsOf(formatted(['Jan', 'Feb'], customer))
+    expect(formatter('Jan')).toBe(customer('Jan'))
+  })
+
+  it('leaves an echarts template string to echarts', () => {
+    const option = build(repeat(8, 20), {
+      xAxis: {
+        key: 'month',
+        type: 'category',
+        echartOptions: { axisLabel: { formatter: '{value} kg' } },
+      },
+    })
+    expect(labelsOf(option).formatter).toBe('{value} kg')
   })
 })
 
