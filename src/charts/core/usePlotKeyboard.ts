@@ -211,8 +211,12 @@ export function usePlotKeyboard<T>(
     onPointerdown: () => {
       fromPointer = true
     },
-    onPointerup: () => {
-      fromPointer = false
+    // A touch pointer's `focus` arrives after its `pointerup`, so clearing the
+    // flag here would leave `onFocus` reading a tap as keyboard focus. Mouse
+    // and pen still clear eagerly, for a press that never triggers a `focus`
+    // at all (the plot already had it).
+    onPointerup: (event: PointerEvent) => {
+      if (event.pointerType !== 'touch') fromPointer = false
     },
     // Landing on the plot puts the cursor on the first mark, so the first
     // arrow press moves rather than announcing what focus already did.
