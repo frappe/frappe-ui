@@ -231,12 +231,12 @@ const appScenario = computed(() =>
     : scenarios.find((s) => s.id === app.value),
 )
 
-// the header's breadcrumb names where you are: the workspace, then the
-// page that is open
+// the header's breadcrumb names the page that is open, and only that —
+// "Rich text editor", not "Frappe UI / Rich text editor" — as the pattern
+// pages from Settings modal down name themselves
 provide(
   headerCrumbsKey,
   computed(() => [
-    { label: appTitle.value },
     { label: pages.find((p) => p.id === page.value)?.label ?? '' },
   ]),
 )
