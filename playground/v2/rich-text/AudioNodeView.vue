@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // Figma: espresso-2.0 › Recording (31403:45371). A 42px bar on gray-50,
-// ruled and on a 12px radius, 2px/6px in: a 28px ghost play button, an 8px
+// unruled — the fill alone is its edge — on a 12px radius, 2px/6px in: a 28px ghost play button, an 8px
 // gap, the slider, the time as 0:15 / 32:48 in 14px gray-500, then volume
 // and ⋯ as two more 28px ghost buttons 4px apart. The bar is the library's
 // Button, Slider and Dropdown over a hidden <audio>; the slider is drawn
@@ -171,7 +171,7 @@ const moreOptions = computed<DropdownOptions>(() => [
 <template>
   <NodeViewWrapper
     as="div"
-    class="rte-player flex h-[42px] w-full items-center gap-2 rounded-6 border border-outline-gray-1 bg-surface-gray-1 px-[5px] py-0.5"
+    class="rte-player flex h-[42px] w-full items-center gap-2 rounded-6 bg-surface-gray-1 px-1.5 py-0.5"
     data-type="audio"
     :aria-label="node.attrs.title || 'Audio'"
   >
