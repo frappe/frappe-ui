@@ -255,20 +255,30 @@ function track(event: MouseEvent) {
         :viewBox="`0 0 ${H} ${H}`"
         preserveAspectRatio="none"
       >
-        <!-- A wash that fades as it falls: strongest along the line (22%
-             of the trend's colour from 40% down the box, which the line's
-             peaks rise above), down to 2% at the card's foot, so it reads
-             as a gradient rather than one flat tint under the line. -->
+        <!-- The file's wash (1356:69068), stop for stop: the trend's colour
+             at full strength fading to white at nothing by 76.4% of the
+             way, the whole fill at 13%. Its vector, read off the fill's
+             transform, runs from 20% down the box to 176% — past the foot,
+             so a third of the way is left at the card's edge. Fading into
+             white rather than into the colour is what makes it a gradient:
+             the tint thins and pales at once, from about 5% under the line
+             to under 2% at the foot. The white is the card's own ground
+             (surface-base), so dark fades into the dark card. -->
         <defs>
-          <linearGradient :id="id" x1="0" y1="0.4" x2="0" y2="1">
-            <stop offset="0" :stop-color="wash ?? color" stop-opacity="0.22" />
-            <stop offset="1" :stop-color="wash ?? color" stop-opacity="0.02" />
+          <linearGradient :id="id" x1="0.738" y1="0.202" x2="0.742" y2="1.762">
+            <stop offset="0" :stop-color="wash ?? color" stop-opacity="1" />
+            <stop
+              offset="0.764"
+              style="stop-color: var(--surface-base)"
+              stop-opacity="0"
+            />
           </linearGradient>
         </defs>
         <path
           v-if="variant === 'area' || variant === 'inset'"
           :d="areaPath"
           :fill="`url(#${id})`"
+          opacity="0.13"
         />
         <path v-if="variant === 'solid'" :d="areaPath" :fill="color" />
         <path
