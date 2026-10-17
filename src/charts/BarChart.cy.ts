@@ -252,6 +252,25 @@ describe('BarChart', () => {
     })
   })
 
+  describe('value axis', () => {
+    const ticks = () => cy.get('[data-slot="chart-plot"] svg text')
+    const small = [
+      { month: 'Jan', tickets: 1 },
+      { month: 'Feb', tickets: 2 },
+    ]
+
+    it('ticks a small count in whole numbers', () => {
+      mountChart({ data: small, y: 'tickets' })
+      ticks().should('contain.text', '2')
+      ticks().should('not.contain.text', '.5')
+    })
+
+    it('splits a unit when told the axis is not a count', () => {
+      mountChart({ data: small, y: 'tickets', yAxis: { integer: false } })
+      ticks().should('contain.text', '.5')
+    })
+  })
+
   describe('normalized stacking', () => {
     it('fills every column to the top and scales the axis to 100', () => {
       mountChart({ stacked: 'normalized' })

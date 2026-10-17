@@ -62,6 +62,8 @@ export type ChartYAxisConfig = {
   title?: string
   min?: number
   max?: number
+  /** Ticks on whole numbers only. Unset decides from the values on the axis. */
+  integer?: boolean
   echartOptions?: EchartOptionsOverride
 }
 
@@ -830,6 +832,12 @@ export type ChartValueAxisOptions = {
   max?: number
   /** Prints each tick label, and every value this axis carries elsewhere. */
   format?: ChartValueFormatter
+  /**
+   * Puts the ticks on whole numbers only, for a count that has no half. Left
+   * out, it is on when every value the axis plots is a whole number, which
+   * only changes a scale small enough for echarts to split a unit.
+   */
+  integer?: boolean
   /**
    * Escape hatch: deep-merged into this axis' echarts option. On a
    * `stacked: 'normalized'` chart the percent formatter wins over an

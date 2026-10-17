@@ -360,6 +360,7 @@ function toValueAxis(
     title: options.title,
     min: options.min,
     max: options.max,
+    integer: options.integer,
     echartOptions: options.echartOptions,
   }
 }

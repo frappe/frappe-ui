@@ -279,3 +279,86 @@ describe('plotRows', () => {
     expect(ordered[0]).toBe(built.data[0])
   })
 })
+
+describe('a value axis of whole numbers', () => {
+  /** Ticket counts and an hourly rate, small enough for echarts to split a unit. */
+  function counts(overrides: Partial<AxisChartConfig> = {}) {
+    return buildAxisChartOption(
+      {
+        type: 'bar',
+        data: [
+          { day: 'Mon', tickets: 1, rate: 0.4 },
+          { day: 'Tue', tickets: 3, rate: 1.25 },
+          { day: 'Wed', tickets: '2', rate: null },
+        ],
+        xAxis: { key: 'day' },
+        series: [{ name: 'tickets' }],
+        ...overrides,
+      },
+      { tokens },
+    ) as any
+  }
+
+  it('ticks a count in whole numbers', () => {
+    expect(counts().yAxis.minInterval).toBe(1)
+  })
+
+  it('leaves a scale with fractions to echarts', () => {
+    expect(
+      counts({ series: [{ name: 'rate' }] }).yAxis.minInterval,
+    ).toBeUndefined()
+  })
+
+  it('decides from every series on the axis, hidden ones included', () => {
+    const both = { series: [{ name: 'tickets' }, { name: 'rate' }] }
+    expect(counts(both).yAxis.minInterval).toBeUndefined()
+    const hidden = buildAxisChartOption(
+      {
+        type: 'bar',
+        data: [{ day: 'Mon', tickets: 1, rate: 0.4 }],
+        xAxis: { key: 'day' },
+        ...both,
+      },
+      { tokens, hiddenSeries: ['rate'] },
+    ) as any
+    expect(hidden.yAxis.minInterval).toBeUndefined()
+  })
+
+  it('decides each value axis from its own series', () => {
+    const option = counts({
+      series: [{ name: 'tickets' }, { name: 'rate', axis: 'y2' }],
+    })
+    expect(option.yAxis[0].minInterval).toBe(1)
+    expect(option.yAxis[1].minInterval).toBeUndefined()
+  })
+
+  it('ticks a horizontal chart’s value axis the same way', () => {
+    const option = counts({ horizontal: true })
+    expect(option.xAxis.minInterval).toBe(1)
+    expect(option.yAxis.minInterval).toBeUndefined()
+  })
+
+  it('takes `integer` over what the values say, either way', () => {
+    expect(counts({ yAxis: { integer: false } }).yAxis.minInterval).toBe(
+      undefined,
+    )
+    expect(
+      counts({ series: [{ name: 'rate' }], yAxis: { integer: true } }).yAxis
+        .minInterval,
+    ).toBe(1)
+  })
+
+  it('carries `integer` through from the prop', () => {
+    const props = {
+      data: [],
+      x: 'day',
+      y: 'tickets',
+      y2: 'rate',
+      yAxis: { integer: false },
+      y2Axis: { integer: true },
+    } as AxisChartProps
+    const { config } = normalizeAxisChartProps(props)
+    expect(config.yAxis?.integer).toBe(false)
+    expect(config.y2Axis?.integer).toBe(true)
+  })
+})

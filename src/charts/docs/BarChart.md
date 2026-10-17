@@ -78,6 +78,10 @@ down the side, so they are truncated to fit that column. A time axis never tilts
 either. It picks its own ticks, and uses a larger interval instead of crowding
 them.
 
+## Counts
+
+When every value on a value axis is a whole number, its ticks are whole numbers too, so a count of 2 never gets a tick at 0.5. This applies to `y`, `y2` and the value axis of a `horizontal` chart, each decided from its own series. Set `yAxis.integer` (or `y2Axis.integer`) to `true` or `false` to override it.
+
 ## A line among the bars
 
 `seriesConfig[key].type` sets how one series draws: `'bar'`, `'line'` or

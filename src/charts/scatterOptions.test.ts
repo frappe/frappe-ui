@@ -686,3 +686,26 @@ describe('reference lines against the rest of the scatter', () => {
     expect(annotated.yAxis.max).toBeUndefined()
   })
 })
+
+describe('scatter value axes of whole numbers', () => {
+  it('ticks each axis in whole numbers when its column holds them', () => {
+    const option = build({
+      data: [
+        { spend: 1, revenue: 0.5 },
+        { spend: 2, revenue: 1.5 },
+      ],
+    })
+    expect(option.xAxis.minInterval).toBe(1)
+    expect(option.yAxis.minInterval).toBeUndefined()
+  })
+
+  it('takes `integer` over what the column says', () => {
+    const option = build({
+      xAxis: { integer: false },
+      yAxis: { integer: true },
+      data: [{ spend: 1, revenue: 0.5 }],
+    })
+    expect(option.xAxis.minInterval).toBeUndefined()
+    expect(option.yAxis.minInterval).toBe(1)
+  })
+})
