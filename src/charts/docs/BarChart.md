@@ -35,6 +35,8 @@ both the share and the measured number. `yAxis.format` formats that number in
 the tooltip. The axis ticks always show percentages, even if you set
 `yAxis.format` or an `axisLabel.formatter` in that axis's `echartOptions`.
 
+When the chart has one column, such as a single bar split into shares, the legend shows each series' share after its name, as a donut legend does. With more than one column, the legend shows no shares, because each column has different shares.
+
 Shares are computed per stack. Two stacks with different `stackName`s each
 reach 100, and a bar stack and an area stack are separate totals. A series that
 stacks with nothing (a line, or a bar or area on its own) keeps its own values.

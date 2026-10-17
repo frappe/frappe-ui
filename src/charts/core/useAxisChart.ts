@@ -25,7 +25,7 @@ import {
   type AxisChartFormatters,
   type ResolvedTooltipColumn,
 } from '../seriesData'
-import { formatAxisValue, formatValue } from '../format'
+import { formatAxisValue, formatPercent, formatValue } from '../format'
 import { useChartTokens } from '../tokens'
 import { documentDir, markName, plotReading } from '../utils'
 import type {
@@ -216,15 +216,26 @@ export function useAxisChart<C extends AxisChartConfig>(
   )
 
   // No number is printed beside an axis series: a sum is wrong for a rate or
-  // an average, and the chart cannot tell which one it was handed.
+  // an average, and the chart cannot tell which one it was handed. A 100%
+  // stack of one column is the exception: it is a part-to-whole, so each
+  // series prints its share as a donut slice does. Across several columns no
+  // one share holds for all of them, and a share of the summed columns would
+  // weigh them by the totals the plot sets aside.
   const legendItems = computed<ChartLegendItem[]>(() =>
-    config.value.series.map((series) => ({
-      name: series.name,
-      label: seriesLabel(series),
-      color: seriesColors.value[series.name],
-      hidden: hiddenSeries.value.includes(series.name),
-      weight: weights.value[series.name],
-    })),
+    config.value.series.map((series) => {
+      const share =
+        rows.value.length === 1
+          ? stackShares.value?.get(series.name)?.[0]
+          : null
+      return {
+        name: series.name,
+        label: seriesLabel(series),
+        color: seriesColors.value[series.name],
+        hidden: hiddenSeries.value.includes(series.name),
+        weight: weights.value[series.name],
+        hint: share == null ? undefined : formatPercent(share),
+      }
+    }),
   )
 
   function formatSeriesValue(series: AxisChartSeriesConfig, value: number) {

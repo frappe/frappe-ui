@@ -278,6 +278,22 @@ describe('BarChart', () => {
       cy.get('[data-slot="chart-plot"] svg text').should('contain.text', '100')
     })
 
+    it('prints each series’ share in the legend for a single column', () => {
+      mountChart({
+        stacked: 'normalized',
+        horizontal: true,
+        data: [{ month: 'All', sales: 65, refunds: 35 }],
+      })
+      cy.get('[data-slot="chart-legend"]')
+        .should('contain.text', '65%')
+        .and('contain.text', '35%')
+    })
+
+    it('prints no share in the legend across several columns', () => {
+      mountChart({ stacked: 'normalized' })
+      cy.get('[data-slot="chart-legend"]').should('not.contain.text', '%')
+    })
+
     it('prints the share on the bars', () => {
       mountChart({
         stacked: 'normalized',
