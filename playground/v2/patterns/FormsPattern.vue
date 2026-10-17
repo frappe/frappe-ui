@@ -83,7 +83,7 @@ const useIMAP = ref(false)
           v-model="useSSL"
           size="md"
           label="Connect with SSL/TLS Encryption"
-          class="[&_label]:!text-sm"
+          class="[&_label]:!text-sm [&_label]:!leading-tighter"
         />
         <Badge theme="violet" variant="subtle" size="lg">
           <template #prefix>
@@ -96,7 +96,7 @@ const useIMAP = ref(false)
         v-model="useIMAP"
         size="md"
         label="Use IMAP"
-        class="[&_label]:!text-sm"
+        class="[&_label]:!text-sm [&_label]:!leading-tighter"
       />
     </div>
   </div>
