@@ -18,6 +18,7 @@ import type {
 } from './types'
 import {
   EMPTY_SELECTABLE_VALUE_PREFIX,
+  checkedItemClasses,
   isCustomOption,
   isSelectableOption,
   itemClasses,
@@ -168,7 +169,11 @@ function handleSelect(item: NormalizedItem, event: Event) {
                     : 'unchecked'
                   : undefined
               "
-              :class="[itemClasses, itemRootSizeClasses(size)]"
+              :class="[
+                itemClasses,
+                checkedItemClasses,
+                itemRootSizeClasses(size),
+              ]"
               @select="handleSelect(item, $event)"
             >
               <!--

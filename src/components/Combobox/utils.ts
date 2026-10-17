@@ -15,6 +15,7 @@ import type {
 } from './types'
 
 export {
+  checkedItemClasses,
   inputFontSizeClasses,
   itemClasses,
   itemRootSizeClasses,

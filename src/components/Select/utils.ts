@@ -2,6 +2,7 @@ import type { SelectionSize, SelectionVariant } from '../shared/selection/utils'
 import { resolvePropValue } from '../../utils/resolvePropValue'
 
 export {
+  checkedItemClasses,
   inputFontSizeClasses,
   itemClasses,
   itemRootSizeClasses,

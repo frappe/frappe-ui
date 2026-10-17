@@ -247,6 +247,11 @@
     name: 'update:selectedOptions',
     description: 'Fired alongside `update:modelValue` with the original option objects\nresolved out of `options`, so custom fields on an option survive.',
     type: '[value: MultiSelectOption[]]'
+  },
+  {
+    name: 'highlight',
+    description: 'Fired when the highlighted row changes, by arrow keys or the pointer, with\nthe original option object. `null` once the popover closes.',
+    type: '[option: MultiSelectOption | null]'
   }
 ]
 
