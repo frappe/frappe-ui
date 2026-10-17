@@ -20,6 +20,7 @@ const options = [
     <MultiEmailInput v-model="emails" :options="options">
       <template #tag="{ value, option, removeTag }">
         <Avatar
+          class="size-3"
           :image="option?.avatar"
           :label="option?.label ?? value"
           size="xs"
@@ -28,7 +29,7 @@ const options = [
         <button
           type="button"
           :aria-label="`Remove ${value}`"
-          class="-mr-0.5 grid size-4 place-items-center rounded-1 text-ink-gray-5 hover:text-ink-gray-7"
+          class="inline-flex shrink-0 items-center justify-center rounded-1 text-ink-gray-7 hover:text-ink-gray-9"
           @click="removeTag"
         >
           <span class="lucide-x size-3" />
