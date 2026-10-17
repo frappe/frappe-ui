@@ -425,9 +425,12 @@ const subheaderOptions = subheaderTypes.map(({ value, label }) => ({
 // 14px above the menu, empty while the tray carries the logo, the logo
 // under 6px and over 7px otherwise.
 const cellClass = computed(() => [
-  'flex shrink-0 items-center rounded-4 transition-colors hover:bg-surface-gray-2 data-[state=open]:bg-surface-gray-2',
+  'flex shrink-0 items-center rounded-4 transition-[height,padding,background-color] duration-300 ease-out hover:bg-surface-gray-2 data-[state=open]:bg-surface-gray-2',
+  // left-anchored, not centred: 8px in, a 28px cell is already in the
+  // middle of the 44px rail, so it stays put while the sidebar narrows
+  // rather than leaping to the middle of the 220px column and sliding back
   patternCollapsed.value
-    ? 'h-[41px] w-7 justify-center self-center pb-[7px] pt-1.5'
+    ? 'h-[41px] w-7 justify-center pb-[7px] pt-1.5'
     : 'h-8 w-full gap-2 py-0.5 pl-2 pr-1',
 ])
 
@@ -728,7 +731,7 @@ const outlineTitle = computed(
       </div>
 
       <div
-        class="v2-scroll flex h-full shrink-0 flex-col overflow-y-auto p-2 pb-2.5 transition-[width] duration-300 ease-out"
+        class="v2-scroll flex h-full shrink-0 flex-col overflow-y-auto p-2 pb-2.5 transition-[width,row-gap] duration-300 ease-out"
         :class="patternCollapsed ? 'gap-3.5' : 'gap-2'"
         :style="{ width: patternCollapsed ? '44px' : '220px' }"
       >
@@ -846,7 +849,7 @@ const outlineTitle = computed(
              Espresso sidebar -->
         <div
           v-if="appScenario && patternCollapsed"
-          class="flex flex-col items-center gap-0.5"
+          class="flex flex-col gap-0.5"
         >
           <SidebarRow
             v-for="(row, i) in collapsedRows"
@@ -857,11 +860,9 @@ const outlineTitle = computed(
         </div>
         <SidebarMenu v-else-if="appScenario" :scenario="appScenario" />
 
-        <div
-          v-else
-          class="flex flex-col gap-0.5"
-          :class="patternCollapsed && 'items-center'"
-        >
+        <!-- the rows keep their left edge as the rail narrows (see
+             cellClass): 28px squares 8px in sit in the 44px rail's middle -->
+        <div v-else class="flex flex-col gap-0.5">
           <!-- 28px rows 2px apart, px 8: a 16px icon · 8px · the 14 label.
                The states are the sidebar-item component's own (29766:167193),
                so both themes come from the same tokens: the pick sits on a
@@ -910,7 +911,7 @@ const outlineTitle = computed(
         <div
           v-if="appScenario"
           class="mt-auto flex flex-col pt-4"
-          :class="patternCollapsed ? 'items-center gap-1' : 'gap-2'"
+          :class="patternCollapsed ? 'gap-1' : 'gap-2'"
         >
           <!-- Default (34359:136305), on the rail: the status cell raised
                like an active row, storage, what's new and help, then the
