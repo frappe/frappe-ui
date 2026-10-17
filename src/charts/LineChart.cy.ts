@@ -50,6 +50,39 @@ const MARKS = '[data-slot="chart-plot"] svg > g'
 const lines = () => cy.get(`${MARKS} path[stroke^="#"]:not([d=""])`)
 
 describe('LineChart', () => {
+  describe('colors named by a CSS variable', () => {
+    beforeEach(() => {
+      cy.document().then((doc) => {
+        const style = doc.createElement('style')
+        style.id = 'brand-colors'
+        style.textContent = `:root { --brand: #ff0000; --goal: #0000ff }
+          [data-theme='dark'] { --brand: #00ff00 }`
+        doc.head.appendChild(style)
+      })
+    })
+    afterEach(() => {
+      cy.document().then((doc) => {
+        doc.getElementById('brand-colors')?.remove()
+        doc.documentElement.removeAttribute('data-theme')
+      })
+    })
+
+    it('draws in the value the variable holds, again after a theme flip', () => {
+      mountChart({
+        seriesConfig: { sales: { color: 'var(--brand)' } },
+        referenceLines: [{ value: 12, color: 'var(--goal)' }],
+      })
+      cy.get(`${MARKS} path[stroke="#ff0000"]`).should('exist')
+      cy.get(`${MARKS} path[stroke="#0000ff"]`).should('exist')
+      cy.get(`${MARKS} path[stroke^="var("]`).should('not.exist')
+      cy.document().then((doc) =>
+        doc.documentElement.setAttribute('data-theme', 'dark'),
+      )
+      cy.get(`${MARKS} path[stroke="#00ff00"]`).should('exist')
+      cy.get(`${MARKS} path[stroke="#ff0000"]`).should('not.exist')
+    })
+  })
+
   it('draws one line per series, through every category', () => {
     mountChart()
     lines().should('have.length', 2)

@@ -2,7 +2,7 @@
  * @vitest-environment jsdom
  */
 import { afterEach, describe, expect, it } from 'vitest'
-import { resolveChartTokens } from './tokens'
+import { resolveChartTokens, resolveCssVariables } from './tokens'
 
 /** A chart element inside `depth` wrappers, appended to the document. */
 function mount(...backgrounds: (string | undefined)[]) {
@@ -52,5 +52,66 @@ describe('the surface behind the plot', () => {
 
   it('falls back to the scheme when no ancestor paints at all', () => {
     expect(resolveChartTokens(mount(undefined)).backdrop).toBe('#ffffff')
+  })
+})
+
+describe('CSS variables in a caller’s colors', () => {
+  function chartWith(variables: Record<string, string>) {
+    const el = mount(undefined)
+    for (const [name, value] of Object.entries(variables)) {
+      el.style.setProperty(name, value)
+    }
+    return el
+  }
+
+  it('swaps each variable for the value the chart element computes', () => {
+    const el = chartWith({ '--brand': '#ff0000', '--muted': ' #cccccc ' })
+    const option = {
+      color: ['var(--brand)', '#00ff00'],
+      series: [
+        { itemStyle: { color: 'var( --muted )' } },
+        {
+          lineStyle: {
+            color: 'color-mix(in srgb, var(--brand) 20%, transparent)',
+          },
+        },
+      ],
+    }
+    expect(resolveCssVariables(option, el)).toEqual({
+      color: ['#ff0000', '#00ff00'],
+      series: [
+        { itemStyle: { color: '#cccccc' } },
+        {
+          lineStyle: { color: 'color-mix(in srgb, #ff0000 20%, transparent)' },
+        },
+      ],
+    })
+  })
+
+  it('takes the fallback for a name the element does not define, else leaves it', () => {
+    const el = chartWith({})
+    expect(
+      resolveCssVariables(['var(--nope, #123456)', 'var(--nope)'], el),
+    ).toEqual(['#123456', 'var(--nope)'])
+  })
+
+  it('returns what it changed nothing in as it was, Dates and functions included', () => {
+    const el = chartWith({ '--brand': '#ff0000' })
+    const when = new Date(2024, 0, 1)
+    const formatter = () => 'x'
+    const untouched = { data: [[when, 1]], formatter }
+    const option: Record<string, any> = {
+      series: [untouched, { color: 'var(--brand)' }],
+    }
+    const resolved = resolveCssVariables(option, el)
+    expect(resolved.series[0]).toBe(untouched)
+    expect(resolved.series[0].data[0][0]).toBe(when)
+    expect(resolved.series[1].color).toBe('#ff0000')
+    expect(option.series[1].color).toBe('var(--brand)')
+  })
+
+  it('leaves everything as written without an element to read from', () => {
+    const option = { color: ['var(--brand)'] }
+    expect(resolveCssVariables(option, undefined)).toBe(option)
   })
 })

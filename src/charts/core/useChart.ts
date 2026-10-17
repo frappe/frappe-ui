@@ -12,7 +12,8 @@ import { SVGRenderer } from 'echarts/renderers'
 import type { ECharts, EChartsCoreOption } from 'echarts/core'
 import debounce from '#utils/debounce'
 import { installTextMeasurer } from '../measureText'
-import { prefersReducedMotion } from '../utils'
+import { resolveCssVariables } from '../tokens'
+import { documentAttributes, prefersReducedMotion } from '../utils'
 
 // SVG only: it keeps text selectable and crisp at any DPI, and the canvas
 // renderer is a large slice of echarts we would pay for on every page.
@@ -123,7 +124,9 @@ export function useChart({
   watchEffect(() => {
     const instance = chart.value
     if (!instance) return
-    const nextOption = option()
+    // Read so a theme flip re-resolves the `var(--…)` colors below.
+    documentAttributes()
+    const nextOption = resolveCssVariables(option(), container.value)
     if (!nextOption) return
     instance.setOption(
       drawn ? { ...nextOption, animationDuration: 0 } : nextOption,
