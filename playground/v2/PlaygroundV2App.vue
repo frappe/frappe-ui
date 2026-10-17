@@ -610,11 +610,12 @@ onUnmounted(() => observer?.disconnect())
 // `shadow/light/xs`. The file also lists a 7% black hairline inside the
 // edge, but its own raster shows that stroke folded into the shadow's
 // ring: edge for edge, the xs shadow alone lands on Figma's pixels, and a
-// drawn 1px hairline on top reads nearly twice as heavy. Dark keeps the
-// file's 5.5% white hairline, since black shadows vanish there; it sits
-// inside the 12px, so 11px plus the line keeps the box the same.
+// drawn 1px hairline on top reads nearly twice as heavy. Dark draws the
+// hairline in outline-gray-1, as every elevation-1 card does, since black
+// shadows vanish there; it sits inside the 12px, so 11px plus the line
+// keeps the box the same.
 const alertCardClass =
-  'flex flex-col rounded-6 bg-surface-elevation-1 p-3 shadow-xs dark:border dark:border-[rgba(255,255,255,0.055)] dark:p-[11px]'
+  'flex flex-col rounded-6 bg-surface-elevation-1 p-3 shadow-xs dark:border dark:border-outline-gray-1 dark:p-[11px]'
 
 // what the outline is a list of, per page
 const OUTLINE_TITLES: Record<string, string> = {

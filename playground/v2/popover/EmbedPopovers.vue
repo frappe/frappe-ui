@@ -111,7 +111,7 @@ function addCompact() {
       <!-- the library's underline tabs, as the emoji picker's: their line
            slides from tab to tab over the row's rule. The rule is the
            row's, so it runs under the close button too -->
-      <div class="flex h-7 items-end border-b border-outline-elevation-2 px-4">
+      <div class="flex h-7 items-end border-b border-outline-gray-1 px-4">
         <Tabs v-model="tab">
           <TabList
             variant="underline"

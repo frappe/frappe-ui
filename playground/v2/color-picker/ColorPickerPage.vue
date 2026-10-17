@@ -32,7 +32,7 @@ function onChange(v: string, m: Mode) {
     <div class="flex items-start gap-10">
       <!-- the controller -->
       <div
-        class="flex w-[362px] flex-col gap-4 rounded-6 border border-outline-gray-1 bg-surface-elevation-2 p-4 dark:border-outline-gray-2 dark:bg-surface-elevation-1"
+        class="flex w-[362px] flex-col gap-4 rounded-6 border border-outline-gray-1 bg-surface-elevation-2 p-4 dark:bg-surface-elevation-1"
       >
         <div class="flex flex-col gap-1">
           <p class="text-lg-medium text-ink-gray-8">Colour picker</p>
@@ -53,7 +53,7 @@ function onChange(v: string, m: Mode) {
         <!-- the value: a 330 × 60 preview, and the CSS under it -->
         <div class="flex flex-col gap-2">
           <div
-            class="h-[60px] w-[330px] rounded-4 border border-outline-gray-2"
+            class="h-[60px] w-[330px] rounded-4 border border-outline-gray-2 dark:border-outline-gray-1"
             :style="{
               background: value
                 ? `${layer(value)}${mode === 'image' ? ' center / cover' : ''}, ${CHECKER}`

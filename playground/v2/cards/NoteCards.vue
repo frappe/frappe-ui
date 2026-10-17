@@ -38,9 +38,13 @@ Templeton Peck`
 <template>
   <div class="flex flex-wrap items-start justify-center gap-8">
     <!-- sm -->
-    <article class="espresso-note-card h-[215px] w-[220px] justify-between rounded-6 p-3.5">
+    <article
+      class="espresso-note-card h-[215px] w-[220px] justify-between rounded-6 p-3.5"
+    >
       <div class="flex flex-col gap-1.5">
-        <p class="flex h-4 items-center truncate text-base-medium text-ink-gray-8">
+        <p
+          class="flex h-4 items-center truncate text-base-medium text-ink-gray-8"
+        >
           UX Optimization Guide
         </p>
         <p class="text-sm leading-[19.5px] text-ink-gray-6">{{ NOTE }}</p>
@@ -54,14 +58,22 @@ Templeton Peck`
     </article>
 
     <!-- md -->
-    <article class="espresso-note-card h-[273px] w-[250px] justify-between rounded-6">
+    <article
+      class="espresso-note-card h-[273px] w-[250px] justify-between rounded-6"
+    >
       <div class="flex flex-col">
         <header class="flex h-11 items-center gap-2 px-3.5 py-3">
           <img :src="logo" alt="" class="size-5 shrink-0 rounded-[5px]" />
-          <p class="flex h-4 min-w-0 items-center truncate text-base text-ink-gray-7">Attentive</p>
+          <p
+            class="flex h-4 min-w-0 items-center truncate text-base text-ink-gray-7"
+          >
+            Attentive
+          </p>
         </header>
         <div class="flex flex-col gap-1.5 px-3.5 pb-3.5">
-          <p class="flex h-[18px] items-center truncate text-lg-medium text-ink-gray-8">
+          <p
+            class="flex h-[18px] items-center truncate text-lg-medium text-ink-gray-8"
+          >
             Untitled note
           </p>
           <p class="line-clamp-7 text-p-base text-ink-gray-6">{{ NOTE }}</p>
@@ -69,23 +81,31 @@ Templeton Peck`
       </div>
       <footer class="flex h-11 items-center gap-2 px-3.5 py-3">
         <img :src="maya" alt="" class="size-5 shrink-0 rounded-full" />
-        <p class="flex h-4 min-w-0 flex-1 items-center truncate text-base text-ink-gray-7">
+        <p
+          class="flex h-4 min-w-0 flex-1 items-center truncate text-base text-ink-gray-7"
+        >
           Maya Thompson
         </p>
-        <p class="flex h-4 shrink-0 items-center text-base text-ink-gray-5">18 May</p>
+        <p class="flex h-4 shrink-0 items-center text-base text-ink-gray-5">
+          18 May
+        </p>
       </footer>
     </article>
 
     <!-- lg -->
-    <article class="espresso-note-card h-[261px] w-[280px] justify-between rounded-6 p-4">
+    <article
+      class="espresso-note-card h-[261px] w-[280px] justify-between rounded-6 p-4"
+    >
       <div class="flex flex-col gap-1.5">
-        <p class="flex h-[21px] items-center truncate text-2xl-semibold text-ink-gray-8">
+        <p
+          class="flex h-[21px] items-center truncate text-2xl-semibold text-ink-gray-8"
+        >
           Framework
         </p>
         <p class="text-p-base text-ink-gray-6">
-          Digital products are more abstract and complex than any product we've designed before.
-          People are using their digital devices faster, with less conscious thought and more
-          distracted than ever in history.
+          Digital products are more abstract and complex than any product we've
+          designed before. People are using their digital devices faster, with
+          less conscious thought and more distracted than ever in history.
         </p>
       </div>
       <div class="flex flex-col gap-3">
@@ -95,29 +115,41 @@ Templeton Peck`
         </div>
         <div class="flex h-4 items-center gap-2">
           <span class="size-4 shrink-0 text-ink-gray-6" v-html="calendarIcon" />
-          <p class="min-w-0 truncate text-base text-ink-gray-6">Jan 21,2023 - Jan 24, 2023</p>
+          <p class="min-w-0 truncate text-base text-ink-gray-6">
+            Jan 21,2023 - Jan 24, 2023
+          </p>
         </div>
       </div>
     </article>
 
     <!-- xl -->
     <article class="espresso-note-card h-[376px] w-[480px] gap-4 rounded-7 p-5">
-      <p class="flex h-[23px] items-center truncate text-3xl-semibold text-ink-gray-8">
+      <p
+        class="flex h-[23px] items-center truncate text-3xl-semibold text-ink-gray-8"
+      >
         Expanding our inventory
       </p>
       <div class="flex min-h-0 flex-col gap-3.5">
-        <div class="flex items-center gap-2 border-b border-outline-gray-1 pb-3 dark:border-outline-gray-2">
+        <div
+          class="flex items-center gap-2 border-b border-outline-gray-1 pb-3"
+        >
           <img :src="sandeep" alt="" class="size-10 shrink-0 rounded-full" />
           <div class="flex min-w-0 flex-col gap-1">
-            <p class="flex h-4 items-center truncate text-base-medium text-ink-gray-7">
+            <p
+              class="flex h-4 items-center truncate text-base-medium text-ink-gray-7"
+            >
               Sandeep Prabhakaran
             </p>
-            <p class="flex h-5 items-center truncate text-sm leading-[19.5px] text-ink-gray-6">
+            <p
+              class="flex h-5 items-center truncate text-sm leading-[19.5px] text-ink-gray-6"
+            >
               To: Jonathan Higgins, sandeep@timeless.co, +4
             </p>
           </div>
         </div>
-        <p class="min-h-0 overflow-hidden whitespace-pre-line text-p-base text-ink-gray-6">
+        <p
+          class="min-h-0 overflow-hidden whitespace-pre-line text-p-base text-ink-gray-6"
+        >
           {{ MAIL }}
         </p>
       </div>

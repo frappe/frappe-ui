@@ -79,7 +79,7 @@ const xlRows = [
       <!-- sm -->
       <article class="espresso-list-card h-[168px] w-[268px] rounded-7">
         <header
-          class="-mt-px flex h-11 items-center gap-2 border-b border-outline-gray-1 px-3.5 py-3 dark:border-outline-gray-2"
+          class="-mt-px flex h-11 items-center gap-2 border-b border-outline-gray-1 px-3.5 py-3"
         >
           <img :src="logo" alt="" class="size-5 shrink-0 rounded-[5px]" />
           <p

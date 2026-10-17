@@ -200,7 +200,7 @@ onUnmounted(() => shown.value.forEach((s) => clearTimeout(s.timer)))
     <div class="absolute inset-0 flex items-center justify-center px-5 py-20">
       <!-- the controller -->
       <div
-        class="flex w-[360px] flex-col gap-4 rounded-6 border border-outline-gray-1 bg-surface-elevation-2 p-4 dark:border-outline-gray-2 dark:bg-surface-elevation-1"
+        class="flex w-[360px] flex-col gap-4 rounded-6 border border-outline-gray-1 bg-surface-elevation-2 p-4 dark:bg-surface-elevation-1"
       >
         <div class="flex flex-col gap-1">
           <p class="text-lg-medium text-ink-gray-8">Notification</p>
