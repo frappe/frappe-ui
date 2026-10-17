@@ -150,21 +150,90 @@ describe('crowded category labels', () => {
   })
 
   it('keeps the whole tilt budget however crowded the axis is', () => {
-    const crowded = labelsOf(build(repeat(60, 16)))
+    const crowded = labelsOf(build(repeat(18, 16)))
     expect(crowded.rotate).toBe(45)
     // Two tilted labels run parallel, so a long one reaches further down rather
     // than into its neighbour, and echarts holds open the room the leading one
     // needs past the plot. Crowding costs the axis nothing it could have said.
     expect(crowded.width).toBe(88)
     expect(labelsOf(build(repeat(8, 20))).width).toBe(88)
-    // Whatever still collides at that spacing is thinned out, as before.
-    expect(crowded.hideOverlap).toBe(true)
-    expect(crowded.showMaxLabel).toBe(true)
+    expect(crowded.interval).toBeUndefined()
   })
 
   it('keeps a wide chart flat with the same labels', () => {
     expect(labelsOf(build(repeat(8, 20), {}, 900)).rotate).toBeUndefined()
     expect(labelsOf(build(repeat(8, 20))).rotate).toBe(45)
+  })
+})
+
+describe('category labels too crowded to tilt', () => {
+  /** Thirty days, printed the way a desk dashboard hands them over. */
+  const days = Array.from(
+    { length: 30 },
+    (_, i) => `${String(i + 1).padStart(2, '0')}-09-2026`,
+  )
+  /**
+   * How many slots a label of `width` needs. The end labels overhang their
+   * slots, and echarts narrows the plot by that much to keep them on it.
+   */
+  const thinnedStep = (width: number, count: number) => {
+    const slot = PLOT / count
+    return Math.ceil((width + GAP) / (slot - (width - slot) / count))
+  }
+  const shown = (axisLabel: any, count: number) =>
+    Array.from({ length: count }, (_, i) => i).filter((i) =>
+      axisLabel.interval(i),
+    )
+
+  it('tilts only while the slot holds a tilted line and its clear air', () => {
+    // A tilted line is 13px across, and keeps the 8px a flat label keeps.
+    const tilts = (count: number) => {
+      const slot = PLOT / count
+      return slot * Math.SQRT1_2 >= 13 + GAP
+    }
+    expect(tilts(18)).toBe(true)
+    expect(tilts(20)).toBe(false)
+    expect(labelsOf(build(repeat(18, 16))).rotate).toBe(45)
+    expect(labelsOf(build(repeat(20, 16))).rotate).toBeUndefined()
+  })
+
+  it('lays the labels flat, at least a step apart and as many as fit', () => {
+    const axisLabel = labelsOf(build(days))
+    expect(axisLabel.rotate).toBeUndefined()
+    const step = thinnedStep(
+      estimateTextWidth(days[0], AXIS_LABEL_FONT_SIZE),
+      30,
+    )
+    expect(step).toBeGreaterThan(1)
+    const kept = shown(axisLabel, 30)
+    for (let i = 1; i < kept.length; i++) {
+      expect(kept[i] - kept[i - 1]).toBeGreaterThanOrEqual(step)
+    }
+    expect(kept).toHaveLength(Math.floor(29 / step) + 1)
+  })
+
+  it('prints a thinned label whole when a tilt could have carried it', () => {
+    const axisLabel = labelsOf(build(days))
+    expect(axisLabel.width).toBeUndefined()
+    expect(axisLabel.formatter(days[0])).toBe(days[0])
+  })
+
+  it('labels the first and last category, and spreads the rest evenly', () => {
+    // A step of six fits four gaps into the 29 slots between the ends.
+    expect(shown(labelsOf(build(days)), 30)).toEqual([0, 7, 15, 22, 29])
+  })
+
+  it('caps a long thinned label at what a tilted one carries', () => {
+    const axisLabel = labelsOf(build(repeat(60, 30)))
+    expect(axisLabel.rotate).toBeUndefined()
+    expect(axisLabel.width).toBe(88)
+    expect(axisLabel.formatter(label(30))).toMatch(/^n+…n+$/)
+    const step = thinnedStep(88, 60)
+    expect(shown(axisLabel, 60)).toHaveLength(Math.floor(59 / step) + 1)
+  })
+
+  it('stays flat in RTL too', () => {
+    expect(labelsOf(build(days, { dir: 'rtl' })).rotate).toBeUndefined()
   })
 })
 

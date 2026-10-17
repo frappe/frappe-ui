@@ -409,7 +409,10 @@ export function buildXAxis(
     type === 'time' && opts.inset
       ? timeInset(config, categories, width)
       : undefined
-  const { rotate, labelWidth } = categoryLabelFit(config, { ...opts, type })
+  const { rotate, labelWidth, step } = categoryLabelFit(config, {
+    ...opts,
+    type,
+  })
 
   const axis = {
     type,
@@ -462,6 +465,7 @@ export function buildXAxis(
       // Left out entirely when the labels fit, so a flat axis carries no
       // rotation key at all.
       ...(rotate ? { rotate } : {}),
+      ...(step ? { interval: thinnedInterval(categories.length, step) } : {}),
       ...xAxisLabelFormat(type, {
         tokens,
         timeGrain,
@@ -563,6 +567,8 @@ type CategoryLabelFit = {
   rotate: number
   /** What a label is shortened to, when anything caps it. */
   labelWidth?: number
+  /** Every how many categories a label is drawn. Unset labels every one. */
+  step?: number
 }
 
 /**
@@ -575,8 +581,13 @@ type CategoryLabelFit = {
  * whichever layout carries more text: flat and shortened to the slot, or
  * tilted, which trades the slot for the depth below the axis. Wide slots keep
  * flat labels, because reading across beats reading up a diagonal; crowded ones
- * tilt, where a flat label would be down to a syllable. Whatever still collides
- * after that is thinned out by `hideOverlap`, as it always was.
+ * tilt, where a flat label would be down to a syllable.
+ *
+ * A tilt is bought to name every category, so it is only spent when it does:
+ * the slot has to hold a tilted line and the same clear air a flat label keeps.
+ * Past that, labels are dropped whichever way they lie, and a thinned axis
+ * reads better flat. It then labels every few categories from the first to
+ * the last, each label whole up to what a tilted one could carry.
  *
  * The whole axis takes one layout. Labels leaning two ways read as two axes.
  */
@@ -605,21 +616,60 @@ function categoryLabelFit(
   if (horizontal) return { rotate: 0, labelWidth: categoryLabelWidth(width) }
 
   const slot = categorySlotWidth(config, opts)
-  if (!slot || fitsFlat(opts.categories, drawnLabel(config, type), slot))
-    return { rotate: 0 }
+  const label = drawnLabel(config, type)
+  if (!slot || fitsFlat(opts.categories, label, slot)) return { rotate: 0 }
 
   const flat = Math.floor(slot - CATEGORY_LABEL_GAP)
   const tilted = tiltedLabelWidth()
   if (flat >= tilted) return { rotate: 0, labelWidth: flat }
 
-  return {
-    // The tilt leans towards the value axis. Its column of ticks is width the
-    // grid holds open, and nothing occupies it below the plot — which is
-    // exactly where a tilted label reaches. RTL puts that column on the other
-    // side, so the labels lean the other way.
-    rotate: isRTL ? -TILT_ANGLE : TILT_ANGLE,
-    labelWidth: tilted,
+  // Tilted labels run parallel, so what separates two of them is the slot
+  // measured across the diagonal.
+  if (slot * TILT_SIN >= LABEL_LINE_HEIGHT + CATEGORY_LABEL_GAP) {
+    return {
+      // The tilt leans towards the value axis. Its column of ticks is width the
+      // grid holds open, and nothing occupies it below the plot — which is
+      // exactly where a tilted label reaches. RTL puts that column on the other
+      // side, so the labels lean the other way.
+      rotate: isRTL ? -TILT_ANGLE : TILT_ANGLE,
+      labelWidth: tilted,
+    }
   }
+
+  const widest = opts.categories.reduce(
+    (max: number, value, index) =>
+      Math.max(
+        max,
+        estimateTextWidth(label(value, index), AXIS_LABEL_FONT_SIZE),
+      ),
+    0,
+  )
+  const drawn = Math.min(widest, tilted)
+  // The labels at either end reach past their slots by half a label less half
+  // a slot, and echarts narrows the plot to keep them on the canvas. Measured
+  // against the slot before that, neighbours would collide and echarts would
+  // drop the first label.
+  const narrowed = slot - Math.max(0, drawn - slot) / opts.categories.length
+  return {
+    rotate: 0,
+    labelWidth: widest > tilted ? tilted : undefined,
+    step: Math.ceil((drawn + CATEGORY_LABEL_GAP) / narrowed),
+  }
+}
+
+/**
+ * Which categories a thinned axis labels: the first, the last, and as many as
+ * fit between them at least a step apart, spread evenly. echarts' own
+ * `interval` counts from the first and leaves the last to chance, which reads
+ * as a clipped axis, and pinning the last to it leaves a hole before it.
+ */
+function thinnedInterval(count: number, step: number) {
+  const last = count - 1
+  const gaps = Math.max(1, Math.floor(last / step))
+  const labelled = new Set(
+    Array.from({ length: gaps + 1 }, (_, i) => Math.round((i * last) / gaps)),
+  )
+  return (index: number) => labelled.has(index)
 }
 
 /** The room the x axis has: the chart less its edge pad and the value axes. */
