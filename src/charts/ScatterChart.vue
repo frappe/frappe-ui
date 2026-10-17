@@ -141,6 +141,7 @@ function toValueAxis(axis?: ScatterChartProps['xAxis']) {
     title: axis.title,
     min: axis.min,
     max: axis.max,
+    integer: axis.integer,
     echartOptions: axis.echartOptions,
   }
 }

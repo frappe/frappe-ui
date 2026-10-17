@@ -885,6 +885,10 @@ export function buildValueAxes(
   const primary = buildValueAxis(config.yAxis, tokens, {
     ...opts,
     lines: lines('y'),
+    integer: holdsWholeNumbers(
+      config.data ?? [],
+      config.series.filter((s) => !onY2(s)).map((s) => s.name),
+    ),
     empty: emptyAxisExtent(
       config,
       config.series.filter((s) => !onY2(s)),
@@ -899,6 +903,10 @@ export function buildValueAxes(
       ...opts,
       secondary: true,
       lines: lines('y2'),
+      integer: holdsWholeNumbers(
+        config.data ?? [],
+        config.series.filter(onY2).map((s) => s.name),
+      ),
       empty: emptyAxisExtent(
         config,
         config.series.filter(onY2),
@@ -940,6 +948,23 @@ function emptyAxisExtent(
 }
 
 export type ValueExtent = { min: number; max: number }
+
+/**
+ * Whether every value in these columns is a whole number: a count, which an
+ * axis should not split into halves. Read over every series rather than the
+ * visible ones, so switching one off in the legend does not re-tick the axis.
+ */
+export function holdsWholeNumbers(
+  rows: Record<string, any>[],
+  keys: string[],
+): boolean {
+  return rows.every((row) =>
+    keys.every((key) => {
+      const value = toNumber(row[key])
+      return value === null || Number.isInteger(value)
+    }),
+  )
+}
 
 /**
  * The axis a reference line is read against. `'y2'` falls back to `'y'` on a
@@ -1038,10 +1063,13 @@ export function buildValueAxis(
     empty?: ValueExtent | null
     /** The span its reference lines reach. See `referenceLineExtent`. */
     lines?: { dataMin?: number; dataMax?: number }
+    /** Whether the values plotted on it are whole numbers. See `holdsWholeNumbers`. */
+    integer?: boolean
   },
 ) {
   const { horizontal, isRTL, empty } = opts
   const secondary = Boolean(opts.secondary)
+  const integer = axisConfig?.integer ?? opts.integer
 
   const axis = {
     type: 'value',
@@ -1056,6 +1084,9 @@ export function buildValueAxis(
     min: axisConfig?.min ?? empty?.min,
     max: axisConfig?.max ?? empty?.max,
     ...opts.lines,
+    // A floor on the tick interval, so it only reaches a scale echarts would
+    // otherwise split below one.
+    ...(integer ? { minInterval: 1 } : {}),
     // Gridlines carry the reading of the plot; the axis line itself is noise.
     // Only the primary draws them: with aligned ticks the second set lands on
     // the same rows, so it adds nothing but a doubled line.

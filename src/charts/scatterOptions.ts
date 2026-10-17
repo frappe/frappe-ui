@@ -5,6 +5,7 @@ import {
   DATA_LABEL_FONT_SIZE,
   buildAxisGrid,
   buildValueAxis,
+  holdsWholeNumbers,
   toNumber,
   referenceLineExtent,
 } from './axisChartCommon'
@@ -199,12 +200,14 @@ export function buildScatterOption(
       format: format?.x,
       name: config.xAxis?.title,
       lines: referenceLineExtent(config.referenceLines, 'x', false),
+      integer: holdsWholeNumbers(config.data ?? [], [config.xColumn]),
     }),
     yAxis: valueAxis(config.yAxis, tokens, {
       horizontal: false,
       isRTL,
       format: format?.y,
       lines: referenceLineExtent(config.referenceLines, 'y', false),
+      integer: holdsWholeNumbers(config.data ?? [], [config.yColumn]),
     }),
     series: [
       ...visible.map((entry) =>
@@ -340,9 +343,11 @@ function valueAxis(
     name?: string
     /** The span its reference lines reach. */
     lines?: { dataMin?: number; dataMax?: number }
+    /** Whether its column holds whole numbers only. */
+    integer: boolean
   },
 ) {
-  const { horizontal, isRTL, format, name, lines } = opts
+  const { horizontal, isRTL, format, name, lines, integer } = opts
 
   // Merged *under* the caller's own overrides, the way `applyAxisFormatters`
   // does it: an explicit `echartOptions` still wins over what v2 decided.
@@ -375,5 +380,6 @@ function valueAxis(
     horizontal,
     isRTL,
     lines,
+    integer,
   })
 }
