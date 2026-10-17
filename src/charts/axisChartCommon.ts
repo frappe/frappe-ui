@@ -22,6 +22,7 @@ import type {
   ChartPalette,
   ChartPaletteName,
   ChartYAxisConfig,
+  ReferenceLine,
 } from './types'
 
 export type AxisChartOptionContext = {
@@ -415,7 +416,12 @@ export function buildXAxis(
     // A quantity read along the plot is a position, not a magnitude: there is
     // no baseline to anchor to, so the scale follows the data the way both of
     // a scatter's do.
-    ...(type === 'value' ? { scale: true } : {}),
+    ...(type === 'value'
+      ? {
+          scale: true,
+          ...referenceLineExtent(config.referenceLines, 'x', false),
+        }
+      : {}),
     // RTL reads right-to-left along the horizontal axis; the vertical axis of a
     // horizontal bar chart is inverted so the first category sits on top.
     inverse: horizontal ? true : isRTL,
@@ -795,12 +801,17 @@ export function buildValueAxes(
   const onY2 = (series: AxisChartSeriesConfig) =>
     secondary && series.axis === 'y2'
 
+  const lines = (axis: 'y' | 'y2') =>
+    referenceLineExtent(config.referenceLines, axis, secondary)
+
   const primary = buildValueAxis(config.yAxis, tokens, {
     ...opts,
+    lines: lines('y'),
     empty: emptyAxisExtent(
       config,
       config.series.filter((s) => !onY2(s)),
       hidden,
+      lines('y'),
     ),
   })
   if (!secondary) return primary
@@ -809,7 +820,13 @@ export function buildValueAxes(
     buildValueAxis(config.y2Axis, tokens, {
       ...opts,
       secondary: true,
-      empty: emptyAxisExtent(config, config.series.filter(onY2), hidden),
+      lines: lines('y2'),
+      empty: emptyAxisExtent(
+        config,
+        config.series.filter(onY2),
+        hidden,
+        lines('y2'),
+      ),
     }),
   ]
 }
@@ -831,16 +848,52 @@ function emptyAxisExtent(
   config: AxisChartBaseConfig,
   series: AxisChartSeriesConfig[],
   hidden: string[],
+  lines: { dataMin?: number; dataMax?: number },
 ): ValueExtent | null {
   if (!series.length) return null
   if (series.some((one) => !hidden.includes(one.name))) return null
   const { min, max } = valueExtent(config.data ?? [], series)
   // A value axis holds 0 unless told to `scale`, and none of these are, so the
   // ends have to reach it the way the live axis did.
-  return niceExtent(Math.min(0, min), Math.max(0, max))
+  return niceExtent(
+    Math.min(0, min, lines.dataMin ?? 0),
+    Math.max(0, max, lines.dataMax ?? 0),
+  )
 }
 
 export type ValueExtent = { min: number; max: number }
+
+/**
+ * The axis a reference line is read against. `'y2'` falls back to `'y'` on a
+ * chart that draws one value axis, the same rule a series follows.
+ */
+export function referenceLineAxis(
+  line: ReferenceLine,
+  hasSecondaryValueAxis: boolean,
+): 'x' | 'y' | 'y2' {
+  if (line.axis === 'x') return 'x'
+  return hasSecondaryValueAxis && line.axis === 'y2' ? 'y2' : 'y'
+}
+
+/**
+ * The span the reference lines on one axis reach, as echarts' `dataMin` and
+ * `dataMax`. echarts unions both into the extent the data reaches, so the axis
+ * stretches to every line and still rounds its ends as it does for data.
+ */
+export function referenceLineExtent(
+  lines: ReferenceLine[] | undefined,
+  axis: 'x' | 'y' | 'y2',
+  hasSecondaryValueAxis: boolean,
+): { dataMin?: number; dataMax?: number } {
+  const values: number[] = []
+  for (const line of lines ?? []) {
+    if (referenceLineAxis(line, hasSecondaryValueAxis) !== axis) continue
+    const value = toNumber(line.value)
+    if (value !== null) values.push(value)
+  }
+  if (!values.length) return {}
+  return { dataMin: Math.min(...values), dataMax: Math.max(...values) }
+}
 
 /**
  * The low and the high a set of series reaches across the rows. Rows with
@@ -905,6 +958,8 @@ export function buildValueAxis(
     secondary?: boolean
     /** The ends to pin it to while nothing is drawn on it. See `emptyAxisExtent`. */
     empty?: ValueExtent | null
+    /** The span its reference lines reach. See `referenceLineExtent`. */
+    lines?: { dataMin?: number; dataMax?: number }
   },
 ) {
   const { horizontal, isRTL, empty } = opts
@@ -922,6 +977,7 @@ export function buildValueAxis(
     // title whichever way the bars run.
     min: axisConfig?.min ?? empty?.min,
     max: axisConfig?.max ?? empty?.max,
+    ...opts.lines,
     // Gridlines carry the reading of the plot; the axis line itself is noise.
     // Only the primary draws them: with aligned ticks the second set lands on
     // the same rows, so it adds nothing but a doubled line.

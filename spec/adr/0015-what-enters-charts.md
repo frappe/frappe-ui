@@ -175,9 +175,12 @@ These four stay, and the reason is recorded here so the question is closed for
 
 These decisions fell out of the work and answer questions this record raised.
 
-- **A reference line does not stretch the value axis.** A target far outside the
-  data would flatten the data it is read against, so a line beyond the range is
-  clipped. `yAxis.min` and `max` bring one into frame.
+- **A reference line stretches the value axis it sits on.** This reverses the
+  first answer, that a target far outside the data flattens the data it is read
+  against. A clipped target is worse: a goal that is not drawn reads as no goal,
+  and frappe-charts, which desk moves off, always drew it. A caller who would
+  rather keep the data tall sets `yAxis.min` or `max`, which the line does not
+  move, and the line beyond it is clipped.
 - **`maxSeries` has no default.** A ring cannot show 20 arcs, so `maxSlices`
   defaults. An axis chart with 20 series is legible enough that a default would
   silently redraw every existing long-data chart.

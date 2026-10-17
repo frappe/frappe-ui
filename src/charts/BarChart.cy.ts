@@ -420,9 +420,6 @@ describe('BarChart', () => {
     })
 
     it('keeps the rule while a legend toggle hides a series', () => {
-      // Inside refunds' own range, so the rule is still on the scale once the
-      // taller series goes: a line off the end of the axis is not drawn, which
-      // would pass this test for the wrong reason.
       mountChart({ referenceLines: [{ value: 5, label: 'Target' }] })
       cy.get('[aria-label="Hide Sales"]').click()
       bars().should('have.length', data.length)
@@ -430,6 +427,53 @@ describe('BarChart', () => {
         'contain.text',
         'Target',
       )
+    })
+
+    it('stretches the value axis to a target above the data', () => {
+      mountChart({ referenceLines: [{ value: 300, label: 'Goal' }] })
+      cy.get('[data-slot="chart-plot"] svg text')
+        .should('contain.text', 'Goal')
+        .and('contain.text', '300')
+    })
+
+    /** The label's box, wholly inside the canvas echarts draws on. */
+    function labelInsideCanvas(label: string) {
+      cy.get('[data-slot="chart-plot"] svg').then(($svg) => {
+        const canvas = $svg[0].getBoundingClientRect()
+        const text = [...$svg[0].querySelectorAll('text')].find(
+          (el) => el.textContent === label,
+        )
+        const box = text!.getBoundingClientRect()
+        expect(box.top).to.be.at.least(canvas.top)
+        expect(box.bottom).to.be.at.most(canvas.bottom)
+        expect(box.left).to.be.at.least(canvas.left)
+        expect(box.right).to.be.at.most(canvas.right)
+      })
+    }
+
+    // The scale ends at 25, so a goal there is drawn on the top edge of the plot.
+    it('keeps the label of a rule at the top of the scale on the canvas', () => {
+      mountChart({ referenceLines: [{ value: 25, label: 'Goal' }] })
+      cy.get('[data-slot="chart-plot"] svg text').should('contain.text', 'Goal')
+      labelInsideCanvas('Goal')
+    })
+
+    it('keeps the label of a rule at the end of a row chart on the canvas', () => {
+      mountChart({
+        horizontal: true,
+        referenceLines: [{ value: 25, label: 'Goal' }],
+      })
+      cy.get('[data-slot="chart-plot"] svg text').should('contain.text', 'Goal')
+      labelInsideCanvas('Goal')
+    })
+
+    it('keeps the label of a rule at the bottom of the scale on the canvas', () => {
+      mountChart({ referenceLines: [{ value: -5, label: 'Floor' }] })
+      cy.get('[data-slot="chart-plot"] svg text').should(
+        'contain.text',
+        'Floor',
+      )
+      labelInsideCanvas('Floor')
     })
 
     it('draws a rule down the plot at a category', () => {

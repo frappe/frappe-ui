@@ -131,8 +131,7 @@ export type ReferenceLineLabelPlacement =
 export type ReferenceLine = {
   /**
    * Where the line sits: a number on a value axis, or whatever the category
-   * column holds on the category axis. A value outside the range the plot
-   * covers is not drawn; the scale follows the data, not the annotation.
+   * column holds on the category axis. A value axis stretches to reach it.
    */
   value: number | string | Date
   /**

@@ -219,9 +219,6 @@ describe('LineChart', () => {
     // as empty as the plot gets from here. An all-hidden plot has no scale to
     // place the rule on, which is its own question.
     it('leaves the rule in place while a series is switched off', () => {
-      // Inside refunds' own range, so the rule stays on the scale the plot
-      // settles at: a line off the end of the axis is not drawn, which would
-      // pass this test for the wrong reason.
       mountChart({ referenceLines: [{ value: 5, label: 'Target' }] })
       cy.get('[aria-label="Hide Sales"]').click()
       lines().should('have.length', 1)
