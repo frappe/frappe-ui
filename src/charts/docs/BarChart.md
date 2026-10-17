@@ -110,9 +110,9 @@ label, and its two sides are left and right.
 
 `axis` sets which axis `value` belongs to: `'y'` (the default) or `'y2'` for a
 horizontal line at a value, `'x'` for a vertical line at a category or date.
-`horizontal` swaps the two axes and the lines follow. A line outside the plotted
-range is not drawn, because the scale follows the data, not the lines. Set
-`yAxis.min` or `max` to bring a distant target into view.
+`horizontal` swaps the two axes and the lines follow. The value axis stretches
+to reach every line, so a target above the data stays in view, and goes up a
+tick when a line at its top end leaves no room for the label.
 
 ## Context in the tooltip
 

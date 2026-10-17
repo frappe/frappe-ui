@@ -6,6 +6,7 @@ import {
   buildAxisGrid,
   buildValueAxis,
   toNumber,
+  referenceLineExtent,
 } from './axisChartCommon'
 import { formatLabel } from './format'
 import { CHART_FONT_FAMILY } from './measureText'
@@ -197,11 +198,13 @@ export function buildScatterOption(
       isRTL,
       format: format?.x,
       name: config.xAxis?.title,
+      lines: referenceLineExtent(config.referenceLines, 'x', false),
     }),
     yAxis: valueAxis(config.yAxis, tokens, {
       horizontal: false,
       isRTL,
       format: format?.y,
+      lines: referenceLineExtent(config.referenceLines, 'y', false),
     }),
     series: [
       ...visible.map((entry) =>
@@ -335,9 +338,11 @@ function valueAxis(
     format?: ChartValueFormatter
     /** Axis title, for the axis that draws its own. */
     name?: string
+    /** The span its reference lines reach. */
+    lines?: { dataMin?: number; dataMax?: number }
   },
 ) {
-  const { horizontal, isRTL, format, name } = opts
+  const { horizontal, isRTL, format, name, lines } = opts
 
   // Merged *under* the caller's own overrides, the way `applyAxisFormatters`
   // does it: an explicit `echartOptions` still wins over what v2 decided.
@@ -369,5 +374,6 @@ function valueAxis(
   return buildValueAxis({ ...axis, echartOptions }, tokens, {
     horizontal,
     isRTL,
+    lines,
   })
 }

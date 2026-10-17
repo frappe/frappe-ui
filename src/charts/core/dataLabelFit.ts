@@ -76,6 +76,43 @@ export function dataLabelOverflow(
   return overflow
 }
 
+/**
+ * How far the furthest reference-line label reaches past `bound`, read the way
+ * `dataLabelOverflow` reads a data label. A rule at the end of the scale, such
+ * as a goal that stretched the axis, puts a label placed beyond it outside the
+ * plot. echarts only positions that label when it paints, so it is placed here
+ * first to be measured.
+ */
+export function referenceLabelOverflow(
+  chart: ECharts,
+  side: DataLabelSide,
+  bound: number,
+) {
+  const width = chart.getWidth()
+  let overflow: number | null = null
+
+  ;(chart as any).getModel().eachComponent('markLine', (markLine: any) => {
+    const view = (chart as any).getViewOfComponentModel(markLine)
+    view?.group.traverse((rule: any) => {
+      const label = rule.getTextContent?.()
+      if (!label || label.ignore || !rule.beforeUpdate) return
+      rule.beforeUpdate()
+      const box = label.getBoundingRect().clone()
+      box.applyTransform(label.getLocalTransform())
+
+      const reach =
+        side === 'top'
+          ? bound - box.y
+          : side === 'right'
+            ? box.x + box.width - (width - bound)
+            : bound - box.x
+      overflow = Math.max(overflow ?? -Infinity, reach)
+    })
+  })
+
+  return overflow
+}
+
 /** The pixel a mark ends at on the side its label sits past. */
 function markTip(layout: any, side: DataLabelSide): number | null {
   if (!layout) return null

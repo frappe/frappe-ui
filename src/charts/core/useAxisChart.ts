@@ -1,6 +1,10 @@
 import { computed, reactive, ref, watch, type Ref } from 'vue'
 import type { EChartsCoreOption } from 'echarts/core'
-import { dataLabelOverflow, nextAxisMax } from './dataLabelFit'
+import {
+  dataLabelOverflow,
+  nextAxisMax,
+  referenceLabelOverflow,
+} from './dataLabelFit'
 import { useChart } from './useChart'
 import { usePlotKeyboard } from './usePlotKeyboard'
 import { useTooltipDismiss } from './useTooltipDismiss'
@@ -171,9 +175,10 @@ export function useAxisChart<C extends AxisChartConfig>(
   let raisedFor: EChartsCoreOption | undefined
 
   /**
-   * A data label at the top of the scale reaches past the plot. The value axis
-   * goes up one tick to make room for it, so the plot keeps its place in the
-   * card whatever the numbers are. An axis end the caller fixed is theirs.
+   * A data label or a reference-line label at the top of the scale reaches
+   * past the plot. The value axis goes up one tick to make room for it, so the
+   * plot keeps its place in the card whatever the numbers are. An axis end the
+   * caller fixed is theirs.
    */
   function fitLabels() {
     const instance = chart.value
@@ -189,8 +194,11 @@ export function useAxisChart<C extends AxisChartConfig>(
         : 'right'
       : 'top'
     if (typeof option.grid[side] !== 'number') return
-    const overflow = dataLabelOverflow(instance, side, option.grid[side])
-    if (overflow === null || overflow <= 0) return
+    const overflow = Math.max(
+      dataLabelOverflow(instance, side, option.grid[side]) ?? -Infinity,
+      referenceLabelOverflow(instance, side, option.grid[side]) ?? -Infinity,
+    )
+    if (overflow <= 0) return
 
     const max = nextAxisMax(instance, valueAxis)
     if (max === null) return
