@@ -15,3 +15,5 @@ export { default as CommandPalette } from './CommandPalette.vue'
 export { default as MobileNavSheet } from './MobileNavSheet.vue'
 
 export * from './sidebarList'
+export { default as SidebarPreviewCard } from './SidebarPreviewCard.vue'
+export * from './sidebarStories'
