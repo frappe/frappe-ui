@@ -569,6 +569,33 @@ describe('BarChart', () => {
       })
     })
 
+    it('lays them flat and thins them once even a tilt would crowd', () => {
+      const days = Array.from(
+        { length: 30 },
+        (_, i) => `${String(i + 1).padStart(2, '0')}-09-2026`,
+      )
+      cy.mount(
+        defineComponent({
+          setup() {
+            return () =>
+              h('div', { style: 'width: 420px; height: 300px' }, [
+                h(BarChart, {
+                  data: days.map((day, i) => ({ day, count: i % 4 })),
+                  x: 'day',
+                  y: 'count',
+                  echartOptions: { animation: false },
+                }),
+              ])
+          },
+        }),
+      )
+      const text = '[data-slot="chart-plot"] svg text'
+      cy.get(text).should('contain.text', '01-09-2026')
+      cy.get(text).should('contain.text', '30-09-2026')
+      cy.get(text).should('not.contain.text', '02-09-2026')
+      tilted().should('not.exist')
+    })
+
     it('stacks a row chart’s labels down the side, never tilted', () => {
       mountLongLabels({ horizontal: true })
       tilted().should('not.exist')

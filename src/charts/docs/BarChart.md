@@ -67,6 +67,8 @@ flat, because flat text is easier to read. Crowded slots tilt, where a flat
 label would shrink to a few letters. All labels on the axis use the same layout,
 because labels at two angles look like two axes.
 
+A tilt is used only when it can label every category with space between the labels. When the slots are narrower than that, labels must be dropped in either layout, so the axis stays flat and labels every few categories instead, such as every seventh day of a month. The labels are spread evenly from the first category to the last, and each label is shown whole up to the length a tilted label can show.
+
 There is no angle prop and no truncation length. The right angle changes with
 the chart width, and the chart already knows the width and has measured the
 text. A `horizontal` chart never tilts its labels: they are already one per line
