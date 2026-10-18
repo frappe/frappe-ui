@@ -72,7 +72,7 @@ import { useTooltipDismiss } from './core/useTooltipDismiss'
 import { buildScatterOption, buildScatterSeries } from './scatterOptions'
 import { formatLabel, formatValue } from './format'
 import { pruneHiddenSeries, toggleHiddenSeries } from './hiddenSeries'
-import { useChartTokens } from './tokens'
+import { useChartTokens, useResolvedConfig } from './tokens'
 import { chartAriaLabel, documentDir, plotReading } from './utils'
 import ChartContainer from './components/ChartContainer.vue'
 import ChartLegend from './components/ChartLegend.vue'
@@ -119,21 +119,24 @@ const dir = computed(() => props.dir ?? documentDir())
 const formatX = computed(() => props.xAxis?.format ?? props.format)
 const formatY = computed(() => props.yAxis?.format ?? props.format)
 
-const config = computed<ScatterChartConfig>(() => ({
-  data: props.data,
-  xColumn: props.x,
-  yColumn: props.y,
-  sizeColumn: props.size,
-  splitByColumn: props.splitBy,
-  labelColumn: props.label,
-  showDataLabels: props.showDataLabels,
-  xAxis: toValueAxis(props.xAxis),
-  yAxis: toValueAxis(props.yAxis),
-  referenceLines: props.referenceLines,
-  palette: props.palette,
-  dir: dir.value,
-  echartOptions: props.echartOptions,
-}))
+const config = useResolvedConfig<ScatterChartConfig>(
+  () => ({
+    data: props.data,
+    xColumn: props.x,
+    yColumn: props.y,
+    sizeColumn: props.size,
+    splitByColumn: props.splitBy,
+    labelColumn: props.label,
+    showDataLabels: props.showDataLabels,
+    xAxis: toValueAxis(props.xAxis),
+    yAxis: toValueAxis(props.yAxis),
+    referenceLines: props.referenceLines,
+    palette: props.palette,
+    dir: dir.value,
+    echartOptions: props.echartOptions,
+  }),
+  plotEl,
+)
 
 function toValueAxis(axis?: ScatterChartProps['xAxis']) {
   if (!axis) return undefined

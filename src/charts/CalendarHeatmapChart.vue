@@ -82,7 +82,7 @@ import {
 } from './calendarHeatmapOptions'
 import { sampleRamp } from './heatmapOptions'
 import { formatDate, formatLabel, formatValue } from './format'
-import { useChartTokens } from './tokens'
+import { useChartTokens, useResolvedConfig } from './tokens'
 import { chartAriaLabel, documentDir, plotReading } from './utils'
 import ChartContainer from './components/ChartContainer.vue'
 import ChartTooltip from './components/ChartTooltip.vue'
@@ -112,18 +112,21 @@ const plotEl = ref<HTMLElement>()
 
 const dir = computed(() => props.dir ?? documentDir())
 
-const config = computed<CalendarHeatmapChartConfig>(() => ({
-  data: props.data,
-  dateColumn: props.date,
-  valueColumn: props.value,
-  start: props.start,
-  end: props.end,
-  weekStart: props.weekStart,
-  min: props.min,
-  max: props.max,
-  palette: props.palette,
-  echartOptions: props.echartOptions,
-}))
+const config = useResolvedConfig<CalendarHeatmapChartConfig>(
+  () => ({
+    data: props.data,
+    dateColumn: props.date,
+    valueColumn: props.value,
+    start: props.start,
+    end: props.end,
+    weekStart: props.weekStart,
+    min: props.min,
+    max: props.max,
+    palette: props.palette,
+    echartOptions: props.echartOptions,
+  }),
+  plotEl,
+)
 
 const { tokens } = useChartTokens(plotEl)
 

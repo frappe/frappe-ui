@@ -173,11 +173,9 @@ describe('DonutChart', () => {
       'have.length',
       1,
     )
-    cy.get('[data-slot="chart-legend"] [style*="--overdue"]').should(
-      'have.css',
-      'background-color',
-      'rgb(255, 0, 0)',
-    )
+    cy.contains('[data-slot="chart-legend"] [aria-pressed]', 'Direct')
+      .find('[style*="background-color"]')
+      .should('have.css', 'background-color', 'rgb(255, 0, 0)')
     cy.document().then((doc) =>
       doc.documentElement.style.removeProperty('--overdue'),
     )

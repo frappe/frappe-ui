@@ -493,6 +493,23 @@ function hexLuminance(color: string): number | null {
  * folded in here — palette precedence lives in `resolveSeriesColors`, so there
  * is one place to read it.
  */
+/**
+ * `config` with every `var(--…)` outside its rows resolved against `el`, so
+ * the option builders blend, shade and contrast concrete colors. Rows are data,
+ * not colors, and the largest part of a config to walk. Re-resolves when the
+ * theme flips.
+ */
+export function useResolvedConfig<C extends { data?: unknown }>(
+  config: () => C,
+  el: Ref<HTMLElement | undefined>,
+): ComputedRef<C> {
+  return computed(() => {
+    documentAttributes()
+    const { data, ...rest } = config()
+    return { ...resolveCssVariables(rest, el.value), data } as C
+  })
+}
+
 export function useChartTokens(el: Ref<HTMLElement | undefined>): {
   tokens: ComputedRef<ChartTokens>
 } {

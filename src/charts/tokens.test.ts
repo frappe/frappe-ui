@@ -2,7 +2,12 @@
  * @vitest-environment jsdom
  */
 import { afterEach, describe, expect, it } from 'vitest'
-import { resolveChartTokens, resolveCssVariables } from './tokens'
+import { ref } from 'vue'
+import {
+  resolveChartTokens,
+  resolveCssVariables,
+  useResolvedConfig,
+} from './tokens'
 
 /** A chart element inside `depth` wrappers, appended to the document. */
 function mount(...backgrounds: (string | undefined)[]) {
@@ -118,5 +123,24 @@ describe('CSS variables in a caller’s colors', () => {
   it('leaves everything as written without an element to read from', () => {
     const option = { color: ['var(--brand)'] }
     expect(resolveCssVariables(option, undefined)).toBe(option)
+  })
+
+  it('reach the option builder resolved, and the rows stay as written', () => {
+    const el = chartWith({ '--brand': '#ff0000' })
+    const rows = [{ note: 'var(--brand)' }]
+    const config = useResolvedConfig(
+      () => ({
+        data: rows,
+        palette: ['var(--brand)'],
+        seriesConfig: { sales: { color: 'var(--brand)' } },
+      }),
+      ref(el),
+    )
+    expect(config.value).toEqual({
+      data: rows,
+      palette: ['#ff0000'],
+      seriesConfig: { sales: { color: '#ff0000' } },
+    })
+    expect(config.value.data).toBe(rows)
   })
 })

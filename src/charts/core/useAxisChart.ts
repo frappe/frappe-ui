@@ -26,7 +26,7 @@ import {
   type ResolvedTooltipColumn,
 } from '../seriesData'
 import { formatAxisValue, formatValue } from '../format'
-import { useChartTokens } from '../tokens'
+import { useChartTokens, useResolvedConfig } from '../tokens'
 import { documentDir, markName, plotReading } from '../utils'
 import type {
   AxisChartConfig,
@@ -75,7 +75,7 @@ export function useAxisChart<C extends AxisChartConfig>(
   const plotEl = ref<HTMLElement>()
   const hiddenSeries = args.hiddenSeries ?? ref<string[]>([])
 
-  const config = computed(args.config)
+  const config = useResolvedConfig(args.config, plotEl)
   const format = computed<AxisChartFormatters>(() => args.format?.() ?? {})
   const horizontal = computed(() => Boolean(args.horizontal?.()))
   const stackShares = computed(() => args.stackShares?.())

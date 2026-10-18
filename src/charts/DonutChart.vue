@@ -118,7 +118,7 @@ import {
   HALF_CENTER_Y,
 } from './donutChartOptions'
 import { formatLabel, formatPercent, formatValue } from './format'
-import { useChartTokens } from './tokens'
+import { useChartTokens, useResolvedConfig } from './tokens'
 import {
   chartAriaLabel,
   documentDir,
@@ -157,19 +157,22 @@ const plotEl = ref<HTMLElement>()
 const dir = computed(() => props.dir ?? documentDir())
 const isHalf = computed(() => props.variant === 'half')
 
-const config = computed<DonutChartConfig>(() => ({
-  data: props.data,
-  categoryColumn: props.category,
-  valueColumn: props.value,
-  maxSlices: props.maxSlices,
-  showDataLabels: props.showDataLabels,
-  centerLabel: props.centerLabel,
-  variant: props.variant,
-  palette: props.palette,
-  colors: props.colors,
-  dir: dir.value,
-  echartOptions: props.echartOptions,
-}))
+const config = useResolvedConfig<DonutChartConfig>(
+  () => ({
+    data: props.data,
+    categoryColumn: props.category,
+    valueColumn: props.value,
+    maxSlices: props.maxSlices,
+    showDataLabels: props.showDataLabels,
+    centerLabel: props.centerLabel,
+    variant: props.variant,
+    palette: props.palette,
+    colors: props.colors,
+    dir: dir.value,
+    echartOptions: props.echartOptions,
+  }),
+  plotEl,
+)
 
 /**
  * The half readout hangs off the arc's flat edge rather than straddling it:

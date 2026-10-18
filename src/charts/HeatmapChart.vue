@@ -106,7 +106,7 @@ import {
   sampleRamp,
 } from './heatmapOptions'
 import { formatLabel, formatValue } from './format'
-import { useChartTokens } from './tokens'
+import { useChartTokens, useResolvedConfig } from './tokens'
 import { chartAriaLabel, documentDir, plotReading } from './utils'
 import ChartContainer from './components/ChartContainer.vue'
 import ChartTooltip from './components/ChartTooltip.vue'
@@ -138,18 +138,21 @@ const plotEl = ref<HTMLElement>()
 
 const dir = computed(() => props.dir ?? documentDir())
 
-const config = computed<HeatmapChartConfig>(() => ({
-  data: props.data,
-  xColumn: props.x,
-  yColumn: props.y,
-  valueColumn: props.value,
-  min: props.min,
-  max: props.max,
-  showDataLabels: props.showDataLabels,
-  palette: props.palette,
-  dir: dir.value,
-  echartOptions: props.echartOptions,
-}))
+const config = useResolvedConfig<HeatmapChartConfig>(
+  () => ({
+    data: props.data,
+    xColumn: props.x,
+    yColumn: props.y,
+    valueColumn: props.value,
+    min: props.min,
+    max: props.max,
+    showDataLabels: props.showDataLabels,
+    palette: props.palette,
+    dir: dir.value,
+    echartOptions: props.echartOptions,
+  }),
+  plotEl,
+)
 
 const { tokens } = useChartTokens(plotEl)
 
