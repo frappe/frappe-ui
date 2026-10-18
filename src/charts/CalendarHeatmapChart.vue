@@ -32,19 +32,18 @@
 
       <!-- Under the last band rather than under the card, so the scale sits
            with what it explains however much height the card has to spare. -->
-      <div
-        v-if="cells.length && layout"
-        data-slot="chart-scale"
-        class="absolute flex -translate-x-full items-center gap-2 whitespace-nowrap text-2xs tabular-nums text-ink-gray-5"
+      <ChartScale
+        v-if="grid && cells.length && layout"
+        class="absolute -translate-x-full"
         :style="{ top: `${layout.scaleTop}px`, left: `${layout.right}px` }"
-      >
-        <span>{{ scale.min }}</span>
-        <span
-          class="h-2 w-20 rounded-1"
-          :style="{ backgroundImage: scale.gradient }"
-        />
-        <span>{{ scale.max }}</span>
-      </div>
+        :min="grid.min"
+        :max="grid.max"
+        :stops="grid.stops"
+        :format="format"
+        :below-min="clipped.belowMin"
+        :above-max="clipped.aboveMax"
+        :dir="dir"
+      />
 
       <span class="sr-only" role="status">{{ reading }}</span>
 
@@ -80,11 +79,11 @@ import {
   buildCalendarHeatmapOption,
   layoutCalendar,
 } from './calendarHeatmapOptions'
-import { sampleRamp } from './heatmapOptions'
 import { formatDate, formatLabel, formatValue } from './format'
 import { useChartTokens, useResolvedConfig } from './tokens'
 import { chartAriaLabel, documentDir, plotReading } from './utils'
 import ChartContainer from './components/ChartContainer.vue'
+import ChartScale from './components/ChartScale.vue'
 import ChartTooltip from './components/ChartTooltip.vue'
 import type {
   CalendarHeatmapChartConfig,
@@ -336,27 +335,14 @@ const keyboard = usePlotKeyboard({
 
 const plotAttrs = keyboard.attrs
 
-/**
- * The ramp under the plot, painted from the stops the cells came from. An end
- * that days lie past reads `≤` or `≥`, so a `max` set under an outlier does not
- * claim the outlier is not there.
- */
-const scale = computed(() => {
-  const { min = 0, max = 0, stops = [] } = grid.value ?? {}
-  const towards = dir.value === 'rtl' ? 'left' : 'right'
-  const below = cells.value.some((cell) => cell.value < min)
-  const above = cells.value.some((cell) => cell.value > max)
+/** Days past an end of the scale: a `max` set under an outlier must say so. */
+const clipped = computed(() => {
+  const { min = 0, max = 0 } = grid.value ?? {}
   return {
-    min: `${below ? '≤ ' : ''}${shorten(min)}`,
-    max: `${above ? '≥ ' : ''}${shorten(max)}`,
-    gradient: `linear-gradient(to ${towards}, ${sampleRamp(stops).join(', ')})`,
+    belowMin: cells.value.some((cell) => cell.value < min),
+    aboveMax: cells.value.some((cell) => cell.value > max),
   }
 })
-
-/** The scale ends sit in a narrow strip, so they read shortened. */
-function shorten(value: number) {
-  return props.format ? props.format(value) : formatValue(value, 1, true)
-}
 
 defineExpose<ChartExposedRefs>({ chart: computed(() => chart.value) })
 </script>

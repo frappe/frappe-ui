@@ -36,37 +36,15 @@
           v-bind="plotAttrs"
         />
 
-        <!-- `text-2xs` is `AXIS_LABEL_FONT_SIZE` as a class: 11px and tight,
-             because these read as axis labels rather than as captions. -->
-        <div
-          data-slot="chart-scale"
-          class="ms-2 flex shrink-0 flex-col items-center justify-end"
-        >
-          <span class="text-2xs tabular-nums text-ink-gray-5">
-            {{ scale.max }}
-          </span>
-          <!-- Grows into the room it has and stops: a ramp as tall as the card
-               reads as a second column of data rather than as a key to one. -->
-          <span
-            class="mt-2 min-h-8 max-h-20 w-2 flex-1 rounded-1"
-            :style="{ backgroundImage: scale.gradient }"
-          />
-          <!-- Holds the whole label row, so `min` starts where an x-axis label
-               starts. Its own height until the first layout, or the first frame
-               would draw a collapsed box. -->
-          <span
-            data-slot="chart-scale-min"
-            class="text-2xs tabular-nums text-ink-gray-5"
-            :style="{
-              marginTop: `${AXIS_LABEL_MARGIN}px`,
-              height: xLabelRowHeight
-                ? `${Math.max(xLabelRowHeight - AXIS_LABEL_MARGIN, 0)}px`
-                : undefined,
-            }"
-          >
-            {{ scale.min }}
-          </span>
-        </div>
+        <ChartScale
+          class="ms-2 shrink-0"
+          vertical
+          :min="matrix.min"
+          :max="matrix.max"
+          :stops="matrix.stops"
+          :format="format"
+          :label-row-height="xLabelRowHeight"
+        />
       </div>
 
       <!-- The tooltip hangs off the pointer, which a reader walking the grid
@@ -98,17 +76,16 @@ import { LabelLayout } from 'echarts/features'
 import { registerChartModules, useChart } from './core/useChart'
 import { usePlotKeyboard } from './core/usePlotKeyboard'
 import { useTooltipDismiss } from './core/useTooltipDismiss'
-import { AXIS_LABEL_MARGIN } from './axisChartCommon'
 import {
   buildHeatmapMatrix,
   buildHeatmapOption,
   heatmapCategoryLabel,
-  sampleRamp,
 } from './heatmapOptions'
 import { formatLabel, formatValue } from './format'
 import { useChartTokens, useResolvedConfig } from './tokens'
 import { chartAriaLabel, documentDir, plotReading } from './utils'
 import ChartContainer from './components/ChartContainer.vue'
+import ChartScale from './components/ChartScale.vue'
 import ChartTooltip from './components/ChartTooltip.vue'
 import type {
   ChartExposedRefs,
@@ -393,24 +370,6 @@ const keyboard = usePlotKeyboard({
 })
 
 const plotAttrs = keyboard.attrs
-
-/** The ramp scale in the chrome, painted from the stops the cells came from. */
-const scale = computed(() => {
-  const { min, max, stops } = matrix.value
-  return {
-    min: shorten(min),
-    max: shorten(max),
-    // Upright, low end at the foot. The labels sit above and below the ramp
-    // rather than either side of it, so this reads the same in both directions
-    // and RTL has nothing to flip.
-    gradient: `linear-gradient(to top, ${sampleRamp(stops).join(', ')})`,
-  }
-})
-
-/** The scale endpoints sit in a narrow strip, so they read shortened. */
-function shorten(value: number) {
-  return props.format ? props.format(value) : formatValue(value, 1, true)
-}
 
 defineExpose<ChartExposedRefs>({ chart: computed(() => chart.value) })
 </script>
