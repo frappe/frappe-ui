@@ -176,9 +176,11 @@ function categoryAxis() {
 }
 
 /**
- * The ends of the color scale. Config wins; the rest comes from the data,
- * except on a diverging ramp, where an unset end is mirrored from the larger
- * side so -4 in a -4..+12 series reads as deep as +4 does the other way.
+ * The ends of the color scale. Config wins; the rest comes from the data. An
+ * unset `min` is 0 unless a value is negative, as a count is read: a smallest
+ * value at the foot of the ramp would draw as pale as a cell with no value. On
+ * a diverging ramp an unset end is mirrored from the larger side so -4 in a
+ * -4..+12 series reads as deep as +4 does the other way.
  */
 export function resolveScale(
   config: HeatmapScaleConfig,
@@ -196,7 +198,7 @@ export function resolveScale(
     }
   }
 
-  return { min: config.min ?? dataMin, max: config.max ?? dataMax }
+  return { min: config.min ?? Math.min(dataMin, 0), max: config.max ?? dataMax }
 }
 
 /**

@@ -360,7 +360,10 @@ export type HeatmapChartConfig = {
    * on zero unless `min`/`max` say otherwise.
    */
   palette?: HeatmapPalette
-  /** Bottom of the color scale. Defaults to the smallest value in the data. */
+  /**
+   * Bottom of the color scale. Defaults to 0 when no value is negative, else to
+   * the smallest value in the data.
+   */
   min?: number
   /** Top of the color scale. Defaults to the largest value in the data. */
   max?: number
@@ -1092,7 +1095,10 @@ export type HeatmapChartProps = ChartBaseProps & {
   y: string
   /** Row key holding the magnitude the cell is colored by. */
   value: string
-  /** Bottom of the color scale. Defaults to the smallest value in the data. */
+  /**
+   * Bottom of the color scale. Defaults to 0 when no value is negative, else to
+   * the smallest value in the data.
+   */
   min?: number
   /** Top of the color scale. Defaults to the largest value in the data. */
   max?: number

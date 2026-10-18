@@ -297,14 +297,9 @@ export function buildCalendarHeatmapGrid(
     .filter(([date]) => range && date >= range.start && date <= range.end)
     .sort(([a], [b]) => (a < b ? -1 : 1))
 
-  const values = inRange.map(([, day]) => day)
-  // From zero, as a count is read: the smallest day starting the ramp would
-  // draw paler than the empty days around it.
-  const fromZero =
-    config.palette !== 'diverging' && values.every((day) => day.value >= 0)
   const { min, max } = resolveScale(
-    { ...config, min: config.min ?? (fromZero ? 0 : undefined) },
-    values,
+    config,
+    inRange.map(([, day]) => day),
   )
   const stops = dataRamp(config, tokens)
   const span = max - min
