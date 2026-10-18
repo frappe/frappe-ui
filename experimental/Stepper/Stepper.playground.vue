@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Stepper } from 'frappe-ui/experimental'
+import { Stepper } from '.'
 import type { Knob } from 'frappe-ui/vitepress'
 
 const steps = [

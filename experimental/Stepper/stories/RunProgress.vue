@@ -2,8 +2,8 @@
 // A long-running job whose third stage has parts: the one nested example.
 import { onBeforeUnmount, ref } from 'vue'
 import { Button } from 'frappe-ui'
-import { Stepper } from 'frappe-ui/experimental'
-import type { StepItem } from 'frappe-ui/experimental'
+import { Stepper } from '..'
+import type { StepItem } from '..'
 
 const steps: StepItem[] = [
   { value: 'plan', label: 'Resolution planning' },

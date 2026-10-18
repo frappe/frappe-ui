@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // The small size for a sidebar or run log, with each step's duration.
-import { Stepper } from 'frappe-ui/experimental'
+import { Stepper } from '..'
 
 const steps = [
   { value: 'fetch', label: 'Fetch sources', meta: '0:42' },
