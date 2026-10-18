@@ -2,8 +2,8 @@
 // A setup wizard: finished steps are clickable, and a step can be skipped.
 import { computed, ref } from 'vue'
 import { Button } from 'frappe-ui'
-import { Stepper } from 'frappe-ui/experimental'
-import type { StepItem } from 'frappe-ui/experimental'
+import { Stepper } from '..'
+import type { StepItem } from '..'
 
 const steps = ref<StepItem[]>([
   {

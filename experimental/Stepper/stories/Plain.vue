@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // The default vertical list with nothing extra: numbers and labels.
-import { Stepper } from 'frappe-ui/experimental'
+import { Stepper } from '..'
 
 const steps = [
   { value: 'account', label: 'Account' },

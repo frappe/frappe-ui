@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // The horizontal default: the stock Progress with one interval per step.
-import { Stepper } from 'frappe-ui/experimental'
+import { Stepper } from '..'
 
 const steps = [
   { value: 'account', label: 'Account' },
