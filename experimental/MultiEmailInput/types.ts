@@ -52,7 +52,10 @@ export interface MultiEmailInputProps extends InputLabelingProps {
    */
   options?: MultiEmailOption[]
 
-  /** Replaces the results with a loading state. */
+  /**
+   * Shows a spinner in place of the results for a typed query. With an empty
+   * query the list stays closed until results arrive.
+   */
   loading?: boolean
 
   /** Size of the control and option rows. */
@@ -129,7 +132,10 @@ export interface MultiEmailInputSlots {
   /** Replaces the suffix region of a suggestion row. */
   'item-suffix'?: (props: MultiEmailItemSlotProps) => any
 
-  /** Fallback content rendered when there are no suggestions. */
+  /**
+   * Rendered when a typed query matches nothing. Without it or `emptyText`,
+   * the list stays closed instead.
+   */
   empty?: (props: { query: string }) => any
 }
 
