@@ -31,11 +31,17 @@
       />
 
       <!-- Under the last band rather than under the card, so the scale sits
-           with what it explains however much height the card has to spare. -->
+           with what it explains however much height the card has to spare.
+           Ends where the calendar ends, unless the calendar is narrower than
+           the scale: then it starts at the plot's edge. -->
       <ChartScale
         v-if="grid && cells.length && layout"
-        class="absolute -translate-x-full"
-        :style="{ top: `${layout.scaleTop}px`, left: `${layout.right}px` }"
+        class="absolute"
+        :style="{
+          top: `${layout.scaleTop}px`,
+          left: `${layout.right}px`,
+          transform: `translateX(max(-100%, -${layout.right}px))`,
+        }"
         :min="grid.min"
         :max="grid.max"
         :stops="grid.stops"
@@ -268,8 +274,7 @@ function dayPoint(day: CalendarHeatmapDay) {
   // echarts types the finder without the calendar's own key.
   const finder: Record<string, number> = { calendarIndex: day.band }
   const at = chart.value?.convertToPixel(finder, day.date) as unknown as
-    | number[]
-    | undefined
+    number[] | undefined
   if (!at || at.some((n) => typeof n !== 'number' || isNaN(n))) {
     return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }
   }

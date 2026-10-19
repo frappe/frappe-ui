@@ -90,6 +90,17 @@ describe('CalendarHeatmapChart', () => {
     })
   })
 
+  it('keeps the scale inside the plot when the calendar is narrower than it', () => {
+    mountChart({ start: '2024-03-04', end: '2024-03-07' })
+    cy.get('[data-slot="chart-plot"]').then(([plot]) => {
+      cy.get('[data-slot="chart-scale"]').should(([scale]) => {
+        expect(scale.getBoundingClientRect().left).to.be.at.least(
+          plot.getBoundingClientRect().left,
+        )
+      })
+    })
+  })
+
   it('marks an end of the scale that days lie past', () => {
     mountChart({ max: 5 })
     cy.get('[data-slot="chart-scale"] > span').then((spans) => {
