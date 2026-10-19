@@ -181,6 +181,14 @@ describe('PercentageBarChart', () => {
       cy.get('[data-slot="chart-legend"]').should('contain.text', '50%')
     })
 
+    it('names a lone slice', () => {
+      mountChart({ data: [data[0]] })
+      cy.get('[data-slot="chart-legend"] [aria-pressed]')
+        .should('have.length', 1)
+        .and('contain.text', 'Search')
+        .and('contain.text', '100%')
+    })
+
     it('hides a slice and re-shares the rest against what is left', () => {
       mountChart()
       cy.get('[aria-label="Hide Search"]').click()

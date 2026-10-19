@@ -95,7 +95,7 @@
       </ChartTooltip>
     </template>
 
-    <template v-if="legendItems.length > 1" #legend>
+    <template v-if="legendItems.length" #legend>
       <ChartLegend
         :items="legendItems"
         @change="toggleSlice"
