@@ -132,6 +132,40 @@
           </span>
         </div>
 
+        <!-- Past 100 the track shrinks to 100's share of the reading and the
+             rest fills beside it, so a reading over its whole shows how far. -->
+        <div
+          v-if="progress && !isEmpty"
+          class="mt-0.5 flex h-1.5 gap-0.5"
+          role="progressbar"
+          aria-valuemin="0"
+          :aria-valuemax="Math.max(progressValue, 100)"
+          :aria-valuenow="progressValue"
+          :aria-label="title"
+        >
+          <div
+            class="h-full overflow-hidden rounded-full bg-surface-gray-3"
+            :style="{ width: `${progressWhole}%` }"
+          >
+            <!-- At least as wide as it is tall: a reading of 0.05% is not 0. -->
+            <div
+              v-if="progressValue > 0"
+              class="h-full min-w-1.5 rounded-full"
+              :class="progressInk"
+              :style="{
+                width: `${Math.min(progressValue, 100)}%`,
+                ...progressStyle,
+              }"
+            />
+          </div>
+          <div
+            v-if="progressWhole < 100"
+            class="h-full flex-1 rounded-full"
+            :class="progressInk"
+            :style="progressStyle"
+          />
+        </div>
+
         <div v-if="isEmpty" class="text-sm text-ink-gray-5">No data</div>
 
         <!-- One text line tall, and no taller: a control in the caption slot is
@@ -310,6 +344,17 @@ const formattedValue = computed(() =>
 // Never empty: this line sets the height of the card's top block, and an empty
 // one would collapse it and take the block's other variants with it.
 const valueText = computed(() => formattedValue.value || '—')
+
+const progressValue = computed(() => Math.max(props.progress?.value ?? 0, 0))
+const progressWhole = computed(() =>
+  progressValue.value > 100 ? (100 / progressValue.value) * 100 : 100,
+)
+const progressInk = computed(() =>
+  props.progress?.color ? undefined : 'bg-surface-gray-7',
+)
+const progressStyle = computed(() =>
+  props.progress?.color ? { backgroundColor: props.progress.color } : undefined,
+)
 
 // Not counted up, and never printed beside the em dash: nothing measured
 // against a target reads as a target of its own.

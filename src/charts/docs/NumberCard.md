@@ -27,6 +27,12 @@ of its trend line. It works like `seriesConfig[key].color` for a series. It does
 not change the rest of the card, and the change keeps the color that shows
 whether the number went up or down.
 
+## Progress
+
+`progress` draws a bar under the number for how far it has come towards a whole, such as disk used or revenue against a target. Pass `value` as a percent, the way `Progress` takes it. Past 100 the bar fills and a gap marks where 100 falls. `color` overrides the gray the bar fills in.
+
+<ComponentPreview name="Charts-NumberProgress" csr="true" self-layout />
+
 ## The title row
 
 `#actions` goes at the end of the row and `#title-suffix` right after the title

@@ -110,6 +110,7 @@ export type {
   HeatmapAxisOptions,
   HeatmapCellEvent,
   HeatmapPalette,
+  NumberCardProgress,
   NumberCardSparkline,
   ReferenceLine,
   ReferenceLineLabelPlacement,

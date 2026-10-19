@@ -109,6 +109,47 @@ describe('NumberCard', () => {
     })
   })
 
+  describe('progress', () => {
+    const bar = () => cy.get('[role="progressbar"]')
+
+    it('fills a bar under the reading to its percent', () => {
+      mountCard({ progress: { value: 40 } })
+      bar().should('have.attr', 'aria-valuenow', '40')
+      bar().children().should('have.length', 1)
+      bar()
+        .find('.bg-surface-gray-7')
+        .should('have.attr', 'style')
+        .and('contain', 'width: 40%')
+    })
+
+    it('fills in the color the caller named', () => {
+      mountCard({ progress: { value: 40, color: 'rgb(245, 158, 11)' } })
+      bar()
+        .find('.rounded-full .rounded-full')
+        .should('have.css', 'background-color', 'rgb(245, 158, 11)')
+    })
+
+    it('splits past 100 where 100 falls', () => {
+      mountCard({ progress: { value: 125 } })
+      bar().children().should('have.length', 2)
+      bar()
+        .children()
+        .first()
+        .should('have.attr', 'style')
+        .and('contain', 'width: 80%')
+    })
+
+    it('keeps a tiny reading visible', () => {
+      mountCard({ progress: { value: 0.05 } })
+      bar().find('.bg-surface-gray-7').invoke('outerWidth').should('be.gte', 6)
+    })
+
+    it('draws nothing for a card with no reading', () => {
+      mountCard({ value: null, progress: { value: 40 } })
+      bar().should('not.exist')
+    })
+  })
+
   describe('card surface', () => {
     it('draws the surface by default', () => {
       mountCard()

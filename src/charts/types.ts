@@ -433,6 +433,19 @@ export type NumberCardConfig = {
   dir?: ChartDir
   /** A trend across the bottom of the card: shape only, no axes to read against. */
   sparkline?: NumberCardSparkline
+  /** How far the reading has come towards a whole, drawn as a bar under it. */
+  progress?: NumberCardProgress
+}
+
+export type NumberCardProgress = {
+  /**
+   * Percent of the whole, as `Progress` takes it. The caller works it out: a
+   * reading against its target, or a percent reading as it stands. Past 100 the
+   * bar fills and a gap marks where 100 falls.
+   */
+  value: number
+  /** Overrides the gray the bar fills in. */
+  color?: string
 }
 
 export type NumberCardSparkline = {
@@ -1092,6 +1105,8 @@ export type NumberCardProps = Omit<ChartBaseProps, 'subtitle'> &
     deltaFormat?: ChartValueFormatter
     /** A trend across the bottom of the card: shape only, no axes to read against. */
     sparkline?: NumberCardSparkline
+    /** How far the reading has come towards a whole, drawn as a bar under it. */
+    progress?: NumberCardProgress
   }
 
 // The chrome, i.e. everything around the plot. A chart an app draws itself
