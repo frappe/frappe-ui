@@ -117,6 +117,16 @@ describe('AvatarBadge', () => {
     })
   }
 
+  function expectSameColor(selector: string, probeSelector: string) {
+    cy.get(probeSelector).then(($probe) => {
+      cy.get(selector).should(
+        'have.css',
+        'color',
+        getComputedStyle($probe[0]).color,
+      )
+    })
+  }
+
   it('fills the indicator, gray by default', () => {
     mountWithProbe('bg-surface-gray-5', () => h(AvatarBadge))
 
@@ -135,8 +145,18 @@ describe('AvatarBadge', () => {
     expectSameBackground('[data-slot="avatar-badge"]', '[data-cy="probe"]')
   })
 
+  it('takes its text color from a class, over the default white', () => {
+    // text-ink-gray-9 sorts before the default text-white in the stylesheet,
+    // so it wins only because the default sits in :where().
+    mountWithProbe('text-ink-gray-9', () =>
+      h(AvatarBadge, { class: 'text-ink-gray-9' }),
+    )
+
+    expectSameColor('[data-slot="avatar-badge"]', '[data-cy="probe"]')
+  })
+
   it('centers its content', () => {
-    mountWithProbe('', () =>
+    mountWithProbe('text-white', () =>
       h(AvatarBadge, () => h('span', { 'data-cy': 'icon', class: 'size-2' })),
     )
 
@@ -144,6 +164,7 @@ describe('AvatarBadge', () => {
       .should('have.css', 'justify-content', 'center')
       .and('have.css', 'align-items', 'center')
     cy.get('[data-cy="icon"]').should('exist')
+    expectSameColor('[data-slot="avatar-badge"]', '[data-cy="probe"]')
   })
 
   it('cuts the badge out with the page surface by default', () => {
