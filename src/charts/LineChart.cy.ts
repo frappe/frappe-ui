@@ -91,6 +91,24 @@ describe('LineChart', () => {
       .and('contain.text', 'Mar')
   })
 
+  it('keeps the levelled ticks of a time axis when xAxis.format is set', () => {
+    mountChart({
+      data: ['2025-01-01', '2025-02-01', '2025-03-01', '2025-04-01'].map(
+        (month, i) => ({ month, sales: 10 + i, refunds: 2 + i }),
+      ),
+      xAxis: { format: (value: string) => `on ${value}` },
+    })
+    lines().should('have.length', 2)
+    cy.get('[data-slot="chart-plot"] svg text')
+      .should('contain.text', 'Feb')
+      .and('not.contain.text', 'on ')
+    cy.get('[data-slot="chart-plot"] [role="img"]').focus()
+    cy.get('[data-slot="chart-tooltip"]').should(
+      'contain.text',
+      'on 2025-01-01',
+    )
+  })
+
   it('opens the tooltip on hover, with every series at that category', () => {
     mountChart()
     lines().should('have.length', 2)

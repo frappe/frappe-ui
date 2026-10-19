@@ -15,6 +15,8 @@ because the data names those series, not you.
 
 <ComponentPreview name="Charts-LineTrend" csr="true" self-layout />
 
+`xAxis.format` prints the date where a value is read, such as the tooltip. It does not reach the tick labels of a time axis, which keep their levels: the year that opens a run of months, then the months.
+
 ## A numeric x axis
 
 `xAxis.type: 'value'` treats the x column as numbers on a scale. Each point sits

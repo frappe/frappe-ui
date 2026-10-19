@@ -829,7 +829,12 @@ export type ChartXAxisOptions = {
   type?: 'category' | 'time' | 'value'
   /** Label granularity on a time axis. Inferred from the spacing of the data. */
   timeGrain?: TimeGrain
-  /** Prints each category label. Takes whatever the column holds. */
+  /**
+   * Prints each category label. Takes whatever the column holds.
+   *
+   * On a time axis it prints the date where a value is read, such as the
+   * tooltip, and leaves the tick labels alone: they keep their levels.
+   */
   format?: ChartCategoryFormatter
   /** Escape hatch: deep-merged into this axis' echarts option. */
   echartOptions?: EchartOptionsOverride
