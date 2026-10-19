@@ -105,6 +105,38 @@ describe('CSS variables in a caller’s colors', () => {
     ).toEqual(['#123456', 'var(--nope)'])
   })
 
+  it('reads past a fallback with parentheses of its own', () => {
+    const el = chartWith({ '--brand': '#ff0000' })
+    expect(
+      resolveCssVariables(
+        [
+          'var(--brand, rgb(0, 0, 255))',
+          'var(--nope, rgb(0, 0, 255))',
+          'color-mix(in srgb, var(--nope, rgb(0, 0, 255)) 20%, transparent)',
+        ],
+        el,
+      ),
+    ).toEqual([
+      '#ff0000',
+      'rgb(0, 0, 255)',
+      'color-mix(in srgb, rgb(0, 0, 255) 20%, transparent)',
+    ])
+  })
+
+  it('resolves a fallback the way it resolves the variable', () => {
+    const el = chartWith({ '--brand': '#ff0000', '--muted': '#cccccc' })
+    expect(
+      resolveCssVariables(
+        [
+          'var(--brand, var(--muted))',
+          'var(--nope, var(--muted))',
+          'var(--nope, oklch(1 0 0))',
+        ],
+        el,
+      ),
+    ).toEqual(['#ff0000', '#cccccc', '#ffffff'])
+  })
+
   it('returns what it changed nothing in as it was, Dates and functions included', () => {
     const el = chartWith({ '--brand': '#ff0000' })
     const when = new Date(2024, 0, 1)

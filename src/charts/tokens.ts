@@ -252,9 +252,6 @@ export function resolveChartTokens(el?: HTMLElement | null): ChartTokens {
   }
 }
 
-/** `var(--name)` or `var(--name, fallback)`, the fallback without nested parentheses. */
-const CSS_VARIABLE = /var\(\s*(--[\w-]+)\s*(?:,([^()]*))?\)/g
-
 /**
  * `value` with every `var(--name)` in its strings swapped for what `el`
  * computes for that name, so a caller's own colors reach echarts as concrete
@@ -268,21 +265,53 @@ const CSS_VARIABLE = /var\(\s*(--[\w-]+)\s*(?:,([^()]*))?\)/g
 export function resolveCssVariables<T>(value: T, el?: Element | null): T {
   if (!el || typeof getComputedStyle !== 'function') return value
   let styles: CSSStyleDeclaration | undefined
-  const read = (name: string) => {
-    const value = (styles ??= getComputedStyle(el))
-      .getPropertyValue(name)
-      .trim()
-    return oklchCssToSrgb(value) ?? value
-  }
+  const read = (name: string) =>
+    (styles ??= getComputedStyle(el)).getPropertyValue(name).trim()
 
   return mapStrings(value, (text) =>
-    text.includes('var(')
-      ? text.replace(
-          CSS_VARIABLE,
-          (match, name, fallback) => read(name) || fallback?.trim() || match,
-        )
-      : text,
+    text.includes('var(') ? substituteVariables(text, read) : text,
   )
+}
+
+/**
+ * `text` with each `var(--name)` swapped for `read(name)`, else for its
+ * fallback, which is substituted the same way. A fallback can hold parentheses
+ * of its own, `rgb(…)` or another `var(…)`, so its end is found by counting
+ * them.
+ */
+function substituteVariables(
+  text: string,
+  read: (name: string) => string,
+): string {
+  const head = /var\(\s*(--[\w-]+)\s*([,)])/g
+  let out = ''
+  let copied = 0
+  for (let match; (match = head.exec(text)); ) {
+    let end = match.index + match[0].length
+    let fallback = ''
+    if (match[2] === ',') {
+      const close = closingParen(text, end)
+      if (close === -1) break
+      fallback = substituteVariables(text.slice(end, close), read).trim()
+      end = close + 1
+    }
+    const value = read(match[1]) || fallback
+    out +=
+      text.slice(copied, match.index) +
+      (value ? (oklchCssToSrgb(value) ?? value) : text.slice(match.index, end))
+    copied = head.lastIndex = end
+  }
+  return out + text.slice(copied)
+}
+
+/** Where the `)` closing a parenthesis opened just before `from` is, or -1. */
+function closingParen(text: string, from: number) {
+  let depth = 1
+  for (let i = from; i < text.length; i++) {
+    if (text[i] === '(') depth++
+    else if (text[i] === ')' && --depth === 0) return i
+  }
+  return -1
 }
 
 function mapStrings(value: any, map: (text: string) => string): any {
