@@ -91,6 +91,20 @@ describe('buildDonutChartOption', () => {
     )
   })
 
+  it('labels slices with the shares the legend prints, adding up to 100', () => {
+    const { label } = build({
+      showDataLabels: true,
+      data: [
+        { channel: 'a', visits: 1 },
+        { channel: 'b', visits: 1 },
+        { channel: 'c', visits: 1 },
+      ],
+    }).series[0]
+    expect(
+      ['a', 'b', 'c'].map((name) => label.formatter({ name, percent: 33.33 })),
+    ).toEqual(['a 34%', 'b 33%', 'c 33%'])
+  })
+
   it('runs the ring counter-clockwise in RTL', () => {
     expect(build().series[0].clockwise).toBe(true)
     expect(build({ dir: 'rtl' }).series[0].clockwise).toBe(false)

@@ -38,7 +38,7 @@ export function buildDonutChartOption(
   const slices = buildSlices(config, context)
   // Echarts pads a zero slice like any other. The legend still lists it.
   const plotted = drawnSlices(slices)
-  const labels = new Map(slices.map((slice) => [slice.name, slice.label]))
+  const sliceByName = new Map(slices.map((slice) => [slice.name, slice]))
 
   const isHalf = config.variant === 'half'
 
@@ -79,12 +79,14 @@ export function buildDonutChartOption(
           show: Boolean(config.showDataLabels),
           color: tokens.dataLabel,
           fontSize: DATA_LABEL_FONT_SIZE,
-          // `params.percent` is echarts' own share of the series total, which is
-          // the visible total — the same denominator the legend uses.
-          formatter: (params: any) =>
-            `${labels.get(params.name) ?? params.name} ${formatPercent(
-              params.percent,
-            )}`,
+          // The slice's own share rather than echarts' `params.percent`, which
+          // rounds each slice on its own and so disagrees with the legend.
+          formatter: (params: any) => {
+            const slice = sliceByName.get(params.name)
+            return `${slice?.label ?? params.name} ${formatPercent(
+              slice?.percent ?? params.percent,
+            )}`
+          },
         },
         labelLine: {
           show: Boolean(config.showDataLabels),

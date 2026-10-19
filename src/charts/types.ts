@@ -261,7 +261,11 @@ export type DonutSlice = {
   /** The category value as it should read; not unique. */
   label: string
   value: number
-  /** Share of the *visible* total, so hiding a slice re-percentages the rest. */
+  /**
+   * Share of the *visible* total, so hiding a slice re-percentages the rest.
+   * Rounded with the other slices' to whole points that add up to 100; a share
+   * under 1 stays as it is.
+   */
   percent: number
   color: string
   hidden: boolean
@@ -276,7 +280,11 @@ export type DonutSliceEvent = {
   /** The slice as it reads, i.e. the category value or "Others". */
   label: string
   value: number
-  /** Share of the *visible* total, so a hidden slice changes what this reads. */
+  /**
+   * Share of the *visible* total, so a hidden slice changes what this reads.
+   * The share the legend printed: whole points that add up to 100 across the
+   * slices, except a share under 1, which stays as it is.
+   */
   percent: number
   /** One row, or every grouped row when the "Others" slice was clicked. */
   rows: Record<string, any>[]

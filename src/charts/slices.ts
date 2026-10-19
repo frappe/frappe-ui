@@ -55,6 +55,13 @@ export function buildSlices(
       hiddenSlices.includes(slice.name) ? sum : sum + slice.value,
     0,
   )
+  const percents = roundShares(
+    grouped.map((slice) =>
+      hiddenSlices.includes(slice.name) || !visibleTotal
+        ? 0
+        : (slice.value / visibleTotal) * 100,
+    ),
+  )
 
   return grouped.map((slice, index) => {
     const hidden = hiddenSlices.includes(slice.name)
@@ -67,9 +74,32 @@ export function buildSlices(
       // so pinning one never recolors the others.
       color: config.colors?.[key] || colors[index],
       hidden,
-      percent: hidden || !visibleTotal ? 0 : (slice.value / visibleTotal) * 100,
+      percent: percents[index],
     }
   })
+}
+
+/**
+ * Whole points that add up to 100. Rounded one at a time, three equal shares
+ * print 99% between them and six print 102%. Largest remainder: every share
+ * takes its floor, and the points still missing go to the biggest fractions,
+ * the bigger slice first on a tie. A share under 1 keeps its true size so it
+ * prints `<1%`, not `0%`.
+ */
+function roundShares(percents: number[]): number[] {
+  const floors = percents.map(Math.floor)
+  const missing =
+    Math.round(percents.reduce((sum, percent) => sum + percent, 0)) -
+    floors.reduce((sum, floor) => sum + floor, 0)
+  const rounded = [...floors]
+  percents
+    .map((percent, index) => ({ index, remainder: percent - floors[index] }))
+    .sort((a, b) => b.remainder - a.remainder)
+    .slice(0, missing)
+    .forEach(({ index }) => rounded[index]++)
+  return rounded.map((share, index) =>
+    percents[index] > 0 && percents[index] < 1 ? percents[index] : share,
+  )
 }
 
 /** The slices with a mark on the plot: a zero slice has no arc and no block. */

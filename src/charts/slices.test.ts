@@ -5,6 +5,7 @@ import {
   sliceLegendItems,
   type SliceConfig,
 } from './slices'
+import { formatPercent } from './format'
 import { OTHERS_KEY } from './utils'
 import type { ChartTokens } from './tokens'
 
@@ -201,8 +202,8 @@ describe('buildSlices', () => {
       expect(
         slices({}, ['Email']).map((s) => [s.label, s.percent, s.hidden]),
       ).toEqual([
-        ['Search', 62.5, false],
-        ['Direct', 37.5, false],
+        ['Search', 63, false],
+        ['Direct', 37, false],
         ['Email', 0, true],
       ])
     })
@@ -217,6 +218,33 @@ describe('buildSlices', () => {
       expect(
         slices({}, ['Search', 'Direct', 'Email']).map((s) => s.percent),
       ).toEqual([0, 0, 0])
+    })
+  })
+
+  describe('shares', () => {
+    const printed = (values: number[]) =>
+      slices({
+        data: values.map((visits, i) => ({ channel: `c${i}`, visits })),
+      }).map((s) => formatPercent(s.percent))
+    const total = (shares: string[]) =>
+      shares.reduce((sum, share) => sum + parseInt(share), 0)
+
+    it('adds up to 100 for three equal slices', () => {
+      expect(printed([1, 1, 1])).toEqual(['34%', '33%', '33%'])
+    })
+
+    it('adds up to 100 for six equal slices', () => {
+      const shares = printed([1, 1, 1, 1, 1, 1])
+      expect(total(shares)).toBe(100)
+      expect(shares).toEqual(['17%', '17%', '17%', '17%', '16%', '16%'])
+    })
+
+    it('adds up to 100 when two halves would both round up', () => {
+      expect(printed([4.5, 4.5, 91])).toEqual(['91%', '5%', '4%'])
+    })
+
+    it('prints a share under 1 as <1%', () => {
+      expect(printed([996, 4])).toEqual(['100%', '<1%'])
     })
   })
 
@@ -252,7 +280,7 @@ describe('sliceLegendItems', () => {
       items.map((i) => [i.name, i.hint, i.weight, i.formattedValue]),
     ).toEqual([
       ['Search', '63%', 50, '50 visits'],
-      ['Direct', '38%', 30, '30 visits'],
+      ['Direct', '37%', 30, '30 visits'],
       ['Email', undefined, 20, '20 visits'],
     ])
   })
