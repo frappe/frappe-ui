@@ -160,6 +160,29 @@ describe('DonutChart', () => {
     cy.get('[data-slot="chart-legend"] [aria-pressed]').should('have.length', 3)
   })
 
+  // A zero slice has no arc, so it can neither empty the ring nor hold it up.
+  it('counts the slices drawn, not the ones unhidden, when refusing a hide', () => {
+    mountChart({
+      data: [
+        { source: 'Search', visits: 100 },
+        { source: 'Direct', visits: 0 },
+        { source: 'Email', visits: 0 },
+      ],
+    })
+    cy.get('[aria-label="Hide Search"]').click()
+    cy.get('[aria-label="Hide Search"]').should(
+      'have.attr',
+      'aria-pressed',
+      'true',
+    )
+    cy.get('[aria-label="Hide Direct"]').click()
+    cy.get('[aria-label="Show Direct"]').should(
+      'have.attr',
+      'aria-pressed',
+      'false',
+    )
+  })
+
   it('pins a color to a category, CSS variable or not, in the ring and the legend', () => {
     cy.document().then((doc) =>
       doc.documentElement.style.setProperty('--overdue', '#ff0000'),

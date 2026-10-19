@@ -305,7 +305,9 @@ function toggleSeries(name: string) {
   hiddenSeries.value = toggleHiddenSeries(
     hiddenSeries.value,
     name,
-    series.value.length,
+    series.value
+      .filter((entry) => !hiddenSeries.value.includes(entry.name))
+      .map((entry) => entry.name),
   )
 }
 

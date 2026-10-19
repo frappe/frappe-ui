@@ -112,12 +112,15 @@ import { registerChartModules, useChart } from './core/useChart'
 import { pruneHiddenSeries, toggleHiddenSeries } from './hiddenSeries'
 import { useTooltipDismiss } from './core/useTooltipDismiss'
 import { usePlotKeyboard } from './core/usePlotKeyboard'
-import {
-  buildDonutChartOption,
-  buildDonutSlices,
-  HALF_CENTER_Y,
-} from './donutChartOptions'
+import { buildDonutChartOption, HALF_CENTER_Y } from './donutChartOptions'
 import { formatLabel, formatPercent, formatValue } from './format'
+import {
+  buildSlices,
+  drawnSlices,
+  sliceEvent,
+  sliceLegendItems,
+  sliceTooltipItem,
+} from './slices'
 import { useChartTokens, useResolvedConfig } from './tokens'
 import {
   chartAriaLabel,
@@ -130,7 +133,6 @@ import ChartLegend from './components/ChartLegend.vue'
 import ChartTooltip from './components/ChartTooltip.vue'
 import type {
   ChartExposedRefs,
-  ChartLegendItem,
   ChartTooltipItem,
   DonutChartConfig,
   DonutChartEmits,
@@ -196,7 +198,7 @@ const readoutStyle = computed(() =>
 const { tokens } = useChartTokens(plotEl)
 
 const slices = computed(() =>
-  buildDonutSlices(config.value, {
+  buildSlices(config.value, {
     tokens: tokens.value,
     hiddenSlices: hiddenSlices.value,
   }),
@@ -267,14 +269,7 @@ const { chart, dispatch } = useChart({
     },
     click: (params: any) => {
       const slice = sliceByName.value.get(params.name)
-      if (!slice) return
-      emit('select', {
-        name: slice.name,
-        label: slice.label,
-        value: slice.value,
-        percent: slice.percent,
-        rows: slice.rows,
-      })
+      if (slice) emit('select', sliceEvent(slice))
     },
   },
   onZrEvents: {
@@ -309,34 +304,15 @@ function showTooltip(name: string) {
     return
   }
 
-  tooltip.items = [
-    {
-      name: slice.name,
-      label: slice.label,
-      color: slice.color,
-      value: slice.value,
-      formattedValue: formatMeasure(slice.value),
-      percent: slice.percent,
-      kind: 'series',
-    },
-  ]
+  tooltip.items = [sliceTooltipItem(slice, formatMeasure)]
   tooltip.rows = slice.rows
   tooltip.x = pointer.x
   tooltip.y = pointer.y
   tooltip.open = true
 }
 
-const legendItems = computed<ChartLegendItem[]>(() =>
-  slices.value.map((slice) => ({
-    name: slice.name,
-    label: slice.label,
-    color: slice.color,
-    hidden: slice.hidden,
-    // A hidden slice has no share of the visible total, so it shows none.
-    hint: slice.hidden ? undefined : formatPercent(slice.percent),
-    weight: slice.value,
-    formattedValue: formatMeasure(slice.value),
-  })),
+const legendItems = computed(() =>
+  sliceLegendItems(slices.value, formatMeasure),
 )
 
 // The ring is one tab stop and the arrow keys walk it: an echarts plot draws
@@ -368,14 +344,7 @@ const { attrs: plotAttrs } = usePlotKeyboard({
   move: readSlice,
   activate: (index) => {
     const slice = visibleSlices.value[index]
-    if (!slice) return
-    emit('select', {
-      name: slice.name,
-      label: slice.label,
-      value: slice.value,
-      percent: slice.percent,
-      rows: slice.rows,
-    })
+    if (slice) emit('select', sliceEvent(slice))
   },
   clear: () => {
     hovered.value = null
@@ -388,7 +357,7 @@ function toggleSlice(name: string) {
   hiddenSlices.value = toggleHiddenSeries(
     hiddenSlices.value,
     name,
-    slices.value.length,
+    drawnSlices(slices.value).map((slice) => slice.name),
   )
 }
 

@@ -236,7 +236,7 @@ export function useAxisChart<C extends AxisChartConfig>(
     hiddenSeries.value = toggleHiddenSeries(
       hiddenSeries.value,
       name,
-      config.value.series.length,
+      visibleSeries.value.map((series) => series.name),
     )
   }
 
