@@ -1081,6 +1081,39 @@ export type DonutChartProps = ChartBaseProps & {
   echartOptions?: EchartOptionsOverride
 }
 
+export type PercentageBarChartProps = ChartBaseProps & {
+  /** The rows to draw. One row is one slice, before the "Others" grouping. */
+  data: Record<string, any>[]
+  /** Row key holding the slice name. */
+  category: string
+  /** Row key holding the slice size. */
+  value: string
+  /**
+   * How many slices the bar holds, "Others" included. Past that the bar keeps
+   * the largest `maxSlices - 1` and sums the tail into a single "Others" slice,
+   * named `OTHERS_KEY`. Defaults to 9, as on `DonutChart`, so a breakdown cuts
+   * into the same slices on either chart.
+   */
+  maxSlices?: number
+  /**
+   * Slices the legend has switched off, by name. Bind it with
+   * `v-model:hiddenSlices` to drive the legend from the app. Left unbound, the
+   * legend owns it.
+   */
+  hiddenSlices?: string[]
+  /** Prints the tooltip and each slice's accessible name. */
+  format?: ChartValueFormatter
+  /** Defaults to `'categorical'`: slices are unrelated categories, not steps. */
+  palette?: ChartPalette
+  /**
+   * Pins a color to a slice, keyed by its category value, e.g. `{ Overdue:
+   * 'var(--ink-red-5)' }`. `OTHERS_KEY` pins "Others". A category grouped into
+   * "Others" takes that slice's color. The other slices keep the palette color
+   * they would have had.
+   */
+  colors?: Record<string, string>
+}
+
 export type FunnelChartProps = ChartBaseProps & {
   /** One row per stage, in process order. Rows are drawn as they arrive. */
   data: Record<string, any>[]
@@ -1441,6 +1474,19 @@ export type DonutChartSlots = ChartActionsSlot &
       /** Only set while a slice is hovered. */
       percent?: number
     }) => unknown
+    /**
+     * Replaces the tooltip body. `items` holds the hovered slice alone. A named
+     * slice carries one row, and the "Others" slice every row it collapsed.
+     */
+    tooltip?: (props: ChartTooltipSlotProps) => unknown
+  }
+
+/** The ring's events: the bar cuts the same slices. */
+export type PercentageBarChartEmits = DonutChartEmits
+
+export type PercentageBarChartSlots = ChartActionsSlot &
+  ChartTitleSuffixSlot &
+  ChartStateSlots & {
     /**
      * Replaces the tooltip body. `items` holds the hovered slice alone. A named
      * slice carries one row, and the "Others" slice every row it collapsed.

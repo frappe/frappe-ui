@@ -10,6 +10,7 @@ export { default as FunnelChart } from './FunnelChart.vue'
 export { default as HeatmapChart } from './HeatmapChart.vue'
 export { default as LineChart } from './LineChart.vue'
 export { default as NumberCard } from './NumberCard.vue'
+export { default as PercentageBarChart } from './PercentageBarChart.vue'
 export { default as SankeyChart } from './SankeyChart.vue'
 export { default as ScatterChart } from './ScatterChart.vue'
 
@@ -85,6 +86,9 @@ export type {
   LineChartSlots,
   NumberCardProps,
   NumberCardSlots,
+  PercentageBarChartEmits,
+  PercentageBarChartProps,
+  PercentageBarChartSlots,
   SankeyChartEmits,
   SankeyChartProps,
   SankeyChartSlots,
