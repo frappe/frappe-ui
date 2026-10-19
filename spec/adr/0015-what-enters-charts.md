@@ -49,6 +49,7 @@ unchanged — what entered still entered. See the
 | Series axis (3rd pass, 2026-09-21) | `y2`, a column prop beside `y` | Convention 4, read from the caller's side. The column props pair with the axis options — `x`/`xAxis`, `y`/`yAxis`, `y2`/`y2Axis` — so which scale a column is measured against is said where the column is named. It replaces `seriesConfig[key].axis`, which the 2nd pass had put in its place — see Leaves. |
 | Scatter point labels (2nd pass) | `showDataLabels` on `ScatterChart` | Convention 4. A donut prints `showInlineLabels` and an axis series prints `showDataLabels`, so a scatter that cannot name its points is the odd one out. It prints the `label` column: both measures are already on the axes. |
 | `NumberCard` value color (2nd pass) | `color` on `NumberCardProps` | Consistency, against convention 2. See below. |
+| `NumberCard` progress (4th pass, 2026-10-19) | `progress: { value, color? }` on `NumberCardProps` | Convention 1. How far a reading has come towards a whole is a reading of the data. The caller passes `value` as a percent, by convention 5: the library does not compute the caller's numbers. It is not derived from `target`, because a percent reading such as disk used has a whole of 100% and no target. |
 
 Reference lines have an internal rule that is not API: each line is hosted on
 its own empty series, one per axis, so a legend toggle cannot remove the line

@@ -172,6 +172,39 @@
             </span>
           </slot>
         </div>
+
+        <!-- Past 100 the track shrinks to 100's share of the reading and the
+             rest fills beside it, so a reading over its whole shows how far. -->
+        <div
+          v-if="showProgress"
+          class="mt-0.5 flex h-1 gap-0.5"
+          role="meter"
+          aria-valuemin="0"
+          :aria-valuemax="Math.max(progressValue, 100)"
+          :aria-valuenow="progressValue"
+          :aria-valuetext="`${Math.round(progressValue)}%`"
+          :aria-label="title"
+        >
+          <div
+            class="h-full overflow-hidden rounded-full bg-surface-gray-3"
+            :style="{ width: `${progressWhole}%` }"
+          >
+            <!-- At least as wide as it is tall: a reading of 0.05% is not 0. -->
+            <div
+              v-if="progressValue > 0"
+              class="h-full min-w-1 rounded-full"
+              :style="{
+                width: `${Math.min(progressValue, 100)}%`,
+                ...progressStyle,
+              }"
+            />
+          </div>
+          <div
+            v-if="progressWhole < 100"
+            class="h-full flex-1 rounded-full"
+            :style="progressStyle"
+          />
+        </div>
       </template>
     </div>
   </ChartCard>
@@ -289,10 +322,15 @@ const areaPath = computed(() =>
 )
 
 const { tokens } = useChartTokens(root)
-const sparklineColor = computed(
-  () =>
-    props.sparkline?.color ?? paletteColors('sequential', tokens.value, 1)[0],
+const defaultColor = computed(
+  () => paletteColors('sequential', tokens.value, 1)[0],
 )
+const sparklineColor = computed(
+  () => props.sparkline?.color ?? defaultColor.value,
+)
+const progressStyle = computed(() => ({
+  backgroundColor: props.progress?.color ?? defaultColor.value,
+}))
 
 // Time runs with the reading direction, so an RTL card reads oldest-first from
 // the right. Mirroring the box is enough: the line carries no text.
@@ -310,6 +348,17 @@ const formattedValue = computed(() =>
 // Never empty: this line sets the height of the card's top block, and an empty
 // one would collapse it and take the block's other variants with it.
 const valueText = computed(() => formattedValue.value || '—')
+
+const showProgress = computed(
+  () =>
+    props.progress != null &&
+    Number.isFinite(props.progress.value) &&
+    !isEmpty.value,
+)
+const progressValue = computed(() => Math.max(props.progress?.value ?? 0, 0))
+const progressWhole = computed(() =>
+  progressValue.value > 100 ? (100 / progressValue.value) * 100 : 100,
+)
 
 // Not counted up, and never printed beside the em dash: nothing measured
 // against a target reads as a target of its own.
