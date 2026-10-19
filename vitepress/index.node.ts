@@ -239,6 +239,7 @@ export function defineDocsConfig(
 export type {
   SidebarSection,
   SidebarItem,
+  SidebarPreview,
 } from './components/Docs/sidebarList.ts'
 export { isActiveLink, getSidebarList } from './components/Docs/sidebarList.ts'
 
