@@ -204,7 +204,7 @@ const boxClasses = computed(() => [
 // Matches the design system's tag: 20px tall, padded 3px 4px 3px 6px, a 12px
 // avatar (8px initials, as the xs avatar's would overflow) and close icon. The padding is 1px less on each side for the border.
 const chipClasses =
-  'inline-flex h-5 max-w-full items-center gap-1 rounded-2 border border-outline-gray-1 bg-surface-base py-0.5 pl-[5px] pr-[3px] text-xs leading-[1.15] text-ink-gray-7 transition-colors data-[disabled]:opacity-60 aria-[current=true]:ring-2 aria-[current=true]:ring-outline-gray-3'
+  'inline-flex h-5 max-w-full items-center gap-1 rounded-2 border border-outline-gray-1 bg-surface-base py-0.5 pl-[5px] pr-[3px] text-xs leading-tighter text-ink-gray-7 transition-colors data-[disabled]:opacity-60 aria-[current=true]:ring-2 aria-[current=true]:ring-outline-gray-3'
 
 const inputClasses = computed(() => [
   'min-w-[6rem] flex-1 border-0 bg-transparent p-0.5 text-ink-gray-8 outline-none ring-0 placeholder:text-ink-gray-4 focus:ring-0 disabled:cursor-not-allowed',
