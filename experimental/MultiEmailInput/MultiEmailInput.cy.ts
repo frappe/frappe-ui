@@ -18,6 +18,8 @@ function host(
     error?: string
     disabled?: boolean
     size?: 'xs' | 'sm' | 'md' | 'lg'
+    emptyText?: string
+    empty?: string
   } = {},
 ) {
   return defineComponent({
@@ -38,18 +40,23 @@ function host(
           { 'data-cy': 'set-prog', onClick: this.setProgrammatically },
           'set',
         ),
-        h(MultiEmailInput, {
-          modelValue: this.model,
-          'onUpdate:modelValue': (v: string[]) => (this.model = v),
-          onInvalid: (v: string) => (this.invalid = v),
-          options: options.suggestions ?? members,
-          label: options.label,
-          required: options.required,
-          error: options.error,
-          disabled: options.disabled,
-          size: options.size,
-          placeholder: 'Add email…',
-        }),
+        h(
+          MultiEmailInput,
+          {
+            modelValue: this.model,
+            'onUpdate:modelValue': (v: string[]) => (this.model = v),
+            onInvalid: (v: string) => (this.invalid = v),
+            options: options.suggestions ?? members,
+            label: options.label,
+            required: options.required,
+            error: options.error,
+            disabled: options.disabled,
+            size: options.size,
+            emptyText: options.emptyText,
+            placeholder: 'Add email…',
+          },
+          options.empty ? { empty: () => options.empty } : undefined,
+        ),
       ]
     },
   })
@@ -195,6 +202,33 @@ describe('MultiEmailInput', () => {
     cy.get('[data-slot="content"]').should('not.exist')
     cy.get('[data-slot="input"]').type('person.com')
     cy.get('[data-create="true"]').should('exist')
+  })
+
+  it('shows `emptyText` when a typed query matches nothing', () => {
+    cy.mount(host({ suggestions: [], emptyText: 'No matches' }))
+    cy.get('[data-slot="input"]').type('zz')
+    cy.get('[data-slot="empty"]').should('have.text', 'No matches')
+  })
+
+  it('shows the `empty` slot when a typed query matches nothing', () => {
+    cy.mount(host({ suggestions: [], empty: 'Nobody here' }))
+    cy.get('[data-slot="input"]').type('zz')
+    cy.get('[data-slot="empty"]').should('have.text', 'Nobody here')
+  })
+
+  it('opens on focus only once the first fetch has results', () => {
+    cy.mount(asyncHost())
+    cy.get('[data-slot="input"]').focus()
+    cy.get('[data-cy="loading"]').should('have.text', 'true')
+    cy.get('[data-slot="content"]').should('not.exist')
+    cy.get('[data-slot="item"]').should('have.length', 2)
+  })
+
+  it('shows the spinner while a typed query loads', () => {
+    cy.mount(asyncHost())
+    cy.get('[data-slot="input"]').type('ada')
+    cy.get('[data-slot="loading"]').should('exist')
+    cy.get('[data-slot="item"]').should('have.length', 1)
   })
 
   it('reopens the list on click after Escape', () => {
