@@ -22,10 +22,13 @@
         {{ label && label[0] }}
       </template>
     </div>
+    <!-- The fill around the indicator cuts it out of the avatar. It must match
+         the surface behind the avatar, so `--avatar-badge-ring` overrides it
+         from the avatar or any ancestor (a popover, a hovered row). -->
     <div
       v-if="$slots.indicator"
       :class="[
-        'absolute bottom-0 right-0 grid place-items-center rounded-full bg-surface-base',
+        'absolute bottom-0 right-0 grid place-items-center rounded-full bg-[var(--avatar-badge-ring,var(--surface-base))]',
         indicatorContainerClasses,
       ]"
     >
@@ -173,7 +176,7 @@ defineSlots<{
   /** Custom content shown inside the avatar (icon / initials replacement) */
   default?: () => any
 
-  /** Small indicator shown at the bottom-right of the avatar */
+  /** Small indicator shown at the bottom-right of the avatar, usually an `AvatarBadge` */
   indicator?: () => any
 }>()
 </script>
