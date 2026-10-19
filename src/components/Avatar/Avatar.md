@@ -77,16 +77,18 @@ and the class takes over from its breakpoint up.
 
 `AvatarBadge` fills the indicator, so the avatar's `size` prop sets its size
 (see [Custom sizes](#custom-sizes)). Without a color class the badge is gray. A
-ring cuts the badge out of the avatar. The badge takes a class, not `theme`,
-because a status color is app data (see
+ring cuts the badge out of the avatar (see [Styling hooks](#styling-hooks)). The
+badge takes a class, not `theme`, because a status color is app data (see
 [P4](https://github.com/frappe/frappe-ui/blob/main/PHILOSOPHY.md#p4-two-color-axes-only-variant--theme--no-semantic-axis)).
 
-### Badge ring
+## Styling hooks
 
-The ring has the color of the page surface. When the avatar sits on a different
-surface, such as a popover, a dialog or a hovered row, set the
-`--avatar-badge-ring` CSS variable to that surface's color. Set it on the
-avatar, or on any parent to set every avatar inside it:
+### `--avatar-badge-ring`
+
+Sets the color of the ring around the badge. The default is the color of the
+page surface. When the avatar sits on a different surface, such as a popover, a
+dialog or a hovered row, set it to that surface's color. Set it on the avatar,
+or on any parent to set every avatar inside it:
 
 ```vue
 <div
