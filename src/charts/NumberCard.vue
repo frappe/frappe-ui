@@ -176,12 +176,13 @@
         <!-- Past 100 the track shrinks to 100's share of the reading and the
              rest fills beside it, so a reading over its whole shows how far. -->
         <div
-          v-if="progress && !isEmpty"
+          v-if="showProgress"
           class="mt-0.5 flex h-1 gap-0.5"
-          role="progressbar"
+          role="meter"
           aria-valuemin="0"
           :aria-valuemax="Math.max(progressValue, 100)"
           :aria-valuenow="progressValue"
+          :aria-valuetext="`${progressValue}%`"
           :aria-label="title"
         >
           <div
@@ -321,13 +322,14 @@ const areaPath = computed(() =>
 )
 
 const { tokens } = useChartTokens(root)
+const defaultColor = computed(
+  () => paletteColors('sequential', tokens.value, 1)[0],
+)
 const sparklineColor = computed(
-  () =>
-    props.sparkline?.color ?? paletteColors('sequential', tokens.value, 1)[0],
+  () => props.sparkline?.color ?? defaultColor.value,
 )
 const progressStyle = computed(() => ({
-  backgroundColor:
-    props.progress?.color ?? paletteColors('sequential', tokens.value, 1)[0],
+  backgroundColor: props.progress?.color ?? defaultColor.value,
 }))
 
 // Time runs with the reading direction, so an RTL card reads oldest-first from
@@ -347,6 +349,12 @@ const formattedValue = computed(() =>
 // one would collapse it and take the block's other variants with it.
 const valueText = computed(() => formattedValue.value || '—')
 
+const showProgress = computed(
+  () =>
+    props.progress != null &&
+    Number.isFinite(props.progress.value) &&
+    !isEmpty.value,
+)
 const progressValue = computed(() => Math.max(props.progress?.value ?? 0, 0))
 const progressWhole = computed(() =>
   progressValue.value > 100 ? (100 / progressValue.value) * 100 : 100,

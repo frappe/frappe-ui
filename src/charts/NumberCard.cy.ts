@@ -110,7 +110,7 @@ describe('NumberCard', () => {
   })
 
   describe('progress', () => {
-    const bar = () => cy.get('[role="progressbar"]')
+    const bar = () => cy.get('[role="meter"]')
     const fill = () => bar().children().first().children().first()
 
     it('fills a bar to the reading’s percent', () => {
@@ -121,10 +121,17 @@ describe('NumberCard', () => {
     })
 
     it('fills in the sparkline’s blue by default', () => {
-      mountCard({ progress: { value: 40 } })
-      fill()
-        .should('have.css', 'background-color')
-        .and('not.eq', 'rgba(0, 0, 0, 0)')
+      mountCard({
+        sparkline: { data: [1, 5, 3, 8], type: 'line' },
+        progress: { value: 40 },
+      })
+      cy.get('[data-slot="chart-card"] svg path[fill="none"]').then(($line) => {
+        fill().should(
+          'have.css',
+          'background-color',
+          getComputedStyle($line[0]).stroke,
+        )
+      })
     })
 
     it('fills in the color the caller named', () => {
@@ -151,6 +158,22 @@ describe('NumberCard', () => {
         .first()
         .should('have.attr', 'style')
         .and('contain', 'width: 80%')
+    })
+
+    it('reads past 100 as its percent', () => {
+      mountCard({ progress: { value: 125 } })
+      bar()
+        .should('have.attr', 'aria-valuetext', '125%')
+        .and('have.attr', 'aria-valuemax', '125')
+    })
+
+    it('draws nothing for a percent that is not finite', () => {
+      mountCard({ progress: { value: NaN } })
+      bar().should('not.exist')
+      mountCard({ progress: { value: Infinity } })
+      bar().should('not.exist')
+      mountCard({ progress: { value: -Infinity } })
+      bar().should('not.exist')
     })
 
     it('keeps a tiny reading visible', () => {
