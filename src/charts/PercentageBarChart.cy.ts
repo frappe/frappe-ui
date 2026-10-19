@@ -181,6 +181,29 @@ describe('PercentageBarChart', () => {
       cy.get('[data-slot="chart-legend"]').should('contain.text', '50%')
     })
 
+    it('sits under the bar, the two centred in the height to spare', () => {
+      mountChart({ title: 'Visits' })
+      cy.get('[data-slot="chart-container"]').then(($container) => {
+        const box = $container[0].getBoundingClientRect()
+        const header = $container[0]
+          .querySelector('[data-slot="chart-header"]')!
+          .getBoundingClientRect()
+        const bar = $container[0]
+          .querySelector('[data-slot="chart-plot"]')!
+          .getBoundingClientRect()
+        const legend = $container[0]
+          .querySelector('[data-slot="chart-legend"]')!
+          .getBoundingClientRect()
+
+        expect(header.top).to.be.closeTo(box.top, 1)
+        expect(legend.top - bar.bottom).to.be.closeTo(6, 1)
+        expect(bar.top - header.bottom).to.be.closeTo(
+          box.bottom - legend.bottom,
+          8,
+        )
+      })
+    })
+
     it('names a lone slice', () => {
       mountChart({ data: [data[0]] })
       cy.get('[data-slot="chart-legend"] [aria-pressed]')

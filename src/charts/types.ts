@@ -1372,6 +1372,11 @@ export type ChartContainerProps = {
   error?: string | null
   /** Draws the empty state: there is data, and it plots to nothing. */
   empty?: boolean
+  /**
+   * Centres the plot and its legend in the height the card has to spare, for
+   * a plot as tall as its content. Otherwise the plot takes that height.
+   */
+  centered?: boolean
   /** Forces layout direction; defaults to document.documentElement.dir */
   dir?: ChartDir
 }

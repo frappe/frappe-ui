@@ -5,6 +5,7 @@
     :loading="loading"
     :error="error"
     :empty="isEmpty"
+    centered
     :dir="dir"
   >
     <template v-if="$slots.actions" #actions><slot name="actions" /></template>
