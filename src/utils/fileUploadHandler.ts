@@ -1,9 +1,82 @@
 import {
-  isPrivateUpload,
-  UploadError,
-  type UploadOptions,
-} from './useFileUpload'
-import { getMaxFileSize, formatBytes, fileSizeLimitMessage } from './fileSize'
+  getMaxFileSize,
+  getFileChunkSize,
+  formatBytes,
+  fileSizeLimitMessage,
+} from './fileSize'
+
+export interface UploadOptions {
+  private?: boolean
+  folder?: string
+  file_url?: string
+  doctype?: string
+  docname?: string
+  fieldname?: string
+  method?: string
+  type?: string
+  upload_endpoint?: string
+  optimize?: boolean
+  max_width?: number
+  max_height?: number
+  params?: object
+  signal?: AbortSignal
+  onProgress?: (progress: {
+    loaded: number
+    total: number
+    percent: number
+  }) => void
+}
+
+/**
+ * Resolves whether an upload is private. Unset resolves to **private** — a
+ * file with no stated intent is treated as access-controlled, not
+ * world-readable. Pass `private: false` for intentionally public files.
+ *
+ * Internal: not exported from the package.
+ */
+export function isPrivateUpload(options: UploadOptions = {}) {
+  return options.private ?? true
+}
+
+/** What made an upload fail. */
+export type UploadErrorKind = 'file-size' | 'network' | 'server' | 'abort'
+
+/**
+ * The error every upload path rejects with: `upload()`, `useFileUpload()`,
+ * and `FileUploadHandler.upload()`. Read `kind` to tell a cancelled upload
+ * from a failed one; `messages` carries the server's messages when it sent
+ * any.
+ */
+export class UploadError extends Error {
+  /** What made the upload fail. */
+  readonly kind: UploadErrorKind
+
+  /** HTTP status, when the server answered. */
+  readonly status?: number
+
+  /** Server messages, in the order the server sent them. Empty otherwise. */
+  readonly messages: string[]
+
+  /** The parsed error payload, when the server sent one. */
+  readonly response?: unknown
+
+  constructor(
+    message: string,
+    options: {
+      kind: UploadErrorKind
+      status?: number
+      messages?: string[]
+      response?: unknown
+    },
+  ) {
+    super(message)
+    this.name = 'UploadError'
+    this.kind = options.kind
+    this.status = options.status
+    this.messages = options.messages ?? []
+    this.response = options.response
+  }
+}
 
 type EventListenerOption = 'start' | 'progress' | 'finish' | 'error'
 
@@ -13,8 +86,25 @@ declare global {
   }
 }
 
-function parseServerMessages(error: any): string[] {
-  if (!error?._server_messages) return []
+/** One request of an upload: the whole file, or one slice of it. */
+interface Chunk {
+  blob: Blob | null
+  index: number
+  count: number
+  offset: number
+}
+
+/** The part of a Frappe error response this module reads. */
+interface ServerError {
+  message?: string
+  exc?: string
+  exc_type?: string
+  _server_messages?: string
+  _error_message?: string
+}
+
+function parseServerMessages(error: ServerError): string[] {
+  if (!error._server_messages) return []
   try {
     return JSON.parse(error._server_messages)
       .map((message: string) => {
@@ -30,20 +120,125 @@ function parseServerMessages(error: any): string[] {
   }
 }
 
-function extractUploadErrorMessage(error: any): string {
+function extractUploadErrorMessage(error: ServerError): string {
   const messages = parseServerMessages(error)
   if (messages.length) return messages.join('\n')
-  if (error?.message) return error.message
-  if (error?._error_message) return error._error_message
-  if (error?.exc_type === 'MaxFileSizeReachedError') {
+  if (error.message) return error.message
+  if (error._error_message) return error._error_message
+  if (error.exc_type === 'MaxFileSizeReachedError') {
     const maxFileSize = getMaxFileSize()
     return maxFileSize
       ? `File size exceeded the maximum allowed size of ${formatBytes(maxFileSize)}.`
       : 'File size exceeds the maximum allowed limit.'
   }
-  return 'Error Uploading File'
+  return 'Upload failed'
 }
 
+function serverError(status: number, responseText: string): UploadError {
+  // A 413 comes from a proxy in front of Frappe (nginx's
+  // `client_max_body_size`), not from Frappe, so its limit is unknown here.
+  // Frappe's own size check answers 417 with `MaxFileSizeReachedError`.
+  if (status === 413) {
+    return new UploadError(
+      'The server rejected this upload because it is too large.',
+      { kind: 'server', status },
+    )
+  }
+  let error: ServerError = {}
+  try {
+    error = JSON.parse(responseText)
+  } catch {
+    // not JSON
+  }
+  if (error.exc) {
+    try {
+      console.error(JSON.parse(error.exc)[0])
+    } catch {
+      // pass
+    }
+  }
+  return new UploadError(extractUploadErrorMessage(error), {
+    kind: 'server',
+    status,
+    messages: parseServerMessages(error),
+    response: error,
+  })
+}
+
+/** Split `file` into the requests that upload it, in order. */
+function chunksOf(file: File | null): Chunk[] {
+  const chunkSize = getFileChunkSize()
+  if (!file || file.size <= chunkSize) {
+    return [{ blob: file, index: 0, count: 1, offset: 0 }]
+  }
+  const count = Math.ceil(file.size / chunkSize)
+  return Array.from({ length: count }, (_, index) => {
+    const offset = index * chunkSize
+    return {
+      blob: file.slice(offset, offset + chunkSize),
+      index,
+      count,
+      offset,
+    }
+  })
+}
+
+function formDataFor(
+  file: File | null,
+  chunk: Chunk,
+  options: UploadOptions,
+): FormData {
+  const formData = new FormData()
+  if (file && chunk.blob) {
+    // Every chunk carries the original filename: Frappe appends chunks to
+    // a temp file named after it.
+    formData.append('file', chunk.blob, file.name)
+  }
+  if (file && chunk.count > 1) {
+    formData.append('chunk_index', String(chunk.index))
+    formData.append('total_chunk_count', String(chunk.count))
+    formData.append('chunk_byte_offset', String(chunk.offset))
+    formData.append('total_file_size', String(file.size))
+  }
+  formData.append('is_private', isPrivateUpload(options) ? '1' : '0')
+  formData.append('folder', options.folder || 'Home')
+
+  const fields = {
+    file_url: options.file_url,
+    doctype: options.doctype,
+    docname: options.docname,
+    fieldname: options.fieldname,
+    method: options.method,
+    type: options.type,
+  }
+  for (const [key, value] of Object.entries(fields)) {
+    if (value) formData.append(key, value)
+  }
+
+  if (options.optimize) {
+    formData.append('optimize', '1')
+    if (options.max_width) {
+      formData.append('max_width', options.max_width.toString())
+    }
+    if (options.max_height) {
+      formData.append('max_height', options.max_height.toString())
+    }
+  }
+  if (options.params) {
+    for (const [key, value] of Object.entries(options.params)) {
+      formData.append(key, value)
+    }
+  }
+  return formData
+}
+
+/**
+ * Uploads a file to Frappe's `upload_file` endpoint. A file larger than the
+ * `fileChunkSize` config is sent as a series of chunk requests, one after
+ * another, so that no single request exceeds a proxy's body size limit.
+ * `start` and `finish` fire once per upload and `progress` covers the
+ * whole file.
+ */
 class FileUploadHandler {
   listeners: { [event: string]: Function[] }
   failed: boolean
@@ -58,145 +253,100 @@ class FileUploadHandler {
     this.listeners[event].push(handler)
   }
 
-  trigger(event: string, data?: any) {
+  trigger(event: string, data?: unknown) {
     let handlers = this.listeners[event] || []
     handlers.forEach((handler) => {
       handler.call(this, data)
     })
   }
 
-  upload(file: File | null, options: UploadOptions): Promise<any> {
-    return new Promise((resolve, reject) => {
-      const limitMessage = fileSizeLimitMessage(file)
-      if (limitMessage) {
-        reject(new UploadError(limitMessage, { kind: 'file-size' }))
-        return
-      }
-      let xhr = new XMLHttpRequest()
-      xhr.upload.addEventListener('loadstart', () => {
-        this.trigger('start')
-      })
-      xhr.upload.addEventListener('progress', (e) => {
-        if (e.lengthComputable) {
-          this.trigger('progress', {
-            uploaded: e.loaded,
-            total: e.total,
-          })
+  async upload(file: File | null, options: UploadOptions): Promise<any> {
+    const limitMessage = fileSizeLimitMessage(file)
+    if (limitMessage) {
+      throw new UploadError(limitMessage, { kind: 'file-size' })
+    }
+
+    this.trigger('start')
+    try {
+      let result: unknown
+      for (const chunk of chunksOf(file)) {
+        if (options.signal?.aborted) {
+          throw new UploadError('Upload cancelled', { kind: 'abort' })
         }
+        result = await this.send(file, chunk, options)
+      }
+      this.trigger('finish')
+      return result
+    } catch (error) {
+      this.failed = true
+      const response = error instanceof UploadError ? error.response : undefined
+      this.trigger('error', response)
+      throw error
+    }
+  }
+
+  private send(
+    file: File | null,
+    chunk: Chunk,
+    options: UploadOptions,
+  ): Promise<unknown> {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest()
+      const abort = () => xhr.abort()
+      options.signal?.addEventListener('abort', abort, { once: true })
+      const settle = () => options.signal?.removeEventListener('abort', abort)
+
+      xhr.upload.addEventListener('progress', (e) => {
+        if (!e.lengthComputable) return
+        // e.loaded counts multipart overhead too, so scale it to the
+        // chunk's bytes. That keeps progress steady across chunk borders.
+        const loaded = chunk.blob
+          ? chunk.offset + chunk.blob.size * (e.loaded / e.total)
+          : e.loaded
+        const total = file ? file.size : e.total
+        this.trigger('progress', { uploaded: loaded, total })
+        options.onProgress?.({
+          loaded,
+          total,
+          percent: Math.round((loaded / total) * 100),
+        })
       })
+
       xhr.addEventListener('error', () => {
-        this.trigger('error')
+        settle()
         reject(new UploadError('Upload failed', { kind: 'network' }))
       })
-
       xhr.addEventListener('abort', () => {
-        this.trigger('error')
+        settle()
         reject(new UploadError('Upload cancelled', { kind: 'abort' }))
       })
+
       xhr.onreadystatechange = () => {
-        if (xhr.readyState == XMLHttpRequest.DONE) {
-          if (xhr.status === 200) {
-            let r = null
-            try {
-              r = JSON.parse(xhr.responseText)
-            } catch (e) {
-              r = xhr.responseText
-            }
-            let out = r.message || r
-            this.trigger('finish')
-            resolve(out)
-          } else {
-            this.failed = true
-            let error: {
-              message?: string
-              exc?: string
-              _server_messages?: string
-              httpStatus?: number
-            } = {}
-
-            if (xhr.status === 413 || xhr.status === 0) {
-              error = {
-                message:
-                  getMaxFileSize() != null
-                    ? `File size exceeded the maximum allowed size of ${formatBytes(getMaxFileSize() as number)}.`
-                    : 'File size exceeds the maximum allowed limit',
-                httpStatus: 413,
-              }
-            } else {
-              try {
-                error = JSON.parse(xhr.responseText)
-              } catch (e) {
-                // pass
-              }
-            }
-
-            if (error && error.exc) {
-              console.error(JSON.parse(error.exc)[0])
-            }
-            this.trigger('error', error)
-            reject(
-              new UploadError(extractUploadErrorMessage(error), {
-                kind: 'server',
-                status: xhr.status,
-                messages: parseServerMessages(error),
-                response: error,
-              }),
-            )
-          }
+        // Status 0 means no response: the `error` or `abort` listener
+        // above settles the promise.
+        if (xhr.readyState !== XMLHttpRequest.DONE || xhr.status === 0) {
+          return
         }
+        settle()
+        if (xhr.status !== 200) {
+          reject(serverError(xhr.status, xhr.responseText))
+          return
+        }
+        let r
+        try {
+          r = JSON.parse(xhr.responseText)
+        } catch {
+          r = xhr.responseText
+        }
+        resolve(r?.message || r)
       }
 
-      const uploadEndpoint =
-        options.upload_endpoint || '/api/method/upload_file'
-      xhr.open('POST', uploadEndpoint, true)
+      xhr.open('POST', options.upload_endpoint || '/api/method/upload_file')
       xhr.setRequestHeader('Accept', 'application/json')
-
       if (window.csrf_token && window.csrf_token !== '{{ csrf_token }}') {
         xhr.setRequestHeader('X-Frappe-CSRF-Token', window.csrf_token)
       }
-
-      let form_data = new FormData()
-      if (file) {
-        form_data.append('file', file, file.name)
-      }
-      form_data.append('is_private', isPrivateUpload(options) ? '1' : '0')
-      form_data.append('folder', options.folder || 'Home')
-
-      if (options.file_url) {
-        form_data.append('file_url', options.file_url)
-      }
-
-      if (options.doctype) {
-        form_data.append('doctype', options.doctype)
-      }
-
-      if (options.docname) {
-        form_data.append('docname', options.docname)
-      }
-
-      if (options.fieldname) {
-        form_data.append('fieldname', options.fieldname)
-      }
-
-      if (options.method) {
-        form_data.append('method', options.method)
-      }
-
-      if (options.type) {
-        form_data.append('type', options.type)
-      }
-
-      if (options.optimize) {
-        form_data.append('optimize', '1')
-        if (options.max_width) {
-          form_data.append('max_width', options.max_width.toString())
-        }
-        if (options.max_height) {
-          form_data.append('max_height', options.max_height.toString())
-        }
-      }
-
-      xhr.send(form_data)
+      xhr.send(formDataFor(file, chunk, options))
     })
   }
 }

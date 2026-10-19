@@ -243,6 +243,21 @@ with `is_private=1`. Pass `private: false` only for files meant to be public.
 For a single upload with no reactive state, call `upload(file, options)`. It
 takes the same options and resolves to the uploaded file's record.
 
+### Large files
+
+A file larger than the chunk size is sent in chunks, one request after another,
+so that no single request is larger than a proxy in front of Frappe accepts.
+Progress covers the whole file, and the upload resolves when the last chunk is
+saved. The chunk size defaults to 25 MB. Set it from Frappe's
+`get_file_chunk_size()`, which reads `file_chunk_size` from the site config:
+
+```ts
+setConfig('fileChunkSize', boot.file_chunk_size)
+```
+
+`setConfig('maxFileSize', bytes)` rejects a larger file before any request
+starts.
+
 ### useFileUpload
 
 A composable that uploads a file and tracks its progress in reactive state.
@@ -308,8 +323,8 @@ resolves to the uploaded file's record, and rejects with an
 
 | Event      | Payload                | Fires when                  |
 | ---------- | ---------------------- | --------------------------- |
-| `start`    | none                   | The request starts.         |
-| `progress` | `{ uploaded, total }`  | Upload progress changes.    |
+| `start`    | none                   | The upload starts.          |
+| `progress` | `{ uploaded, total }`  | Upload progress changes. `total` is the file size. |
 | `error`    | The server's error text, if any | The upload fails. |
 | `finish`   | none                   | The upload succeeds.        |
 
