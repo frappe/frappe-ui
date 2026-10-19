@@ -55,6 +55,39 @@ function host(
   })
 }
 
+// A host that fetches on `update:query` after `delay` ms, like the
+// AsyncSuggestions story, with a second input to move focus to.
+function asyncHost(delay = 300) {
+  return defineComponent({
+    setup() {
+      const model = ref<string[]>([])
+      const options = ref<MultiEmailOption[]>([])
+      const loading = ref(false)
+      let timer: ReturnType<typeof setTimeout>
+      const search = (q: string) => {
+        clearTimeout(timer)
+        loading.value = true
+        timer = setTimeout(() => {
+          const s = q.trim().toLowerCase()
+          options.value = members.filter((o) => o.value.includes(s))
+          loading.value = false
+        }, delay)
+      }
+      return () => [
+        h('span', { 'data-cy': 'loading' }, String(loading.value)),
+        h(MultiEmailInput, {
+          modelValue: model.value,
+          'onUpdate:modelValue': (v: string[]) => (model.value = v),
+          'onUpdate:query': search,
+          options: options.value,
+          loading: loading.value,
+        }),
+        h('input', { 'data-cy': 'other' }),
+      ]
+    },
+  })
+}
+
 describe('MultiEmailInput', () => {
   it('renders the control and placeholder', () => {
     cy.mount(host())
@@ -172,6 +205,34 @@ describe('MultiEmailInput', () => {
     cy.get('[data-slot="content"]').should('not.exist')
     cy.get('[data-slot="input"]').click()
     cy.get('[data-slot="item"]').should('have.length', 2)
+  })
+
+  // While the list is hidden reka never sees the blur or Escape, so the
+  // component must close itself or a late fetch reopens a field the user left.
+  it('stays closed when results land after focus has left', () => {
+    cy.mount(asyncHost())
+    cy.get('[data-slot="input"]').focus()
+    cy.get('[data-cy="loading"]').should('have.text', 'true')
+    cy.get('[data-cy="other"]').focus()
+    cy.get('[data-cy="loading"]').should('have.text', 'false')
+    cy.wait(50)
+    cy.get('[data-slot="content"]').should('not.exist')
+  })
+
+  it('stays closed when results land after Escape', () => {
+    cy.mount(asyncHost())
+    cy.get('[data-slot="input"]').focus().type('{esc}')
+    cy.get('[data-cy="loading"]').should('have.text', 'false')
+    cy.wait(50)
+    cy.get('[data-slot="content"]').should('not.exist')
+  })
+
+  it('clears unmatched typed text on blur', () => {
+    cy.mount(asyncHost(0))
+    cy.get('[data-slot="input"]').type('zz@')
+    cy.get('[data-slot="content"]').should('not.exist')
+    cy.get('[data-cy="other"]').focus()
+    cy.get('[data-slot="input"]').should('have.value', '')
   })
 
   it('renders the error region and marks the input invalid', () => {

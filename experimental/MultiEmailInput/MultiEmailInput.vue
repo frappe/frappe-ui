@@ -183,6 +183,8 @@ const hasContent = computed(
     showEmpty.value,
 )
 
+const listOpen = computed(() => open.value && hasContent.value)
+
 // Avatar has its own scale (`xs` 16px, `sm` 20px, `md` 24px), and the option
 // row is `min-h-6`/`min-h-7`/`min-h-8`/`min-h-10` plus `ItemListRow`'s own
 // padding. Step the avatar down with the row for the two small sizes rather
@@ -247,6 +249,25 @@ function onFocus(event: FocusEvent) {
 // Focus opens the list once; a click reopens it after a pick or Escape.
 function onClick() {
   if (!props.disabled) open.value = true
+}
+
+// Reka closes on blur and Escape, and clears the query, only while its list is
+// mounted. A hidden list hears neither, so close the way reka would; otherwise
+// a fetch landing later reopens a field the user has left.
+function close() {
+  open.value = false
+  query.value = ''
+}
+
+function onBlur(event: FocusEvent) {
+  emit('blur', event)
+  if (listOpen.value) return
+  const control = (event.target as HTMLElement).closest('[data-slot="control"]')
+  // Same check as reka: a frame later, focus has settled (a chip's delete
+  // button stays inside; switching windows keeps the input active).
+  requestAnimationFrame(() => {
+    if (!control?.contains(document.activeElement)) close()
+  })
 }
 
 function onEnter() {
@@ -317,7 +338,7 @@ defineSlots<MultiEmailInputSlots>()
       v-model="model"
       multiple
       ignore-filter
-      :open="open && hasContent"
+      :open="listOpen"
       :disabled="disabled"
       class="relative"
       @update:open="open = $event"
@@ -377,10 +398,11 @@ defineSlots<MultiEmailInputSlots>()
               :class="inputClasses"
               v-bind="inputAriaAttrs"
               @keydown.enter.prevent="onEnter"
+              @keydown.esc="close"
               @paste="onPaste"
               @focus="onFocus"
               @click="onClick"
-              @blur="emit('blur', $event)"
+              @blur="onBlur"
             />
           </ComboboxInput>
         </TagsInputRoot>
