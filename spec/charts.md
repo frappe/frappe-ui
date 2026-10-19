@@ -114,6 +114,10 @@ axis: `yAxis.format`, `y2Axis.format`, and `xAxis.format` for the category
 labels. `y` and `y2` are there to carry two units, so one chart-level formatter
 could only be right for one of them. This is the axis charts and the scatter.
 
+On a time axis, `xAxis.format` prints the x value where a value is read, the
+tooltip, and not the ticks. A tick is a position the scale chose rather than a
+value of the column, so the chart labels it by its level: `2025`, `Feb`, `Mar`.
+
 A chart with one measure and no value axis takes `format` at the chart level,
 because there is one unit and nowhere else to put it: the donut, the percentage
 bar, the funnel, the heatmap and the number card.
