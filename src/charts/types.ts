@@ -433,7 +433,7 @@ export type NumberCardConfig = {
   dir?: ChartDir
   /** A trend across the bottom of the card: shape only, no axes to read against. */
   sparkline?: NumberCardSparkline
-  /** How far the reading has come towards a whole, drawn as a bar under it. */
+  /** How far the reading has come towards a whole, drawn as a bar under it and its change. */
   progress?: NumberCardProgress
 }
 
@@ -444,7 +444,7 @@ export type NumberCardProgress = {
    * bar fills and a gap marks where 100 falls.
    */
   value: number
-  /** Overrides the gray the bar fills in. */
+  /** Overrides the sequential-palette blue the bar fills in. */
   color?: string
 }
 
@@ -1105,7 +1105,7 @@ export type NumberCardProps = Omit<ChartBaseProps, 'subtitle'> &
     deltaFormat?: ChartValueFormatter
     /** A trend across the bottom of the card: shape only, no axes to read against. */
     sparkline?: NumberCardSparkline
-    /** How far the reading has come towards a whole, drawn as a bar under it. */
+    /** How far the reading has come towards a whole, drawn as a bar under it and its change. */
     progress?: NumberCardProgress
   }
 

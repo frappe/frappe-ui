@@ -109,7 +109,7 @@
   },
   {
     name: 'progress',
-    description: 'How far the reading has come towards a whole, drawn as a bar under it.',
+    description: 'How far the reading has come towards a whole, drawn as a bar under it and its change.',
     required: false,
     type: 'NumberCardProgress'
   },

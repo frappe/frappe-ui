@@ -29,7 +29,7 @@ whether the number went up or down.
 
 ## Progress
 
-`progress` draws a bar under the number for how far it has come towards a whole, such as disk used or revenue against a target. Pass `value` as a percent, the way `Progress` takes it. Past 100 the bar fills and a gap marks where 100 falls. `color` overrides the gray the bar fills in.
+`progress` draws a bar under the number and its change for how far the number has come towards a whole, such as disk used or revenue against a target. Pass `value` as a percent, the way `Progress` takes it. Past 100 the bar fills and a gap marks where 100 falls. The bar fills in the same blue as a sparkline, and `color` overrides it.
 
 <ComponentPreview name="Charts-NumberProgress" csr="true" self-layout />
 

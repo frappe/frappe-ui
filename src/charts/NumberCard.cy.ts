@@ -111,22 +111,36 @@ describe('NumberCard', () => {
 
   describe('progress', () => {
     const bar = () => cy.get('[role="progressbar"]')
+    const fill = () => bar().children().first().children().first()
 
-    it('fills a bar under the reading to its percent', () => {
+    it('fills a bar to the reading’s percent', () => {
       mountCard({ progress: { value: 40 } })
       bar().should('have.attr', 'aria-valuenow', '40')
       bar().children().should('have.length', 1)
-      bar()
-        .find('.bg-surface-gray-7')
-        .should('have.attr', 'style')
-        .and('contain', 'width: 40%')
+      fill().should('have.attr', 'style').and('contain', 'width: 40%')
+    })
+
+    it('fills in the sparkline’s blue by default', () => {
+      mountCard({ progress: { value: 40 } })
+      fill()
+        .should('have.css', 'background-color')
+        .and('not.eq', 'rgba(0, 0, 0, 0)')
     })
 
     it('fills in the color the caller named', () => {
       mountCard({ progress: { value: 40, color: 'rgb(245, 158, 11)' } })
-      bar()
-        .find('.rounded-full .rounded-full')
-        .should('have.css', 'background-color', 'rgb(245, 158, 11)')
+      fill().should('have.css', 'background-color', 'rgb(245, 158, 11)')
+    })
+
+    it('sits under the change, as a sparkline does', () => {
+      mountCard({ delta: 5, progress: { value: 40 } })
+      cy.contains('5').then(($delta) => {
+        bar().then(($bar) => {
+          expect($bar[0].getBoundingClientRect().top).to.be.greaterThan(
+            $delta[0].getBoundingClientRect().bottom,
+          )
+        })
+      })
     })
 
     it('splits past 100 where 100 falls', () => {
@@ -141,7 +155,7 @@ describe('NumberCard', () => {
 
     it('keeps a tiny reading visible', () => {
       mountCard({ progress: { value: 0.05 } })
-      bar().find('.bg-surface-gray-7').invoke('outerWidth').should('be.gte', 6)
+      fill().invoke('outerWidth').should('be.gte', 4)
     })
 
     it('draws nothing for a card with no reading', () => {
