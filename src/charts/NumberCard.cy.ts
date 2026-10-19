@@ -167,6 +167,11 @@ describe('NumberCard', () => {
         .and('have.attr', 'aria-valuemax', '125')
     })
 
+    it('reads its percent as a whole number', () => {
+      mountCard({ progress: { value: (621_800 / 750_000) * 100 } })
+      bar().should('have.attr', 'aria-valuetext', '83%')
+    })
+
     it('draws nothing for a percent that is not finite', () => {
       mountCard({ progress: { value: NaN } })
       bar().should('not.exist')

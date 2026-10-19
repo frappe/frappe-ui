@@ -182,7 +182,7 @@
           aria-valuemin="0"
           :aria-valuemax="Math.max(progressValue, 100)"
           :aria-valuenow="progressValue"
-          :aria-valuetext="`${progressValue}%`"
+          :aria-valuetext="`${Math.round(progressValue)}%`"
           :aria-label="title"
         >
           <div
