@@ -77,7 +77,9 @@ and the class takes over from its breakpoint up.
 
 `AvatarBadge` fills the indicator, so the avatar's `size` prop sets its size
 (see [Custom sizes](#custom-sizes)). Without a color class the badge is gray. A
-ring cuts the badge out of the avatar.
+ring cuts the badge out of the avatar. The badge takes a class, not `theme`,
+because a status color is app data (see
+[P4](https://github.com/frappe/frappe-ui/blob/main/PHILOSOPHY.md#p4-two-color-axes-only-variant--theme--no-semantic-axis)).
 
 ### Badge ring
 
