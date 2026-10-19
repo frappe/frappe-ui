@@ -61,6 +61,12 @@
     type: 'number'
   },
   {
+    name: 'order',
+    description: 'The order the slices go round the ring. `\'size\'` puts the biggest first.\n`\'rows\'` keeps the rows\' order, for categories that already have one, such\nas ageing buckets or months. Either way `maxSlices` keeps the largest, and\n"Others" comes last. Defaults to `\'size\'`.',
+    required: false,
+    type: 'SliceOrder'
+  },
+  {
     name: 'hiddenSlices',
     description: 'Slices the legend has switched off, by name. Bind it with\n`v-model:hiddenSlices` to drive the legend from the app. Left unbound, the\nlegend owns it.',
     required: false,

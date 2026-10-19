@@ -226,6 +226,19 @@ describe('DonutChart', () => {
     )
   })
 
+  it("goes round the ring in the rows' order with order: 'rows'", () => {
+    mountChart({ data: [data[2], data[0], data[1]], order: 'rows' })
+    slices().should('have.length', data.length)
+    cy.get('[data-slot="chart-legend"] [aria-pressed]').then(($items) =>
+      expect(
+        [...$items].map((el) => el.getAttribute('aria-label')),
+      ).to.deep.equal(['Hide Email', 'Hide Search', 'Hide Direct']),
+    )
+    // Focus lands on the first slice drawn.
+    cy.get('[data-slot="chart-plot"] [role="img"]').focus()
+    cy.get('[data-slot="chart-tooltip"]').should('contain.text', 'Email')
+  })
+
   it('folds the tail into one slice past maxSlices', () => {
     mountChart({ maxSlices: 2 })
     slices().should('have.length', 2)

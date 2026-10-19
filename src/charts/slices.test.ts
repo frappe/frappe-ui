@@ -197,6 +197,52 @@ describe('buildSlices', () => {
     })
   })
 
+  describe("order: 'rows'", () => {
+    const buckets = (...values: number[]) =>
+      ['0-30', '31-60', '61-90', '90+'].map((channel, i) => ({
+        channel,
+        visits: values[i],
+      }))
+    const ordered = (overrides: Partial<SliceConfig>) =>
+      slices({ order: 'rows', ...overrides })
+
+    it('draws the slices as the rows arrive', () => {
+      expect(
+        ordered({ data: buckets(5, 40, 10, 30) }).map((s) => [
+          s.label,
+          s.percent,
+        ]),
+      ).toEqual([
+        ['0-30', 6],
+        ['31-60', 47],
+        ['61-90', 12],
+        ['90+', 35],
+      ])
+    })
+
+    it('keeps the largest past maxSlices, in row order, "Others" last', () => {
+      const built = ordered({ data: buckets(5, 40, 10, 30), maxSlices: 3 })
+      expect(built.map((s) => s.label)).toEqual(['31-60', '90+', 'Others'])
+      expect(built[2].rows.map((r) => r.channel)).toEqual(['0-30', '61-90'])
+    })
+
+    it('keeps the earlier row of two the same size', () => {
+      const built = ordered({ data: buckets(10, 20, 10, 10), maxSlices: 3 })
+      expect(built.map((s) => s.label)).toEqual(['0-30', '31-60', 'Others'])
+    })
+
+    it('rounds the bigger slice up on a tie, as biggest first does', () => {
+      const data = [
+        { channel: 'a', visits: 1 },
+        { channel: 'b', visits: 7 },
+      ]
+      expect(ordered({ data }).map((s) => formatPercent(s.percent))).toEqual([
+        '12%',
+        '88%',
+      ])
+    })
+  })
+
   describe('hidden slices', () => {
     it('re-percentages the rest against the visible total', () => {
       expect(

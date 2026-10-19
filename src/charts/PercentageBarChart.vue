@@ -135,6 +135,7 @@ const slices = computed(() =>
       categoryColumn: props.category,
       valueColumn: props.value,
       maxSlices: props.maxSlices,
+      order: props.order,
       palette: props.palette,
       colors: props.colors,
     },

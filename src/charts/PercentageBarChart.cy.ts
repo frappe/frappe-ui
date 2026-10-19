@@ -49,6 +49,15 @@ describe('PercentageBarChart', () => {
       )
   })
 
+  it("draws the slices in the rows' order with order: 'rows'", () => {
+    mountChart({ data: [data[2], data[0], data[1]], order: 'rows' })
+    slices().then(($slices) =>
+      expect(
+        [...$slices].map((el) => el.getAttribute('aria-label')),
+      ).to.deep.equal(['Email, 20, 20%', 'Search, 50, 50%', 'Direct, 30, 30%']),
+    )
+  })
+
   it('names the track after the chart', () => {
     mountChart({ title: 'Traffic', subtitle: 'This week' })
     track().should('have.attr', 'aria-label', 'Traffic, This week')

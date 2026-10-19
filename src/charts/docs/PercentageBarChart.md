@@ -18,6 +18,10 @@ It is the ring of `DonutChart` unrolled, for a strip under a number. It draws pl
 
 <ComponentPreview name="Charts-PercentageStorage" csr="true" self-layout />
 
+## Keeping the rows' order
+
+The biggest slice comes first by default. `order="rows"` draws the slices in the order the rows arrive instead, for categories that already have an order, such as ageing buckets or months. `maxSlices` still keeps the largest slices, and "Others" comes last.
+
 ## Pinning a color
 
 `colors` pins a color to a category, so a slice keeps its meaning whatever its size. Key it by the category value, and by `OTHERS_KEY` for "Others". A category grouped into "Others" takes that slice's color. The other slices keep the palette colors they would have had. A color can be a CSS variable, such as `var(--ink-red-5)`.

@@ -19,7 +19,13 @@ import type {
 
 export type SliceConfig = Pick<
   DonutChartConfig,
-  'data' | 'categoryColumn' | 'valueColumn' | 'maxSlices' | 'palette' | 'colors'
+  | 'data'
+  | 'categoryColumn'
+  | 'valueColumn'
+  | 'maxSlices'
+  | 'order'
+  | 'palette'
+  | 'colors'
 >
 
 export type SliceContext = {
@@ -94,7 +100,10 @@ function roundShares(percents: number[]): number[] {
   const rounded = [...floors]
   percents
     .map((percent, index) => ({ index, remainder: percent - floors[index] }))
-    .sort((a, b) => b.remainder - a.remainder)
+    .sort(
+      (a, b) =>
+        b.remainder - a.remainder || percents[b.index] - percents[a.index],
+    )
     .slice(0, missing)
     .forEach(({ index }) => rounded[index]++)
   return rounded.map((share, index) =>
@@ -161,27 +170,30 @@ function groupRows(config: SliceConfig): UnsizedSlice[] {
       (entry): entry is { row: Record<string, any>; value: number } =>
         entry.value !== null && entry.value >= 0,
     )
-    // Biggest first: the plot, the legend and the tail that gets grouped all
-    // depend on this order.
-    .sort((a, b) => b.value - a.value)
+  const bySize = [...entries].sort((a, b) => b.value - a.value)
 
   const max = Math.max(MIN_MAX_SLICES, config.maxSlices ?? DEFAULT_MAX_SLICES)
   // One of the slots goes to "Others" itself.
   const keep = entries.length > max ? max - 1 : entries.length
+  // The largest are kept whatever the drawing order, so the cap holds.
+  const kept = new Set(bySize.slice(0, keep))
+  const ordered = config.order === 'rows' ? entries : bySize
 
   const seen = new Set<string>()
-  const slices: UnsizedSlice[] = entries.slice(0, keep).map((entry) => {
-    const label = categoryLabel(entry.row[config.categoryColumn])
-    return {
-      name: uniqueName(label, seen),
-      label,
-      value: entry.value,
-      rows: [entry.row],
-      isOthers: false,
-    }
-  })
+  const slices: UnsizedSlice[] = ordered
+    .filter((entry) => kept.has(entry))
+    .map((entry) => {
+      const label = categoryLabel(entry.row[config.categoryColumn])
+      return {
+        name: uniqueName(label, seen),
+        label,
+        value: entry.value,
+        rows: [entry.row],
+        isOthers: false,
+      }
+    })
 
-  const overflow = entries.slice(keep)
+  const overflow = ordered.filter((entry) => !kept.has(entry))
   if (!overflow.length) return slices
 
   return [

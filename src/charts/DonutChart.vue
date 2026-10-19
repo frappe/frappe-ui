@@ -165,6 +165,7 @@ const config = useResolvedConfig<DonutChartConfig>(
     categoryColumn: props.category,
     valueColumn: props.value,
     maxSlices: props.maxSlices,
+    order: props.order,
     showDataLabels: props.showDataLabels,
     centerLabel: props.centerLabel,
     variant: props.variant,

@@ -227,6 +227,8 @@ export type DonutChartConfig = {
    * readable long before the palette runs out, so it defaults to 9.
    */
   maxSlices?: number
+  /** Slices go biggest first, or as the rows arrive. Defaults to `'size'`. */
+  order?: SliceOrder
   /**
    * Ramp slice colors are drawn from. Defaults to `'categorical'`: slices are
    * unrelated categories, not steps of one magnitude, so they read as separate
@@ -254,7 +256,9 @@ export type DonutChartConfig = {
 
 export type DonutVariant = 'full' | 'half'
 
-/** One arc of the ring, after sorting, "Others" grouping and color assignment. */
+export type SliceOrder = 'size' | 'rows'
+
+/** One arc of the ring, after ordering, "Others" grouping and color assignment. */
 export type DonutSlice = {
   /** Identity used by echarts actions and the legend. Unique within the ring. */
   name: string
@@ -1051,6 +1055,13 @@ export type DonutChartProps = ChartBaseProps & {
    */
   maxSlices?: number
   /**
+   * The order the slices go round the ring. `'size'` puts the biggest first.
+   * `'rows'` keeps the rows' order, for categories that already have one, such
+   * as ageing buckets or months. Either way `maxSlices` keeps the largest, and
+   * "Others" comes last. Defaults to `'size'`.
+   */
+  order?: SliceOrder
+  /**
    * Slices the legend has switched off, by name. Bind it with
    * `v-model:hiddenSlices` to drive the legend from the app. Left unbound, the
    * legend owns it.
@@ -1095,6 +1106,13 @@ export type PercentageBarChartProps = ChartBaseProps & {
    * into the same slices on either chart.
    */
   maxSlices?: number
+  /**
+   * The order the slices go along the bar. `'size'` puts the biggest first.
+   * `'rows'` keeps the rows' order, for categories that already have one, such
+   * as ageing buckets or months. Either way `maxSlices` keeps the largest, and
+   * "Others" comes last. Defaults to `'size'`, as on `DonutChart`.
+   */
+  order?: SliceOrder
   /**
    * Slices the legend has switched off, by name. Bind it with
    * `v-model:hiddenSlices` to drive the legend from the app. Left unbound, the

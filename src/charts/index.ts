@@ -126,4 +126,5 @@ export type {
   SankeyLinkEvent,
   SankeyNodeAlign,
   ScatterPointEvent,
+  SliceOrder,
 } from './types'
