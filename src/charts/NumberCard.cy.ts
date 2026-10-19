@@ -190,6 +190,24 @@ describe('NumberCard', () => {
     })
   })
 
+  describe('title row', () => {
+    const titleRow = () => cy.get('[data-slot="number-card-title"]')
+
+    it('is left out when there is nothing to put in it', () => {
+      mountCard({ title: undefined })
+      card().should('contain.text', '12,300')
+      titleRow().should('not.exist')
+    })
+
+    it('stays for an actions slot alone', () => {
+      mountCard(
+        { title: undefined },
+        { actions: () => h('button', 'Week') },
+      )
+      titleRow().should('contain.text', 'Week')
+    })
+  })
+
   // The card has no plot, so it has no tooltip slot; these are the other two it
   // forwards outside the states.
   describe('slots', () => {
