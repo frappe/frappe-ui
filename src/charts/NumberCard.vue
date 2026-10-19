@@ -229,9 +229,9 @@ const TONE_CLASSES: Record<DeltaTone, string> = {
   neutral: 'text-ink-gray-6',
 }
 
-const direction = computed(() => deltaDirection(props.delta))
+const direction = computed(() => deltaDirection(props, props.delta))
 const toneClass = computed(
-  () => TONE_CLASSES[deltaTone(props.delta, props.negativeIsBetter)],
+  () => TONE_CLASSES[deltaTone(props, props.delta, props.negativeIsBetter)],
 )
 const formattedDelta = computed(() => formatCardDelta(props, props.delta))
 // An empty row would still take the column's gap above the number.
