@@ -182,7 +182,8 @@ const showLoading = computed(() => props.loading && typed.value !== '')
 const hasContent = computed(
   () =>
     showLoading.value ||
-    (!props.loading && (suggestions.value.length > 0 || showCreateOption.value)) ||
+    (!props.loading &&
+      (suggestions.value.length > 0 || showCreateOption.value)) ||
     showEmpty.value,
 )
 
