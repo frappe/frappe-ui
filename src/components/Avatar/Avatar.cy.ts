@@ -111,6 +111,12 @@ describe('AvatarBadge', () => {
       .then(($el) => getComputedStyle($el[0]).backgroundColor)
   }
 
+  // badge → sized wrapper → ring
+  function ringOf(selector: string) {
+    cy.get(selector).parent().parent().invoke('attr', 'data-cy', 'ring')
+    return '[data-cy="ring"]'
+  }
+
   function expectSameBackground(selector: string, probeSelector: string) {
     backgroundOf(probeSelector).then((expected) => {
       backgroundOf(selector).should('eq', expected)
@@ -172,12 +178,10 @@ describe('AvatarBadge', () => {
       h(AvatarBadge),
     )
 
-    // badge → sized wrapper → ring
-    cy.get('[data-slot="avatar-badge"]')
-      .parent()
-      .parent()
-      .invoke('attr', 'data-cy', 'ring')
-    expectSameBackground('[data-cy="ring"]', '[data-cy="probe"]')
+    expectSameBackground(
+      ringOf('[data-slot="avatar-badge"]'),
+      '[data-cy="probe"]',
+    )
   })
 
   it('takes the ring color from --avatar-badge-ring on an ancestor', () => {
@@ -187,11 +191,10 @@ describe('AvatarBadge', () => {
       '--avatar-badge-ring: var(--surface-gray-2)',
     )
 
-    cy.get('[data-slot="avatar-badge"]')
-      .parent()
-      .parent()
-      .invoke('attr', 'data-cy', 'ring')
-    expectSameBackground('[data-cy="ring"]', '[data-cy="probe"]')
+    expectSameBackground(
+      ringOf('[data-slot="avatar-badge"]'),
+      '[data-cy="probe"]',
+    )
   })
 
   it('leaves other indicator content as it was', () => {
@@ -200,10 +203,6 @@ describe('AvatarBadge', () => {
     )
 
     cy.get('[data-cy="dot"]').parent().should('have.class', 'h-3')
-    cy.get('[data-cy="dot"]')
-      .parent()
-      .parent()
-      .invoke('attr', 'data-cy', 'ring')
-    expectSameBackground('[data-cy="ring"]', '[data-cy="probe"]')
+    expectSameBackground(ringOf('[data-cy="dot"]'), '[data-cy="probe"]')
   })
 })
