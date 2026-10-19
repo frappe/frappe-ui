@@ -10,8 +10,7 @@
 </template>
 
 <script setup lang="ts">
-defineSlots<{
-  /** Content centered in the badge, such as an icon */
-  default?: () => any
-}>()
+import type { AvatarBadgeSlots } from './types'
+
+defineSlots<AvatarBadgeSlots>()
 </script>

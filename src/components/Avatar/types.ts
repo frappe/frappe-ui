@@ -22,3 +22,8 @@ export interface AvatarProps {
   /** Visual color theme used for the fallback avatar */
   theme?: AvatarTheme
 }
+
+export interface AvatarBadgeSlots {
+  /** Content centered in the badge, such as an icon */
+  default?: () => any
+}
