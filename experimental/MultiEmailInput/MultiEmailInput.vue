@@ -152,9 +152,11 @@ const suggestions = computed<MultiEmailOption[]>(() =>
   props.options.filter((o) => !selectedSet.value.has(o.value.toLowerCase())),
 )
 
+const typed = computed(() => query.value.trim())
+
 // Offer an explicit "create" row when the typed value is a valid, new address.
 const showCreateOption = computed(() => {
-  const q = query.value.trim()
+  const q = typed.value
   if (!q || !validate(q)) return false
   const lc = q.toLowerCase()
   if (selectedSet.value.has(lc)) return false
@@ -165,7 +167,8 @@ const showCreateOption = computed(() => {
 // unless the host asked for an empty state.
 const showEmpty = computed(
   () =>
-    Boolean(query.value.trim() && (props.emptyText || slots.empty)) &&
+    typed.value !== '' &&
+    Boolean(props.emptyText || slots.empty) &&
     !props.loading &&
     !suggestions.value.length &&
     !showCreateOption.value,
@@ -173,7 +176,7 @@ const showEmpty = computed(
 
 // The spinner only for a typed query: the fetch primed on focus opens the
 // list once it has results, rather than flashing a spinner over nothing.
-const showLoading = computed(() => props.loading && Boolean(query.value.trim()))
+const showLoading = computed(() => props.loading && typed.value !== '')
 
 // The list opens only when it has something to show.
 const hasContent = computed(
@@ -271,7 +274,7 @@ function onBlur(event: FocusEvent) {
 }
 
 function onEnter() {
-  const q = query.value.trim()
+  const q = typed.value
   if (!q) return
   // Valid addresses and matching suggestions are committed by Combobox selecting
   // the highlighted row (the create row's value IS the typed address). Only when
@@ -434,11 +437,11 @@ defineSlots<MultiEmailInputSlots>()
                    highlighted row, and Enter commits what the user typed. -->
               <ComboboxItem
                 v-if="showCreateOption"
-                :value="query.trim()"
+                :value="typed"
                 data-slot="item"
                 data-create="true"
                 :data-size="size"
-                :text-value="query.trim()"
+                :text-value="typed"
                 :class="[itemClasses, itemRootSizeClasses(size)]"
               >
                 <ItemListRow :size="toItemListSize(size)">
@@ -452,7 +455,7 @@ defineSlots<MultiEmailInputSlots>()
                   </template>
                   <template #label>
                     <div class="min-w-0 truncate text-ink-gray-8">
-                      {{ createLabel(query.trim()) }}
+                      {{ createLabel(typed) }}
                     </div>
                   </template>
                 </ItemListRow>
