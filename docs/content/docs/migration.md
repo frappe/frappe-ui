@@ -4577,7 +4577,9 @@ If a chart must stay in one locale whatever the page says, pass your own
 `format`. The axis, the tooltip and the labels all use it.
 
 Numbers only. Dates and time-axis labels still print in English, whatever the
-page declares. Pass `xAxis.format` to print them in another language.
+page declares. Pass `xAxis.format` to print the date in another language where a
+value is read, such as the tooltip. The ticks of a time axis keep their English
+levels; a category axis prints its ticks with `xAxis.format` too.
 
 ### `FunnelChart` always prints its percentages
 

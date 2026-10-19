@@ -386,15 +386,16 @@ Seven parts: `CommandPalette` + `CommandPaletteInput` + `CommandPaletteList` + `
 
 ## Charts and Calendar
 
-`frappe-ui/charts` exports `BarChart`, `LineChart`, `AreaChart`, `DonutChart`, `FunnelChart`, `HeatmapChart`, `ScatterChart`, `SankeyChart`, `NumberCard`, plus the chrome `ChartCard`, `ChartContainer`, `ChartLegend`, `ChartTooltip`. Every chart takes `:data` (your rows) plus flat props that name the columns. The column names differ per family; everything below is required unless marked optional:
+`frappe-ui/charts` exports `BarChart`, `LineChart`, `AreaChart`, `DonutChart`, `PercentageBarChart`, `FunnelChart`, `HeatmapChart`, `CalendarHeatmapChart`, `ScatterChart`, `SankeyChart`, `NumberCard`, plus the chrome `ChartCard`, `ChartContainer`, `ChartLegend`, `ChartTooltip`. Every chart takes `:data` (your rows) plus flat props that name the columns. The column names differ per family; everything below is required unless marked optional:
 
 - `BarChart` / `LineChart` / `AreaChart` — `x`, `y` (`string | string[]` for several series); optional `splitBy`, plus `horizontal` on `BarChart`
-- `DonutChart` / `FunnelChart` — `category`, `value`
+- `DonutChart` / `PercentageBarChart` / `FunnelChart` — `category`, `value`
 - `ScatterChart` — `x`, `y`; optional `size`, `splitBy`
 - `HeatmapChart` — `x`, `y`, `value`
+- `CalendarHeatmapChart` — `date`, `value`; optional `start`, `end`, `weekStart`
 - `SankeyChart` — `source`, `target`, `value`
 
-Every chart also takes `title`, `subtitle`, `loading` and `error`, and draws its own header, tooltip and empty state, so pass `title` instead of drawing a heading above the chart. `BarChart`, `LineChart`, `AreaChart`, `DonutChart` and `ScatterChart` also draw their own legend; `FunnelChart`, `HeatmapChart` and `SankeyChart` draw none. Reach for `ChartLegend` / `ChartTooltip` only in a plot you draw yourself. There is no `height` prop: the chart root is `h-full`, so put the height on the wrapper (`<div class="h-80"><BarChart … /></div>`). `NumberCard` is the KPI tile, with **required** `title` and `value` (`number | string | null`) plus `prefix`, `suffix`, `delta`, `deltaSuffix`, `deltaCaption`, `negativeIsBetter`, `format`, `deltaFormat`, `sparkline` and `card` (default `true`). `format` and `deltaFormat` take `(value: number) => string` for number formatting. `ChartCard` is that same card surface with a default slot.
+Every chart also takes `title`, `subtitle`, `loading` and `error`, and draws its own header, tooltip and empty state, so pass `title` instead of drawing a heading above the chart. `BarChart`, `LineChart`, `AreaChart`, `DonutChart`, `PercentageBarChart` and `ScatterChart` also draw their own legend; `FunnelChart`, `HeatmapChart`, `CalendarHeatmapChart` and `SankeyChart` draw none. Reach for `ChartLegend` / `ChartTooltip` only in a plot you draw yourself. There is no `height` prop: the chart root is `h-full`, so put the height on the wrapper (`<div class="h-80"><BarChart … /></div>`). `NumberCard` is the KPI tile, with **required** `title` and `value` (`number | string | null`) plus `prefix`, `suffix`, `delta`, `deltaSuffix`, `deltaCaption`, `negativeIsBetter`, `format`, `deltaFormat`, `sparkline` and `card` (default `true`). `format` and `deltaFormat` take `(value: number) => string` for number formatting. `ChartCard` is that same card surface with a default slot.
 
 `Calendar` is a day/week/month/agenda view imported from `frappe-ui/experimental`. `CalendarMode` is `'Day' | 'Week' | 'Month' | 'Agenda'`; an event is `{ id?, title?, fromDate/toDate, fromTime/toTime, participant?, venue?, color? }`.
 

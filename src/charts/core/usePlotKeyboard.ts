@@ -41,6 +41,11 @@ export type PlotKeyboardArgs<T> = {
    * others, so a plot with one dimension answers to all four keys.
    */
   cross?: (delta: number) => void
+  /**
+   * Left and right, where one press is more than one mark: a calendar steps a
+   * week, and walks its days with up and down. Left out, they step one mark.
+   */
+  along?: (delta: number) => void
 }
 
 export type PlotKeyboardReturn = {
@@ -135,6 +140,12 @@ export function usePlotKeyboard<T>(
     args.cross(delta)
   }
 
+  /** Left and right, which step from no cursor as `cross` does. */
+  function along(delta: number) {
+    if (!args.along || index.value === null) return step(delta)
+    args.along(delta)
+  }
+
   function refresh() {
     if (index.value === null) return
     if (!count.value) return leave()
@@ -166,10 +177,10 @@ export function usePlotKeyboard<T>(
 
     switch (event.key) {
       case 'ArrowRight':
-        step(1)
+        along(1)
         break
       case 'ArrowLeft':
-        step(-1)
+        along(-1)
         break
       case 'ArrowDown':
         cross(1)

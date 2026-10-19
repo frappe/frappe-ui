@@ -4,11 +4,13 @@ import './style.css'
 
 export { default as AreaChart } from './AreaChart.vue'
 export { default as BarChart } from './BarChart.vue'
+export { default as CalendarHeatmapChart } from './CalendarHeatmapChart.vue'
 export { default as DonutChart } from './DonutChart.vue'
 export { default as FunnelChart } from './FunnelChart.vue'
 export { default as HeatmapChart } from './HeatmapChart.vue'
 export { default as LineChart } from './LineChart.vue'
 export { default as NumberCard } from './NumberCard.vue'
+export { default as PercentageBarChart } from './PercentageBarChart.vue'
 export { default as SankeyChart } from './SankeyChart.vue'
 export { default as ScatterChart } from './ScatterChart.vue'
 
@@ -49,6 +51,9 @@ export type {
   BarChartEmits,
   BarChartProps,
   BarChartSlots,
+  CalendarHeatmapChartEmits,
+  CalendarHeatmapChartProps,
+  CalendarHeatmapChartSlots,
   ChartActionsSlot,
   ChartBaseProps,
   ChartCardProps,
@@ -81,6 +86,9 @@ export type {
   LineChartSlots,
   NumberCardProps,
   NumberCardSlots,
+  PercentageBarChartEmits,
+  PercentageBarChartProps,
+  PercentageBarChartSlots,
   SankeyChartEmits,
   SankeyChartProps,
   SankeyChartSlots,
@@ -94,6 +102,8 @@ export type {
 // config shapes the option builders read stay internal.
 export type {
   AxisTitlePlacement,
+  CalendarHeatmapCellEvent,
+  CalendarHeatmapWeekStart,
   ChartDatapointEvent,
   ChartDir,
   ChartExposed,
@@ -117,4 +127,5 @@ export type {
   SankeyLinkEvent,
   SankeyNodeAlign,
   ScatterPointEvent,
+  SliceOrder,
 } from './types'

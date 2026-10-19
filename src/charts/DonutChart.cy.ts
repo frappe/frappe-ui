@@ -90,6 +90,14 @@ describe('DonutChart', () => {
     cy.get('[data-slot="chart-legend"]').should('contain.text', '50%')
   })
 
+  it('names a lone slice in the legend', () => {
+    mountChart({ data: [data[0]] })
+    cy.get('[data-slot="chart-legend"] [aria-pressed]')
+      .should('have.length', 1)
+      .and('contain.text', 'Search')
+      .and('contain.text', '100%')
+  })
+
   it('hides a slice and re-shares the rest against what is left', () => {
     mountChart()
     cy.get('[aria-label="Hide Search"]').click()
@@ -147,6 +155,96 @@ describe('DonutChart', () => {
     mountChart({ variant: 'half' })
     slices().should('have.length', data.length)
     cy.get('[data-slot="chart-plot"]').should('contain.text', '100')
+  })
+
+  it('draws a lone non-zero slice alone, keeping the zero ones in the legend', () => {
+    const lone = [
+      { source: 'Search', visits: 100 },
+      { source: 'Direct', visits: 0 },
+      { source: 'Email', visits: 0 },
+    ]
+    mountChart({ data: lone })
+    slices().should('have.length', 1)
+    cy.get('[data-slot="chart-legend"] [aria-pressed]').should('have.length', 3)
+  })
+
+  // A zero slice has no arc, so it can neither empty the ring nor hold it up.
+  it('counts the slices drawn, not the ones unhidden, when refusing a hide', () => {
+    mountChart({
+      data: [
+        { source: 'Search', visits: 100 },
+        { source: 'Direct', visits: 0 },
+        { source: 'Email', visits: 0 },
+      ],
+    })
+    cy.get('[aria-label="Hide Search"]').click()
+    cy.get('[aria-label="Hide Search"]').should(
+      'have.attr',
+      'aria-pressed',
+      'true',
+    )
+    cy.get('[aria-label="Hide Direct"]').click()
+    cy.get('[aria-label="Show Direct"]').should(
+      'have.attr',
+      'aria-pressed',
+      'false',
+    )
+  })
+
+  it('pins a color to a category, CSS variable or not, in the ring and the legend', () => {
+    cy.document().then((doc) =>
+      doc.documentElement.style.setProperty('--overdue', '#ff0000'),
+    )
+    mountChart({ colors: { Direct: 'var(--overdue)', Email: '#00ff00' } })
+    cy.get('[data-slot="chart-plot"] svg path[fill="#ff0000"]').should(
+      'have.length',
+      1,
+    )
+    cy.get('[data-slot="chart-plot"] svg path[fill="#00ff00"]').should(
+      'have.length',
+      1,
+    )
+    cy.contains('[data-slot="chart-legend"] [aria-pressed]', 'Direct')
+      .find('[style*="background-color"]')
+      .should('have.css', 'background-color', 'rgb(255, 0, 0)')
+    cy.document().then((doc) =>
+      doc.documentElement.style.removeProperty('--overdue'),
+    )
+  })
+
+  it('keeps a slice in an oklch variable filled while it is highlighted', () => {
+    cy.document().then((doc) =>
+      doc.documentElement.style.setProperty(
+        '--overdue',
+        'oklch(0.628 0.2577 29.23)',
+      ),
+    )
+    mountChart({ colors: { Search: 'var(--overdue)' } })
+    slices().should('have.length', data.length)
+    // Focus lands on the first slice, Search, and highlights it.
+    cy.get('[data-slot="chart-plot"] [role="img"]').focus()
+    cy.get('[data-slot="chart-tooltip"]').should('contain.text', 'Search')
+    // echarts writes a highlighted fill back as rgb(), and an oklch one, which
+    // it cannot parse, as none.
+    cy.get('[data-slot="chart-plot"] svg path[fill="rgb(255,0,0)"]').should(
+      'exist',
+    )
+    cy.document().then((doc) =>
+      doc.documentElement.style.removeProperty('--overdue'),
+    )
+  })
+
+  it("goes round the ring in the rows' order with order: 'rows'", () => {
+    mountChart({ data: [data[2], data[0], data[1]], order: 'rows' })
+    slices().should('have.length', data.length)
+    cy.get('[data-slot="chart-legend"] [aria-pressed]').then(($items) =>
+      expect(
+        [...$items].map((el) => el.getAttribute('aria-label')),
+      ).to.deep.equal(['Hide Email', 'Hide Search', 'Hide Direct']),
+    )
+    // Focus lands on the first slice drawn.
+    cy.get('[data-slot="chart-plot"] [role="img"]').focus()
+    cy.get('[data-slot="chart-tooltip"]').should('contain.text', 'Email')
   })
 
   it('folds the tail into one slice past maxSlices', () => {

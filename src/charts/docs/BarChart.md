@@ -67,12 +67,20 @@ flat, because flat text is easier to read. Crowded slots tilt, where a flat
 label would shrink to a few letters. All labels on the axis use the same layout,
 because labels at two angles look like two axes.
 
+A tilt is used only when it can label every category with space between the labels. When the slots are narrower than that, labels must be dropped in either layout, so the axis stays flat and labels every few categories instead, such as every seventh day of a month. The labels are spread evenly from the first category to the last, and each label is shown whole up to the length a tilted label can show.
+
+A label from `xAxis.format` is measured and truncated the same way, in the middle.
+
 There is no angle prop and no truncation length. The right angle changes with
 the chart width, and the chart already knows the width and has measured the
 text. A `horizontal` chart never tilts its labels: they are already one per line
 down the side, so they are truncated to fit that column. A time axis never tilts
 either. It picks its own ticks, and uses a larger interval instead of crowding
 them.
+
+## Counts
+
+When every value on a value axis is a whole number, its ticks are whole numbers too, so a count of 2 never gets a tick at 0.5. This applies to `y`, `y2` and the value axis of a `horizontal` chart, each decided from its own series. Set `yAxis.integer` (or `y2Axis.integer`) to `true` or `false` to override it.
 
 ## A line among the bars
 
@@ -110,9 +118,9 @@ label, and its two sides are left and right.
 
 `axis` sets which axis `value` belongs to: `'y'` (the default) or `'y2'` for a
 horizontal line at a value, `'x'` for a vertical line at a category or date.
-`horizontal` swaps the two axes and the lines follow. A line outside the plotted
-range is not drawn, because the scale follows the data, not the lines. Set
-`yAxis.min` or `max` to bring a distant target into view.
+`horizontal` swaps the two axes and the lines follow. The value axis stretches
+to reach every line, so a target above the data stays in view, and goes up a
+tick when a line at its top end leaves no room for the label.
 
 ## Context in the tooltip
 

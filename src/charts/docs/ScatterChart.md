@@ -52,9 +52,8 @@ charts already use `referenceLines` for that.
 
 <ComponentPreview name="Charts-ScatterQuadrants" csr="true" self-layout />
 
-A line outside the plotted range is not drawn, because each scale follows the
-data, not the lines. Set `xAxis.min` / `max` or `yAxis.min` / `max` to bring a
-distant line into view.
+Each scale stretches to reach the lines on it, so a line outside the data stays
+in view.
 
 ## Naming the points
 

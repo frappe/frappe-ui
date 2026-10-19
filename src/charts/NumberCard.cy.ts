@@ -78,6 +78,14 @@ describe('NumberCard', () => {
       cy.get('.lucide-arrow-up-right').should('not.exist')
       cy.get('.lucide-arrow-down-left').should('not.exist')
     })
+
+    it('reads a delta that prints as zero as flat', () => {
+      mountCard({ delta: 0.04, deltaSuffix: '%' })
+      card().should('contain.text', '0%')
+      cy.get('.lucide-arrow-up-right').should('not.exist')
+      cy.get('.text-ink-gray-6').should('contain.text', '0%')
+      cy.get('.text-ink-green-7').should('not.exist')
+    })
   })
 
   describe('sparkline', () => {
@@ -270,6 +278,24 @@ describe('NumberCard', () => {
       mountCard({ value: null }, { empty: () => h('span', 'Nothing yet') })
 
       card().should('contain.text', 'Nothing yet').and('not.contain.text', '—')
+    })
+  })
+
+  describe('title row', () => {
+    const titleRow = () => cy.get('[data-slot="chart-header"]')
+
+    it('is left out when there is nothing to put in it', () => {
+      mountCard({ title: undefined })
+      card().should('contain.text', '12,300')
+      titleRow().should('not.exist')
+    })
+
+    it('stays for an actions slot alone', () => {
+      mountCard(
+        { title: undefined },
+        { actions: () => h('button', 'Week') },
+      )
+      titleRow().should('contain.text', 'Week')
     })
   })
 

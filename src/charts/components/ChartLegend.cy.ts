@@ -230,7 +230,13 @@ describe('ChartLegend', () => {
                     hidden: hidden.value.includes(item.name),
                   })),
                   onChange: (name: string) => {
-                    hidden.value = toggleHiddenSeries(hidden.value, name, count)
+                    hidden.value = toggleHiddenSeries(
+                      hidden.value,
+                      name,
+                      many(count)
+                        .map((item) => item.name)
+                        .filter((n) => !hidden.value.includes(n)),
+                    )
                   },
                 }),
               ])
@@ -391,7 +397,13 @@ describe('ChartLegend', () => {
                     hidden: hidden.value.includes(item.name),
                   })),
                   onChange: (name: string) => {
-                    hidden.value = toggleHiddenSeries(hidden.value, name, 3)
+                    hidden.value = toggleHiddenSeries(
+                      hidden.value,
+                      name,
+                      many(3)
+                        .map((item) => item.name)
+                        .filter((n) => !hidden.value.includes(n)),
+                    )
                   },
                 }),
               ])

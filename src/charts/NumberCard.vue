@@ -62,7 +62,11 @@
       class="relative flex min-w-0 flex-col gap-1.5"
       :class="{ 'pb-10': showSparkline }"
     >
-      <div class="flex min-w-0 items-center justify-between gap-3">
+      <div
+        v-if="showTitleRow"
+        data-slot="chart-header"
+        class="flex min-w-0 items-center justify-between gap-3"
+      >
         <!-- The font-size class is on the row, not on the title span, so slot
              content sized in `em` follows the card's smaller title. Zero
              height for the same reason `#actions` has it. -->
@@ -258,11 +262,13 @@ const TONE_CLASSES: Record<DeltaTone, string> = {
   neutral: 'text-ink-gray-6',
 }
 
-const direction = computed(() => deltaDirection(props.delta))
-const toneClass = computed(
-  () => TONE_CLASSES[deltaTone(props.delta, props.negativeIsBetter)],
-)
+const direction = computed(() => deltaDirection(props))
+const toneClass = computed(() => TONE_CLASSES[deltaTone(props)])
 const formattedDelta = computed(() => formatCardDelta(props, props.delta))
+// An empty row would still take the column's gap above the number.
+const showTitleRow = computed(() =>
+  Boolean(props.title || slots['title-suffix'] || slots.actions),
+)
 const showEmptySlot = computed(() => isEmpty.value && Boolean(slots.empty))
 // Only over a reading. The em dash a card with no value prints is not a number
 // the color says anything about, and the loading skeleton is not one either.
