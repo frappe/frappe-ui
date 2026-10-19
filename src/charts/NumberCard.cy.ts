@@ -199,7 +199,7 @@ describe('NumberCard', () => {
   })
 
   describe('title row', () => {
-    const titleRow = () => cy.get('[data-slot="number-card-title"]')
+    const titleRow = () => cy.get('[data-slot="chart-header"]')
 
     it('is left out when there is nothing to put in it', () => {
       mountCard({ title: undefined })

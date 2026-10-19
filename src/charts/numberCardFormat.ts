@@ -9,17 +9,15 @@ export type DeltaTone = 'positive' | 'negative' | 'neutral'
 
 type DeltaConfig = Pick<
   NumberCardConfig,
-  'deltaPrefix' | 'deltaSuffix' | 'deltaFormat'
+  'delta' | 'deltaPrefix' | 'deltaSuffix' | 'deltaFormat' | 'negativeIsBetter'
 >
 
 /**
  * A delta that prints the way zero does is flat: an arrow beside "0%" would
  * point at a move the reader cannot see.
  */
-export function deltaDirection(
-  config: DeltaConfig,
-  delta: number | null | undefined,
-): DeltaDirection {
+export function deltaDirection(config: DeltaConfig): DeltaDirection {
+  const { delta } = config
   if (!isPresent(delta)) return 'flat'
   if (formatCardDelta(config, delta) === formatCardDelta(config, 0)) {
     return 'flat'
@@ -31,14 +29,10 @@ export function deltaDirection(
  * `negativeIsBetter` flips the colors without touching the arrow: churn falling
  * still points down, it just stops being red.
  */
-export function deltaTone(
-  config: DeltaConfig,
-  delta: number | null | undefined,
-  negativeIsBetter = false,
-): DeltaTone {
-  const direction = deltaDirection(config, delta)
+export function deltaTone(config: DeltaConfig): DeltaTone {
+  const direction = deltaDirection(config)
   if (direction === 'flat') return 'neutral'
-  const better = negativeIsBetter ? 'down' : 'up'
+  const better = config.negativeIsBetter ? 'down' : 'up'
   return direction === better ? 'positive' : 'negative'
 }
 
