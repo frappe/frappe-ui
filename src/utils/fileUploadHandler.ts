@@ -146,7 +146,9 @@ function serverError(status: number, responseText: string): UploadError {
   }
   let error: ServerError = {}
   try {
-    error = JSON.parse(responseText)
+    const parsed: unknown = JSON.parse(responseText)
+    // `null`, a string or a number carries no fields to read.
+    if (parsed && typeof parsed === 'object') error = parsed
   } catch {
     // not JSON
   }

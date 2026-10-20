@@ -325,7 +325,7 @@ resolves to the uploaded file's record, and rejects with an
 | ---------- | ---------------------- | --------------------------- |
 | `start`    | none                   | The upload starts.          |
 | `progress` | `{ uploaded, total }`  | Upload progress changes. `total` is the file size. |
-| `error`    | The server's error text, if any | The upload fails. |
+| `error`    | The server's parsed error response, if it sent one | The upload fails. |
 | `finish`   | none                   | The upload succeeds.        |
 
 ## UploadError

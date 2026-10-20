@@ -254,6 +254,34 @@ describe('FileUploadHandler', () => {
       expect(onFinish).not.toHaveBeenCalled()
     })
 
+    it('stops between chunks when the signal aborts', async () => {
+      const controller = new AbortController()
+      const handler = new FileUploadHandler()
+      handler.on('progress', ({ uploaded }: { uploaded: number }) => {
+        if (uploaded >= 10) controller.abort()
+      })
+
+      const error = await handler
+        .upload(bigFile(), { signal: controller.signal })
+        .catch((e) => e)
+
+      expect(error).toBeInstanceOf(UploadError)
+      expect(error.kind).toBe('abort')
+      expect(ScriptedXhr.instances).toHaveLength(1)
+    })
+
+    it('rejects when an error response is JSON null', async () => {
+      ScriptedXhr.responses = [{ status: 500, body: null }]
+
+      const error = await new FileUploadHandler()
+        .upload(file(), {})
+        .catch((e) => e)
+
+      expect(error).toBeInstanceOf(UploadError)
+      expect(error.status).toBe(500)
+      expect(error.message).toBe('Upload failed')
+    })
+
     it('does not quote maxFileSize when a proxy answers 413', async () => {
       ScriptedXhr.responses = [{ status: 413, body: {} }]
       setConfig('maxFileSize', 200 * 1024 * 1024)
