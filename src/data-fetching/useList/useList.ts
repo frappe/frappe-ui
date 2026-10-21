@@ -13,7 +13,11 @@ import {
   OnFetchErrorContext,
   UseFetchOptions,
 } from '@vueuse/core'
-import { FrappeResponseError, useFrappeFetch } from '../useFrappeFetch'
+import {
+  FrappeResponseError,
+  getRequestDispatchSeq,
+  useFrappeFetch,
+} from '../useFrappeFetch'
 import { useAction } from '../useAction'
 import { parseFilters, makeGetParams, normalizeCacheKey } from '../utils'
 import { UseListOptions, UseListResponse } from './types'
@@ -114,9 +118,20 @@ export function useList<T extends { name: string }>(
     return transform ? applyTransform(structuredClone(rows), transform) : rows
   }
 
+  // The dispatch number of the newest list request, whoever sent it: `reload`
+  // or `useFetch`'s parameter watcher under `refetch: true`. A request with an
+  // older number was superseded, and `useFetch` aborted it.
+  let lastDispatch = 0
+
   const fetchOptions: UseFetchOptions = {
     immediate,
     refetch,
+    beforeFetch({ options }) {
+      const seq = getRequestDispatchSeq(options)
+      if (seq !== undefined && seq > lastDispatch) {
+        lastDispatch = seq
+      }
+    },
     initialData: initialData || null,
     afterFetch: handleAfterFetch<T>({
       ...options,
@@ -129,7 +144,14 @@ export function useList<T extends { name: string }>(
       _limit,
       hasNextPage,
     }),
-    onFetchError: handleFetchError<T>(options),
+    onFetchError: handleFetchError<T>({
+      ...options,
+      isSuperseded(ctx) {
+        const seq = getRequestDispatchSeq(ctx.context.options)
+        return seq !== undefined && seq < lastDispatch
+      },
+      getError: () => error.value,
+    }),
   }
 
   const {
@@ -402,8 +424,21 @@ function applyTransform<T>(rows: T[], transform?: (data: T[]) => T[]) {
   return Array.isArray(returnValue) ? returnValue : rows
 }
 
-function handleFetchError<T>({ onError }: UseListOptions<T>) {
+function handleFetchError<T>({
+  onError,
+  isSuperseded,
+  getError,
+}: UseListOptions<T> & {
+  isSuperseded: (ctx: OnFetchErrorContext) => boolean
+  getError: () => unknown
+}) {
   return function (ctx: OnFetchErrorContext) {
+    if (isSuperseded(ctx)) {
+      // A newer request replaced this one. Its abort is not an error of the
+      // list, and `useFetch` writes whatever is returned here into `error`,
+      // so hand back the error the newer request left there.
+      return { ...ctx, error: getError() }
+    }
     if (onError) {
       try {
         onError(ctx.error)

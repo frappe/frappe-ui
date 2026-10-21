@@ -764,4 +764,41 @@ describe('useList concurrency', () => {
     expect(users.setValue.data).toMatchObject({ name: 'quick-user' })
     expect(users.setValue.error).toBe(null)
   })
+
+  it('leaves error and onError alone when a newer reload aborts an older one', async () => {
+    const onError = vi.fn()
+    const users = useList<User>({
+      baseUrl,
+      doctype: 'User',
+      fields: ['name', 'email'],
+      immediate: false,
+      refetch: false,
+      onError,
+    })
+
+    await Promise.all([users.reload(), users.reload()])
+
+    expect(users.data).toHaveLength(20)
+    expect(users.error).toBe(null)
+    expect(onError).not.toHaveBeenCalled()
+  })
+
+  it('still reports a request aborted by abort()', async () => {
+    const onError = vi.fn()
+    const users = useList<User>({
+      baseUrl,
+      doctype: 'User',
+      fields: ['name', 'email'],
+      immediate: false,
+      refetch: false,
+      onError,
+    })
+
+    const reloading = users.reload()
+    users.abort()
+    await reloading
+
+    expect(users.error).toBeTruthy()
+    expect(onError).toHaveBeenCalledOnce()
+  })
 })
