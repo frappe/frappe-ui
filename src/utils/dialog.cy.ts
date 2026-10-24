@@ -370,6 +370,39 @@ describe('dialog.ts — imperative API', () => {
     cy.contains('button', 'Cancel').should('exist')
   })
 
+  it('prompt autofocuses the first text field and submits on Enter', () => {
+    const onConfirm = cy.spy().as('onConfirm')
+
+    cy.mount(DialogManager)
+
+    cy.then(() => {
+      prompt({
+        title: 'Rename project',
+        fields: [
+          {
+            name: 'name',
+            label: 'Name',
+            defaultValue: 'Old name',
+          },
+        ],
+        onConfirm,
+      })
+    })
+
+    cy.get('[role=dialog] input[type=text]')
+      .should('have.focus')
+      .type('New name')
+      .type('{enter}')
+
+    cy.get('@onConfirm').should('have.been.calledOnce')
+    cy.get('@onConfirm').then((spy: any) => {
+      const ctx = spy.firstCall.args[0]
+      expect(ctx.values).to.deep.equal({ name: 'New name' })
+    })
+
+    cy.get('[role=dialog]').should('not.exist')
+  })
+
   it('prompt submits typed values via onConfirm', () => {
     const onConfirm = cy.spy().as('onConfirm')
     cy.mount(DialogManager)
@@ -462,6 +495,42 @@ describe('dialog.ts — imperative API', () => {
 
     cy.get('[role=dialog] [role=combobox]').click().type('Bug')
     cy.contains('[role=option]', 'Create').should('not.exist')
+  })
+
+    it('prompt combobox does not submit on Enter while selecting an option', () => {
+    const onConfirm = cy.spy().as('onConfirm')
+
+    cy.mount(DialogManager)
+
+    cy.then(() => {
+      prompt({
+        title: 'Pick a label',
+        fields: [
+          {
+            name: 'label',
+            label: 'Label',
+            type: 'combobox',
+            options: [
+              { label: 'Bug', value: 'bug' },
+              { label: 'Docs', value: 'docs' },
+            ],
+          },
+        ],
+        onConfirm,
+      })
+    })
+
+    cy.get('[role=dialog] [role=combobox]').click().type('Bug')
+    cy.contains('[role=option]', 'Bug').should('exist')
+    cy.get('[role=dialog] [role=combobox]').type('{enter}')
+
+    cy.get('@onConfirm').should('not.have.been.called')
+    cy.get('[role=dialog]').should('exist')
+
+    cy.contains('button', 'Submit').click()
+
+    cy.get('@onConfirm').should('have.been.calledOnce')
+    cy.get('[role=dialog]').should('not.exist')
   })
 
   it('prompt seeds defaultValue and submits it untouched', () => {
