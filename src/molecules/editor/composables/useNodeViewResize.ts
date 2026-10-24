@@ -274,18 +274,20 @@ export function useNodeViewResize(
     return editor.view.dom.clientWidth - maxWidthPadding
   }
 
-  // Snaps use the content box: media renders no wider than it, so a snap past
-  // it would save a width the media never showed.
-  function getContentWidth(): number {
+  // The base for "Full width" and its fractions: the widest the media can
+  // show. Media renders no wider than the content box, so a snap past it would
+  // save a width the media never showed. `maxWidthPadding` is a fixed stand-in
+  // for the editor padding, so the two never add up: the tighter limit wins.
+  function getFullWidth(): number {
     const dom = editor.view.dom
     const style = getComputedStyle(dom)
     const padding =
       parseFloat(style.paddingLeft) + parseFloat(style.paddingRight)
-    return dom.clientWidth - padding - maxWidthPadding
+    return Math.min(dom.clientWidth - padding, getMaxDragWidth())
   }
 
   function getSnapTargets(): SnapTarget[] {
-    const maxWidth = getContentWidth()
+    const maxWidth = getFullWidth()
     const targets: SnapTarget[] = [
       { width: maxWidth, label: 'Full width' },
       { width: Math.round(maxWidth * 0.75), label: '75%' },

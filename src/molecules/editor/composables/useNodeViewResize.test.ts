@@ -398,30 +398,39 @@ describe('useNodeViewResize', () => {
     unmount()
   })
 
-  it('snaps to fractions of the content width inside the editor padding', () => {
-    // 70px padding each side leaves 860px of content, the most media can show.
-    const el = makeEl(400, 200)
-    const { api, unmount } = mountResize(makeEditor(true, [], 70), {
-      mediaEl: () => el,
-      getAspectRatio: () => 0.5,
-      getPos: () => 0,
-      onCommit: vi.fn(),
-    })
+  // An embed's `maxWidthPadding` stands in for the editor padding, so a real
+  // padding replaces it rather than adding to it.
+  it.each([
+    { media: 'an image', maxWidthPadding: 0, maxDragWidth: '1000px' },
+    { media: 'an embed', maxWidthPadding: 40, maxDragWidth: '960px' },
+  ])(
+    'snaps $media to fractions of the content width inside the editor padding',
+    ({ maxWidthPadding, maxDragWidth }) => {
+      // 70px padding each side leaves 860px of content, the most media can show.
+      const el = makeEl(400, 200)
+      const { api, unmount } = mountResize(makeEditor(true, [], 70), {
+        mediaEl: () => el,
+        getAspectRatio: () => 0.5,
+        getPos: () => 0,
+        onCommit: vi.fn(),
+        maxWidthPadding,
+      })
 
-    api.startResize({ clientX: 0, clientY: 0 } as MouseEvent, 'right')
-    window.dispatchEvent(new MouseEvent('pointermove', { clientX: 26 }))
-    expect(api.guide.value?.snap?.label).toBe('50%')
-    expect(el.style.width).toBe('430px')
-    window.dispatchEvent(new MouseEvent('pointermove', { clientX: 456 }))
-    expect(api.guide.value?.snap?.label).toBe('Full width')
-    expect(el.style.width).toBe('860px')
-    // Away from any snap, the drag still reaches the padding box as before.
-    window.dispatchEvent(new MouseEvent('pointermove', { clientX: 700 }))
-    expect(el.style.width).toBe('1000px')
+      api.startResize({ clientX: 0, clientY: 0 } as MouseEvent, 'right')
+      window.dispatchEvent(new MouseEvent('pointermove', { clientX: 26 }))
+      expect(api.guide.value?.snap?.label).toBe('50%')
+      expect(el.style.width).toBe('430px')
+      window.dispatchEvent(new MouseEvent('pointermove', { clientX: 456 }))
+      expect(api.guide.value?.snap?.label).toBe('Full width')
+      expect(el.style.width).toBe('860px')
+      // Away from any snap, the drag still reaches the padding box as before.
+      window.dispatchEvent(new MouseEvent('pointermove', { clientX: 700 }))
+      expect(el.style.width).toBe(maxDragWidth)
 
-    window.dispatchEvent(new MouseEvent('pointerup'))
-    unmount()
-  })
+      window.dispatchEvent(new MouseEvent('pointerup'))
+      unmount()
+    },
+  )
 
   it('moves the snap line on scroll and re-snaps on window resize', () => {
     const el = makeEl(400, 200)
