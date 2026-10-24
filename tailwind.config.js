@@ -31,6 +31,8 @@ export default {
   content: [
     './index.html',
     './App.vue',
+    // Dev-only scratch surface rendered by App.vue — not part of the package.
+    './playground/**/*.{vue,js,ts,jsx,tsx}',
     './src/**/*.{vue,js,ts,jsx,tsx}',
     './experimental/**/*.{vue,js,ts,jsx,tsx}',
     './docs/**/*.{vue,js,ts,md}',
