@@ -26,6 +26,24 @@ const knobs: Knob[] = [
     visibleWhen: (v) => v.format === 'token',
   },
   {
+    name: 'largestUnit',
+    type: 'tabs',
+    default: 'hour',
+    options: [
+      { label: 'hour', value: 'hour' },
+      { label: 'day', value: 'day' },
+    ],
+  },
+  {
+    name: 'smallestUnit',
+    type: 'tabs',
+    default: 'second',
+    options: [
+      { label: 'second', value: 'second' },
+      { label: 'minute', value: 'minute' },
+    ],
+  },
+  {
     name: 'size',
     type: 'tabs',
     default: 'sm',
@@ -62,6 +80,9 @@ function buildCode(v: Record<string, any>) {
   if (v.label) attrs.push(`label="${v.label}"`)
   if (v.description) attrs.push(`description="${v.description}"`)
   if (format && format !== 'short') attrs.push(`format="${format}"`)
+  if (v.largestUnit !== 'hour') attrs.push(`largest-unit="${v.largestUnit}"`)
+  if (v.smallestUnit !== 'second')
+    attrs.push(`smallest-unit="${v.smallestUnit}"`)
   if (v.size !== 'sm') attrs.push(`size="${v.size}"`)
   if (v.variant !== 'subtle') attrs.push(`variant="${v.variant}"`)
   if (v.required) attrs.push('required')
@@ -80,6 +101,8 @@ function buildCode(v: Record<string, any>) {
           :label="values.label || undefined"
           :description="values.description || undefined"
           :format="resolveFormat(values) || 'short'"
+          :largest-unit="values.largestUnit"
+          :smallest-unit="values.smallestUnit"
           :size="values.size"
           :variant="values.variant"
           :required="values.required"

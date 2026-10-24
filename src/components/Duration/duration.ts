@@ -2,7 +2,7 @@
 // Duration helpers: convert between a seconds value and human-readable text.
 // ---------------------------------------------------------------------------
 
-import type { DurationFormat } from './types'
+import type { DurationFormat, DurationUnits } from './types'
 
 /**
  * Format a duration in seconds as text.
@@ -17,24 +17,44 @@ import type { DurationFormat } from './types'
  *   formatDuration(5445, "h'h' m'm' s's'")  // "1h 30m 45s"   (template, all parts)
  *   formatDuration(90,   "h'h' m'm' s's'")  // "0h 1m 30s"
  *   formatDuration(7323, 'hh:mm:ss')        // "02:02:03"
+ *
+ * `units` sets the unit range of the `short` and `long` presets:
+ *
+ *   formatDuration(93784, 'short', { largestUnit: 'day' })      // "1d 2h 3m 4s"
+ *   formatDuration(93784, 'short', { smallestUnit: 'minute' })  // "26h 3m"
  */
 export function formatDuration(
   totalSeconds: number | null | undefined,
   format: DurationFormat = 'short',
+  units: DurationUnits = {},
 ): string {
   if (totalSeconds === null || totalSeconds === undefined) return ''
 
   const seconds = Number(totalSeconds)
   if (Number.isNaN(seconds)) return ''
 
+  if (format === 'short' || format === 'long') {
+    const parts = splitDuration(seconds, units)
+    const smallestUnit = units.smallestUnit ?? 'second'
+    return format === 'short'
+      ? formatShort(parts, smallestUnit)
+      : formatLong(parts, smallestUnit)
+  }
+
   const hours = Math.floor(seconds / 3600)
   const minutes = Math.floor((seconds % 3600) / 60)
   const secs = seconds % 60
 
-  if (format === 'short') return formatShort(hours, minutes, secs)
-  if (format === 'long') return formatLong(hours, minutes, secs)
   if (format === 'colon') return formatColon(hours, minutes, secs)
   return renderTemplate(format, hours, minutes, secs)
+}
+
+/** Round seconds to the smallest unit, as the presets show them. */
+export function roundDuration(
+  seconds: number,
+  smallestUnit: DurationUnits['smallestUnit'] = 'second',
+): number {
+  return smallestUnit === 'minute' ? Math.round(seconds / 60) * 60 : seconds
 }
 
 // ---------------------------------------------------------------------------
@@ -92,20 +112,49 @@ function renderTemplate(
   return out
 }
 
-function formatShort(hours: number, minutes: number, secs: number): string {
-  const parts: string[] = []
-  if (hours) parts.push(`${hours}h`)
-  if (minutes) parts.push(`${minutes}m`)
-  if (secs) parts.push(`${secs}s`)
-  return parts.length ? parts.join(' ') : '0s'
+type DurationPartUnit = 'day' | 'hour' | 'minute' | 'second'
+type DurationParts = Record<DurationPartUnit, number>
+
+const PART_UNITS: DurationPartUnit[] = ['day', 'hour', 'minute', 'second']
+const SHORT_LABELS: Record<DurationPartUnit, string> = {
+  day: 'd',
+  hour: 'h',
+  minute: 'm',
+  second: 's',
 }
 
-function formatLong(hours: number, minutes: number, secs: number): string {
-  const parts: string[] = []
-  if (hours) parts.push(hours === 1 ? '1 hour' : `${hours} hours`)
-  if (minutes) parts.push(minutes === 1 ? '1 minute' : `${minutes} minutes`)
-  if (secs) parts.push(secs === 1 ? '1 second' : `${secs} seconds`)
-  return parts.length ? parts.join(' ') : '0 seconds'
+function splitDuration(
+  totalSeconds: number,
+  units: DurationUnits,
+): DurationParts {
+  const seconds = roundDuration(totalSeconds, units.smallestUnit)
+  const day = units.largestUnit === 'day' ? Math.floor(seconds / 86400) : 0
+  return {
+    day,
+    hour: Math.floor((seconds - day * 86400) / 3600),
+    minute: Math.floor((seconds % 3600) / 60),
+    second: seconds % 60,
+  }
+}
+
+function formatShort(
+  parts: DurationParts,
+  smallestUnit: DurationPartUnit,
+): string {
+  const text = PART_UNITS.filter((unit) => parts[unit]).map(
+    (unit) => `${parts[unit]}${SHORT_LABELS[unit]}`,
+  )
+  return text.length ? text.join(' ') : `0${SHORT_LABELS[smallestUnit]}`
+}
+
+function formatLong(
+  parts: DurationParts,
+  smallestUnit: DurationPartUnit,
+): string {
+  const text = PART_UNITS.filter((unit) => parts[unit]).map((unit) =>
+    parts[unit] === 1 ? `1 ${unit}` : `${parts[unit]} ${unit}s`,
+  )
+  return text.length ? text.join(' ') : `0 ${smallestUnit}s`
 }
 
 function formatColon(hours: number, minutes: number, secs: number): string {
@@ -118,7 +167,7 @@ function formatColon(hours: number, minutes: number, secs: number): string {
 // Parse: human-readable string → seconds (integer) or null if invalid.
 //
 // Supported formats (case-insensitive, spaces optional, any unit order):
-//   1h 30m 45s | 4m 3h 4s | 4sec 3hour 4min | 1h30m45s
+//   1h 30m 45s | 4m 3h 4s | 4sec 3hour 4min | 1h30m45s | 1d 2h | 2 days
 //   1:30:45    | 1:30     | :45
 //   90         | 90s      (bare integer treated as seconds)
 // ---------------------------------------------------------------------------
@@ -158,7 +207,8 @@ function parseColon(input: string): number | null {
 // Named units in any order: scan (number)(unit) tokens left-to-right and
 // verify no unexpected text exists between tokens. Rejects duplicate units.
 function parseUnits(input: string): number | null {
-  const tokenRe = /(\d+)\s*(hours?|hrs?|h|minutes?|mins?|m|seconds?|secs?|s)/g
+  const tokenRe =
+    /(\d+)\s*(days?|d|hours?|hrs?|h|minutes?|mins?|m|seconds?|secs?|s)/g
   const tokens: { value: number; unit: string }[] = []
   let lastEnd = 0
   let match: RegExpExecArray | null
@@ -177,7 +227,8 @@ function parseUnits(input: string): number | null {
   for (const { value, unit } of tokens) {
     if (seen.has(unit)) return null
     seen.add(unit)
-    if (unit === 'h') total += value * 3600
+    if (unit === 'd') total += value * 86400
+    else if (unit === 'h') total += value * 3600
     else if (unit === 'm') total += value * 60
     else total += value
   }
