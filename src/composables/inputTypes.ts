@@ -14,7 +14,10 @@
 export type InputSize = 'xs' | 'sm' | 'md' | 'lg'
 
 /** Size scale for binary controls (Checkbox, Radio, Switch). */
-export type ToggleSize = 'xs' | 'sm' | 'md' | 'lg'
+export type ToggleSize = 'xs' | 'sm' | 'md'
+
+/** Size scale for binary controls (Radio only). */
+export type RadioSize = 'xs' | 'sm' | 'md' | 'lg'
 
 /**
  * Size scale for numeric range controls (Slider). Deliberately narrower than

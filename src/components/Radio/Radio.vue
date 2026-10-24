@@ -83,7 +83,13 @@ const rowClasses = computed(() => {
     'focus:outline-none focus-visible:focus-ring',
     isDisabled.value ? 'cursor-not-allowed' : 'cursor-pointer',
   ]
-  if (!padded.value) return classes
+  if (!padded.value){
+    if(size.value === 'lg'){
+      classes.push('min-h-[44px]')
+      if (!hasDescription.value) classes.push('items-center')
+    }
+  return classes
+  }
 
   // Rows with a description grow with vertical padding; label-only rows keep a
   // fixed compact height (24 / 28 / 32 / 44px) so lists stay evenly spaced.
@@ -126,7 +132,7 @@ const circleClasses = computed(() => {
     size.value === 'lg'
       ? {
           control: 'size-4.5 group-data-[state=checked]:border-[5.5px]',
-          offset: 'mt-1',
+          offset: 'mt-[1px]',
         }
       : size.value === 'md'
       ? {
@@ -174,7 +180,7 @@ const circleClasses = computed(() => {
 })
 
 const labelClasses = computed(() => [
-  'block text-base leading-normal select-none',
+  'block leading-normal select-none',
   size.value === 'lg' ? 'text-lg' : 'text-base',
   isDisabled.value ? 'text-ink-gray-4' : 'text-ink-gray-7',
 ])
