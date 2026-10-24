@@ -95,6 +95,19 @@ describe('Combobox', () => {
       cy.get('[data-slot="trigger"]').should('have.attr', 'data-disabled')
       cy.get('[role="combobox"]').should('have.attr', 'disabled')
     })
+
+    it('draws a disabled value in the trigger’s muted ink', () => {
+      cy.mount(Combobox, {
+        props: { options: fruits, modelValue: 'Apple', disabled: true },
+      })
+
+      cy.get('[data-slot="trigger"]').then(($trigger) => {
+        const muted = getComputedStyle($trigger[0]).color
+        cy.get('[role="combobox"]')
+          .should('have.value', 'Apple')
+          .and('have.css', 'color', muted)
+      })
+    })
   })
 
   describe('selection', () => {

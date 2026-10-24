@@ -202,4 +202,4 @@ export function buildCustomOptionContext(
 }
 
 export const inputClasses =
-  'min-w-0 flex-1 border-0 bg-transparent p-0 text-ink-gray-8 outline-none ring-0 placeholder:text-ink-gray-4 focus:border-0 focus:outline-none focus:ring-0'
+  'min-w-0 flex-1 border-0 bg-transparent p-0 text-ink-gray-8 disabled:text-ink-gray-4 outline-none ring-0 placeholder:text-ink-gray-4 focus:border-0 focus:outline-none focus:ring-0'
