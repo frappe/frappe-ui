@@ -28,6 +28,20 @@
     default: '"short"'
   },
   {
+    name: 'largestUnit',
+    description: 'The biggest unit of the `short` and `long` presets and of the edit text.\n`day` shows 93784 as `1d 2h 3m 4s`. Defaults to `hour` (`26h 3m 4s`).',
+    required: false,
+    type: 'DurationLargestUnit',
+    default: '"hour"'
+  },
+  {
+    name: 'smallestUnit',
+    description: 'The smallest unit of the `short` and `long` presets and of the edit text.\n`minute` rounds to the nearest minute, and a typed value is saved rounded.\nDefaults to `second`.',
+    required: false,
+    type: 'DurationSmallestUnit',
+    default: '"second"'
+  },
+  {
     name: 'size',
     description: 'Visual size of the input. Forwarded to the underlying `TextInput`.',
     required: false,

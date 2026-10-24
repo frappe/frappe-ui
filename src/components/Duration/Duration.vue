@@ -30,12 +30,14 @@
 <script setup lang="ts">
 import { computed, nextTick, ref } from 'vue'
 import { TextInput } from '../TextInput'
-import { formatDuration, parseDuration } from './duration'
+import { formatDuration, parseDuration, roundDuration } from './duration'
 import type { DurationProps, DurationExposed } from './types'
 
 const props = withDefaults(defineProps<DurationProps>(), {
   placeholder: '1h 30m 45s',
   format: 'short',
+  largestUnit: 'hour',
+  smallestUnit: 'second',
 })
 
 const model = defineModel<number | null>({ default: null })
@@ -50,13 +52,19 @@ defineSlots<{
 const inputRef = ref<InstanceType<typeof TextInput> | null>(null)
 const isFocused = ref(false)
 const editValue = ref('')
+const focusValue = ref('')
 const internalError = ref('')
 const cancelled = ref(false)
+
+const units = computed(() => ({
+  largestUnit: props.largestUnit,
+  smallestUnit: props.smallestUnit,
+}))
 
 const displayValue = computed(() =>
   isFocused.value || internalError.value
     ? editValue.value
-    : formatDuration(model.value, props.format),
+    : formatDuration(model.value, props.format, units.value),
 )
 
 function handleFocus() {
@@ -67,7 +75,8 @@ function handleFocus() {
   isFocused.value = true
   // Always edit in the canonical "1h 30m 45s" notation so the typed value
   // round-trips through parseDuration regardless of the display `format`.
-  editValue.value = formatDuration(model.value, 'short')
+  editValue.value = formatDuration(model.value, 'short', units.value)
+  focusValue.value = editValue.value
   internalError.value = ''
   nextTick(() => inputRef.value?.inputElement?.select())
 }
@@ -102,6 +111,13 @@ function handleKeydown(event: KeyboardEvent) {
 function commit() {
   const raw = editValue.value.trim()
 
+  // The edit text may be rounded, so committing it unchanged would rewrite the value.
+  if (raw === focusValue.value) {
+    internalError.value = ''
+    isFocused.value = false
+    return
+  }
+
   if (raw === '') {
     internalError.value = ''
     isFocused.value = false
@@ -123,7 +139,7 @@ function commit() {
 
   internalError.value = ''
   isFocused.value = false
-  model.value = seconds
+  model.value = roundDuration(seconds, props.smallestUnit)
 }
 
 defineExpose<DurationExposed>({
