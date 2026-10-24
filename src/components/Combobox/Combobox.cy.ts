@@ -96,13 +96,25 @@ describe('Combobox', () => {
       cy.get('[role="combobox"]').should('have.attr', 'disabled')
     })
 
-    it('draws a disabled value in the trigger’s muted ink', () => {
-      cy.mount(Combobox, {
-        props: { options: fruits, modelValue: 'Apple', disabled: true },
+    it('draws a disabled value in the muted disabled ink', () => {
+      // The trigger's own colour resolves to `text-ink-gray-7`, so compare
+      // against the `ink-gray-4` token that a disabled Select value uses.
+      const WithMutedProbe = defineComponent({
+        setup() {
+          return () => [
+            h(Combobox, {
+              options: fruits,
+              modelValue: 'Apple',
+              disabled: true,
+            }),
+            h('span', { 'data-testid': 'muted', class: 'text-ink-gray-4' }),
+          ]
+        },
       })
+      cy.mount(WithMutedProbe)
 
-      cy.get('[data-slot="trigger"]').then(($trigger) => {
-        const muted = getComputedStyle($trigger[0]).color
+      cy.get('[data-testid="muted"]').then(($muted) => {
+        const muted = getComputedStyle($muted[0]).color
         cy.get('[role="combobox"]')
           .should('have.value', 'Apple')
           .and('have.css', 'color', muted)
