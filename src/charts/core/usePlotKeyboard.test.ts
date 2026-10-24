@@ -38,7 +38,8 @@ function setup(count = 4) {
     focus: () => handlers().onFocus(),
     blur: () => handlers().onBlur(),
     pointerdown: () => handlers().onPointerdown(),
-    pointerup: () => handlers().onPointerup(),
+    pointerup: (pointerType = 'mouse') =>
+      handlers().onPointerup({ pointerType }),
     press: (key: string) =>
       handlers().onKeydown({ key, preventDefault: () => {} }),
     pressEvent: (key: string) => {
@@ -120,6 +121,17 @@ describe('usePlotKeyboard', () => {
   it('leaves the cursor alone when a pointer caused the focus', () => {
     const plot = setup()
     plot.pointerdown()
+    plot.focus()
+    expect(plot.moves).toEqual([])
+    expect(plot.keyboard.index.value).toBe(null)
+  })
+
+  // A touch pointer's `focus` arrives after its `pointerup`, so the flag has
+  // to survive that gap or the tap reads as keyboard focus.
+  it('leaves the cursor alone when a touch tap ends before the focus arrives', () => {
+    const plot = setup()
+    plot.pointerdown()
+    plot.pointerup('touch')
     plot.focus()
     expect(plot.moves).toEqual([])
     expect(plot.keyboard.index.value).toBe(null)
