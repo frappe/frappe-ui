@@ -19,10 +19,23 @@
  *
  * Window listeners are removed on stop AND on `onUnmounted`, fixing the leak
  * where a drag interrupted by unmount left handlers attached to `window`.
+ *
+ * The drag snaps to a few widths when it comes within `SNAP_DISTANCE` of one:
+ * fractions of the editor width, the media's own natural width, and the width
+ * of any other media in the document, so images in a post can line up. Holding
+ * Alt resizes freely. `guide` describes the live drag for the node view to draw.
  */
 import { ref, onUnmounted, type Ref } from 'vue'
 import type { Editor } from '@tiptap/core'
 import { safeGetPos } from '#molecules/editor/extensions/shared/node-view'
+
+const SNAP_DISTANCE = 8
+
+const MATCHED_NODE_LABELS: Record<string, string> = {
+  image: 'Same as image',
+  video: 'Same as video',
+  iframe: 'Same as embed',
+}
 
 export interface ResizeArgs {
   /** The element being resized (image / video / iframe). May be null pre-mount. */
@@ -58,6 +71,8 @@ export interface ResizeArgs {
    *   re-writes a style property when its bound VALUE changes).
    */
   mediaSizing?: 'attribute' | 'style'
+  /** The media's own width in px (e.g. `naturalWidth`), offered as a snap. */
+  getNaturalWidth?: () => number
   /** Minimum width in px. Default 50 (matches the image node view). */
   minWidth?: number
   /** Reserved px subtracted from the editor width as the max. Default 0. */
@@ -67,14 +82,32 @@ export interface ResizeArgs {
 /** Which handle started the drag; each one has its own delta math. */
 export type ResizeEdge = 'left' | 'right' | 'corner'
 
+/** A width the drag snaps to, and the name shown while it holds. */
+export interface SnapTarget {
+  width: number
+  label: string
+}
+
+/**
+ * The live drag: its width, the snap it holds (if any), and while a snap holds,
+ * a vertical line through the dragged edge spanning the editor, in viewport px.
+ */
+export interface ResizeGuide {
+  width: number
+  snap: SnapTarget | null
+  line: { x: number; top: number; height: number } | null
+}
+
 export function useNodeViewResize(
   editor: Editor,
   args: ResizeArgs,
 ): {
   isResizing: Ref<boolean>
+  guide: Ref<ResizeGuide | null>
   startResize: (event: PointerEvent | MouseEvent, edge?: ResizeEdge) => void
 } {
   const isResizing = ref(false)
+  const guide = ref<ResizeGuide | null>(null)
   const minWidth = args.minWidth ?? 50
   const maxWidthPadding = args.maxWidthPadding ?? 0
 
@@ -83,6 +116,7 @@ export function useNodeViewResize(
   let startWidth = 0
   let aspectRatio = 1
   let dragFrom: ResizeEdge = 'corner'
+  let snapTargets: SnapTarget[] = []
 
   function startResize(
     event: PointerEvent | MouseEvent,
@@ -105,6 +139,8 @@ export function useNodeViewResize(
     const renderedAspect = el.offsetWidth ? el.offsetHeight / el.offsetWidth : 0
     aspectRatio = renderedAspect || args.getAspectRatio() || 1
     dragFrom = edge
+    snapTargets = getSnapTargets()
+    guide.value = { width: startWidth, snap: null, line: null }
 
     window.addEventListener('pointermove', handleResize)
     window.addEventListener('pointerup', stopResize)
@@ -141,10 +177,12 @@ export function useNodeViewResize(
       dragFrom === 'corner'
         ? (deltaX + deltaY * aspectRatio) / (1 + aspectRatio * aspectRatio)
         : deltaX * (dragFrom === 'left' ? -1 : 1)
-    const newWidth = Math.max(
+    const freeWidth = Math.max(
       minWidth,
       Math.min(startWidth + deltaWidth, editorWidth - maxWidthPadding),
     )
+    const snap = event.altKey ? null : findSnap(freeWidth)
+    const newWidth = snap?.width ?? freeWidth
     const newHeight = newWidth * aspectRatio
 
     el.style.width = `${newWidth}px`
@@ -153,11 +191,28 @@ export function useNodeViewResize(
     // Grow the clipping wrapper in lockstep so the live drag isn't clipped.
     const container = args.containerEl?.()
     if (container) container.style.width = `${newWidth}px`
+
+    guide.value = {
+      width: newWidth,
+      snap,
+      line: snap ? getSnapLine(el) : null,
+    }
+  }
+
+  function getSnapLine(el: HTMLElement): ResizeGuide['line'] {
+    const media = el.getBoundingClientRect()
+    const bounds = editor.view.dom.getBoundingClientRect()
+    return {
+      x: dragFrom === 'left' ? media.left : media.right,
+      top: bounds.top,
+      height: bounds.height,
+    }
   }
 
   function stopResize(): void {
     if (!isResizing.value) return
     isResizing.value = false
+    guide.value = null
     removeWindowListeners()
     document.body.style.cursor = ''
 
@@ -199,6 +254,38 @@ export function useNodeViewResize(
     }
   }
 
+  function getSnapTargets(): SnapTarget[] {
+    const maxWidth = editor.view.dom.clientWidth - maxWidthPadding
+    const targets: SnapTarget[] = [
+      { width: maxWidth, label: 'Full width' },
+      { width: Math.round(maxWidth * 0.75), label: '75%' },
+      { width: Math.round(maxWidth * 0.5), label: '50%' },
+      { width: Math.round(maxWidth * 0.25), label: '25%' },
+    ]
+    const naturalWidth = args.getNaturalWidth?.()
+    if (naturalWidth)
+      targets.push({ width: naturalWidth, label: 'Original size' })
+
+    const ownPos = safeGetPos(args.getPos)
+    editor.state.doc.descendants((node, pos) => {
+      const label = MATCHED_NODE_LABELS[node.type.name]
+      const width = Number(node.attrs.width)
+      if (label && width && pos !== ownPos) targets.push({ width, label })
+    })
+    return targets.filter((t) => t.width >= minWidth && t.width <= maxWidth)
+  }
+
+  function findSnap(width: number): SnapTarget | null {
+    let closest: SnapTarget | null = null
+    for (const target of snapTargets) {
+      const distance = Math.abs(target.width - width)
+      if (distance > SNAP_DISTANCE) continue
+      if (!closest || distance < Math.abs(closest.width - width))
+        closest = target
+    }
+    return closest
+  }
+
   function onCommitGuarded(width: number, height: number): void {
     args.onCommit({ width, height })
   }
@@ -214,5 +301,5 @@ export function useNodeViewResize(
     if (isResizing.value) document.body.style.cursor = ''
   })
 
-  return { isResizing, startResize }
+  return { isResizing, guide, startResize }
 }

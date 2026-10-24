@@ -28,10 +28,27 @@ function mountResize(editor: Editor, args: ResizeArgs) {
   }
 }
 
-function makeEditor(editable = true): Editor {
+/** `nodes` stand in for the document's media: their type, width and position. */
+function makeEditor(
+  editable = true,
+  nodes: { type: string; width: number; pos: number }[] = [],
+): Editor {
   return {
     isEditable: editable,
-    view: { dom: { clientWidth: 1000 } },
+    view: {
+      dom: {
+        clientWidth: 1000,
+        getBoundingClientRect: () => ({ top: 20, height: 600 }),
+      },
+    },
+    state: {
+      doc: {
+        descendants: (visit: (node: unknown, pos: number) => void) =>
+          nodes.forEach(({ type, width, pos }) =>
+            visit({ type: { name: type }, attrs: { width } }, pos),
+          ),
+      },
+    },
   } as unknown as Editor
 }
 
@@ -276,6 +293,76 @@ describe('useNodeViewResize', () => {
     api.startResize({ clientX: 0, clientY: 0 } as MouseEvent, 'left')
     window.dispatchEvent(new MouseEvent('pointermove', { clientX: -50 }))
     expect(el.style.width).toBe('250px')
+    window.dispatchEvent(new MouseEvent('pointerup'))
+    unmount()
+  })
+
+  it('snaps to a fraction of the editor width, unless Alt is held', () => {
+    const onCommit = vi.fn()
+    const el = makeEl(400, 200)
+    const { api, unmount } = mountResize(makeEditor(), {
+      mediaEl: () => el,
+      getAspectRatio: () => 0.5,
+      getPos: () => 0,
+      onCommit,
+    })
+
+    api.startResize({ clientX: 0, clientY: 0 } as MouseEvent, 'right')
+    // 494px is within reach of 50% of the 1000px editor.
+    window.dispatchEvent(new MouseEvent('pointermove', { clientX: 94 }))
+    expect(el.style.width).toBe('500px')
+    expect(api.guide.value?.snap?.label).toBe('50%')
+    // The line spans the editor; jsdom lays nothing out, so the edge is at 0.
+    expect(api.guide.value?.line).toEqual({ x: 0, top: 20, height: 600 })
+
+    window.dispatchEvent(
+      new MouseEvent('pointermove', { clientX: 94, altKey: true }),
+    )
+    expect(el.style.width).toBe('494px')
+    expect(api.guide.value).toEqual({ width: 494, snap: null, line: null })
+
+    window.dispatchEvent(new MouseEvent('pointerup'))
+    expect(api.guide.value).toBeNull()
+    unmount()
+  })
+
+  it('snaps to the natural width and to other media, never to itself', () => {
+    const el = makeEl(400, 200)
+    const editor = makeEditor(true, [
+      { type: 'image', width: 420, pos: 0 },
+      { type: 'image', width: 612, pos: 5 },
+      { type: 'paragraph', width: 340, pos: 9 },
+    ])
+    const { api, unmount } = mountResize(editor, {
+      mediaEl: () => el,
+      getAspectRatio: () => 0.5,
+      getNaturalWidth: () => 680,
+      getPos: () => 0,
+      onCommit: vi.fn(),
+    })
+
+    api.startResize({ clientX: 0, clientY: 0 } as MouseEvent, 'right')
+    const dragTo = (width: number) =>
+      window.dispatchEvent(
+        new MouseEvent('pointermove', { clientX: width - 400 }),
+      )
+
+    dragTo(606)
+    expect(api.guide.value?.snap).toEqual({
+      width: 612,
+      label: 'Same as image',
+    })
+    dragTo(675)
+    expect(api.guide.value?.snap).toEqual({
+      width: 680,
+      label: 'Original size',
+    })
+    // Its own stored width (420) and non-media nodes are not targets.
+    dragTo(418)
+    expect(api.guide.value?.snap).toBeNull()
+    dragTo(338)
+    expect(api.guide.value?.snap).toBeNull()
+
     window.dispatchEvent(new MouseEvent('pointerup'))
     unmount()
   })

@@ -17,6 +17,7 @@ import {
 import { safeGetPos } from '#molecules/editor/extensions/shared/node-view'
 import MediaToolbar from './MediaToolbar.vue'
 import MediaResizeHandle from './MediaResizeHandle.vue'
+import MediaResizeGuide from './MediaResizeGuide.vue'
 import VideoControls from './VideoControls.vue'
 import UploadProgressIndicator from './UploadProgressIndicator.vue'
 import {
@@ -158,10 +159,11 @@ watch(nodeKey, () => {
   isFreshInsert.value = Boolean(props.node.attrs.uploadId)
 })
 
-const { isResizing, startResize } = useNodeViewResize(editor, {
+const { isResizing, guide, startResize } = useNodeViewResize(editor, {
   mediaEl: () => mediaRef.value,
   containerEl: () => containerRef.value,
   getAspectRatio: () => mediaIntrinsicAspect(),
+  getNaturalWidth: () => mediaNaturalWidth(),
   getPos: () => props.getPos(),
   onCommit: ({ width, height }) => props.updateAttributes({ width, height }),
 })
@@ -183,6 +185,14 @@ function mediaIntrinsicAspect(): number {
     }
   }
   return heightOverWidth(width, height)
+}
+
+function mediaNaturalWidth(): number {
+  const el = mediaRef.value
+  if (!el) return 0
+  return el instanceof HTMLVideoElement
+    ? el.videoWidth
+    : (el as HTMLImageElement).naturalWidth
 }
 
 function selectMedia() {
@@ -403,6 +413,7 @@ function setVideoOptions(options: {
           @resize-start="startResizeFromHandle"
           @resize-keydown="onResizeKeydown"
         />
+        <MediaResizeGuide :guide="() => guide" />
 
         <!-- Upload error over the staged preview: same overlay pattern as the
              gallery grid cell, kept inside the media box. -->
