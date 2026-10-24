@@ -8,6 +8,7 @@
 import { computed, ref, useTemplateRef, watch } from 'vue'
 import { usePortalTarget } from '#composables/usePortalTarget'
 import type { ResizeGuide } from '#molecules/editor/composables/useNodeViewResize'
+import { MEDIA_CORNER_GRIP_INSET } from './media-node-view-utils'
 
 const props = defineProps<{
   /**
@@ -17,10 +18,6 @@ const props = defineProps<{
    */
   guide: () => ResizeGuide | null
 }>()
-
-// Room the centred pill must leave on each side: the corner grip shares its
-// row (`right-2.5` + `size-7`, 38px), plus a 4px gap so the two never touch.
-const LABEL_INSET = 42
 
 const current = computed(() => props.guide())
 const label = computed(() => {
@@ -45,7 +42,7 @@ watch(
 const labelFits = computed(
   () =>
     !!current.value &&
-    labelWidth.value <= current.value.width - LABEL_INSET * 2,
+    labelWidth.value <= current.value.width - MEDIA_CORNER_GRIP_INSET * 2,
 )
 
 const portalTarget = usePortalTarget()

@@ -26,7 +26,8 @@ function mount(initial: ResizeGuide) {
   app.mount(root)
   return {
     guide,
-    label: () => root.querySelector<HTMLElement>('.tabular-nums')!,
+    // The line teleports out of the root, leaving the label as its only child.
+    label: () => root.firstElementChild as HTMLElement,
     unmount: () => {
       app.unmount()
       root.remove()
