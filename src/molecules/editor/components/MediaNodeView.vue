@@ -190,9 +190,7 @@ function mediaIntrinsicAspect(): number {
 function mediaNaturalWidth(): number {
   const el = mediaRef.value
   if (!el) return 0
-  return el instanceof HTMLVideoElement
-    ? el.videoWidth
-    : (el as HTMLImageElement).naturalWidth
+  return el instanceof HTMLVideoElement ? el.videoWidth : el.naturalWidth
 }
 
 function selectMedia() {

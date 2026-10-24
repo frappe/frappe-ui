@@ -337,13 +337,13 @@ describe('useNodeViewResize', () => {
     expect(el.style.width).toBe('500px')
     expect(api.guide.value?.snap?.label).toBe('50%')
     // The line spans the editor; jsdom lays nothing out, so the edge is at 0.
-    expect(api.guide.value?.line).toEqual({ x: 0, top: 20, height: 600 })
+    expect(api.guide.value?.snap?.line).toEqual({ x: 0, top: 20, height: 600 })
 
     window.dispatchEvent(
       new MouseEvent('pointermove', { clientX: 94, altKey: true }),
     )
     expect(el.style.width).toBe('494px')
-    expect(api.guide.value).toEqual({ width: 494, snap: null, line: null })
+    expect(api.guide.value).toEqual({ width: 494, snap: null })
 
     window.dispatchEvent(new MouseEvent('pointerup'))
     expect(api.guide.value).toBeNull()
@@ -373,18 +373,18 @@ describe('useNodeViewResize', () => {
       )
 
     dragTo(606)
-    expect(api.guide.value?.snap).toEqual({
+    expect(api.guide.value?.snap).toMatchObject({
       width: 612,
       label: 'Same as image',
     })
     // An embed with no stored width snaps to the width it renders at.
     dragTo(636)
-    expect(api.guide.value?.snap).toEqual({
+    expect(api.guide.value?.snap).toMatchObject({
       width: 640,
       label: 'Same as embed',
     })
     dragTo(675)
-    expect(api.guide.value?.snap).toEqual({
+    expect(api.guide.value?.snap).toMatchObject({
       width: 680,
       label: 'Original size',
     })
@@ -435,13 +435,13 @@ describe('useNodeViewResize', () => {
 
     api.startResize({ clientX: 0, clientY: 0 } as MouseEvent, 'right')
     window.dispatchEvent(new MouseEvent('pointermove', { clientX: 94 }))
-    expect(api.guide.value?.line?.top).toBe(20)
+    expect(api.guide.value?.snap?.line.top).toBe(20)
 
     // The pointer holds still while the page scrolls the editor up.
     const dom = editor.view.dom
     dom.getBoundingClientRect = () => ({ top: -80, height: 600 }) as DOMRect
     window.dispatchEvent(new Event('scroll'))
-    expect(api.guide.value?.line?.top).toBe(-80)
+    expect(api.guide.value?.snap?.line.top).toBe(-80)
 
     // At 800px wide, 50% is 400: the held 494px no longer snaps.
     Object.defineProperty(dom, 'clientWidth', { value: 800 })

@@ -25,7 +25,7 @@
  * of any other media in the document, so images in a post can line up. Holding
  * Alt resizes freely. `guide` describes the live drag for the node view to draw.
  */
-import { ref, onUnmounted, type Ref } from 'vue'
+import { computed, ref, onUnmounted, type Ref } from 'vue'
 import type { Editor } from '@tiptap/core'
 import { safeGetPos } from '#molecules/editor/extensions/shared/node-view'
 
@@ -88,26 +88,29 @@ export interface SnapTarget {
   label: string
 }
 
-/**
- * The live drag: its width, the snap it holds (if any), and while a snap holds,
- * a vertical line through the dragged edge spanning the editor, in viewport px.
- */
+/** A vertical line through the dragged edge spanning the editor, in viewport px. */
+export interface SnapLine {
+  x: number
+  top: number
+  height: number
+}
+
+/** The live drag: its width, and the snap it holds (if any) with its line. */
 export interface ResizeGuide {
   width: number
-  snap: SnapTarget | null
-  line: { x: number; top: number; height: number } | null
+  snap: (SnapTarget & { line: SnapLine }) | null
 }
 
 export function useNodeViewResize(
   editor: Editor,
   args: ResizeArgs,
 ): {
-  isResizing: Ref<boolean>
+  isResizing: Readonly<Ref<boolean>>
   guide: Ref<ResizeGuide | null>
   startResize: (event: PointerEvent | MouseEvent, edge?: ResizeEdge) => void
 } {
-  const isResizing = ref(false)
   const guide = ref<ResizeGuide | null>(null)
+  const isResizing = computed(() => guide.value !== null)
   const minWidth = args.minWidth ?? 50
   const maxWidthPadding = args.maxWidthPadding ?? 0
 
@@ -127,7 +130,6 @@ export function useNodeViewResize(
     const el = args.mediaEl()
     if (!el) return
 
-    isResizing.value = true
     startDragX = event.clientX
     startDragY = event.clientY
     startWidth = el.offsetWidth
@@ -141,7 +143,7 @@ export function useNodeViewResize(
     aspectRatio = renderedAspect || args.getAspectRatio() || 1
     dragFrom = edge
     snapTargets = getSnapTargets()
-    guide.value = { width: startWidth, snap: null, line: null }
+    guide.value = { width: startWidth, snap: null }
 
     window.addEventListener('pointermove', handleResize)
     window.addEventListener('pointerup', stopResize)
@@ -199,8 +201,7 @@ export function useNodeViewResize(
 
     guide.value = {
       width: newWidth,
-      snap,
-      line: snap ? getSnapLine(el) : null,
+      snap: snap ? { ...snap, line: getSnapLine(el) } : null,
     }
   }
 
@@ -213,7 +214,7 @@ export function useNodeViewResize(
     refreshGuide()
   }
 
-  function getSnapLine(el: HTMLElement): ResizeGuide['line'] {
+  function getSnapLine(el: HTMLElement): SnapLine {
     const media = el.getBoundingClientRect()
     const bounds = editor.view.dom.getBoundingClientRect()
     return {
@@ -225,7 +226,6 @@ export function useNodeViewResize(
 
   function stopResize(): void {
     if (!isResizing.value) return
-    isResizing.value = false
     guide.value = null
     lastPointerEvent = null
     removeWindowListeners()

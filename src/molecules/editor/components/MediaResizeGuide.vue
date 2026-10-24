@@ -24,13 +24,13 @@ const portalTarget = usePortalTarget()
 
 <template>
   <template v-if="current">
-    <Teleport v-if="current.line" :to="portalTarget ?? 'body'">
+    <Teleport v-if="current.snap" :to="portalTarget ?? 'body'">
       <div
         class="pointer-events-none fixed z-50 w-px -translate-x-1/2 bg-surface-gray-7"
         :style="{
-          left: `${current.line.x}px`,
-          top: `${current.line.top}px`,
-          height: `${current.line.height}px`,
+          left: `${current.snap.line.x}px`,
+          top: `${current.snap.line.top}px`,
+          height: `${current.snap.line.height}px`,
         }"
       />
     </Teleport>
