@@ -1,5 +1,121 @@
 # frappe-ui
 
+## 1.1.0
+
+### Minor Changes
+
+- Charts: `DonutChart` and `PercentageBarChart` take `order: 'rows'`, which
+  draws the slices in the order the rows arrive instead of biggest first, for
+  ordered categories such as ageing buckets (additive).
+  [#1307](https://github.com/frappe/frappe-ui/pull/1307)
+- Charts: new `CalendarHeatmapChart` colors one cell per day, laid out by week
+  and weekday, in bands of twelve months past a year (additive).
+  [#1307](https://github.com/frappe/frappe-ui/pull/1307)
+- Charts: `ChartContainer` takes `centered`, which centres a plot as tall as its
+  content together with its legend in the height to spare; `PercentageBarChart`
+  uses it, so its legend stays under the bar (additive).
+  [#1307](https://github.com/frappe/frappe-ui/pull/1307)
+- Charts: the legend now takes one row at most; when the series do not fit, it
+  shows the largest ones and a "+N more" button that lists every series, largest
+  first, with a search field past 15 (feat).
+  [#1294](https://github.com/frappe/frappe-ui/pull/1294)
+- Charts: colors given as a CSS variable, such as `var(--brand)` in `palette`,
+  `seriesConfig` or a reference line, now resolve against the chart's element
+  and follow theme changes (additive).
+  [#1307](https://github.com/frappe/frappe-ui/pull/1307)
+- Charts: a value axis whose values are all whole numbers now ticks in whole
+  numbers, so a small count no longer reads 0.5 or 1.5; the new `integer` option
+  on `yAxis`, `y2Axis` and a scatter's axes turns it on or off (additive).
+  [#1307](https://github.com/frappe/frappe-ui/pull/1307)
+- Charts: `DonutChart` takes `colors`, a map from category value to color, so a
+  slice such as "Overdue" keeps its color whatever its size (additive).
+  [#1307](https://github.com/frappe/frappe-ui/pull/1307)
+- MultiSelect: the new `highlight` event reports the highlighted option, or
+  `null` once the popover closes (additive).
+  [#1298](https://github.com/frappe/frappe-ui/pull/1298)
+- NumberCard: `progress` draws a bar for how far the reading has come towards a
+  whole. [#1309](https://github.com/frappe/frappe-ui/pull/1309)
+- Charts: new `PercentageBarChart` draws a breakdown as one bar, from the same
+  rows and props as `DonutChart` (additive).
+  [#1307](https://github.com/frappe/frappe-ui/pull/1307)
+- Charts: a reference line now stretches its value axis, so a goal above the
+  data stays in view instead of not being drawn (additive).
+  [#1307](https://github.com/frappe/frappe-ui/pull/1307)
+- Stepper: the new `Stepper` component shows progress through ordered steps,
+  with sub-steps, skipped steps, and a running or failed current step. It ships
+  from `frappe-ui/experimental` while its API is refined (additive).
+  [#1276](https://github.com/frappe/frappe-ui/pull/1276)
+- Charts: `useChart` also returns the measured plot `height` (additive).
+  [#1307](https://github.com/frappe/frappe-ui/pull/1307)
+
+### Patch Changes
+
+- Charts: a `DonutChart` or `PercentageBarChart` with one slice now names it and
+  its share in the legend (fix).
+  [#1307](https://github.com/frappe/frappe-ui/pull/1307)
+- Charts: series named by a `splitBy` value and axis titles now print as given,
+  without capitalizing (fix).
+  [#1293](https://github.com/frappe/frappe-ui/pull/1293)
+- Charts: a value axis raised a tick to fit a label keeps its tick step, so the
+  new end lands on a tick (fix).
+  [#1307](https://github.com/frappe/frappe-ui/pull/1307)
+- Charts: a category axis too crowded to tilt every label now lays its labels
+  flat and labels every few categories, keeping the first and the last, instead
+  of tilting them and dropping the ones that collide (fix).
+  [#1307](https://github.com/frappe/frappe-ui/pull/1307)
+- Charts: a category label printed by `xAxis.format` is now truncated in the
+  middle when it is too long, like an unformatted label, instead of losing its
+  end (fix). [#1307](https://github.com/frappe/frappe-ui/pull/1307)
+- Vite plugin: `codeLanguages` now works on Vite 8, where the dev server's
+  dependency scan failed with `Not implemented` (fix).
+  [#1301](https://github.com/frappe/frappe-ui/pull/1301)
+- Combobox: a disabled input-mode combobox now draws its value in the muted
+  disabled ink, as Select does (fix).
+  [#1318](https://github.com/frappe/frappe-ui/pull/1318)
+- Charts: a donut whose only non-zero slice is the whole draws a closed ring,
+  and zero slices take no gap on the ring while staying in the legend (fix).
+  [#1307](https://github.com/frappe/frappe-ui/pull/1307)
+- Charts: a breakdown's shares add up to 100% in `DonutChart`'s legend, tooltip
+  and labels, and `DonutSliceEvent.percent` is now that rounded whole-number
+  share (fix). [#1307](https://github.com/frappe/frappe-ui/pull/1307)
+- Editor: resizing an image, video or embed now snaps to 25%, 50%, 75% and full
+  width, to the media's original size, and to the width of other media in the
+  document, with a guide line and a width label while you drag; hold Alt to
+  resize freely (fix). [#1316](https://github.com/frappe/frappe-ui/pull/1316)
+- Editor: content set from outside through `v-model` no longer adds an undo
+  step, so undo cannot wipe a document that loaded after the editor mounted
+  (fix). [#1299](https://github.com/frappe/frappe-ui/pull/1299)
+- HeatmapChart: when no value is negative, the color scale now starts at 0
+  instead of at the smallest value, so the smallest cell no longer draws as pale
+  as an empty one; set `min` for the old scale (fix).
+  [#1307](https://github.com/frappe/frappe-ui/pull/1307)
+- Dropdown, ContextMenu: a menu taller than the space on screen now scrolls
+  instead of running off the edge (fix).
+  [#1300](https://github.com/frappe/frappe-ui/pull/1300)
+- MultiEmailInput: chips now use the design system's tag size, with a 20px
+  height, a 12px avatar and a 12px close icon. The suggestion list no longer
+  opens empty: it stays closed on focus when there is nothing to suggest, and
+  while a typed address matches nothing, unless `emptyText` or the `empty` slot
+  is set. A click reopens it after Escape (fix).
+  [#1306](https://github.com/frappe/frappe-ui/pull/1306)
+- MultiSelect: a checked row is no longer filled grey; its checkbox shows the
+  state (fix). [#1298](https://github.com/frappe/frappe-ui/pull/1298)
+- MultiSelect: attributes such as `aria-label` reach the trigger, as on Select,
+  and the list takes its name from `label` or `aria-label` (fix).
+  [#1298](https://github.com/frappe/frappe-ui/pull/1298)
+- NumberCard: a card with no title, `title-suffix` or `actions` no longer leaves
+  an empty row above the number (fix).
+  [#1307](https://github.com/frappe/frappe-ui/pull/1307)
+- NumberCard: a delta that prints as zero, such as `0.04` shown as "0%", now
+  reads as flat: no arrow, neutral tone (fix).
+  [#1307](https://github.com/frappe/frappe-ui/pull/1307)
+- Stepper: an app that scans frappe-ui's Tailwind content globs now gets the
+  classes `Stepper` from `frappe-ui/experimental` draws with, so it no longer
+  renders unstyled (fix). [#1308](https://github.com/frappe/frappe-ui/pull/1308)
+- Charts: `xAxis.format` on a time axis prints the date in the tooltip and no
+  longer flattens the levelled tick labels (fix).
+  [#1307](https://github.com/frappe/frappe-ui/pull/1307)
+
 ## 1.0.2
 
 ### Patch Changes
