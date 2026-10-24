@@ -18,9 +18,9 @@ const props = defineProps<{
   guide: () => ResizeGuide | null
 }>()
 
-// The pill's gap to each side of the media, the same 10px (`bottom-2.5`) it
-// keeps from the bottom edge, so it never sits flush against the clipped edge.
-const LABEL_INSET = 10
+// Room the centred pill must leave on each side: the corner grip shares its
+// row (`right-2.5` + `size-7`, 38px), plus a 4px gap so the two never touch.
+const LABEL_INSET = 42
 
 const current = computed(() => props.guide())
 const label = computed(() => {
@@ -30,7 +30,8 @@ const label = computed(() => {
 })
 
 // Measured after each render that changes the text: the media clips its
-// overflow, so a pill wider than a small image would read "riginal siz".
+// overflow, so a pill too wide for a small image would read "riginal siz" or
+// sit on the grip.
 // Hidden with `invisible` rather than `v-if` so it keeps a width to measure.
 const labelEl = useTemplateRef<HTMLElement>('labelEl')
 const labelWidth = ref(0)

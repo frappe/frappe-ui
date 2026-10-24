@@ -44,19 +44,25 @@ describe('MediaResizeGuide label', () => {
   })
   afterEach(() => vi.restoreAllMocks())
 
-  it('hides while it is wider than the media and shows again once it fits', async () => {
+  it('hides while it would be clipped or reach the grip, and shows once it fits', async () => {
     // "Original size" measures 91px: too wide for a 64px icon.
     const ctx = mount({ width: 64, snap: snap('Original size') })
     await nextTick()
     expect(ctx.label().textContent?.trim()).toBe('Original size')
     expect(ctx.label().classList.contains('invisible')).toBe(true)
 
-    // Releasing the snap shortens the text to "64px" (28px), which fits.
-    ctx.guide.value = { width: 64, snap: null }
+    // On 160px media the 91px pill would still reach the corner grip.
+    ctx.guide.value = { width: 160, snap: snap('Original size') }
     await nextTick()
+    expect(ctx.label().classList.contains('invisible')).toBe(true)
+
+    // A free drag shortens the text to "120px" (35px), which clears the grip.
+    ctx.guide.value = { width: 120, snap: null }
+    await nextTick()
+    expect(ctx.label().textContent?.trim()).toBe('120px')
     expect(ctx.label().classList.contains('invisible')).toBe(false)
 
-    // Same snap again on wider media fits too.
+    // The same snap on wider media fits.
     ctx.guide.value = { width: 200, snap: snap('Original size') }
     await nextTick()
     expect(ctx.label().classList.contains('invisible')).toBe(false)
