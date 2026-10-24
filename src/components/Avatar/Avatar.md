@@ -23,9 +23,25 @@ avatar from the one under it, and a count stands in for the rest.
 
 ### Online status
 
-The `#indicator` slot places a dot on the bottom-right corner.
+Put an `AvatarBadge` in the `#indicator` slot to show a status dot on the
+bottom-right corner. A background class on the badge sets its color.
+
+```vue
+<Avatar :image :label>
+  <template #indicator>
+    <AvatarBadge class="bg-surface-green-5" />
+  </template>
+</Avatar>
+```
 
 <ComponentPreview name="Avatar-Presence" />
+
+### Verified badge
+
+Content in an `AvatarBadge`, such as an icon, is centered in the badge. Use a
+size with room for it, and give it text for screen readers.
+
+<ComponentPreview name="Avatar-Verified" />
 
 ### Workspace switcher
 
@@ -53,12 +69,40 @@ initial and its background. It has no effect on a photo.
 
 A sizing class on the avatar (`size-*`, `w-*`, `h-*`) replaces the `size`
 prop's width and height. The `size` prop still sets the text size of the
-initial and the size of the indicator dot. A responsive class like
+initial and the size of the badge. A responsive class like
 `sm:size-16` works alongside `size`: `size` sets the width on small screens,
 and the class takes over from its breakpoint up.
+
+### Badge
+
+`AvatarBadge` fills the indicator, so the avatar's `size` prop sets its size
+(see [Custom sizes](#custom-sizes)). Without a color class the badge is gray. A
+ring cuts the badge out of the avatar (see [Styling hooks](#styling-hooks)). The
+badge takes a class, not `theme`, because a status color is app data (see
+[P4](https://github.com/frappe/frappe-ui/blob/main/PHILOSOPHY.md#p4-two-color-axes-only-variant--theme--no-semantic-axis)).
+
+## Styling hooks
+
+### `--avatar-badge-ring`
+
+Sets the color of the ring around the badge. The default is the color of the
+page surface. When the avatar sits on a different surface, such as a popover, a
+dialog or a hovered row, set it to that surface's color. Set it on the avatar,
+or on any parent to set every avatar inside it:
+
+```vue
+<div
+  class="hover:bg-surface-gray-2 hover:[--avatar-badge-ring:var(--surface-gray-2)]"
+>
+  <Avatar :image :label>…</Avatar>
+</div>
+```
 
 ## Accessibility
 
 The image uses `label` as its alt text.
+
+A badge shows status with color only. Show the status as text next to the
+avatar, or put text with the `sr-only` class in the badge.
 
 <!-- @include: ./Avatar.api.md -->
