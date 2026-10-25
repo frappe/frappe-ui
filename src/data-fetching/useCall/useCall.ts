@@ -274,6 +274,10 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
     // `_execute(true)` rethrows this request's own failure. That includes the
     // abort of a request a newer one replaced: the abort stays out of
     // `error`, but this submit did not land, so it rejects with the abort.
+    // Any other failure rejects with `error.value`, not the raw error:
+    // the factory's `onFetchError` in `useFrappeFetch` turns a server failure
+    // into a `FrappeResponseError` and stores that in `error`, while
+    // `_execute(true)` rethrows the raw error.
     const sending = _execute(true)
     const seq = currentDispatchSeq()
     try {
