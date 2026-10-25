@@ -12,17 +12,30 @@
  *   `mousemove` / `mouseup` listeners on `window` plus the matching body cursor.
  * - `mousemove` applies temporary inline `width`/`height` to the element for
  *   live visual feedback, clamping width between `minWidth` and the editor's
- *   content width (minus `maxWidthPadding`).
+ *   width (minus `maxWidthPadding`).
  * - `mouseup` reads the final rendered size, clears the temporary inline styles,
  *   and commits via `onCommit` — guarded by `safeGetPos` so a stale node view
  *   never writes back into the document.
  *
  * Window listeners are removed on stop AND on `onUnmounted`, fixing the leak
  * where a drag interrupted by unmount left handlers attached to `window`.
+ *
+ * The drag snaps to a few widths when it comes within `SNAP_DISTANCE` of one:
+ * fractions of the editor's content width, the media's own natural width, and the width
+ * of any other media in the document, so images in a post can line up. Holding
+ * Alt resizes freely. `guide` describes the live drag for the node view to draw.
  */
-import { ref, onUnmounted, type Ref } from 'vue'
+import { computed, ref, onUnmounted, type Ref } from 'vue'
 import type { Editor } from '@tiptap/core'
 import { safeGetPos } from '#molecules/editor/extensions/shared/node-view'
+
+const SNAP_DISTANCE = 8
+
+const MATCHED_NODE_LABELS: Record<string, string> = {
+  image: 'Same as image',
+  video: 'Same as video',
+  iframe: 'Same as embed',
+}
 
 export interface ResizeArgs {
   /** The element being resized (image / video / iframe). May be null pre-mount. */
@@ -58,6 +71,8 @@ export interface ResizeArgs {
    *   re-writes a style property when its bound VALUE changes).
    */
   mediaSizing?: 'attribute' | 'style'
+  /** The media's own width in px (e.g. `naturalWidth`), offered as a snap. */
+  getNaturalWidth?: () => number
   /** Minimum width in px. Default 50 (matches the image node view). */
   minWidth?: number
   /** Reserved px subtracted from the editor width as the max. Default 0. */
@@ -67,14 +82,35 @@ export interface ResizeArgs {
 /** Which handle started the drag; each one has its own delta math. */
 export type ResizeEdge = 'left' | 'right' | 'corner'
 
+/** A width the drag snaps to, and the name shown while it holds. */
+export interface SnapTarget {
+  width: number
+  label: string
+}
+
+/** A vertical line through the dragged edge spanning the editor, in viewport px. */
+export interface SnapLine {
+  x: number
+  top: number
+  height: number
+}
+
+/** The live drag: its width, and the snap it holds (if any) with its line. */
+export interface ResizeGuide {
+  width: number
+  snap: (SnapTarget & { line: SnapLine }) | null
+}
+
 export function useNodeViewResize(
   editor: Editor,
   args: ResizeArgs,
 ): {
-  isResizing: Ref<boolean>
+  isResizing: Readonly<Ref<boolean>>
+  guide: Ref<ResizeGuide | null>
   startResize: (event: PointerEvent | MouseEvent, edge?: ResizeEdge) => void
 } {
-  const isResizing = ref(false)
+  const guide = ref<ResizeGuide | null>(null)
+  const isResizing = computed(() => guide.value !== null)
   const minWidth = args.minWidth ?? 50
   const maxWidthPadding = args.maxWidthPadding ?? 0
 
@@ -83,6 +119,8 @@ export function useNodeViewResize(
   let startWidth = 0
   let aspectRatio = 1
   let dragFrom: ResizeEdge = 'corner'
+  let snapTargets: SnapTarget[] = []
+  let lastPointerEvent: PointerEvent | null = null
 
   function startResize(
     event: PointerEvent | MouseEvent,
@@ -92,7 +130,6 @@ export function useNodeViewResize(
     const el = args.mediaEl()
     if (!el) return
 
-    isResizing.value = true
     startDragX = event.clientX
     startDragY = event.clientY
     startWidth = el.offsetWidth
@@ -105,10 +142,16 @@ export function useNodeViewResize(
     const renderedAspect = el.offsetWidth ? el.offsetHeight / el.offsetWidth : 0
     aspectRatio = renderedAspect || args.getAspectRatio() || 1
     dragFrom = edge
+    snapTargets = getSnapTargets()
+    guide.value = { width: startWidth, snap: null }
 
     window.addEventListener('pointermove', handleResize)
     window.addEventListener('pointerup', stopResize)
     window.addEventListener('pointercancel', stopResize)
+    // Capture catches scrolling containers too, which a fixed snap line has to
+    // follow even while the pointer is held still.
+    window.addEventListener('scroll', refreshGuide, true)
+    window.addEventListener('resize', refreshSnapTargets)
     document.body.style.cursor = edge === 'corner' ? 'nwse-resize' : 'ew-resize'
   }
 
@@ -116,8 +159,8 @@ export function useNodeViewResize(
     if (!isResizing.value) return
     const el = args.mediaEl()
     if (!el) return
+    lastPointerEvent = event
 
-    const editorWidth = editor.view.dom.clientWidth
     const deltaX = event.clientX - startDragX
     const deltaY = event.clientY - startDragY
     // A corner can only travel along the line (1, aspectRatio) — the ratio is
@@ -141,10 +184,12 @@ export function useNodeViewResize(
       dragFrom === 'corner'
         ? (deltaX + deltaY * aspectRatio) / (1 + aspectRatio * aspectRatio)
         : deltaX * (dragFrom === 'left' ? -1 : 1)
-    const newWidth = Math.max(
+    const freeWidth = Math.max(
       minWidth,
-      Math.min(startWidth + deltaWidth, editorWidth - maxWidthPadding),
+      Math.min(startWidth + deltaWidth, getMaxDragWidth()),
     )
+    const snap = event.altKey ? null : findSnap(freeWidth)
+    const newWidth = snap?.width ?? freeWidth
     const newHeight = newWidth * aspectRatio
 
     el.style.width = `${newWidth}px`
@@ -153,11 +198,36 @@ export function useNodeViewResize(
     // Grow the clipping wrapper in lockstep so the live drag isn't clipped.
     const container = args.containerEl?.()
     if (container) container.style.width = `${newWidth}px`
+
+    guide.value = {
+      width: newWidth,
+      snap: snap ? { ...snap, line: getSnapLine(el) } : null,
+    }
+  }
+
+  function refreshGuide(): void {
+    if (lastPointerEvent) handleResize(lastPointerEvent)
+  }
+
+  function refreshSnapTargets(): void {
+    snapTargets = getSnapTargets()
+    refreshGuide()
+  }
+
+  function getSnapLine(el: HTMLElement): SnapLine {
+    const media = el.getBoundingClientRect()
+    const bounds = editor.view.dom.getBoundingClientRect()
+    return {
+      x: dragFrom === 'left' ? media.left : media.right,
+      top: bounds.top,
+      height: bounds.height,
+    }
   }
 
   function stopResize(): void {
     if (!isResizing.value) return
-    isResizing.value = false
+    guide.value = null
+    lastPointerEvent = null
     removeWindowListeners()
     document.body.style.cursor = ''
 
@@ -199,6 +269,66 @@ export function useNodeViewResize(
     }
   }
 
+  // The drag clamp keeps the editor's padding box, as it did before snapping.
+  function getMaxDragWidth(): number {
+    return editor.view.dom.clientWidth - maxWidthPadding
+  }
+
+  // The base for "Full width" and its fractions: the widest the media can
+  // show. Media renders no wider than the content box, so a snap past it would
+  // save a width the media never showed. `maxWidthPadding` is a fixed stand-in
+  // for the editor padding, so the two never add up: the tighter limit wins.
+  function getFullWidth(): number {
+    const dom = editor.view.dom
+    const style = getComputedStyle(dom)
+    const padding =
+      parseFloat(style.paddingLeft) + parseFloat(style.paddingRight)
+    return Math.min(dom.clientWidth - padding, getMaxDragWidth())
+  }
+
+  function getSnapTargets(): SnapTarget[] {
+    const maxWidth = getFullWidth()
+    const targets: SnapTarget[] = [
+      { width: maxWidth, label: 'Full width' },
+      { width: Math.round(maxWidth * 0.75), label: '75%' },
+      { width: Math.round(maxWidth * 0.5), label: '50%' },
+      { width: Math.round(maxWidth * 0.25), label: '25%' },
+    ]
+    const naturalWidth = args.getNaturalWidth?.()
+    if (naturalWidth)
+      targets.push({ width: naturalWidth, label: 'Original size' })
+
+    const ownPos = safeGetPos(args.getPos)
+    editor.state.doc.descendants((node, pos) => {
+      const label = MATCHED_NODE_LABELS[node.type.name]
+      if (!label || pos === ownPos) return
+      const width = Number(node.attrs.width) || getRenderedWidth(pos)
+      if (width) targets.push({ width, label })
+    })
+    return targets.filter((t) => t.width >= minWidth && t.width <= maxWidth)
+  }
+
+  // Media without a stored width (a fresh image, an embed at its default size)
+  // still shows at some width, which is just as useful to line up with.
+  function getRenderedWidth(pos: number): number {
+    const dom = editor.view.nodeDOM(pos)
+    if (!(dom instanceof HTMLElement)) return 0
+    return (
+      dom.querySelector<HTMLElement>('img, video, iframe')?.offsetWidth ?? 0
+    )
+  }
+
+  function findSnap(width: number): SnapTarget | null {
+    let closest: SnapTarget | null = null
+    for (const target of snapTargets) {
+      const distance = Math.abs(target.width - width)
+      if (distance > SNAP_DISTANCE) continue
+      if (!closest || distance < Math.abs(closest.width - width))
+        closest = target
+    }
+    return closest
+  }
+
   function onCommitGuarded(width: number, height: number): void {
     args.onCommit({ width, height })
   }
@@ -207,6 +337,8 @@ export function useNodeViewResize(
     window.removeEventListener('pointermove', handleResize)
     window.removeEventListener('pointerup', stopResize)
     window.removeEventListener('pointercancel', stopResize)
+    window.removeEventListener('scroll', refreshGuide, true)
+    window.removeEventListener('resize', refreshSnapTargets)
   }
 
   onUnmounted(() => {
@@ -214,5 +346,5 @@ export function useNodeViewResize(
     if (isResizing.value) document.body.style.cursor = ''
   })
 
-  return { isResizing, startResize }
+  return { isResizing, guide, startResize }
 }

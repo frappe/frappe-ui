@@ -28,10 +28,47 @@ function mountResize(editor: Editor, args: ResizeArgs) {
   }
 }
 
-function makeEditor(editable = true): Editor {
+/**
+ * A media node in the fake document. `renderedWidth` is what its node view
+ * shows on screen, read when the node stores no `width`.
+ */
+interface FakeMedia {
+  type: string
+  pos: number
+  width?: number
+  renderedWidth?: number
+}
+
+/** A 1000px wide editor, with `padding` px on either side of its content. */
+function makeEditor(
+  editable = true,
+  nodes: FakeMedia[] = [],
+  padding = 0,
+): Editor {
+  const dom = document.createElement('div')
+  dom.style.padding = `0 ${padding}px`
+  Object.defineProperty(dom, 'clientWidth', { value: 1000, configurable: true })
+  dom.getBoundingClientRect = () => ({ top: 20, height: 600 }) as DOMRect
   return {
     isEditable: editable,
-    view: { dom: { clientWidth: 1000 } },
+    view: {
+      dom,
+      nodeDOM: (pos: number) => {
+        const node = nodes.find((n) => n.pos === pos)
+        if (!node?.renderedWidth) return null
+        const wrapper = document.createElement('div')
+        wrapper.append(makeEl(node.renderedWidth))
+        return wrapper
+      },
+    },
+    state: {
+      doc: {
+        descendants: (visit: (node: unknown, pos: number) => void) =>
+          nodes.forEach(({ type, width, pos }) =>
+            visit({ type: { name: type }, attrs: { width } }, pos),
+          ),
+      },
+    },
   } as unknown as Editor
 }
 
@@ -70,6 +107,8 @@ describe('useNodeViewResize', () => {
     expect(remove).toHaveBeenCalledWith('pointermove', expect.any(Function))
     expect(remove).toHaveBeenCalledWith('pointerup', expect.any(Function))
     expect(remove).toHaveBeenCalledWith('pointercancel', expect.any(Function))
+    expect(remove).toHaveBeenCalledWith('scroll', expect.any(Function), true)
+    expect(remove).toHaveBeenCalledWith('resize', expect.any(Function))
     expect(document.body.style.cursor).toBe('')
     unmount()
   })
@@ -90,6 +129,8 @@ describe('useNodeViewResize', () => {
     expect(remove).toHaveBeenCalledWith('pointermove', expect.any(Function))
     expect(remove).toHaveBeenCalledWith('pointerup', expect.any(Function))
     expect(remove).toHaveBeenCalledWith('pointercancel', expect.any(Function))
+    expect(remove).toHaveBeenCalledWith('scroll', expect.any(Function), true)
+    expect(remove).toHaveBeenCalledWith('resize', expect.any(Function))
     expect(document.body.style.cursor).toBe('')
   })
 
@@ -276,6 +317,147 @@ describe('useNodeViewResize', () => {
     api.startResize({ clientX: 0, clientY: 0 } as MouseEvent, 'left')
     window.dispatchEvent(new MouseEvent('pointermove', { clientX: -50 }))
     expect(el.style.width).toBe('250px')
+    window.dispatchEvent(new MouseEvent('pointerup'))
+    unmount()
+  })
+
+  it('snaps to a fraction of the editor width, unless Alt is held', () => {
+    const onCommit = vi.fn()
+    const el = makeEl(400, 200)
+    const { api, unmount } = mountResize(makeEditor(), {
+      mediaEl: () => el,
+      getAspectRatio: () => 0.5,
+      getPos: () => 0,
+      onCommit,
+    })
+
+    api.startResize({ clientX: 0, clientY: 0 } as MouseEvent, 'right')
+    // 494px is within reach of 50% of the 1000px editor.
+    window.dispatchEvent(new MouseEvent('pointermove', { clientX: 94 }))
+    expect(el.style.width).toBe('500px')
+    expect(api.guide.value?.snap?.label).toBe('50%')
+    // The line spans the editor; jsdom lays nothing out, so the edge is at 0.
+    expect(api.guide.value?.snap?.line).toEqual({ x: 0, top: 20, height: 600 })
+
+    window.dispatchEvent(
+      new MouseEvent('pointermove', { clientX: 94, altKey: true }),
+    )
+    expect(el.style.width).toBe('494px')
+    expect(api.guide.value).toEqual({ width: 494, snap: null })
+
+    window.dispatchEvent(new MouseEvent('pointerup'))
+    expect(api.guide.value).toBeNull()
+    unmount()
+  })
+
+  it('snaps to the natural width and to other media, never to itself', () => {
+    const el = makeEl(400, 200)
+    const editor = makeEditor(true, [
+      { type: 'image', width: 420, pos: 0 },
+      { type: 'image', width: 612, pos: 5 },
+      { type: 'paragraph', width: 340, pos: 9 },
+      { type: 'iframe', renderedWidth: 640, pos: 12 },
+    ])
+    const { api, unmount } = mountResize(editor, {
+      mediaEl: () => el,
+      getAspectRatio: () => 0.5,
+      getNaturalWidth: () => 680,
+      getPos: () => 0,
+      onCommit: vi.fn(),
+    })
+
+    api.startResize({ clientX: 0, clientY: 0 } as MouseEvent, 'right')
+    const dragTo = (width: number) =>
+      window.dispatchEvent(
+        new MouseEvent('pointermove', { clientX: width - 400 }),
+      )
+
+    dragTo(606)
+    expect(api.guide.value?.snap).toMatchObject({
+      width: 612,
+      label: 'Same as image',
+    })
+    // An embed with no stored width snaps to the width it renders at.
+    dragTo(636)
+    expect(api.guide.value?.snap).toMatchObject({
+      width: 640,
+      label: 'Same as embed',
+    })
+    dragTo(675)
+    expect(api.guide.value?.snap).toMatchObject({
+      width: 680,
+      label: 'Original size',
+    })
+    // Its own stored width (420) and non-media nodes are not targets.
+    dragTo(418)
+    expect(api.guide.value?.snap).toBeNull()
+    dragTo(338)
+    expect(api.guide.value?.snap).toBeNull()
+
+    window.dispatchEvent(new MouseEvent('pointerup'))
+    unmount()
+  })
+
+  // An embed's `maxWidthPadding` stands in for the editor padding, so a real
+  // padding replaces it rather than adding to it.
+  it.each([
+    { media: 'an image', maxWidthPadding: 0, maxDragWidth: '1000px' },
+    { media: 'an embed', maxWidthPadding: 40, maxDragWidth: '960px' },
+  ])(
+    'snaps $media to fractions of the content width inside the editor padding',
+    ({ maxWidthPadding, maxDragWidth }) => {
+      // 70px padding each side leaves 860px of content, the most media can show.
+      const el = makeEl(400, 200)
+      const { api, unmount } = mountResize(makeEditor(true, [], 70), {
+        mediaEl: () => el,
+        getAspectRatio: () => 0.5,
+        getPos: () => 0,
+        onCommit: vi.fn(),
+        maxWidthPadding,
+      })
+
+      api.startResize({ clientX: 0, clientY: 0 } as MouseEvent, 'right')
+      window.dispatchEvent(new MouseEvent('pointermove', { clientX: 26 }))
+      expect(api.guide.value?.snap?.label).toBe('50%')
+      expect(el.style.width).toBe('430px')
+      window.dispatchEvent(new MouseEvent('pointermove', { clientX: 456 }))
+      expect(api.guide.value?.snap?.label).toBe('Full width')
+      expect(el.style.width).toBe('860px')
+      // Away from any snap, the drag still reaches the padding box as before.
+      window.dispatchEvent(new MouseEvent('pointermove', { clientX: 700 }))
+      expect(el.style.width).toBe(maxDragWidth)
+
+      window.dispatchEvent(new MouseEvent('pointerup'))
+      unmount()
+    },
+  )
+
+  it('moves the snap line on scroll and re-snaps on window resize', () => {
+    const el = makeEl(400, 200)
+    const editor = makeEditor()
+    const { api, unmount } = mountResize(editor, {
+      mediaEl: () => el,
+      getAspectRatio: () => 0.5,
+      getPos: () => 0,
+      onCommit: vi.fn(),
+    })
+
+    api.startResize({ clientX: 0, clientY: 0 } as MouseEvent, 'right')
+    window.dispatchEvent(new MouseEvent('pointermove', { clientX: 94 }))
+    expect(api.guide.value?.snap?.line.top).toBe(20)
+
+    // The pointer holds still while the page scrolls the editor up.
+    const dom = editor.view.dom
+    dom.getBoundingClientRect = () => ({ top: -80, height: 600 }) as DOMRect
+    window.dispatchEvent(new Event('scroll'))
+    expect(api.guide.value?.snap?.line.top).toBe(-80)
+
+    // At 800px wide, 50% is 400: the held 494px no longer snaps.
+    Object.defineProperty(dom, 'clientWidth', { value: 800 })
+    window.dispatchEvent(new Event('resize'))
+    expect(api.guide.value?.snap).toBeNull()
+    expect(el.style.width).toBe('494px')
+
     window.dispatchEvent(new MouseEvent('pointerup'))
     unmount()
   })
