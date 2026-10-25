@@ -1,4 +1,8 @@
-import { createFetch } from '@vueuse/core'
+import {
+  createFetch,
+  type BeforeFetchContext,
+  type OnFetchErrorContext,
+} from '@vueuse/core'
 import { docStore } from './docStore'
 import { listStore } from './useList/listStore'
 import { LOCAL_WRITE, writeGate, type DispatchStamp } from './writeGate'
@@ -64,8 +68,37 @@ export function currentDispatchSeq(): number {
  * `options` object per `execute` and every hook in the chain is handed that
  * same object, so it names the request.
  */
-export function getRequestDispatchSeq(options: object): number | undefined {
+function getRequestDispatchSeq(options: object): number | undefined {
   return requestSeqs.get(options)
+}
+
+/**
+ * Tracks the newest request one `useFetch` instance has sent, whoever sent
+ * it: the instance's `execute`, or `useFetch`'s parameter watcher under
+ * `refetch: true`. `useFetch` aborts the request in flight when it sends a
+ * new one, so a request older than the newest was replaced. Its abort is not
+ * an error of the instance.
+ *
+ * Pass `beforeFetch` as the per-call `beforeFetch`. `createFetch` chains it
+ * after the factory's, which has already numbered the request.
+ */
+export function trackNewestRequest() {
+  let newest = 0
+  return {
+    beforeFetch({ options }: BeforeFetchContext) {
+      const seq = getRequestDispatchSeq(options)
+      if (seq !== undefined && seq > newest) {
+        newest = seq
+      }
+    },
+    /** The dispatch number of the newest request sent so far. */
+    newest: () => newest,
+    /** Whether a newer request replaced the one that failed. */
+    isSuperseded(ctx: OnFetchErrorContext) {
+      const seq = getRequestDispatchSeq(ctx.context.options)
+      return seq !== undefined && seq < newest
+    },
+  }
 }
 
 /**

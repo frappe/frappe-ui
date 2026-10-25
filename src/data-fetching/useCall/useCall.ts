@@ -4,7 +4,7 @@ import {
   currentDispatchSeq,
   FrappeResponseError,
   getDispatchStamp,
-  getRequestDispatchSeq,
+  trackNewestRequest,
   useFrappeFetch,
 } from '../useFrappeFetch'
 import { LOCAL_WRITE, type WriteStamp } from '../writeGate'
@@ -90,24 +90,17 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
 
   type FrappeResponse<T> = { data: T }
 
-  // The dispatch number of the newest request this call has sent, whoever
-  // sent it: this call's `execute`, or `useFetch`'s parameter watcher under
-  // `refetch: true`. `submit` compares it with the number it read before it
-  // waited. The number itself is minted in `useFrappeFetch`, at the top of
-  // `execute`; counting here instead would be a tick late, because
+  // `submit` compares the newest request's number with the number it read
+  // before it waited. The number itself is minted in `useFrappeFetch`, at the
+  // top of `execute`; counting here instead would be a tick late, because
   // `createFetch` chains a per-call `beforeFetch` after the factory's, and a
   // submit in the same tick would have taken its reading by then.
-  let lastDispatch = 0
+  const requests = trackNewestRequest()
 
   const fetchOptions: UseFetchOptions = {
     immediate,
     refetch,
-    beforeFetch({ options }) {
-      const seq = getRequestDispatchSeq(options)
-      if (seq !== undefined && seq > lastDispatch) {
-        lastDispatch = seq
-      }
-    },
+    beforeFetch: requests.beforeFetch,
     // `data` is read back out as `data.value?.data` below (the raw fetch
     // response is `{ data: TResponse }`), so the seed value has to be
     // wrapped the same way — an unwrapped `initialData` would read as
@@ -162,6 +155,12 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
       return ctx
     },
     onFetchError(ctx) {
+      if (requests.isSuperseded(ctx)) {
+        // A newer request replaced this one. Its abort is not an error of the
+        // call, and `useFetch` writes whatever is returned here into `error`,
+        // so hand back the error the newer request left there.
+        return { ...ctx, error: error.value }
+      }
       if (onError) {
         try {
           onError(ctx.error)
@@ -214,13 +213,6 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
   }
 
   onFetchResponse(() => {
-    // This response succeeded, so the call is not in error. `execute` clears
-    // `error` when it starts, but a request this one superseded rejects with
-    // its abort *after* that, and nothing put the ref back. Two overlapping
-    // submits ended with the newer one rejecting on the older one's abort.
-    // `data` is already overwritten by whichever response settled last; the
-    // error half has to follow the same rule.
-    error.value = null
     resolve()
     promise.value = makePromise()
   })
@@ -274,19 +266,27 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
       const sentBefore = currentDispatchSeq()
       await nextTick()
       await whenSettled()
-      if (lastDispatch > sentBefore) {
+      if (requests.newest() > sentBefore) {
         if (error.value) throw error.value
         return data.value?.data ?? null
       }
       // Nothing went out with these params. Fall through and send it here,
       // the same way a submit without `refetch` does.
     }
-    const response = await execute()
     // Actions reject, reads resolve. `submit()` writes, so a caller that
     // does not handle failure must not run its success path (DAT-Q1).
     // `execute`/`fetch`/`reload` keep resolving; read `error` after them.
-    if (error.value) throw error.value
-    return response
+    // `_execute(true)` rethrows this request's own failure. That includes the
+    // abort of a request a newer one replaced: the abort stays out of
+    // `error`, but this submit did not land, so it rejects with the abort.
+    const sending = _execute(true)
+    const seq = currentDispatchSeq()
+    try {
+      await sending
+    } catch (e) {
+      throw requests.newest() > seq ? e : error.value
+    }
+    return data.value?.data ?? null
   }
 
   const reset = () => {

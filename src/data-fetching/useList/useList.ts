@@ -15,7 +15,7 @@ import {
 } from '@vueuse/core'
 import {
   FrappeResponseError,
-  getRequestDispatchSeq,
+  trackNewestRequest,
   useFrappeFetch,
 } from '../useFrappeFetch'
 import { useAction } from '../useAction'
@@ -118,20 +118,12 @@ export function useList<T extends { name: string }>(
     return transform ? applyTransform(structuredClone(rows), transform) : rows
   }
 
-  // The dispatch number of the newest list request, whoever sent it: `reload`
-  // or `useFetch`'s parameter watcher under `refetch: true`. A request with an
-  // older number was superseded, and `useFetch` aborted it.
-  let lastDispatch = 0
+  const requests = trackNewestRequest()
 
   const fetchOptions: UseFetchOptions = {
     immediate,
     refetch,
-    beforeFetch({ options }) {
-      const seq = getRequestDispatchSeq(options)
-      if (seq !== undefined && seq > lastDispatch) {
-        lastDispatch = seq
-      }
-    },
+    beforeFetch: requests.beforeFetch,
     initialData: initialData || null,
     afterFetch: handleAfterFetch<T>({
       ...options,
@@ -146,10 +138,7 @@ export function useList<T extends { name: string }>(
     }),
     onFetchError: handleFetchError<T>({
       ...options,
-      isSuperseded(ctx) {
-        const seq = getRequestDispatchSeq(ctx.context.options)
-        return seq !== undefined && seq < lastDispatch
-      },
+      isSuperseded: requests.isSuperseded,
       getError: () => error.value,
     }),
   }
