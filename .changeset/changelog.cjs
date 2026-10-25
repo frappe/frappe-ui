@@ -1,6 +1,6 @@
 // Formats one CHANGELOG.md line per changeset:
 //
-//   - Checkbox: a checked box lightens on hover (fix). [#1186](…/pull/1186)
+//   - Checkbox: a checked box lightens on hover. [#1186](…/pull/1186)
 //
 // The PR number comes from the commit that added the changeset. A squash merge
 // puts it in the commit subject, such as "fix(Checkbox): … (#1186)". For other
