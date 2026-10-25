@@ -7,6 +7,7 @@ import {
   type Ref,
 } from 'vue'
 import { moduleSingleton } from './moduleSingleton'
+import { useId } from './useId'
 import Dialog from '../components/Dialog/Dialog.vue'
 import { Button } from '../components/Button'
 import FormControl from '../components/FormControl/FormControl.vue'
@@ -490,7 +491,6 @@ function createNewOption(
   }
 }
 
-let promptFormId = 0
 export function prompt(args: PromptArgs): DialogHandle {
   const state = reactive<LifecycleState>({
     open: true,
@@ -500,7 +500,6 @@ export function prompt(args: PromptArgs): DialogHandle {
   let assignedId = -1
   const close = makeClose(state)
   const setError = makeSetError(state)
-  const formId = `frappe-ui-prompt-${++promptFormId}`
 
   const values = reactive<Record<string, any>>(
     Object.fromEntries(args.fields.map((f) => [f.name, initialFieldValue(f)])),
@@ -645,6 +644,7 @@ export function prompt(args: PromptArgs): DialogHandle {
   const component = defineComponent({
     name: 'ImperativePromptDialog',
     setup() {
+      const formId = useId()
       return () =>
         h(
           Dialog,
