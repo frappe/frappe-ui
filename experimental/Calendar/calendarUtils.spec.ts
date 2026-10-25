@@ -118,4 +118,48 @@ describe('findOverlappingEventsCount', () => {
     const bUnderC = (events.c.over as CalendarEvent[])[1]
     expect(overIds(bUnderC)).toEqual(['a'])
   })
+
+  // A declined event takes no column, but it is still drawn, and beneath: the
+  // pill laid over it cuts against it as against any other event beneath.
+  it('puts a pill over the declined event it crosses', () => {
+    const events = laidOutOnGrid([
+      at('vendor', '10:00', '11:00'),
+      at('roadmap', '10:30', '11:30'),
+    ])
+    const declined = laidOutOnGrid([
+      { ...at('vendor', '10:00', '11:00'), isDeclined: true },
+      at('roadmap', '10:30', '11:30'),
+    ])
+    expect(events.roadmap.hallNumber).toBe(1)
+    expect(declined.roadmap.hallNumber).toBe(0)
+    expect(overIds(declined.roadmap)).toEqual(['vendor'])
+    expect((declined.roadmap.over as CalendarEvent[])[0].hallNumber).toBe(0)
+    expect(overIds(declined.vendor)).toEqual([])
+  })
+
+  it('leaves a pill off the declined event it clears', () => {
+    const events = laidOutOnGrid([
+      { ...at('vendor', '09:00', '10:00'), isDeclined: true },
+      at('roadmap', '10:00', '11:00'),
+    ])
+    expect(overIds(events.roadmap)).toEqual([])
+  })
+
+  it('lays a later declined event over an earlier one it crosses', () => {
+    const events = laidOutOnGrid([
+      { ...at('b', '10:30', '11:30'), isDeclined: true },
+      { ...at('a', '10:00', '11:00'), isDeclined: true },
+    ])
+    expect(overIds(events.b)).toEqual(['a'])
+    expect(overIds(events.a)).toEqual([])
+    expect(
+      findOverlappingEventsCount(
+        [
+          { ...at('b', '10:30', '11:30'), isDeclined: true },
+          { ...at('a', '10:00', '11:00'), isDeclined: true },
+        ],
+        minuteHeight,
+      ).map((event) => event.id),
+    ).toEqual(['a', 'b'])
+  })
 })
