@@ -19,7 +19,20 @@ jobs:
   release-pr:
     runs-on: ubuntu-latest
     steps:
+      # A push made with GITHUB_TOKEN does not start other workflows on its
+      # own, so the checks on the release PR waited for a maintainer to
+      # approve them after every merge. A push made with the barista app
+      # token starts them.
+      - name: Mint barista app token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.BARISTA_APP_ID }}
+          private-key: ${{ secrets.BARISTA_PRIVATE_KEY }}
+
       - uses: actions/checkout@v4
+        with:
+          token: ${{ steps.app-token.outputs.token }}
 
       - uses: actions/setup-node@v4
         with:
@@ -38,4 +51,4 @@ jobs:
           commit: 'chore(release): version packages'
           title: 'chore(release): version packages'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
