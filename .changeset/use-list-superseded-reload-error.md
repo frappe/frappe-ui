@@ -2,4 +2,4 @@
 'frappe-ui': patch
 ---
 
-useList: a reload that a newer reload aborts no longer sets `error` or calls `onError` (fix).
+useList: a fetch that a newer fetch replaces, such as the first of two quick `reload()` calls, no longer sets `error` or calls `onError` (fix).
