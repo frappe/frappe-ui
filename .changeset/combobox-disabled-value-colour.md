@@ -3,4 +3,4 @@
 ---
 
 Combobox: a disabled input-mode combobox now draws its value in the muted
-disabled ink, as Select does (fix).
+disabled ink, as Select does.

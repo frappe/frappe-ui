@@ -2,4 +2,4 @@
 'frappe-ui': patch
 ---
 
-Switch: disabled switches use distinct backgrounds for on and off states (fix).
+Switch: disabled switches use distinct backgrounds for on and off states.

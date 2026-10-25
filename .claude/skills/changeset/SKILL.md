@@ -29,12 +29,12 @@ Tests, stories, playgrounds and Markdown files do not count, even inside
 
 ## Choose the bump
 
-| Change | Bump | Tag |
-| --- | --- | --- |
-| Bug fix, or a visual or behavior correction | `patch` | `fix` |
-| New public API: a component, prop, slot, event, export or token | `minor` | `additive` |
-| Deprecation of a public API | `minor` | `deprecation` |
-| Breaking change | Stop. Ask a maintainer. v1 takes no major release from a PR. | none |
+| Change | Bump |
+| --- | --- |
+| Bug fix, or a visual or behavior correction | `patch` |
+| New public API: a component, prop, slot, event, export or token | `minor` |
+| Deprecation of a public API | `minor` |
+| Breaking change | Stop. Ask a maintainer. v1 takes no major release from a PR. |
 
 `minor` needs the `release:minor` label on the PR. A maintainer adds it.
 Without the label, the check fails. Say in the PR description why the change
@@ -50,7 +50,7 @@ name:
 'frappe-ui': patch
 ---
 
-Combobox: a picked option now commits before the popover closes (fix).
+Combobox: a picked option now commits before the popover closes.
 ```
 
 Name `frappe-ui` only. A `create-frappe-ui` change also takes a `frappe-ui`
@@ -62,14 +62,15 @@ Write for an app developer who reads the changelog. The text of each changeset
 becomes one line in `CHANGELOG.md`. Use this format:
 
 ```md
-<Component or area>: <what changed for the app> (<tag>).
+<Component or area>: <what changed for the app>.
 ```
 
 - Start with the component or area, such as `Combobox` or `Tailwind preset`.
 - Say what changed for the app, not how the code changed.
-- End with the tag for the bump, from the table in "Choose the bump". There is
-  no breaking tag, because a PR cannot make a breaking change.
-- A `deprecation` line also says what to use instead.
+- Do not end with a tag such as `(fix)` or `(additive)`. The release PR
+  already puts each line under "Minor Changes" or "Patch Changes".
+- A deprecation ends with `(deprecation)`, so it stands out from the new
+  features under "Minor Changes", and says what to use instead.
 - If the app must do something, say what in the same line. Keep the text to
   one line.
 - Use one changeset per change. A PR with two independent changes adds two
@@ -78,8 +79,8 @@ becomes one line in `CHANGELOG.md`. Use this format:
 Examples:
 
 ```md
-Combobox: a picked option now commits before the popover closes (fix).
-Dialog: the new `size` prop sets the width of the dialog (additive).
+Combobox: a picked option now commits before the popover closes.
+Dialog: the new `size` prop sets the width of the dialog.
 Badge: the `theme` prop is deprecated; use `variant` instead (deprecation).
 ```
 
