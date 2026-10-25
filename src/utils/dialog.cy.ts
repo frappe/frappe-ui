@@ -497,7 +497,7 @@ describe('dialog.ts — imperative API', () => {
     cy.contains('[role=option]', 'Create').should('not.exist')
   })
 
-    it('prompt combobox does not submit on Enter while selecting an option', () => {
+  it('prompt combobox does not submit on Enter while selecting an option', () => {
     const onConfirm = cy.spy().as('onConfirm')
 
     cy.mount(DialogManager)
@@ -530,6 +530,40 @@ describe('dialog.ts — imperative API', () => {
     cy.contains('button', 'Submit').click()
 
     cy.get('@onConfirm').should('have.been.calledOnce')
+    cy.get('@onConfirm').then((spy: any) => {
+      expect(spy.firstCall.args[0].values).to.deep.equal({ label: 'bug' })
+    })
+    cy.get('[role=dialog]').should('not.exist')
+  })
+
+  it('prompt textarea adds a new line on Enter instead of submitting', () => {
+    const onConfirm = cy.spy().as('onConfirm')
+
+    cy.mount(DialogManager)
+
+    cy.then(() => {
+      prompt({
+        title: 'Add a note',
+        fields: [{ name: 'note', label: 'Note', type: 'textarea' }],
+        onConfirm,
+      })
+    })
+
+    cy.get('[role=dialog] textarea')
+      .should('have.focus')
+      .type('line one{enter}line two')
+
+    cy.get('@onConfirm').should('not.have.been.called')
+    cy.get('[role=dialog]').should('exist')
+
+    cy.contains('button', 'Submit').click()
+
+    cy.get('@onConfirm').should('have.been.calledOnce')
+    cy.get('@onConfirm').then((spy: any) => {
+      expect(spy.firstCall.args[0].values).to.deep.equal({
+        note: 'line one\nline two',
+      })
+    })
     cy.get('[role=dialog]').should('not.exist')
   })
 
