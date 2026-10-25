@@ -82,7 +82,7 @@ const users = useCall({
 | `transform`    | `(data) => data`                        |            | Changes the response before it goes into `data`. Returning `undefined` keeps the response as is. |
 | `beforeSubmit` | `(params) => void \| Promise<void>`     |            | Runs before each `submit()`. If it throws, no request is sent and `submit()` rejects.            |
 | `onSuccess`    | `(data) => void`                        |            | Called with the data after each successful request.                                              |
-| `onError`      | `(error: Error) => void`                |            | Called with the error after each failed request.                                                 |
+| `onError`      | `(error: Error) => void`                |            | Called with the error after each failed request. A request that a newer request replaces does not count: it is aborted silently. |
 
 ## Return value
 
@@ -100,7 +100,7 @@ const users = useCall({
 | `reload()`        | `() => Promise<TResponse \| null>`             | Sends a request with the current params. Resolves with the data, or `null` if it fails. Also available as `execute()` and `fetch()`. |
 | `submit(params?)` | `(params?) => Promise<TResponse \| null>`      | Runs `beforeSubmit`, then sends a request with `params`, or the `params` option if omitted. Rejects if it fails. |
 | `reset()`         | `() => void`                                   | Clears the params set by the last `submit()`.                                                 |
-| `abort()`         | `() => void`                                   | Aborts the request in flight.                                                                 |
+| `abort()`         | `() => void`                                   | Aborts the request in flight. This sets `error` and calls `onError`.                          |
 
 These pages use `reload()` and `loading`. The other names do the same thing
 and stay in v1.
@@ -122,6 +122,9 @@ Each `useCall` has one request slot, so:
   the later call. Both resolve with its response.
 - A params change aborts the request in flight. Both callers resolve with the
   new response.
+- Without `refetch`, a `submit()` while another is in flight aborts the older
+  request. The older `submit()` rejects with the abort. `error` and `onError`
+  belong to the newer request.
 
 When writes must run at the same time, give each its own `useCall`, or use the
 write members of [`useDoc`](./use-doc.md), which send one request per submit.
