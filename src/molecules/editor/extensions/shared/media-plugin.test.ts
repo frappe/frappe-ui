@@ -2,59 +2,269 @@
  * @vitest-environment jsdom
  */
 
-import { describe, it, expect, vi } from 'vitest'
-
-vi.mock('#molecules/editor/extensions/shared/node-view', () => ({
-  dispatchIfAlive: vi.fn(),
-}))
-
+import { afterEach, describe, it, expect, vi } from 'vitest'
+import { Editor, Extension, Node } from '@tiptap/core'
+import Document from '@tiptap/extension-document'
+import Paragraph from '@tiptap/extension-paragraph'
+import Text from '@tiptap/extension-text'
+import { UndoRedo } from '@tiptap/extensions'
+import { undoDepth } from '@tiptap/pm/history'
+import { Plugin, PluginKey } from '@tiptap/pm/state'
 import { createMediaPlugin } from '#molecules/editor/extensions/shared/media-plugin'
-import { dispatchIfAlive } from '#molecules/editor/extensions/shared/node-view'
-import type { MediaUploadConfig } from '#molecules/editor/extensions/shared/media-upload-types'
 
-function mediaNode(src: string, attrs: Record<string, unknown> = {}) {
-  return {
-    type: { name: 'image' },
-    attrs: { src, ...attrs },
-  }
+const probeDimensions = vi.fn(async () => ({ width: 100, height: 50 }))
+
+const Image = Node.create({
+  name: 'image',
+  group: 'block',
+  atom: true,
+  addAttributes: () => ({
+    src: { default: null },
+    width: { default: null },
+    height: { default: null },
+    loading: { default: false },
+    align: { default: null },
+  }),
+  parseHTML: () => [{ tag: 'img' }],
+  renderHTML: ({ HTMLAttributes }) => ['img', HTMLAttributes],
+  addProseMirrorPlugins() {
+    const host = { editor: this.editor, options: {} }
+    return [
+      createMediaPlugin(
+        {} as never,
+        {
+          nodeName: 'image',
+          accept: /image/i,
+          storeBase64: true,
+          probeDimensions,
+        },
+        host,
+      ),
+    ]
+  },
+})
+
+// y-prosemirror's plugin key, which frappe-ui cannot import
+const ySyncKey = new PluginKey('y-sync')
+const YSync = Extension.create({
+  name: 'ySyncStandIn',
+  addProseMirrorPlugins: () => [new Plugin({ key: ySyncKey })],
+})
+
+// Appends a paragraph after a trailing image, as TrailingNode does
+const TrailingParagraph = Extension.create({
+  name: 'trailingParagraph',
+  addProseMirrorPlugins: () => [
+    new Plugin({
+      appendTransaction: (_transactions, _oldState, state) => {
+        const last = state.doc.lastChild
+        if (last?.type.name === 'paragraph') return null
+        return state.tr.insert(
+          state.doc.content.size,
+          state.schema.nodes.paragraph.create(),
+        )
+      },
+    }),
+  ],
+})
+
+const editors: Editor[] = []
+afterEach(() => {
+  editors.splice(0).forEach((editor) => editor.destroy())
+  probeDimensions.mockClear()
+})
+
+function makeEditor(content: string, extensions: Extension[] = []) {
+  const editor = new Editor({
+    // Tiptap runs plugins in reverse extension order, so these append after
+    // the media plugin has already seen the transaction they respond to.
+    extensions: [
+      ...extensions,
+      Document,
+      Paragraph,
+      Text,
+      Image,
+      YSync,
+      // Short, so a test can wait past it and turn a recorded write into its
+      // own undo step. prosemirror-history treats 0 as its 500 ms default.
+      UndoRedo.configure({ newGroupDelay: 1 }),
+    ],
+    content,
+  })
+  editors.push(editor)
+  return editor
 }
 
-describe('media plugin dimension backfill', () => {
-  it('does not write stale dimensions when the node at the captured position changed source', async () => {
-    const inserted = mediaNode('/files/old.png')
-    const live = mediaNode('/files/new.png')
-    const config: MediaUploadConfig = {
-      nodeName: 'image',
-      accept: /image/i,
-      storeBase64: true,
-      probeDimensions: vi.fn(async () => ({ width: 100, height: 50 })),
-    }
-    const view = {
-      state: {
-        doc: { nodeAt: () => live },
-        tr: { setNodeMarkup: vi.fn() },
-      },
-    }
-    const plugin = createMediaPlugin({} as never, config, {
-      editor: { view } as never,
-      options: {},
+const settle = () => new Promise((resolve) => setTimeout(resolve, 0))
+
+const sizes = (editor: Editor) => {
+  const found: [unknown, unknown][] = []
+  editor.state.doc.descendants((node) => {
+    if (node.type.name === 'image')
+      found.push([node.attrs.width, node.attrs.height])
+  })
+  return found
+}
+
+describe('media dimension back-fill', () => {
+  it('sizes an image the person inserts', async () => {
+    const editor = makeEditor('<p>x</p>')
+    editor.commands.insertContentAt(0, {
+      type: 'image',
+      attrs: { src: '/files/new.png' },
     })
-    const newState = {
-      doc: {
-        descendants: (visit: (node: unknown, pos: number) => void) => {
-          visit(inserted, 5)
-        },
-        nodeAt: () => inserted,
-      },
-    }
+    await settle()
 
-    ;(plugin as any).spec.appendTransaction(
-      [{ docChanged: true }],
-      {} as never,
-      newState,
+    expect(sizes(editor)).toEqual([[100, 50]])
+  })
+
+  it('sizes a stored image once the person edits the document', async () => {
+    const editor = makeEditor('<img src="/files/old.png"><p>x</p>')
+    await settle()
+    expect(probeDimensions).not.toHaveBeenCalled()
+
+    editor.commands.insertContentAt(editor.state.doc.content.size - 1, 'y')
+    await settle()
+
+    expect(sizes(editor)).toEqual([[100, 50]])
+  })
+
+  it('leaves an image that arrives from a collaborator as it came', async () => {
+    const editor = makeEditor('<p>x</p>')
+    const remote = editor.state.tr.insert(
+      0,
+      editor.schema.nodes.image.create({ src: '/files/theirs.png' }),
     )
-    await Promise.resolve()
+    editor.view.dispatch(remote.setMeta(ySyncKey, { isChangeOrigin: true }))
+    await settle()
 
-    expect(dispatchIfAlive).not.toHaveBeenCalled()
+    expect(sizes(editor)).toEqual([[null, null]])
+    expect(probeDimensions).not.toHaveBeenCalled()
+  })
+
+  it('leaves an image loaded without an update event as it came', async () => {
+    const editor = makeEditor('<p>x</p>')
+    editor.commands.setContent('<img src="/files/loaded.png">', {
+      emitUpdate: false,
+    })
+    await settle()
+
+    expect(sizes(editor)).toEqual([[null, null]])
+    expect(probeDimensions).not.toHaveBeenCalled()
+  })
+
+  it('sizes an image once its upload finishes', async () => {
+    const editor = makeEditor('<p>x</p>')
+    editor.commands.insertContentAt(0, {
+      type: 'image',
+      attrs: { src: 'blob:pending', loading: true },
+    })
+    await settle()
+    expect(probeDimensions).not.toHaveBeenCalled()
+
+    const image = editor.state.doc.firstChild!
+    editor.view.dispatch(
+      editor.state.tr.setNodeMarkup(0, undefined, {
+        ...image.attrs,
+        src: '/files/done.png',
+        loading: false,
+      }),
+    )
+    await settle()
+
+    expect(sizes(editor)).toEqual([[100, 50]])
+  })
+
+  it('does not size an image whose source changed while it was measured', async () => {
+    let measured = (_dims: { width: number; height: number }) => {}
+    probeDimensions.mockImplementationOnce(
+      () => new Promise((resolve) => (measured = resolve)),
+    )
+    const editor = makeEditor('<p>x</p>')
+    editor.commands.insertContentAt(0, {
+      type: 'image',
+      attrs: { src: '/files/old.png' },
+    })
+    editor.view.dispatch(
+      editor.state.tr
+        .setNodeAttribute(0, 'src', '/files/new.png')
+        .setMeta(ySyncKey, { isChangeOrigin: true }),
+    )
+    measured({ width: 100, height: 50 })
+    await settle()
+
+    expect(probeDimensions).toHaveBeenCalledWith('/files/old.png')
+    expect(sizes(editor)).toEqual([[null, null]])
+  })
+
+  it("reverts the person's edit with one undo, not the sizing", async () => {
+    const editor = makeEditor('<img src="/files/old.png"><p>x</p>')
+    editor.commands.insertContentAt(editor.state.doc.content.size - 1, 'y')
+    await settle()
+    expect(sizes(editor)).toEqual([[100, 50]])
+
+    editor.commands.undo()
+    await settle()
+
+    expect(editor.state.doc.textContent).toBe('x')
+    expect(undoDepth(editor.state)).toBe(0)
+  })
+
+  it('removes an inserted image with one undo when it is measured late', async () => {
+    let measured = (_dims: { width: number; height: number }) => {}
+    probeDimensions.mockImplementationOnce(
+      () => new Promise((resolve) => (measured = resolve)),
+    )
+    const editor = makeEditor('<p>x</p>')
+    editor.commands.insertContentAt(0, {
+      type: 'image',
+      attrs: { src: '/files/new.png' },
+    })
+    // past newGroupDelay, so a recorded write would start its own undo step
+    await new Promise((resolve) => setTimeout(resolve, 5))
+    measured({ width: 100, height: 50 })
+    await settle()
+    expect(sizes(editor)).toEqual([[100, 50]])
+
+    editor.commands.undo()
+    await settle()
+
+    expect(sizes(editor)).toEqual([])
+    expect(undoDepth(editor.state)).toBe(0)
+  })
+
+  it('leaves an unsized image as it was when undo brings it back', async () => {
+    const editor = makeEditor('<img src="/files/old.png"><p>x</p>')
+    editor.commands.deleteRange({ from: 0, to: 1 })
+    editor.commands.undo()
+    await settle()
+
+    expect(sizes(editor)).toEqual([[null, null]])
+    expect(probeDimensions).not.toHaveBeenCalled()
+  })
+
+  it('leaves an image loaded without an update event as it came when another plugin appends', async () => {
+    const editor = makeEditor('<p>x</p>', [TrailingParagraph])
+    editor.commands.setContent('<img src="/files/loaded.png">', {
+      emitUpdate: false,
+    })
+    await settle()
+
+    expect(editor.state.doc.lastChild?.type.name).toBe('paragraph')
+    expect(sizes(editor)).toEqual([[null, null]])
+    expect(probeDimensions).not.toHaveBeenCalled()
+  })
+
+  it('leaves an unsized image as it was when undo brings it back and another plugin appends', async () => {
+    const editor = makeEditor('<p>x</p><img src="/files/old.png">', [
+      TrailingParagraph,
+    ])
+    editor.commands.deleteRange({ from: 3, to: 4 })
+    editor.commands.undo()
+    await settle()
+
+    expect(editor.state.doc.lastChild?.type.name).toBe('paragraph')
+    expect(sizes(editor)).toEqual([[null, null]])
+    expect(probeDimensions).not.toHaveBeenCalled()
   })
 })

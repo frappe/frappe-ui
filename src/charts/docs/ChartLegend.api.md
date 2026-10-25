@@ -7,7 +7,7 @@
   const propsData = [
   {
     name: 'items',
-    description: 'One entry per series, in the order they are drawn.',
+    description: 'One entry per series, in the order they are drawn. Entries that do not fit\non one row go behind "+N more", ranked by `weight`.',
     required: true,
     type: 'ChartLegendItem[]'
   }

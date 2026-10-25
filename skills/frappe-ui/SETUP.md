@@ -7,7 +7,7 @@
 ```bash
 npm uninstall tailwindcss @tailwindcss/vite
 npm install -D tailwindcss@^3.4 postcss autoprefixer vite@^7 @vitejs/plugin-vue@^6
-npm install frappe-ui@rc vue-router@^4
+npm install frappe-ui vue-router@^4
 ```
 
 - **Tailwind v3.** frappe-ui ships a Tailwind v3 preset (`darkMode`, `theme`, `plugins`, `safelist`). Tailwind v4 ignores that shape and the design tokens never load.
@@ -50,7 +50,7 @@ Every `frappeui()` sub-plugin except `lucideIcons` and `frappeTypes` is on by de
 frappeui({ frappeProxy: false, jinjaBootData: false, buildConfig: false })
 ```
 
-Leave `optimizeDeps` alone. The plugin declares its own `optimizeDeps.include` (`highlight.js/lib/core`, `reka-ui`, `vue-sonner`, `dompurify`) and its own `optimizeDeps.esbuildOptions.plugins` entry, which is how `codeLanguages` stubs a `@codemirror/lang-*` package the app did not install. Its `barrelImports` sub-plugin also expects Vite to pre-bundle an installed frappe-ui as one chunk. Your own `esbuildOptions.plugins` survive: `mergeConfig` concatenates that array.
+Leave `optimizeDeps` alone. The plugin declares its own `optimizeDeps.include` (`highlight.js/lib/core`, `reka-ui`, `vue-sonner`, `dompurify`) and its own `optimizeDeps.esbuildOptions.plugins` entry (`optimizeDeps.rolldownOptions.plugins` on Vite 8), which is how `codeLanguages` stubs a `@codemirror/lang-*` package the app did not install. Its `barrelImports` sub-plugin also expects Vite to pre-bundle an installed frappe-ui as one chunk. Your own `plugins` entries there survive: `mergeConfig` concatenates that array.
 
 ### Prototyping against a non-Frappe backend
 

@@ -4,14 +4,19 @@
  * and both paths have to reach the same answer.
  */
 
-/** Toggles one series, refusing to hide the last visible one — an empty plot reads as a bug. */
+/**
+ * Toggles one series, refusing to hide the last one drawn — an empty plot reads
+ * as a bug. `drawn` is what the plot draws, not what is unhidden: a slice worth
+ * nothing has a legend entry and no mark, so it can neither hold the plot up
+ * nor empty it.
+ */
 export function toggleHiddenSeries(
   hidden: string[],
   name: string,
-  seriesCount: number,
+  drawn: string[],
 ): string[] {
   if (hidden.includes(name)) return hidden.filter((n) => n !== name)
-  if (hidden.length >= seriesCount - 1) return hidden
+  if (drawn.length === 1 && drawn[0] === name) return hidden
   return [...hidden, name]
 }
 

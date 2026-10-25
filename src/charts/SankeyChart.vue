@@ -60,7 +60,7 @@ import { usePlotKeyboard } from './core/usePlotKeyboard'
 import { useTooltipDismiss } from './core/useTooltipDismiss'
 import { buildSankeyGraph, buildSankeyOption } from './sankeyOptions'
 import { formatLabel, formatValue } from './format'
-import { useChartTokens } from './tokens'
+import { useChartTokens, useResolvedConfig } from './tokens'
 import {
   chartAriaLabel,
   documentDir,
@@ -93,16 +93,19 @@ const plotEl = ref<HTMLElement>()
 
 const dir = computed(() => props.dir ?? documentDir())
 
-const config = computed<SankeyChartConfig>(() => ({
-  data: props.data,
-  sourceColumn: props.source,
-  targetColumn: props.target,
-  valueColumn: props.value,
-  vertical: props.vertical,
-  nodeAlign: props.nodeAlign,
-  palette: props.palette,
-  echartOptions: props.echartOptions,
-}))
+const config = useResolvedConfig<SankeyChartConfig>(
+  () => ({
+    data: props.data,
+    sourceColumn: props.source,
+    targetColumn: props.target,
+    valueColumn: props.value,
+    vertical: props.vertical,
+    nodeAlign: props.nodeAlign,
+    palette: props.palette,
+    echartOptions: props.echartOptions,
+  }),
+  plotEl,
+)
 
 const { tokens } = useChartTokens(plotEl)
 

@@ -377,4 +377,25 @@ describe('ContextMenu', () => {
     cy.get('[data-cy=trigger]').rightclick()
     cy.get('[data-slot=empty]').should('contain.text', 'Nothing here')
   })
+
+  it('scrolls a menu taller than the screen so its last item can be selected', () => {
+    const onClick = cy.stub().as('onClick')
+    const longOptions = Array.from({ length: 30 }, (_, i) => ({
+      label: i === 29 ? 'Last item' : `Item ${i + 1}`,
+      onClick: i === 29 ? onClick : undefined,
+    }))
+    cy.viewport(500, 300)
+    cy.mount(ContextMenu, {
+      props: { options: longOptions },
+      slots: { default: trigger },
+    })
+
+    cy.get('[data-cy=trigger]').rightclick()
+    cy.get('[data-slot=content]').should(($el) => {
+      expect($el[0].getBoundingClientRect().bottom).to.be.at.most(300)
+      expect($el[0].scrollHeight).to.be.greaterThan($el[0].clientHeight)
+    })
+    cy.contains('[role=menuitem]', 'Last item').scrollIntoView().click()
+    cy.get('@onClick').should('have.been.calledOnce')
+  })
 })

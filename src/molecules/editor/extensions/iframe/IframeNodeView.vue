@@ -3,6 +3,7 @@ import { computed, ref, toRaw, watch } from 'vue'
 import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3'
 import MediaToolbar from '#molecules/editor/components/MediaToolbar.vue'
 import MediaResizeHandle from '#molecules/editor/components/MediaResizeHandle.vue'
+import MediaResizeGuide from '#molecules/editor/components/MediaResizeGuide.vue'
 import { SELECTED_MEDIA_RING } from '#molecules/editor/components/media-node-view-utils'
 import { useNodeViewEditable } from '#molecules/editor/composables/useNodeViewEditable'
 import {
@@ -49,7 +50,7 @@ const sandbox = computed<string>(() => IFRAME_SANDBOX)
 const isInteractive = computed<boolean>(() => !!props.node.attrs.interactive)
 const overlayActive = computed(() => isEditable.value && !isInteractive.value)
 
-const { startResize } = useNodeViewResize(editor, {
+const { guide, startResize } = useNodeViewResize(editor, {
   mediaEl: () => iframeRef.value,
   containerEl: () => containerRef.value,
   getAspectRatio: () => aspectRatio.value,
@@ -220,6 +221,7 @@ function commitCaption(event: Event): void {
           @resize-start="onResizeStart"
           @resize-keydown="onResizeKeydown"
         />
+        <MediaResizeGuide :guide="() => guide" />
 
         <!-- Placeholder while no src is set -->
         <div

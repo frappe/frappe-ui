@@ -94,12 +94,11 @@ const clampedValue = computed(() =>
 const fillOffset = computed(() => clampedValue.value - MAX_VALUE)
 
 /**
- * A bare percentage (reka-ui's default) says how far along the bar is but not
- * what it measures, so prefer the visible label when there is one.
+ * The progressbar's accessible name: the visible label, or a generic name.
+ * Not reka-ui's default percentage, because `aria-valuenow` already announces
+ * the value and a "40%" name would be read twice.
  */
-const valueLabel = computed(
-  () => props.label || `${Math.round(clampedValue.value)}%`,
-)
+const valueLabel = computed(() => props.label || 'Progress')
 
 const filledIntervalCount = computed(() =>
   Math.round((clampedValue.value / MAX_VALUE) * (props.intervals ?? 0)),

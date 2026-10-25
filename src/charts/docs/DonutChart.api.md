@@ -61,6 +61,12 @@
     type: 'number'
   },
   {
+    name: 'order',
+    description: 'The order the slices go round the ring. `\'size\'` puts the biggest first.\n`\'rows\'` keeps the rows\' order, for categories that already have one, such\nas ageing buckets or months. Either way `maxSlices` keeps the largest, and\n"Others" comes last. Defaults to `\'size\'`.',
+    required: false,
+    type: 'SliceOrder'
+  },
+  {
     name: 'hiddenSlices',
     description: 'Slices the legend has switched off, by name. Bind it with\n`v-model:hiddenSlices` to drive the legend from the app. Left unbound, the\nlegend owns it.',
     required: false,
@@ -96,6 +102,12 @@
     description: 'Defaults to `\'categorical\'`: slices are unrelated categories, not steps.',
     required: false,
     type: 'ChartPalette'
+  },
+  {
+    name: 'colors',
+    description: 'Pins a color to a slice, keyed by its category value, e.g. `{ Overdue:\n\'var(--ink-red-5)\' }`. `OTHERS_KEY` pins "Others". A category grouped into\n"Others" takes that slice\'s color. The other slices keep the palette color\nthey would have had.',
+    required: false,
+    type: 'Record<string, string>'
   },
   {
     name: 'echartOptions',
