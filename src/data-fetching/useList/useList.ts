@@ -118,7 +118,8 @@ export function useList<T extends { name: string }>(
     return transform ? applyTransform(structuredClone(rows), transform) : rows
   }
 
-  const requests = trackNewestRequest()
+  // `error` is destructured below, after `fetchOptions` is built.
+  const requests = trackNewestRequest(() => error.value)
 
   const fetchOptions: UseFetchOptions = {
     immediate,
@@ -136,11 +137,7 @@ export function useList<T extends { name: string }>(
       _limit,
       hasNextPage,
     }),
-    onFetchError: handleFetchError<T>({
-      ...options,
-      isSuperseded: requests.isSuperseded,
-      getError: () => error.value,
-    }),
+    onFetchError: requests.onFetchError(handleFetchError<T>(options)),
   }
 
   const {
@@ -413,21 +410,8 @@ function applyTransform<T>(rows: T[], transform?: (data: T[]) => T[]) {
   return Array.isArray(returnValue) ? returnValue : rows
 }
 
-function handleFetchError<T>({
-  onError,
-  isSuperseded,
-  getError,
-}: UseListOptions<T> & {
-  isSuperseded: (ctx: OnFetchErrorContext) => boolean
-  getError: () => unknown
-}) {
+function handleFetchError<T>({ onError }: UseListOptions<T>) {
   return function (ctx: OnFetchErrorContext) {
-    if (isSuperseded(ctx)) {
-      // A newer request replaced this one. Its abort is not an error of the
-      // list, and `useFetch` writes whatever is returned here into `error`,
-      // so hand back the error the newer request left there.
-      return { ...ctx, error: getError() }
-    }
     if (onError) {
       try {
         onError(ctx.error)
@@ -436,5 +420,5 @@ function handleFetchError<T>({
       }
     }
     return ctx
-  } as UseFetchOptions['onFetchError']
+  }
 }

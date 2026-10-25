@@ -95,7 +95,8 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
   // top of `execute`; counting here instead would be a tick late, because
   // `createFetch` chains a per-call `beforeFetch` after the factory's, and a
   // submit in the same tick would have taken its reading by then.
-  const requests = trackNewestRequest()
+  // `error` is destructured below, after `fetchOptions` is built.
+  const requests = trackNewestRequest(() => error.value)
 
   const fetchOptions: UseFetchOptions = {
     immediate,
@@ -154,13 +155,7 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
       }
       return ctx
     },
-    onFetchError(ctx) {
-      if (requests.isSuperseded(ctx)) {
-        // A newer request replaced this one. Its abort is not an error of the
-        // call, and `useFetch` writes whatever is returned here into `error`,
-        // so hand back the error the newer request left there.
-        return { ...ctx, error: error.value }
-      }
+    onFetchError: requests.onFetchError((ctx) => {
       if (onError) {
         try {
           onError(ctx.error)
@@ -169,7 +164,7 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
         }
       }
       return ctx
-    },
+    }),
   }
 
   let result

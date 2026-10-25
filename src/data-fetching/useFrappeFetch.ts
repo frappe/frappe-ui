@@ -1,7 +1,7 @@
 import {
   createFetch,
   type BeforeFetchContext,
-  type OnFetchErrorContext,
+  type UseFetchOptions,
 } from '@vueuse/core'
 import { docStore } from './docStore'
 import { listStore } from './useList/listStore'
@@ -81,8 +81,13 @@ function getRequestDispatchSeq(options: object): number | undefined {
  *
  * Pass `beforeFetch` as the per-call `beforeFetch`. `createFetch` chains it
  * after the factory's, which has already numbered the request.
+ *
+ * Wrap the per-call `onFetchError` in `onFetchError`. This is the one place a
+ * replaced request's abort is handled: it stops here and leaves the
+ * instance's `error` as it is (read through `getError`). Every other failure
+ * goes on to the wrapped handler.
  */
-export function trackNewestRequest() {
+export function trackNewestRequest(getError: () => unknown) {
   let newest = 0
   return {
     beforeFetch({ options }: BeforeFetchContext) {
@@ -93,13 +98,21 @@ export function trackNewestRequest() {
     },
     /** The dispatch number of the newest request sent so far. */
     newest: () => newest,
-    /** Whether a newer request replaced the one that failed. */
-    isSuperseded(ctx: OnFetchErrorContext) {
-      const seq = getRequestDispatchSeq(ctx.context.options)
-      return seq !== undefined && seq < newest
+    onFetchError(handler: FetchErrorHook): FetchErrorHook {
+      return (ctx) => {
+        const seq = getRequestDispatchSeq(ctx.context.options)
+        if (seq !== undefined && seq < newest) {
+          // `useFetch` writes whatever is returned here into `error`, so
+          // hand back the error the newer request left there.
+          return { ...ctx, error: getError() }
+        }
+        return handler(ctx)
+      }
     },
   }
 }
+
+type FetchErrorHook = NonNullable<UseFetchOptions['onFetchError']>
 
 /**
  * The stamp put on a Response by the wrapped fetch below. The single source
