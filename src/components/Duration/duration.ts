@@ -2,7 +2,12 @@
 // Duration helpers: convert between a seconds value and human-readable text.
 // ---------------------------------------------------------------------------
 
-import type { DurationFormat, DurationUnits } from './types'
+import type {
+  DurationFormat,
+  DurationLargestUnit,
+  DurationSmallestUnit,
+  DurationUnits,
+} from './types'
 
 /**
  * Format a duration in seconds as text.
@@ -33,26 +38,23 @@ export function formatDuration(
   const seconds = Number(totalSeconds)
   if (Number.isNaN(seconds)) return ''
 
-  if (format === 'short' || format === 'long') {
-    const parts = splitDuration(seconds, units)
-    const smallestUnit = units.smallestUnit ?? 'second'
-    return format === 'short'
-      ? formatShort(parts, smallestUnit)
-      : formatLong(parts, smallestUnit)
-  }
+  const { largestUnit = 'hour', smallestUnit = 'second' } = units
+  const isPreset = format === 'short' || format === 'long'
+  // `colon` and templates have no day token and show the seconds unrounded.
+  const parts = isPreset
+    ? splitDuration(seconds, largestUnit, smallestUnit)
+    : splitDuration(seconds, 'hour', 'second')
 
-  const hours = Math.floor(seconds / 3600)
-  const minutes = Math.floor((seconds % 3600) / 60)
-  const secs = seconds % 60
-
-  if (format === 'colon') return formatColon(hours, minutes, secs)
-  return renderTemplate(format, hours, minutes, secs)
+  if (format === 'short') return formatShort(parts, smallestUnit)
+  if (format === 'long') return formatLong(parts, smallestUnit)
+  if (format === 'colon') return formatColon(parts)
+  return renderTemplate(format, parts)
 }
 
 /** Round seconds to the smallest unit, as the presets show them. */
 export function roundDuration(
   seconds: number,
-  smallestUnit: DurationUnits['smallestUnit'] = 'second',
+  smallestUnit: DurationSmallestUnit,
 ): number {
   return smallestUnit === 'minute' ? Math.round(seconds / 60) * 60 : seconds
 }
@@ -68,12 +70,7 @@ export function roundDuration(
 //   "h'h' m'm' s's'" → "1h 30m 45s"
 //   "hh:mm:ss"       → "01:30:45"
 // ---------------------------------------------------------------------------
-function renderTemplate(
-  template: string,
-  hours: number,
-  minutes: number,
-  secs: number,
-): string {
+function renderTemplate(template: string, parts: DurationParts): string {
   const pad = (value: number) => String(value).padStart(2, '0')
   let out = ''
   let i = 0
@@ -99,7 +96,8 @@ function renderTemplate(
     if (ch === 'h' || ch === 'm' || ch === 's') {
       let len = 1
       while (template[i + len] === ch) len++
-      const value = ch === 'h' ? hours : ch === 'm' ? minutes : secs
+      const unit = ch === 'h' ? 'hour' : ch === 'm' ? 'minute' : 'second'
+      const value = parts[unit]
       out += len >= 2 ? pad(value) : String(value)
       i += len
       continue
@@ -125,10 +123,11 @@ const SHORT_LABELS: Record<DurationPartUnit, string> = {
 
 function splitDuration(
   totalSeconds: number,
-  units: DurationUnits,
+  largestUnit: DurationLargestUnit,
+  smallestUnit: DurationSmallestUnit,
 ): DurationParts {
-  const seconds = roundDuration(totalSeconds, units.smallestUnit)
-  const day = units.largestUnit === 'day' ? Math.floor(seconds / 86400) : 0
+  const seconds = roundDuration(totalSeconds, smallestUnit)
+  const day = largestUnit === 'day' ? Math.floor(seconds / 86400) : 0
   return {
     day,
     hour: Math.floor((seconds - day * 86400) / 3600),
@@ -157,10 +156,10 @@ function formatLong(
   return text.length ? text.join(' ') : `0 ${smallestUnit}s`
 }
 
-function formatColon(hours: number, minutes: number, secs: number): string {
+function formatColon({ hour, minute, second }: DurationParts): string {
   const pad = (value: number) => String(value).padStart(2, '0')
-  if (hours) return `${hours}:${pad(minutes)}:${pad(secs)}`
-  return `${minutes}:${pad(secs)}`
+  if (hour) return `${hour}:${pad(minute)}:${pad(second)}`
+  return `${minute}:${pad(second)}`
 }
 
 // ---------------------------------------------------------------------------
