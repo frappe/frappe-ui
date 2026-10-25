@@ -128,7 +128,7 @@ function commit() {
   const seconds = parseDuration(raw)
   if (seconds === null) {
     internalError.value =
-      'Invalid format. Try: 1h 30m 45s, 1 hour 30 minutes, 1:30:45, 90s'
+      'Invalid format. Try: 1h 30m 45s, 1 hour 30 minutes, 1d 2h, 1:30:45, 90s'
     // Report the error and let focus leave. The rejected text stays visible
     // (displayValue tracks the error state) as a reminder, but they aren't
     // trapped in the field. Re-focusing restarts from the canonical saved
