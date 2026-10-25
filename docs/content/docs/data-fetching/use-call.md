@@ -71,7 +71,7 @@ const users = useCall({
 | Name           | Type                                    | Default    | Description                                                                                      |
 | -------------- | --------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------ |
 | `url`          | `string \| Ref<string>`                 | required   | The URL path to call, such as `/api/v2/method/ping`. A ref changes it reactively.                |
-| `method`       | `'GET'`, `'POST'`, `'PUT'` or `'DELETE'` | `'GET'`    | The HTTP method. `GET` sends `params` in the query string, the others in the body.              |
+| `method`       | `'GET'`, `'POST'`, `'PUT'` or `'DELETE'` | `'GET'`    | The HTTP method. `GET` sends `params` in the query string, objects and arrays as JSON. The others send them in the body. |
 | `params`       | `object \| () => object`                |            | The request params. Use the function form so reactive values are read again on each request.    |
 | `immediate`    | `boolean`                               | `true`     | Sends the first request when `useCall` runs.                                                     |
 | `refetch`      | `boolean`                               | `false`    | Sends a new request when a reactive `url` or `params` value changes.                            |
