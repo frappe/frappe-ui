@@ -553,8 +553,8 @@ export function prompt(args: PromptArgs): DialogHandle {
     if (state.loading) return
     const missing = checkRequired()
     if (missing) {
-      // Match the previous behavior — silently no-op so HTML5 required UI
-      // can take over via the underlying FormControl.
+      // Required fields are checked here because the form is `novalidate`.
+      // An empty required field blocks submit without a message.
       return
     }
     state.loading = true
