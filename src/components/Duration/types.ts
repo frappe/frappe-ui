@@ -37,7 +37,10 @@ export interface DurationProps extends InputLabelingProps {
   /** The duration value in seconds (two-way via `v-model`). */
   modelValue?: number | null
 
-  /** Placeholder shown when the input is empty. Defaults to `1h 30m 45s`. */
+  /**
+   * Placeholder shown when the input is empty. Defaults to `1h 30m` when
+   * `smallestUnit` is `minute`, and `1h 30m 45s` otherwise.
+   */
   placeholder?: string
 
   /**

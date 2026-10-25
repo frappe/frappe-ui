@@ -10,7 +10,7 @@
     :disabled="disabled"
     :size="size"
     :variant="variant"
-    :placeholder="placeholder"
+    :placeholder="placeholderText"
     @focus="handleFocus"
     @blur="handleBlur"
     @input="handleInput"
@@ -34,7 +34,6 @@ import { formatDuration, parseDuration, roundDuration } from './duration'
 import type { DurationProps, DurationExposed } from './types'
 
 const props = withDefaults(defineProps<DurationProps>(), {
-  placeholder: '1h 30m 45s',
   format: 'short',
   largestUnit: 'hour',
   smallestUnit: 'second',
@@ -60,6 +59,12 @@ const units = computed(() => ({
   largestUnit: props.largestUnit,
   smallestUnit: props.smallestUnit,
 }))
+
+const placeholderText = computed(
+  () =>
+    props.placeholder ??
+    (props.smallestUnit === 'minute' ? '1h 30m' : '1h 30m 45s'),
+)
 
 const displayValue = computed(() =>
   isFocused.value || internalError.value

@@ -45,6 +45,15 @@ describe('Duration', () => {
     cy.get('input').should('have.value', '1d 2h 3m')
   })
 
+  it('drops the seconds from the default placeholder in a minute field', () => {
+    cy.mount(Duration)
+    cy.get('input').should('have.attr', 'placeholder', '1h 30m 45s')
+    cy.mount(Duration, { props: { smallestUnit: 'minute' } })
+    cy.get('input').should('have.attr', 'placeholder', '1h 30m')
+    cy.mount(Duration, { props: { smallestUnit: 'minute', placeholder: '2h' } })
+    cy.get('input').should('have.attr', 'placeholder', '2h')
+  })
+
   it('does not rewrite a rounded value that was not edited', () => {
     cy.mount(Duration, {
       props: {

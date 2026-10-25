@@ -15,10 +15,9 @@
   },
   {
     name: 'placeholder',
-    description: 'Placeholder shown when the input is empty. Defaults to `1h 30m 45s`.',
+    description: 'Placeholder shown when the input is empty. Defaults to `1h 30m` when\n`smallestUnit` is `minute`, and `1h 30m 45s` otherwise.',
     required: false,
-    type: 'string',
-    default: '"1h 30m 45s"'
+    type: 'string'
   },
   {
     name: 'format',
