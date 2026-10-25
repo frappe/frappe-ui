@@ -86,6 +86,10 @@ With `smallest-unit="minute"`, the value shows rounded to the nearest minute, so
 `3599` shows `1h`. A typed value is saved rounded. A saved value that is not
 edited keeps its seconds.
 
+A minute field also reads a bare number as minutes and `a:b` as hours and
+minutes, so `15` saves `900` and `1:30` saves `5400`. `1:30:45` and text with
+units, such as `45s`, read the same as in a seconds field.
+
 ### Label, description and error
 
 `label` renders above the field and `description` below it. `error` renders

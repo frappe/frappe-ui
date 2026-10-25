@@ -125,7 +125,7 @@ function commit() {
     return
   }
 
-  const seconds = parseDuration(raw)
+  const seconds = parseDuration(raw, units.value)
   if (seconds === null) {
     internalError.value =
       'Invalid format. Try: 1h 30m 45s, 1 hour 30 minutes, 1d 2h, 1:30:45, 90s'

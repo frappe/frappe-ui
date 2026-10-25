@@ -168,25 +168,35 @@ function formatColon({ hour, minute, second }: DurationParts): string {
 // Supported formats (case-insensitive, spaces optional, any unit order):
 //   1h 30m 45s | 4m 3h 4s | 4sec 3hour 4min | 1h30m45s | 1d 2h | 2 days
 //   1:30:45    | 1:30     | :45
-//   90         | 90s      (bare integer treated as seconds)
+//   90         | 90s
+//
+// A bare integer and the last colon group are read in the smallest unit:
+// `90` is 90 seconds and `1:30` is 1m 30s by default, but with
+// `smallestUnit: 'minute'` `90` is 90 minutes and `1:30` is 1h 30m.
+// `1:30:45` is always h:m:s, and named units (`90s`) always keep their unit.
 // ---------------------------------------------------------------------------
-export function parseDuration(str: string): number | null {
+export function parseDuration(
+  str: string,
+  units: DurationUnits = {},
+): number | null {
   const input = str.trim().toLowerCase()
   if (!input) return null
 
-  const colonSeconds = parseColon(input)
+  const unitSeconds = units.smallestUnit === 'minute' ? 60 : 1
+
+  const colonSeconds = parseColon(input, unitSeconds)
   if (colonSeconds !== null) return colonSeconds
 
-  // Bare integer: treated as seconds.
-  if (/^\d+$/.test(input)) return parseInt(input, 10)
+  if (/^\d+$/.test(input)) return parseInt(input, 10) * unitSeconds
 
   return parseUnits(input)
 }
 
-// Colon-separated: h:m:s or m:s or :s. Groups are not bounded to 0-59:
+// Colon-separated: h:m:s, or two groups ending in the smallest unit (m:s or
+// h:m), or one such group (:s or :m). Groups are not bounded to 0-59:
 // out-of-range parts overflow by design, so "1:75" parses to 135s (1m + 75s)
 // and "5:99" to 399s. This mirrors stopwatch-style entry and is harmless.
-function parseColon(input: string): number | null {
+function parseColon(input: string, unitSeconds: number): number | null {
   const match = input.match(/^(\d+):(\d+):(\d+)$|^(\d+):(\d+)$|^:(\d+)$/)
   if (!match) return null
 
@@ -198,9 +208,9 @@ function parseColon(input: string): number | null {
     )
   }
   if (match[4] !== undefined) {
-    return parseInt(match[4], 10) * 60 + parseInt(match[5], 10)
+    return (parseInt(match[4], 10) * 60 + parseInt(match[5], 10)) * unitSeconds
   }
-  return parseInt(match[6], 10)
+  return parseInt(match[6], 10) * unitSeconds
 }
 
 // Named units in any order: scan (number)(unit) tokens left-to-right and

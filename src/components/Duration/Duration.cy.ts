@@ -69,6 +69,27 @@ describe('Duration', () => {
     cy.get('input').should('have.value', '1h 1m')
   })
 
+  it('reads a bare number and a:b in the smallest unit', () => {
+    cy.mount(Duration, {
+      props: {
+        smallestUnit: 'minute',
+        'onUpdate:modelValue': cy.spy().as('onMinute'),
+      },
+    })
+    cy.get('input').type('15').blur()
+    cy.get('@onMinute').should('be.calledWith', 900)
+    cy.get('input').focus().clear().type('1:30').blur()
+    cy.get('@onMinute').should('be.calledWith', 5400)
+
+    cy.mount(Duration, {
+      props: { 'onUpdate:modelValue': cy.spy().as('onSecond') },
+    })
+    cy.get('input').type('15').blur()
+    cy.get('@onSecond').should('be.calledWith', 15)
+    cy.get('input').focus().clear().type('1:30').blur()
+    cy.get('@onSecond').should('be.calledWith', 90)
+  })
+
   it('commits a parsed value on blur', () => {
     cy.mount(Duration, {
       props: { 'onUpdate:modelValue': cy.spy().as('onUpdate') },
@@ -214,6 +235,15 @@ describe('parseDuration', () => {
 
   it('treats a bare integer as seconds', () => {
     expect(parseDuration('90')).to.equal(90)
+  })
+
+  it('reads bare numbers and short colon input as minutes with smallestUnit minute', () => {
+    const minute = { smallestUnit: 'minute' } as const
+    expect(parseDuration('15', minute)).to.equal(900)
+    expect(parseDuration('1:30', minute)).to.equal(5400)
+    expect(parseDuration(':45', minute)).to.equal(2700)
+    expect(parseDuration('1:30:45', minute)).to.equal(5445)
+    expect(parseDuration('29s', minute)).to.equal(29)
   })
 
   it('rejects invalid input', () => {
