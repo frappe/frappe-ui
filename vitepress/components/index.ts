@@ -1,3 +1,5 @@
 export { default as Layout } from './Layout.vue'
 export { default as Navbar } from './Navbar.vue'
+export { default as Brand } from './Brand.vue'
+export { default as SiteActions } from './SiteActions.vue'
 export * from './Docs'

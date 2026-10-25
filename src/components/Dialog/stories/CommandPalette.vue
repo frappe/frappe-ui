@@ -126,7 +126,11 @@ function onEnter() {
           />
           <span class="flex-1 truncate">{{ cmd.label }}</span>
           <span class="text-p-xs text-ink-gray-5">{{ cmd.hint }}</span>
-          <KeyboardShortcut v-if="cmd.combo" :combo="cmd.combo" bg />
+          <KeyboardShortcut
+            v-if="cmd.combo"
+            :combo="cmd.combo"
+            bg
+          />
         </li>
       </ul>
 

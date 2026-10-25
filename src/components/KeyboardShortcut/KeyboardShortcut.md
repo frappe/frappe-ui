@@ -1,52 +1,74 @@
 # KeyboardShortcut
 
-Renders a keyboard combo, e.g. `Mod+K`, as styled keys. `Mod` resolves to `⌘` on
-macOS and `Ctrl` elsewhere.
-
-## Playground
+Shows a key combination, such as `Mod+K`, as keys. It only shows the
+shortcut: to make the shortcut work, use
+[`useKeyboardShortcut`](../other/composables#usekeyboardshortcut).
 
 <ComponentPlayground name="KeyboardShortcut" />
 
-## Default
+## Examples
 
-<ComponentPreview name="KeyboardShortcut-Default" />
+### Search button
 
-Purely presentational. It does not register or fire the shortcut. Pair it with
-[`useKeyboardShortcut`](../other/composables.md#usekeyboardshortcut) for that.
+The shortcut that opens search, at the end of a search button.
 
-It reads the same key names as a shortcut combo, so a combo written for
-`useKeyboardShortcut` renders here unchanged: `Digit1` shows `1`, `Slash` shows
+<ComponentPreview name="KeyboardShortcut-SearchTrigger" />
+
+### Command palette hints
+
+Hints at the bottom of a command palette. `bg` draws each key as a chip, and
+`alt-combos` lists another combo that does the same thing.
+
+<ComponentPreview name="KeyboardShortcut-PaletteFooter" />
+
+### Task menu
+
+Each menu row ends with its shortcut. On the delete row, `alt-combos` adds
+`Delete` as an alternative to `Mod+Backspace`.
+
+<ComponentPreview name="KeyboardShortcut-DeleteRow" />
+
+## Behavior
+
+### Key names
+
+`Mod` shows `⌘` on macOS and `Ctrl` elsewhere.
+
+`combo` reads the same key names as `useKeyboardShortcut`, so a combo written
+for that composable renders here unchanged: `Digit1` shows `1`, `Slash` shows
 `/`, `Backtick` shows `` ` ``.
 
-It reads **only** those names. `combo` stays typed `string`, because callers
-usually compute it, so the check happens at runtime: an unknown token renders as
-written and warns once in development. Write `Mod+K`, not `cmd+k`. Import
-`KeyboardShortcutCombo` to get the compile-time check where the value is known.
+It reads **only** those names. `combo` is typed `string`, because callers
+usually compute it, so the check happens at runtime: an unknown key name
+renders as written and warns once in development. Write `Mod+K`, not `cmd+k`.
+Import the `KeyboardShortcutCombo` type to get the check at compile time where
+the value is known.
 
-## What a screen reader hears
-
-A chip is a picture of a key. The root is a labelled `role="img"` that spells
-the whole sequence, for example "Shortcut Control + Backspace, or Delete". That
-role replaces its subtree, so a reader meets each key once instead of once per
-chip. With no `combo` the root takes no role, and the default slot reads
-normally.
+### Icons
 
 `useIcons` controls the icons on the arrow, Enter, Backspace and Delete keys, in
-both `bg` and plain mode. ⌘ stays an icon in both modes. Plain mode draws Shift
-and Alt as icons, `bg` mode draws them as text.
+both `bg` and plain mode. ⌘ is always an icon. Plain mode draws Shift and Alt
+as icons, and `bg` mode draws them as text.
 
-## Styling hooks
+In plain mode, a `+` appears only between two keys drawn as text, as in
+"Ctrl+K". A key drawn as an icon needs none, so `Mod+K` shows "⌘K" on macOS.
+`bg` mode draws no `+`.
 
-The root carries `data-slot="keyboard-shortcut"`, and `data-bg` when `bg` is
-set. Each key carries `data-slot="key"` with a `data-key-type` of `cmd`, `ctrl`,
-`shift`, `alt` or `key`. The `+` separators carry `data-slot="separator"`, and
-alternative combos sit in `data-slot="alt-combos"` inside the root. Style
-through those instead of a class prop (P10):
+### Alternative combos
 
-```css
-[data-slot='keyboard-shortcut'][data-bg] [data-slot='key'] {
-  background: var(--surface-gray-8);
-}
-```
+`altCombos` lists other combos after a `/`. A combo that shows the same keys as
+the main combo, or as an earlier alternative, is left out.
+
+### Without a combo
+
+With no `combo`, the component renders its default slot.
+
+## Accessibility
+
+Each key is a picture of a key, so the root is a labelled `role="img"` that
+spells the whole sequence, for example "Shortcut Control + Backspace, or
+Delete". That role replaces everything inside it, so a screen reader reads
+each key once instead of once per chip. With no `combo`, the root has no role,
+and the default slot reads normally.
 
 <!-- @include: ./KeyboardShortcut.api.md -->

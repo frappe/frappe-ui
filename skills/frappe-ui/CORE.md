@@ -87,7 +87,7 @@ Any lucide icon renders as a `<span>` carrying the icon class, named `lucide-<ke
 
 - Size with `size-*` by role: `size-4` default (buttons, sidebar items, header actions), `size-3.5` inline meta beside `text-sm`, `size-5` mobile row leading, `size-6` empty-state glyphs, `size-2` / `size-1.5` status and unread dots.
 - Decorative icons take `aria-hidden="true"`. Icons support labels — reserve icon-only buttons for universal actions, and give the parent an `aria-label` when the icon is the only content.
-- Props named `icon` take the namespaced **string** `"lucide-edit"` or a Vue component: `Button`, `Dropdown` options, `Alert`, `Switch`, `Tabs` items. `Dialog` is the exception — its `icon` is a lucide string or `{ name, theme }` only, and a component renders nothing. `Badge` has no `icon` prop — put the span in its `#prefix` / `#suffix`.
+- Props named `icon` take the namespaced **string** `"lucide-edit"` or a Vue component: `Button`, `Dropdown` options, `Alert`, `Switch`, `Tabs` items. `Dialog` also accepts a lucide string or component. Its separate `theme` prop colors the icon. `Badge` has no `icon` prop — put the span in its `#prefix` / `#suffix`.
 - `<Icon :icon />` renders a `lucide-*` string, an emoji, or a component. `name` remains a supported alternate prop; `icon` wins when both are supplied. A bare value like `"home"` renders nothing.
 
 ## Page anatomy
@@ -163,7 +163,7 @@ Default for any trigger. `<Button :label icon iconLeft iconRight variant theme s
 
 - `variant`: `solid | subtle | outline | ghost` (default `subtle`). `theme`: `gray | blue | green | red` (default `gray`). `size`: `xs | sm | md | lg` (default `sm`).
 - Also `tooltip`, `loadingText`, `type` (`button | submit | reset`, default `button`).
-- Navigation: `route` (a Vue Router target) or `link` (an external URL) — it renders the matching element with the right semantics.
+- Navigation: `route` (a Vue Router target) or `href` (an external URL, opened in a new tab). `route` wins when both are supplied. Example: `<Button href="https://frappe.io" label="Visit Frappe" />`.
 - Icon-only: pass just `icon`. Leading icon: `iconLeft` + `label`.
 - Primary action: `variant="solid" theme="gray"`. Destructive: `variant="solid" theme="red"` or `subtle theme="red"`.
 
@@ -193,10 +193,10 @@ Menu of actions anchored to a trigger. `Dropdown`'s default slot (or `#trigger`)
 
 ### `Dialog`
 
-`v-model:open` is the canonical model (plain `v-model` / `modelValue` also works). Props: `title`, `message`, `icon` (a `lucide-*` string or `{ name, theme }`), `size` (`xs`…`7xl`, default `lg`), `position` (`center | top`), `paddingTop`, `actions`, `dismissible` (default `true`), `showCloseButton` (default `true`), `bare`.
+`v-model:open` is the canonical model (plain `v-model` / `modelValue` also works). Props: `title`, `message`, `icon` (a `lucide-*` string or Vue component), `theme`, `size` (`xs`…`7xl`, default `lg`), `position` (`center | top`), `paddingTop`, `actions`, `dismissible` (default `true`), `showCloseButton` (default `true`), `bare`.
 
-- `actions` is an array of `ButtonProps` plus `label` and `onClick(ctx)`, where `ctx` is `{ close }`.
-- `Dialog` has no `theme` prop. The colour lives on the icon object: `:icon="{ name: 'lucide-trash-2', theme: 'red' }"` — `DialogTheme` is `amber | blue | red | green`.
+- `actions` is an array of `ButtonProps` plus `onClick(ctx)`, where `ctx` is `{ close }`.
+- `theme` colors the icon: `icon="lucide-trash-2" theme="red"`. `DialogTheme` is `amber | blue | red | green`.
 - `bare` drops the padded card, the auto-header and the auto-actions (full-bleed content).
 
 ### Imperative dialogs and toasts
@@ -253,16 +253,16 @@ The default for a labeled field, and a dispatcher: `type` picks the child compon
 ### The rest
 
 - `TextInput` / `Textarea` / `Password` — single-line / multi-line / masked. `v-model` is `string | number` (`string` for `Textarea` and `Password`). Also `type` (`TextInput` only), `placeholder`, `disabled`, `debounce` (ms, `TextInput` / `Textarea`), `rows` (`Textarea`).
-- `Select` — fixed list, one value. `v-model` is `string | number`; `options: Array<string | { label, value, disabled?, icon?, description? }>`. Also `placeholder`, `emptyText`, `open`, `side`, `align`, `offset`, `portalTo`.
+- `Select` — fixed list, one value. `v-model` is `string | number | null`; `options: Array<string | { label, value, disabled?, icon?, description? }>`. Also `placeholder`, `emptyText`, `open`, `side`, `align`, `offset`, `portalTo`.
 - `MultiSelect` — fixed list, several values. `v-model` is `Array<string | number>`; `options` accepts `{ label, value, icon?, description?, disabled? }` and grouped entries `{ group, options, hideLabel? }`. Optional `v-model:query`.
-- `Combobox` — one value with search. `v-model` is `string | number | null`; `options` take the same `{ label, value, icon?, description?, disabled? }` shape as `MultiSelect`, or a bare string, and group as `{ group, options }`. Optional `v-model:query` — the component owns the query when unbound. Also `placeholder`, `loading`, `emptyText`, `hideSearch`, `trigger` (`'input' | 'button'`, default `input`), and `filterable` (default `true`) — set `filterable="false"` whenever the options come from a server search, or the client re-filters the ranked results away.
+- `Combobox` — one value with search. `v-model` is `string | number | null`; `options` take the same `{ label, value, icon?, description?, disabled? }` shape as `MultiSelect`, or a bare string, and group as `{ group, options }`. Optional `v-model:query` — the component owns the query when unbound. Also `placeholder`, `loading`, `emptyText`, `hideSearch`, `trigger` (`'input' | 'button'`, default `input`), and `filterable` (default `true`) — set `:filterable="false"` whenever the options come from a server search, or the client re-filters the ranked results away.
 - `Checkbox` / `Switch` / `Radio` — `v-model` plus `label`. `Checkbox` model is `boolean` (`1`/`0` still accepted) and adds `indeterminate`. `Switch` adds `controlPosition` (`start | end`, default `end`) and `icon`. `RadioGroup` holds the `v-model` (`string | number | boolean`) and `orientation` (`vertical | horizontal`), while `Radio` renders one option with a **required** `value` plus optional `disabled`. `Checkbox` and `Switch` take `padded` for a clickable row surface; on radios `padded` and `size` live on `RadioGroup` and are inherited, so `<Radio padded>` is ignored.
 - `DatePicker` / `DateTimePicker` / `TimePicker` — `v-model` holds the value as a string. `DateRangePicker`'s `v-model` is `[from, to]` in `YYYY-MM-DD`, or `[]` when nothing is selected; it also takes `dualPane`.
 - `Slider` — `v-model` is `number[]`: `[25]` for one thumb, `[20, 80]` for a range. Props `min`, `max`, `step`, `size` (`sm | md`); emits `value-commit` on drag end.
 - `Rating` — `v-model` is a `number`. Props `max` (default 5), `step` (`1 | 0.5`).
 - `Duration` — `v-model` is seconds (`number | null`). `format` is `short | long | colon` or a token template such as `hh:mm:ss`.
 - `FileUploader` — Frappe-native upload. Props `fileTypes`, `private` (default `true`), `folder`, `doctype`, `docname`, `fieldname`, `optimize`, `validateFile`. Emits `success` with the uploaded File doc, and `failure`. It has no labeling props — render your own label around it.
-- `ErrorMessage` — `<ErrorMessage :message="err" />`; `message` takes a string or an `Error`.
+- `ErrorMessage` — `<ErrorMessage :message="err" />`; `message` takes a string, a string array, or an `Error`.
 - `ItemListRow` — the shared row primitive behind `Dropdown`, `Select`, `Combobox` and `MultiSelect`. Use it when you compose a custom listbox or menu surface and want the design-system row shell with its prefix/label/suffix regions and `active` / `selected` / `disabled` states. Props `as`, `size` (`xs | sm | md | lg`), `active`, `selected`, `disabled`.
 
 ## Display
@@ -271,7 +271,7 @@ The default for a labeled field, and a dispatcher: `type` picks the child compon
 - `Alert` — inline notice. `<Alert :title :description theme :icon :primary-action :secondary-action dismissible @dismiss />`. No layout prop: it renders a single-line row and switches to the stacked banner when `description` or `secondaryAction` is set, readable as `data-layout` (`"row"` / `"banner"`). `theme` (`gray | blue | green | amber | red`, default `gray`) colours the status icon; every theme auto-shows one, `:icon="false"` hides it, and a `lucide-*` string or component replaces it — the container never changes colour. Actions are `ButtonProps` plus `onClick({ dismiss })`. The component is stateless: `dismissible` shows a × that emits `dismiss`, and the parent hides the alert with `v-if`.
 - `Avatar` — `<Avatar :label :image size shape theme />`. `label` generates the initials when there is no image. `size`: `xs | sm | md | lg | xl | 2xl | 3xl`. `shape`: `circle | square`. `theme`: `gray | blue | green | amber | red | violet`.
 - `Progress` — `value` is **required**. Also `size` (`sm | md | lg | xl`), `label`, `hint`, and numeric `intervals` (the number of step-indicator segments).
-- `Spinner` / `LoadingIndicator` — inline spinners. `LoadingText` is a spinner plus one line of text; its only prop is `text?: string` (default `"Loading..."`), and it has no `lines` prop. `Skeleton` is the placeholder primitive: no props, size it with classes (`<Skeleton class="h-4 w-40" />`). First page load renders the shell with `Skeleton` in the content slots.
+- `Spinner` — inline spinner; size it with `size` (`xs`, `sm`, `md`, `lg`) or a class. `LoadingText` is a spinner plus one line of text; its only prop is `text?: string` (default `"Loading..."`), and it has no `lines` prop. `Skeleton` is the placeholder primitive: no props, size it with classes (`<Skeleton class="h-4 w-40" />`). First page load renders the shell with `Skeleton` in the content slots.
 - `Divider` — `orientation` (`horizontal | vertical`) picks the axis. Also `align` (`start | center | end`), `flexItem`, `action`.
 - `Breadcrumbs` — a **required** `items` array of `{ label, route?, href?, onClick? }`.
 - `Tabs` — full content tabs. `v-model` holds a `TabValue` (`string | number`). Compose `TabList` + `TabTrigger :value` + `TabPanel :value`, or pass the `tabs` shorthand `[{ value, label, icon?, route? }]`. `variant`: `underline | subtle | ghost | browser-tab`. `size`: `sm | md`. `vertical` renders a side rail. (`v-model:tab` belongs to `SettingsDialog`, not `Tabs`.)
@@ -386,17 +386,18 @@ Seven parts: `CommandPalette` + `CommandPaletteInput` + `CommandPaletteList` + `
 
 ## Charts and Calendar
 
-`frappe-ui/charts` exports `BarChart`, `LineChart`, `AreaChart`, `DonutChart`, `FunnelChart`, `HeatmapChart`, `ScatterChart`, `SankeyChart`, `NumberCard`, plus the chrome `ChartCard`, `ChartContainer`, `ChartLegend`, `ChartTooltip`. Every chart takes `:data` (your rows) plus flat props that name the columns. The column names differ per family; everything below is required unless marked optional:
+`frappe-ui/charts` exports `BarChart`, `LineChart`, `AreaChart`, `DonutChart`, `PercentageBarChart`, `FunnelChart`, `HeatmapChart`, `CalendarHeatmapChart`, `ScatterChart`, `SankeyChart`, `NumberCard`, plus the chrome `ChartCard`, `ChartContainer`, `ChartLegend`, `ChartTooltip`. Every chart takes `:data` (your rows) plus flat props that name the columns. The column names differ per family; everything below is required unless marked optional:
 
-- `BarChart` / `LineChart` / `AreaChart` — `x`, `y` (`string | string[]` for several series); optional `series`, plus `horizontal` on `BarChart`
-- `DonutChart` / `FunnelChart` — `category`, `value`
-- `ScatterChart` — `x`, `y`; optional `size`, `series`
+- `BarChart` / `LineChart` / `AreaChart` — `x`, `y` (`string | string[]` for several series); optional `splitBy`, plus `horizontal` on `BarChart`
+- `DonutChart` / `PercentageBarChart` / `FunnelChart` — `category`, `value`
+- `ScatterChart` — `x`, `y`; optional `size`, `splitBy`
 - `HeatmapChart` — `x`, `y`, `value`
+- `CalendarHeatmapChart` — `date`, `value`; optional `start`, `end`, `weekStart`
 - `SankeyChart` — `source`, `target`, `value`
 
-Every chart also takes `title`, `subtitle`, `loading` and `error`, and draws its own header, tooltip and empty state, so pass `title` instead of drawing a heading above the chart. `BarChart`, `LineChart`, `AreaChart`, `DonutChart` and `ScatterChart` also draw their own legend; `FunnelChart`, `HeatmapChart` and `SankeyChart` draw none. Reach for `ChartLegend` / `ChartTooltip` only in a plot you draw yourself. There is no `height` prop: the chart root is `h-full`, so put the height on the wrapper (`<div class="h-80"><BarChart … /></div>`). `NumberCard` is the KPI tile, with **required** `title` and `value` (`number | string | null`) plus `prefix`, `suffix`, `delta`, `deltaSuffix`, `deltaCaption`, `negativeIsBetter`, `precision`, `compact`, `sparkline` and `card` (default `true`). `ChartCard` is that same card surface with a default slot.
+Every chart also takes `title`, `subtitle`, `loading` and `error`, and draws its own header, tooltip and empty state, so pass `title` instead of drawing a heading above the chart. `BarChart`, `LineChart`, `AreaChart`, `DonutChart`, `PercentageBarChart` and `ScatterChart` also draw their own legend; `FunnelChart`, `HeatmapChart`, `CalendarHeatmapChart` and `SankeyChart` draw none. Reach for `ChartLegend` / `ChartTooltip` only in a plot you draw yourself. There is no `height` prop: the chart root is `h-full`, so put the height on the wrapper (`<div class="h-80"><BarChart … /></div>`). `NumberCard` is the KPI tile, with **required** `title` and `value` (`number | string | null`) plus `prefix`, `suffix`, `delta`, `deltaSuffix`, `deltaCaption`, `negativeIsBetter`, `format`, `deltaFormat`, `sparkline` and `card` (default `true`). `format` and `deltaFormat` take `(value: number) => string` for number formatting. `ChartCard` is that same card surface with a default slot.
 
-`Calendar` is a day/week/month view imported from `frappe-ui/experimental`. `CalendarMode` is `'Day' | 'Week' | 'Month'`; an event is `{ id?, title?, fromDate/toDate, fromTime/toTime, participant?, venue?, color? }`.
+`Calendar` is a day/week/month/agenda view imported from `frappe-ui/experimental`. `CalendarMode` is `'Day' | 'Week' | 'Month' | 'Agenda'`; an event is `{ id?, title?, fromDate/toDate, fromTime/toTime, participant?, venue?, color? }`.
 
 ## Names that moved
 

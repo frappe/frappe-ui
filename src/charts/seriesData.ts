@@ -176,6 +176,9 @@ function buildSeries(
   // column that is no longer selected is expected, not an error.
   const style = props.seriesConfig?.[name]
   return {
+    // A `splitBy` name is a value read from the data, so it prints as given
+    // instead of going through `formatLabel`, which is for column keys.
+    ...(props.splitBy && axis === 'y' ? { label: name } : {}),
     // The collapsed tail has no column behind it, so its label comes from here
     // rather than from the data. Ahead of the style: a `seriesConfig` entry for
     // the reserved key renames and colors it like any other series.
@@ -334,10 +337,11 @@ function capSeries(pivoted: Pivoted, maxSeries?: number): Pivoted {
 
 /**
  * What each series is worth across the whole chart, which is what decides who
- * survives the cap. Magnitude rather than signed total: a series that runs
- * large and negative carries the chart as much as one that runs large.
+ * survives the cap and who keeps a place on an overflowing legend row.
+ * Magnitude rather than signed total: a series that runs large and negative
+ * carries the chart as much as one that runs large.
  */
-function seriesWeights(rows: Record<string, any>[], names: string[]) {
+export function seriesWeights(rows: Record<string, any>[], names: string[]) {
   const weights: Record<string, number> = {}
   for (const name of names) weights[name] = 0
   for (const row of rows) {
@@ -356,6 +360,7 @@ function toValueAxis(
     title: options.title,
     min: options.min,
     max: options.max,
+    integer: options.integer,
     echartOptions: options.echartOptions,
   }
 }

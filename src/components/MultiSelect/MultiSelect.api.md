@@ -3,6 +3,7 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
+  import ExposedTable from '@/components/Docs/ExposedTable.vue'
 
   const propsData = [
   {
@@ -246,6 +247,24 @@
     name: 'update:selectedOptions',
     description: 'Fired alongside `update:modelValue` with the original option objects\nresolved out of `options`, so custom fields on an option survive.',
     type: '[value: MultiSelectOption[]]'
+  },
+  {
+    name: 'highlight',
+    description: 'Fired when the highlighted row changes, by arrow keys or the pointer, with\nthe original option object. `null` once the popover closes.',
+    type: '[option: MultiSelectOption | null]'
+  }
+]
+
+  const exposedData = [
+  {
+    name: 'clear',
+    description: 'Clears the current selection. It leaves the search query alone.',
+    type: '() => void'
+  },
+  {
+    name: 'focus',
+    description: 'Moves focus to the trigger.',
+    type: '(options?: FocusOptions) => void'
   }
 ]
 </script>
@@ -257,3 +276,5 @@
 <SlotsTable :data="slotsData"/>
 
 <EmitsTable :data="emitsData"/>
+
+<ExposedTable :data="exposedData"/>

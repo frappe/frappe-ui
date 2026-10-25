@@ -47,7 +47,7 @@
           <span v-else class="leading-none uppercase">{{ part.display }}</span>
         </span>
         <span
-          v-if="idx < parsedParts.length - 1 && showPlus"
+          v-if="plusAfter[idx]"
           class="font-mono text-[10px] leading-none opacity-60"
           aria-hidden="true"
           data-slot="separator"
@@ -88,18 +88,28 @@ import type { KeyboardShortcutProps } from './types'
 const isMac = computed(() => isMacPlatform())
 
 const props = withDefaults(defineProps<KeyboardShortcutProps>(), {
-  showPlus: true,
+  showPlus: 'auto',
   altCombos: () => [],
   useIcons: true,
 })
-
-const showPlus = computed<boolean>(() => props.showPlus)
 
 const effectiveCombo = computed(() => props.combo)
 
 const parse = (raw?: string) => parseCombo(raw, isMac.value)
 
 const parsedParts = computed<ComboPart[]>(() => parse(effectiveCombo.value))
+
+// An icon key stands apart on its own, so "⌘K" and "⇧F2" need no `+`. Two text
+// keys side by side do: "CTRL K" reads as one word, "CTRL+K" does not.
+const plusAfter = computed<boolean[]>(() =>
+  parsedParts.value
+    .slice(0, -1)
+    .map((part, idx) =>
+      props.showPlus === 'auto'
+        ? !(drawsIcon(part) || drawsIcon(parsedParts.value[idx + 1]))
+        : props.showPlus,
+    ),
+)
 
 const uniqueAltCombos = computed<string[]>(() => {
   if (!props.altCombos?.length) return []
@@ -150,6 +160,11 @@ const keyIconMap: Record<string, string> = {
 // `constructor` would resolve to a function and be bound as a class.
 const iconNameFor = (display: string): string | null =>
   Object.hasOwn(keyIconMap, display) ? keyIconMap[display] : null
+
+// Plain mode draws ⌘, Shift and Alt as icons, and the keys `iconFor` covers.
+function drawsIcon(part: ComboPart): boolean {
+  return ['cmd', 'shift', 'alt'].includes(part.type) || iconFor(part) !== null
+}
 
 function iconFor(part: ComboPart): string | null {
   if (!props.useIcons) return null

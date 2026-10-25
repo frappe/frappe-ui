@@ -387,7 +387,7 @@ const visibleTabs = computed(() =>
       <TabList
         :variant="props.variant"
         :size="props.size"
-        :side="props.side"
+        :edge="props.edge"
       >
         <TabTrigger
           v-for="tab in visibleTabs"

@@ -35,7 +35,7 @@ const rows = computed(() =>
 </script>
 
 <template>
-  <div class="grid gap-8">
+  <div class="not-prose my-8 grid gap-8">
     <section class="grid gap-4">
       <div class="grid divide-y divide-outline-gray-1">
         <div

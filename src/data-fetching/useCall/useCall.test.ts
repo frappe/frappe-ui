@@ -5,6 +5,7 @@
 import { ref } from 'vue'
 import { http, HttpResponse } from 'msw'
 import { useCall } from '../index'
+import { useIsolatedCall } from '../useIsolatedCall'
 import { url, waitUntilValueChanges } from '../../mocks/utils'
 import { server } from '../../mocks/node'
 
@@ -662,6 +663,41 @@ describe('useCall', () => {
 
     await waitUntilValueChanges(() => secondCall.data)
     expect(secondCall.data).toBe('pong')
+  })
+
+  it('caches the response as the server sent it and transforms it once on read', async () => {
+    // `transform` parses a JSON string. Parsing it a second time throws, so
+    // the cache must never hand `transform` a value it already transformed.
+    server.use(
+      http.get(url('/api/v2/method/json-string'), () =>
+        HttpResponse.json({ data: JSON.stringify({ n: 1 }) }),
+      ),
+    )
+    const options = {
+      url: url('/api/v2/method/json-string'),
+      cacheKey: 'parsed-json-string',
+      transform: (data: string | { n: number }) => JSON.parse(data as string),
+    }
+
+    const call = useCall(options)
+    await vi.waitFor(() => expect(call.data).toEqual({ n: 1 }))
+
+    const reopened = useCall({ ...options, immediate: false })
+    await vi.waitFor(() => expect(reopened.data).toEqual({ n: 1 }))
+
+    // `useIsolatedCall` writes the same cache through its own path.
+    const isolated = useIsolatedCall({
+      ...options,
+      cacheKey: 'parsed-json-string-isolated',
+    })
+    await isolated.submit()
+    expect(isolated.data).toEqual({ n: 1 })
+
+    const reopenedIsolated = useIsolatedCall({
+      ...options,
+      cacheKey: 'parsed-json-string-isolated',
+    })
+    await vi.waitFor(() => expect(reopenedIsolated.data).toEqual({ n: 1 }))
   })
 
   it('keeps cached data visible when a refetch fails', async () => {

@@ -16,7 +16,7 @@ import { normalizeUnionOrder } from './type-unions'
  * and look at the rows themselves.
  */
 
-export type ApiTableKind = 'prop' | 'slot' | 'emit'
+export type ApiTableKind = 'prop' | 'slot' | 'emit' | 'exposed'
 
 export type ApiEntry = {
   name: string
@@ -48,12 +48,13 @@ export type ApiDifference =
       current: string | undefined
     }
 
-const KIND_ORDER: ApiTableKind[] = ['prop', 'slot', 'emit']
+const KIND_ORDER: ApiTableKind[] = ['prop', 'slot', 'emit', 'exposed']
 
 const KIND_BY_SUFFIX: Record<string, ApiTableKind> = {
   Props: 'prop',
   Slots: 'slot',
   Emits: 'emit',
+  Exposed: 'exposed',
 }
 
 // Single-component folders name their arrays `propsData`; multi-component
@@ -62,6 +63,7 @@ const SINGLE_COMPONENT_NAMES: Record<string, ApiTableKind> = {
   propsData: 'prop',
   slotsData: 'slot',
   emitsData: 'emit',
+  exposedData: 'exposed',
 }
 
 function pascalCase(name: string) {

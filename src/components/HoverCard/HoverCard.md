@@ -1,52 +1,57 @@
 # HoverCard
 
-Shows a floating panel when the pointer rests on (or the keyboard focuses) a
-trigger — for profile previews, link previews, and other sighted-only context.
-Built on [reka-ui](https://reka-ui.com/)'s `HoverCard` primitives.
-
-Use `HoverCard` for hover-driven panels and [`Popover`](./popover) for
-click-driven ones. For short text hints prefer [`Tooltip`](./tooltip) instead.
-
-## Example
-
-`#trigger` is rendered as-child, so hover and focus a11y are wired
-automatically. `#default` renders inside the standard panel shell. Both slots receive `{ open, setOpen, close }`; `close()` is shorthand for `setOpen(false)`.
+A floating panel that opens when the pointer rests on a trigger or the
+keyboard focuses it, for previews of a person or a link. For a panel that
+opens on click, use [`Popover`](./popover), and for a short text hint, use
+[`Tooltip`](./tooltip).
 
 <ComponentPreview name="HoverCard-Example" />
 
-## Delays
+## Examples
 
-`hoverDelay` and `leaveDelay` are in **milliseconds** (consistent with `Tooltip`).
-`hoverDelay` is how long the pointer must rest before the card opens;
-`leaveDelay` is how long after the pointer leaves before it closes.
+### Link preview
 
-<ComponentPreview name="HoverCard-Delays" />
+`side="top"` opens the card above the link, and `arrow` points it back at the
+link.
 
-## Arrow
+<ComponentPreview name="HoverCard-LinkPreview" />
 
-Set `arrow` to render a small arrow pointing at the trigger, styled to match the
-panel surface.
+### Assignees
 
-<ComponentPreview name="HoverCard-Arrow" />
+Shorter `hover-delay` and `leave-delay` values let the pointer move across a
+row of avatars and open each card quickly.
 
-## Styling
+<ComponentPreview name="HoverCard-Assignees" />
 
-Like `Popover`, the card owns its panel shell and exposes the same stable
-`data-slot` hooks — `[data-slot="content"]` for the portaled content and
-`[data-slot="content-body"]` for the shell that owns the visuals. There are no
-class-injection props.
+## Behavior
 
-## Motion
+### Trigger and content
 
-The card appears instantly. An 80ms fade smooths the paint on open, and there is
-no exit animation. `prefers-reduced-motion` is respected. No configuration is
-required.
+Put the trigger in `#trigger` and the card content in `#default`. Both slots
+receive `{ open, setOpen, close }`, where `close()` is the same as
+`setOpen(false)`.
 
-## Notes
+### Delays
 
-- `HoverCard` is for sighted-only enhancement — don't put essential actions or
-  information that can only be reached by hovering.
-- The card stays open while the pointer is over either the trigger or the card,
-  so users can move into it to interact.
+`hoverDelay` is how long the pointer must rest on the trigger before the card
+opens. `leaveDelay` is how long the card waits after the pointer leaves before
+it closes. Both are in milliseconds, like `Tooltip`'s, and both default to
+`300`.
+
+### Moving into the card
+
+The card stays open while the pointer is over the trigger or over the card, so
+people can move into the card and click a link in it.
+
+### Position
+
+`side`, `align`, `offset` and `collisionPadding` work the same as on
+[`Popover`](./popover#position).
+
+## Accessibility
+
+The card also opens when the trigger gets keyboard focus. Touch screens and
+screen readers may never show it, so do not put an action or a fact in the card
+that people cannot reach another way.
 
 <!-- @include: ./HoverCard.api.md -->

@@ -1,12 +1,13 @@
 # Composables
 
-Composition API helpers that don't belong to one component.
+Composition API helpers that don't belong to one component: page title, color
+scheme, shell scrolling and keyboard shortcuts.
 
 ## usePageMeta
 
-Keeps `document.title` (and the favicon) in sync with reactive state. Call it
-once per page component; it watches the function you pass and re-applies the
-result whenever a dependency changes.
+Keeps `document.title` and the favicon in sync with reactive state. Call it once
+per page component. It watches the function you pass and applies the result
+again whenever a dependency changes.
 
 ```vue
 <script setup>
@@ -22,17 +23,20 @@ usePageMeta(() => ({
 </script>
 ```
 
-The function returns `null`/`undefined` to skip an update, or a `PageMeta`
+The function returns `null` or `undefined` to skip an update, or a `PageMeta`
 object:
 
-- `title` — sets `document.title`.
-- `icon` — a URL to a favicon image.
-- `emoji` — renders the emoji as the favicon, taking priority over `icon`.
-- Omitting both `icon` and `emoji` restores the page's original favicon.
+| Field   | Type     | Description                                           |
+| ------- | -------- | ----------------------------------------------------- |
+| `title` | `string` | Sets `document.title`.                                |
+| `icon`  | `string` | URL of a favicon image.                               |
+| `emoji` | `string` | Uses the emoji as the favicon. Wins over `icon`.      |
 
-Called inside a component, the watcher stops automatically on unmount — there
-is nothing to clean up. Called outside one (a router hook, a plain module),
-it returns a stop function:
+With neither `icon` nor `emoji`, the page's original favicon comes back.
+
+Inside a component, the watcher stops on unmount, so there is nothing to clean
+up. `usePageMeta` also returns a stop function, for calls outside a component
+such as a router hook or a plain module:
 
 ```js
 const stop = usePageMeta(() => ({ title: 'Loading…' }))
@@ -42,9 +46,9 @@ stop()
 
 ## useColorScheme
 
-The app's light/dark preference, shared by every caller. The first call
-restores the saved preference and starts following the OS setting — there is
-nothing to install.
+Reads and sets the app's light or dark preference. Every caller shares one
+state. The first call restores the saved preference and starts following the OS
+setting, so there is nothing to install.
 
 ```vue
 <script setup>
@@ -61,28 +65,23 @@ const { colorScheme, resolvedColorScheme, setColorScheme, toggleColorScheme } =
 </template>
 ```
 
-- `colorScheme` — `Ref<'light' | 'dark' | 'system'>`, read-only. It, the
-  `<html data-theme>` attribute, and the saved preference always move
-  together, so write through `setColorScheme` rather than assigning the ref.
-- `resolvedColorScheme` — `Ref<'light' | 'dark'>`, read-only. What the page is
-  painted in. Under `system` it follows the OS setting while `colorScheme`
-  stays `system`, so this is what a sun-or-moon icon, or a per-scheme asset,
-  reads.
-- `setColorScheme(scheme)` — selects a preference: applies `data-theme` and
-  persists it.
-- `toggleColorScheme()` — switches to the opposite of what is on screen. Under
-  `system` on a dark OS it selects `light`, so one press always moves.
+| Member                  | Type                                     | Description                                                                                                                  |
+| ----------------------- | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `colorScheme`           | `Ref<'light' \| 'dark' \| 'system'>`     | The selected preference. Read-only: change it with `setColorScheme`, which also updates `<html data-theme>` and the saved value. |
+| `resolvedColorScheme`   | `Ref<'light' \| 'dark'>`                 | The scheme on screen. Under `system` it follows the OS. Read this for a sun or moon icon, or an image per scheme.            |
+| `setColorScheme(scheme)` | `(scheme) => void`                      | Selects a preference, sets `data-theme`, and saves it.                                                                       |
+| `toggleColorScheme()`   | `() => void`                             | Switches to the opposite of what is on screen. Under `system` on a dark OS it selects `light`.                               |
 
-Switching schemes would otherwise cross-fade every transitioning surface at
-once, which reads as a flash. To suppress it, `useColorScheme` puts a
-`no-transition` class on `<html>` for the two frames around the swap; the
-rule that acts on it ships in `frappe-ui/style.css`. Apps that don't load
-that stylesheet still switch correctly — they just see the cross-fade.
+Switching schemes would otherwise animate every element with a CSS transition
+at the same time, which looks like a flash. To prevent it, `useColorScheme` adds
+a `no-transition` class to `<html>` for the two frames around the switch. The
+CSS rule for that class is in `frappe-ui/style.css`. Apps that don't load that
+stylesheet still switch correctly, but with the animation.
 
 ## useResolvedColorScheme
 
-The same `'light' | 'dark'` value, for a component that must not own the
-scheme. It reads the document and follows it; it writes nothing.
+Returns the current `'light' | 'dark'` scheme without setting it. It reads the
+document and follows changes, and it writes nothing.
 
 ```vue
 <script setup>
@@ -96,28 +95,28 @@ const scheme = useResolvedColorScheme()
 </template>
 ```
 
-Use it when something else already owns `data-theme`: an app that bootstraps
-its own theme before paint, a page embedded in a host shell, or a demo in an
-iframe. `useColorScheme()` would make a second writer of the attribute and of
-the `theme` storage key, because its first call applies the saved preference.
+Use it when something else already sets `data-theme`: an app that sets its own
+theme before the first paint, a page embedded in another app, or a demo in an
+iframe. `useColorScheme()` would be a second writer of that attribute and of the
+`theme` storage key, because its first call applies the saved preference.
 
 - It returns `Readonly<Ref<'light' | 'dark'>>` directly, not an object.
 - It reads `<html data-theme>` first, then Tailwind's `dark` class, then the
   OS setting, and reacts to all three.
-- It writes no attribute, no class and no `localStorage` key, and it does not
-  start `useColorScheme`'s shared state.
-- Outside the browser it holds `light`.
+- It writes no attribute, class or `localStorage` key, and it does not start
+  `useColorScheme`'s shared state.
+- Outside the browser it returns `light`.
 
 When your app owns the scheme, read `useColorScheme().resolvedColorScheme`
-instead. It is the same value from the object that sets it.
+instead. It is the same value.
 
 ## shellScrollContainer / useShellScrolled
 
-`shellScrollContainer` is a computed ref pointing at the scroll element of the
-mounted [`DesktopShell` or `MobileShell`](../components/desktopshell) — `null`
-when neither is mounted. Read `scrollTop` off it, or call `scrollTo`/`scrollBy`
-directly, from anywhere — a component, a `vue-router` `scrollBehavior`, a
-navigation guard.
+`shellScrollContainer` is a computed ref to the scroll element of the mounted
+[`DesktopShell` or `MobileShell`](../components/desktopshell), or `null` when
+neither is mounted. Read `scrollTop` from it, or call `scrollTo` or `scrollBy`,
+from anywhere: a component, a `vue-router` `scrollBehavior`, or a navigation
+guard.
 
 ```vue
 <script setup>
@@ -129,9 +128,9 @@ function scrollToTop() {
 </script>
 ```
 
-`useShellScrolled` tracks whether that container is scrolled past a threshold
-— the usual driver of a header's border or shadow appearing on scroll. It
-follows the active shell automatically across a desktop/mobile layout swap.
+`useShellScrolled` returns whether that container is scrolled past a threshold.
+Use it to show a header border or shadow on scroll. It follows the active shell
+when the layout switches between desktop and mobile.
 
 ```vue
 <script setup>
@@ -145,23 +144,21 @@ const scrolled = useShellScrolled({ threshold: 12 })
 </template>
 ```
 
-`threshold` is required, in pixels. There is no default: 200px suited a long
-document and nothing else, and a header border that appeared 200px late read as
-a bug rather than as a missing argument.
+`threshold` is required, in pixels. It has no default because no single value
+suits every layout: the old 200px default made header borders appear late.
 
-The value comes from the nearest enclosing shell. A shell provides its own
-scroll element to its subtree, so a page inside one reads that shell even while
-another is still mounted. The module registry is the fallback for a caller no
-shell encloses.
+The value comes from the nearest shell above the caller. A shell provides its
+own scroll element to its children, so a page inside one reads that shell even
+while another shell is still mounted. A caller outside any shell reads the
+globally registered shell instead.
 
 Without a mounted shell, `scrolled` stays `false` and the composable warns once
 in development.
 
 ## useKeyboardShortcut
 
-Registers a global keyboard shortcut for as long as the calling component is
-mounted. No manual `keydown` listener, no cleanup to remember. It returns
-nothing.
+Registers a global keyboard shortcut while the calling component is mounted. It
+adds and removes the `keydown` listener for you, and returns nothing.
 
 ```vue
 <script setup>
@@ -181,8 +178,8 @@ Pass an array to register several at once.
 
 ### The combo
 
-A combo is `Mod+Ctrl+Alt+Shift+<Key>`. That order is the canonical spelling and
-the type enforces it, but the matcher accepts the modifiers in any order.
+A combo is `Mod+Ctrl+Alt+Shift+<Key>`. The type requires that order, but the
+matcher accepts the modifiers in any order.
 
 | Modifier | Means |
 | --- | --- |
@@ -191,20 +188,19 @@ the type enforces it, but the matcher accepts the modifiers in any order.
 | `Alt` | Alt, Option on macOS |
 | `Shift` | Shift |
 
-Punctuation and digits use a key **name**, never the character: `Mod+Slash`,
-not `Mod+/`. `+` is the separator, so `Mod++` would split into empty parts and
-never fire. The names are `Digit0`–`Digit9`, `Plus`, `Minus`, `Equal`, `Slash`,
-`Backslash`, `Backtick`, `Comma`, `Period`, `Semicolon`, `Quote`,
-`BracketLeft`, `BracketRight`.
+Digits and punctuation use a key **name**, not the character: `Mod+Slash`, not
+`Mod+/`. `+` separates the parts, so `Mod++` would never fire. The names are
+`Digit0`–`Digit9`, `Plus`, `Minus`, `Equal`, `Slash`, `Backslash`, `Backtick`,
+`Comma`, `Period`, `Semicolon`, `Quote`, `BracketLeft`, `BracketRight`.
 
 `Plus` is the keypad `+`. A normal keyboard types `+` with Shift, so ⌘+ is
 `Mod+Shift+Equal`.
 
 Letters, function keys and named keys (`Escape`, `Enter`, `Space`, `ArrowUp`, …)
 match `event.key`. Digits and punctuation match `event.code`, so
-`Mod+Shift+Digit1` fires on ⌘⇧1 and on ⌘⇧! alike. A punctuation name means the
-physical key position, as labelled on a US layout, so `Mod+Slash` fires on the
-same key everywhere. The full grammar is in
+`Mod+Shift+Digit1` fires on both ⌘⇧1 and ⌘⇧!. A punctuation name means the
+physical key position on a US layout, so `Mod+Slash` fires on the same key on
+every layout. The full grammar is in
 [`spec/shortcuts.md`](https://github.com/frappe/frappe-ui/blob/main/spec/shortcuts.md).
 
 TypeScript checks the combo: an unknown key name or a stray character fails to
@@ -214,19 +210,19 @@ compile. In JavaScript it warns once and never fires.
 
 | Option | Type | Default | Description |
 | --- | --- | --- | --- |
-| `combo` | `KeyboardShortcutCombo` | — | The key combination |
-| `description` | `string` | — | Label in `KeyboardShortcutsDialog`. Shortcuts sharing one merge into a single row |
-| `group` | `string` | `"General"` | Heading the shortcut is listed under |
-| `handler` | `(e) => void` | — | Runs on keydown. Press mode |
-| `onHold` | `(e) => void` | — | Runs once when the combo goes down. Hold mode |
-| `onRelease` | `(e?) => void` | — | Runs when a held combo is released |
-| `enabled` | `MaybeRefOrGetter<boolean>` | `true` | While `false` the shortcut is inert **and** hidden from the dialog |
-| `preventDefault` | `boolean` | `true` | Call `preventDefault()` on the matched event |
-| `allowInInput` | `boolean` | `false` | Fire while an input, textarea or contenteditable has focus |
-| `allowInDialog` | `boolean` | `false` | Fire while focus is inside a `[role="dialog"]` element |
+| `combo` | `KeyboardShortcutCombo` | none | The key combination. |
+| `description` | `string` | none | Label in `KeyboardShortcutsDialog`. Shortcuts with the same label share one row. |
+| `group` | `string` | `"General"` | Heading the shortcut is listed under. |
+| `handler` | `(e) => void` | none | Runs on keydown. Press mode. |
+| `onHold` | `(e) => void` | none | Runs once when the combo goes down. Hold mode. |
+| `onRelease` | `(e?) => void` | none | Runs when a held combo is released. |
+| `enabled` | `MaybeRefOrGetter<boolean>` | `true` | While `false`, the shortcut does nothing **and** is hidden from the dialog. |
+| `preventDefault` | `boolean` | `true` | Call `preventDefault()` on the matched event. |
+| `allowInInput` | `boolean` | `false` | Fire while an input, textarea or contenteditable has focus. |
+| `allowInDialog` | `boolean` | `false` | Fire while focus is inside a `[role="dialog"]` element. |
 
-A registration is either press mode or hold mode. Press mode takes `handler`;
-hold mode takes `onHold` and, usually, `onRelease`, and takes no `handler`.
+A shortcut uses either press mode or hold mode. Press mode takes `handler`.
+Hold mode takes `onHold` and usually `onRelease`, and no `handler`.
 
 ```ts
 useKeyboardShortcut({
@@ -238,22 +234,21 @@ useKeyboardShortcut({
 })
 ```
 
-`onRelease` also runs when the component unmounts, or is deactivated inside a
-`<KeepAlive>`, while the combo is still down. Without it the highlight above
-would stay on, with no shortcut left to switch it off. A teardown carries no
-event, so `onRelease` gets none: its parameter is optional, and a callback that
-reads the event has to handle `undefined`.
+`onRelease` also runs if the component unmounts, or is deactivated inside a
+`<KeepAlive>`, while the combo is still held. Without this, the highlight above
+would stay on with no shortcut left to turn it off. In that case there is no
+key event, so `onRelease` gets no argument: its parameter is optional, and a
+callback that reads the event must handle `undefined`.
 
 ### Two shortcuts on one combo
 
 The last registration that is **enabled at the time of the keypress** wins.
-`enabled` is resolved before precedence, so two registrations with mutually
-exclusive guards both keep working. In development the library warns once per
-combo, naming the shadowed shortcut and the active one.
+`enabled` is checked first, so two registrations with opposite conditions both
+work. In development the library warns once per combo, naming the hidden
+shortcut and the active one.
 
 ### Showing them to the user
 
-[`KeyboardShortcutsDialog`](../components/keyboardshortcutsdialog) renders
-whatever is registered as a searchable cheat sheet. It reads the registry
-itself, and its default slot hands the grouped shortcuts to an app that wants
-its own layout.
+[`KeyboardShortcutsDialog`](../components/keyboardshortcutsdialog) shows every
+registered shortcut as a searchable list. It reads the registry itself, and its
+default slot gives the grouped shortcuts to an app that wants its own layout.

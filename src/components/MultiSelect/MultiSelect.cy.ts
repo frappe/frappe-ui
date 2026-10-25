@@ -91,6 +91,55 @@ describe('MultiSelect', () => {
     ])
   })
 
+  it('leaves a checked row unfilled', () => {
+    cy.mount(MultiSelect, {
+      props: { options, modelValue: ['apple', 'banana'] },
+    })
+
+    cy.get('[data-slot="trigger"]').click()
+    cy.get(
+      '[role=option][data-state="checked"]:not([data-highlighted])',
+    ).should('have.css', 'background-color', 'rgba(0, 0, 0, 0)')
+  })
+
+  it('emits highlight with the original option, and null on close', () => {
+    const richOptions = [
+      { label: 'Apple', value: 'apple', kind: 'pome' },
+      { label: 'Banana', value: 'banana', kind: 'berry' },
+    ]
+
+    cy.mount(MultiSelect, {
+      props: {
+        options: richOptions,
+        onHighlight: cy.spy().as('onHighlight'),
+      },
+    })
+
+    cy.get('[data-slot="trigger"]').click()
+    cy.get('[data-slot="input"]').type('{downarrow}{downarrow}')
+    cy.get('@onHighlight').should('have.been.calledWith', richOptions[1])
+
+    cy.get('[data-slot="input"]').type('{esc}')
+    cy.get('@onHighlight').should('have.been.calledWith', null)
+  })
+
+  it('names the list by its label, else by aria-label', () => {
+    cy.mount(MultiSelect, { props: { options, label: 'Fruits' } })
+    cy.get('[data-slot="trigger"]').click()
+    cy.get('[role=listbox]')
+      .invoke('attr', 'aria-labelledby')
+      .then((id) => cy.get(`#${id}`).should('contain.text', 'Fruits'))
+
+    cy.mount(MultiSelect, {
+      props: { options },
+      attrs: { 'aria-label': 'Fruits' },
+    })
+    cy.get('[data-slot="trigger"]')
+      .should('have.attr', 'aria-label', 'Fruits')
+      .click()
+    cy.get('[role=listbox]').should('have.attr', 'aria-label', 'Fruits')
+  })
+
   it('supports numeric option values', () => {
     cy.mount(MultiSelect, {
       props: {

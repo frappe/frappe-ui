@@ -1,5 +1,5 @@
 import type { ComputedRef, InjectionKey, Ref } from 'vue'
-import type { TabsSide, TabsSize, TabsVariant, TabValue } from './types'
+import type { TabsEdge, TabsSize, TabsVariant, TabValue } from './types'
 
 /**
  * Internal wiring between the composed Tabs parts. Not public API — apps
@@ -27,7 +27,7 @@ export interface TabsRootContext {
 export interface TabListContext {
   variant: ComputedRef<TabsVariant>
   size: ComputedRef<TabsSize>
-  side: ComputedRef<TabsSide>
+  edge: ComputedRef<TabsEdge>
 }
 
 export const tabsRootKey: InjectionKey<TabsRootContext> = Symbol(

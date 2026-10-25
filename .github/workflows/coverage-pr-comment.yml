@@ -27,10 +27,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'yarn'
 
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
+      # The script needs only tsx and gh, not the full dependency tree. The
+      # version matches yarn.lock.
+      - name: Install tsx
+        run: npm install -g tsx@4.21.0
 
       - name: Download HEAD coverage summary
         uses: actions/download-artifact@v4
@@ -65,4 +66,4 @@ jobs:
       - name: Update PR description with coverage
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: yarn tsx .github/scripts/update-pr-coverage.ts
+        run: tsx .github/scripts/update-pr-coverage.ts

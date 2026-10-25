@@ -497,7 +497,7 @@ function buildTypography() {
 // Custom elevation names present in Figma but with zero call sites anywhere
 // (#940 rule-5 census: frappe-ui's own source/docs/stories, all 9 consumer
 // apps, and frappe's ui/ package). `status` isn't even wired into the docs'
-// own elevation showcase (ElevationPreview.vue renders only the six numbered
+// own elevation showcase (ShadowsPreview.vue renders only the six numbered
 // steps) — it's named in prose once and never rendered.
 const DROPPED_CUSTOM_ELEVATIONS = ['status']
 

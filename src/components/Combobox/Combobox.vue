@@ -17,6 +17,7 @@ import { useReactiveSlots } from '../../composables/useReactiveSlots'
 import { usePortalTarget } from '../../composables/usePortalTarget'
 import { useEmptyValueMapping } from '../shared/selection/useEmptyValueMapping'
 import { useFilteredGroups } from '../shared/selection/useFilteredGroups'
+import { rankMatch } from '../../utils/rankMatch'
 import { useIsModelBound } from '../shared/selection/useIsModelBound'
 import {
   InputDescription,
@@ -52,6 +53,7 @@ import type {
   NormalizedCustomOption,
   NormalizedGroup,
   NormalizedItem,
+  NormalizedSelectableOption,
 } from './utils'
 
 defineOptions({
@@ -233,6 +235,8 @@ const filteredGroups = useFilteredGroups<NormalizedItem, NormalizedGroup>({
     item.type === 'custom'
       ? matchesCustomOption(item, q)
       : matchesSelectableOption(item, q),
+  // custom action rows keep their place; options rank by how well they match
+  rank: (item, q) => (item.type === 'custom' ? null : rankMatch(item.label, q)),
   // `alwaysMatch` carries consumer-declared visibility: a custom row's
   // `condition` is authoritative and runs even before the user types, so it
   // is deliberately unaffected by `filterable`.
@@ -306,13 +310,10 @@ const searchSlotProps = computed<ComboboxSearchSlotProps>(() => ({
   focus: focusSearch,
 }))
 
-function commitSelectableOption(value: ComboboxOptionValue) {
-  const option =
-    allSelectableOptions.value.find((item) => item.value === value) ?? null
-
-  model.value = value
+function commitSelectableOption(option: NormalizedSelectableOption) {
+  model.value = option.value
   emit('update:selectedOption', option)
-  query.value = option?.label ?? String(value)
+  query.value = option.label
   hasTypedSinceOpen.value = false
 }
 
@@ -330,7 +331,7 @@ function handleRootModelValueChange(
   )
 
   if (selectableOption) {
-    commitSelectableOption(selectableOption.value)
+    commitSelectableOption(selectableOption)
   }
 }
 
@@ -360,6 +361,17 @@ function handleCustomItemSelect(item: NormalizedCustomOption, event: Event) {
   item.onClick(buildCustomOptionContext(typedQuery.value))
 
   if (!item.keepOpen) open.value = false
+}
+
+// Commit before closing. Reka closes first and sends the value later, and
+// closing resets the query. Options derived from the query can then drop the
+// picked option before the value arrives.
+function handleOptionSelect(item: NormalizedSelectableOption, event: Event) {
+  event.preventDefault()
+  if (item.disabled || props.disabled) return
+
+  commitSelectableOption(item)
+  open.value = false
 }
 
 function handleFocusScopeMountAutoFocus(event: Event) {
@@ -453,7 +465,21 @@ if (isButtonMode.value && isQueryBound() && query.value !== '') {
   hasTypedSinceOpen.value = true
 }
 
-defineExpose<SelectionExposed>({ clear, focus })
+defineExpose<SelectionExposed>({
+  /**
+   * Clears the current selection (sets the model to `null`). In
+   * `trigger="button"` mode the typed search query stays. In
+   * `trigger="input"` mode the input empties, because there it shows the
+   * selected option's label.
+   */
+  clear,
+  /**
+   * Moves focus to the input in `trigger="input"` mode, and to the button in
+   * `trigger="button"` mode. While the popover's search input is showing, it
+   * focuses that instead.
+   */
+  focus,
+})
 defineSlots<ComboboxSlots>()
 </script>
 
@@ -757,6 +783,7 @@ defineSlots<ComboboxSlots>()
                   :slot-fns="slotFns"
                   :all-selectable-options="allSelectableOptions"
                   @select-custom="handleCustomItemSelect"
+                  @select-option="handleOptionSelect"
                 />
 
                 <div v-if="$slots.footer" data-slot="footer">

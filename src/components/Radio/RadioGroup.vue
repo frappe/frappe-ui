@@ -92,6 +92,10 @@ const controlAttrs = computed(() =>
 // first enabled one when nothing is selected. That is where a Tab press lands,
 // so a ref call and the keyboard agree (INP-Q5).
 defineExpose<InputExposed>({
+  /**
+   * Moves focus to the checked radio, or to the first enabled radio when
+   * nothing is checked.
+   */
   focus: (options?: FocusOptions) => {
     const root = rootRef.value?.$el
     if (!root) return

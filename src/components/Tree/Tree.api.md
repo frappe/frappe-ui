@@ -3,6 +3,7 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
+  import ExposedTable from '@/components/Docs/ExposedTable.vue'
 
   const propsData = [
   {
@@ -99,6 +100,34 @@
     type: '[info: DropInfo | null]'
   }
 ]
+
+  const exposedData = [
+  {
+    name: 'expand',
+    description: 'Opens the node with this key. A key whose children have not loaded yet\nopens as soon as they arrive. Like every method here, it works while the\ntree is `disabled`.',
+    type: '(key: TreeKey) => void'
+  },
+  {
+    name: 'collapse',
+    description: 'Closes the node with this key.',
+    type: '(key: TreeKey) => void'
+  },
+  {
+    name: 'toggle',
+    description: 'Flips the node with this key.',
+    type: '(key: TreeKey) => void'
+  },
+  {
+    name: 'expandAll',
+    description: 'Opens every node that has children, keeping any keys already open.',
+    type: '() => void'
+  },
+  {
+    name: 'collapseAll',
+    description: 'Closes every node.',
+    type: '() => void'
+  }
+]
 </script>
 
 ## API Reference
@@ -108,3 +137,5 @@
 <SlotsTable :data="slotsData"/>
 
 <EmitsTable :data="emitsData"/>
+
+<ExposedTable :data="exposedData"/>

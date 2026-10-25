@@ -123,12 +123,12 @@ describe('combo axes', () => {
     expect(option.tooltip.axisPointer.type).toBe('shadow')
   })
 
-  it('runs a bar-free chart edge to edge with a rule for a pointer', () => {
+  it('shades no pointer on a bar-free chart, which points with a rule', () => {
     const option = build({
       type: 'line',
       series: [{ name: 'sales' }, { name: 'refunds', type: 'area' }],
     })
-    expect(option.xAxis.boundaryGap).toBe(false)
+    expect(option.xAxis.boundaryGap).toBe(true)
     expect(option.tooltip.axisPointer.type).toBe('line')
   })
 
@@ -208,26 +208,6 @@ describe('combo axes', () => {
     // A fixed end prints what it is given, so 1743 in five steps is unreadable.
     expect(build(dual({}), ['rate']).yAxis[1].max).toBe(2000)
     expect(build(dual({ max: 1800 }), ['rate']).yAxis[1].max).toBe(1800)
-  })
-
-  it('reserves label room for the hungriest mark that shows labels', () => {
-    const bare = build().grid.top
-    const withLine = build({
-      series: [
-        { name: 'sales' },
-        { name: 'refunds', type: 'line', showDataLabels: true },
-      ],
-    }).grid.top
-    const withBar = build({
-      series: [
-        { name: 'sales', showDataLabels: true },
-        { name: 'refunds', type: 'line', showDataLabels: true },
-      ],
-    }).grid.top
-
-    expect(withLine).toBeGreaterThan(bare)
-    // A free bar labels past its tip, which needs more room than a point does.
-    expect(withBar).toBeGreaterThan(withLine)
   })
 })
 

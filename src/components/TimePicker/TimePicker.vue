@@ -562,6 +562,7 @@ watch(
 defineExpose<PickerExposed>({
   open: () => setOpen(true),
   close,
+  /** Moves focus to the input. */
   focus: (options?: FocusOptions) => {
     inputRef.value?.focus(options)
   },

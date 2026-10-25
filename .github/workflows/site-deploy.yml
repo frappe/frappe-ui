@@ -30,6 +30,9 @@ jobs:
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
+        env:
+          # This job never runs Cypress, so skip its binary download.
+          CYPRESS_INSTALL_BINARY: 0
 
       - name: Build with VitePress
         run: VITEPRESS_BASE=/ yarn docs:build

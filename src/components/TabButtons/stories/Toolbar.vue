@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue'
-import { Avatar, Button, TabButtons } from 'frappe-ui'
+import { Button, TabButtons } from 'frappe-ui'
 
 const filter = ref('events')
 
@@ -26,10 +26,5 @@ const filters = [
       icon-left="lucide-users"
       icon-right="lucide-chevron-down"
     />
-    <Button label="Santhosh" icon-right="lucide-chevron-down">
-      <template #prefix>
-        <Avatar size="xs" label="Santhosh" />
-      </template>
-    </Button>
   </div>
 </template>

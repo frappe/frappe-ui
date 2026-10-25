@@ -234,6 +234,37 @@ describe('<KeyboardShortcut />', () => {
     expect(warn.mock.calls[0][0]).toContain('An empty part')
   })
 
+  it("draws + only between two text keys under the default 'auto'", () => {
+    const plus = (combo: string, props: Record<string, unknown> = {}) =>
+      render({ combo, ...props }).querySelectorAll('[data-slot=separator]')
+        .length
+
+    // jsdom reports no platform, so it stands in for Windows and Linux,
+    // where Mod is the text key Ctrl.
+    expect(plus('Mod+K')).toBe(1)
+    expect(plus('Mod+Shift+K')).toBe(0)
+    expect(plus('Shift+F2')).toBe(0)
+    expect(plus('Mod+Enter')).toBe(0)
+    expect(plus('Mod+Enter', { useIcons: false })).toBe(1)
+    expect(plus('Mod+Shift+K', { altCombos: ['Mod+J'] })).toBe(1)
+
+    vi.spyOn(navigator, 'platform', 'get').mockReturnValue('MacIntel')
+    expect(plus('Mod+K')).toBe(0)
+    expect(plus('Mod+Ctrl+K', { showPlus: 'auto' })).toBe(1)
+  })
+
+  it('draws every + or none when showPlus is a boolean', () => {
+    const plus = (props: Record<string, unknown>) =>
+      render({ combo: 'Mod+Shift+K', ...props }).querySelectorAll(
+        '[data-slot=separator]',
+      ).length
+
+    expect(plus({ showPlus: true })).toBe(2)
+    // A bare `show-plus` attribute arrives as '' and still means true.
+    expect(plus({ showPlus: '' })).toBe(2)
+    expect(plus({ showPlus: false })).toBe(0)
+  })
+
   it('marks the bg variant with data-bg', () => {
     const plain = render({ combo: 'Mod+K' })
     expect(

@@ -10,6 +10,7 @@ import {
 } from 'vue'
 import {
   canUseCachedFallback,
+  transformCached,
   useCall,
   type StoreWritingCallOptions,
 } from './useCall/useCall'
@@ -157,6 +158,9 @@ export function useIsolatedCall<
     let call: ReturnType<
       typeof useCall<TResponse, Record<string, any>>
     > | null = null
+    // The response as the server sent it, which is what the cache holds.
+    // Copied before `transform` runs, because it may change it in place.
+    let rawResponse: TResponse | undefined
     try {
       call = scope.run(() =>
         useCall<TResponse, Record<string, any>>({
@@ -166,7 +170,12 @@ export function useIsolatedCall<
           immediate: false,
           refetch: false,
           staleOnError,
-          transform,
+          transform:
+            transform &&
+            ((data: TResponse) => {
+              if (normalizedCacheKey) rawResponse = structuredClone(data)
+              return transform(data)
+            }),
           // Passed straight through, ungated: store writes run for every
           // successful submit, carrying this request's stamp, and the stores
           // reject the stale ones per document — a finer and better-informed
@@ -179,7 +188,7 @@ export function useIsolatedCall<
             // one in idb, nor report itself as the current outcome.
             if (!isNewest()) return
             if (normalizedCacheKey) {
-              idbStore.set(normalizedCacheKey, data)
+              idbStore.set(normalizedCacheKey, transform ? rawResponse : data)
             }
             onSuccess?.(data)
           },
@@ -277,14 +286,7 @@ export function useIsolatedCall<
         submitData.value == null ||
         error.value)
     ) {
-      let cachedData = cachedResponse.value as TResponse
-      if (transform) {
-        let returnValue = transform(cachedData)
-        if (returnValue !== undefined) {
-          cachedData = returnValue
-        }
-      }
-      return cachedData
+      return cachedResponse.value as TResponse
     }
     return submitData.value
   })
@@ -292,7 +294,7 @@ export function useIsolatedCall<
   if (normalizedCacheKey) {
     idbStore.get(normalizedCacheKey).then((data) => {
       if (data) {
-        cachedResponse.value = data
+        cachedResponse.value = transformCached(data as TResponse, transform)
       }
     })
   }

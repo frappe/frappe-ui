@@ -22,7 +22,7 @@ import { Button } from 'frappe-ui'
         </template>
       </Button>
       <Button icon-left="lucide-arrow-up-down">Sort</Button>
-      <Button icon="lucide-ellipsis" />
+      <Button icon="lucide-ellipsis" label="More" />
     </div>
   </div>
 </template>

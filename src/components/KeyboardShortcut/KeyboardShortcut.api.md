@@ -19,10 +19,10 @@
   },
   {
     name: 'showPlus',
-    description: 'Whether to visually show `+` separators between keys (non-`bg` mode only).',
+    description: 'Draw `+` between keys. `\'auto\'` draws it only between two text keys: "Ctrl+K", but "⌘K" and "⇧F2". Plain mode only.',
     required: false,
-    type: 'boolean',
-    default: 'true'
+    type: 'boolean | "auto"',
+    default: '"auto"'
   },
   {
     name: 'altCombos',

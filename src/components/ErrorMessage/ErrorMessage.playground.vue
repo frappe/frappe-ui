@@ -7,7 +7,6 @@ const knobs: Knob[] = [
     name: 'message',
     type: 'text',
     default: 'Email is required.',
-    width: '20rem',
   },
 ]
 

@@ -27,7 +27,7 @@ const tabs = [
         />
       </TabList>
       <TabPanel v-for="t in tabs" :key="t.value" :value="t.value">
-        <div class="p-4 text-base text-ink-gray-7">
+        <div class="py-4 text-base text-ink-gray-7">
           {{ t.label }} content for this record shows up here.
         </div>
       </TabPanel>

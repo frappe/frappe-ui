@@ -7,7 +7,6 @@ const knobs: Knob[] = [
     name: 'label',
     type: 'text',
     default: 'Email',
-    width: '12rem',
   },
   {
     name: 'required',

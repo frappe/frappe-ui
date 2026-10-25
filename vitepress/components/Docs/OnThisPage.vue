@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute } from 'vitepress'
+import { ScrollArea } from 'frappe-ui'
 
 interface Heading {
   type: string
@@ -17,6 +18,14 @@ const h2Exists = ref(false)
 let observer: IntersectionObserver | undefined
 const visible = new Set<string>()
 
+// VitePress appends a `#` anchor whose text is a zero-width space. trim() keeps
+// that character, and it can wrap onto a line of its own in the outline.
+function headingText(el: Element) {
+  const copy = el.cloneNode(true) as Element
+  copy.querySelectorAll('.header-anchor').forEach((a) => a.remove())
+  return copy.textContent?.trim() ?? ''
+}
+
 const setHeadings = () => {
   // Real doc headings carry an id (VitePress adds it for the anchor); headings
   // from components without one, e.g. Accordion triggers, are filtered out already.
@@ -29,7 +38,7 @@ const setHeadings = () => {
 
   headings.value = elements.map((el) => ({
     type: el.tagName.toLowerCase(),
-    name: el.textContent?.trim() ?? '',
+    name: headingText(el),
     id: el.id,
   }))
 
@@ -55,6 +64,18 @@ const syncActive = () => {
 
 const route = useRoute()
 
+const list = ref<HTMLElement | null>(null)
+const marker = ref<{ top: number; height: number } | null>(null)
+watch([activeHeading, headings], () =>
+  nextTick(() => {
+    const links = list.value?.querySelectorAll<HTMLElement>('a')
+    const el = Array.from(links ?? []).find(
+      (a) => a.getAttribute('href') === `#${activeHeading.value}`,
+    )
+    marker.value = el ? { top: el.offsetTop, height: el.offsetHeight } : null
+  }),
+)
+
 onMounted(() => {
   observer = new IntersectionObserver(
     (entries) => {
@@ -76,28 +97,37 @@ watch(route, () => nextTick(setHeadings))
 </script>
 
 <template>
+  <!-- A sticky column the height of the viewport below the navbar, scrolling
+       on its own when the outline is longer than the screen. The viewport's
+       pt-10 matches the prose column's lg:p-10, so the label sits level with
+       the page's h1. -->
   <aside
-    class="sticky top-20 hidden lg:flex flex-col h-fit mt-10 leading-relaxed w-[200px]"
+    class="sticky top-12 flex h-[calc(100vh-3rem)] flex-col leading-relaxed"
     :class="{ invisible: headings.length == 0 }"
   >
-    <!-- Transparent border keeps the label on the same left edge as the links,
-         which carry the rail's visible border. -->
-    <span
-      class="font-medium whitespace-nowrap pl-4 pb-1 border-l border-transparent"
-      >On this page</span
-    >
+    <ScrollArea class="min-h-0 flex-1" viewport-class="px-5 pt-10 pb-10">
+      <div ref="list" class="relative flex flex-col">
+        <span
+          v-if="marker"
+          class="absolute left-0 w-0.5 -translate-x-[0.5px] rounded-full bg-surface-gray-7 transition-all duration-200 ease-out"
+          :style="{ top: `${marker.top}px`, height: `${marker.height}px` }"
+          aria-hidden="true"
+        />
+        <!-- The label starts on the rail's line, left of the indented links. -->
+        <span class="font-medium whitespace-nowrap pb-1">On this page</span>
 
-    <a
-      v-for="x in headings"
-      :href="`#${x.id}`"
-      class="text-ink-gray-6 pl-4 py-1 border-l hover:text-ink-gray-9"
-      @click="activeHeading = x.id"
-      :class="{
-        'pl-7': x.type == 'h3' && h2Exists,
-        'border-outline-gray-7 text-ink-gray-9':
-          activeHeading && x.id == activeHeading,
-      }"
-      >{{ x.name }}</a
-    >
+        <a
+          v-for="x in headings"
+          :href="`#${x.id}`"
+          class="text-ink-gray-6 pl-4 py-1 border-l hover:text-ink-gray-9"
+          @click="activeHeading = x.id"
+          :class="{
+            'pl-7': x.type == 'h3' && h2Exists,
+            'text-ink-gray-9': activeHeading && x.id == activeHeading,
+          }"
+          >{{ x.name }}</a
+        >
+      </div>
+    </ScrollArea>
   </aside>
 </template>

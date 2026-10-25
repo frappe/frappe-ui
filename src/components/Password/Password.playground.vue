@@ -6,9 +6,8 @@ import type { Knob } from 'frappe-ui/vitepress'
 const model = ref('')
 
 const knobs: Knob[] = [
-  { name: 'label', type: 'text', default: 'Password', width: '12rem' },
-  { name: 'description', type: 'text', default: '', width: '20rem' },
-  { name: 'placeholder', type: 'text', default: '••••••••', width: '12rem' },
+  { name: 'label', type: 'text', default: 'Password' },
+  { name: 'description', type: 'text', default: '' },
   {
     name: 'size',
     type: 'tabs',
@@ -38,7 +37,7 @@ function buildCode(v: Record<string, any>) {
   const attrs = []
   if (v.label) attrs.push(`label="${v.label}"`)
   if (v.description) attrs.push(`description="${v.description}"`)
-  if (v.placeholder) attrs.push(`placeholder="${v.placeholder}"`)
+  attrs.push('placeholder="••••••••"')
   if (v.size !== 'sm') attrs.push(`size="${v.size}"`)
   if (v.variant !== 'subtle') attrs.push(`variant="${v.variant}"`)
   if (v.required) attrs.push('required')
@@ -56,7 +55,7 @@ function buildCode(v: Record<string, any>) {
           v-model="model"
           :label="values.label || undefined"
           :description="values.description || undefined"
-          :placeholder="values.placeholder || undefined"
+          placeholder="••••••••"
           :size="values.size"
           :variant="values.variant"
           :required="values.required"

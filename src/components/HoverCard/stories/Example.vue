@@ -13,13 +13,13 @@ import { Avatar, HoverCard } from 'frappe-ui'
       <div class="flex w-64 gap-3 p-3">
         <Avatar
           label="Jane Doe"
-          image="https://avatars.githubusercontent.com/u/499550?v=4"
+          image="https://i.pravatar.cc/80?u=jane@example.com"
           size="2xl"
         />
         <div>
           <p class="text-p-base font-medium text-ink-gray-9">Jane Doe</p>
           <p class="mt-1 text-p-sm text-ink-gray-6">
-            Designer. Likes hover cards.
+            Product designer on the Mobile team.
           </p>
         </div>
       </div>

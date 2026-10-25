@@ -4,7 +4,7 @@
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
 
-  const slotsData = [
+  const mobileShellSlots = [
   {
     name: 'default',
     description: 'The routed page content, placed in the native-scrolling content area.',
@@ -16,8 +16,79 @@
     type: 'any'
   }
 ]
+
+  const mobileNavSlots = [
+  {
+    name: 'default',
+    description: 'One or more `MobileNavItem`s, each becoming an equal-width tab.',
+    type: 'any'
+  }
+]
+
+  const mobileNavItemProps = [
+  {
+    name: 'label',
+    description: 'Label under the icon; also the accessible name.',
+    required: true,
+    type: 'string'
+  },
+  {
+    name: 'icon',
+    description: 'Icon CSS class, e.g. `lucide-home`, or a component. Ignored when the\ndefault slot is used (for a custom glyph or an avatar).',
+    required: false,
+    type: 'string | Component'
+  },
+  {
+    name: 'route',
+    description: 'Navigation target. Renders a router link. Tapping the item while it is\nalready the current route scrolls the shell to the top instead of\nre-navigating.',
+    required: false,
+    type: 'RouteDestination'
+  },
+  {
+    name: 'href',
+    description: 'External URL. Used when `route` is absent; renders a native same-tab anchor.',
+    required: false,
+    type: 'string'
+  },
+  {
+    name: 'active',
+    description: 'Highlight this item. Independent of the current route so one tab can stay\nlit across a whole section (e.g. Home across community routes). Defaults to\nwhether `route` resolves to the current route.',
+    required: false,
+    type: 'boolean'
+  }
+]
+
+  const mobileNavItemSlots = [
+  {
+    name: 'default',
+    description: 'Custom content in place of the default icon — an avatar, a badge. Receives `{ active }`.',
+    type: '{ active: boolean; }'
+  }
+]
+
+  const mobileNavItemEmits = [
+  {
+    name: 'click',
+    description: '',
+    type: '[event: MouseEvent]'
+  }
+]
 </script>
 
 ## API Reference
 
-<SlotsTable :data="slotsData"/>
+### MobileShell
+
+<SlotsTable :data="mobileShellSlots"/>
+
+### MobileNav
+
+<SlotsTable :data="mobileNavSlots"/>
+
+### MobileNavItem
+
+<PropsTable folder="MobileNav" name="MobileNavItem" :data="mobileNavItemProps"/>
+
+<SlotsTable :data="mobileNavItemSlots"/>
+
+<EmitsTable :data="mobileNavItemEmits"/>

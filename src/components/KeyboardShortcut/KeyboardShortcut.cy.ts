@@ -12,14 +12,14 @@ describe('<KeyboardShortcut />', () => {
     cy.get('kbd').should('have.length', 3)
   })
 
-  it('shows + separators by default and hides them when showPlus is false', () => {
-    cy.mount(KeyboardShortcut, { props: { combo: 'Mod+K' } })
-    cy.contains('+').should('exist')
+  it('shows + separators when showPlus is set and hides them when it is false', () => {
+    cy.mount(KeyboardShortcut, { props: { combo: 'Mod+K', showPlus: false } })
+    cy.contains('+').should('not.exist')
 
     cy.mount(KeyboardShortcut, {
-      props: { combo: 'Mod+K', showPlus: false },
+      props: { combo: 'Mod+K', showPlus: true },
     })
-    cy.contains('+').should('not.exist')
+    cy.contains('+').should('exist')
   })
 
   it('renders alternative combos after a separator', () => {
@@ -45,7 +45,9 @@ describe('<KeyboardShortcut />', () => {
   })
 
   it('carries the documented styling hooks', () => {
-    cy.mount(KeyboardShortcut, { props: { combo: 'Mod+Shift+K' } })
+    cy.mount(KeyboardShortcut, {
+      props: { combo: 'Mod+Shift+K', showPlus: true },
+    })
     cy.get('[data-slot=keyboard-shortcut]').should('not.have.attr', 'data-bg')
     cy.get('[data-slot=keyboard-shortcut] [data-slot=key]').should(
       'have.length',

@@ -830,18 +830,37 @@ watch(
 )
 
 defineExpose({
+  /**
+   * Rebuilds the calendar's own copy of `events`. The calendar already does
+   * this whenever `events` changes.
+   */
   reloadEvents,
+  /** The title of the visible range, e.g. "August 2026". */
   currentMonthYear,
+  /** The year of the visible month. */
   currentYear,
+  /** The visible month, `0` for January. */
   currentMonth,
+  /** The day of the month the view is anchored on. */
   currentDay,
+  /**
+   * The views that `config` does not disable. Read once, when the calendar
+   * mounts.
+   */
   enabledModes,
+  /** The visible view. */
   activeView,
+  /** Moves back one day, week or month, depending on the view. */
   decrement,
+  /** Moves forward one day, week or month, depending on the view. */
   increment,
+  /** Switches to this view. */
   updateActiveView,
+  /** Jumps to this date, or to today when no date is given. */
   setCalendarDate,
+  /** Jumps to this date and moves the month picker to it. */
   onMonthYearChange,
+  /** The month picker's date, as `YYYY-MM-DD`. */
   selectedMonthDate,
 })
 </script>

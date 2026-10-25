@@ -19,15 +19,25 @@ const names = [
   'Diego Santos',
   'Lena Fischer',
 ]
+const roles = {
+  Admin: { icon: 'lucide-shield-check', theme: 'blue' },
+  Member: { icon: 'lucide-user', theme: 'gray' },
+  Guest: { icon: 'lucide-globe', theme: 'amber' },
+} as const
+type Role = keyof typeof roles
+
 const search = ref('')
 const users = Array.from({ length: 28 }, (_, i) => {
   const name = names[i % names.length]
+  const role: Role =
+    i === 0 || i === 7 ? 'Admin' : i % 9 === 4 ? 'Guest' : 'Member'
   return {
     name,
     email: `${name.split(' ')[0].toLowerCase()}${i + 1}@example.com`,
-    role: i === 0 ? 'Admin' : 'Member',
+    role,
   }
 })
+
 const filtered = computed(() =>
   users.filter((u) =>
     u.name.toLowerCase().includes(search.value.toLowerCase()),
@@ -40,7 +50,7 @@ const filtered = computed(() =>
     <div class="flex flex-col gap-4">
       <div class="flex items-center justify-between gap-3">
         <h2 class="text-lg font-semibold text-ink-gray-8">Users</h2>
-        <Button variant="solid" icon-left="lucide-plus">Invite</Button>
+        <Button icon-left="lucide-plus">Invite</Button>
       </div>
       <TextInput v-model="search" placeholder="Search by name or email">
         <template #prefix>
@@ -71,10 +81,10 @@ const filtered = computed(() =>
             <div class="truncate text-sm text-ink-gray-5">{{ user.email }}</div>
           </div>
         </div>
-        <Badge
-          theme="gray"
-          :variant="user.role === 'Admin' ? 'solid' : 'subtle'"
-        >
+        <Badge :theme="roles[user.role].theme" class="justify-self-start">
+          <template #prefix>
+            <span :class="roles[user.role].icon" aria-hidden="true" />
+          </template>
           {{ user.role }}
         </Badge>
       </div>

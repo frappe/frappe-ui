@@ -6,10 +6,10 @@ import { theme as DocsTheme, Navbar } from 'frappe-ui/vitepress'
 import { getRecipe } from '@/components/recipes'
 
 const { frontmatter, params } = useData()
-// Reuse the shared prose layout; the default Navbar comes from the theme.
+// Reuse the shared prose layout; its header and sidebar come from the theme.
 const SharedLayout = DocsTheme.Layout
 // Branch badge (set via vite define in the docs config) — a frappe-ui-only
-// showcase extra slotted into the shared Navbar.
+// showcase extra slotted into the header actions.
 const devBranch = typeof __DEV_BRANCH__ !== 'undefined' ? __DEV_BRANCH__ : ''
 
 // Chrome-less recipe demo target (/recipes/demo/<slug>) — rendered
@@ -111,23 +111,20 @@ onBeforeUnmount(() => {
     </div>
   </FrappeUIProvider>
 
-  <!-- Doc pages: shared layout (sidebar + content) with the dev badge added. -->
+  <!-- Doc pages: shared layout (sidebar + header + content) with the dev
+       badge added to the header. -->
   <component :is="SharedLayout" v-else>
-    <template #navbar>
-      <Navbar :is-docs="true">
-        <template #actions>
-          <Badge
-            v-if="devBranch"
-            :title="`git branch: ${devBranch}`"
-            theme="amber"
-            variant="outline"
-            class="hidden md:flex"
-          >
-            <template #prefix><span class="lucide-git-branch" /></template>
-            {{ devBranch }}
-          </Badge>
-        </template>
-      </Navbar>
+    <template #actions>
+      <Badge
+        v-if="devBranch"
+        :title="`git branch: ${devBranch}`"
+        theme="amber"
+        variant="outline"
+        class="hidden md:flex"
+      >
+        <template #prefix><span class="lucide-git-branch" /></template>
+        {{ devBranch }}
+      </Badge>
     </template>
   </component>
 </template>

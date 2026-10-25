@@ -43,6 +43,13 @@ const SOURCE_ROOTS = [
   path.join(__dirname, '../../src'),
   EXPERIMENTAL_ROOT,
 ]
+
+// Folders whose components are documented on another folder's page, keyed by
+// the folder without a page. Their tables go into the page folder's
+// `<folder>.api.md`: a page can include only one generated file, because each
+// one opens a `<script setup>`.
+const DOCUMENTED_ON: Record<string, string> = { MobileNav: 'MobileShell' }
+
 const AUTO_STORIES_START = '<!-- AUTO-GENERATED STORIES START -->'
 const AUTO_STORIES_END = '<!-- AUTO-GENERATED STORIES END -->'
 
@@ -122,6 +129,156 @@ function getDeclaredEmits(vuePath: string) {
   }
 
   return emits
+}
+
+// The variable Vue's language tooling binds the `defineExpose()` argument to.
+// With a type argument it is declared as that type (`let __VLS_exposed!: T`);
+// without one it is the object itself.
+const EXPOSED_VAR = '__VLS_exposed'
+
+type JsDocTag = { name: string; text?: string }
+
+function findNode<T extends ts.Node>(
+  root: ts.Node,
+  match: (node: ts.Node) => node is T,
+): T | undefined {
+  let found: T | undefined
+  const visit = (node: ts.Node) => {
+    if (found) return
+    if (match(node)) found = node
+    else ts.forEachChild(node, visit)
+  }
+  visit(root)
+  return found
+}
+
+/**
+ * JSDoc written on the properties of the object handed to `defineExpose`, by
+ * property name. Components that share an exposed type (every input exposes
+ * `InputExposed`) use it to say what their own member does, so it wins over
+ * the shared type's description.
+ */
+function getExposeLiteralDocs(
+  sourceFile: ts.SourceFile,
+  typeChecker: ts.TypeChecker,
+) {
+  const docs = new Map<string, { description: string; tags: JsDocTag[] }>()
+
+  const call = findNode(
+    sourceFile,
+    (node): node is ts.CallExpression =>
+      ts.isCallExpression(node) &&
+      ts.isIdentifier(node.expression) &&
+      node.expression.text === 'defineExpose',
+  )
+  let argument = call?.arguments[0]
+
+  // `defineExpose(exposed)`: follow the identifier to the object it names.
+  if (argument && ts.isIdentifier(argument)) {
+    const declaration =
+      typeChecker.getSymbolAtLocation(argument)?.valueDeclaration
+    argument =
+      declaration && ts.isVariableDeclaration(declaration)
+        ? declaration.initializer
+        : undefined
+  }
+  if (!argument || !ts.isObjectLiteralExpression(argument)) return docs
+
+  // Read the comment off the property node. Its symbol would not do: a
+  // shorthand property (`{ focus }`) resolves to the local function, whose
+  // comment describes the implementation.
+  for (const property of argument.properties) {
+    if (!property.name || !ts.isIdentifier(property.name)) continue
+    const jsDoc = ts.getJSDocCommentsAndTags(property).find(ts.isJSDoc)
+    if (!jsDoc) continue
+    docs.set(property.name.text, {
+      description: ts.getTextOfJSDocComment(jsDoc.comment)?.trim() ?? '',
+      tags: (jsDoc.tags ?? []).map((tag) => ({
+        name: tag.tagName.text,
+        text: ts.getTextOfJSDocComment(tag.comment),
+      })),
+    })
+  }
+
+  return docs
+}
+
+// Vue unwraps a ref handed to `defineExpose` at the proxy boundary, so a caller
+// reads the ref's value. Every ref type carries Vue's `RefSymbol` brand.
+function unwrapRef(
+  typeChecker: ts.TypeChecker,
+  type: ts.Type,
+  location: ts.Node,
+) {
+  const isRef = type
+    .getProperties()
+    .some((property) => property.getName().startsWith('__@RefSymbol'))
+  const value = type.getProperty('value')
+  return isRef && value
+    ? typeChecker.getTypeOfSymbolAtLocation(value, location)
+    : type
+}
+
+/**
+ * The members a template ref on the component can reach: what it hands
+ * `defineExpose`, read off the type Vue generates for it.
+ *
+ * vue-component-meta also reports exposed members, but it drops any whose name
+ * matches a prop. Popover's `open()` method shares its name with the `open`
+ * prop, so reading the generated type directly is the only way to keep it.
+ *
+ * A member tagged `@internal` is left out: it is there for another part of the
+ * library, not for the component's users.
+ */
+function getExposed(vuePath: string) {
+  const program = tsconfigChecker.getProgram()
+  const sourceFile = program?.getSourceFile(vuePath)
+  if (!program || !sourceFile) return []
+
+  const typeChecker = program.getTypeChecker()
+  const declaration = findNode(
+    sourceFile,
+    (node): node is ts.VariableDeclaration =>
+      ts.isVariableDeclaration(node) &&
+      ts.isIdentifier(node.name) &&
+      node.name.text === EXPOSED_VAR,
+  )
+  if (!declaration) return []
+
+  const literalDocs = getExposeLiteralDocs(sourceFile, typeChecker)
+  const exposedType = typeChecker.getTypeAtLocation(declaration.name)
+
+  return exposedType.getProperties().flatMap((member) => {
+    const literal = literalDocs.get(member.getName())
+    const tags: JsDocTag[] =
+      literal?.tags ??
+      member.getJsDocTags(typeChecker).map((tag) => ({
+        name: tag.name,
+        text: tag.text ? ts.displayPartsToString(tag.text) : undefined,
+      }))
+    if (tags.some((tag) => tag.name === 'internal')) return []
+
+    const type = unwrapRef(
+      typeChecker,
+      typeChecker.getTypeOfSymbolAtLocation(member, declaration),
+      declaration,
+    )
+    const printed = printType(typeChecker, type)
+
+    return withOptional({
+      name: member.getName(),
+      description:
+        literal?.description ||
+        ts
+          .displayPartsToString(member.getDocumentationComment(typeChecker))
+          .trim(),
+      // The `| undefined` of optional parameters goes, as it does for a prop.
+      // A trailing one stays: it belongs to the member itself (`chart` is
+      // `undefined` until the first draw).
+      type: printed.replace(/ \| undefined(?=[;,)}\]])/g, ''),
+      deprecated: getDeprecation(tags),
+    })
+  })
 }
 
 // Return the `@deprecated` message, `true` if the tag is present without
@@ -329,17 +486,21 @@ function extractTableData(name: string, data: any, vuePath: string) {
       }),
     )
 
-  return { name, props, slots, emits }
+  const exposed = getExposed(vuePath)
+
+  return { name, props, slots, emits, exposed }
 }
 
-type ComponentMeta = ReturnType<typeof extractTableData>
+// `folder` is the component's own folder, which differs from the folder whose
+// file it is written to when the component is documented on another page.
+type ComponentMeta = ReturnType<typeof extractTableData> & { folder: string }
 
 // Generate one meta file per folder. Multi-component folders (e.g.
 // DatePicker, which also exports DateTimePicker and DateRangePicker) emit
 // a single file with all sibling components — required because each Vue
 // SFC can only have one `<script setup>`, and doc pages include the meta
 // file inline.
-function genFolderMetaTable(folder: string, components: ComponentMeta[]) {
+function genFolderMetaTable(components: ComponentMeta[]) {
   const multi = components.length > 1
   const scriptLines = [
     '<!-- Auto Generated by scripts/propsgen.ts -->',
@@ -348,16 +509,27 @@ function genFolderMetaTable(folder: string, components: ComponentMeta[]) {
     "  import SlotsTable from '@/components/Docs/SlotsTable.vue'",
     "  import EmitsTable from '@/components/Docs/EmitsTable.vue'",
   ]
+  if (components.some((c) => c.exposed.length > 0)) {
+    scriptLines.push(
+      "  import ExposedTable from '@/components/Docs/ExposedTable.vue'",
+    )
+  }
 
   const constNames = (componentName: string) => {
     if (!multi) {
-      return { props: 'propsData', slots: 'slotsData', emits: 'emitsData' }
+      return {
+        props: 'propsData',
+        slots: 'slotsData',
+        emits: 'emitsData',
+        exposed: 'exposedData',
+      }
     }
     const prefix = camelCase(componentName)
     return {
       props: `${prefix}Props`,
       slots: `${prefix}Slots`,
       emits: `${prefix}Emits`,
+      exposed: `${prefix}Exposed`,
     }
   }
 
@@ -372,22 +544,27 @@ function genFolderMetaTable(folder: string, components: ComponentMeta[]) {
     if (c.emits.length > 0) {
       scriptLines.push(`\n  const ${names.emits} = ${arrToExpression(c.emits)}`)
     }
+    if (c.exposed.length > 0) {
+      scriptLines.push(
+        `\n  const ${names.exposed} = ${arrToExpression(c.exposed)}`,
+      )
+    }
   }
 
   scriptLines.push('</script>')
 
   let markupStr = ''
 
-  const hasAnyAcross = components.some(
-    (c) => c.props.length || c.slots.length || c.emits.length,
-  )
+  const hasAny = (c: ComponentMeta) =>
+    c.props.length || c.slots.length || c.emits.length || c.exposed.length
+
+  const hasAnyAcross = components.some(hasAny)
   if (multi && hasAnyAcross) {
     markupStr += `## API Reference\n\n`
   }
 
   for (const c of components) {
-    const hasAny = c.props.length || c.slots.length || c.emits.length
-    if (!hasAny) continue
+    if (!hasAny(c)) continue
 
     if (multi) {
       markupStr += `### ${c.name}\n\n`
@@ -396,7 +573,7 @@ function genFolderMetaTable(folder: string, components: ComponentMeta[]) {
     }
 
     const names = constNames(c.name)
-    const folderAttr = folder !== c.name ? ` folder="${folder}"` : ''
+    const folderAttr = c.folder !== c.name ? ` folder="${c.folder}"` : ''
 
     if (c.props.length > 0) {
       markupStr += `<PropsTable${folderAttr} name="${c.name}" :data="${names.props}"/>\n\n`
@@ -406,6 +583,9 @@ function genFolderMetaTable(folder: string, components: ComponentMeta[]) {
     }
     if (c.emits.length > 0) {
       markupStr += `<EmitsTable :data="${names.emits}"/>\n\n`
+    }
+    if (c.exposed.length > 0) {
+      markupStr += `<ExposedTable :data="${names.exposed}"/>\n\n`
     }
   }
 
@@ -498,6 +678,9 @@ type Documentable = {
   vuePath: string
   siblings: string[]
 }
+
+// The folder whose page documents this component.
+const pageFolderOf = (d: Documentable) => DOCUMENTED_ON[d.folder] ?? d.folder
 
 function getDocumentables(): Documentable[] {
   const docs: Documentable[] = []
@@ -597,7 +780,7 @@ function parseRequestedFolders(
   folders: string[],
 ) {
   const byLowerName = new Map(
-    documentables.map((d) => [d.name.toLowerCase(), d.folder]),
+    documentables.map((d) => [d.name.toLowerCase(), pageFolderOf(d)]),
   )
 
   const args = process.argv.slice(2).filter((arg) => arg !== '--')
@@ -640,13 +823,13 @@ function parseRequestedFolders(
 }
 
 const documentables = getDocumentables()
-const folderOrder = [...new Set(documentables.map((d) => d.folder))]
+const folderOrder = [...new Set(documentables.map(pageFolderOf))]
 const selectedFolders = parseRequestedFolders(documentables, folderOrder)
 const docsByFolder = new Map<string, Documentable[]>()
 for (const d of documentables) {
-  const list = docsByFolder.get(d.folder) ?? []
+  const list = docsByFolder.get(pageFolderOf(d)) ?? []
   list.push(d)
-  docsByFolder.set(d.folder, list)
+  docsByFolder.set(pageFolderOf(d), list)
 }
 
 // Props and union members are put back into source order (see `source-order`),
@@ -724,16 +907,17 @@ selectedFolders.forEach((folder) => {
   try {
     const docs = docsByFolder.get(folder) ?? []
     if (docs.length === 0) return
-    // Primary first, then any sub-components in declaration order.
+    // Primary first, then any sub-components in declaration order, then the
+    // components of folders documented on this page.
     const ordered = [
-      ...docs.filter((d) => d.name === pascalCase(d.folder)),
-      ...docs.filter((d) => d.name !== pascalCase(d.folder)),
+      ...docs.filter((d) => d.name === pascalCase(folder)),
+      ...docs.filter((d) => d.name !== pascalCase(folder)),
     ]
     const rootDir = ordered[0].rootDir
 
     const components = ordered.map((d) => {
       const meta = tsconfigChecker.getComponentMeta(d.vuePath)
-      return extractTableData(d.name, meta, d.vuePath)
+      return { ...extractTableData(d.name, meta, d.vuePath), folder: d.folder }
     })
 
     // A family that splits its docs one page per component (`<folder>/docs/
@@ -749,14 +933,14 @@ selectedFolders.forEach((folder) => {
       .filter((c) => hasOwnPage(c.name))
       .map((component) => ({
         path: path.join(pagesDir, `${component.name}.api.md`),
-        content: genFolderMetaTable(folder, [component]),
+        content: genFolderMetaTable([component]),
       }))
 
     const shared = components.filter((c) => !hasOwnPage(c.name))
     if (shared.length) {
       metaFiles.push({
         path: path.join(rootDir, folder, `${folder}.api.md`),
-        content: genFolderMetaTable(folder, shared),
+        content: genFolderMetaTable(shared),
       })
     }
 

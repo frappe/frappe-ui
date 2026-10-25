@@ -9,10 +9,12 @@
  * conventions §1.6 contract.
  */
 import { Plugin } from '@tiptap/pm/state'
+import { isHistoryTransaction } from '@tiptap/pm/history'
 import type { Transaction, EditorState } from '@tiptap/pm/state'
 import type { EditorView } from '@tiptap/pm/view'
 import type { Editor } from '@tiptap/core'
 import { dispatchIfAlive } from '#molecules/editor/extensions/shared/node-view'
+import { isRemoteChange } from '#molecules/editor/extensions/shared/collaboration'
 import { resolveUploadOptions } from '#molecules/editor/extensions/shared/media-upload-engine'
 import type {
   MediaUploadConfig,
@@ -42,6 +44,19 @@ function collectFiles(
     }
   }
   return files
+}
+
+/** Whether a transaction loads content or undoes/redoes, not a person's edit. */
+function isLoadOrUndo(transaction: Transaction): boolean {
+  // A transaction another plugin appends (TrailingNode, ListJoin) carries no
+  // meta of its own. ProseMirror tags it with the root transaction that
+  // caused it, so ask that one too.
+  const root = transaction.getMeta('appendedTransaction') as
+    | Transaction
+    | undefined
+  return [transaction, root].some(
+    (tr) => tr && (tr.getMeta('preventUpdate') || isHistoryTransaction(tr)),
+  )
 }
 
 /**
@@ -79,8 +94,12 @@ export function createMediaPlugin(
     },
 
     /**
-     * After any doc-changing transaction, back-fill width/height onto freshly
-     * inserted nodes that have a `src` but no dimensions and are not loading.
+     * Back-fill width/height onto every media node that has a `src` but no
+     * dimensions and is not loading, after the person's own edit. This heals
+     * new and stored media alike. Loaded content, a collaborator's change and
+     * undo/redo write nothing, so opening or watching a document never
+     * changes it. The write is kept out of undo history, so Ctrl+Z reverts
+     * the person's edit.
      */
     appendTransaction(
       transactions: readonly Transaction[],
@@ -88,6 +107,8 @@ export function createMediaPlugin(
       newState: EditorState,
     ): Transaction | null {
       if (!transactions.some((tr) => tr.docChanged)) return null
+      if (isRemoteChange(transactions, newState)) return null
+      if (transactions.some(isLoadOrUndo)) return null
 
       const pending: number[] = []
       newState.doc.descendants((node, pos) => {
@@ -118,11 +139,13 @@ export function createMediaPlugin(
             if (live.attrs.width != null && live.attrs.height != null) return
             dispatchIfAlive(
               view,
-              view.state.tr.setNodeMarkup(pos, undefined, {
-                ...live.attrs,
-                width: live.attrs.width ?? dims.width,
-                height: live.attrs.height ?? dims.height,
-              }),
+              view.state.tr
+                .setNodeMarkup(pos, undefined, {
+                  ...live.attrs,
+                  width: live.attrs.width ?? dims.width,
+                  height: live.attrs.height ?? dims.height,
+                })
+                .setMeta('addToHistory', false),
             )
           })
           .catch(() => {

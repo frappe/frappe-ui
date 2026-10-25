@@ -7,7 +7,7 @@ import {
 } from 'reka-ui'
 import Checkbox from '../Checkbox/Checkbox.vue'
 import ItemListRow from '../ItemListRow/ItemListRow.vue'
-import { LoadingIndicator } from '../LoadingIndicator'
+import { Spinner } from '../Spinner'
 import OptionIcon from '../shared/selection/OptionIcon.vue'
 import type { MultiSelectItemSlotProps, MultiSelectSize } from './types'
 import { createItemSlotRender } from '../shared/selection/createItemSlotRender'
@@ -81,7 +81,7 @@ function getItemTextValue(item: NormalizedOption) {
       data-slot="loading"
       class="flex items-center gap-2 px-2 py-1.5 text-base text-ink-gray-5"
     >
-      <LoadingIndicator class="size-4" />
+      <Spinner class="size-4" />
       <span>Loading...</span>
     </div>
 
@@ -246,10 +246,9 @@ function getItemTextValue(item: NormalizedOption) {
 
 <style scoped>
 /*
- * The outer item row paints its own bg via data-[highlighted] /
- * data-[state=checked] utilities — including the combined hover+selected
- * state. Clear ItemListRow's own bg so the outer color always shows
- * through; text emphasis on selected stays.
+ * The outer item row paints its own bg via data-[highlighted]. Clear
+ * ItemListRow's own bg, so a checked row is not filled: the checkbox shows
+ * the state. Text emphasis on selected stays.
  */
 [data-slot='item'] [data-slot='item-list-row'] {
   background-color: transparent;

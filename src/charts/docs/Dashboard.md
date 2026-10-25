@@ -5,8 +5,8 @@ outline: false
 
 # Dashboard
 
-Charts are card-shaped: each draws its own title, subtitle, legend and states,
-and fills the box you give it. A dashboard is that box repeated — the page owns
-the grid and the card chrome, the charts own everything inside.
+Each chart draws its own title, subtitle, legend and states, and fills the box
+you give it. To build a dashboard, place charts in a grid. The page sets the
+grid and the cards; the charts draw everything inside them.
 
 <ComponentPreview name="Charts-Dashboard" csr="true" wide self-layout />

@@ -98,6 +98,20 @@ describe('parseApiTables', () => {
     ])
   })
 
+  it('reads template ref tables, so the check covers them too', () => {
+    const source = apiFile(`
+  const exposedData = [{ name: 'focus', type: '() => void' }]
+
+  const datePickerExposed = [{ name: 'open', type: '() => void' }]`)
+
+    expect(
+      parseApiTables(source, 'Rating').map((t) => [t.component, t.kind]),
+    ).toEqual([
+      ['Rating', 'exposed'],
+      ['DatePicker', 'exposed'],
+    ])
+  })
+
   it('takes the component name from the folder for a single-component file', () => {
     const source = apiFile(`
   const propsData = [{ name: 'columns', type: 'Column[]' }]`)

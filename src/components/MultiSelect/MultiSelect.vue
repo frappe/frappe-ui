@@ -9,13 +9,14 @@ import {
   FocusScope,
 } from 'reka-ui'
 import Button from '../Button/Button.vue'
-import { LoadingIndicator } from '../LoadingIndicator'
+import { Spinner } from '../Spinner'
 import MultiSelectResults from './MultiSelectResults.vue'
 import { useInputLabeling } from '../../composables/useInputLabeling'
 import { useReactiveSlots } from '../../composables/useReactiveSlots'
 import { usePortalTarget } from '../../composables/usePortalTarget'
 import { useEmptyValueMapping } from '../shared/selection/useEmptyValueMapping'
 import { useFilteredGroups } from '../shared/selection/useFilteredGroups'
+import { rankMatch } from '../../utils/rankMatch'
 import { useIsModelBound } from '../shared/selection/useIsModelBound'
 import OptionIcon from '../shared/selection/OptionIcon.vue'
 import {
@@ -110,6 +111,22 @@ const {
   hasDescriptionSlot: () => Boolean(slots.description),
 })
 
+const triggerAttrs = computed(() => {
+  const { class: _class, style: _style, ...rest } = attrs
+  return rest
+})
+
+// The list is named like the field: by its label, else by the name given to
+// the component itself.
+const listAttrs = computed(() =>
+  props.label || slots.label
+    ? { 'aria-labelledby': labelId.value }
+    : {
+        'aria-label': attrs['aria-label'],
+        'aria-labelledby': attrs['aria-labelledby'],
+      },
+)
+
 const hasLabeling = computed(() => {
   return Boolean(
     props.label ||
@@ -195,6 +212,7 @@ const filteredGroups = useFilteredGroups({
   hasTypedSinceOpen,
   query,
   matches: matchesOption,
+  rank: (item, q) => rankMatch(item.label, q),
   filterable: () => props.filterable ?? true,
 })
 
@@ -305,6 +323,21 @@ function handleRootOpenChange(value: boolean) {
   open.value = value
 }
 
+const highlightedValue = ref<unknown>()
+
+const highlightedOption = computed<MultiSelectOption | null>(() => {
+  if (highlightedValue.value === undefined) return null
+  const value = toExternalValue(highlightedValue.value)
+  return rawOptions.value.find((option) => option.value === value) ?? null
+})
+
+watch(highlightedOption, (option) => emit('highlight', option))
+
+// reka reports each new highlight but never its end, which comes with closing.
+watch(open, (isOpen) => {
+  if (!isOpen) highlightedValue.value = undefined
+})
+
 function handleInputChange(event: Event) {
   setQuery((event.target as HTMLInputElement).value)
 }
@@ -345,7 +378,11 @@ watch(open, (isOpen, wasOpen) => {
   hasTypedSinceOpen.value = false
 })
 
-defineExpose<SelectionExposed>({ clear, focus })
+defineExpose<SelectionExposed>({
+  clear,
+  /** Moves focus to the trigger. */
+  focus,
+})
 defineSlots<MultiSelectSlots>()
 </script>
 
@@ -374,6 +411,7 @@ defineSlots<MultiSelectSlots>()
       :ignore-filter="true"
       @update:modelValue="handleRootModelValueChange"
       @update:open="handleRootOpenChange"
+      @highlight="highlightedValue = $event?.value"
     >
       <ComboboxAnchor as-child @click="handleTriggerClick">
         <slot v-if="$slots.trigger" name="trigger" v-bind="slotProps" />
@@ -388,6 +426,7 @@ defineSlots<MultiSelectSlots>()
         <button
           v-else
           ref="trigger"
+          v-bind="triggerAttrs"
           type="button"
           :class="[
             triggerClasses,
@@ -479,6 +518,7 @@ defineSlots<MultiSelectSlots>()
 
       <ComboboxPortal :to="portalTarget">
         <ComboboxContent
+          v-bind="listAttrs"
           data-slot="content"
           data-selection
           :data-variant="variant"
@@ -526,7 +566,7 @@ defineSlots<MultiSelectSlots>()
                   class="min-w-0 flex-1 border-0 bg-transparent px-0 py-2 text-base text-ink-gray-8 outline-none placeholder:text-ink-gray-4 focus:ring-0"
                   @input="handleInputChange"
                 />
-                <LoadingIndicator
+                <Spinner
                   v-if="loading"
                   class="size-4 shrink-0 text-ink-gray-5"
                 />

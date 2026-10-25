@@ -127,6 +127,7 @@ function commit() {
 }
 
 defineExpose<DurationExposed>({
+  /** Moves focus to the input. */
   focus: (options) => inputRef.value?.focus(options),
 })
 </script>

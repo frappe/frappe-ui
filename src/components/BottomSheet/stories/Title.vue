@@ -7,9 +7,9 @@ const options = ['Rename', 'Duplicate', 'Move to folder', 'Delete']
 </script>
 
 <template>
-  <Button label="Open with a title" @click="open = true" />
+  <Button label="Actions" icon-left="lucide-ellipsis" @click="open = true" />
 
-  <BottomSheet v-model:open="open" title="Actions">
+  <BottomSheet v-model:open="open" title="report.pdf">
     <div class="flex flex-col p-2 pb-8">
       <button
         v-for="option in options"

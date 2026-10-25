@@ -1,102 +1,80 @@
 # Tooltip
 
 A small label that describes its trigger, shown on hover or keyboard focus.
-Built on [reka-ui](https://reka-ui.com/)'s `Tooltip` primitives, so focus,
-dismissal and aria wiring come for free.
-
-## Playground
+For content people interact with, such as links or buttons, use
+[`HoverCard`](./hovercard) or [`Popover`](./popover).
 
 <ComponentPlayground name="Tooltip" />
 
-## Default
+## Examples
 
-Pass the label as `text` and wrap the trigger in the default slot.
+### Toolbar buttons
 
-<ComponentPreview name="Tooltip-Examples" />
-
-## Side and offset
-
-`side` (`top` / `right` / `bottom` / `left`) picks which edge of the trigger the
-tooltip sits on; `offset` sets the gap in px. Both match `Popover` and
-`HoverCard`. The tooltip flips automatically to stay inside the viewport.
-
-## Slots
-
-`#default` is the **trigger** — Tooltip is the one overlay that reads this way,
-because `<Tooltip text="Delete"><Button /></Tooltip>` is the shape almost every
-call site wants.
-
-`#content` is the tooltip's content, for anything richer than a string. It
-renders inside the standard bubble, so you inherit the surface rather than
-rebuilding it. Add `bare` when the content brings its own surface — an image
-preview, say. The arrow renders either way.
-
-<ComponentPreview name="Tooltip-Slots" />
-
-## Grouping (shared hover delay)
-
-Wrap a group of buttons in a `TooltipProvider` so that once one tooltip is open,
-moving the pointer to a neighbouring trigger within `skip-delay` opens its
-tooltip instantly — no delay between adjacent buttons. `Tooltip` and
-tooltip-bearing `Button`s automatically reuse a surrounding provider instead of
-creating their own.
+`TooltipProvider` groups the tooltips of a toolbar. After the first tooltip
+opens, moving to the next button opens its tooltip at once.
 
 <ComponentPreview name="Tooltip-Group" />
 
-## Styling
+### Keyboard shortcut
 
-There are no class-injection props. Style the tooltip through the stable
-`data-slot` hooks:
+The `#content` slot shows the button's name and its shortcut.
 
-| Hook                    | Element                                      |
-| ----------------------- | -------------------------------------------- |
-| `[data-slot="content"]` | the portaled content (reka `TooltipContent`) |
-| `[data-slot="bubble"]`  | the default bubble that owns the visuals (absent under `bare`) |
-| `[data-slot="arrow"]`   | the arrow pointing back at the trigger       |
+<ComponentPreview name="Tooltip-Shortcut" />
 
-```css
-:where([data-slot='bubble']) {
-  /* your overrides */
-}
-```
+### File preview
 
-## Notes
+`bare` drops the dark bubble, so an image preview shows on its own surface.
 
-- Set `disabled` to suppress the tooltip while still rendering the trigger.
-  Useful when the label only applies in some states.
-- A tooltip labels its trigger — it is not a place for interactive content.
-  For a panel you can click into, use [`HoverCard`](./hovercard).
+<ComponentPreview name="Tooltip-FilePreview" />
 
-## Migrating from v0
+### Warning on a delete button
 
-`placement` is now `side`, and `arrowClass` is gone — style the arrow through
-`[data-slot="arrow"]`, or use `offset` if you were using it to nudge the
-tooltip's position.
+`:hover-delay="0"` shows the warning as soon as the pointer reaches the
+button.
 
-`#body` is now `#content`, and it renders inside the bubble. Most `#body` call
-sites hand-copied the bubble's own classes to get them back, so the move usually
-means deleting that wrapper:
+<ComponentPreview name="Tooltip-Examples" />
 
-```vue
-<!-- before -->
-<Tooltip>
-  <template #body>
-    <div class="rounded bg-surface-gray-10 px-2 py-1 text-xs text-ink-base shadow-xl">
-      <span>Hide password</span>
-    </div>
-  </template>
-  <Button icon="eye" />
-</Tooltip>
+## Behavior
 
-<!-- after -->
-<Tooltip>
-  <template #content>
-    <span>Hide password</span>
-  </template>
-  <Button icon="eye" />
-</Tooltip>
-```
+### Trigger and content
 
-If the content genuinely brings its own surface, keep it and add `bare`.
+The default slot is the **trigger**. Tooltip is the only overlay that works
+this way, because `<Tooltip text="Delete"><Button /></Tooltip>` is what almost
+every use needs. The trigger must be an element that can take focus, or the
+tooltip does not open from the keyboard.
+
+`text` is the label. The `#content` slot replaces it with richer content, which
+shows inside the same bubble. Add `bare` when the content has its own surface,
+such as an image. The arrow shows in both cases.
+
+### Position
+
+`side` (`top`, `right`, `bottom`, `left`) picks the edge of the trigger the
+tooltip opens on, and `offset` sets the gap in pixels. Both work the same as on
+`Popover` and `HoverCard`. The tooltip flips to stay inside the screen.
+
+### Hover delay
+
+`hoverDelay` is how long the pointer must rest on the trigger before the
+tooltip opens, in milliseconds. It defaults to `500`.
+
+### Groups
+
+Wrap a row of triggers in a `TooltipProvider`. Once one tooltip in the group is
+open, moving the pointer to another trigger within `skipDelay` opens its
+tooltip with no delay. `Tooltip` and a `Button` with a `tooltip` prop use the
+surrounding provider instead of creating their own. Inside a provider, the
+provider's `hoverDelay` applies, not the tooltip's.
+
+### Disabled
+
+`disabled` turns off the tooltip and still renders the trigger. Use it when the
+label applies only in some states.
+
+## Accessibility
+
+The tooltip opens when its trigger gets keyboard focus and closes on
+<kbd>Escape</kbd>. It has the `tooltip` role, and screen readers read it as the
+trigger's description.
 
 <!-- @include: ./Tooltip.api.md -->

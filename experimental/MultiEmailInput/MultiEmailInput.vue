@@ -15,7 +15,7 @@ import {
 } from 'reka-ui'
 import Avatar from '../../src/components/Avatar/Avatar.vue'
 import ItemListRow from '../../src/components/ItemListRow/ItemListRow.vue'
-import { LoadingIndicator } from '../../src/components/LoadingIndicator'
+import { Spinner } from '../../src/components/Spinner'
 import {
   InputDescription,
   InputError,
@@ -49,7 +49,6 @@ const props = withDefaults(defineProps<MultiEmailInputProps>(), {
   loading: false,
   size: 'sm',
   placeholder: 'Add email…',
-  emptyText: 'No results',
   loadingText: 'Loading...',
   disabled: false,
   side: 'bottom',
@@ -153,18 +152,42 @@ const suggestions = computed<MultiEmailOption[]>(() =>
   props.options.filter((o) => !selectedSet.value.has(o.value.toLowerCase())),
 )
 
+const typed = computed(() => query.value.trim())
+
 // Offer an explicit "create" row when the typed value is a valid, new address.
 const showCreateOption = computed(() => {
-  const q = query.value.trim()
+  const q = typed.value
   if (!q || !validate(q)) return false
   const lc = q.toLowerCase()
   if (selectedSet.value.has(lc)) return false
   return !suggestions.value.some((o) => o.value.toLowerCase() === lc)
 })
 
+// Most typing here is a new address, so an unmatched query shows nothing
+// unless the host asked for an empty state.
 const showEmpty = computed(
-  () => !props.loading && !suggestions.value.length && !showCreateOption.value,
+  () =>
+    typed.value !== '' &&
+    Boolean(props.emptyText || slots.empty) &&
+    !props.loading &&
+    !suggestions.value.length &&
+    !showCreateOption.value,
 )
+
+// The spinner only for a typed query: the fetch primed on focus opens the
+// list once it has results, rather than flashing a spinner over nothing.
+const showLoading = computed(() => props.loading && typed.value !== '')
+
+// The list opens only when it has something to show.
+const hasContent = computed(
+  () =>
+    showLoading.value ||
+    (!props.loading &&
+      (suggestions.value.length > 0 || showCreateOption.value)) ||
+    showEmpty.value,
+)
+
+const listOpen = computed(() => open.value && hasContent.value)
 
 // Avatar has its own scale (`xs` 16px, `sm` 20px, `md` 24px), and the option
 // row is `min-h-6`/`min-h-7`/`min-h-8`/`min-h-10` plus `ItemListRow`'s own
@@ -182,8 +205,10 @@ const boxClasses = computed(() => [
   props.disabled && 'cursor-not-allowed bg-surface-gray-1',
 ])
 
+// Matches the design system's tag: 20px tall, padded 3px 4px 3px 6px, a 12px
+// avatar (8px initials, as the xs avatar's would overflow) and close icon. The padding is 1px less on each side for the border.
 const chipClasses =
-  'inline-flex items-center gap-1 rounded-4 border border-outline-gray-1 bg-surface-base px-1.5 py-0.5 text-sm text-ink-gray-7 transition-colors data-[disabled]:opacity-60 aria-[current=true]:ring-2 aria-[current=true]:ring-outline-gray-3'
+  'inline-flex h-5 max-w-full items-center gap-1 rounded-2 border border-outline-gray-1 bg-surface-base py-0.5 pl-[5px] pr-[3px] text-xs leading-tighter text-ink-gray-7 transition-colors data-[disabled]:opacity-60 aria-[current=true]:ring-2 aria-[current=true]:ring-outline-gray-3'
 
 const inputClasses = computed(() => [
   'min-w-[6rem] flex-1 border-0 bg-transparent p-0.5 text-ink-gray-8 outline-none ring-0 placeholder:text-ink-gray-4 focus:ring-0 disabled:cursor-not-allowed',
@@ -225,8 +250,32 @@ function onFocus(event: FocusEvent) {
   if (!props.options.length && !query.value) emit('update:query', '')
 }
 
+// Focus opens the list once; a click reopens it after a pick or Escape.
+function onClick() {
+  if (!props.disabled) open.value = true
+}
+
+// Reka closes on blur and Escape, and clears the query, only while its list is
+// mounted. A hidden list hears neither, so close the way reka would; otherwise
+// a fetch landing later reopens a field the user has left.
+function close() {
+  open.value = false
+  query.value = ''
+}
+
+function onBlur(event: FocusEvent) {
+  emit('blur', event)
+  if (listOpen.value) return
+  const control = (event.target as HTMLElement).closest('[data-slot="control"]')
+  // Same check as reka: a frame later, focus has settled (a chip's delete
+  // button stays inside; switching windows keeps the input active).
+  requestAnimationFrame(() => {
+    if (!control?.contains(document.activeElement)) close()
+  })
+}
+
 function onEnter() {
-  const q = query.value.trim()
+  const q = typed.value
   if (!q) return
   // Valid addresses and matching suggestions are committed by Combobox selecting
   // the highlighted row (the create row's value IS the typed address). Only when
@@ -293,7 +342,7 @@ defineSlots<MultiEmailInputSlots>()
       v-model="model"
       multiple
       ignore-filter
-      :open="open"
+      :open="listOpen"
       :disabled="disabled"
       class="relative"
       @update:open="open = $event"
@@ -328,6 +377,7 @@ defineSlots<MultiEmailInputSlots>()
               :remove-tag="() => removeAt(chip.index)"
             >
               <Avatar
+                class="size-3 [&>div]:text-[8px]"
                 :image="chip.option?.avatar"
                 :label="chip.label"
                 size="xs"
@@ -335,7 +385,7 @@ defineSlots<MultiEmailInputSlots>()
               <span class="truncate">{{ chip.label }}</span>
               <TagsInputItemDelete
                 :aria-label="`Remove ${chip.value}`"
-                class="-mr-0.5 inline-flex items-center justify-center rounded-1 p-0.5 text-ink-gray-5 opacity-70 transition hover:text-ink-gray-7 hover:opacity-100"
+                class="inline-flex shrink-0 items-center justify-center rounded-1 text-ink-gray-7 transition hover:text-ink-gray-9"
               >
                 <span class="lucide-x size-3" />
               </TagsInputItemDelete>
@@ -352,9 +402,11 @@ defineSlots<MultiEmailInputSlots>()
               :class="inputClasses"
               v-bind="inputAriaAttrs"
               @keydown.enter.prevent="onEnter"
+              @keydown.esc="close"
               @paste="onPaste"
               @focus="onFocus"
-              @blur="emit('blur', $event)"
+              @click="onClick"
+              @blur="onBlur"
             />
           </ComboboxInput>
         </TagsInputRoot>
@@ -373,11 +425,11 @@ defineSlots<MultiEmailInputSlots>()
         >
           <ComboboxViewport class="max-h-60 overflow-auto p-1">
             <div
-              v-if="loading"
+              v-if="showLoading"
               data-slot="loading"
               class="flex items-center gap-2 px-2 py-1.5 text-base text-ink-gray-5"
             >
-              <LoadingIndicator class="size-4" />
+              <Spinner class="size-4" />
               <span>{{ loadingText }}</span>
             </div>
 
@@ -386,11 +438,11 @@ defineSlots<MultiEmailInputSlots>()
                    highlighted row, and Enter commits what the user typed. -->
               <ComboboxItem
                 v-if="showCreateOption"
-                :value="query.trim()"
+                :value="typed"
                 data-slot="item"
                 data-create="true"
                 :data-size="size"
-                :text-value="query.trim()"
+                :text-value="typed"
                 :class="[itemClasses, itemRootSizeClasses(size)]"
               >
                 <ItemListRow :size="toItemListSize(size)">
@@ -404,7 +456,7 @@ defineSlots<MultiEmailInputSlots>()
                   </template>
                   <template #label>
                     <div class="min-w-0 truncate text-ink-gray-8">
-                      {{ createLabel(query.trim()) }}
+                      {{ createLabel(typed) }}
                     </div>
                   </template>
                 </ItemListRow>

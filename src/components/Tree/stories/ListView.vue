@@ -71,7 +71,7 @@ function addReport(node: TreeNode) {
       <template #item-suffix="{ node }">
         <Button
           variant="ghost"
-          icon="plus"
+          icon="lucide-plus"
           :aria-label="`Add report under ${node.label}`"
           @click.stop="addReport(node)"
         />

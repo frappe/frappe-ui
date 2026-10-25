@@ -7,7 +7,7 @@ import {
   ComboboxViewport,
 } from 'reka-ui'
 import ItemListRow from '../ItemListRow/ItemListRow.vue'
-import { LoadingIndicator } from '../LoadingIndicator'
+import { Spinner } from '../Spinner'
 import OptionIcon from '../shared/selection/OptionIcon.vue'
 import { createItemSlotRender } from '../shared/selection/createItemSlotRender'
 import { useEmptyValueMapping } from '../shared/selection/useEmptyValueMapping'
@@ -18,6 +18,7 @@ import type {
 } from './types'
 import {
   EMPTY_SELECTABLE_VALUE_PREFIX,
+  checkedItemClasses,
   isCustomOption,
   isSelectableOption,
   itemClasses,
@@ -52,6 +53,7 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   selectCustom: [item: NormalizedCustomOption, event: Event]
+  selectOption: [item: NormalizedSelectableOption, event: Event]
 }>()
 
 const ItemSlotRender = createItemSlotRender('ComboboxItemSlotRender')
@@ -102,6 +104,7 @@ function getItemTextValue(item: NormalizedItem) {
 
 function handleSelect(item: NormalizedItem, event: Event) {
   if (isCustomOption(item)) emit('selectCustom', item, event)
+  else emit('selectOption', item, event)
 }
 </script>
 
@@ -112,7 +115,7 @@ function handleSelect(item: NormalizedItem, event: Event) {
       data-slot="loading"
       class="flex items-center gap-2 px-2 py-1.5 text-base text-ink-gray-5"
     >
-      <LoadingIndicator class="size-4" />
+      <Spinner class="size-4" />
       <span>Loading...</span>
     </div>
 
@@ -166,7 +169,11 @@ function handleSelect(item: NormalizedItem, event: Event) {
                     : 'unchecked'
                   : undefined
               "
-              :class="[itemClasses, itemRootSizeClasses(size)]"
+              :class="[
+                itemClasses,
+                checkedItemClasses,
+                itemRootSizeClasses(size),
+              ]"
               @select="handleSelect(item, $event)"
             >
               <!--

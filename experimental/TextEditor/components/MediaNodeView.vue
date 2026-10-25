@@ -3,7 +3,7 @@
 import { ref, onMounted, onUnmounted, computed, h } from 'vue'
 import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3'
 import { Button } from '#components/Button'
-import { LoadingIndicator } from '#components/LoadingIndicator'
+import { Spinner } from '#components/Spinner'
 import Tooltip from '#components/Tooltip/Tooltip.vue'
 import { localFileMap } from '../extensions/image/image-extension'
 import { ErrorMessage } from '#components/ErrorMessage'
@@ -375,7 +375,7 @@ const wrapperClasses = (float: string) => [
           <div
             class="bg-gray-900/80 p-2 inset-0 leading-none rounded-1 flex flex-col items-center justify-center gap-2">
             <div class="flex items-center gap-2">
-              <LoadingIndicator class="text-gray-100 size-4" />
+              <Spinner class="text-gray-100 size-4" />
               <span class="text-gray-100">Uploading {{ isVideo ? 'video' : 'image' }}...</span>
             </div>
           </div>

@@ -20,7 +20,7 @@ onMounted(() => router.replace('/mail/inbox'))
         <TabTrigger value="archive" label="Archive" route="/mail/archive" />
       </TabList>
     </Tabs>
-    <div class="p-4 text-base text-ink-gray-7">
+    <div class="py-4 text-base text-ink-gray-7">
       Current route: <code>{{ route.path }}</code>
     </div>
   </div>

@@ -3,6 +3,7 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
+  import ExposedTable from '@/components/Docs/ExposedTable.vue'
 
   const settingsDialogProps = [
   {
@@ -190,6 +191,14 @@
   }
 ]
 
+  const settingsBodyExposed = [
+  {
+    name: 'viewportElement',
+    description: 'The element that actually scrolls. `null` before mount.',
+    type: 'HTMLElement | null'
+  }
+]
+
   const settingsRowProps = [
   {
     name: 'title',
@@ -265,6 +274,8 @@
 ### SettingsBody
 
 <SlotsTable :data="settingsBodySlots"/>
+
+<ExposedTable :data="settingsBodyExposed"/>
 
 ### SettingsRow
 

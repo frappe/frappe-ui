@@ -1,30 +1,31 @@
 # HeatmapChart
 
-Magnitude across two dimensions, a cell per pair.
+Shows a value across two dimensions, with one cell for each pair.
 
 ## Values in cells
 
-`x`, `y` and `value` name a cell's column, row and magnitude, so the data is one
-row per cell. `showDataLabels` prints values inside the cells, dropping any label
-that would collide with its neighbour.
+`x`, `y` and `value` name a cell's column, row and value, so the data has one
+row per cell. `showDataLabels` prints values inside the cells and hides any label
+that would overlap its neighbor.
 
 <ComponentPreview name="Charts-HeatmapTickets" csr="true" self-layout />
 
 ## Printing the categories
 
-`xAxis.format` and `yAxis.format` print one cut each, on the axis and in the
-tooltip. Each is given the value the row carried rather than the string the
-category reads as, so a date column can read as `Mar`.
+`xAxis.format` and `yAxis.format` format the categories of their axis, on the
+axis and in the tooltip. Each gets the raw value from the row, not the category
+string, so a date column can print as `Mar`.
 
-They change how a category prints, not what it is: two categories that print
-alike stay two cells, and `select` still names the raw value.
+They change how a category prints, not what it is. Two categories that print the
+same stay two cells, and `select` still reports the raw value.
 
 <ComponentPreview name="Charts-HeatmapSignups" csr="true" self-layout />
 
 ## Signed data
 
-Signed data reads on the `diverging` ramp, centered on zero. `min` and `max` pin
-the scale so the colors mean the same thing across reloads.
+Use the `diverging` ramp for data with positive and negative values. It is
+centered on zero. Set `min` and `max` to fix the scale, so the colors mean the
+same thing across reloads.
 
 <ComponentPreview name="Charts-HeatmapDemand" csr="true" self-layout />
 

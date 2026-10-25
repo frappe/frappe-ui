@@ -6,11 +6,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { docStore } from './docStore'
 import { LOCAL_WRITE } from './writeGate'
 import { idbStore } from './idbStore'
+import { signInAs } from '../mocks/utils'
 
 const DOCTYPE = 'User'
 
 function idbKey(name: string) {
-  return `doc:${DOCTYPE}/${name}`
+  return `doc:v2:${DOCTYPE}/${name}`
 }
 
 /** A promise whose settlement the test controls, to hold an IDB call open. */
@@ -39,6 +40,21 @@ function hasSlot(name: string) {
   return (docStore as unknown as { docs: Map<string, unknown> }).docs.has(
     `${DOCTYPE}/${name}`,
   )
+}
+
+/**
+ * Drop what the store holds in memory and keep IndexedDB, as a page load does.
+ * A user switch is always a page load, so this is how a second user meets the
+ * first user's cache.
+ */
+function simulatePageLoad() {
+  const store = docStore as unknown as Record<
+    'docs' | 'lastFetched' | 'inflight',
+    Map<string, unknown>
+  >
+  store.docs.clear()
+  store.lastFetched.clear()
+  store.inflight.clear()
 }
 
 /**
@@ -218,5 +234,57 @@ describe('docStore', () => {
 
     afterDelete.resolve(null)
     await flush()
+  })
+})
+
+describe('docStore per user', () => {
+  const record = { doctype: DOCTYPE, name: 'shared', bio: 'saved by alice' }
+
+  afterEach(async () => {
+    vi.restoreAllMocks()
+    for (const user of ['alice@example.com', 'bob@example.com', null]) {
+      signInAs(user)
+      await docStore.clearAll()
+    }
+    vi.unstubAllGlobals()
+  })
+
+  async function cachedCopy(user: string | null) {
+    simulatePageLoad()
+    signInAs(user)
+    const copy = docStore.getDoc(DOCTYPE, 'shared')
+    await flush()
+    return copy.value
+  }
+
+  it('a doc one user cached is not read by another user or a guest', async () => {
+    signInAs('alice@example.com')
+    await docStore.setDoc({ ...record }, LOCAL_WRITE)
+
+    expect(await cachedCopy('bob@example.com')).toBe(null)
+    expect(await cachedCopy('Guest')).toBe(null)
+    expect(await cachedCopy(null)).toBe(null)
+    expect(await cachedCopy('alice@example.com')).toMatchObject(record)
+  })
+
+  it("clearAll clears only the signed-in user's docs", async () => {
+    signInAs('alice@example.com')
+    await docStore.setDoc({ ...record }, LOCAL_WRITE)
+    signInAs('bob@example.com')
+    await docStore.setDoc({ ...record, bio: 'saved by bob' }, LOCAL_WRITE)
+
+    await docStore.clearAll()
+
+    expect(await cachedCopy('bob@example.com')).toBe(null)
+    expect(await cachedCopy('alice@example.com')).toMatchObject(record)
+  })
+
+  it.each([
+    ['no session', null],
+    ['a guest', 'Guest'],
+  ])('with %s, docs keep the un-namespaced key', async (_, user) => {
+    signInAs(user)
+    await docStore.setDoc({ ...record }, LOCAL_WRITE)
+    expect(await idbStore.keys()).toEqual([idbKey('shared')])
   })
 })

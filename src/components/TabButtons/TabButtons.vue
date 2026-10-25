@@ -41,7 +41,7 @@ const props = withDefaults(defineProps<TabButtonsProps>(), {
   variant: 'subtle',
   size: 'sm',
   vertical: false,
-  side: 'left',
+  edge: 'start',
   fluid: false,
 })
 
@@ -112,7 +112,7 @@ const rootClasses = computed(() => [
     variant: props.variant,
     size: props.size,
     orientation: props.vertical ? 'vertical' : 'horizontal',
-    side: props.side,
+    edge: props.edge,
   }),
 ])
 
@@ -245,7 +245,7 @@ watch(
 )
 
 const browserCardBase = computed<BrowserTabBase>(() =>
-  props.vertical ? props.side : 'default',
+  props.vertical ? props.edge : 'default',
 )
 
 // Layer that clips the pill indicator's shadow to the track's rounded box.
@@ -281,7 +281,7 @@ const indicatorStyle = computed(() => {
 function browserTabBase(checked: boolean): BrowserTabBase {
   if (props.variant !== 'browser-tab') return 'none'
   if (!props.vertical) return 'default'
-  return checked ? props.side : 'default'
+  return checked ? props.edge : 'default'
 }
 
 function hasLabel(label: TabButton['label']) {
@@ -318,6 +318,12 @@ function tabElementProps(button: (typeof resolvedButtons.value)[number]) {
 // gives a disabled `route`/`href` option a real disabled `<button>`, which
 // cannot take focus at all. With nothing left to focus the call does nothing.
 defineExpose<TabButtonsExposed>({
+  /**
+   * Moves focus to the selected tab, or to the first enabled tab when nothing
+   * is selected. That is the tab `Tab` reaches, since the group is one tab
+   * stop. Disabled tabs are skipped, so a group with no enabled tab does
+   * nothing.
+   */
   focus: (options?: FocusOptions) => {
     const track = trackRef.value
     if (!track) return

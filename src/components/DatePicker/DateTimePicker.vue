@@ -167,6 +167,10 @@ function onShellClose() {
 defineExpose<PickerExposed>({
   open: () => shellRef.value?.open(),
   close: () => shellRef.value?.close(),
+  /**
+   * Moves focus to the input. With a custom `#trigger`, it focuses the first
+   * focusable element inside it.
+   */
   focus: (options?: FocusOptions) => shellRef.value?.focus(options),
 })
 

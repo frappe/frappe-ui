@@ -15,6 +15,7 @@ export type ChartExposed = {
  * so what a caller reads is `ChartExposed`. Internal.
  */
 export type ChartExposedRefs = {
+  /** The echarts instance, once the plot has a size to initialise into. */
   chart: ComputedRef<ECharts | undefined>
 }
 
@@ -61,6 +62,8 @@ export type ChartYAxisConfig = {
   title?: string
   min?: number
   max?: number
+  /** Ticks on whole numbers only. Unset decides from the values on the axis. */
+  integer?: boolean
   echartOptions?: EchartOptionsOverride
 }
 
@@ -87,9 +90,9 @@ export type AxisChartSeriesConfig = {
   axis?: 'y' | 'y2'
   /**
    * Prints this series' values in the tooltip and its data labels, for a series
-   * whose unit differs from the others on its axis. Without one, the tooltip
-   * uses its axis' `format` and a label prints a compact number. A label on a
-   * normalized stack prints the series' share either way.
+   * whose unit differs from the others on its axis. Without one, both use its
+   * axis' `format`. A label on a normalized stack prints the series' share
+   * either way.
    */
   format?: ChartValueFormatter
   showDataLabels?: boolean
@@ -130,8 +133,7 @@ export type ReferenceLineLabelPlacement =
 export type ReferenceLine = {
   /**
    * Where the line sits: a number on a value axis, or whatever the category
-   * column holds on the category axis. A value outside the range the plot
-   * covers is not drawn; the scale follows the data, not the annotation.
+   * column holds on the category axis. A value axis stretches to reach it.
    */
   value: number | string | Date
   /**
@@ -225,12 +227,19 @@ export type DonutChartConfig = {
    * readable long before the palette runs out, so it defaults to 9.
    */
   maxSlices?: number
+  /** Slices go biggest first, or as the rows arrive. Defaults to `'size'`. */
+  order?: SliceOrder
   /**
    * Ramp slice colors are drawn from. Defaults to `'categorical'`: slices are
    * unrelated categories, not steps of one magnitude, so they read as separate
    * hues rather than as a ramp.
    */
   palette?: ChartPalette
+  /**
+   * Pins a color to a slice, keyed by its category value, or by `OTHERS_KEY`
+   * for "Others". The rest take the palette, as if none were pinned.
+   */
+  colors?: Record<string, string>
   /**
    * Prints each slice's name and share next to the ring. Off by default: the
    * legend carries the same information without the leader lines.
@@ -247,14 +256,20 @@ export type DonutChartConfig = {
 
 export type DonutVariant = 'full' | 'half'
 
-/** One arc of the ring, after sorting, "Others" grouping and color assignment. */
+export type SliceOrder = 'size' | 'rows'
+
+/** One arc of the ring, after ordering, "Others" grouping and color assignment. */
 export type DonutSlice = {
   /** Identity used by echarts actions and the legend. Unique within the ring. */
   name: string
   /** The category value as it should read; not unique. */
   label: string
   value: number
-  /** Share of the *visible* total, so hiding a slice re-percentages the rest. */
+  /**
+   * Share of the *visible* total, so hiding a slice re-percentages the rest.
+   * Rounded with the other slices' to whole points that add up to 100; a share
+   * under 1 stays as it is.
+   */
   percent: number
   color: string
   hidden: boolean
@@ -269,7 +284,11 @@ export type DonutSliceEvent = {
   /** The slice as it reads, i.e. the category value or "Others". */
   label: string
   value: number
-  /** Share of the *visible* total, so a hidden slice changes what this reads. */
+  /**
+   * Share of the *visible* total, so a hidden slice changes what this reads.
+   * The share the legend printed: whole points that add up to 100 across the
+   * slices, except a share under 1, which stays as it is.
+   */
   percent: number
   /** One row, or every grouped row when the "Others" slice was clicked. */
   rows: Record<string, any>[]
@@ -353,7 +372,10 @@ export type HeatmapChartConfig = {
    * on zero unless `min`/`max` say otherwise.
    */
   palette?: HeatmapPalette
-  /** Bottom of the color scale. Defaults to the smallest value in the data. */
+  /**
+   * Bottom of the color scale. Defaults to 0 when no value is negative, else to
+   * the smallest value in the data.
+   */
   min?: number
   /** Top of the color scale. Defaults to the largest value in the data. */
   max?: number
@@ -406,6 +428,117 @@ export type HeatmapCellEvent = {
   row: Record<string, any>
 }
 
+/** The weekday each column of a calendar heatmap starts on. */
+export type CalendarHeatmapWeekStart =
+  | 'sunday'
+  | 'monday'
+  | 'tuesday'
+  | 'wednesday'
+  | 'thursday'
+  | 'friday'
+  | 'saturday'
+
+export type CalendarHeatmapChartConfig = {
+  /** One row per day. Of two on the same day, the later one is drawn. */
+  data: Record<string, any>[]
+  /**
+   * Row key holding the day: a `Date`, or an ISO string such as `2024-03-01`.
+   * A time or offset after the date is ignored.
+   */
+  dateColumn: string
+  /** Row key holding the magnitude the day is colored by. */
+  valueColumn: string
+  title?: string
+  subtitle?: string
+  /** As on `HeatmapChartConfig`. */
+  palette?: HeatmapPalette
+  /**
+   * Bottom of the color scale. Defaults to 0 when no day is negative, else to
+   * the smallest day in the range.
+   */
+  min?: number
+  /**
+   * Top of the color scale. Defaults to the largest day in the range. Days
+   * above it draw in the deepest color, and the scale reads `≥ max`.
+   */
+  max?: number
+  /**
+   * First day drawn. Defaults to the first of the month the data starts in.
+   * Given with `end`, the range is drawn even with no data in it.
+   */
+  start?: string | Date
+  /** Last day drawn. Defaults to the last of the month the data ends in. */
+  end?: string | Date
+  /** Defaults to the dayjs locale's week start, else `'sunday'`. */
+  weekStart?: CalendarHeatmapWeekStart
+  echartOptions?: EchartOptionsOverride
+}
+
+/** One day that has data, after color assignment. */
+export type CalendarHeatmapCell = {
+  /** The day, as `YYYY-MM-DD`. */
+  date: string
+  value: number
+  color: string
+  /** The row drawn for the day. */
+  row: Record<string, any>
+}
+
+/** One day drawn, with data or without, and the mark echarts draws it as. */
+export type CalendarHeatmapDay = {
+  /** The day, as `YYYY-MM-DD`. */
+  date: string
+  /** The band the day is drawn in. */
+  band: number
+  /** The day's data, or none for a day with no row. */
+  cell?: CalendarHeatmapCell
+  /** The series that draws the day: its band's data series, or its empty one. */
+  seriesIndex: number
+  /** The day's place in that series. */
+  dataIndex: number
+}
+
+/** One row of weeks. A range longer than a year draws one per twelve months. */
+export type CalendarHeatmapBand = {
+  /** First day drawn in the band, as `YYYY-MM-DD`. */
+  start: string
+  /** Last day drawn in the band, as `YYYY-MM-DD`. */
+  end: string
+  /**
+   * First and last day the band lays out. Past a year, a whole twelve months
+   * from the range's first month, so months line up from band to band.
+   */
+  span: [string, string]
+  /** Week columns the band spans. */
+  weeks: number
+  /** The band's days that have data, in date order. */
+  cells: CalendarHeatmapCell[]
+}
+
+/** The calendar as the plot, the tooltip and the ramp scale all read it. */
+export type CalendarHeatmapGrid = {
+  /** None when there is nothing to draw. */
+  bands: CalendarHeatmapBand[]
+  /** Every day that has data, in date order. */
+  cells: CalendarHeatmapCell[]
+  /** Every day drawn, in date order. */
+  days: CalendarHeatmapDay[]
+  /** Bottom of the color scale, config or data. */
+  min: number
+  /** Top of the color scale, config or data. */
+  max: number
+  /** The ramp the scale runs along, low end first. */
+  stops: string[]
+}
+
+export type CalendarHeatmapCellEvent = {
+  /** The day, as `YYYY-MM-DD`. */
+  date: string
+  value: number
+  /** The row drawn for the day. */
+  row: Record<string, any>
+}
+
 export type NumberCardConfig = {
   title: string
   /** Null renders the empty state; a KPI with no number is not a zero. */
@@ -432,6 +565,19 @@ export type NumberCardConfig = {
   dir?: ChartDir
   /** A trend across the bottom of the card: shape only, no axes to read against. */
   sparkline?: NumberCardSparkline
+  /** How far the reading has come towards a whole, drawn as a bar under it and its change. */
+  progress?: NumberCardProgress
+}
+
+export type NumberCardProgress = {
+  /**
+   * Percent of the whole, as `Progress` takes it. The caller works it out: a
+   * reading against its target, or a percent reading as it stands. Past 100 the
+   * bar fills and a gap marks where 100 falls.
+   */
+  value: number
+  /** Overrides the sequential-palette blue the bar fills in. */
+  color?: string
 }
 
 export type NumberCardSparkline = {
@@ -593,6 +739,17 @@ export type ChartLegendItem = {
   hidden: boolean
   /** Muted note after the label, e.g. a donut slice's share of the total. */
   hint?: string
+  /**
+   * What the series is worth across the chart, e.g. the sum of its values'
+   * magnitudes, which is what `maxSeries` caps by. Ranks the entries when
+   * they do not fit on one row; left out, the entry keeps its given place.
+   */
+  weight?: number
+  /**
+   * The series' value as the chart formats it, printed in the "+N more" list,
+   * e.g. a donut slice's measure. Left out, the row prints no number.
+   */
+  formattedValue?: string
 }
 
 export type ChartTooltipItem = {
@@ -685,7 +842,12 @@ export type ChartXAxisOptions = {
   type?: 'category' | 'time' | 'value'
   /** Label granularity on a time axis. Inferred from the spacing of the data. */
   timeGrain?: TimeGrain
-  /** Prints each category label. Takes whatever the column holds. */
+  /**
+   * Prints each category label. Takes whatever the column holds.
+   *
+   * On a time axis it prints the date where a value is read, such as the
+   * tooltip, and leaves the tick labels alone: they keep their levels.
+   */
   format?: ChartCategoryFormatter
   /** Escape hatch: deep-merged into this axis' echarts option. */
   echartOptions?: EchartOptionsOverride
@@ -703,6 +865,12 @@ export type ChartValueAxisOptions = {
   max?: number
   /** Prints each tick label, and every value this axis carries elsewhere. */
   format?: ChartValueFormatter
+  /**
+   * Puts the ticks on whole numbers only, for a count that has no half. Left
+   * out, it is on when every value the axis plots is a whole number, which
+   * only changes a scale small enough for echarts to split a unit.
+   */
+  integer?: boolean
   /**
    * Escape hatch: deep-merged into this axis' echarts option. On a
    * `stacked: 'normalized'` chart the percent formatter wins over an
@@ -733,9 +901,9 @@ export type SeriesStyle = {
   type?: ChartMark
   /**
    * Prints this series' values in the tooltip and its data labels, for a series
-   * whose unit differs from the others on its axis. Without one, the tooltip
-   * uses its axis' `format` and a label prints a compact number. A label on a
-   * normalized stack prints the series' share either way.
+   * whose unit differs from the others on its axis. Without one, both use its
+   * axis' `format`. A label on a normalized stack prints the series' share
+   * either way.
    */
   format?: ChartValueFormatter
   /** Prints this series' value beside each of its marks. */
@@ -905,6 +1073,13 @@ export type DonutChartProps = ChartBaseProps & {
    */
   maxSlices?: number
   /**
+   * The order the slices go round the ring. `'size'` puts the biggest first.
+   * `'rows'` keeps the rows' order, for categories that already have one, such
+   * as ageing buckets or months. Either way `maxSlices` keeps the largest, and
+   * "Others" comes last. Defaults to `'size'`.
+   */
+  order?: SliceOrder
+  /**
    * Slices the legend has switched off, by name. Bind it with
    * `v-model:hiddenSlices` to drive the legend from the app. Left unbound, the
    * legend owns it.
@@ -924,8 +1099,55 @@ export type DonutChartProps = ChartBaseProps & {
   format?: ChartValueFormatter
   /** Defaults to `'categorical'`: slices are unrelated categories, not steps. */
   palette?: ChartPalette
+  /**
+   * Pins a color to a slice, keyed by its category value, e.g. `{ Overdue:
+   * 'var(--ink-red-5)' }`. `OTHERS_KEY` pins "Others". A category grouped into
+   * "Others" takes that slice's color. The other slices keep the palette color
+   * they would have had.
+   */
+  colors?: Record<string, string>
   /** Escape hatch: deep-merged into the echarts option the props built. */
   echartOptions?: EchartOptionsOverride
+}
+
+export type PercentageBarChartProps = ChartBaseProps & {
+  /** The rows to draw. One row is one slice, before the "Others" grouping. */
+  data: Record<string, any>[]
+  /** Row key holding the slice name. */
+  category: string
+  /** Row key holding the slice size. */
+  value: string
+  /**
+   * How many slices the bar holds, "Others" included. Past that the bar keeps
+   * the largest `maxSlices - 1` and sums the tail into a single "Others" slice,
+   * named `OTHERS_KEY`. Defaults to 9, as on `DonutChart`, so a breakdown cuts
+   * into the same slices on either chart.
+   */
+  maxSlices?: number
+  /**
+   * The order the slices go along the bar. `'size'` puts the biggest first.
+   * `'rows'` keeps the rows' order, for categories that already have one, such
+   * as ageing buckets or months. Either way `maxSlices` keeps the largest, and
+   * "Others" comes last. Defaults to `'size'`, as on `DonutChart`.
+   */
+  order?: SliceOrder
+  /**
+   * Slices the legend has switched off, by name. Bind it with
+   * `v-model:hiddenSlices` to drive the legend from the app. Left unbound, the
+   * legend owns it.
+   */
+  hiddenSlices?: string[]
+  /** Prints the tooltip and each slice's accessible name. */
+  format?: ChartValueFormatter
+  /** Defaults to `'categorical'`: slices are unrelated categories, not steps. */
+  palette?: ChartPalette
+  /**
+   * Pins a color to a slice, keyed by its category value, e.g. `{ Overdue:
+   * 'var(--ink-red-5)' }`. `OTHERS_KEY` pins "Others". A category grouped into
+   * "Others" takes that slice's color. The other slices keep the palette color
+   * they would have had.
+   */
+  colors?: Record<string, string>
 }
 
 export type FunnelChartProps = ChartBaseProps & {
@@ -950,7 +1172,10 @@ export type HeatmapChartProps = ChartBaseProps & {
   y: string
   /** Row key holding the magnitude the cell is colored by. */
   value: string
-  /** Bottom of the color scale. Defaults to the smallest value in the data. */
+  /**
+   * Bottom of the color scale. Defaults to 0 when no value is negative, else to
+   * the smallest value in the data.
+   */
   min?: number
   /** Top of the color scale. Defaults to the largest value in the data. */
   max?: number
@@ -968,6 +1193,50 @@ export type HeatmapChartProps = ChartBaseProps & {
   /**
    * Ramp cells are colored from. Defaults to `'sequential'`, which is what a
    * magnitude reads as; `'diverging'` is for signed data and centers on zero.
+   */
+  palette?: HeatmapPalette
+  /** Escape hatch: deep-merged into the echarts option the props built. */
+  echartOptions?: EchartOptionsOverride
+}
+
+export type CalendarHeatmapChartProps = ChartBaseProps & {
+  /** The rows to plot, one per day. Of two on the same day, the later one is drawn. */
+  data: Record<string, any>[]
+  /**
+   * Row key holding the day: a `Date`, or an ISO string such as `2024-03-01`.
+   * A time or offset after the date is ignored.
+   */
+  date: string
+  /** Row key holding the magnitude the day is colored by. */
+  value: string
+  /**
+   * First day drawn, as a `Date` or an ISO string. Defaults to the first of the
+   * month the data starts in. Given with `end`, the range is drawn even with no
+   * data in it.
+   */
+  start?: string | Date
+  /** Last day drawn. Defaults to the last of the month the data ends in. */
+  end?: string | Date
+  /**
+   * The weekday at the top of each column. Defaults to the week start of the
+   * dayjs locale, and to `'sunday'` when the locale names none.
+   */
+  weekStart?: CalendarHeatmapWeekStart
+  /**
+   * Bottom of the color scale. Defaults to 0 when no day is negative, else to
+   * the smallest day in the range.
+   */
+  min?: number
+  /**
+   * Top of the color scale. Defaults to the largest day in the range. Days
+   * above it draw in the deepest color, and the scale reads `≥ max`.
+   */
+  max?: number
+  /** Prints every number the calendar shows: the scale ends and the tooltip. */
+  format?: ChartValueFormatter
+  /**
+   * Ramp days are colored from. Defaults to `'sequential'`; `'diverging'` is
+   * for signed data and centers on zero.
    */
   palette?: HeatmapPalette
   /** Escape hatch: deep-merged into the echarts option the props built. */
@@ -1080,6 +1349,8 @@ export type NumberCardProps = Omit<ChartBaseProps, 'subtitle'> &
     deltaFormat?: ChartValueFormatter
     /** A trend across the bottom of the card: shape only, no axes to read against. */
     sparkline?: NumberCardSparkline
+    /** How far the reading has come towards a whole, drawn as a bar under it and its change. */
+    progress?: NumberCardProgress
   }
 
 // The chrome, i.e. everything around the plot. A chart an app draws itself
@@ -1116,12 +1387,20 @@ export type ChartContainerProps = {
   error?: string | null
   /** Draws the empty state: there is data, and it plots to nothing. */
   empty?: boolean
+  /**
+   * Centres the plot and its legend in the height the card has to spare, for
+   * a plot as tall as its content. Otherwise the plot takes that height.
+   */
+  centered?: boolean
   /** Forces layout direction; defaults to document.documentElement.dir */
   dir?: ChartDir
 }
 
 export type ChartLegendProps = {
-  /** One entry per series, in the order they are drawn. */
+  /**
+   * One entry per series, in the order they are drawn. Entries that do not fit
+   * on one row go behind "+N more", ranked by `weight`.
+   */
   items: ChartLegendItem[]
 }
 
@@ -1245,6 +1524,19 @@ export type DonutChartSlots = ChartActionsSlot &
     tooltip?: (props: ChartTooltipSlotProps) => unknown
   }
 
+/** The ring's events: the bar cuts the same slices. */
+export type PercentageBarChartEmits = DonutChartEmits
+
+export type PercentageBarChartSlots = ChartActionsSlot &
+  ChartTitleSuffixSlot &
+  ChartStateSlots & {
+    /**
+     * Replaces the tooltip body. `items` holds the hovered slice alone. A named
+     * slice carries one row, and the "Others" slice every row it collapsed.
+     */
+    tooltip?: (props: ChartTooltipSlotProps) => unknown
+  }
+
 export type FunnelChartEmits = {
   /**
    * A stage was selected, by click or by Enter on the keyboard cursor. Carries
@@ -1279,6 +1571,24 @@ export type HeatmapChartSlots = ChartActionsSlot &
     /**
      * Replaces the tooltip body. `items` holds the hovered cell alone, and
      * `rows` the row behind it, so a body can read a column the grid never drew.
+     */
+    tooltip?: (props: ChartTooltipSlotProps) => unknown
+  }
+
+export type CalendarHeatmapChartEmits = {
+  /**
+   * A day with data was selected, by click or by Enter on the keyboard cursor.
+   * Carries the day, its value and the row behind it.
+   */
+  select: [event: CalendarHeatmapCellEvent]
+}
+
+export type CalendarHeatmapChartSlots = ChartActionsSlot &
+  ChartTitleSuffixSlot &
+  ChartStateSlots & {
+    /**
+     * Replaces the tooltip body. `items` holds the hovered day alone, and
+     * `rows` the row behind it. A day with no row reads `No data`, with no row.
      */
     tooltip?: (props: ChartTooltipSlotProps) => unknown
   }

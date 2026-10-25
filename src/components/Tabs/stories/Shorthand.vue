@@ -34,7 +34,9 @@ const tabs = [
       class="rounded-4 border p-2"
     >
       <template #tab-panel="{ tab: t }">
-        <div class="p-4 text-base text-ink-gray-7">{{ t.data?.content }}</div>
+        <div class="px-2 py-4 text-base text-ink-gray-7">
+          {{ t.data?.content }}
+        </div>
       </template>
     </Tabs>
     <Switch v-model="showTasks" label="Show the Tasks tab" />

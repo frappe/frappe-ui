@@ -139,8 +139,11 @@ function setOpen(value: boolean) {
 }
 
 defineExpose({
+  /** Opens the popover. Does nothing when it is already open. */
   open,
+  /** Closes the popover. Does nothing when it is already closed. */
   close,
+  /** The content element. `null` while the popover is closed. */
   get contentEl() {
     return getContentEl()
   },

@@ -36,6 +36,7 @@ import OptionIcon from '../shared/selection/OptionIcon.vue'
 import PopoverPanel from '../shared/popover/PopoverPanel.vue'
 import {
   EMPTY_VALUE_PREFIX,
+  checkedItemClasses,
   inputFontSizeClasses,
   itemClasses,
   itemRootSizeClasses,
@@ -215,9 +216,8 @@ const internalModel = computed<SelectOptionValue | undefined>({
 
 const selectedOption = computed(() => {
   return (
-    selectOptions.value.find(
-      (option) => option.value === currentValue.value,
-    ) ?? null
+    selectOptions.value.find((option) => option.value === currentValue.value) ??
+    null
   )
 })
 
@@ -303,7 +303,12 @@ function getOptionKey(option: SelectNormalizedOption, index: number) {
 
 defineSlots<SelectSlots>()
 
-const exposed: SelectionExposed = { clear, focus }
+const exposed: SelectionExposed = {
+  /** Clears the selection and sets the model to `null`. */
+  clear,
+  /** Moves focus to the trigger. */
+  focus,
+}
 defineExpose(exposed)
 </script>
 
@@ -462,7 +467,7 @@ defineExpose(exposed)
                   :disabled="internalOption.option.disabled"
                   :value="internalOption.internalValue"
                   data-slot="item"
-                  :class="[itemClasses, itemRootClasses]"
+                  :class="[itemClasses, checkedItemClasses, itemRootClasses]"
                 >
                   <!--
                   Full-row takeover precedence:

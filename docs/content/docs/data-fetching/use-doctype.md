@@ -1,8 +1,8 @@
 # useDoctype
 
-`useDoctype` groups the write operations for a DocType — insert, delete, set a
-field, run a method — without fetching or holding any document itself. Use it
-alongside [`useDoc`](./use-doc.md) or [`useList`](./use-list.md) for reads.
+`useDoctype` creates, saves, deletes and runs methods on documents of one
+DocType, without fetching any. Use it next to [`useDoc`](./use-doc.md) or
+[`useList`](./use-list.md), which do the reading.
 
 ## Basic example
 
@@ -23,10 +23,13 @@ async function close(name) {
 </script>
 ```
 
-Every submit runs independently — closing two documents at once, or one document
-twice, does not cancel either request.
+Each submit sends its own request. Closing two documents at once, or one
+document twice, does not cancel either request.
 
-## Running a method
+## Run a method
+
+`runDocMethod` calls a method on one document. `runMethod` calls a method on
+the DocType itself:
 
 ```vue
 <script setup>
@@ -42,8 +45,7 @@ async function resetPassword(name) {
   })
 }
 
-async function ping() {
-  // a method on the DocType itself, not one document
+async function loadOnlineUsers() {
   await user.runMethod.submit({ method: 'get_online_users' })
 }
 </script>
@@ -51,41 +53,43 @@ async function ping() {
 
 ## Options
 
-`useDoctype(doctype, options?)` — the DocType is a positional argument, not a
-field on the options object.
+The DocType is the first argument: `useDoctype(doctype, options?)`.
 
-- `doctype` — the DocType every member acts on.
-- `options.baseUrl` — prefix prepended to the generated request URLs.
+| Name              | Type     | Default  | Description                        |
+| ----------------- | -------- | -------- | ---------------------------------- |
+| `doctype`         | `string` | required | The DocType every member acts on.  |
+| `options.baseUrl` | `string` | `''`     | A prefix for every request URL.    |
 
 ## Return value
 
-Every member below shares the same shape: `data`, `error`, `loading` (`true`
-while any submit for that member is in flight), `submit(params)`, and
-`isLoading(...)` reporting on one target so a list can show a spinner on the row
-it belongs to.
+| Name           | Type         | Description                                                                                                  |
+| -------------- | ------------ | ------------------------------------------------------------------------------------------------------------ |
+| `insert`       | write member | `insert.submit(values)` creates a document and resolves with it. `insert.isLoading()` takes no argument.     |
+| `setValue`     | write member | `setValue.submit({ name, ...values })` saves fields of one document. `setValue.isLoading(name)` checks one document. |
+| `delete`       | write member | `delete.submit({ name })` deletes one document. `delete.isLoading(name)` checks one document.                |
+| `runDocMethod` | write member | `runDocMethod.submit({ name, method, params?, validate? })` calls a whitelisted method on one document. `runDocMethod.isLoading(name, method)` checks one pair. |
+| `runMethod`    | write member | `runMethod.submit({ method, params?, validate? })` calls a whitelisted method on the DocType. `runMethod.isLoading(method)` checks one method. |
 
-- `insert` — `insert.submit(values)` creates a document. `insert.isLoading()`
-  takes no argument — a new document has no name yet to key on.
-- `delete` — `delete.submit({ name })` deletes a document.
-  `delete.isLoading(name)` reports on one document.
-- `setValue` — `setValue.submit({ name, ...values })` updates one or more fields
-  on a document. `setValue.isLoading(name)` reports on one document.
-- `runDocMethod` — `runDocMethod.submit({ name, method, params?, validate? })`
-  calls a whitelisted method on one document. `validate` runs first and, if it
-  returns a string, rejects the submit with that message instead of sending a
-  request. `runDocMethod.isLoading(name, method)` reports on one document/method
-  pair.
-- `runMethod` — `runMethod.submit({ method, params?, validate? })` calls a
-  whitelisted method on the DocType itself, not a specific document.
-  `runMethod.isLoading(method)` reports on one method.
+Every write member has these members:
 
-`data` and `error` on each member belong to that member's most recently
-_started_ submit, not the one that settles last — a slower, older submit still
-resolves or rejects its own caller, but does not overwrite a newer submit's
-`data`/`error`.
+| Name              | Type             | Description                                                                         |
+| ----------------- | ---------------- | ----------------------------------------------------------------------------------- |
+| `data`            | `T \| null`      | The response of the submit that started last.                                       |
+| `error`           | `Error \| null`  | The error of the submit that started last.                                          |
+| `loading`         | `boolean`        | `true` while any submit of this member is in flight.                                |
+| `submit(params)`  | `(params) => Promise` | Sends the request. Resolves with the response, or rejects with the error.      |
+| `isLoading(...)`  | `(...) => boolean` | `true` while a submit for one target is in flight, so a list can show it on one row. |
+
+An older submit that settles after a newer one still resolves or rejects for
+its own caller, but does not change `data` or `error`.
+
+`setValue` and `delete` also update the document in every `useDoc` and
+`useList` that shows it.
 
 ## Errors
 
 `submit()` rejects with a
-[`FrappeResponseError`](../other/utilities.md#frapperesponseerror) on a Frappe
-error response, or with the `validate` message on `runDocMethod`/ `runMethod`.
+[`FrappeResponseError`](../other/utilities.md#frapperesponseerror) when the
+server returns an error. On `runDocMethod` and `runMethod`, a `validate`
+function runs first. If it returns a string, `submit()` rejects with that
+message and sends no request.

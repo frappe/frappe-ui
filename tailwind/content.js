@@ -49,6 +49,7 @@ export const content = [
   glob('experimental/Accordion/**/*.{vue,js,ts,jsx,tsx}'),
   glob('experimental/FloatingWindow/**/*.{vue,js,ts,jsx,tsx}'),
   glob('experimental/MultiEmailInput/**/*.{vue,js,ts,jsx,tsx}'),
+  glob('experimental/Stepper/**/*.{vue,js,ts,jsx,tsx}'),
   glob('experimental/Calendar/**/*.{vue,js,ts,jsx,tsx}'),
   glob('experimental/Charts/**/*.{vue,js,ts,jsx,tsx}'),
   glob('experimental/CommandPalette/**/*.{vue,js,ts,jsx,tsx}'),

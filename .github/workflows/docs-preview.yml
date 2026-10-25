@@ -19,7 +19,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
         with:
-          fetch-depth: 0
           persist-credentials: false
 
       - name: Setup Node
@@ -30,6 +29,9 @@ jobs:
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
+        env:
+          # This job never runs Cypress, so skip its binary download.
+          CYPRESS_INSTALL_BINARY: 0
 
       - name: Build preview
         run: >-

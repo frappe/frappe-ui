@@ -38,7 +38,8 @@ function rootDirRoots(rootDir: string): SourceRootMap[] {
 }
 
 function resolveRoots(options: ColocatedComponentDocsOptions): SourceRootMap[] {
-  if (options.sourceRoots && options.sourceRoots.length) return options.sourceRoots
+  if (options.sourceRoots && options.sourceRoots.length)
+    return options.sourceRoots
   if (options.rootDir) return rootDirRoots(options.rootDir)
   // No legacy in-repo fallback: warn rather than resolve into nonexistent paths.
   console.warn(
@@ -144,7 +145,7 @@ export function syncColocatedComponentDocs(
     }
 
     // Remove orphan proxies — only those we created (header check), so
-    // hand-written legacy pages like badge.md, legacy.md stay untouched.
+    // hand-written pages in this directory stay untouched.
     if (fs.existsSync(proxyDir)) {
       for (const name of fs.readdirSync(proxyDir)) {
         const filePath = path.join(proxyDir, name)

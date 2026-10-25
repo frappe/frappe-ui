@@ -1,14 +1,10 @@
 <script setup lang="ts">
 import { state } from '../../state'
 import { useData, useRoute, withBase } from 'vitepress'
+import { ScrollArea } from 'frappe-ui'
+import Brand from '../Brand.vue'
+import Search from './Search.vue'
 import { getSidebarList, isActiveLink } from './sidebarList'
-
-import {
-  ScrollAreaRoot,
-  ScrollAreaViewport,
-  ScrollAreaThumb,
-  ScrollAreaScrollbar,
-} from 'reka-ui'
 
 const { site, theme } = useData()
 // Data-driven sections: prefer `sections`, fall back to `sidebar`.
@@ -22,50 +18,54 @@ const isActive = (link: string) =>
 </script>
 
 <template>
+  <!-- Styled like frappe-ui's own Sidebar family: the `surface-sidebar` rail,
+       SidebarLabel headings, and SidebarItem rows with the elevated active row.
+       Plain markup rather than the components themselves — these are static
+       <a> links, not router-driven items. -->
   <aside
-    class="flex h-[calc(100vh-3rem)] w-full min-w-fit flex-col sticky top-12"
+    class="flex h-screen w-full flex-col sticky top-0 border-r border-outline-gray-1 bg-surface-sidebar"
   >
-    <ScrollAreaRoot
-      class="relative overflow-hidden"
-      style="--scrollbar-size: 10px"
-      :scroll-hide-delay="0"
-    >
-      <ScrollAreaViewport class="h-full w-full">
-        <!-- px-3 + the items' own pl-2 lands the labels on the navbar logo's
-             left edge (header px-5), so the two share one left rail. -->
-        <nav class="flex flex-col gap-7 px-3 pb-10 pt-2">
-          <div v-for="section in list" :key="section.text">
-            <div class="px-2 text-sm flex items-center h-7 text-ink-gray-5">
-              {{ section.text }}
-            </div>
+    <!-- The brand is the sidebar's header, the way an app's SidebarHeader is.
+         48px tall so it lines up with the content column's PageHeader. -->
+    <div class="flex h-12 shrink-0 items-center px-3">
+      <Brand />
+    </div>
 
-            <div class="flex flex-col gap-0.5">
-              <a
-                v-for="item in section.items"
-                :key="item.text"
-                :href="withBase(item.link)"
-                class="pl-2 flex h-7 items-center rounded-4 text-sm transition-colors"
-                :class="
-                  isActive(item.link)
-                    ? 'bg-surface-gray-2 text-ink-gray-8'
-                    : 'text-ink-gray-6 hover:bg-surface-gray-1 hover:text-ink-gray-8'
-                "
-              >
-                {{ item.text }}
-              </a>
-            </div>
+    <!-- Search is navigation, so it lives in the rail with the links. Same
+         px-3 gutter as the rows below; `outline` gives it a border so the
+         gray field still reads as a field on the gray rail. -->
+    <div class="shrink-0 px-3 pt-1 pb-2">
+      <Search variant="outline" placeholder="Search" class="flex w-full" />
+    </div>
+
+    <!-- Padding lives on the viewport so the active row's shadow has room and
+         overflow-hidden doesn't clip it. The brand, the search field and the
+         row pills all sit on the same px-3 gutter. -->
+    <ScrollArea class="min-h-0 flex-1" viewport-class="px-3 pt-2 pb-10">
+      <nav class="flex flex-col gap-5">
+        <div v-for="section in list" :key="section.text">
+          <div class="flex h-7 items-center pl-2 text-base text-ink-gray-5">
+            {{ section.text }}
           </div>
-        </nav>
-      </ScrollAreaViewport>
 
-      <ScrollAreaScrollbar
-        class="z-20 flex touch-none select-none p-0.5 transition-colors duration-[160ms] ease-out data-[orientation=vertical]:w-2.5"
-        orientation="vertical"
-      >
-        <ScrollAreaThumb
-          class="relative flex-1 rounded-[10px] bg-surface-gray-3 before:absolute before:left-1/2 before:top-1/2 before:h-full before:min-h-[44px] before:w-full before:min-w-[44px] before:-translate-x-1/2 before:-translate-y-1/2 before:content-['']"
-        />
-      </ScrollAreaScrollbar>
-    </ScrollAreaRoot>
+          <div class="flex flex-col gap-0.5">
+            <a
+              v-for="item in section.items"
+              :key="item.text"
+              :href="withBase(item.link)"
+              :aria-current="isActive(item.link) ? 'page' : undefined"
+              class="flex h-7 items-center rounded-4 pl-2 text-sm transition"
+              :class="
+                isActive(item.link)
+                  ? 'bg-surface-elevation-3 text-ink-gray-8 shadow-sm'
+                  : 'text-ink-gray-6 hover:bg-surface-gray-2'
+              "
+            >
+              {{ item.text }}
+            </a>
+          </div>
+        </div>
+      </nav>
+    </ScrollArea>
   </aside>
 </template>

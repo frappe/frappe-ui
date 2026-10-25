@@ -131,7 +131,10 @@ describe('BarChart', () => {
       it('draws no mark and takes no legend entry', () => {
         mountWithExtra()
         bars().should('have.length', data.length * 2)
-        cy.get('[data-slot="chart-legend"] button').should('have.length', 2)
+        cy.get('[data-slot="chart-legend"] [aria-pressed]').should(
+          'have.length',
+          2,
+        )
         cy.get('[data-slot="chart-legend"]').should(
           'not.contain.text',
           'Orders',
@@ -152,7 +155,10 @@ describe('BarChart', () => {
   describe('legend', () => {
     it('lists one entry per series, named as the chrome names them', () => {
       mountChart()
-      cy.get('[data-slot="chart-legend"] button').should('have.length', 2)
+      cy.get('[data-slot="chart-legend"] [aria-pressed]').should(
+        'have.length',
+        2,
+      )
       cy.get('[aria-label="Hide Sales"]').should(
         'have.attr',
         'aria-pressed',
@@ -215,7 +221,10 @@ describe('BarChart', () => {
 
     it('keeps a line series in the legend, and hides it like any other', () => {
       mountChart({ seriesConfig: { refunds: { type: 'line' } } })
-      cy.get('[data-slot="chart-legend"] button').should('have.length', 2)
+      cy.get('[data-slot="chart-legend"] [aria-pressed]').should(
+        'have.length',
+        2,
+      )
       cy.get('[aria-label="Hide Refunds"]').click()
       lines().should('not.exist')
       bars().should('have.length', data.length)
@@ -240,6 +249,25 @@ describe('BarChart', () => {
       })
       bars().should('have.length', data.length * 2)
       lines().should('not.exist')
+    })
+  })
+
+  describe('value axis', () => {
+    const ticks = () => cy.get('[data-slot="chart-plot"] svg text')
+    const small = [
+      { month: 'Jan', tickets: 1 },
+      { month: 'Feb', tickets: 2 },
+    ]
+
+    it('ticks a small count in whole numbers', () => {
+      mountChart({ data: small, y: 'tickets' })
+      ticks().should('contain.text', '2')
+      ticks().should('not.contain.text', '.5')
+    })
+
+    it('splits a unit when told the axis is not a count', () => {
+      mountChart({ data: small, y: 'tickets', yAxis: { integer: false } })
+      ticks().should('contain.text', '.5')
     })
   })
 
@@ -273,6 +301,75 @@ describe('BarChart', () => {
     })
   })
 
+  describe('data labels', () => {
+    const plotText = () => cy.get('[data-slot="chart-plot"] svg text')
+
+    /** Every label and tick inside the canvas, on the side the bars grow to. */
+    function insideCanvas(side: 'top' | 'right') {
+      cy.get('[data-slot="chart-plot"] svg').then(($svg) => {
+        const canvas = $svg[0].getBoundingClientRect()
+        plotText().each(($text) => {
+          const box = $text[0].getBoundingClientRect()
+          if (side === 'top') expect(box.top).to.be.at.least(canvas.top)
+          else expect(box.right).to.be.at.most(canvas.right)
+        })
+      })
+    }
+
+    /** The tick at 20 and the label on the bar that reaches it, both drawn. */
+    const topLabelDrawn = () =>
+      plotText()
+        .filter((_, el) => el.textContent === '20')
+        .should('have.length', 2)
+
+    // Sales top out at 20, which is where echarts ends the scale.
+    const labelled = {
+      y: 'sales',
+      seriesConfig: { sales: { showDataLabels: true } },
+    }
+
+    it('raises the axis a tick for a label at the top of the scale', () => {
+      mountChart(labelled)
+      bars().should('have.length', data.length)
+      plotText().should('contain.text', '25')
+      topLabelDrawn()
+      insideCanvas('top')
+    })
+
+    it('leaves the axis alone when the labels already fit', () => {
+      mountChart({
+        ...labelled,
+        data: data.map((row) => ({ ...row, sales: row.sales - 7 })),
+      })
+      bars().should('have.length', data.length)
+      plotText().should('contain.text', '15').and('not.contain.text', '20')
+    })
+
+    it('raises the value axis of a row chart the same way', () => {
+      mountChart({ ...labelled, horizontal: true })
+      bars().should('have.length', data.length)
+      plotText().should('contain.text', '25')
+      topLabelDrawn()
+      insideCanvas('right')
+    })
+
+    it('makes room for a label at the top of the second axis', () => {
+      mountChart({
+        y: 'sales',
+        y2: 'refunds',
+        seriesConfig: { refunds: { showDataLabels: true } },
+      })
+      bars().should('have.length', data.length * 2)
+      insideCanvas('top')
+    })
+
+    it('keeps an axis end the caller fixed', () => {
+      mountChart({ ...labelled, yAxis: { max: 20 } })
+      bars().should('have.length', data.length)
+      plotText().should('not.contain.text', '25')
+    })
+  })
+
   describe('maxSeries', () => {
     const byRegion = [
       { month: 'Jan', region: 'East', amount: 50 },
@@ -288,7 +385,7 @@ describe('BarChart', () => {
         splitBy: 'region',
         maxSeries: 3,
       })
-      cy.get('[data-slot="chart-legend"] button')
+      cy.get('[data-slot="chart-legend"] [aria-pressed]')
         .should('have.length', 3)
         .last()
         .should('contain.text', 'Others')
@@ -334,14 +431,14 @@ describe('BarChart', () => {
         'Target',
       )
       // An annotation, not a series: the legend still lists the two columns.
-      cy.get('[data-slot="chart-legend"] button').should('have.length', 2)
+      cy.get('[data-slot="chart-legend"] [aria-pressed]').should(
+        'have.length',
+        2,
+      )
       bars().should('have.length', data.length * 2)
     })
 
     it('keeps the rule while a legend toggle hides a series', () => {
-      // Inside refunds' own range, so the rule is still on the scale once the
-      // taller series goes: a line off the end of the axis is not drawn, which
-      // would pass this test for the wrong reason.
       mountChart({ referenceLines: [{ value: 5, label: 'Target' }] })
       cy.get('[aria-label="Hide Sales"]').click()
       bars().should('have.length', data.length)
@@ -349,6 +446,63 @@ describe('BarChart', () => {
         'contain.text',
         'Target',
       )
+    })
+
+    it('stretches the value axis to a target above the data', () => {
+      mountChart({ referenceLines: [{ value: 300, label: 'Goal' }] })
+      cy.get('[data-slot="chart-plot"] svg text')
+        .should('contain.text', 'Goal')
+        .and('contain.text', '300')
+    })
+
+    /** The label's box, wholly inside the canvas echarts draws on. */
+    function labelInsideCanvas(label: string) {
+      cy.get('[data-slot="chart-plot"] svg').then(($svg) => {
+        const canvas = $svg[0].getBoundingClientRect()
+        const text = [...$svg[0].querySelectorAll('text')].find(
+          (el) => el.textContent === label,
+        )
+        const box = text!.getBoundingClientRect()
+        expect(box.top).to.be.at.least(canvas.top)
+        expect(box.bottom).to.be.at.most(canvas.bottom)
+        expect(box.left).to.be.at.least(canvas.left)
+        expect(box.right).to.be.at.most(canvas.right)
+      })
+    }
+
+    // The scale ends at 25, so a goal there is drawn on the top edge of the plot.
+    it('keeps the label of a rule at the top of the scale on the canvas', () => {
+      mountChart({ referenceLines: [{ value: 25, label: 'Goal' }] })
+      cy.get('[data-slot="chart-plot"] svg text').should('contain.text', 'Goal')
+      labelInsideCanvas('Goal')
+    })
+
+    // 0 to 30 ticks every 5. Raised to 35, echarts would pick a step of 10 for
+    // the new span and leave 35 hanging off a 30 tick.
+    it('keeps the tick step when the axis goes up for a label', () => {
+      mountChart({ referenceLines: [{ value: 30, label: 'Goal' }] })
+      cy.get('[data-slot="chart-plot"] svg text')
+        .should('contain.text', '35')
+        .and('contain.text', '25')
+      labelInsideCanvas('Goal')
+    })
+
+    it('keeps the label of a rule at the end of a row chart on the canvas', () => {
+      mountChart({
+        horizontal: true,
+        referenceLines: [{ value: 25, label: 'Goal' }],
+      })
+      cy.get('[data-slot="chart-plot"] svg text').should('contain.text', 'Goal')
+      labelInsideCanvas('Goal')
+    })
+
+    it('keeps the label of a rule at the bottom of the scale on the canvas', () => {
+      mountChart({ referenceLines: [{ value: -5, label: 'Floor' }] })
+      cy.get('[data-slot="chart-plot"] svg text').should(
+        'contain.text',
+        'Floor',
+      )
+      labelInsideCanvas('Floor')
     })
 
     it('draws a rule down the plot at a category', () => {
@@ -442,6 +596,33 @@ describe('BarChart', () => {
           expect($bar[0].getBoundingClientRect().bottom).to.be.at.most(top + 1)
         })
       })
+    })
+
+    it('lays them flat and thins them once even a tilt would crowd', () => {
+      const days = Array.from(
+        { length: 30 },
+        (_, i) => `${String(i + 1).padStart(2, '0')}-09-2026`,
+      )
+      cy.mount(
+        defineComponent({
+          setup() {
+            return () =>
+              h('div', { style: 'width: 420px; height: 300px' }, [
+                h(BarChart, {
+                  data: days.map((day, i) => ({ day, count: i % 4 })),
+                  x: 'day',
+                  y: 'count',
+                  echartOptions: { animation: false },
+                }),
+              ])
+          },
+        }),
+      )
+      const text = '[data-slot="chart-plot"] svg text'
+      cy.get(text).should('contain.text', '01-09-2026')
+      cy.get(text).should('contain.text', '30-09-2026')
+      cy.get(text).should('not.contain.text', '02-09-2026')
+      tilted().should('not.exist')
     })
 
     it('stacks a row chart’s labels down the side, never tilted', () => {

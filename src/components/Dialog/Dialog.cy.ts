@@ -3,6 +3,7 @@ import Dialog from './Dialog.vue'
 import Button from '../Button/Button.vue'
 import Dropdown from '../Dropdown/Dropdown.vue'
 import { _resetWarnUnsupportedIconObject } from '../../utils/iconString'
+import { Editor, EditorContent, RichTextKit } from '../../molecules/editor'
 
 describe('Dialog', () => {
   // ---- Canonical v1 surface --------------------------------------------------
@@ -160,6 +161,64 @@ describe('Dialog', () => {
     // `pointer-events: none` on <body>, so nothing outside the content is a hit
     // target. The dismiss itself is driven by DismissableLayer's document-level
     // pointerdown listener, which still sees the event.
+    cy.get('.dialog-overlay').click(0, 0, { force: true })
+    cy.get('[role=dialog]').should('not.exist')
+  })
+
+  it('an editor @mention menu inside the dialog takes clicks without closing it', () => {
+    const Wrapper = defineComponent({
+      setup() {
+        const open = ref(true)
+        const content = ref('<p></p>')
+        return { open, content }
+      },
+      render() {
+        return h(
+          Dialog,
+          {
+            open: this.open,
+            'onUpdate:open': (v: boolean) => (this.open = v),
+            bare: true,
+          },
+          {
+            default: () =>
+              h(
+                Editor,
+                {
+                  modelValue: this.content,
+                  'onUpdate:modelValue': (v: string) => (this.content = v),
+                  extensions: [
+                    RichTextKit.configure({
+                      mention: {
+                        items: [
+                          { label: 'Jane Doe', value: 'jane@example.com' },
+                          { label: 'Sam Janes', value: 'sam@example.com' },
+                        ],
+                      },
+                    }),
+                  ],
+                },
+                { default: () => h(EditorContent) },
+              ),
+          },
+        )
+      },
+    })
+
+    cy.mount(Wrapper)
+    cy.get('[role=dialog] .ProseMirror').click().type('@Ja')
+
+    // a real click, not forced: the menu sits on <body>, outside the dialog
+    cy.get('[aria-label=Suggestions]').contains('Jane Doe').click()
+
+    cy.get('[role=dialog] .ProseMirror span.mention').should(
+      'have.attr',
+      'data-id',
+      'jane@example.com',
+    )
+    cy.get('[role=dialog]').should('exist')
+
+    // an ordinary outside click still closes the dialog
     cy.get('.dialog-overlay').click(0, 0, { force: true })
     cy.get('[role=dialog]').should('not.exist')
   })

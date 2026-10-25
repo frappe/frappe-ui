@@ -72,7 +72,7 @@ styles them directly. A `tabs` shorthand remains for generated tab sets.
 type TabValue = string | number
 type TabsVariant = 'underline' | 'subtle' | 'ghost' | 'browser-tab'
 type TabsSize = 'sm' | 'md'
-type TabsSide = 'left' | 'right'
+type TabsEdge = 'start' | 'end'
 ```
 
 ### `Tabs` (root)
@@ -87,7 +87,7 @@ interface TabsProps {
   /** Shorthand mode only; forwarded to the generated TabList. */
   variant?: TabsVariant
   size?: TabsSize
-  side?: TabsSide
+  edge?: TabsEdge
 }
 
 interface TabsEmits {
@@ -125,12 +125,15 @@ State rules:
 interface TabListProps {
   variant?: TabsVariant
   size?: TabsSize
-  /** browser-tab + vertical only: which edge the tabs attach to. */
-  side?: TabsSide
+  /**
+   * browser-tab + vertical only: the edge of the list the tabs attach to.
+   * `start` is the left edge in left-to-right text.
+   */
+  edge?: TabsEdge
 }
 ```
 
-Defaults: `variant = 'underline'`, `size = 'sm'`, `side = 'left'`.
+Defaults: `variant = 'underline'`, `size = 'sm'`, `edge = 'start'`.
 
 - `TabList` renders one element the app can style directly: padding, gap,
   borders, and visibility belong to the call site. The v0
@@ -147,7 +150,7 @@ Defaults: `variant = 'underline'`, `size = 'sm'`, `side = 'left'`.
   decision; the migration guide carries the recipe for both modes.
   [Shorthand mode](#shorthand-mode) is the one exception, and only for the
   parts it generates itself
-- every variant supports both orientations. `side` applies only when
+- every variant supports both orientations. `edge` applies only when
   `variant = 'browser-tab'` and the root is `vertical`, matching v0
   `TabButtons`
 - `underline` renders the animated active indicator; `subtle` renders raised
@@ -365,7 +368,7 @@ from the route itself for the tabs that have one.
 `TabButtons` stays a separate component with radiogroup semantics. It is a
 value input, not a panel switcher. The two share:
 
-- `TabValue`, `TabsVariant`, `TabsSize`, `TabsSide`
+- `TabValue`, `TabsVariant`, `TabsSize`, `TabsEdge`
 - the item vocabulary: `value` (required), `label`, `icon`, `iconLeft`,
   `disabled`
 - trigger visuals: at the same `variant` and `size`, a `TabButtons` and a
@@ -492,6 +495,15 @@ Before/afters live in [`migration.md`](../docs/content/docs/migration.md):
   `#suffix` slot covers trailing content
 
 ## Changelog
+
+### 2026-09-24 (edge)
+
+- **`side` is now `edge`** on `Tabs`, `TabList` and `TabButtons`, with values
+  `start` and `end` instead of `left` and `right`; `TabsSide` is `TabsEdge`.
+  The prop never moved the list. It picks the edge of the list that carries
+  the line, so it clashed with `side` on `Tooltip` and `Popover`, which means
+  placement. `start` and `end` follow text direction: `start` is the left edge
+  in left-to-right text and the right edge in right-to-left text.
 
 ### 2026-09-17 (route reset)
 

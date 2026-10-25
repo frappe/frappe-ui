@@ -115,16 +115,23 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
     initialData: initialData !== undefined ? { data: initialData } : undefined,
     afterFetch(ctx: AfterFetchContext<FrappeResponse<TResponse>>) {
       if (ctx.data) {
+        // The cache holds the response as the server sent it: transformed
+        // data may not survive JSON, and `transform` runs again when the
+        // cache is read. Copied first, because `transform` may change the
+        // response in place.
+        let normalizedCacheKey = normalizeCacheKey(cacheKey, 'useCall')
+        if (normalizedCacheKey) {
+          idbStore.set(
+            normalizedCacheKey,
+            transform ? structuredClone(ctx.data.data) : ctx.data.data,
+          )
+        }
+
         if (transform) {
           let returnValue = transform(ctx.data.data)
           if (returnValue !== undefined) {
             ctx.data.data = returnValue
           }
-        }
-
-        let normalizedCacheKey = normalizeCacheKey(cacheKey, 'useCall')
-        if (normalizedCacheKey) {
-          idbStore.set(normalizedCacheKey, ctx.data.data)
         }
 
         if (onStoreWrite) {
@@ -299,14 +306,7 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
         data.value?.data == null ||
         error.value)
     ) {
-      let cachedData = cachedResponse.value as TResponse
-      if (transform) {
-        let returnValue = transform(cachedData)
-        if (returnValue !== undefined) {
-          cachedData = returnValue
-        }
-      }
-      return cachedData
+      return cachedResponse.value as TResponse
     }
     return data.value?.data ?? null
   })
@@ -314,7 +314,7 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
   if (normalizedCacheKey) {
     idbStore.get(normalizedCacheKey).then((data) => {
       if (data) {
-        cachedResponse.value = data
+        cachedResponse.value = transformCached(data as TResponse, transform)
       }
     })
   }
@@ -343,6 +343,18 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
       ? (params?: never) => Promise<TResponse | null>
       : (params?: TParams) => Promise<TResponse | null>
   }
+}
+
+// Runs `transform` on a response read from the cache, once, the same as on a
+// fresh response: the cache stores it as the server sent it. Shared with
+// `useIsolatedCall`.
+export function transformCached<TResponse>(
+  data: TResponse,
+  transform?: (data: TResponse) => TResponse,
+) {
+  if (!transform) return data
+  let returnValue = transform(data)
+  return returnValue !== undefined ? returnValue : data
 }
 
 // Shared with `useIsolatedCall`, which replicates the cached-fallback rules.

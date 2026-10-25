@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  oklchCssToSrgb,
   clampToGamut,
   hexToOklch,
   inGamut,
@@ -75,6 +76,26 @@ describe('oklch conversion', () => {
     expect(red.l).toBeCloseTo(0.6279, 3)
     expect(red.c).toBeCloseTo(0.2577, 3)
     expect(red.h).toBeCloseTo(29.23, 1)
+  })
+})
+
+describe('a CSS oklch() color as sRGB', () => {
+  it('reads lightness and chroma as numbers or percentages', () => {
+    expect(oklchCssToSrgb('oklch(1 0 0)')).toBe('#ffffff')
+    expect(oklchCssToSrgb('oklch(0% 0 0)')).toBe('#000000')
+    expect(oklchCssToSrgb('oklch(0.628 0.2577 29.23)')).toBe('#ff0000')
+    expect(oklchCssToSrgb('oklch(62.8% 64.4% 29.23deg)')).toBe('#ff0000')
+  })
+
+  it('keeps an alpha below 1 as rgba()', () => {
+    expect(oklchCssToSrgb('oklch(1 0 none / 50%)')).toBe(
+      'rgba(255, 255, 255, 0.5)',
+    )
+  })
+
+  it('names nothing for any other notation', () => {
+    expect(oklchCssToSrgb('#ff0000')).toBeNull()
+    expect(oklchCssToSrgb('rgb(255 0 0)')).toBeNull()
   })
 })
 

@@ -184,6 +184,7 @@ function focus(options?: FocusOptions) {
 // type-checks the object literal itself, and a ComputedRef doesn't
 // structurally match the plain `HTMLInputElement | null` the type declares.
 defineExpose<TextInputExposed>({
+  /** Moves focus to the input. */
   focus,
   get inputElement() {
     return inputRef.value

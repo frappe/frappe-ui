@@ -3,6 +3,7 @@
   import PropsTable from '@/components/Docs/PropsTable.vue'
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
+  import ExposedTable from '@/components/Docs/ExposedTable.vue'
 
   const listViewProps = [
   {
@@ -52,6 +53,29 @@
     name: 'update:active-row',
     description: 'Fired when the active row changes.',
     type: 'any[]'
+  }
+]
+
+  const listViewExposed = [
+  {
+    name: 'selections',
+    description: 'The keys (`rowKey` values) of the selected rows.',
+    type: 'Reactive<Set<unknown>>'
+  },
+  {
+    name: 'allRowsSelected',
+    description: 'Whether every enabled row is selected.',
+    type: 'boolean'
+  },
+  {
+    name: 'toggleRow',
+    description: 'Selects the row with this key, or deselects it if it is selected.',
+    type: '(row: any) => void'
+  },
+  {
+    name: 'toggleAllRows',
+    description: 'Selects every enabled row. Clears the selection instead when `select` is\nfalse or every row is already selected.',
+    type: '(select: any) => void'
   }
 ]
 
@@ -318,6 +342,8 @@
 <SlotsTable :data="listViewSlots"/>
 
 <EmitsTable :data="listViewEmits"/>
+
+<ExposedTable :data="listViewExposed"/>
 
 ### ListEmptyState
 
