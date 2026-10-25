@@ -87,9 +87,8 @@ describe('HeatmapChart', () => {
     // A continuous ramp has no entries to switch on and off, so the scale
     // stands in for the legend.
     cy.get('[data-slot="chart-legend"]').should('not.exist')
-    cy.get('[data-slot="chart-scale"]')
-      .should('contain.text', '2')
-      .and('contain.text', '8')
+    cy.get('[data-slot="chart-scale"]').should('contain.text', '8')
+    cy.get('[data-slot="chart-scale-min"]').should('have.text', '0')
 
     box('[data-slot="chart-scale"]').then((scale) => {
       box('[data-slot="chart-plot"] [role="img"]').then((plot) => {

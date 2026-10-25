@@ -333,6 +333,13 @@ export default plugin(
               'h5 strong': {
                 fontWeight: 600,
               },
+              // keep a named text color on bold text (typography's `strong` color would override it)
+              ':where(span[style*="--prose-color-"]) strong': {
+                color: 'inherit',
+              },
+              'strong:where([style*="--prose-color-"])': {
+                color: 'inherit',
+              },
               'img[data-align=right]': {
                 marginLeft: 'auto',
                 marginRight: '0',
@@ -434,19 +441,6 @@ export default plugin(
                 },
                 'a:hover': {
                   borderBottom: '1px solid var(--ink-gray-6)',
-                },
-
-                // named text color + bold: the color lives on a `textStyle`
-                // span that wraps (or is wrapped by) `<strong>`. Typography's
-                // `strong { color: var(--tw-prose-bold) }` otherwise overrides
-                // the inherited named color, painting bold text gray. Mirror the
-                // base preset's `a strong { color: inherit }` so bold keeps the
-                // span's color in both nesting orders.
-                ':where(span[style*="--prose-color-"]) strong': {
-                  color: 'inherit',
-                },
-                'strong:where([style*="--prose-color-"])': {
-                  color: 'inherit',
                 },
 
                 // inline code: subtle pill — strip Tailwind's added quotes

@@ -3,6 +3,8 @@
 export * from './experimental/Accordion'
 export * from './experimental/FloatingWindow'
 export * from './experimental/MultiEmailInput'
+// Stepper. Incubating while its API is reviewed and refined before freezing.
+export * from './experimental/Stepper'
 export { inputFontSizeClasses } from './src/components/Combobox/utils'
 export {
   InputLabel,

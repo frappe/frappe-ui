@@ -8,30 +8,55 @@ import {
 
 describe('deltaDirection', () => {
   it('reads the sign, and treats no delta as flat', () => {
-    expect(deltaDirection(4)).toBe('up')
-    expect(deltaDirection(-4)).toBe('down')
-    expect(deltaDirection(0)).toBe('flat')
-    expect(deltaDirection(null)).toBe('flat')
-    expect(deltaDirection(undefined)).toBe('flat')
-    expect(deltaDirection(NaN)).toBe('flat')
+    expect(deltaDirection({ delta: 4 })).toBe('up')
+    expect(deltaDirection({ delta: -4 })).toBe('down')
+    expect(deltaDirection({ delta: 0 })).toBe('flat')
+    expect(deltaDirection({ delta: null })).toBe('flat')
+    expect(deltaDirection({ delta: undefined })).toBe('flat')
+    expect(deltaDirection({ delta: NaN })).toBe('flat')
+  })
+
+  it('counts a delta that prints as zero as flat', () => {
+    expect(deltaDirection({ deltaSuffix: '%', delta: 0.04 })).toBe('flat')
+    expect(deltaDirection({ deltaSuffix: '%', delta: -0.04 })).toBe('flat')
+    expect(deltaDirection({ delta: 0.6 })).toBe('up')
+  })
+
+  it('follows the delta format, which decides what prints as zero', () => {
+    const twoDecimals = (value: number) => value.toFixed(2)
+    expect(deltaDirection({ deltaFormat: twoDecimals, delta: 0.04 })).toBe('up')
+    expect(deltaDirection({ deltaFormat: twoDecimals, delta: 0.004 })).toBe(
+      'flat',
+    )
+    expect(
+      deltaDirection({ deltaFormat: (v) => v.toFixed(0), delta: 0.4 }),
+    ).toBe('flat')
   })
 })
 
 describe('deltaTone', () => {
   it('colors a rise green by default', () => {
-    expect(deltaTone(4)).toBe('positive')
-    expect(deltaTone(-4)).toBe('negative')
+    expect(deltaTone({ delta: 4 })).toBe('positive')
+    expect(deltaTone({ delta: -4 })).toBe('negative')
   })
 
   it('flips for a metric where less is better', () => {
-    expect(deltaTone(4, true)).toBe('negative')
-    expect(deltaTone(-4, true)).toBe('positive')
+    expect(deltaTone({ delta: 4, negativeIsBetter: true })).toBe('negative')
+    expect(deltaTone({ delta: -4, negativeIsBetter: true })).toBe('positive')
   })
 
   it('stays neutral with no movement to report', () => {
-    expect(deltaTone(0)).toBe('neutral')
-    expect(deltaTone(0, true)).toBe('neutral')
-    expect(deltaTone(null)).toBe('neutral')
+    expect(deltaTone({ delta: 0 })).toBe('neutral')
+    expect(deltaTone({ delta: 0, negativeIsBetter: true })).toBe('neutral')
+    expect(deltaTone({ delta: null })).toBe('neutral')
+  })
+
+  it('stays neutral for a delta that prints as zero', () => {
+    expect(deltaTone({ delta: 0.04 })).toBe('neutral')
+    expect(deltaTone({ delta: -0.04, negativeIsBetter: true })).toBe('neutral')
+    expect(deltaTone({ deltaFormat: (v) => v.toFixed(2), delta: 0.04 })).toBe(
+      'positive',
+    )
   })
 })
 

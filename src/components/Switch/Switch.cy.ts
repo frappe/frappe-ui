@@ -25,6 +25,23 @@ describe('Switch', () => {
     cy.get('[role="switch"]').should('have.attr', 'disabled')
   })
 
+  it('tells disabled on and disabled off apart by background', () => {
+    cy.mount(() =>
+      h('div', [
+        h(Switch, { disabled: true, modelValue: true, 'data-test': 'on' }),
+        h(Switch, { disabled: true, modelValue: false, 'data-test': 'off' }),
+      ]),
+    )
+
+    cy.get('[data-test="on"]').then(($on) => {
+      cy.get('[data-test="off"]').then(($off) => {
+        const background = (el: HTMLElement) =>
+          getComputedStyle(el).backgroundColor
+        expect(background($on[0])).to.not.equal(background($off[0]))
+      })
+    })
+  })
+
   it('dims the label and description when disabled', () => {
     cy.mount(Switch, {
       props: { label: 'abc', description: 'Helper text.', disabled: true },

@@ -1,6 +1,6 @@
 # Charts
 
-Nine chart components in the `frappe-ui/charts` subpath, drawn with
+Eleven chart components in the `frappe-ui/charts` subpath, drawn with
 [echarts](https://echarts.apache.org). Props are flat and name the columns of
 your data (`x`, `y`, `y2`, `splitBy`, `category`, `value`), so you can save a
 chart as one typed object and render it with `v-bind="savedChart"`.
@@ -12,12 +12,15 @@ import { BarChart, LineChart } from 'frappe-ui/charts'
 Importing the subpath also loads the `--chart-*` color tokens. See
 [Chart colors](/docs/charts/colors) for the three ramps and how to change
 them. The `palette` prop picks a ramp by name (`categorical`, `sequential` or
-`diverging`) or takes a list of colors.
+`diverging`) or takes a list of colors. Any color a chart takes can be a CSS
+variable such as `var(--brand)`. It resolves against the chart's own element,
+and again when the theme changes.
 
 Each echarts chart registers only the echarts modules it needs, so importing
 `DonutChart` loads only the pie module. The three axis charts share the bar and
 line modules, because each of them can draw bars and lines. `FunnelChart` and
-`NumberCard` do not use echarts. Both draw their own SVG.
+`NumberCard` do not use echarts. Both draw their own SVG. `PercentageBarChart`
+does not use echarts either. It draws divs.
 
 ## Data shapes
 
@@ -41,8 +44,10 @@ Use it for a combo chart, or to fill one line of a `LineChart`.
 | [LineChart](/docs/charts/linechart) | Trends, a second value axis, gaps |
 | [AreaChart](/docs/charts/areachart) | Lines with a fill |
 | [DonutChart](/docs/charts/donutchart) | Share of a total |
+| [PercentageBarChart](/docs/charts/percentagebarchart) | Share of a total, as one bar |
 | [FunnelChart](/docs/charts/funnelchart) | Drop-off from stage to stage |
 | [HeatmapChart](/docs/charts/heatmapchart) | Size of a value across two dimensions |
+| [CalendarHeatmapChart](/docs/charts/calendarheatmapchart) | A value for each day |
 | [ScatterChart](/docs/charts/scatterchart) | Two measures against each other |
 | [SankeyChart](/docs/charts/sankeychart) | Flow from a source to a target |
 | [NumberCard](/docs/charts/numbercard) | One number and its change |
@@ -172,7 +177,8 @@ is instant.
 ## The echarts instance
 
 Every echarts-backed chart hands back its instance as `chart` on a template ref.
-`FunnelChart` and `NumberCard` draw no echarts plot and hand back nothing.
+`FunnelChart`, `NumberCard` and `PercentageBarChart` draw no echarts plot and
+hand back nothing.
 
 ```vue
 <script setup lang="ts">
@@ -264,7 +270,8 @@ Three series get three evenly spaced colors, not the first three.
 ### `OTHERS_KEY`
 
 The key of the series that collects the extra series when you set a limit:
-`maxSeries` on an axis chart, `maxSlices` on a donut. It is a reserved key, so a
-group that is really named "Others" does not clash with it. Use
+`maxSeries` on an axis chart, `maxSlices` on a donut or a percentage bar. It is
+a reserved key, so a group that is really named "Others" does not clash with
+it. Use
 `seriesConfig[OTHERS_KEY]` to rename or recolor it like any other series. Its
 label is "Others" unless you set a `label`.

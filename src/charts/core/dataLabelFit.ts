@@ -7,19 +7,21 @@ export type DataLabelSide = 'top' | 'right' | 'left'
 const DEFAULT_LABEL_DISTANCE = 5
 
 /**
- * The axis end one tick past the current one, or `null` when echarts has drawn
- * fewer than two ticks to read a step from. Read off the ticks rather than the
- * scale's extent, because the ticks are what the reader sees and what a label
- * has to clear.
+ * The axis end one tick past the current one and the step that reaches it, or
+ * `null` when echarts has drawn fewer than two ticks to read a step from. Read
+ * off the ticks rather than the scale's extent, because the ticks are what the
+ * reader sees and what a label has to clear. The step is pinned too: left to
+ * echarts, the longer span can get a coarser step the new end is not on.
  */
-export function nextAxisMax(chart: ECharts, axis: 'xAxis' | 'yAxis') {
+export function nextAxisTick(chart: ECharts, axis: 'xAxis' | 'yAxis') {
   const ticks = (chart as any)
     .getModel()
     .getComponent(axis, 0)
     ?.axis?.scale?.getTicks?.()
   if (!ticks || ticks.length < 2) return null
   const last = ticks[ticks.length - 1].value
-  return last + (last - ticks[ticks.length - 2].value)
+  const interval = last - ticks[ticks.length - 2].value
+  return { max: last + interval, interval }
 }
 
 /**
@@ -69,6 +71,43 @@ export function dataLabelOverflow(
           : side === 'right'
             ? tip + distance + box.width - (width - bound)
             : bound - (tip - distance - box.width)
+      overflow = Math.max(overflow ?? -Infinity, reach)
+    })
+  })
+
+  return overflow
+}
+
+/**
+ * How far the furthest reference-line label reaches past `bound`, read the way
+ * `dataLabelOverflow` reads a data label. A rule at the end of the scale, such
+ * as a goal that stretched the axis, puts a label placed beyond it outside the
+ * plot. echarts only positions that label when it paints, so it is placed here
+ * first to be measured.
+ */
+export function referenceLabelOverflow(
+  chart: ECharts,
+  side: DataLabelSide,
+  bound: number,
+) {
+  const width = chart.getWidth()
+  let overflow: number | null = null
+
+  ;(chart as any).getModel().eachComponent('markLine', (markLine: any) => {
+    const view = (chart as any).getViewOfComponentModel(markLine)
+    view?.group.traverse((rule: any) => {
+      const label = rule.getTextContent?.()
+      if (!label || label.ignore || !rule.beforeUpdate) return
+      rule.beforeUpdate()
+      const box = label.getBoundingRect().clone()
+      box.applyTransform(label.getLocalTransform())
+
+      const reach =
+        side === 'top'
+          ? bound - box.y
+          : side === 'right'
+            ? box.x + box.width - (width - bound)
+            : bound - box.x
       overflow = Math.max(overflow ?? -Infinity, reach)
     })
   })

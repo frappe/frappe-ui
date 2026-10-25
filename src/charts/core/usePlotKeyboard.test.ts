@@ -296,6 +296,36 @@ describe('usePlotKeyboard', () => {
     expect(plain.keyboard.index.value).toBe(2)
   })
 
+  it('hands left and right to the chart when it walks them itself', () => {
+    const walked: number[] = []
+    const scope = effectScope()
+    let keyboard!: PlotKeyboardReturn
+    scope.run(() => {
+      keyboard = usePlotKeyboard({
+        marks: () => ['a', 'b', 'c'],
+        key: (mark) => mark,
+        move: () => {},
+        activate: () => {},
+        clear: () => {},
+        along: (delta) => walked.push(delta),
+      })
+    })
+    const press = (key: string) =>
+      (keyboard.attrs.value as Record<string, any>).onKeydown({
+        key,
+        preventDefault: () => {},
+      })
+
+    press('ArrowRight')
+    expect(keyboard.index.value).toBe(0)
+    expect(walked).toEqual([])
+
+    press('ArrowRight')
+    press('ArrowLeft')
+    expect(walked).toEqual([1, -1])
+    expect(keyboard.index.value).toBe(0)
+  })
+
   it('reads the mark again when a chart asks', () => {
     const plot = setup()
     plot.focus()

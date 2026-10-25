@@ -62,7 +62,7 @@
   },
   {
     name: 'min',
-    description: 'Bottom of the color scale. Defaults to the smallest value in the data.',
+    description: 'Bottom of the color scale. Defaults to 0 when no value is negative, else to\nthe smallest value in the data.',
     required: false,
     type: 'number'
   },

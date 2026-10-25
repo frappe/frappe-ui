@@ -21,6 +21,13 @@ export const MEDIA_CHROME_BUTTON =
   'flex size-7 items-center justify-center rounded-4 bg-black-overlay-300 text-white transition-colors hover:bg-black-overlay-400 active:bg-black-overlay-500 data-[state=open]:bg-black-overlay-500'
 
 /**
+ * Room a label centred along the media's bottom edge leaves on each side for
+ * the corner resize grip: its `right-2.5` inset (`MediaResizeHandle.vue`) plus
+ * the `size-7` above (38px), and a 4px gap so the two never touch.
+ */
+export const MEDIA_CORNER_GRIP_INSET = 42
+
+/**
  * The selection ring around a media, embed, or gallery node.
  *
  * The offset color is spelled out because Tailwind's default is a hard `#fff`,

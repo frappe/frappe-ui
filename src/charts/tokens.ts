@@ -3,6 +3,7 @@ import {
   getResolvedColorScheme,
   type ResolvedColorScheme,
 } from '../composables/useColorScheme'
+import { oklchCssToSrgb } from './colorMath'
 import { documentAttributes } from './utils'
 import type { ChartPalette, ChartPaletteName } from './types'
 
@@ -251,6 +252,87 @@ export function resolveChartTokens(el?: HTMLElement | null): ChartTokens {
   }
 }
 
+/**
+ * `value` with every `var(--name)` in its strings swapped for what `el`
+ * computes for that name, so a caller's own colors reach echarts as concrete
+ * values, the way the tokens above do. An `oklch()` value comes back as sRGB:
+ * echarts cannot parse it, and a color it cannot parse paints nothing once it
+ * derives a hover color from it. Read off `el` rather than the document
+ * root, so a variable defined on a card or inside a shadow root resolves. A name
+ * `el` does not define takes the fallback, else stays as written. Walks arrays
+ * and plain objects, and returns the parts it changed nothing in as they were.
+ */
+export function resolveCssVariables<T>(value: T, el?: Element | null): T {
+  if (!el || typeof getComputedStyle !== 'function') return value
+  let styles: CSSStyleDeclaration | undefined
+  const read = (name: string) =>
+    (styles ??= getComputedStyle(el)).getPropertyValue(name).trim()
+
+  return mapStrings(value, (text) =>
+    text.includes('var(') ? substituteVariables(text, read) : text,
+  )
+}
+
+/**
+ * `text` with each `var(--name)` swapped for `read(name)`, else for its
+ * fallback, which is substituted the same way. A fallback can hold parentheses
+ * of its own, `rgb(…)` or another `var(…)`, so its end is found by counting
+ * them.
+ */
+function substituteVariables(
+  text: string,
+  read: (name: string) => string,
+): string {
+  const head = /var\(\s*(--[\w-]+)\s*([,)])/g
+  let out = ''
+  let copied = 0
+  for (let match; (match = head.exec(text)); ) {
+    let end = match.index + match[0].length
+    let fallback = ''
+    if (match[2] === ',') {
+      const close = closingParen(text, end)
+      if (close === -1) break
+      fallback = substituteVariables(text.slice(end, close), read).trim()
+      end = close + 1
+    }
+    const value = read(match[1]) || fallback
+    out +=
+      text.slice(copied, match.index) +
+      (value ? (oklchCssToSrgb(value) ?? value) : text.slice(match.index, end))
+    copied = head.lastIndex = end
+  }
+  return out + text.slice(copied)
+}
+
+/** Where the `)` closing a parenthesis opened just before `from` is, or -1. */
+function closingParen(text: string, from: number) {
+  let depth = 1
+  for (let i = from; i < text.length; i++) {
+    if (text[i] === '(') depth++
+    else if (text[i] === ')' && --depth === 0) return i
+  }
+  return -1
+}
+
+function mapStrings(value: any, map: (text: string) => string): any {
+  if (typeof value === 'string') return map(value)
+  if (Array.isArray(value)) {
+    const next = value.map((item) => mapStrings(item, map))
+    return next.some((item, index) => item !== value[index]) ? next : value
+  }
+  if (!value || typeof value !== 'object') return value
+  const prototype = Object.getPrototypeOf(value)
+  // A `Date` on a time axis, an echarts graphic: not ours to rebuild.
+  if (prototype !== Object.prototype && prototype !== null) return value
+  let next: Record<string, any> | undefined
+  for (const key of Object.keys(value)) {
+    const mapped = mapStrings(value[key], map)
+    if (mapped === value[key]) continue
+    next = { ...(next ?? value), [key]: mapped }
+  }
+  return next ?? value
+}
+
 export function pickSeriesColor(ramp: string[], index: number) {
   if (!ramp.length) return FALLBACK_CATEGORICAL.light[0]
   return ramp[index % ramp.length]
@@ -440,6 +522,23 @@ function hexLuminance(color: string): number | null {
  * folded in here — palette precedence lives in `resolveSeriesColors`, so there
  * is one place to read it.
  */
+/**
+ * `config` with every `var(--…)` outside its rows resolved against `el`, so
+ * the option builders blend, shade and contrast concrete colors. Rows are data,
+ * not colors, and the largest part of a config to walk. Re-resolves when the
+ * theme flips.
+ */
+export function useResolvedConfig<C extends { data?: unknown }>(
+  config: () => C,
+  el: Ref<HTMLElement | undefined>,
+): ComputedRef<C> {
+  return computed(() => {
+    documentAttributes()
+    const { data, ...rest } = config()
+    return { ...resolveCssVariables(rest, el.value), data } as C
+  })
+}
+
 export function useChartTokens(el: Ref<HTMLElement | undefined>): {
   tokens: ComputedRef<ChartTokens>
 } {

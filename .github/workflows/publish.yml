@@ -7,7 +7,7 @@ on:
 
 permissions:
   id-token: write # Required for OIDC
-  contents: write # push the release tag
+  contents: write # push the release tag and create the GitHub release
 
 jobs:
   publish:
@@ -33,8 +33,19 @@ jobs:
 
       - if: steps.publish_tag.outputs.changed == 'true'
         run: npm test
-      - if: steps.publish_tag.outputs.changed == 'true'
-        run: npm publish --tag ${{ steps.publish_tag.outputs.tag }}
+      # Skips if this version is already on npm, so a re-run can still reach
+      # the steps after it, for example to retry the GitHub release.
+      - name: Publish frappe-ui
+        if: steps.publish_tag.outputs.changed == 'true'
+        env:
+          VERSION: ${{ steps.publish_tag.outputs.version }}
+          TAG: ${{ steps.publish_tag.outputs.tag }}
+        run: |
+          if [ -n "$(npm view "frappe-ui@$VERSION" version 2>/dev/null)" ]; then
+            echo "frappe-ui@$VERSION is already on npm, skipping."
+            exit 0
+          fi
+          npm publish --tag "$TAG"
 
       # Tag the exact commit that was published (head_sha checked out above).
       # Idempotent: skips if the tag already exists, so workflow re-runs are safe.
@@ -60,15 +71,48 @@ jobs:
       # After that, both packages use the same tag.
       #
       # It runs after the tag, so a failure here can't leave frappe-ui's release
-      # untagged. To recover, publish by hand from packages/create-frappe-ui.
+      # untagged. Like frappe-ui, it skips a version that is already on npm, so
+      # re-running the workflow recovers from a failure here or later.
       - name: Publish create-frappe-ui
         if: steps.publish_tag.outputs.changed == 'true'
         working-directory: packages/create-frappe-ui
         env:
+          VERSION: ${{ steps.publish_tag.outputs.version }}
           TAG: ${{ steps.publish_tag.outputs.tag }}
         run: |
+          if [ -n "$(npm view "create-frappe-ui@$VERSION" version 2>/dev/null)" ]; then
+            echo "create-frappe-ui@$VERSION is already on npm, skipping."
+            exit 0
+          fi
           current=$(npm view create-frappe-ui dist-tags.latest 2>/dev/null || true)
           if [ "$TAG" != latest ] && { [ -z "$current" ] || [[ "$current" == *-* ]]; }; then
             TAG=latest
           fi
           npm publish --tag "$TAG"
+
+      # The release notes are this version's section of CHANGELOG.md, without
+      # its heading. Runs last, so a failure here can't block either npm
+      # publish or the tag. Idempotent: skips if the release already exists.
+      # To recover from a failure, re-run the workflow: every earlier step
+      # skips the work it already did.
+      - name: Create the GitHub release
+        if: steps.publish_tag.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.publish_tag.outputs.version }}
+          TAG: ${{ steps.publish_tag.outputs.tag }}
+        run: |
+          tag="v$VERSION"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "Release $tag already exists, skipping."
+            exit 0
+          fi
+          awk -v heading="## $VERSION" '
+            $0 == heading { found = 1; next }
+            found && /^## / { exit }
+            found { print }
+          ' CHANGELOG.md > release-notes.md
+          prerelease=()
+          if [ "$TAG" != latest ]; then prerelease=(--prerelease); fi
+          gh release create "$tag" --verify-tag --title "$tag" \
+            --notes-file release-notes.md "${prerelease[@]}"
