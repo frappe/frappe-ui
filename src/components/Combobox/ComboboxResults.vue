@@ -18,6 +18,7 @@ import type {
 } from './types'
 import {
   EMPTY_SELECTABLE_VALUE_PREFIX,
+  checkedItemClasses,
   isCustomOption,
   isSelectableOption,
   itemClasses,
@@ -52,6 +53,7 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   selectCustom: [item: NormalizedCustomOption, event: Event]
+  selectOption: [item: NormalizedSelectableOption, event: Event]
 }>()
 
 const ItemSlotRender = createItemSlotRender('ComboboxItemSlotRender')
@@ -102,6 +104,7 @@ function getItemTextValue(item: NormalizedItem) {
 
 function handleSelect(item: NormalizedItem, event: Event) {
   if (isCustomOption(item)) emit('selectCustom', item, event)
+  else emit('selectOption', item, event)
 }
 </script>
 
@@ -166,7 +169,11 @@ function handleSelect(item: NormalizedItem, event: Event) {
                     : 'unchecked'
                   : undefined
               "
-              :class="[itemClasses, itemRootSizeClasses(size)]"
+              :class="[
+                itemClasses,
+                checkedItemClasses,
+                itemRootSizeClasses(size),
+              ]"
               @select="handleSelect(item, $event)"
             >
               <!--

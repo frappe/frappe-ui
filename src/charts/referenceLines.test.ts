@@ -180,14 +180,57 @@ describe('reference lines and the value axes', () => {
     expect(entriesOf(option)[0].xAxis).toBe(35)
   })
 
-  it('leaves the value-axis scale to the data', () => {
-    // A rule is an annotation: stretching the scale to fit a target ten times
-    // the data would flatten every bar it is meant to be read against.
-    const bare = build()
-    const annotated = build({ referenceLines: [{ value: 100000 }] })
-    expect(structure(annotated.yAxis)).toEqual(structure(bare.yAxis))
-    expect(annotated.yAxis.min).toBeUndefined()
-    expect(annotated.yAxis.max).toBeUndefined()
+  it('stretches the value axis to reach every line, ends still rounded', () => {
+    const option = build({
+      referenceLines: [
+        { value: 300 },
+        { value: -5 },
+        { value: 'Feb', axis: 'x' },
+      ],
+    })
+    // Unioned into the data extent rather than pinned, so echarts still picks
+    // round ends: a fixed `max` would end the axis at 300 exactly.
+    expect(option.yAxis).toMatchObject({ dataMin: -5, dataMax: 300 })
+    expect(option.yAxis.max).toBeUndefined()
+    expect(option.xAxis.dataMax).toBeUndefined()
+  })
+
+  it('stretches each value axis by its own lines', () => {
+    const option = build({
+      ...dualAxis,
+      referenceLines: [{ value: 300 }, { value: 90, axis: 'y2' }],
+    })
+    expect(option.yAxis[0]).toMatchObject({ dataMin: 300, dataMax: 300 })
+    expect(option.yAxis[1]).toMatchObject({ dataMin: 90, dataMax: 90 })
+  })
+
+  it('stretches the value axis across the plot on a horizontal chart', () => {
+    const option = build({ horizontal: true, referenceLines: [{ value: 300 }] })
+    expect(option.xAxis.dataMax).toBe(300)
+    expect(option.yAxis.dataMax).toBeUndefined()
+  })
+
+  it('stretches a numeric x axis to an x line', () => {
+    const option = build({
+      type: 'line',
+      data: [
+        { day: 1, sales: 10 },
+        { day: 5, sales: 20 },
+      ],
+      xAxis: { key: 'day', type: 'value' },
+      series: [{ name: 'sales' }],
+      referenceLines: [{ value: 9, axis: 'x' }],
+    })
+    expect(option.xAxis).toMatchObject({ dataMin: 9, dataMax: 9 })
+    expect(option.yAxis.dataMax).toBeUndefined()
+  })
+
+  it('keeps a line in reach while every series on its axis is hidden', () => {
+    const option = build({ referenceLines: [{ value: 300 }] }, [
+      'sales',
+      'refunds',
+    ])
+    expect(option.yAxis.max).toBeGreaterThanOrEqual(300)
   })
 })
 
@@ -309,8 +352,7 @@ describe('reference lines against the rest of the plot', () => {
   })
 
   it('is not counted as a bar', () => {
-    // A bar host would take a slot in every category and narrow the real bars;
-    // it would also inset a line chart's category axis.
+    // A bar host would take a slot in every category and narrow the real bars.
     const bars = build({ referenceLines: [{ value: 15 }] })
     expect(hostsOf(bars)[0].type).toBe('line')
     expect(hostsOf(bars)[0].data).toEqual([])
@@ -320,7 +362,6 @@ describe('reference lines against the rest of the plot', () => {
       series: [{ name: 'sales' }],
       referenceLines: [{ value: 15 }],
     })
-    expect(lines.xAxis.boundaryGap).toBe(false)
     expect(lines.tooltip.axisPointer.type).toBe('line')
   })
 

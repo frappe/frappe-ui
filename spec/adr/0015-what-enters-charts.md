@@ -45,10 +45,12 @@ unchanged — what entered still entered. See the
 | Series cap | `maxSeries` | Conventions 3 and 4. A grouping column with 200 values produces an unreadable chart, and `maxSlices` already solves the same problem for the donut. |
 | Scatter | `ScatterChart`, with an optional size measure | Convention 1. It is a way to read two measures against each other. With `referenceLines` it also covers Insights' quadrant lines, so no `show_quadrants` prop. |
 | Sankey | `SankeyChart` | Convention 1. A flow between a source and a target is a reading of the data. |
+| Percentage bar | `PercentageBarChart`, taking the rows and props of `DonutChart` | Conventions 1 and 4. A share of a total is a reading of the data, and the ring and the bar read it from the same rows. So `maxSlices`, `hiddenSlices` and `colors` mean the same on both, and a breakdown moves between them with its props. |
 | Numeric x axis | `xAxis.type: 'value'` | Convention 1. Reading a measure against a quantity — conversion against discount, revenue against distance — is a statement about the data, the same one `'time'` already makes about a date. It is a third reading of the x column the axis is typed with, not a prop beside it, and the caller still says only what the column means. |
 | Series axis (3rd pass, 2026-09-21) | `y2`, a column prop beside `y` | Convention 4, read from the caller's side. The column props pair with the axis options — `x`/`xAxis`, `y`/`yAxis`, `y2`/`y2Axis` — so which scale a column is measured against is said where the column is named. It replaces `seriesConfig[key].axis`, which the 2nd pass had put in its place — see Leaves. |
 | Scatter point labels (2nd pass) | `showDataLabels` on `ScatterChart` | Convention 4. A donut prints `showInlineLabels` and an axis series prints `showDataLabels`, so a scatter that cannot name its points is the odd one out. It prints the `label` column: both measures are already on the axes. |
 | `NumberCard` value color (2nd pass) | `color` on `NumberCardProps` | Consistency, against convention 2. See below. |
+| `NumberCard` progress (4th pass, 2026-10-19) | `progress: { value, color? }` on `NumberCardProps` | Convention 1. How far a reading has come towards a whole is a reading of the data. The caller passes `value` as a percent, by convention 5: the library does not compute the caller's numbers. It is not derived from `target`, because a percent reading such as disk used has a whole of 100% and no target. |
 
 Reference lines have an internal rule that is not API: each line is hosted on
 its own empty series, one per axis, so a legend toggle cannot remove the line
@@ -175,9 +177,12 @@ These four stay, and the reason is recorded here so the question is closed for
 
 These decisions fell out of the work and answer questions this record raised.
 
-- **A reference line does not stretch the value axis.** A target far outside the
-  data would flatten the data it is read against, so a line beyond the range is
-  clipped. `yAxis.min` and `max` bring one into frame.
+- **A reference line stretches the value axis it sits on.** This reverses the
+  first answer, that a target far outside the data flattens the data it is read
+  against. A clipped target is worse: a goal that is not drawn reads as no goal,
+  and frappe-charts, which desk moves off, always drew it. A caller who would
+  rather keep the data tall sets `yAxis.min` or `max`, which the line does not
+  move, and the line beyond it is clipped.
 - **`maxSeries` has no default.** A ring cannot show 20 arcs, so `maxSlices`
   defaults. An axis chart with 20 series is legible enough that a default would
   silently redraw every existing long-data chart.

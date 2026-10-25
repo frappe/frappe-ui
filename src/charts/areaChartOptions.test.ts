@@ -60,7 +60,7 @@ describe('area chart option', () => {
       ['Feb', 20],
     ])
     expect(option.series[0].areaStyle).toBeTruthy()
-    expect(option.xAxis.boundaryGap).toBe(false)
+    expect(option.xAxis.boundaryGap).toBe(true)
   })
 
   it('thins crowded labels out and keeps the last category', () => {

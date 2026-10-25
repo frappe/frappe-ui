@@ -24,14 +24,36 @@ One `ChartLegendItem` per series, in the order the series are drawn:
 | `color` | The color the series is drawn in. |
 | `hidden` | Whether the series is hidden. |
 | `hint` | A muted note after the label, e.g. a donut slice's share. |
+| `weight` | What the series is worth across the chart. Ranks the entries that do not fit. |
+| `formattedValue` | A number printed beside the entry in the "+N more" list. |
 
 A hidden entry keeps its place in the row and dims: the swatch fades and the
 label turns gray. If the entry left the row, there would be no way to show the
 series again.
 
-The row wraps and never scrolls. It takes as many lines as it needs and the plot
-gets shorter, which the chart's resize observer picks up. A scrolling legend
-would hide series names that most users never scroll to.
+## Many series
+
+The legend takes one row at most. When every entry fits, the row shows them in
+the order the series are drawn. When they do not, the row shows the entries
+with the largest `weight`, as many as fit, and then a "+N more" button. A legend
+that wrapped would take the plot's height, and one that scrolled would hide
+series names that most users never scroll to.
+
+"+N more" opens a [MultiSelect](/docs/components/multiselect) list of every
+entry, largest `weight` first, with the drawn series checked. Checking or
+unchecking a row emits `change` the way pressing an entry on the row does. The
+arrow keys move through the list and Enter toggles a row. Past 15 entries, the
+list has a search field, and matches keep the same order. The rows do not emit
+`highlight`: only the entries on the row do.
+
+An entry with no `weight` keeps its given place after the ranked ones, and so
+does "Others". The line, area and bar charts weigh a series by the sum of its
+values' magnitudes, which is also what `maxSeries` keeps, and print no number:
+a sum is wrong for a rate or an average. `DonutChart` weighs a slice by its
+value and prints it, since slices are parts of a whole. `ScatterChart` passes
+no weight, so its groups keep their order.
+
+<ComponentPreview name="Charts-LineManySeries" csr="true" self-layout />
 
 ## Toggling
 

@@ -68,7 +68,7 @@ describe('ScatterChart', () => {
   it('splits the rows into groups the legend names', () => {
     mountChart({ splitBy: 'region' })
     points().should('have.length', data.length)
-    cy.get('[data-slot="chart-legend"] button')
+    cy.get('[data-slot="chart-legend"] [aria-pressed]')
       .should('have.length', 2)
       .and('contain.text', 'EU')
     cy.get('[data-slot="chart-legend"]').should('contain.text', 'US')
@@ -85,7 +85,7 @@ describe('ScatterChart', () => {
   it('takes a group out of the plot when its legend entry is pressed', () => {
     mountChart({ splitBy: 'region' })
     points().should('have.length', 4)
-    cy.get('[data-slot="chart-legend"] button').first().click()
+    cy.get('[data-slot="chart-legend"] [aria-pressed]').first().click()
     points().should('have.length', 2)
   })
 
@@ -136,13 +136,19 @@ describe('ScatterChart', () => {
     cy.get('[data-slot="chart-tooltip"]').should('contain.text', '$400')
   })
 
-  it('heads the plot with the y axis title and puts the x title on its axis', () => {
+  it('heads the plot with the y axis title and puts the x title on its axis, as given', () => {
     mountChart({
-      xAxis: { title: 'spend' },
-      yAxis: { title: 'revenue' },
+      xAxis: { title: 'requests/s' },
+      yAxis: { title: 'net_revenue' },
     })
-    cy.get('[data-slot="chart-container"]').should('contain.text', 'Revenue')
-    cy.get('[data-slot="chart-plot"] svg text').should('contain.text', 'Spend')
+    cy.get('[data-slot="chart-container"]').should(
+      'contain.text',
+      'net_revenue',
+    )
+    cy.get('[data-slot="chart-plot"] svg text').should(
+      'contain.text',
+      'requests/s',
+    )
   })
 
   describe('point labels', () => {
@@ -180,7 +186,10 @@ describe('ScatterChart', () => {
         'Target',
       )
       // An annotation, not a series: the legend still lists the two groups.
-      cy.get('[data-slot="chart-legend"] button').should('have.length', 2)
+      cy.get('[data-slot="chart-legend"] [aria-pressed]').should(
+        'have.length',
+        2,
+      )
       points().should('have.length', data.length)
     })
 
@@ -202,7 +211,7 @@ describe('ScatterChart', () => {
         splitBy: 'region',
         referenceLines: [{ value: 1000, label: 'Target' }],
       })
-      cy.get('[data-slot="chart-legend"] button').first().click()
+      cy.get('[data-slot="chart-legend"] [aria-pressed]').first().click()
       points().should('have.length', 2)
       cy.get('[data-slot="chart-plot"] svg text').should(
         'contain.text',

@@ -25,18 +25,23 @@
  *
  * The same job has to be done twice. `resolveId` covers the Rollup graph, which
  * is the production build and every dev request the server transforms. It
- * cannot cover Vite's dependency pre-bundling: that step is esbuild, and it
- * resolves through `vite:resolve` alone, with no user plugin hooks. `frappe-ui`
- * is a bare specifier, so `frappe-ui/code-editor` is pre-bundled, and an absent
- * language there does not degrade — esbuild fails the optimize step and the dev
- * server exits:
+ * cannot cover Vite's dependency pre-bundling: that step is a separate esbuild
+ * or Rolldown build, and it runs no user plugin hooks. `frappe-ui` is a bare
+ * specifier, so `frappe-ui/code-editor` is pre-bundled, and an absent language
+ * there does not degrade. Before Vite 8, esbuild fails the optimize step and
+ * the dev server exits:
  *
  *     Error during dependency optimization:
  *     ✘ [ERROR] Could not resolve "@codemirror/lang-json"
  *
- * So the plugin also contributes an esbuild twin through
- * `optimizeDeps.esbuildOptions.plugins`, which does the same resolve-then-stub
- * with esbuild's hooks.
+ * So the plugin also hands the optimizer a twin. Vite 8 pre-bundles with
+ * Rolldown, which runs Rollup-style hooks, so the twin there is the same
+ * `resolveId` and `load` through `optimizeDeps.rolldownOptions.plugins`. Older
+ * Vite pre-bundles with esbuild, so the twin there does the same
+ * resolve-then-stub with esbuild's hooks through
+ * `optimizeDeps.esbuildOptions.plugins`. Vite 8 only imitates part of
+ * esbuild's plugin API, and the esbuild twin needs the parts it leaves out, so
+ * each Vite gets its own.
  */
 
 import { dirname, join } from 'node:path'
@@ -85,6 +90,31 @@ function moduleKey(id) {
 }
 
 export function codeLanguages() {
+  return {
+    ...stubPlugin(),
+    // `pre`, so the hook runs before Vite's resolver and can ask for it by
+    // hand. `this.resolve` reports the absence instead of throwing it.
+    enforce: 'pre',
+
+    config() {
+      // Vite 8 and rolldown-vite set `rolldownVersion`; esbuild Vite does not.
+      if (this?.meta?.rolldownVersion) {
+        return {
+          optimizeDeps: { rolldownOptions: { plugins: [stubPlugin()] } },
+        }
+      }
+      return { optimizeDeps: { esbuildOptions: { plugins: [esbuildTwin()] } } }
+    },
+  }
+}
+
+/**
+ * Stub a language package that does not resolve, but only for frappe-ui's own
+ * `languages` module. Rollup and Rolldown share these hooks, so Vite 8's
+ * pre-bundling reuses them. It gets its own copy because `languagesModule` is
+ * cached per build.
+ */
+function stubPlugin() {
   // `frappe-ui/code-editor`'s own directory, resolved once per build. A path
   // test would be wrong: an app is free to keep its own
   // `src/code-editor/languages.ts`, and stubbing a package that file needs
@@ -111,9 +141,6 @@ export function codeLanguages() {
 
   return {
     name: 'frappeui-code-languages',
-    // `pre`, so the hook runs before Vite's resolver and can ask for it by
-    // hand. `this.resolve` reports the absence instead of throwing it.
-    enforce: 'pre',
 
     buildStart() {
       languagesModule = null
@@ -138,16 +165,13 @@ export function codeLanguages() {
       if (!id.startsWith(VIRTUAL_PREFIX)) return null
       return stub(id.slice(VIRTUAL_PREFIX.length))
     },
-
-    config() {
-      return { optimizeDeps: { esbuildOptions: { plugins: [esbuildTwin()] } } }
-    },
   }
 }
 
 /**
- * The pre-bundling half. Same rule, esbuild's hooks: stub a language package
- * that does not resolve, but only for frappe-ui's own `languages` module.
+ * The pre-bundling half before Vite 8. Same rule, esbuild's hooks: stub a
+ * language package that does not resolve, but only for frappe-ui's own
+ * `languages` module.
  */
 function esbuildTwin() {
   return {

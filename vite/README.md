@@ -241,9 +241,11 @@ Error during dependency optimization:
 
 The plugin replaces an absent package with a stub that throws when
 `loadLanguage` reaches it. It covers both paths: a Rollup `resolveId` hook for
-the build, and an esbuild twin through `optimizeDeps.esbuildOptions.plugins` for
-dependency pre-bundling, which runs no Rollup hooks. The build and the dev
-server both succeed, and the error names the package to install:
+the build, and a twin for dependency pre-bundling, which runs no user plugin
+hooks. On Vite 8 the twin goes through `optimizeDeps.rolldownOptions.plugins`;
+on older Vite it is an esbuild plugin through
+`optimizeDeps.esbuildOptions.plugins`. The build and the dev server both
+succeed, and the error names the package to install:
 
 ```
 [frappe-ui] loadLanguage('sql') could not load @codemirror/lang-sql: Cannot find module '@codemirror/lang-sql'. If it is not installed: yarn add @codemirror/lang-sql

@@ -21,7 +21,7 @@ const latency = [
       y="p95"
       y2="errors"
       :x-axis="{ type: 'time', timeGrain: 'day' }"
-      :y-axis="{ title: 'p95 latency', format: (value) => `${value} ms` }"
+      :y-axis="{ title: 'P95 latency', format: (value) => `${value} ms` }"
       :y2-axis="{ title: 'Error rate', format: (value) => `${value}%` }"
       palette="categorical"
       :series-config="{ errors: { label: 'Errors' } }"

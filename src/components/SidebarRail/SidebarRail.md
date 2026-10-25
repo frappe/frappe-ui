@@ -52,7 +52,9 @@ its items, so moving between items shows each tooltip with no delay.
 ### Variants
 
 - `variant="subtle"` (default) is a filled cell with a bar on its left edge when
-  active. Use the default slot for an image, an avatar or initials.
+  active. Use the default slot for an image, an avatar or initials. When the
+  slot holds an `<img>`, the cell paints no fill, so the image's rounded corners
+  show no gray rim. The bar still marks the active item.
 - `variant="ghost"` is transparent until hovered, and raised when active. Pass
   an `icon` for a shortcut such as Search or Notifications.
 

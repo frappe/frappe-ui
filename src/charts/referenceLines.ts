@@ -2,6 +2,7 @@ import {
   DATA_LABEL_FONT_SIZE,
   MARK_Z,
   dashedLine,
+  referenceLineAxis,
   toNumber,
 } from './axisChartCommon'
 import { translucent, type ChartTokens } from './tokens'
@@ -132,7 +133,7 @@ export function buildReferenceLineSeries(
  * is the same one.
  */
 function hostIndex(line: ReferenceLine, ctx: ReferenceLineContext) {
-  return ctx.hasSecondaryValueAxis && line.axis === 'y2' ? 1 : 0
+  return referenceLineAxis(line, ctx.hasSecondaryValueAxis) === 'y2' ? 1 : 0
 }
 
 function markLineEntry(

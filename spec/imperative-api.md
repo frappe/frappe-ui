@@ -678,4 +678,4 @@ Each item is done by the sweep that owns the component, as
 
 Loud breaks needing only a changelog line: `DialogExposed`, `DropdownExposed`,
 `FileUploader.inputRef`. All three have one in
-[`changelog.md`](../docs/content/docs/changelog.md).
+[`changelog/v0-to-v1.md`](../docs/content/docs/changelog/v0-to-v1.md).

@@ -1,6 +1,7 @@
 import type { Editor, Range } from '@tiptap/core'
 import type { Node as ProseMirrorNode } from '@tiptap/pm/model'
 import type { EditorState } from '@tiptap/pm/state'
+import { rankMatch } from '#utils/rankMatch'
 
 /**
  * Shared helpers for slash/emoji/mention/tag suggesters: DRY node-insertion,
@@ -47,6 +48,14 @@ export function filterByQuery<T>(items: T[], query: string, key: keyof T): T[] {
     const value = item[key]
     return typeof value === 'string' && value.toLowerCase().includes(needle)
   })
+}
+
+/** `filterByQuery` in `rankMatch` order: best match first, ties keep input order. */
+export function rankByQuery<T>(items: T[], query: string, key: keyof T): T[] {
+  return filterByQuery(items, query, key).sort(
+    (a, b) =>
+      rankMatch(String(a[key]), query) - rankMatch(String(b[key]), query),
+  )
 }
 
 /**

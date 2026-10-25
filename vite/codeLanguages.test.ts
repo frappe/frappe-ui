@@ -8,6 +8,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { readFileSync, readdirSync } from 'node:fs'
+import * as vite from 'vite'
 import { build, optimizeDeps, resolveConfig, type RollupOutput } from 'vite'
 import { afterAll, describe, expect, it } from 'vitest'
 import { codeLanguages, OPTIONAL_LANGUAGES } from './codeLanguages.js'
@@ -210,13 +211,20 @@ describe('codeLanguages', () => {
 })
 
 /**
- * Vite pre-bundles bare specifiers with esbuild, and that step runs no Rollup
+ * Vite pre-bundles bare specifiers in a separate build that runs no user
  * plugin hooks. `frappe-ui/code-editor` is a bare specifier, so the optimizer
- * reaches `languages.ts` on its own, and an absent package there kills the dev
- * server instead of degrading. The plugin's esbuild twin covers it.
+ * reaches `languages.ts` on its own, and an absent package there breaks dev.
+ * The plugin's optimizer twin covers it: esbuild's before Vite 8, Rolldown's
+ * from Vite 8 on.
  */
 describe('codeLanguages in dependency pre-bundling', () => {
-  async function optimize(root: string, plugins = [codeLanguages()]) {
+  const CODE_EDITOR = 'frappe-ui/code-editor'
+
+  async function optimize(
+    root: string,
+    plugins = [codeLanguages()],
+    dep = CODE_EDITOR,
+  ) {
     const config = await resolveConfig(
       {
         root,
@@ -224,7 +232,7 @@ describe('codeLanguages in dependency pre-bundling', () => {
         logLevel: 'silent',
         plugins,
         optimizeDeps: {
-          include: ['frappe-ui/code-editor'],
+          include: [dep],
           // esbuild prints its own errors, and the failing case expects one.
           esbuildOptions: { logLevel: 'silent' },
         },
@@ -239,12 +247,38 @@ describe('codeLanguages in dependency pre-bundling', () => {
    * metadata rather than from the root: a project without a `package.json`
    * caches in `.vite`, not in `node_modules/.vite`.
    */
-  function optimized(metadata: Awaited<ReturnType<typeof optimizeDeps>>) {
-    const dir = dirname(metadata.optimized['frappe-ui/code-editor'].file)
+  function optimized(
+    metadata: Awaited<ReturnType<typeof optimizeDeps>>,
+    dep = CODE_EDITOR,
+  ) {
+    const dir = dirname(metadata.optimized[dep].file)
     return readdirSync(dir)
       .filter((name) => name.endsWith('.js'))
       .map((name) => readFileSync(join(dir, name), 'utf8'))
       .join('\n')
+  }
+
+  /**
+   * What an absent package the plugin did not stub does to pre-bundling.
+   * esbuild fails the step and the dev server exits. Rolldown keeps the import
+   * in the bundle, and the dev server then fails to serve the whole module
+   * with `Failed to resolve import "@codemirror/lang-json"`.
+   */
+  async function expectUnstubbed(
+    root: string,
+    plugins: Parameters<typeof optimize>[1],
+    dep = CODE_EDITOR,
+  ) {
+    const pending = optimize(root, plugins, dep)
+    if (!('rolldownVersion' in vite)) {
+      await expect(pending).rejects.toThrow(
+        /Could not resolve "@codemirror\/lang-json"/,
+      )
+      return
+    }
+    const code = optimized(await pending, dep)
+    expect(code).toContain('import("@codemirror/lang-json")')
+    expect(code).not.toContain("Cannot find module '@codemirror/lang-json'")
   }
 
   it('pre-bundles when the language package is absent', async () => {
@@ -259,12 +293,9 @@ describe('codeLanguages in dependency pre-bundling', () => {
   }, 30000)
 
   it('is the reason dev works', async () => {
-    // Without the twin, esbuild ends the optimize step and `vite dev` exits.
     const root = project(FRAPPE_UI)
 
-    await expect(optimize(root, [])).rejects.toThrow(
-      /Could not resolve "@codemirror\/lang-json"/,
-    )
+    await expectUnstubbed(root, [])
   }, 30000)
 
   it('leaves an installed package alone', async () => {
@@ -304,22 +335,6 @@ describe('codeLanguages in dependency pre-bundling', () => {
       'node_modules/other-ui/src/molecules/code-editor/languages.js': LANGUAGES,
     })
 
-    const config = await resolveConfig(
-      {
-        root,
-        configFile: false,
-        logLevel: 'silent',
-        plugins: [codeLanguages()],
-        optimizeDeps: {
-          include: ['other-ui/code-editor'],
-          esbuildOptions: { logLevel: 'silent' },
-        },
-      },
-      'serve',
-    )
-
-    await expect(optimizeDeps(config, true)).rejects.toThrow(
-      /Could not resolve "@codemirror\/lang-json"/,
-    )
+    await expectUnstubbed(root, [codeLanguages()], 'other-ui/code-editor')
   }, 30000)
 })
