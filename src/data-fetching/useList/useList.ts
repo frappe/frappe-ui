@@ -13,7 +13,11 @@ import {
   OnFetchErrorContext,
   UseFetchOptions,
 } from '@vueuse/core'
-import { FrappeResponseError, useFrappeFetch } from '../useFrappeFetch'
+import {
+  FrappeResponseError,
+  trackNewestRequest,
+  useFrappeFetch,
+} from '../useFrappeFetch'
 import { useAction } from '../useAction'
 import { parseFilters, makeGetParams, normalizeCacheKey } from '../utils'
 import { UseListOptions, UseListResponse } from './types'
@@ -114,9 +118,13 @@ export function useList<T extends { name: string }>(
     return transform ? applyTransform(structuredClone(rows), transform) : rows
   }
 
+  // `error` is destructured below, after `fetchOptions` is built.
+  const requests = trackNewestRequest(() => error.value)
+
   const fetchOptions: UseFetchOptions = {
     immediate,
     refetch,
+    beforeFetch: requests.beforeFetch,
     initialData: initialData || null,
     afterFetch: handleAfterFetch<T>({
       ...options,
@@ -129,7 +137,7 @@ export function useList<T extends { name: string }>(
       _limit,
       hasNextPage,
     }),
-    onFetchError: handleFetchError<T>(options),
+    onFetchError: requests.onFetchError(handleFetchError<T>(options)),
   }
 
   const {
@@ -412,5 +420,5 @@ function handleFetchError<T>({ onError }: UseListOptions<T>) {
       }
     }
     return ctx
-  } as UseFetchOptions['onFetchError']
+  }
 }

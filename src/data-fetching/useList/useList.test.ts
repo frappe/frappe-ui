@@ -764,4 +764,79 @@ describe('useList concurrency', () => {
     expect(users.setValue.data).toMatchObject({ name: 'quick-user' })
     expect(users.setValue.error).toBe(null)
   })
+
+  it('leaves error and onError alone when a newer reload aborts an older one', async () => {
+    const onError = vi.fn()
+    const users = useList<User>({
+      baseUrl,
+      doctype: 'User',
+      fields: ['name', 'email'],
+      immediate: false,
+      refetch: false,
+      onError,
+    })
+
+    await Promise.all([users.reload(), users.reload()])
+
+    expect(users.data).toHaveLength(20)
+    expect(users.error).toBe(null)
+    expect(onError).not.toHaveBeenCalled()
+  })
+
+  it('reports the failure of the newest reload when it supersedes an older one', async () => {
+    // Every list request fails. The second reload aborts the first, so the
+    // list must report the second request's server error exactly once, and
+    // never the first request's abort.
+    server.use(
+      http.get(url('/api/v2/document/User'), () => {
+        return HttpResponse.json(
+          {
+            errors: [
+              {
+                title: 'Server Error',
+                message: 'newest reload failed',
+                type: 'ValidationError',
+                indicator: 'red',
+              },
+            ],
+          },
+          { status: 500 },
+        )
+      }),
+    )
+    const onError = vi.fn()
+    const users = useList<User>({
+      baseUrl,
+      doctype: 'User',
+      fields: ['name', 'email'],
+      immediate: false,
+      refetch: false,
+      onError,
+    })
+
+    await Promise.all([users.reload(), users.reload()])
+
+    expect(users.error?.message).toContain('newest reload failed')
+    expect(onError).toHaveBeenCalledOnce()
+    expect(onError).toHaveBeenCalledWith(users.error)
+  })
+
+  it('still reports a request aborted by abort()', async () => {
+    const onError = vi.fn()
+    const users = useList<User>({
+      baseUrl,
+      doctype: 'User',
+      fields: ['name', 'email'],
+      immediate: false,
+      refetch: false,
+      onError,
+    })
+
+    const reloading = users.reload()
+    users.abort()
+    await reloading
+
+    expect(users.error).toBeTruthy()
+    expect(onError).toHaveBeenCalledOnce()
+  })
 })
