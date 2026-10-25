@@ -196,6 +196,13 @@ const displayValue = computed(() => {
   return currentValue.value === null ? '' : String(currentValue.value)
 })
 
+// The button trigger shows the placeholder when the model is `null`, or `''`
+// with no `''` option to name it. A value that is not in the loaded options
+// shows as text, the same as in input mode.
+const showsPlaceholder = computed(
+  () => !selectedOption.value && displayValue.value === '',
+)
+
 const triggerClasses = computed(() => [
   triggerBaseClasses,
   triggerSizeClasses(props.size),
@@ -614,10 +621,10 @@ defineSlots<ComboboxSlots>()
               <span
                 :class="[
                   'min-w-0 flex-1 truncate text-left font-normal leading-tighter',
-                  !selectedOption && 'text-ink-gray-4',
+                  showsPlaceholder && 'text-ink-gray-4',
                 ]"
               >
-                {{ selectedOption?.label ?? placeholder }}
+                {{ showsPlaceholder ? placeholder : displayValue }}
               </span>
 
               <slot name="suffix" v-bind="controlSlotProps">
