@@ -9,12 +9,12 @@ permissions:
 
 jobs:
   verify:
-    # Skips only the bot's release PR, which deletes the changesets it applies.
-    # A fork branch with the same name does not match.
+    # Skips only the release PR, which deletes the changesets it applies. A fork
+    # branch with the same name does not match. The author is not checked: the
+    # barista app opens the release PR, so it is not github-actions[bot].
     if: >-
       ${{ !(github.head_ref == 'changeset-release/main' &&
-      github.event.pull_request.head.repo.full_name == github.repository &&
-      github.event.pull_request.user.login == 'github-actions[bot]') }}
+      github.event.pull_request.head.repo.full_name == github.repository) }}
     runs-on: ubuntu-latest
     steps:
       # Checks out the merge commit, so HEAD^1 is the base branch.
