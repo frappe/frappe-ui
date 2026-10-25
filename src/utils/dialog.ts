@@ -7,6 +7,7 @@ import {
   type Ref,
 } from 'vue'
 import { moduleSingleton } from './moduleSingleton'
+import { useId } from './useId'
 import Dialog from '../components/Dialog/Dialog.vue'
 import { Button } from '../components/Button'
 import FormControl from '../components/FormControl/FormControl.vue'
@@ -551,8 +552,8 @@ export function prompt(args: PromptArgs): DialogHandle {
     if (state.loading) return
     const missing = checkRequired()
     if (missing) {
-      // Match the previous behavior — silently no-op so HTML5 required UI
-      // can take over via the underlying FormControl.
+      // Required fields are checked here because the form is `novalidate`.
+      // An empty required field blocks submit without a message.
       return
     }
     state.loading = true
@@ -579,6 +580,11 @@ export function prompt(args: PromptArgs): DialogHandle {
 
   const resolvedIcon = resolveIcon(args.theme, args.icon)
   const buttonTheme = themeToButtonTheme(args.theme)
+
+  const autofocusField = args.fields.find(
+    (field) =>
+      !field.type || field.type === 'text' || field.type === 'textarea',
+  )
 
   const renderField = (field: PromptField) => {
     const onUpdate = (val: any) => {
@@ -609,6 +615,7 @@ export function prompt(args: PromptArgs): DialogHandle {
         label: field.label,
         description: field.description,
         type: (field.type as any) || 'text',
+        autofocus: field === autofocusField || undefined,
         required: field.required,
         placeholder: field.placeholder,
         options,
@@ -637,6 +644,7 @@ export function prompt(args: PromptArgs): DialogHandle {
   const component = defineComponent({
     name: 'ImperativePromptDialog',
     setup() {
+      const formId = useId()
       return () =>
         h(
           Dialog,
@@ -655,17 +663,31 @@ export function prompt(args: PromptArgs): DialogHandle {
           },
           {
             default: () =>
-              h('div', { class: 'space-y-3' }, [
-                args.message
-                  ? h(
-                      'p',
-                      { class: 'text-p-base text-ink-gray-7' },
-                      args.message,
-                    )
-                  : null,
-                ...args.fields.map(renderField),
-                state.error ? h(ErrorMessage, { message: state.error }) : null,
-              ]),
+              h(
+                'form',
+                {
+                  id: formId,
+                  class: 'space-y-3',
+                  novalidate: true,
+                  onSubmit: (event: Event) => {
+                    event.preventDefault()
+                    onSubmit()
+                  },
+                },
+                [
+                  args.message
+                    ? h(
+                        'p',
+                        { class: 'text-p-base text-ink-gray-7' },
+                        args.message,
+                      )
+                    : null,
+                  ...args.fields.map(renderField),
+                  state.error
+                    ? h(ErrorMessage, { message: state.error })
+                    : null,
+                ],
+              ),
             actions: () =>
               h('div', { class: 'flex flex-row-reverse gap-2' }, [
                 h(Button, {
@@ -673,7 +695,8 @@ export function prompt(args: PromptArgs): DialogHandle {
                   variant: 'solid',
                   theme: buttonTheme,
                   loading: state.loading,
-                  onClick: onSubmit,
+                  type: 'submit',
+                  form: formId,
                 }),
                 h(Button, {
                   label: args.cancelLabel || 'Cancel',
