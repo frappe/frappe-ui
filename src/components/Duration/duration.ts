@@ -194,8 +194,9 @@ export function parseDuration(
 
 // Colon-separated: h:m:s, or two groups ending in the smallest unit (m:s or
 // h:m), or one such group (:s or :m). Groups are not bounded to 0-59:
-// out-of-range parts overflow by design, so "1:75" parses to 135s (1m + 75s)
-// and "5:99" to 399s. This mirrors stopwatch-style entry and is harmless.
+// out-of-range parts overflow by design. In seconds mode "1:75" parses to 135s
+// (1m + 75s) and "5:99" to 399s; in minute mode "1:75" is 8100s (1h + 75m).
+// This mirrors stopwatch-style entry and is harmless.
 function parseColon(input: string, unitSeconds: number): number | null {
   const match = input.match(/^(\d+):(\d+):(\d+)$|^(\d+):(\d+)$|^:(\d+)$/)
   if (!match) return null

@@ -35,7 +35,7 @@
   },
   {
     name: 'smallestUnit',
-    description: 'The smallest unit of the `short` and `long` presets and of the edit text.\n`minute` rounds to the nearest minute, and a typed value is saved rounded.\nDefaults to `second`.',
+    description: 'The smallest unit of the `short` and `long` presets and of the edit text.\n`minute` rounds to the nearest minute, and a typed value is saved rounded.\nIn a minute field, a bare number is minutes and `a:b` is hours and\nminutes: `15` is 15 minutes and `1:30` is 1h 30m. Defaults to `second`.',
     required: false,
     type: 'DurationSmallestUnit',
     default: '"second"'
