@@ -29,7 +29,7 @@ Three cross-cutting conventions to know before reading anything else:
 All from the `frappe-ui` root entry.
 
 - [Alert](https://ui.frappe.io/docs/components/alert): inline status row or banner; a title alone renders one row, a description or second action switches to a banner.
-- [Avatar](https://ui.frappe.io/docs/components/avatar): user/entity avatar with image or label-derived initials; `AvatarBadge` in its `#indicator` slot shows a status dot.
+- [Avatar](https://ui.frappe.io/docs/components/avatar): user/entity avatar with image or label-derived initials.
 - [Badge](https://ui.frappe.io/docs/components/badge): status pill; same `variant` + `theme` axes as Button.
 - [BottomSheet](https://ui.frappe.io/docs/components/bottomsheet): panel that slides up from the bottom edge; the mobile counterpart to Dialog, same modal semantics.
 - [Breadcrumbs](https://ui.frappe.io/docs/components/breadcrumbs): page-header trail; takes `items: { label, route?, href?, onClick? }[]`.
