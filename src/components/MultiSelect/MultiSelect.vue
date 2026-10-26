@@ -16,6 +16,7 @@ import { useReactiveSlots } from '../../composables/useReactiveSlots'
 import { usePortalTarget } from '../../composables/usePortalTarget'
 import { useEmptyValueMapping } from '../shared/selection/useEmptyValueMapping'
 import { useFilteredGroups } from '../shared/selection/useFilteredGroups'
+import { rankMatch } from '../../utils/rankMatch'
 import { useIsModelBound } from '../shared/selection/useIsModelBound'
 import OptionIcon from '../shared/selection/OptionIcon.vue'
 import {
@@ -110,6 +111,22 @@ const {
   hasDescriptionSlot: () => Boolean(slots.description),
 })
 
+const triggerAttrs = computed(() => {
+  const { class: _class, style: _style, ...rest } = attrs
+  return rest
+})
+
+// The list is named like the field: by its label, else by the name given to
+// the component itself.
+const listAttrs = computed(() =>
+  props.label || slots.label
+    ? { 'aria-labelledby': labelId.value }
+    : {
+        'aria-label': attrs['aria-label'],
+        'aria-labelledby': attrs['aria-labelledby'],
+      },
+)
+
 const hasLabeling = computed(() => {
   return Boolean(
     props.label ||
@@ -195,6 +212,7 @@ const filteredGroups = useFilteredGroups({
   hasTypedSinceOpen,
   query,
   matches: matchesOption,
+  rank: (item, q) => rankMatch(item.label, q),
   filterable: () => props.filterable ?? true,
 })
 
@@ -305,6 +323,21 @@ function handleRootOpenChange(value: boolean) {
   open.value = value
 }
 
+const highlightedValue = ref<unknown>()
+
+const highlightedOption = computed<MultiSelectOption | null>(() => {
+  if (highlightedValue.value === undefined) return null
+  const value = toExternalValue(highlightedValue.value)
+  return rawOptions.value.find((option) => option.value === value) ?? null
+})
+
+watch(highlightedOption, (option) => emit('highlight', option))
+
+// reka reports each new highlight but never its end, which comes with closing.
+watch(open, (isOpen) => {
+  if (!isOpen) highlightedValue.value = undefined
+})
+
 function handleInputChange(event: Event) {
   setQuery((event.target as HTMLInputElement).value)
 }
@@ -378,6 +411,7 @@ defineSlots<MultiSelectSlots>()
       :ignore-filter="true"
       @update:modelValue="handleRootModelValueChange"
       @update:open="handleRootOpenChange"
+      @highlight="highlightedValue = $event?.value"
     >
       <ComboboxAnchor as-child @click="handleTriggerClick">
         <slot v-if="$slots.trigger" name="trigger" v-bind="slotProps" />
@@ -392,6 +426,7 @@ defineSlots<MultiSelectSlots>()
         <button
           v-else
           ref="trigger"
+          v-bind="triggerAttrs"
           type="button"
           :class="[
             triggerClasses,
@@ -483,6 +518,7 @@ defineSlots<MultiSelectSlots>()
 
       <ComboboxPortal :to="portalTarget">
         <ComboboxContent
+          v-bind="listAttrs"
           data-slot="content"
           data-selection
           :data-variant="variant"

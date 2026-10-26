@@ -103,7 +103,7 @@ time.
 | `staleOnError` | `boolean`                                  | `false`                       | With `cacheKey`, a failed fetch keeps showing the cached rows. A Frappe error response still clears them.    |
 | `transform`    | `(rows: T[]) => T[]`                       |                               | Changes the rows before they go into `data`. It gets every row loaded so far, from all pages, and runs again after each new page or row change. It gets a copy, so it may change the rows in place. |
 | `onSuccess`    | `(rows: T[]) => void`                      |                               | Called with all loaded rows after each successful fetch.                                                     |
-| `onError`      | `(error: Error) => void`                   |                               | Called with the error after each failed fetch.                                                               |
+| `onError`      | `(error: Error) => void`                   |                               | Called with the error after each failed fetch. A fetch that a newer fetch replaces does not count: it is aborted silently. |
 | `url`          | `string`                                   | `/api/v2/document/<doctype>`  | Replaces the URL of the fetch. The list params are still added.                                              |
 | `baseUrl`      | `string`                                   | `''`                          | A prefix for every request URL.                                                                              |
 
@@ -123,7 +123,7 @@ time.
 | `canAbort`                      | `boolean`                 | `true` while a fetch that can be aborted is in flight.                                              |
 | `aborted`                       | `boolean`                 | `true` if the last fetch was aborted.                                                               |
 | `reload()`                      | `() => Promise`           | Fetches again from `start`. Resolves even if it fails, so check `error`. Also available as `execute()` and `fetch()`. |
-| `abort()`                       | `() => void`              | Aborts the fetch in flight.                                                                         |
+| `abort()`                       | `() => void`              | Aborts the fetch in flight. This sets `error` and calls `onError`.                                  |
 | `next()`                        | `() => void`              | Moves `start` forward one page and fetches it.                                                      |
 | `previous()`                    | `() => void`              | Moves `start` back one page and fetches it.                                                         |
 | `updateRow(doc)`                | `(doc) => void`           | Changes the row with the same `name` in `data`, without a request. Only fields the row has change. Pass values as the server sends them: `transform` runs again on the row. |

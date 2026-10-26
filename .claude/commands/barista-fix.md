@@ -57,6 +57,7 @@ Nothing else.
    - Don't add tests unless the change is risky enough that tests are essential and writing them is also small. Otherwise call out "tests not added" in the PR body so the maintainer can add them on the PR.
    - Don't run formatters/linters across unrelated files. The diff should be only the lines that matter.
    - Don't add comments justifying the fix in the code. The PR body and the linked issue carry that context.
+   - Add a changeset. Write `.changeset/barista-issue-<ISSUE_NUMBER>.md` by hand as described in `.claude/skills/changeset/SKILL.md`. Use `patch`. If the fix needs `minor`, bail: the PR needs a maintainer.
 
 5. **Sanity-check the diff.** `git status` then `git diff` (or `git diff --stat` first if large). If the diff touches a denylisted path, **stop and bail to step 7**. If the diff is unexpectedly large (>~150 lines or >5 files), reconsider — fix mode is for small.
 

@@ -100,6 +100,14 @@ export function useEditor(
     extensions,
     editable: toValue(options.editable) ?? true,
     autofocus: options.autofocus,
+    editorProps: {
+      handleDOMEvents: {
+        // ProseMirror's dragstart runs even when read-only and overwrites the drag
+        // data; claiming the event (without preventDefault) keeps the browser's
+        // native payload, such as a link URL.
+        dragstart: (view) => !view.editable,
+      },
+    },
     onUpdate: ({ editor: tiptapEditor }) => {
       if (!isCollaborationMode && options.content && !applyingExternalUpdate) {
         const value = serialize(tiptapEditor)
@@ -178,12 +186,18 @@ export function useEditor(
 
       applyingExternalUpdate = true
       try {
-        editor.value.commands.setContent(
-          content ?? '',
-          format === 'markdown'
-            ? { emitUpdate: false, contentType: 'markdown' }
-            : { emitUpdate: false },
-        )
+        // Kept out of history: a document loaded from outside is not an edit,
+        // so undo must not revert it (e.g. back to empty before a draft loaded).
+        editor.value
+          .chain()
+          .setContent(
+            content ?? '',
+            format === 'markdown'
+              ? { emitUpdate: false, contentType: 'markdown' }
+              : { emitUpdate: false },
+          )
+          .setMeta('addToHistory', false)
+          .run()
         // Same reason as at construction: while unmounted there are no
         // plugins, so nothing normalizes what `setContent` just parsed.
         // No-op when there is nothing to join.

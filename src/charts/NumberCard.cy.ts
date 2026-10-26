@@ -78,6 +78,14 @@ describe('NumberCard', () => {
       cy.get('.lucide-arrow-up-right').should('not.exist')
       cy.get('.lucide-arrow-down-left').should('not.exist')
     })
+
+    it('reads a delta that prints as zero as flat', () => {
+      mountCard({ delta: 0.04, deltaSuffix: '%' })
+      card().should('contain.text', '0%')
+      cy.get('.lucide-arrow-up-right').should('not.exist')
+      cy.get('.text-ink-gray-6').should('contain.text', '0%')
+      cy.get('.text-ink-green-7').should('not.exist')
+    })
   })
 
   describe('sparkline', () => {
@@ -106,6 +114,89 @@ describe('NumberCard', () => {
     it('keeps the sparkline out of the accessible tree', () => {
       mountCard({ sparkline: { data: [1, 5, 3, 8] } })
       cy.get('[aria-hidden="true"] svg').should('exist')
+    })
+  })
+
+  describe('progress', () => {
+    const bar = () => cy.get('[role="meter"]')
+    const fill = () => bar().children().first().children().first()
+
+    it('fills a bar to the reading’s percent', () => {
+      mountCard({ progress: { value: 40 } })
+      bar().should('have.attr', 'aria-valuenow', '40')
+      bar().children().should('have.length', 1)
+      fill().should('have.attr', 'style').and('contain', 'width: 40%')
+    })
+
+    it('fills in the sparkline’s blue by default', () => {
+      mountCard({
+        sparkline: { data: [1, 5, 3, 8], type: 'line' },
+        progress: { value: 40 },
+      })
+      cy.get('[data-slot="chart-card"] svg path[fill="none"]').then(($line) => {
+        fill().should(
+          'have.css',
+          'background-color',
+          getComputedStyle($line[0]).stroke,
+        )
+      })
+    })
+
+    it('fills in the color the caller named', () => {
+      mountCard({ progress: { value: 40, color: 'rgb(245, 158, 11)' } })
+      fill().should('have.css', 'background-color', 'rgb(245, 158, 11)')
+    })
+
+    it('sits under the change, as a sparkline does', () => {
+      mountCard({ delta: 5, progress: { value: 40 } })
+      cy.contains('5').then(($delta) => {
+        bar().then(($bar) => {
+          expect($bar[0].getBoundingClientRect().top).to.be.greaterThan(
+            $delta[0].getBoundingClientRect().bottom,
+          )
+        })
+      })
+    })
+
+    it('splits past 100 where 100 falls', () => {
+      mountCard({ progress: { value: 125 } })
+      bar().children().should('have.length', 2)
+      bar()
+        .children()
+        .first()
+        .should('have.attr', 'style')
+        .and('contain', 'width: 80%')
+    })
+
+    it('reads past 100 as its percent', () => {
+      mountCard({ progress: { value: 125 } })
+      bar()
+        .should('have.attr', 'aria-valuetext', '125%')
+        .and('have.attr', 'aria-valuemax', '125')
+    })
+
+    it('reads its percent as a whole number', () => {
+      mountCard({ progress: { value: (621_800 / 750_000) * 100 } })
+      bar().should('have.attr', 'aria-valuetext', '83%')
+    })
+
+    it('draws nothing for a percent that is not finite', () => {
+      mountCard({ progress: { value: NaN } })
+      bar().should('not.exist')
+      mountCard({ progress: { value: Infinity } })
+      bar().should('not.exist')
+      mountCard({ progress: { value: -Infinity } })
+      bar().should('not.exist')
+    })
+
+    it('keeps a tiny reading visible', () => {
+      mountCard({ progress: { value: 0.05 } })
+      fill().invoke('outerWidth').should('be.gte', 4)
+    })
+
+    it('draws nothing for a card with no reading', () => {
+      mountCard({ value: null, progress: { value: 40 } })
+      bar().should('not.exist')
     })
   })
 
@@ -187,6 +278,24 @@ describe('NumberCard', () => {
       mountCard({ value: null }, { empty: () => h('span', 'Nothing yet') })
 
       card().should('contain.text', 'Nothing yet').and('not.contain.text', '—')
+    })
+  })
+
+  describe('title row', () => {
+    const titleRow = () => cy.get('[data-slot="chart-header"]')
+
+    it('is left out when there is nothing to put in it', () => {
+      mountCard({ title: undefined })
+      card().should('contain.text', '12,300')
+      titleRow().should('not.exist')
+    })
+
+    it('stays for an actions slot alone', () => {
+      mountCard(
+        { title: undefined },
+        { actions: () => h('button', 'Week') },
+      )
+      titleRow().should('contain.text', 'Week')
     })
   })
 

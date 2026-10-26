@@ -54,6 +54,12 @@
     type: 'boolean'
   },
   {
+    name: 'centered',
+    description: 'Centres the plot and its legend in the height the card has to spare, for\na plot as tall as its content. Otherwise the plot takes that height.',
+    required: false,
+    type: 'boolean'
+  },
+  {
     name: 'dir',
     description: 'Forces layout direction; defaults to document.documentElement.dir',
     required: false,

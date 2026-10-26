@@ -15,10 +15,9 @@
   },
   {
     name: 'placeholder',
-    description: 'Placeholder shown when the input is empty. Defaults to `1h 30m 45s`.',
+    description: 'Placeholder shown when the input is empty. Defaults to `1h 30m` when\n`smallestUnit` is `minute`, and `1h 30m 45s` otherwise.',
     required: false,
-    type: 'string',
-    default: '"1h 30m 45s"'
+    type: 'string'
   },
   {
     name: 'format',
@@ -26,6 +25,20 @@
     required: false,
     type: 'DurationFormat',
     default: '"short"'
+  },
+  {
+    name: 'largestUnit',
+    description: 'The biggest unit of the `short` and `long` presets and of the edit text.\n`day` shows 93784 as `1d 2h 3m 4s`. Defaults to `hour` (`26h 3m 4s`).',
+    required: false,
+    type: 'DurationLargestUnit',
+    default: '"hour"'
+  },
+  {
+    name: 'smallestUnit',
+    description: 'The smallest unit of the `short` and `long` presets and of the edit text.\n`minute` rounds to the nearest minute, and a typed value is saved rounded.\nIn a minute field, a bare number is minutes and `a:b` is hours and\nminutes: `15` is 15 minutes and `1:30` is 1h 30m. Defaults to `second`.',
+    required: false,
+    type: 'DurationSmallestUnit',
+    default: '"second"'
   },
   {
     name: 'size',

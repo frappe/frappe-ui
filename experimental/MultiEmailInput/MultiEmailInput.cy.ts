@@ -18,6 +18,8 @@ function host(
     error?: string
     disabled?: boolean
     size?: 'xs' | 'sm' | 'md' | 'lg'
+    emptyText?: string
+    empty?: string
   } = {},
 ) {
   return defineComponent({
@@ -38,18 +40,56 @@ function host(
           { 'data-cy': 'set-prog', onClick: this.setProgrammatically },
           'set',
         ),
+        h(
+          MultiEmailInput,
+          {
+            modelValue: this.model,
+            'onUpdate:modelValue': (v: string[]) => (this.model = v),
+            onInvalid: (v: string) => (this.invalid = v),
+            options: options.suggestions ?? members,
+            label: options.label,
+            required: options.required,
+            error: options.error,
+            disabled: options.disabled,
+            size: options.size,
+            emptyText: options.emptyText,
+            placeholder: 'Add email…',
+          },
+          options.empty ? { empty: () => options.empty } : undefined,
+        ),
+      ]
+    },
+  })
+}
+
+// A host that fetches on `update:query` after `delay` ms, like the
+// AsyncSuggestions story, with a second input to move focus to.
+function asyncHost(delay = 300) {
+  return defineComponent({
+    setup() {
+      const model = ref<string[]>([])
+      const options = ref<MultiEmailOption[]>([])
+      const loading = ref(false)
+      let timer: ReturnType<typeof setTimeout>
+      const search = (q: string) => {
+        clearTimeout(timer)
+        loading.value = true
+        timer = setTimeout(() => {
+          const s = q.trim().toLowerCase()
+          options.value = members.filter((o) => o.value.includes(s))
+          loading.value = false
+        }, delay)
+      }
+      return () => [
+        h('span', { 'data-cy': 'loading' }, String(loading.value)),
         h(MultiEmailInput, {
-          modelValue: this.model,
-          'onUpdate:modelValue': (v: string[]) => (this.model = v),
-          onInvalid: (v: string) => (this.invalid = v),
-          options: options.suggestions ?? members,
-          label: options.label,
-          required: options.required,
-          error: options.error,
-          disabled: options.disabled,
-          size: options.size,
-          placeholder: 'Add email…',
+          modelValue: model.value,
+          'onUpdate:modelValue': (v: string[]) => (model.value = v),
+          'onUpdate:query': search,
+          options: options.value,
+          loading: loading.value,
         }),
+        h('input', { 'data-cy': 'other' }),
       ]
     },
   })
@@ -142,6 +182,91 @@ describe('MultiEmailInput', () => {
     cy.get('[data-slot="input"]').focus()
     cy.get('[data-slot="item"]').should('have.length', 1)
     cy.get('[data-slot="item"]').should('contain.text', 'Grace Hopper')
+  })
+
+  it('opens the suggestions on focus', () => {
+    cy.mount(host())
+    cy.get('[data-slot="input"]').focus()
+    cy.get('[data-slot="item"]').should('have.length', 2)
+  })
+
+  it('keeps the list closed on focus when there is nothing to suggest', () => {
+    cy.mount(host({ suggestions: [] }))
+    cy.get('[data-slot="input"]').focus()
+    cy.get('[data-slot="content"]').should('not.exist')
+  })
+
+  it('keeps the list closed while a typed address matches nothing', () => {
+    cy.mount(host({ suggestions: [] }))
+    cy.get('[data-slot="input"]').type('new@')
+    cy.get('[data-slot="content"]').should('not.exist')
+    cy.get('[data-slot="input"]').type('person.com')
+    cy.get('[data-create="true"]').should('exist')
+  })
+
+  it('shows `emptyText` when a typed query matches nothing', () => {
+    cy.mount(host({ suggestions: [], emptyText: 'No matches' }))
+    cy.get('[data-slot="input"]').type('zz')
+    cy.get('[data-slot="empty"]').should('have.text', 'No matches')
+  })
+
+  it('shows the `empty` slot when a typed query matches nothing', () => {
+    cy.mount(host({ suggestions: [], empty: 'Nobody here' }))
+    cy.get('[data-slot="input"]').type('zz')
+    cy.get('[data-slot="empty"]').should('have.text', 'Nobody here')
+  })
+
+  it('opens on focus only once the first fetch has results', () => {
+    cy.mount(asyncHost())
+    cy.get('[data-slot="input"]').focus()
+    cy.get('[data-cy="loading"]').should('have.text', 'true')
+    cy.get('[data-slot="content"]').should('not.exist')
+    cy.get('[data-slot="item"]').should('have.length', 2)
+  })
+
+  it('shows the spinner while a typed query loads', () => {
+    cy.mount(asyncHost())
+    cy.get('[data-slot="input"]').type('ada')
+    cy.get('[data-slot="loading"]').should('exist')
+    cy.get('[data-slot="item"]').should('have.length', 1)
+  })
+
+  it('reopens the list on click after Escape', () => {
+    cy.mount(host())
+    cy.get('[data-slot="input"]').focus()
+    cy.get('[data-slot="item"]').should('have.length', 2)
+    cy.get('[data-slot="input"]').type('{esc}')
+    cy.get('[data-slot="content"]').should('not.exist')
+    cy.get('[data-slot="input"]').click()
+    cy.get('[data-slot="item"]').should('have.length', 2)
+  })
+
+  // While the list is hidden reka never sees the blur or Escape, so the
+  // component must close itself or a late fetch reopens a field the user left.
+  it('stays closed when results land after focus has left', () => {
+    cy.mount(asyncHost())
+    cy.get('[data-slot="input"]').focus()
+    cy.get('[data-cy="loading"]').should('have.text', 'true')
+    cy.get('[data-cy="other"]').focus()
+    cy.get('[data-cy="loading"]').should('have.text', 'false')
+    cy.wait(50)
+    cy.get('[data-slot="content"]').should('not.exist')
+  })
+
+  it('stays closed when results land after Escape', () => {
+    cy.mount(asyncHost())
+    cy.get('[data-slot="input"]').focus().type('{esc}')
+    cy.get('[data-cy="loading"]').should('have.text', 'false')
+    cy.wait(50)
+    cy.get('[data-slot="content"]').should('not.exist')
+  })
+
+  it('clears unmatched typed text on blur', () => {
+    cy.mount(asyncHost(0))
+    cy.get('[data-slot="input"]').type('zz@')
+    cy.get('[data-slot="content"]').should('not.exist')
+    cy.get('[data-cy="other"]').focus()
+    cy.get('[data-slot="input"]').should('have.value', '')
   })
 
   it('renders the error region and marks the input invalid', () => {

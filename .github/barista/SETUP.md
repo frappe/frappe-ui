@@ -19,8 +19,8 @@ existing credentials. The settings use the documented
 [Greptile directory format](https://www.greptile.com/docs/code-review/greptile-config-reference).
 
 The Barista command retains its own tools, invocation details, and comment
-format. Fix mode remains a Barista operation. The shared changelog rule is
-review guidance, not a deterministic required check.
+format. Fix mode remains a Barista operation. The `Verify changesets` check
+requires a changeset. Review checks that its bump and text are right.
 CodeRabbit's repository configuration has been removed. Disabling an installed
 CodeRabbit app requires a separate change to its repository or organization settings.
 The standalone `.semgrep.yml` remains available, but Greptile does not run it

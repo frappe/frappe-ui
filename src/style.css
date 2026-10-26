@@ -14,3 +14,15 @@
 .no-transition *::after {
   transition: none !important;
 }
+
+/* MobileShell: iOS 26 sizes an installed web app's viewport short by the status
+   bar height while the page is shorter than the screen, so the fixed shell and
+   its tab bar stop above a strip of page background (WebKit 301108). A page at
+   least as tall as the screen gets the full viewport. The cap keeps the page
+   from scrolling in apps with an opaque status bar, where 100lvh overstates the
+   viewport and the top inset is 0 (WebKit 316008). */
+@media (display-mode: standalone) {
+  html {
+    min-height: min(100lvh, calc(100% + env(safe-area-inset-top)));
+  }
+}

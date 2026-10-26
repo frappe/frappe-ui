@@ -139,10 +139,10 @@ const switchClasses = computed(() => {
     // The focus ring is applied globally via :focus-visible. In the padded
     // padded rows it is shown on the row instead, so suppress it on the control.
     props.padded ? 'focus:outline-none focus:ring-0' : '',
-    'disabled:cursor-not-allowed disabled:bg-surface-gray-3',
+    'disabled:cursor-not-allowed',
     model.value
-      ? 'bg-surface-gray-10 enabled:hover:bg-surface-gray-9 active:bg-surface-gray-8 group-hover:enabled:bg-surface-gray-9'
-      : 'bg-surface-gray-4 enabled:hover:bg-surface-gray-5 active:bg-surface-gray-6 group-hover:enabled:bg-surface-gray-5',
+      ? 'bg-surface-gray-10 enabled:hover:bg-surface-gray-9 active:bg-surface-gray-8 group-hover:enabled:bg-surface-gray-9 disabled:bg-surface-gray-7'
+      : 'bg-surface-gray-4 enabled:hover:bg-surface-gray-5 active:bg-surface-gray-6 group-hover:enabled:bg-surface-gray-5 disabled:bg-surface-gray-3',
     props.size === 'md'
       ? 'h-5 w-8 border-[3px]'
       : props.size === 'sm'

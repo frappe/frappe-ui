@@ -127,6 +127,32 @@ export function oklchToHex(color: Oklch): string {
   return toHex(oklchToRgb(clampToGamut(color)))
 }
 
+const CSS_OKLCH =
+  /^oklch\(\s*([\d.]+%?)\s+([\d.]+%?)\s+([\d.]+|none)(?:deg)?\s*(?:\/\s*([\d.]+%?)\s*)?\)$/i
+
+/**
+ * A CSS `oklch()` color as hex, or as `rgba()` when it carries an alpha below
+ * 1, clamped into sRGB. Null for anything else.
+ */
+export function oklchCssToSrgb(text: string): string | null {
+  const match = CSS_OKLCH.exec(text.trim())
+  if (!match) return null
+  const [, lightness, chroma, hue, alpha] = match
+  const number = (value: string, percentOf: number) =>
+    value.endsWith('%')
+      ? (parseFloat(value) / 100) * percentOf
+      : parseFloat(value)
+  const hex = oklchToHex({
+    l: number(lightness, 1),
+    c: number(chroma, 0.4),
+    h: hue === 'none' ? 0 : parseFloat(hue),
+  })
+  const opacity = alpha === undefined ? 1 : number(alpha, 1)
+  if (opacity >= 1) return hex
+  const { r, g, b } = parseHex(hex)
+  return `rgba(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}, ${opacity})`
+}
+
 export function hexToOklch(hex: string): Oklch {
   return rgbToOklch(parseHex(hex))
 }

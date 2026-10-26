@@ -1,6 +1,10 @@
 import { computed, reactive, ref, watch, type Ref } from 'vue'
 import type { EChartsCoreOption } from 'echarts/core'
-import { dataLabelOverflow, nextAxisMax } from './dataLabelFit'
+import {
+  dataLabelOverflow,
+  nextAxisTick,
+  referenceLabelOverflow,
+} from './dataLabelFit'
 import { useChart } from './useChart'
 import { usePlotKeyboard } from './usePlotKeyboard'
 import { useTooltipDismiss } from './useTooltipDismiss'
@@ -17,11 +21,12 @@ import { pruneHiddenSeries, toggleHiddenSeries } from '../hiddenSeries'
 import { buildTooltipItems } from '../tooltipItems'
 import {
   seriesLabel,
+  seriesWeights,
   type AxisChartFormatters,
   type ResolvedTooltipColumn,
 } from '../seriesData'
-import { formatAxisValue, formatLabel, formatValue } from '../format'
-import { useChartTokens } from '../tokens'
+import { formatAxisValue, formatValue } from '../format'
+import { useChartTokens, useResolvedConfig } from '../tokens'
 import { documentDir, markName, plotReading } from '../utils'
 import type {
   AxisChartConfig,
@@ -70,7 +75,7 @@ export function useAxisChart<C extends AxisChartConfig>(
   const plotEl = ref<HTMLElement>()
   const hiddenSeries = args.hiddenSeries ?? ref<string[]>([])
 
-  const config = computed(args.config)
+  const config = useResolvedConfig(args.config, plotEl)
   const format = computed<AxisChartFormatters>(() => args.format?.() ?? {})
   const horizontal = computed(() => Boolean(args.horizontal?.()))
   const stackShares = computed(() => args.stackShares?.())
@@ -106,15 +111,11 @@ export function useAxisChart<C extends AxisChartConfig>(
   const axisTitlePlacement = computed<AxisTitlePlacement>(() =>
     horizontal.value ? 'bottom' : 'top',
   )
-  const yAxisTitle = computed(() =>
-    config.value.yAxis?.title
-      ? formatLabel(config.value.yAxis.title)
-      : undefined,
-  )
+  const yAxisTitle = computed(() => config.value.yAxis?.title || undefined)
   const y2AxisTitle = computed(() =>
     config.value.y2Axis?.title &&
     hasSecondaryValueAxis(config.value, horizontal.value)
-      ? formatLabel(config.value.y2Axis.title)
+      ? config.value.y2Axis.title
       : undefined,
   )
 
@@ -174,9 +175,10 @@ export function useAxisChart<C extends AxisChartConfig>(
   let raisedFor: EChartsCoreOption | undefined
 
   /**
-   * A data label at the top of the scale reaches past the plot. The value axis
-   * goes up one tick to make room for it, so the plot keeps its place in the
-   * card whatever the numbers are. An axis end the caller fixed is theirs.
+   * A data label or a reference-line label at the top of the scale reaches
+   * past the plot. The value axis goes up one tick to make room for it, so the
+   * plot keeps its place in the card whatever the numbers are. An axis end the
+   * caller fixed is theirs.
    */
   function fitLabels() {
     const instance = chart.value
@@ -192,21 +194,36 @@ export function useAxisChart<C extends AxisChartConfig>(
         : 'right'
       : 'top'
     if (typeof option.grid[side] !== 'number') return
-    const overflow = dataLabelOverflow(instance, side, option.grid[side])
-    if (overflow === null || overflow <= 0) return
+    const overflow = Math.max(
+      dataLabelOverflow(instance, side, option.grid[side]) ?? -Infinity,
+      referenceLabelOverflow(instance, side, option.grid[side]) ?? -Infinity,
+    )
+    if (overflow <= 0) return
 
-    const max = nextAxisMax(instance, valueAxis)
-    if (max === null) return
+    const tick = nextAxisTick(instance, valueAxis)
+    if (tick === null) return
     raisedFor = option
-    instance.setOption({ [valueAxis]: [{ max }] })
+    instance.setOption({ [valueAxis]: [tick] })
   }
 
+  // Apart from the legend entries, which rebuild on every toggle: hiding a
+  // series does not change its weight.
+  const weights = computed(() =>
+    seriesWeights(
+      rows.value,
+      config.value.series.map((series) => series.name),
+    ),
+  )
+
+  // No number is printed beside an axis series: a sum is wrong for a rate or
+  // an average, and the chart cannot tell which one it was handed.
   const legendItems = computed<ChartLegendItem[]>(() =>
     config.value.series.map((series) => ({
       name: series.name,
       label: seriesLabel(series),
       color: seriesColors.value[series.name],
       hidden: hiddenSeries.value.includes(series.name),
+      weight: weights.value[series.name],
     })),
   )
 
@@ -219,7 +236,7 @@ export function useAxisChart<C extends AxisChartConfig>(
     hiddenSeries.value = toggleHiddenSeries(
       hiddenSeries.value,
       name,
-      config.value.series.length,
+      visibleSeries.value.map((series) => series.name),
     )
   }
 

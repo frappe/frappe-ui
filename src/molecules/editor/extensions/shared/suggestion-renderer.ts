@@ -5,6 +5,7 @@ import type {
 } from '@tiptap/suggestion'
 import type { Component } from 'vue'
 import {
+  autoUpdate,
   computePosition,
   flip,
   offset,
@@ -40,6 +41,9 @@ export function createSuggestionRenderer(
   let isActive = false
   // Monotonic token; a stale onUpdate from a superseded query bails.
   let renderToken = 0
+  // Monotonic token; a stale computePosition settling later bails.
+  let positionToken = 0
+  let cleanupAutoUpdate: (() => void) | null = null
 
   function getListExpose(): SuggestionListExpose | null {
     const ref = renderer?.ref as SuggestionListExpose | null | undefined
@@ -52,6 +56,7 @@ export function createSuggestionRenderer(
     const rect = getReferenceClientRect()
     if (!rect) return
     const reference = { getBoundingClientRect: () => rect }
+    const token = ++positionToken
     void computePosition(reference, floatingEl, {
       placement: floatingOptions?.placement ?? 'bottom-start',
       middleware: [
@@ -60,7 +65,7 @@ export function createSuggestionRenderer(
         shift({ padding: 8 }),
       ],
     }).then(({ x, y }) => {
-      if (!floatingEl) return
+      if (!floatingEl || token !== positionToken) return
       Object.assign(floatingEl.style, {
         position: 'absolute',
         left: `${x}px`,
@@ -91,9 +96,29 @@ export function createSuggestionRenderer(
 
     floatingEl = wrapper
     floatingEl.style.position = 'absolute'
+    // A modal Dialog lets this <body> popup take clicks when the editor is
+    // inside it. A popup left open in an editor behind the Dialog stays
+    // unclickable, so it can't insert into that editor.
+    if (props.editor.view.dom.closest('[role=dialog]'))
+      floatingEl.style.pointerEvents = 'auto'
+    floatingEl.dataset.editorFloating = ''
     document.body.appendChild(floatingEl)
     getReferenceClientRect = props.clientRect as () => DOMRect | null
-    updatePosition()
+
+    // Positions once, then keeps the popup on the caret through scroll, window
+    // resize and its own height changes (`flip()` measures a height that async
+    // rows and late fonts change after the fact). autoUpdate reads only
+    // `contextElement`, to find the editor's scroll ancestors; `updatePosition`
+    // reads the caret rect itself.
+    cleanupAutoUpdate = autoUpdate(
+      {
+        getBoundingClientRect: () =>
+          getReferenceClientRect?.() ?? new DOMRect(),
+        contextElement: props.editor.view.dom,
+      },
+      floatingEl,
+      updatePosition,
+    )
   }
 
   return {
@@ -139,6 +164,9 @@ export function createSuggestionRenderer(
     onExit() {
       isActive = false
       renderToken++
+      positionToken++
+      cleanupAutoUpdate?.()
+      cleanupAutoUpdate = null
       floatingEl?.remove()
       renderer?.destroy()
       floatingEl = null

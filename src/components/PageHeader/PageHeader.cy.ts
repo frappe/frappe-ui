@@ -161,6 +161,36 @@ describe('PageHeaderMobile', () => {
     cy.get('h1').should('contain.text', 'Discussion')
     cy.get('[data-test=suffix]').should('contain.text', 'More')
   })
+
+  describe('in RTL', () => {
+    beforeEach(() => {
+      cy.document().then((doc) => {
+        doc.documentElement.setAttribute('dir', 'rtl')
+      })
+    })
+
+    afterEach(() => {
+      cy.document().then((doc) => {
+        doc.documentElement.removeAttribute('dir')
+      })
+    })
+
+    it('puts #prefix at the reading start and #suffix at the reading end', () => {
+      cy.mount(PageHeaderMobile, {
+        slots: {
+          prefix: () => h('button', { 'data-test': 'prefix' }, 'Back'),
+          suffix: () => h('button', { 'data-test': 'suffix' }, 'More'),
+        },
+      })
+      cy.get('header').should(($header) => {
+        const prefix = $header.find('[data-test=prefix]')[0]
+        const suffix = $header.find('[data-test=suffix]')[0]
+        expect(prefix.getBoundingClientRect().left).to.be.greaterThan(
+          suffix.getBoundingClientRect().right,
+        )
+      })
+    })
+  })
 })
 
 describe('PageHeaderMobileTitle', () => {

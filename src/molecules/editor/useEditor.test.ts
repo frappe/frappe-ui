@@ -28,7 +28,7 @@ vi.mock('@tiptap/core', () => {
     editable: boolean
     storage: Record<string, any> = {}
     commands = {
-      setContent: vi.fn((content: any) => {
+      setContent: vi.fn((content: any, _options?: any) => {
         this.content = content
         this.options.onUpdate?.({ editor: this })
       }),
@@ -44,6 +44,10 @@ vi.mock('@tiptap/core', () => {
 
     chain() {
       const api: any = {
+        setContent: (content: any, options?: any) => {
+          this.commands.setContent(content, options)
+          return api
+        },
         joinAdjacentLists: () => api,
         setMeta: () => api,
         run: () => true,

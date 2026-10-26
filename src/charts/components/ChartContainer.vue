@@ -57,77 +57,87 @@
       </span>
     </div>
 
-    <!-- The pad stands in for the space a legend would have taken, so a
-         single-series chart sits in the card the way a multi-series one does. -->
+    <!-- A centred plot keeps its legend beside it, and the two split the
+         height the card has to spare above and below them. -->
     <div
-      data-slot="chart-plot"
-      class="relative min-h-0 flex-1"
-      :class="{ 'pb-3': !$slots.legend && !bottomAxisTitle }"
+      class="flex min-h-0 flex-1 flex-col gap-1.5"
+      :class="{ 'justify-center': centered }"
     >
-      <!-- The plot stays mounted through every state: unmounting it would
+      <!-- The pad stands in for the space a legend would have taken, so a
+         single-series chart sits in the card the way a multi-series one does. -->
+      <div
+        data-slot="chart-plot"
+        class="relative min-h-0"
+        :class="{
+          'flex-1': !centered,
+          'pb-3': !$slots.legend && !bottomAxisTitle,
+        }"
+      >
+        <!-- The plot stays mounted through every state: unmounting it would
            dispose the echarts instance and re-init it on the way back. -->
-      <div class="h-full w-full" :class="{ invisible: state !== 'ready' }">
-        <slot />
-      </div>
+        <div class="h-full w-full" :class="{ invisible: state !== 'ready' }">
+          <slot />
+        </div>
 
-      <!-- The loading state gets the whole plot box rather than a row in the
+        <!-- The loading state gets the whole plot box rather than a row in the
            middle of it, because what it draws is the shape of the plot. A
            caller replacing it is drawing a placeholder, not a caption. -->
-      <div
-        v-if="state === 'loading'"
-        data-slot="chart-loading"
-        class="absolute inset-0"
-      >
-        <!-- Announced by the container, so an app's own placeholder does not
+        <div
+          v-if="state === 'loading'"
+          data-slot="chart-loading"
+          class="absolute inset-0"
+        >
+          <!-- Announced by the container, so an app's own placeholder does not
              have to carry the announcement with it. -->
-        <span class="sr-only" role="status">Loading chart</span>
-        <slot name="loading">
-          <!-- A block the size of the plot, not a spinner in the middle of it.
+          <span class="sr-only" role="status">Loading chart</span>
+          <slot name="loading">
+            <!-- A block the size of the plot, not a spinner in the middle of it.
                A dashboard fills in a card at a time, and a placeholder holding
                the grid's shape reads as one card arriving rather than as eight
                spinners turning out of step. NumberCard, which has no plot,
                skeletons its reading the same way. -->
-          <Skeleton class="h-full w-full rounded-4" />
-        </slot>
+            <Skeleton class="h-full w-full rounded-4" />
+          </slot>
+        </div>
+
+        <div
+          v-else-if="state !== 'ready'"
+          class="absolute inset-0 flex flex-col items-center justify-center gap-2 text-center"
+        >
+          <template v-if="state === 'error'">
+            <slot name="error" :error="error">
+              <span class="text-sm-medium text-ink-red-7">
+                Could not render this chart
+              </span>
+              <span v-if="error" class="max-w-sm text-p-sm text-ink-gray-5">
+                {{ error }}
+              </span>
+            </slot>
+          </template>
+
+          <template v-else>
+            <slot name="empty">
+              <span class="text-p-sm text-ink-gray-5">No data to show</span>
+            </slot>
+          </template>
+        </div>
       </div>
 
-      <div
-        v-else-if="state !== 'ready'"
-        class="absolute inset-0 flex flex-col items-center justify-center gap-2 text-center"
-      >
-        <template v-if="state === 'error'">
-          <slot name="error" :error="error">
-            <span class="text-sm-medium text-ink-red-7">
-              Could not render this chart
-            </span>
-            <span v-if="error" class="max-w-sm text-p-sm text-ink-gray-5">
-              {{ error }}
-            </span>
-          </slot>
-        </template>
-
-        <template v-else>
-          <slot name="empty">
-            <span class="text-p-sm text-ink-gray-5">No data to show</span>
-          </slot>
-        </template>
-      </div>
-    </div>
-
-    <!-- The same titles under the plot, for a value axis that runs along the
+      <!-- The same titles under the plot, for a value axis that runs along the
          bottom. Pinned to the far end: the near end of a row chart is the
          category-label column, where a title would read as a heading for it. -->
-    <div
-      v-if="bottomAxisTitle"
-      class="-mt-2 flex items-baseline justify-end gap-3 text-p-xs text-ink-gray-5"
-    >
-      <span class="truncate">{{ yAxisTitle }}</span>
-      <span v-if="y2AxisTitle" class="truncate">
-        {{ y2AxisTitle }}
-      </span>
-    </div>
+      <div
+        v-if="bottomAxisTitle"
+        class="-mt-2 flex items-baseline justify-end gap-3 text-p-xs text-ink-gray-5"
+      >
+        <span class="truncate">{{ yAxisTitle }}</span>
+        <span v-if="y2AxisTitle" class="truncate">
+          {{ y2AxisTitle }}
+        </span>
+      </div>
 
-    <slot name="legend" />
+      <slot name="legend" />
+    </div>
   </div>
 </template>
 

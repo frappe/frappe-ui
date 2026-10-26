@@ -49,6 +49,58 @@ describe('applyAxisFormatters', () => {
     ).toBe('[Jan]')
   })
 
+  describe('on a time axis', () => {
+    const dates = [
+      { month: '2025-01-01', sales: 10, refunds: 2 },
+      { month: '2025-02-01', sales: 20, refunds: 4 },
+      { month: '2025-03-01', sales: 15, refunds: 3 },
+    ]
+    const timeAxis = {
+      key: 'month',
+      type: 'time' as const,
+      timeGrain: 'month' as const,
+    }
+
+    it('keeps the levelled tick labels', () => {
+      const { formatter } = build(
+        { x: (value) => `[${value}]` },
+        { data: dates, xAxis: timeAxis },
+      ).xAxis.axisLabel
+      expect(formatter('2025-02-01')).toBe('Feb')
+      expect(formatter('2025-01-01', 0, { level: 1 })).toBe('{primary|2025}')
+    })
+
+    it('keeps them when the type is inferred from the dates', () => {
+      const { formatter } = build(
+        { x: (value) => `[${value}]` },
+        { data: dates, xAxis: { key: 'month' } },
+      ).xAxis.axisLabel
+      expect(formatter('2025-02-01')).toBe('Feb')
+    })
+
+    it('still takes the value axis formats', () => {
+      const option = build(
+        { x: (value) => `[${value}]`, y: currency },
+        { data: dates, xAxis: timeAxis },
+      )
+      expect(option.yAxis[0].axisLabel.formatter(10)).toBe('$10')
+    })
+
+    it('lets an explicit echartOptions formatter set the ticks', () => {
+      const option = build(
+        { x: (value) => `[${value}]` },
+        {
+          data: dates,
+          xAxis: {
+            ...timeAxis,
+            echartOptions: { axisLabel: { formatter: () => 'override' } },
+          },
+        },
+      )
+      expect(option.xAxis.axisLabel.formatter('2025-02-01')).toBe('override')
+    })
+  })
+
   it('formats each value axis with its own format', () => {
     const option = build({ y: currency, y2: (v) => `${v}%` })
     expect(option.yAxis[0].axisLabel.formatter(10)).toBe('$10')

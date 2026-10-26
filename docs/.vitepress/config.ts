@@ -60,7 +60,7 @@ function buildSidebar(): SidebarSection[] {
         },
         { text: 'Tailwind Setup', link: '/docs/getting-started/tailwind' },
         { text: 'Migration from v0', link: '/docs/migration' },
-        { text: 'Changelog', link: '/docs/changelog' },
+        { text: 'Changelog', link: '/docs/changelog/v1' },
       ],
     },
     {
@@ -83,8 +83,13 @@ function buildSidebar(): SidebarSection[] {
         { text: 'LineChart', link: '/docs/charts/linechart' },
         { text: 'AreaChart', link: '/docs/charts/areachart' },
         { text: 'DonutChart', link: '/docs/charts/donutchart' },
+        { text: 'PercentageBarChart', link: '/docs/charts/percentagebarchart' },
         { text: 'FunnelChart', link: '/docs/charts/funnelchart' },
         { text: 'HeatmapChart', link: '/docs/charts/heatmapchart' },
+        {
+          text: 'CalendarHeatmapChart',
+          link: '/docs/charts/calendarheatmapchart',
+        },
         { text: 'ScatterChart', link: '/docs/charts/scatterchart' },
         { text: 'SankeyChart', link: '/docs/charts/sankeychart' },
         { text: 'NumberCard', link: '/docs/charts/numbercard' },

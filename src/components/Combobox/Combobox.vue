@@ -17,6 +17,7 @@ import { useReactiveSlots } from '../../composables/useReactiveSlots'
 import { usePortalTarget } from '../../composables/usePortalTarget'
 import { useEmptyValueMapping } from '../shared/selection/useEmptyValueMapping'
 import { useFilteredGroups } from '../shared/selection/useFilteredGroups'
+import { rankMatch } from '../../utils/rankMatch'
 import { useIsModelBound } from '../shared/selection/useIsModelBound'
 import {
   InputDescription,
@@ -195,6 +196,13 @@ const displayValue = computed(() => {
   return currentValue.value === null ? '' : String(currentValue.value)
 })
 
+// The button trigger shows the placeholder when the model is `null`, or `''`
+// with no `''` option to name it. A value that is not in the loaded options
+// shows as text, the same as in input mode.
+const showsPlaceholder = computed(
+  () => !selectedOption.value && displayValue.value === '',
+)
+
 const triggerClasses = computed(() => [
   triggerBaseClasses,
   triggerSizeClasses(props.size),
@@ -234,6 +242,8 @@ const filteredGroups = useFilteredGroups<NormalizedItem, NormalizedGroup>({
     item.type === 'custom'
       ? matchesCustomOption(item, q)
       : matchesSelectableOption(item, q),
+  // custom action rows keep their place; options rank by how well they match
+  rank: (item, q) => (item.type === 'custom' ? null : rankMatch(item.label, q)),
   // `alwaysMatch` carries consumer-declared visibility: a custom row's
   // `condition` is authoritative and runs even before the user types, so it
   // is deliberately unaffected by `filterable`.
@@ -611,10 +621,10 @@ defineSlots<ComboboxSlots>()
               <span
                 :class="[
                   'min-w-0 flex-1 truncate text-left font-normal leading-tighter',
-                  !selectedOption && 'text-ink-gray-4',
+                  showsPlaceholder && 'text-ink-gray-4',
                 ]"
               >
-                {{ selectedOption?.label ?? placeholder }}
+                {{ showsPlaceholder ? placeholder : displayValue }}
               </span>
 
               <slot name="suffix" v-bind="controlSlotProps">

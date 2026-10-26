@@ -7,9 +7,10 @@
 2. Trace suspected regressions through surrounding code, callers, and tests.
    Each code finding must state its changed line, observable consequence, and evidence.
    Distinguish new failures from existing failures and state verification gaps.
-3. Check the PR description for `## Changelog`: a consumer-facing entry or
-   `None` with a reason. Flag missing or empty sections. For entry style, consult
-   `docs/content/docs/changelog.md`.
+3. Check the changeset in `.changeset/`. The `Verify changesets` check enforces
+   that one exists and caps the bump. Review what it cannot: the bump must match
+   the change, and the text must tell an app developer what changed. Follow
+   `.claude/skills/changeset/SKILL.md`.
 4. Report unresolved findings once per cause, with the smallest useful correction.
    An empty finding list is a valid result.
 

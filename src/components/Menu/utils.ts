@@ -16,7 +16,7 @@ export type NormalizedMenuGroup = MenuGroupOption & {
 
 export const menuClasses = {
   content:
-    'menu-content z-[100] min-w-40 divide-y divide-outline-elevation-2 rounded-6 bg-surface-elevation-2 shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none',
+    'menu-content z-[100] min-w-40 max-h-[--reka-popper-available-height] overflow-y-auto divide-y divide-outline-elevation-2 rounded-6 bg-surface-elevation-2 shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none',
   group: 'p-1.5 space-y-px',
   groupLabel:
     'flex h-7 items-center px-2 text-sm font-medium leading-tighter text-ink-gray-4',

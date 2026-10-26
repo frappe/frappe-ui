@@ -32,6 +32,73 @@ describe('Duration', () => {
     cy.get('input').focus().should('have.value', '2h 2m 3s')
   })
 
+  it('shows days with largestUnit="day"', () => {
+    cy.mount(Duration, { props: { modelValue: 93784, largestUnit: 'day' } })
+    cy.get('input').should('have.value', '1d 2h 3m 4s')
+    cy.get('input').focus().should('have.value', '1d 2h 3m 4s')
+  })
+
+  it('rounds to the minute with smallestUnit="minute"', () => {
+    cy.mount(Duration, {
+      props: { modelValue: 93784, largestUnit: 'day', smallestUnit: 'minute' },
+    })
+    cy.get('input').should('have.value', '1d 2h 3m')
+  })
+
+  it('drops the seconds from the default placeholder in a minute field', () => {
+    cy.mount(Duration)
+    cy.get('input').should('have.attr', 'placeholder', '1h 30m 45s')
+    cy.mount(Duration, { props: { smallestUnit: 'minute' } })
+    cy.get('input').should('have.attr', 'placeholder', '1h 30m')
+    cy.mount(Duration, { props: { smallestUnit: 'minute', placeholder: '2h' } })
+    cy.get('input').should('have.attr', 'placeholder', '2h')
+  })
+
+  it('does not rewrite a rounded value that was not edited', () => {
+    cy.mount(Duration, {
+      props: {
+        modelValue: 93784,
+        smallestUnit: 'minute',
+        'onUpdate:modelValue': cy.spy().as('onUpdate'),
+      },
+    })
+    cy.get('input').focus().blur()
+    cy.get('@onUpdate').should('not.be.called')
+  })
+
+  it('saves a typed value rounded with smallestUnit="minute"', () => {
+    cy.mount(Duration, {
+      props: {
+        smallestUnit: 'minute',
+        'onUpdate:modelValue': cy.spy().as('onUpdate'),
+      },
+    })
+    cy.get('input').type('1h 40s').blur()
+    cy.get('@onUpdate').should('be.calledWith', 3660)
+    cy.get('input').should('have.value', '1h 1m')
+  })
+
+  it('reads a bare number and a:b in the smallest unit', () => {
+    cy.mount(Duration, {
+      props: {
+        smallestUnit: 'minute',
+        'onUpdate:modelValue': cy.spy().as('onMinute'),
+      },
+    })
+    cy.get('input').type('15').blur()
+    cy.get('@onMinute').should('be.calledWith', 900)
+    cy.get('input').focus().clear().type('1:30').blur()
+    cy.get('@onMinute').should('be.calledWith', 5400)
+
+    cy.mount(Duration, {
+      props: { 'onUpdate:modelValue': cy.spy().as('onSecond') },
+    })
+    cy.get('input').type('15').blur()
+    cy.get('@onSecond').should('be.calledWith', 15)
+    cy.get('input').focus().clear().type('1:30').blur()
+    cy.get('@onSecond').should('be.calledWith', 90)
+  })
+
   it('commits a parsed value on blur', () => {
     cy.mount(Duration, {
       props: { 'onUpdate:modelValue': cy.spy().as('onUpdate') },
@@ -160,6 +227,12 @@ describe('parseDuration', () => {
     expect(parseDuration('2hrs 15min')).to.equal(8100)
   })
 
+  it('parses days', () => {
+    expect(parseDuration('1d 2h 3m 4s')).to.equal(93784)
+    expect(parseDuration('1 day')).to.equal(86400)
+    expect(parseDuration('2 days 1h')).to.equal(176400)
+  })
+
   it('parses colon syntax', () => {
     expect(parseDuration('1:30:45')).to.equal(5445)
     expect(parseDuration('1:30')).to.equal(90)
@@ -171,6 +244,15 @@ describe('parseDuration', () => {
 
   it('treats a bare integer as seconds', () => {
     expect(parseDuration('90')).to.equal(90)
+  })
+
+  it('reads bare numbers and short colon input as minutes with smallestUnit minute', () => {
+    const minute = { smallestUnit: 'minute' } as const
+    expect(parseDuration('15', minute)).to.equal(900)
+    expect(parseDuration('1:30', minute)).to.equal(5400)
+    expect(parseDuration(':45', minute)).to.equal(2700)
+    expect(parseDuration('1:30:45', minute)).to.equal(5445)
+    expect(parseDuration('29s', minute)).to.equal(29)
   })
 
   it('rejects invalid input', () => {
@@ -202,6 +284,31 @@ describe('formatDuration', () => {
     expect(formatDuration(90, "h'h' m'm' s's'")).to.equal('0h 1m 30s')
     expect(formatDuration(7323, 'hh:mm:ss')).to.equal('02:02:03')
     expect(formatDuration(5445, "h 'hours'")).to.equal('1 hours')
+  })
+
+  it('shows days in the presets with largestUnit day', () => {
+    expect(formatDuration(93784)).to.equal('26h 3m 4s')
+    expect(formatDuration(93784, 'short', { largestUnit: 'day' })).to.equal(
+      '1d 2h 3m 4s',
+    )
+    expect(formatDuration(176400, 'long', { largestUnit: 'day' })).to.equal(
+      '2 days 1 hour',
+    )
+  })
+
+  it('rounds to the nearest minute with smallestUnit minute', () => {
+    expect(formatDuration(93784, 'short', { smallestUnit: 'minute' })).to.equal(
+      '26h 3m',
+    )
+    expect(formatDuration(3599, 'short', { smallestUnit: 'minute' })).to.equal(
+      '1h',
+    )
+    expect(formatDuration(29, 'short', { smallestUnit: 'minute' })).to.equal(
+      '0m',
+    )
+    expect(formatDuration(29, 'long', { smallestUnit: 'minute' })).to.equal(
+      '0 minutes',
+    )
   })
 
   it('renders zero and nullish values', () => {

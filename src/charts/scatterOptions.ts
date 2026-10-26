@@ -5,7 +5,9 @@ import {
   DATA_LABEL_FONT_SIZE,
   buildAxisGrid,
   buildValueAxis,
+  holdsWholeNumbers,
   toNumber,
+  referenceLineExtent,
 } from './axisChartCommon'
 import { formatLabel } from './format'
 import { CHART_FONT_FAMILY } from './measureText'
@@ -104,7 +106,8 @@ export function buildScatterSeries(
 
   return names.map((name, index) => ({
     name,
-    label: formatLabel(name),
+    // A group's name is a value read from the data, which prints as given.
+    label: config.splitByColumn ? name : formatLabel(name),
     color: colors[index],
     points: grouped.get(name)!.map((point) => ({
       ...point,
@@ -196,11 +199,15 @@ export function buildScatterOption(
       isRTL,
       format: format?.x,
       name: config.xAxis?.title,
+      lines: referenceLineExtent(config.referenceLines, 'x', false),
+      integer: holdsWholeNumbers(config.data ?? [], [config.xColumn]),
     }),
     yAxis: valueAxis(config.yAxis, tokens, {
       horizontal: false,
       isRTL,
       format: format?.y,
+      lines: referenceLineExtent(config.referenceLines, 'y', false),
+      integer: holdsWholeNumbers(config.data ?? [], [config.yColumn]),
     }),
     series: [
       ...visible.map((entry) =>
@@ -334,9 +341,13 @@ function valueAxis(
     format?: ChartValueFormatter
     /** Axis title, for the axis that draws its own. */
     name?: string
+    /** The span its reference lines reach. */
+    lines?: { dataMin?: number; dataMax?: number }
+    /** Whether its column holds whole numbers only. */
+    integer: boolean
   },
 ) {
-  const { horizontal, isRTL, format, name } = opts
+  const { horizontal, isRTL, format, name, lines, integer } = opts
 
   // Merged *under* the caller's own overrides, the way `applyAxisFormatters`
   // does it: an explicit `echartOptions` still wins over what v2 decided.
@@ -348,7 +359,7 @@ function valueAxis(
       boundaryGap: [AXIS_INSET, AXIS_INSET],
       ...(name
         ? {
-            name: formatLabel(name),
+            name,
             nameLocation: 'end',
             nameGap: 8,
             nameTextStyle: {
@@ -368,5 +379,7 @@ function valueAxis(
   return buildValueAxis({ ...axis, echartOptions }, tokens, {
     horizontal,
     isRTL,
+    lines,
+    integer,
   })
 }

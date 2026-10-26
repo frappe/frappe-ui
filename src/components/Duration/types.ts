@@ -21,11 +21,26 @@ export type DurationFormatPreset = 'short' | 'long' | 'colon'
 // `string & {}` keeps preset autocomplete while still accepting any template.
 export type DurationFormat = DurationFormatPreset | (string & {})
 
+/** The biggest unit the `short` and `long` presets use. `hour` folds days into hours. */
+export type DurationLargestUnit = 'day' | 'hour'
+
+/** The smallest unit the `short` and `long` presets use. `minute` rounds the seconds. */
+export type DurationSmallestUnit = 'minute' | 'second'
+
+/** The unit range of the `short` and `long` presets and of the edit text. */
+export interface DurationUnits {
+  largestUnit?: DurationLargestUnit
+  smallestUnit?: DurationSmallestUnit
+}
+
 export interface DurationProps extends InputLabelingProps {
   /** The duration value in seconds (two-way via `v-model`). */
   modelValue?: number | null
 
-  /** Placeholder shown when the input is empty. Defaults to `1h 30m 45s`. */
+  /**
+   * Placeholder shown when the input is empty. Defaults to `1h 30m` when
+   * `smallestUnit` is `minute`, and `1h 30m 45s` otherwise.
+   */
   placeholder?: string
 
   /**
@@ -34,6 +49,20 @@ export interface DurationProps extends InputLabelingProps {
    * `hh:mm:ss`). Defaults to `short`.
    */
   format?: DurationFormat
+
+  /**
+   * The biggest unit of the `short` and `long` presets and of the edit text.
+   * `day` shows 93784 as `1d 2h 3m 4s`. Defaults to `hour` (`26h 3m 4s`).
+   */
+  largestUnit?: DurationLargestUnit
+
+  /**
+   * The smallest unit of the `short` and `long` presets and of the edit text.
+   * `minute` rounds to the nearest minute, and a typed value is saved rounded.
+   * In a minute field, a bare number is minutes and `a:b` is hours and
+   * minutes: `15` is 15 minutes and `1:30` is 1h 30m. Defaults to `second`.
+   */
+  smallestUnit?: DurationSmallestUnit
 
   /** Visual size of the input. Forwarded to the underlying `TextInput`. */
   size?: InputSize

@@ -6,6 +6,7 @@ import { buildConfig } from './buildConfig.js'
 import { siteBanner } from './siteBanner.js'
 import { barrelImports } from './barrelImports.js'
 import { codeLanguages } from './codeLanguages.js'
+import { benchFiles } from './benchFiles.js'
 
 function frappeuiPlugin(options = {}) {
   let plugins = []
@@ -19,6 +20,9 @@ function frappeuiPlugin(options = {}) {
   const barrelImportsOpt = options.barrelImports ?? true
   const codeLanguagesOpt = options.codeLanguages ?? true
 
+  // Resolve `../…/sites/<file>` imports in the bench when they do not resolve
+  // in place, as for an app linked into apps/ from another folder.
+  plugins.push(benchFiles())
   if (codeLanguagesOpt) {
     // Stub the `@codemirror/lang-*` packages this app did not install, so
     // `frappe-ui/code-editor` builds with the languages it renders and no more.

@@ -57,7 +57,7 @@ number. Leave `intervals` out for a continuous bar.
 ## Accessibility
 
 The bar has the `progressbar` role, with `aria-valuenow` set to the value
-from 0 to 100. Screen readers read `label` as the value text, or the
-percentage when there is no label.
+from 0 to 100. `label` is the bar's accessible name. A bar without a label is
+named "Progress".
 
 <!-- @include: ./Progress.api.md -->

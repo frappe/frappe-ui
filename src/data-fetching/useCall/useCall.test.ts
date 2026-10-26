@@ -141,6 +141,35 @@ describe('useCall', () => {
     expect(call.data).toEqual({ value: 'test' })
   })
 
+  it('sends object and array GET params as JSON the server can parse', async () => {
+    server.use(
+      http.get(url('/api/v2/method/get_count'), ({ request }) => {
+        const query = new URL(request.url).searchParams
+        return HttpResponse.json({
+          data: {
+            filters: JSON.parse(query.get('filters')!),
+            fields: JSON.parse(query.get('fields')!),
+          },
+        })
+      }),
+    )
+
+    const call = useCall({
+      url: url('/api/v2/method/get_count'),
+      params: { filters: { status: 'Open' }, fields: ['name', 'title'] },
+      immediate: false,
+    })
+
+    call.fetch()
+    await call.promise
+
+    expect(call.error).toBe(null)
+    expect(call.data).toEqual({
+      filters: { status: 'Open' },
+      fields: ['name', 'title'],
+    })
+  })
+
   it('refetches automatically when a reactive param changes (refetch: true)', async () => {
     const dynamicValue = ref('first')
     const call = useCall<{ value: string }, { value: string }>({
@@ -584,6 +613,69 @@ describe('useCall', () => {
     })
     expect(call.error).toBe(null)
     await older.catch(() => {})
+  })
+
+  // `useFetch` aborts the request in flight when a newer one starts. That
+  // abort is not an error of the call.
+  describe('when a newer request replaces an older one', () => {
+    const call = (v: string, onError: (error: Error) => void) =>
+      useCall<{ success: boolean; received: { v: string } }, { v: string }>({
+        url: url('/api/v2/method/post'),
+        method: 'POST',
+        params: { v },
+        immediate: false,
+        onError,
+      })
+
+    it('leaves error and onError alone', async () => {
+      const onError = vi.fn()
+      const posts = call('slow-one', onError)
+
+      await Promise.all([posts.reload(), posts.reload()])
+
+      expect(posts.data).toEqual({ success: true, received: { v: 'slow-one' } })
+      expect(posts.error).toBe(null)
+      expect(onError).not.toHaveBeenCalled()
+    })
+
+    it('reports the failure of the newest request once', async () => {
+      const onError = vi.fn()
+      const posts = call('slow-fail', onError)
+
+      await Promise.all([posts.reload(), posts.reload()])
+
+      expect(posts.error?.message).toContain('post failed')
+      expect(onError).toHaveBeenCalledOnce()
+      expect(onError).toHaveBeenCalledWith(posts.error)
+    })
+
+    it('still rejects the older submit, which did not land', async () => {
+      const onError = vi.fn()
+      const posts = call('unused', onError)
+
+      const older = posts.submit({ v: 'slow-one' })
+      const newer = posts.submit({ v: 'quick' })
+
+      await expect(older).rejects.toThrow()
+      await expect(newer).resolves.toEqual({
+        success: true,
+        received: { v: 'quick' },
+      })
+      expect(posts.error).toBe(null)
+      expect(onError).not.toHaveBeenCalled()
+    })
+
+    it('still reports a request aborted by abort()', async () => {
+      const onError = vi.fn()
+      const posts = call('slow-one', onError)
+
+      const reloading = posts.reload()
+      posts.abort()
+      await reloading
+
+      expect(posts.error).toBeTruthy()
+      expect(onError).toHaveBeenCalledOnce()
+    })
   })
 
   // A request minted before the submit assigned its params is not the
