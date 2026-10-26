@@ -17,7 +17,8 @@ export type NormalizedMenuGroup = MenuGroupOption & {
 export const menuClasses = {
   content:
     'menu-content z-[100] min-w-40 max-h-[--reka-popper-available-height] overflow-y-auto divide-y divide-outline-elevation-2 rounded-6 bg-surface-elevation-2 shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none',
-  group: 'p-1.5',
+  // The 1px gap keeps a highlighted row and a selected row next to it visibly separate.
+  group: 'flex flex-col gap-px p-1.5',
   groupLabel:
     'flex h-7 items-center px-2 text-sm font-medium leading-tighter text-ink-gray-4',
   itemIcon: 'size-4 shrink-0',
