@@ -1,6 +1,5 @@
 import { h } from 'vue'
 import Avatar from './Avatar.vue'
-import AvatarBadge from './AvatarBadge.vue'
 
 const sizes = ['xs', 'sm', 'md', 'lg', 'xl', '2xl', '3xl']
 
@@ -83,126 +82,50 @@ describe('Avatar', () => {
     })
     cy.get('[data-cy="avatar-plain"]').should('not.have.class', 'w-6')
   })
-})
 
-describe('AvatarBadge', () => {
-  // Mounts the avatar next to a probe element that carries a token class or
-  // style, so a test compares the rendered color with the token's own color.
-  function mountWithProbe(
-    probe: string | { style: string },
-    indicator: () => any,
-    wrapperStyle = '',
-  ) {
-    cy.mount({
-      render: () =>
-        h('div', { style: wrapperStyle }, [
-          h(Avatar, { label: 'Jane Cooper', size: '3xl' }, { indicator }),
-          h('div', {
-            'data-cy': 'probe',
-            ...(typeof probe === 'string' ? { class: probe } : probe),
-          }),
-        ]),
+  it('cuts a see-through hole for the indicator', () => {
+    cy.mount(Avatar, {
+      props: { 'data-cy': 'avatar', label: 'Abc', size: '3xl' },
+      slots: { indicator: () => h('span', { 'data-cy': 'dot' }) },
     })
-  }
 
-  function backgroundOf(selector: string) {
-    return cy
-      .get(selector)
-      .then(($el) => getComputedStyle($el[0]).backgroundColor)
-  }
+    cy.get('[data-cy="avatar"] > div')
+      .first()
+      .should('have.css', 'mask-image')
+      .and('include', 'radial-gradient')
+    cy.get('[data-cy="dot"]')
+      .parent()
+      .parent()
+      .should('have.css', 'background-color', 'rgba(0, 0, 0, 0)')
+  })
 
-  // badge → sized wrapper → ring
-  function ringOf(selector: string) {
-    cy.get(selector).parent().parent().invoke('attr', 'data-cy', 'ring')
-    return '[data-cy="ring"]'
-  }
-
-  function expectSameBackground(selector: string, probeSelector: string) {
-    backgroundOf(probeSelector).then((expected) => {
-      backgroundOf(selector).should('eq', expected)
+  it('hangs the indicator box past the corner', () => {
+    cy.mount(Avatar, {
+      props: { 'data-cy': 'avatar', label: 'Abc', size: '3xl' },
+      slots: { indicator: () => h('span', { 'data-cy': 'dot' }) },
     })
-  }
 
-  function expectSameColor(selector: string, probeSelector: string) {
-    cy.get(probeSelector).then(($probe) => {
-      cy.get(selector).should(
-        'have.css',
-        'color',
-        getComputedStyle($probe[0]).color,
-      )
+    // 3xl: a 1rem box that hangs 0.2rem past the corner, so its center sits
+    // 0.3rem inside the avatar's right and bottom edges.
+    cy.get('[data-cy="avatar"]').then(($avatar) => {
+      const avatar = $avatar[0].getBoundingClientRect()
+      cy.get('[data-cy="dot"]')
+        .parent()
+        .parent()
+        .then(($box) => {
+          const box = $box[0].getBoundingClientRect()
+          expect(box.width).to.eq(16)
+          expect(box.right - avatar.right).to.be.closeTo(3.2, 0.1)
+          expect(box.bottom - avatar.bottom).to.be.closeTo(3.2, 0.1)
+        })
     })
-  }
-
-  it('fills the indicator, gray by default', () => {
-    mountWithProbe('bg-surface-gray-5', () => h(AvatarBadge))
-
-    cy.get('[data-slot="avatar-badge"]')
-      .should('have.class', 'size-full')
-      .and('have.class', 'rounded-full')
-      .and('have.css', 'display', 'flex')
-    expectSameBackground('[data-slot="avatar-badge"]', '[data-cy="probe"]')
   })
 
-  it('takes its color from a class, over the default gray', () => {
-    mountWithProbe('bg-surface-gray-4', () =>
-      h(AvatarBadge, { class: 'bg-surface-gray-4' }),
-    )
+  it('leaves the avatar whole without an indicator', () => {
+    cy.mount(Avatar, {
+      props: { 'data-cy': 'avatar', label: 'Abc' },
+    })
 
-    expectSameBackground('[data-slot="avatar-badge"]', '[data-cy="probe"]')
-  })
-
-  it('takes its text color from a class, over the default white', () => {
-    // text-ink-gray-9 sorts before the default text-white in the stylesheet,
-    // so it wins only because the default sits in :where().
-    mountWithProbe('text-ink-gray-9', () =>
-      h(AvatarBadge, { class: 'text-ink-gray-9' }),
-    )
-
-    expectSameColor('[data-slot="avatar-badge"]', '[data-cy="probe"]')
-  })
-
-  it('centers its content', () => {
-    mountWithProbe('text-white', () =>
-      h(AvatarBadge, () => h('span', { 'data-cy': 'icon', class: 'size-2' })),
-    )
-
-    cy.get('[data-slot="avatar-badge"]')
-      .should('have.css', 'justify-content', 'center')
-      .and('have.css', 'align-items', 'center')
-    cy.get('[data-cy="icon"]').should('exist')
-    expectSameColor('[data-slot="avatar-badge"]', '[data-cy="probe"]')
-  })
-
-  it('cuts the badge out with the page surface by default', () => {
-    mountWithProbe({ style: 'background: var(--surface-base)' }, () =>
-      h(AvatarBadge),
-    )
-
-    expectSameBackground(
-      ringOf('[data-slot="avatar-badge"]'),
-      '[data-cy="probe"]',
-    )
-  })
-
-  it('takes the ring color from --avatar-badge-ring on an ancestor', () => {
-    mountWithProbe(
-      { style: 'background: var(--surface-gray-2)' },
-      () => h(AvatarBadge),
-      '--avatar-badge-ring: var(--surface-gray-2)',
-    )
-
-    expectSameBackground(
-      ringOf('[data-slot="avatar-badge"]'),
-      '[data-cy="probe"]',
-    )
-  })
-
-  it('leaves other indicator content as it was', () => {
-    mountWithProbe({ style: 'background: var(--surface-base)' }, () =>
-      h('span', { 'data-cy': 'dot', class: 'block size-full rounded-full' }),
-    )
-
-    cy.get('[data-cy="dot"]').parent().should('have.class', 'h-3')
-    expectSameBackground(ringOf('[data-cy="dot"]'), '[data-cy="probe"]')
+    cy.get('[data-cy="avatar"] > div').should('have.css', 'mask-image', 'none')
   })
 })

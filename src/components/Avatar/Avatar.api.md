@@ -4,7 +4,7 @@
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
 
-  const avatarProps = [
+  const propsData = [
   {
     name: 'image',
     description: 'Image URL used for the avatar',
@@ -40,7 +40,7 @@
   }
 ]
 
-  const avatarSlots = [
+  const slotsData = [
   {
     name: 'default',
     description: 'Custom content shown inside the avatar (icon / initials replacement)',
@@ -48,15 +48,7 @@
   },
   {
     name: 'indicator',
-    description: 'Small indicator shown at the bottom-right of the avatar, usually an `AvatarBadge`',
-    type: 'any'
-  }
-]
-
-  const avatarBadgeSlots = [
-  {
-    name: 'default',
-    description: 'Content centered in the badge, such as an icon',
+    description: 'Small indicator shown at the bottom-right of the avatar',
     type: 'any'
   }
 ]
@@ -64,12 +56,6 @@
 
 ## API Reference
 
-### Avatar
+<PropsTable name="Avatar" :data="propsData"/>
 
-<PropsTable name="Avatar" :data="avatarProps"/>
-
-<SlotsTable :data="avatarSlots"/>
-
-### AvatarBadge
-
-<SlotsTable :data="avatarBadgeSlots"/>
+<SlotsTable :data="slotsData"/>

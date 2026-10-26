@@ -1,5 +1,5 @@
 ---
-'frappe-ui': minor
+'frappe-ui': patch
 ---
 
-Avatar: the new `AvatarBadge` component shows a status dot or an icon badge in the `#indicator` slot, and the new `--avatar-badge-ring` CSS variable sets the color of the ring around it (additive).
+Avatar: the gap around the `#indicator` content is now cut out of the avatar, so it shows the surface behind the avatar (a hovered row, a popover, a dialog) instead of the page color.

@@ -8,12 +8,14 @@
       :src="image"
       :alt="label"
       :class="[shapeClasses, 'h-full w-full object-cover']"
+      :style="$slots.indicator && indicatorMask"
       @error="(err) => handleImageError(err)"
     />
     <div
       v-else
       class="flex h-full w-full items-center justify-center uppercase select-none"
       :class="[labelClasses, fallbackThemeClasses, shapeClasses]"
+      :style="$slots.indicator && indicatorMask"
     >
       <div :class="iconClasses" v-if="$slots.default">
         <slot></slot>
@@ -22,15 +24,15 @@
         {{ label && label[0] }}
       </template>
     </div>
-    <!-- The fill around the indicator cuts it out of the avatar. It must match
-         the surface behind the avatar, so `--avatar-badge-ring` overrides it
-         from the avatar or any ancestor (a popover, a hovered row). -->
     <div
       v-if="$slots.indicator"
-      :class="[
-        'absolute bottom-0 right-0 grid place-items-center rounded-full bg-[var(--avatar-badge-ring,var(--surface-base))]',
-        indicatorContainerClasses,
-      ]"
+      class="absolute grid place-items-center"
+      :style="{
+        width: indicatorBox.size,
+        height: indicatorBox.size,
+        right: `-${indicatorBox.offset}`,
+        bottom: `-${indicatorBox.offset}`,
+      }"
     >
       <div :class="indicatorClasses">
         <slot name="indicator"></slot>
@@ -130,16 +132,28 @@ const labelClasses = computed(() => {
   return ['font-medium', sizeClass]
 })
 
-const indicatorContainerClasses = computed(() => {
+// The box the indicator sits in, and how far it hangs past the avatar's
+// bottom-right corner. The avatar masks out a circle the size of this box, so
+// the gap around the indicator shows whatever is behind the avatar.
+const indicatorBox = computed(() => {
   return {
-    xs: '-mr-[.1rem] -mb-[.1rem] h-2 w-2',
-    sm: '-mr-[.1rem] -mb-[.1rem] h-[9px] w-[9px]',
-    md: '-mr-[.1rem] -mb-[.1rem] h-2.5 w-2.5',
-    lg: '-mr-[.1rem] -mb-[.1rem] h-3 w-3',
-    xl: '-mr-[.1rem] -mb-[.1rem] h-3 w-3',
-    '2xl': '-mr-[.1rem] -mb-[.1rem] h-3.5 w-3.5',
-    '3xl': '-mr-[.2rem] -mb-[.2rem] h-4 w-4',
+    xs: { size: '0.5rem', offset: '0.1rem' },
+    sm: { size: '9px', offset: '0.1rem' },
+    md: { size: '0.625rem', offset: '0.1rem' },
+    lg: { size: '0.75rem', offset: '0.1rem' },
+    xl: { size: '0.75rem', offset: '0.1rem' },
+    '2xl': { size: '0.875rem', offset: '0.1rem' },
+    '3xl': { size: '1rem', offset: '0.2rem' },
   }[props.size]
+})
+
+const indicatorMask = computed(() => {
+  const { size, offset } = indicatorBox.value
+  const radius = `calc(${size} / 2)`
+  const center = `calc(100% - ${radius} + ${offset})`
+  return {
+    maskImage: `radial-gradient(circle at ${center} ${center}, transparent ${radius}, #000 calc(${radius} + 0.5px))`,
+  }
 })
 
 const indicatorClasses = computed(() => {
@@ -176,7 +190,7 @@ defineSlots<{
   /** Custom content shown inside the avatar (icon / initials replacement) */
   default?: () => any
 
-  /** Small indicator shown at the bottom-right of the avatar, usually an `AvatarBadge` */
+  /** Small indicator shown at the bottom-right of the avatar */
   indicator?: () => any
 }>()
 </script>
