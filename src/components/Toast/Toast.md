@@ -37,6 +37,19 @@ step by passing its `id` back to `toast.loading` and `toast.success`.
 
 <ComponentPreview name="Toast-Async" />
 
+## Usage Guidelines
+
+<ComponentPreview name="Toast-Guidelines" hide-code />
+
+<div class="guideline-text">
+
+- Show a form's errors on its fields, not in a toast.
+- Say what happened in a few words, like “Page copied to clipboard”, not just “Done” or “Error”.
+- Don't confirm routine edits with a toast. The changed value already shows it worked.
+- When an action can be undone or stopped, offer Undo or Cancel in the toast.
+
+</div>
+
 ## Behavior
 
 ### Setup
@@ -45,7 +58,8 @@ The `toast.*` functions need `<ToastProvider />` mounted in the app.
 [`FrappeUIProvider`](./frappeuiprovider) already mounts it. `ToastProvider`
 takes no props: the position, the look and the default duration are the same
 in every app. Up to three toasts show at a time, and each one has a close
-button.
+button. They stack with the newest in front, and spread out while the pointer
+is over them.
 
 ### Functions
 
@@ -75,6 +89,10 @@ toast.success('Saved')
 toast.error('Could not save', { duration: 10000 })
 toast.info('Uploading…', { duration: Infinity })
 ```
+
+Four seconds is often too short to read an error, let alone act on it. Give an
+error people need to read a longer `duration`, like `10000`, and one they must
+act on `duration: Infinity`, so it stays until they close it.
 
 ### Updating a toast
 

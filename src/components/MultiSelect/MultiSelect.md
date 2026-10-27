@@ -134,7 +134,7 @@ the same props and `selectAll`. `close()` is the same as `setOpen(false)`.
 ### Label, description and error
 
 `label` renders above the trigger and `description` below it. `error` renders
-below the trigger and hides `description`. It takes a string, an array of
+below the trigger and hides `description`, and turns the field's border red. It takes a string, an array of
 strings (one line each), or an `Error`, the same values as
 [ErrorMessage](./errormessage). An empty string or an empty array means no
 error. `required` adds a red asterisk to the label.

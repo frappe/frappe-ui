@@ -3,8 +3,9 @@
     class="fui-spinner inline-block shrink-0"
     width="16"
     height="16"
-    role="status"
-    aria-label="Loading"
+    :role="decorative ? undefined : 'status'"
+    :aria-label="decorative ? undefined : label"
+    :aria-hidden="decorative || undefined"
     :class="[colorClass, { 'fui-spinner--track': track }]"
     :style="rootStyle"
   ></svg>
@@ -16,7 +17,12 @@ import type { SpinnerProps, SpinnerSize } from './types'
 
 const props = withDefaults(defineProps<SpinnerProps>(), {
   track: false,
+  label: 'Loading',
 })
+
+// An empty label means the loading state is already spelled out next to the
+// spinner, so it's hidden from screen readers instead of announced twice.
+const decorative = computed(() => props.label === '')
 
 // px diameter, ring thickness and inner padding per size, matching the
 // Figma sizes (the ring is inset from the box edge by `inset`, 7.5% of

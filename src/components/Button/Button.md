@@ -46,6 +46,20 @@ Two actions that share the width of a card, each with `class="flex-1"`.
 
 <ComponentPreview name='Button-LiveClassCard' />
 
+## Usage Guidelines
+
+<ComponentPreview name="Button-Guidelines" hide-code />
+
+<div class="guideline-text">
+
+- Use sentence case for button labels, not title case.
+- Don't mix more than two button variants in one group.
+- Use one solid button per group, for the main action.
+- Label a button with what it does, like “Delete project”, not “OK”.
+- Don't disable a submit button to signal invalid input. Keep it enabled and show what's wrong on click.
+
+</div>
+
 ## Behavior
 
 ### Pressed state
@@ -86,8 +100,10 @@ button type and defaults to `button`.
 
 ## Accessibility
 
-- An icon-only button needs a `label`. The label is not shown. It becomes the
-  button's `aria-label`.
+- An icon-only button needs a name. Its `label` is not shown, and becomes the
+  button's `aria-label`. Without a `label`, the `tooltip` text is used. With
+  neither, the button logs a warning in development, since screen readers would
+  announce it as just "button".
 - A loading button sets `aria-busy="true"`.
 
 <!-- @include: ./Button.api.md -->

@@ -52,7 +52,7 @@ be async, and an error it throws also stops the upload. The message shows as
 
 ### Slot props
 
-Without a default slot, FileUploader renders an "Upload File" button that
+Without a default slot, FileUploader renders an "Upload file" button that
 shows the progress, and an error message under it. The default slot replaces
 both and receives:
 

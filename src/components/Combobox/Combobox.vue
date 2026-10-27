@@ -55,6 +55,7 @@ import type {
   NormalizedItem,
   NormalizedSelectableOption,
 } from './utils'
+import { withInvalidBorder } from '../../utils/invalidBorder'
 
 defineOptions({
   inheritAttrs: false,
@@ -207,7 +208,10 @@ const triggerClasses = computed(() => [
   triggerBaseClasses,
   triggerSizeClasses(props.size),
   inputFontSizeClasses(props.size),
-  triggerVariantClasses(props.variant, Boolean(props.disabled)),
+  withInvalidBorder(
+    triggerVariantClasses(props.variant, Boolean(props.disabled)),
+    hasError.value && !props.disabled,
+  ),
 ])
 
 const resolvedInputClasses = computed(() => [

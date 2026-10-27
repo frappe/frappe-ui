@@ -35,12 +35,25 @@ The `#label` slot replaces the label text and the required marker. It receives
 
 <ComponentPreview name="TextInput-Slots" />
 
+## Usage Guidelines
+
+<ComponentPreview name="TextInput-Guidelines" hide-code />
+
+<div class="guideline-text">
+
+- Use the placeholder for an example value, not as the field's label.
+- Set the input type to match the value, like email or tel, so phones show the right keyboard.
+- Size each field to the length of the content it holds.
+- Show an error when people leave the field, not while they're still typing.
+
+</div>
+
 ## Behavior
 
 ### Label, description and error
 
 `label` renders above the field and `description` below it. `error` renders
-below the field and hides `description`. It takes a string, an array of strings
+below the field and hides `description`, and turns the field's border red. It takes a string, an array of strings
 (one line each), or an `Error`, the same values as
 [ErrorMessage](./errormessage). An empty string or an empty array means no
 error. `required` adds a red asterisk to the label and sets `required` on the

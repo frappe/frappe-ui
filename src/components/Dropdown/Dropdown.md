@@ -1,7 +1,8 @@
 # Dropdown
 
 A menu of actions that opens from a button. To open a menu on right-click, use
-[ContextMenu](./contextmenu) instead.
+[ContextMenu](./contextmenu) instead. To pick a value from a long list people
+need to search, use [Combobox](./combobox).
 
 <ComponentPlayground name="Dropdown" />
 
@@ -49,6 +50,17 @@ submenus for apps and theme. `selected` marks the current app and theme.
 
 <ComponentPreview name="Dropdown-UserMenu" />
 
+## Usage Guidelines
+
+<ComponentPreview name="Dropdown-Guidelines" hide-code />
+
+<div class="guideline-text">
+
+- Put destructive actions like Delete last, in their own group, in red.
+- Open a menu from a Button, not a bare icon, so a keyboard can reach it.
+
+</div>
+
 ## Behavior
 
 ### Options
@@ -57,7 +69,8 @@ submenus for apps and theme. `selected` marks the current app and theme.
 
 - An item has a `label` and an `onClick`. It can also have an `icon`, a
   `description`, a `theme` (`gray` or `red`), a `route`, `disabled` and
-  `selected`.
+  `selected`. Write labels in sentence case, as for
+  [buttons](./button#usage-guidelines).
 - An item with `submenu` opens a nested menu. The submenu takes the same array
   shape.
 - A group is `{ group, options }`. `hideLabel` hides the group heading.
@@ -98,6 +111,11 @@ outer menu item element themselves, so keep them for exceptional cases.
 | `ArrowLeft`                                    | Close the submenu                              |
 | `Escape`                                       | Close the menu and return focus to the trigger |
 
-An icon-only trigger needs a `label` so screen readers can name it.
+An icon-only trigger needs a `label` or `aria-label` so screen readers can
+name it.
+
+Make a custom trigger a `Button`, or another element that takes focus. The
+trigger slot passes the menu's attributes to its element, but a `<span>` or
+`<div>` gets no `tabindex`, so a keyboard can't reach it.
 
 <!-- @include: ./Dropdown.api.md -->

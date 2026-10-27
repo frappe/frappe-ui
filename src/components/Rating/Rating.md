@@ -34,6 +34,16 @@ The `#icon` slot draws a different emoji at each position. The slot's `index`,
 
 <ComponentPreview name="Rating-CustomSlot" />
 
+## Usage Guidelines
+
+<ComponentPreview name="Rating-Guidelines" hide-code />
+
+<div class="guideline-text">
+
+- Show the count with an average, like “4.5 (128 reviews)”. A lone 5.0 from one review misleads.
+
+</div>
+
 ## Behavior
 
 ### Value

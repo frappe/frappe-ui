@@ -23,9 +23,21 @@ own label.
 ### Shift hours
 
 `min` and `max` limit each picker. The end time's `min` is the start time, so
-a shift cannot end before it starts.
+a shift cannot end before it starts, and you don't need to write that check
+yourself.
 
 <ComponentPreview name="TimePicker-Range" />
+
+## Usage Guidelines
+
+<ComponentPreview name="TimePicker-Guidelines" hide-code />
+
+<div class="guideline-text">
+
+- Use TimePicker, not the browser's time field. It looks the same in every browser and lists times to pick from.
+- Use one clock, 12-hour or 24-hour, everywhere in the app.
+
+</div>
 
 ## Behavior
 
@@ -60,7 +72,7 @@ chevron. `close()` is the same as `setOpen(false)`.
 ### Label, description and error
 
 `label` renders above the field and `description` below it. `error` renders
-below the field and hides `description`. It takes a string, an array of strings
+below the field and hides `description`, and turns the field's border red. It takes a string, an array of strings
 (one line each), or an `Error`, the same values as
 [ErrorMessage](./errormessage). An empty string or an empty array means no
 error. `required` adds a red asterisk to the label and sets `required` on the
