@@ -3,7 +3,7 @@ import { Avatar } from 'frappe-ui'
 </script>
 
 <template>
-  <div class="flex items-center gap-3 rounded-lg bg-surface-gray-2 p-3">
+  <div class="flex items-center gap-3 rounded-6 border border-outline-gray-1 bg-surface-gray-2 p-3">
     <Avatar
       image="https://i.pravatar.cc/80?u=jane@example.com"
       label="Jane Cooper"
