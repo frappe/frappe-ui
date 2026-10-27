@@ -246,10 +246,9 @@ function getItemTextValue(item: NormalizedOption) {
 
 <style scoped>
 /*
- * The outer item row paints its own bg via data-[highlighted] /
- * data-[state=checked] utilities — including the combined hover+selected
- * state. Clear ItemListRow's own bg so the outer color always shows
- * through; text emphasis on selected stays.
+ * The outer item row paints its own bg via data-[highlighted]. Clear
+ * ItemListRow's own bg, so a checked row is not filled: the checkbox shows
+ * the state. Text emphasis on selected stays.
  */
 [data-slot='item'] [data-slot='item-list-row'] {
   background-color: transparent;

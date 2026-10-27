@@ -29,6 +29,12 @@ describe('Progress', () => {
       .and('have.attr', 'data-state', 'loading')
   })
 
+  it('gives unlabeled bars a generic accessible name', () => {
+    cy.mount(Progress, { props: { value: 40 } })
+
+    cy.get('[role=progressbar]').should('have.attr', 'aria-label', 'Progress')
+  })
+
   it('clamps the fill to the ends of the track', () => {
     for (const [value, offset] of [
       [150, 0],

@@ -41,7 +41,7 @@
             "
             @interact-outside="
               (e: Event) => {
-                if (!isDismissible) e.preventDefault()
+                if (!isDismissible || isEditorFloating(e)) e.preventDefault()
               }
             "
           >
@@ -220,6 +220,13 @@ const describedByOptOut = computed(() => {
     ? { 'aria-describedby': undefined }
     : {}
 })
+
+// the editor's suggestion menus (@mention, /, #, :) live on <body>; picking from one isn't leaving the dialog
+function isEditorFloating(e: Event) {
+  return (
+    e.target instanceof Element && !!e.target.closest('[data-editor-floating]')
+  )
+}
 
 const sizeClass = computed(() => {
   const map: Record<string, string> = {

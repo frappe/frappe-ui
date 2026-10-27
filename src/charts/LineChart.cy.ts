@@ -50,12 +50,63 @@ const MARKS = '[data-slot="chart-plot"] svg > g'
 const lines = () => cy.get(`${MARKS} path[stroke^="#"]:not([d=""])`)
 
 describe('LineChart', () => {
+  describe('colors named by a CSS variable', () => {
+    beforeEach(() => {
+      cy.document().then((doc) => {
+        const style = doc.createElement('style')
+        style.id = 'brand-colors'
+        style.textContent = `:root { --brand: #ff0000; --goal: #0000ff }
+          [data-theme='dark'] { --brand: #00ff00 }`
+        doc.head.appendChild(style)
+      })
+    })
+    afterEach(() => {
+      cy.document().then((doc) => {
+        doc.getElementById('brand-colors')?.remove()
+        doc.documentElement.removeAttribute('data-theme')
+      })
+    })
+
+    it('draws in the value the variable holds, again after a theme flip', () => {
+      mountChart({
+        seriesConfig: { sales: { color: 'var(--brand)' } },
+        referenceLines: [{ value: 12, color: 'var(--goal)' }],
+      })
+      cy.get(`${MARKS} path[stroke="#ff0000"]`).should('exist')
+      cy.get(`${MARKS} path[stroke="#0000ff"]`).should('exist')
+      cy.get(`${MARKS} path[stroke^="var("]`).should('not.exist')
+      cy.document().then((doc) =>
+        doc.documentElement.setAttribute('data-theme', 'dark'),
+      )
+      cy.get(`${MARKS} path[stroke="#00ff00"]`).should('exist')
+      cy.get(`${MARKS} path[stroke="#ff0000"]`).should('not.exist')
+    })
+  })
+
   it('draws one line per series, through every category', () => {
     mountChart()
     lines().should('have.length', 2)
     cy.get('[data-slot="chart-plot"] svg text')
       .should('contain.text', 'Jan')
       .and('contain.text', 'Mar')
+  })
+
+  it('keeps the levelled ticks of a time axis when xAxis.format is set', () => {
+    mountChart({
+      data: ['2025-01-01', '2025-02-01', '2025-03-01', '2025-04-01'].map(
+        (month, i) => ({ month, sales: 10 + i, refunds: 2 + i }),
+      ),
+      xAxis: { format: (value: string) => `on ${value}` },
+    })
+    lines().should('have.length', 2)
+    cy.get('[data-slot="chart-plot"] svg text')
+      .should('contain.text', 'Feb')
+      .and('not.contain.text', 'on ')
+    cy.get('[data-slot="chart-plot"] [role="img"]').focus()
+    cy.get('[data-slot="chart-tooltip"]').should(
+      'contain.text',
+      'on 2025-01-01',
+    )
   })
 
   it('opens the tooltip on hover, with every series at that category', () => {
@@ -116,6 +167,32 @@ describe('LineChart', () => {
         .then(() => expect(hidden.value).to.deep.equal(['refunds']))
       lines().should('have.length', 1)
     })
+
+    // Thirty series cannot share one row in a 480px card. The ones that weigh
+    // most stay on it. The popover prints no number: a sum is wrong for a rate
+    // or an average, and the chart cannot tell which one it was handed.
+    it('ranks the series by weight, and prints no total', () => {
+      const long = ['Jan', 'Feb'].flatMap((month) =>
+        Array.from({ length: 30 }, (_, i) => ({
+          month,
+          region: `Region ${i}`,
+          amount: i + 1,
+        })),
+      )
+      mountChart({ data: long, y: 'amount', splitBy: 'region' })
+
+      cy.get('[data-slot="chart-legend"] [aria-pressed]')
+        .first()
+        .should('have.attr', 'aria-label', 'Hide Region 29')
+      cy.get('[data-slot="chart-legend"] [aria-label$="more series"]').click()
+      cy.get('[role="listbox"] [role="option"]')
+        .should('have.length', 30)
+        .first()
+        .should('have.text', 'Region 29')
+      lines().should('have.length', 30)
+      cy.contains('[role="listbox"] [role="option"]', /^Region 0$/).click()
+      lines().should('have.length', 29)
+    })
   })
 
   describe('combo series', () => {
@@ -137,6 +214,28 @@ describe('LineChart', () => {
     })
   })
 
+  describe('data labels', () => {
+    it('raises the axis a tick for a label at the top of the scale', () => {
+      // Sales top out at 20, which is where echarts ends the scale.
+      mountChart({
+        y: 'sales',
+        seriesConfig: { sales: { showDataLabels: true } },
+      })
+      lines().should('have.length', 1)
+      cy.get('[data-slot="chart-plot"] svg text').should('contain.text', '25')
+      // The tick at 20 and the label on the point that reaches it.
+      cy.get('[data-slot="chart-plot"] svg text')
+        .filter((_, el) => el.textContent === '20')
+        .should('have.length', 2)
+      cy.get('[data-slot="chart-plot"] svg').then(($svg) => {
+        const top = $svg[0].getBoundingClientRect().top
+        cy.get('[data-slot="chart-plot"] svg text').each(($text) => {
+          expect($text[0].getBoundingClientRect().top).to.be.at.least(top)
+        })
+      })
+    })
+  })
+
   describe('reference lines', () => {
     it('draws a rule that is neither a series nor a legend entry', () => {
       mountChart({ referenceLines: [{ value: 12, label: 'Target' }] })
@@ -147,7 +246,10 @@ describe('LineChart', () => {
       // The rule takes its ink from the theme, not from the palette, so the
       // hex-stroked paths are still the two series.
       lines().should('have.length', 2)
-      cy.get('[data-slot="chart-legend"] button').should('have.length', 2)
+      cy.get('[data-slot="chart-legend"] [aria-pressed]').should(
+        'have.length',
+        2,
+      )
     })
 
     it('reads a y2 line against the second axis', () => {
@@ -168,9 +270,6 @@ describe('LineChart', () => {
     // as empty as the plot gets from here. An all-hidden plot has no scale to
     // place the rule on, which is its own question.
     it('leaves the rule in place while a series is switched off', () => {
-      // Inside refunds' own range, so the rule stays on the scale the plot
-      // settles at: a line off the end of the axis is not drawn, which would
-      // pass this test for the wrong reason.
       mountChart({ referenceLines: [{ value: 5, label: 'Target' }] })
       cy.get('[aria-label="Hide Sales"]').click()
       lines().should('have.length', 1)
@@ -254,6 +353,24 @@ describe('LineChart', () => {
     cy.get('[data-slot="chart-container"]')
       .should('contain.text', 'Sales')
       .and('contain.text', 'Refunds')
+  })
+
+  it('prints a value axis title and a splitBy value as given', () => {
+    mountChart({
+      data: [
+        { month: 'Jan', device: 'eno1 rx errors', sessions: 3 },
+        { month: 'Jan', device: 'iOS', sessions: 5 },
+        { month: 'Feb', device: 'eno1 rx errors', sessions: 4 },
+        { month: 'Feb', device: 'iOS', sessions: 2 },
+      ],
+      y: 'sessions',
+      splitBy: 'device',
+      yAxis: { title: 'requests/s' },
+    })
+    cy.get('[data-slot="chart-container"]').should('contain.text', 'requests/s')
+    cy.get('[data-slot="chart-legend"]')
+      .should('contain.text', 'eno1 rx errors')
+      .and('contain.text', 'iOS')
   })
 
   describe('states', () => {

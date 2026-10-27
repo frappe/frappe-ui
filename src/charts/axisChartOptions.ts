@@ -18,12 +18,14 @@ import {
   MARK_Z,
   type AxisChartOptionContext,
 } from './axisChartCommon'
+import { seriesFormatter } from './axisFormat'
 import { buildReferenceLineSeries } from './referenceLines'
 import { mergeDeep } from './utils'
 import type {
   AxisChartConfig,
   AxisChartSeriesConfig,
   ChartMark,
+  ChartValueFormatter,
   ChartYAxisConfig,
 } from './types'
 
@@ -31,10 +33,6 @@ const BAR_MAX_WIDTH = 32
 /** Slim bars with an airy gap between categories. */
 const BAR_CATEGORY_GAP = '38%'
 const BAR_RADIUS = 4
-/** Room for a data label sitting past the end of a bar. */
-const BAR_LABEL_GUTTER = 40
-/** Room for a data label sitting above a point. */
-const LINE_LABEL_GUTTER = 24
 
 export const DEFAULT_LINE_WIDTH = 2
 /** Big enough to hit with a pointer, small enough not to read as a scatter plot. */
@@ -73,6 +71,8 @@ type SeriesContext = {
   carriesTip: (entry: PlottedSeries, rowIndex: number, value: number) => boolean
   /** Whether this area stacks onto another, i.e. reads as a band. */
   banded: boolean
+  /** Prints this series' values: its own format, or its axis'. */
+  format?: ChartValueFormatter
   /**
    * This series' share of its stack, row by row, on a normalized chart. Set
    * means the plot draws the share and prints it as a percentage; unset means
@@ -95,7 +95,7 @@ export type StackShares = Map<string, (number | null)[]>
  */
 export function buildAxisChartOption(
   config: AxisChartConfig,
-  { tokens, hiddenSeries = [], width }: AxisChartOptionContext,
+  { tokens, hiddenSeries = [], width, format = {} }: AxisChartOptionContext,
 ): EChartsCoreOption {
   const isRTL = config.dir === 'rtl'
   const horizontal = Boolean(config.horizontal)
@@ -113,7 +113,7 @@ export function buildAxisChartOption(
     (entry) => !hiddenSeries.includes(entry.series.name),
   )
   // Read over *every* series rather than the visible ones: hiding the last bar
-  // in the legend should not re-space the category axis under the plot.
+  // in the legend should not swap the pointer from a shade to a rule.
   const hasBars = plotted.some((entry) => entry.mark === 'bar')
   const categories = rows.map((row) => row[config.xAxis.key])
   // A point on a value axis carries its own coordinate; on the other two the
@@ -129,8 +129,8 @@ export function buildAxisChartOption(
     categories,
     horizontal,
     isRTL,
-    // Bars need a half-slot inset at each end to sit in; a line runs edge to edge.
-    boundaryGap: hasBars,
+    // Echarts pads a time axis for the bars it draws, so only the visible count.
+    inset: !horizontal && !visible.some((entry) => entry.mark === 'bar'),
     width,
   })
   const hasSecondary = hasSecondaryValueAxis(config, horizontal)
@@ -148,8 +148,6 @@ export function buildAxisChartOption(
     ...axisChartBase(tokens, hasBars ? 'shadow' : 'line'),
     grid: buildAxisGrid({
       horizontal,
-      isRTL,
-      labelGutter: dataLabelGutter(plotted),
       xAxisTitle: config.xAxis.title,
     }),
     xAxis: horizontal ? valueAxis : xColumnAxis,
@@ -163,6 +161,7 @@ export function buildAxisChartOption(
           isRTL,
           color: colors[entry.series.name],
           yAxisIndex: valueAxisIndex(entry.series, hasSecondary),
+          format: seriesFormatter(entry.series, format, horizontal),
           xValue,
           carriesTip,
           banded: isBanded(entry, plotted),
@@ -346,19 +345,6 @@ function pinValueAxis(
   }
 }
 
-/** Chart-wide room for the labels, i.e. whatever the hungriest mark needs. */
-function dataLabelGutter(plotted: PlottedSeries[]) {
-  let gutter = 0
-  for (const { series, mark, stack } of plotted) {
-    if (!series.showDataLabels) continue
-    // Stacked labels sit inside the fill, so they need no gutter.
-    const needed =
-      mark === 'bar' ? (stack ? 0 : BAR_LABEL_GUTTER) : LINE_LABEL_GUTTER
-    gutter = Math.max(gutter, needed)
-  }
-  return gutter
-}
-
 function buildSeries(
   entry: PlottedSeries,
   config: AxisChartConfig,
@@ -477,11 +463,7 @@ function buildBarSeries(entry: PlottedSeries, ctx: SeriesContext) {
           : tokens.dataLabel,
       fontSize: DATA_LABEL_FONT_SIZE,
       formatter: (params: any) =>
-        plottedLabel(
-          horizontal ? params.value?.[0] : params.value?.[1],
-          series,
-          Boolean(ctx.share),
-        ),
+        plottedLabel(horizontal ? params.value?.[0] : params.value?.[1], ctx),
     },
     labelLayout: { hideOverlap: true },
   }
@@ -532,8 +514,7 @@ function buildLineSeries(
       position: 'top',
       color: tokens.dataLabel,
       fontSize: DATA_LABEL_FONT_SIZE,
-      formatter: (params: any) =>
-        plottedLabel(params.value?.[1], series, Boolean(ctx.share)),
+      formatter: (params: any) => plottedLabel(params.value?.[1], ctx),
     },
     labelLayout: { hideOverlap: true },
   }
@@ -550,14 +531,10 @@ function buildLineSeries(
  * What a data label prints. A normalized series plots a share, so printing it
  * as a number would read as a count of something.
  */
-function plottedLabel(
-  value: any,
-  series: AxisChartSeriesConfig,
-  normalized: boolean,
-) {
+function plottedLabel(value: any, ctx: SeriesContext) {
   if (value === null || value === undefined || isNaN(value)) return ''
-  if (normalized) return formatPercent(value)
-  return series.format ? series.format(value) : formatValue(value, 1, true)
+  if (ctx.share) return formatPercent(value)
+  return ctx.format ? ctx.format(value) : formatValue(value, 1, true)
 }
 
 /**

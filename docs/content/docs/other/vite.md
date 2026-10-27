@@ -125,8 +125,8 @@ Error during dependency optimization:
 
 The plugin replaces each missing package with a stub that throws when
 `loadLanguage` reaches it. It does this for the build (a Rollup hook) and for
-pre-bundling (an esbuild plugin). Both then succeed, and the error names the
-package to install:
+pre-bundling (an esbuild plugin, or a Rolldown plugin on Vite 8). Both then
+succeed, and the error names the package to install:
 
 ```
 [frappe-ui] loadLanguage('sql') could not load @codemirror/lang-sql: Cannot find module '@codemirror/lang-sql'. If it is not installed: yarn add @codemirror/lang-sql
@@ -273,3 +273,22 @@ frappeui({
   },
 })
 ```
+
+## Finding the bench
+
+The proxy port, the build paths, and type generation read the bench. The plugin
+finds it by walking up from the app's folder to the folder that holds `apps/`
+and `sites/`.
+
+An app can also live outside the bench, with a symlink in `apps/` that points to
+it. Walking up from its real folder never reaches the bench. When walking up
+finds no bench, the plugin uses the folder in `FRAPPE_BENCH_PATH`. Pilot sets it
+for `pilot dev`.
+
+```bash
+FRAPPE_BENCH_PATH=~/benches/dev-gameplan yarn build
+```
+
+The plugin then finds your app through its link in `apps/`, so `buildConfig` and
+the site banner work as usual. Relative imports into the bench, such as
+`'../../../../sites/common_site_config.json'`, also resolve.

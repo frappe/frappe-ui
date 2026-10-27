@@ -23,7 +23,10 @@ const GRAIN_FORMATS: Record<TimeGrain, string> = {
   year: 'YYYY',
 }
 
-/** `total_sales` -> `Total Sales`. Used for series names and axis titles. */
+/**
+ * `total_sales` -> `Total Sales`. For a column key that has no `label`. Text
+ * the caller wrote and values read from the data print as given.
+ */
 export function formatLabel(name: string) {
   if (!name) return ''
   return name

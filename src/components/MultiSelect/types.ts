@@ -320,4 +320,10 @@ export interface MultiSelectEmits {
    * resolved out of `options`, so custom fields on an option survive.
    */
   'update:selectedOptions': [value: MultiSelectOption[]]
+
+  /**
+   * Fired when the highlighted row changes, by arrow keys or the pointer, with
+   * the original option object. `null` once the popover closes.
+   */
+  highlight: [option: MultiSelectOption | null]
 }

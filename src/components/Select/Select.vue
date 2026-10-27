@@ -36,6 +36,7 @@ import OptionIcon from '../shared/selection/OptionIcon.vue'
 import PopoverPanel from '../shared/popover/PopoverPanel.vue'
 import {
   EMPTY_VALUE_PREFIX,
+  checkedItemClasses,
   inputFontSizeClasses,
   itemClasses,
   itemRootSizeClasses,
@@ -474,7 +475,7 @@ defineExpose(exposed)
                   :disabled="internalOption.option.disabled"
                   :value="internalOption.internalValue"
                   data-slot="item"
-                  :class="[itemClasses, itemRootClasses]"
+                  :class="[itemClasses, checkedItemClasses, itemRootClasses]"
                 >
                   <!--
                   Full-row takeover precedence:

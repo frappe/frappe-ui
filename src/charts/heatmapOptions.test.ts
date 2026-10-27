@@ -145,13 +145,24 @@ describe('buildHeatmapMatrix', () => {
     expect(built.yCategories).toEqual(['(Blank)'])
   })
 
-  it('defaults the scale to the range of the data', () => {
-    expect(matrix()).toMatchObject({ min: 10, max: 40 })
+  it('defaults the scale to run from 0 to the largest value', () => {
+    expect(matrix()).toMatchObject({ min: 0, max: 40 })
+  })
+
+  it('starts the scale at the smallest value when one is negative', () => {
+    const built = matrix({
+      data: [
+        { day: 'Mon', hour: '8am', orders: -5 },
+        { day: 'Mon', hour: '9am', orders: 40 },
+      ],
+    })
+
+    expect(built).toMatchObject({ min: -5, max: 40 })
   })
 
   it('lets the config pin either end of the scale', () => {
-    expect(matrix({ min: 0 })).toMatchObject({ min: 0, max: 40 })
-    expect(matrix({ max: 100 })).toMatchObject({ min: 10, max: 100 })
+    expect(matrix({ min: 10 })).toMatchObject({ min: 10, max: 40 })
+    expect(matrix({ max: 100 })).toMatchObject({ min: 0, max: 100 })
   })
 
   it('defaults a diverging scale symmetric around zero', () => {
@@ -177,7 +188,7 @@ describe('buildHeatmapMatrix', () => {
   })
 
   it('colors cells along the ramp, deepest at the top of the scale', () => {
-    const built = matrix()
+    const built = matrix({ min: 10 })
     const stops = heatmapRampStops(config(), tokens)
 
     expect(built.cells[0].color.toLowerCase()).toBe(stops[0].toLowerCase())
@@ -189,8 +200,8 @@ describe('buildHeatmapMatrix', () => {
   it('puts a flat grid at the top of the ramp, not the bottom', () => {
     const built = matrix({
       data: [
-        { day: 'Mon', hour: '8am', orders: 7 },
-        { day: 'Tue', hour: '8am', orders: 7 },
+        { day: 'Mon', hour: '8am', orders: 0 },
+        { day: 'Tue', hour: '8am', orders: 0 },
       ],
     })
     const stops = heatmapRampStops(config(), tokens)
@@ -281,7 +292,7 @@ describe('buildHeatmapOption', () => {
       type: 'continuous',
       show: false,
       calculable: false,
-      min: 10,
+      min: 0,
       max: 40,
       seriesIndex: 0,
     })
@@ -293,11 +304,11 @@ describe('buildHeatmapOption', () => {
 
   it('gives a flat grid a span for echarts to interpolate across', () => {
     const option = build({
-      data: [{ day: 'Mon', hour: '8am', orders: 7 }],
+      data: [{ day: 'Mon', hour: '8am', orders: 0 }],
     })
 
     // Every cell sits at the top of the ramp, which is where the matrix puts it.
-    expect(option.visualMap).toMatchObject({ min: 6, max: 7 })
+    expect(option.visualMap).toMatchObject({ min: -1, max: 0 })
   })
 
   it('separates cells with a border in the surface behind the plot', () => {

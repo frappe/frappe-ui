@@ -42,6 +42,7 @@ in any order.
 | ------------ | -------------------------------------- | ------------------ |
 | Short units  | `1h 30m 45s`, `1h30m45s`, `45s 1h 30m` | `5445`             |
 | Long units   | `1 hour 30 minutes`, `2hrs 15min`      | `5400`, `8100`     |
+| Days         | `1d 2h`, `2 days`                      | `93600`, `172800`  |
 | Colon        | `1:30:45`, `1:30`, `:45`               | `5445`, `90`, `45` |
 | Bare integer | `90`                                   | `90`               |
 
@@ -78,6 +79,26 @@ as units.
 
 While the input has focus, it always shows the short notation (`2h 2m 3s`), so
 the text can be edited and read back the same way whatever the format.
+
+### Units
+
+`largestUnit` and `smallestUnit` set which units the `short` and `long` presets
+show. The edit text uses the same units. `colon` and templates name their own
+units, so these props do not change them.
+
+| Props                    | `93784`       |
+| ------------------------ | ------------- |
+| _(default)_              | `26h 3m 4s`   |
+| `largest-unit="day"`     | `1d 2h 3m 4s` |
+| `smallest-unit="minute"` | `26h 3m`      |
+
+With `smallest-unit="minute"`, the value shows rounded to the nearest minute, so
+`3599` shows `1h`. A typed value is saved rounded. A saved value that is not
+edited keeps its seconds.
+
+A minute field also reads a bare number as minutes and `a:b` as hours and
+minutes, so `15` saves `900` and `1:30` saves `5400`. `1:30:45` and text with
+units, such as `45s`, read the same as in a seconds field.
 
 ### Label, description and error
 

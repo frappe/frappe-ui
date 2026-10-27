@@ -6,7 +6,7 @@ pageClass: migration-page
 
 This guide moves an existing app onto `frappe-ui` v1. Work through one
 component family at a time. Each section starts with a before/after table. For
-the full list of changes, see the [changelog](/docs/changelog). For the reasons
+the full list of changes, see the [changelog](/docs/changelog/v0-to-v1). For the reasons
 behind each API, see the
 [v1 release specs](https://github.com/frappe/frappe-ui/tree/main/v1-release).
 
@@ -23,7 +23,7 @@ production. Each one is marked.
 
 **Loud breaks** are changes your build reports: an import that no longer
 resolves, or a type that no longer exists. They are listed in the
-[changelog](/docs/changelog), and appear here only when the replacement needs
+[changelog](/docs/changelog/v0-to-v1), and appear here only when the replacement needs
 explaining. If your build already names the file and the line, the changelog is
 faster to read.
 
@@ -62,8 +62,8 @@ Run each one from the app you are migrating. Where a section gives a
 npx -p frappe-ui packaging-v1 --dry-run .
 npx -p frappe-ui packaging-v1 .
 
-npx --package frappe-ui@rc tokens-v2 --dry-run .
-npx --package frappe-ui@rc tokens-v2 .
+npx --package frappe-ui@1 tokens-v2 --dry-run .
+npx --package frappe-ui@1 tokens-v2 .
 
 npx destinations-v1 .
 
@@ -71,16 +71,16 @@ npx overlays-v1 .
 
 npx navigation-v1 .
 
-npx --package frappe-ui@rc shortcuts-v1 --dry-run .
-npx --package frappe-ui@rc shortcuts-v1 .
+npx --package frappe-ui@1 shortcuts-v1 --dry-run .
+npx --package frappe-ui@1 shortcuts-v1 .
 
-npx --package frappe-ui@rc base-props-v1 --dry-run src
-npx --package frappe-ui@rc base-props-v1 src
+npx --package frappe-ui@1 base-props-v1 --dry-run src
+npx --package frappe-ui@1 base-props-v1 src
 
 npx list-v1 .
 
-npx --package frappe-ui@rc editor-v1 --dry-run .
-npx --package frappe-ui@rc editor-v1 .
+npx --package frappe-ui@1 editor-v1 --dry-run .
+npx --package frappe-ui@1 editor-v1 .
 
 npx -p frappe-ui data-v1 ./src
 ```
@@ -340,13 +340,13 @@ styles get a taller line height.
 a dry run:
 
 ```sh
-npx --package frappe-ui@rc tokens-v2 --dry-run .
+npx --package frappe-ui@1 tokens-v2 --dry-run .
 ```
 
 Review the output, then run it without `--dry-run`:
 
 ```sh
-npx --package frappe-ui@rc tokens-v2 .
+npx --package frappe-ui@1 tokens-v2 .
 ```
 
 The codemod:
@@ -477,7 +477,7 @@ token update.
 **Codemod:** run `tokens-v2` once with `--ink-shift`:
 
 ```sh
-npx --package frappe-ui@rc tokens-v2 --ink-shift .
+npx --package frappe-ui@1 tokens-v2 --ink-shift .
 ```
 
 **Land the codemod and the upgrade in the same change**: the change that
@@ -489,7 +489,7 @@ upgrades to the frappe-ui version with the shifted tokens.
 Add `--dry-run` first to review the renames before they apply:
 
 ```sh
-npx --package frappe-ui@rc tokens-v2 --ink-shift --dry-run .
+npx --package frappe-ui@1 tokens-v2 --ink-shift --dry-run .
 ```
 
 **Flags.** `--ink-shift` cannot be combined with `--force` or `--radius-only`.
@@ -3113,13 +3113,13 @@ Two dialog behaviors to know before you compare its output:
 migrating. Start with a dry run:
 
 ```sh
-npx --package frappe-ui@rc shortcuts-v1 --dry-run .
+npx --package frappe-ui@1 shortcuts-v1 --dry-run .
 ```
 
 Review the output, then run it without `--dry-run`:
 
 ```sh
-npx --package frappe-ui@rc shortcuts-v1 .
+npx --package frappe-ui@1 shortcuts-v1 .
 ```
 
 It:
@@ -3674,8 +3674,8 @@ component tags. Start with a dry run, so that globally registered app components
 that reuse these names are easy to spot:
 
 ```sh
-npx --package frappe-ui@rc base-props-v1 --dry-run src
-npx --package frappe-ui@rc base-props-v1 src
+npx --package frappe-ui@1 base-props-v1 --dry-run src
+npx --package frappe-ui@1 base-props-v1 src
 ```
 
 - Icon `name` is still supported. `icon` is the standard spelling, and wins
@@ -4186,8 +4186,8 @@ SuggestionExtension.configure({ ...options, listComponent: SuggestionList })
 idempotent `editor-v1` codemod, then check the two suggestion shapes by hand:
 
 ```sh
-npx --package frappe-ui@rc editor-v1 --dry-run .
-npx --package frappe-ui@rc editor-v1 .
+npx --package frappe-ui@1 editor-v1 --dry-run .
+npx --package frappe-ui@1 editor-v1 .
 ```
 
 ```vue
@@ -4577,7 +4577,9 @@ If a chart must stay in one locale whatever the page says, pass your own
 `format`. The axis, the tooltip and the labels all use it.
 
 Numbers only. Dates and time-axis labels still print in English, whatever the
-page declares. Pass `xAxis.format` to print them in another language.
+page declares. Pass `xAxis.format` to print the date in another language where a
+value is read, such as the tooltip. The ticks of a time axis keep their English
+levels; a category axis prints its ticks with `xAxis.format` too.
 
 ### `FunnelChart` always prints its percentages
 

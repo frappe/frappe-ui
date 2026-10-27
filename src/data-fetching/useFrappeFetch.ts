@@ -1,4 +1,8 @@
-import { createFetch } from '@vueuse/core'
+import {
+  createFetch,
+  type BeforeFetchContext,
+  type UseFetchOptions,
+} from '@vueuse/core'
 import { docStore } from './docStore'
 import { listStore } from './useList/listStore'
 import { LOCAL_WRITE, writeGate, type DispatchStamp } from './writeGate'
@@ -64,9 +68,51 @@ export function currentDispatchSeq(): number {
  * `options` object per `execute` and every hook in the chain is handed that
  * same object, so it names the request.
  */
-export function getRequestDispatchSeq(options: object): number | undefined {
+function getRequestDispatchSeq(options: object): number | undefined {
   return requestSeqs.get(options)
 }
+
+/**
+ * Tracks the newest request one `useFetch` instance has sent, whoever sent
+ * it: the instance's `execute`, or `useFetch`'s parameter watcher under
+ * `refetch: true`. `useFetch` aborts the request in flight when it sends a
+ * new one, so a request older than the newest was replaced. Its abort is not
+ * an error of the instance.
+ *
+ * Pass `beforeFetch` as the per-call `beforeFetch`. `createFetch` chains it
+ * after the factory's, which has already numbered the request.
+ *
+ * Wrap the per-call `onFetchError` in `onFetchError`. This is the one place a
+ * replaced request's abort is handled: it stops here and leaves the
+ * instance's `error` as it is (read through `getError`). Every other failure
+ * goes on to the wrapped handler.
+ */
+export function trackNewestRequest(getError: () => unknown) {
+  let newest = 0
+  return {
+    beforeFetch({ options }: BeforeFetchContext) {
+      const seq = getRequestDispatchSeq(options)
+      if (seq !== undefined && seq > newest) {
+        newest = seq
+      }
+    },
+    /** The dispatch number of the newest request sent so far. */
+    newest: () => newest,
+    onFetchError(handler: FetchErrorHook): FetchErrorHook {
+      return (ctx) => {
+        const seq = getRequestDispatchSeq(ctx.context.options)
+        if (seq !== undefined && seq < newest) {
+          // `useFetch` writes whatever is returned here into `error`, so
+          // hand back the error the newer request left there.
+          return { ...ctx, error: getError() }
+        }
+        return handler(ctx)
+      }
+    },
+  }
+}
+
+type FetchErrorHook = NonNullable<UseFetchOptions['onFetchError']>
 
 /**
  * The stamp put on a Response by the wrapped fetch below. The single source

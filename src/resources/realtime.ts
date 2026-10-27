@@ -17,9 +17,25 @@ export function onDocUpdate(
   })
 }
 
-let subscribed: Record<string, boolean> = {}
+// Doctypes subscribed per socket, so each new Socket subscribes on its own and
+// a closed one can be garbage collected.
+const subscribed = new WeakMap<Socket, Set<string>>()
+
 function subscribe(socket: Socket, doctype: string): void {
-  if (subscribed[doctype]) return
-  socket.emit('doctype_subscribe', doctype)
-  subscribed[doctype] = true
+  const doctypes = subscribed.get(socket) ?? new Set<string>()
+  if (!subscribed.has(socket)) {
+    subscribed.set(socket, doctypes)
+    // Server-side rooms are per-socket and dropped on disconnect. This handler
+    // subscribes to every doctype on the first connect and on each reconnect.
+    socket.on('connect', () => {
+      for (const type of doctypes) {
+        socket.emit('doctype_subscribe', type)
+      }
+    })
+  }
+  if (doctypes.has(doctype)) return
+  doctypes.add(doctype)
+  // socket.io buffers emits while disconnected and flushes them before
+  // `connect`, so emit directly only on a connected socket.
+  if (socket.connected) socket.emit('doctype_subscribe', doctype)
 }

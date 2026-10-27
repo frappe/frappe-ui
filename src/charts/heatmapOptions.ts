@@ -46,9 +46,12 @@ export const HEATMAP_RAMP_SAMPLES = 32
 
 const HEATMAP_PALETTE: ChartPaletteName = 'sequential'
 
+/** What the color scale reads off a config. The calendar heatmap shares it. */
+type HeatmapScaleConfig = Pick<HeatmapChartConfig, 'palette' | 'min' | 'max'>
+
 /** Gap between two cells, in px. Split either side of the shared edge. */
-const CELL_BORDER_WIDTH = 2
-const CELL_RADIUS = 2
+export const CELL_BORDER_WIDTH = 2
+export const CELL_RADIUS = 2
 
 const BLANK_CATEGORY = '(Blank)'
 
@@ -173,12 +176,14 @@ function categoryAxis() {
 }
 
 /**
- * The ends of the color scale. Config wins; the rest comes from the data,
- * except on a diverging ramp, where an unset end is mirrored from the larger
- * side so -4 in a -4..+12 series reads as deep as +4 does the other way.
+ * The ends of the color scale. Config wins; the rest comes from the data. An
+ * unset `min` is 0 unless a value is negative, as a count is read: a smallest
+ * value at the foot of the ramp would draw as pale as a cell with no value. On
+ * a diverging ramp an unset end is mirrored from the larger side so -4 in a
+ * -4..+12 series reads as deep as +4 does the other way.
  */
-function resolveScale(
-  config: HeatmapChartConfig,
+export function resolveScale(
+  config: HeatmapScaleConfig,
   cells: { value: number }[],
 ): { min: number; max: number } {
   const values = cells.map((cell) => cell.value)
@@ -193,7 +198,7 @@ function resolveScale(
     }
   }
 
-  return { min: config.min ?? dataMin, max: config.max ?? dataMax }
+  return { min: config.min ?? Math.min(dataMin, 0), max: config.max ?? dataMax }
 }
 
 /**
@@ -203,7 +208,7 @@ function resolveScale(
  * runs cool to warm, i.e. negative to positive.
  */
 export function heatmapRampStops(
-  config: HeatmapChartConfig,
+  config: HeatmapScaleConfig,
   tokens: ChartTokens,
 ): string[] {
   const stops = rampStops(config.palette, tokens, HEATMAP_PALETTE)
@@ -234,7 +239,7 @@ export function sampleRamp(
   }
 }
 
-function rampColor(stops: string[], t: number): string {
+export function rampColor(stops: string[], t: number): string {
   if (!stops.length) return ''
   try {
     return interpolateRamp(stops, t)
@@ -422,8 +427,8 @@ export function buildHeatmapOption(
  * all of them at the top of the ramp, the same place `buildHeatmapMatrix` puts
  * them.
  */
-function visualMapMin(matrix: HeatmapMatrix) {
-  return matrix.max > matrix.min ? matrix.min : matrix.max - 1
+export function visualMapMin(scale: { min: number; max: number }) {
+  return scale.max > scale.min ? scale.min : scale.max - 1
 }
 
 function cellValue(params: any): number {

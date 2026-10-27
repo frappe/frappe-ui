@@ -108,6 +108,12 @@
     type: 'NumberCardSparkline'
   },
   {
+    name: 'progress',
+    description: 'How far the reading has come towards a whole, drawn as a bar under it and its change.',
+    required: false,
+    type: 'NumberCardProgress'
+  },
+  {
     name: 'card',
     description: 'Draws the card surface: border, background, corner radius and padding. On\nby default. Set it to `false` for a chart the app has already placed inside\na card of its own, so a bordered box does not nest in a bordered box.',
     required: false,

@@ -88,7 +88,9 @@ right away. They need `<Dialogs />` somewhere in the app, which
   through `FormControl`, so any `FormControl` `type` works. A field's
   `validate` function runs after the `required` check and returns an error
   message, or `null` when the value is fine. Its second argument holds every
-  field's value, so one field can check another.
+  field's value, so one field can check another. The first text or textarea
+  field gets focus when the dialog opens, and Enter in a single-line field
+  submits.
 
 ### Space above the dialog
 

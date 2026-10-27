@@ -95,6 +95,31 @@ describe('Combobox', () => {
       cy.get('[data-slot="trigger"]').should('have.attr', 'data-disabled')
       cy.get('[role="combobox"]').should('have.attr', 'disabled')
     })
+
+    it('draws a disabled value in the muted disabled ink', () => {
+      // The trigger's own colour resolves to `text-ink-gray-7`, so compare
+      // against the `ink-gray-4` token that a disabled Select value uses.
+      const WithMutedProbe = defineComponent({
+        setup() {
+          return () => [
+            h(Combobox, {
+              options: fruits,
+              modelValue: 'Apple',
+              disabled: true,
+            }),
+            h('span', { 'data-testid': 'muted', class: 'text-ink-gray-4' }),
+          ]
+        },
+      })
+      cy.mount(WithMutedProbe)
+
+      cy.get('[data-testid="muted"]').then(($muted) => {
+        const muted = getComputedStyle($muted[0]).color
+        cy.get('[role="combobox"]')
+          .should('have.value', 'Apple')
+          .and('have.css', 'color', muted)
+      })
+    })
   })
 
   describe('selection', () => {
@@ -165,6 +190,46 @@ describe('Combobox', () => {
       cy.contains('[role="option"]', 'Mango').click({ force: true })
       cy.get('@onUpdate').should('not.have.been.called')
     })
+
+    describe('with options derived from the query', () => {
+      // Closing resets the query, and the empty-query list no longer holds
+      // the picked option, as with a server search or a capped list.
+      const mountQueryDrivenOptions = () => {
+        const onUpdate = cy.spy().as('onUpdate')
+        const QueryDrivenOptions = defineComponent({
+          setup() {
+            const query = ref('')
+            return () =>
+              h(Combobox, {
+                options: query.value
+                  ? fruits.filter((fruit) =>
+                      fruit.toLowerCase().includes(query.value.toLowerCase()),
+                    )
+                  : ['Apple'],
+                'onUpdate:query': (value: string) => (query.value = value),
+                'onUpdate:modelValue': onUpdate,
+              })
+          },
+        })
+        cy.mount(QueryDrivenOptions)
+        cy.get('[role="combobox"]').type('man')
+      }
+
+      it('commits a clicked option', () => {
+        mountQueryDrivenOptions()
+        cy.contains('[role="option"]', 'Mango').click()
+
+        cy.get('@onUpdate').should('have.been.calledWith', 'Mango')
+        cy.get('[role="combobox"]').should('have.value', 'Mango')
+      })
+
+      it('commits the highlighted option on Enter', () => {
+        mountQueryDrivenOptions()
+        cy.get('[role="combobox"]').type('{enter}')
+
+        cy.get('@onUpdate').should('have.been.calledWith', 'Mango')
+      })
+    })
   })
 
   describe('query and search', () => {
@@ -210,6 +275,27 @@ describe('Combobox', () => {
       cy.get('[role="option"]')
         .should('have.length', 1)
         .and('contain.text', 'Design')
+    })
+
+    it('lists the best matches first while typing', () => {
+      cy.mount(Combobox, {
+        props: {
+          open: true,
+          options: [
+            { label: 'Approximate No. of SKUs', value: 'skus' },
+            { label: 'Frappe HR', value: 'hrms' },
+            { label: 'App', value: 'app' },
+          ],
+        },
+      })
+      cy.get('[role="combobox"]').type('app')
+      cy.get('[role="option"]').then((options) => {
+        expect([...options].map((o) => o.innerText.trim())).to.deep.equal([
+          'App',
+          'Approximate No. of SKUs',
+          'Frappe HR',
+        ])
+      })
     })
 
     it('accepts an external `query` (v-model:query)', () => {
@@ -1050,6 +1136,61 @@ describe('Combobox', () => {
       cy.get('[data-slot="trigger"]').should('have.prop', 'tagName', 'BUTTON')
       cy.get('[data-slot="trigger"] button').should('not.exist')
       cy.get('[data-slot="trigger"]').should('contain.text', 'Mango')
+    })
+
+    it('renders an unmatched model value instead of the placeholder', () => {
+      cy.mount(Combobox, {
+        props: {
+          options: [{ label: 'Apple', value: 'apple' }],
+          modelValue: 'mango',
+          trigger: 'button',
+          placeholder: 'Pick a fruit',
+        },
+      })
+
+      cy.get('[data-slot="trigger"]')
+        .should('contain.text', 'mango')
+        .and('not.contain.text', 'Pick a fruit')
+      cy.contains('[data-slot="trigger"] span', 'mango').should(
+        'not.have.class',
+        'text-ink-gray-4',
+      )
+    })
+
+    it('shows the placeholder for an empty string model in button mode', () => {
+      cy.mount(Combobox, {
+        props: {
+          options: [{ label: 'Apple', value: 'apple' }],
+          modelValue: '',
+          trigger: 'button',
+          placeholder: 'Pick a fruit',
+        },
+      })
+
+      cy.contains('[data-slot="trigger"] span', 'Pick a fruit').should(
+        'have.class',
+        'text-ink-gray-4',
+      )
+    })
+
+    it('shows the label of an empty string option in button mode', () => {
+      cy.mount(Combobox, {
+        props: {
+          options: [
+            { label: 'None', value: '' },
+            { label: 'Apple', value: 'apple' },
+          ],
+          modelValue: '',
+          trigger: 'button',
+          placeholder: 'Pick a fruit',
+        },
+      })
+
+      cy.get('[data-slot="trigger"]').should('not.contain.text', 'Pick a fruit')
+      cy.contains('[data-slot="trigger"] span', 'None').should(
+        'not.have.class',
+        'text-ink-gray-4',
+      )
     })
 
     it('trigger="button" is in the native tab order and opens on Enter', () => {

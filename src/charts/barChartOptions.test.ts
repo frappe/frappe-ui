@@ -592,6 +592,30 @@ describe('bar chart option series', () => {
     )
   })
 
+  it('prints data labels in the format of the axis they are drawn against', () => {
+    const series: AxisChartSeriesConfig[] = [
+      { name: 'sales', showDataLabels: true },
+      { name: 'share', type: 'line', axis: 'y2', showDataLabels: true },
+    ]
+    const format = {
+      y: (v: number) => `$${v}`,
+      y2: (v: number) => `${v * 100}%`,
+    }
+    const labels = (horizontal: boolean) =>
+      (
+        buildAxisChartOption(config({ series, horizontal }), {
+          tokens,
+          format,
+        }) as any
+      ).series.map((s: any) =>
+        s.label.formatter({ value: horizontal ? [0.3, 'Jan'] : ['Jan', 0.3] }),
+      )
+
+    expect(labels(false)).toEqual(['$0.3', '30%'])
+    // A horizontal chart draws one value axis, so `y2` series read on it.
+    expect(labels(true)).toEqual(['$0.3', '$0.3'])
+  })
+
   it('moves data labels to the bar end when horizontal', () => {
     expect(
       build({ horizontal: true, series: [{ name: 'sales' }] }).series[0].label

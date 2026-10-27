@@ -5,4 +5,5 @@ export type {
   DurationEmits,
   DurationExposed,
   DurationFormat,
+  DurationUnits,
 } from './types'

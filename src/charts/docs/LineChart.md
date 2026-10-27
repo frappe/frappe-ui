@@ -15,6 +15,8 @@ because the data names those series, not you.
 
 <ComponentPreview name="Charts-LineTrend" csr="true" self-layout />
 
+`xAxis.format` prints the date where a value is read, such as the tooltip. It does not reach the tick labels of a time axis, which keep their levels: the year that opens a run of months, then the months.
+
 ## A numeric x axis
 
 `xAxis.type: 'value'` treats the x column as numbers on a scale. Each point sits
@@ -73,9 +75,9 @@ and `dashed`.
 
 A reference line is not a series. It has no legend entry, never shows in the
 tooltip, and cannot be hidden, so a threshold always stays visible for
-comparison. A line outside the plotted range is not drawn, because stretching
-the scale to fit a distant target would flatten the data. Set `yAxis.min` or
-`max` instead.
+comparison. The value axis stretches to reach every line, so a threshold
+outside the data stays in view. It goes up a tick when a line at its top end
+leaves no room for the label.
 
 ## Context in the tooltip
 
