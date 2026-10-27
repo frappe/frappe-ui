@@ -1,0 +1,200 @@
+[[files]]
+path = "CONTEXT.md"
+description = "Shared API vocabulary."
+
+[[files]]
+path = "PHILOSOPHY.md"
+description = "API design principles and compatibility rules, including their exceptions."
+
+[[files]]
+path = "spec/README.md"
+description = "Index of family contracts and decision records."
+
+[[files]]
+path = "spec/adr/0008-no-deprecated-members-in-1-0-0.md"
+description = "Approved pre-v1 removal policy; avoid requiring obsolete compatibility shims."
+
+[[files]]
+path = "spec/at-bar.md"
+description = "Completion criteria for public components."
+scope = [
+	"src/components/**",
+	"src/molecules/**",
+	"src/charts/**",
+]
+
+[[files]]
+path = "spec/inputs.md"
+description = "Input-family intent; reconcile historical sections against current types and accepted decisions."
+scope = [
+	"src/components/TextInput/**",
+	"src/components/Textarea/**",
+	"src/components/Password/**",
+	"src/components/Checkbox/**",
+	"src/components/Switch/**",
+	"src/components/Rating/**",
+	"src/components/Slider/**",
+	"src/components/FormControl/**",
+	"src/composables/inputTypes.ts",
+	"src/composables/useInputLabeling.ts",
+]
+
+[[files]]
+path = "spec/selection.md"
+scope = [
+	"src/components/Select/**",
+	"src/components/Combobox/**",
+	"src/components/MultiSelect/**",
+]
+
+[[files]]
+path = "spec/dropdown.md"
+scope = [
+	"src/components/Dropdown/**",
+	"src/components/ContextMenu/**",
+	"src/components/Menu/**",
+]
+
+[[files]]
+path = "spec/dialog.md"
+scope = [
+	"src/components/Dialog/**",
+	"src/utils/dialog.ts",
+]
+
+[[files]]
+path = "spec/popover.md"
+description = "Popover intent; distinguish obsolete compatibility sections from current contracts."
+scope = ["src/components/Popover/**"]
+
+[[files]]
+path = "spec/hover-card.md"
+scope = ["src/components/HoverCard/**"]
+
+[[files]]
+path = "spec/date-picker.md"
+description = "Picker contracts; old execution checklists are historical."
+scope = [
+	"src/components/DatePicker/**",
+	"src/components/TimePicker/**",
+	"src/components/shared/picker/**",
+]
+
+[[files]]
+path = "spec/toast.md"
+scope = [
+	"src/components/Toast/**",
+	"src/utils/toast.ts",
+]
+
+[[files]]
+path = "spec/tabs.md"
+scope = [
+	"src/components/Tabs/**",
+	"src/components/TabButtons/**",
+]
+
+[[files]]
+path = "spec/item-list-row.md"
+scope = [
+	"src/components/ItemListRow/**",
+	"src/components/Menu/**",
+	"src/components/Select/**",
+	"src/components/Combobox/**",
+	"src/components/MultiSelect/**",
+]
+
+[[files]]
+path = "spec/shortcuts.md"
+scope = [
+	"src/components/KeyboardShortcut/**",
+	"src/components/KeyboardShortcutsDialog/**",
+	"src/composables/useKeyboardShortcut*",
+]
+
+[[files]]
+path = "spec/imperative-api.md"
+scope = [
+	"src/components/**",
+	"src/molecules/**",
+]
+
+[[files]]
+path = "spec/portal-target.md"
+scope = [
+	"src/components/**",
+	"src/composables/usePortalTarget*",
+]
+
+[[files]]
+path = "spec/editor.md"
+scope = [
+	"src/molecules/editor/**",
+	"experimental/TextEditor/**",
+]
+
+[[files]]
+path = "spec/code-editor.md"
+scope = ["src/molecules/code-editor/**"]
+
+[[files]]
+path = "spec/charts.md"
+scope = ["src/charts/**"]
+
+[[files]]
+path = "spec/foundations.md"
+scope = [
+	"tailwind/**",
+	"src/style.css",
+	"src/fonts/**",
+]
+
+[[files]]
+path = "spec/adr/0013-v1-resources-implementation-freeze.md"
+scope = [
+	"src/resources/**",
+	"src/data-fetching/**",
+]
+
+[[files]]
+path = "spec/adr/0010-subpath-export-rule.md"
+scope = [
+	"package.json",
+	"src/index.ts",
+	"experimental.ts",
+	"src/**/index.ts",
+]
+
+[[files]]
+path = "docs/content/docs/migration.md"
+description = "Consumer migration instructions for intentional API changes."
+scope = [
+	"scripts/migrate-*",
+	"tailwind/migrate-*",
+	"docs/content/docs/migration.md",
+]
+
+[[files]]
+path = "docs/content/docs/changelog/v0-to-v1.md"
+description = "Consumer-facing changes from v0 to 1.0.0: breaking changes, deprecations and migration steps."
+scope = [
+	"docs/content/docs/changelog/**",
+	"package.json",
+]
+
+[[files]]
+path = "CHANGELOG.md"
+description = "The live 1.x changelog, generated from changesets and shown on /docs/changelog/v1. Changeset text follows .claude/skills/changeset/SKILL.md."
+scope = [
+	".changeset/**",
+	"CHANGELOG.md",
+	"package.json",
+]
+
+[[files]]
+path = ".changeset/changelog.cjs"
+description = "Formats each changeset as one CHANGELOG.md line followed by its PR link."
+scope = [
+	".changeset/**",
+	"CHANGELOG.md",
+]

@@ -1,0 +1,46 @@
+strictness = 2
+comment_types = ["logic", "syntax"]
+auto_review = ["open"]
+review_drafts = false
+exclude_authors = ["dependabot[bot]", "renovate[bot]", "github-actions[bot]"]
+ignore_keywords = ["WIP", "[skip review]"]
+ignore_patterns = [
+	"node_modules/**",
+	"dist/**",
+	"coverage/**",
+	".nyc_output/**",
+	"yarn.lock",
+	"docs/.vitepress/cache/**",
+	"docs/.vitepress/dist/**",
+	"**/auto-imports.d.ts",
+	"**/components.d.ts",
+	"docs/css/shiki.css",
+	"docs/content/docs/components/*.md",
+	"docs/content/docs/experimental/*.md",
+	"docs/content/docs/charts/*.md",
+	"docs/content/docs/molecules/list.md",
+	"cypress/screenshots/**",
+]
+status_check = true
+update_description = false
+
+[sections.summary]
+included = true
+collapsible = true
+default_open = false
+
+[sections.issues_table]
+included = false
+
+[sections.diagram]
+included = false
+
+[context]
+repos = [
+	"frappe/gameplan",
+	"frappe/crm",
+	"frappe/lms",
+	"frappe/builder",
+	"frappe/drive",
+	"frappe/insights",
+]
