@@ -27,7 +27,51 @@
 </template>
 
 <script setup lang="ts">
-import { Toaster } from 'vue-sonner'
+import { onMounted } from 'vue'
+import { Toaster, toast as sonnerToast } from 'vue-sonner'
+
+onMounted(() => {
+  // Re-publish any toasts that were created before the <Toaster> mounted.
+  // vue-sonner's ToastState stores all toasts globally, but the <Toaster>
+  // component only sees toasts published *after* it subscribes in its
+  // watchEffect. Toasts fired before createApp().mount() or before
+  // FrappeUIProvider renders are therefore silently dropped.
+  //
+  // Here we re-dispatch each pending toast with the same message and id so
+  // ToastState.update() re-publishes it to the now-active subscriber.
+  const pending = sonnerToast.getToasts()
+  if (pending.length > 0) {
+    pending.forEach((t) => {
+      const data = {
+        id: t.id,
+        description: t.description,
+        duration: t.duration,
+        dismissible: t.dismissible,
+        important: t.important,
+      }
+      const message = t.title as string
+      switch (t.type) {
+        case 'success':
+          sonnerToast.success(message, data)
+          break
+        case 'error':
+          sonnerToast.error(message, data)
+          break
+        case 'warning':
+          sonnerToast.warning(message, data)
+          break
+        case 'info':
+          sonnerToast.info(message, data)
+          break
+        case 'loading':
+          sonnerToast.loading(message, data)
+          break
+        default:
+          sonnerToast(message, data)
+      }
+    })
+  }
+})
 </script>
 
 <style>
