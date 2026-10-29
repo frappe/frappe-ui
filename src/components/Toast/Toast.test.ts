@@ -101,9 +101,11 @@ describe('Toast v1 — description sanitization', () => {
 // The viewport's look and timing are fixed, so every app's toasts behave the
 // same. A toast that needs longer sets its own `duration` (OVR-Q7).
 describe('ToastProvider', () => {
-  it('takes no props', async () => {
+  it('exposes offset and mobileOffset props', async () => {
     const ToastProvider = (await import('./ToastProvider.vue')).default
+    const props = (ToastProvider as { props?: Record<string, unknown> }).props
 
-    expect((ToastProvider as { props?: unknown }).props).toBeUndefined()
+    expect(props).toHaveProperty('offset')
+    expect(props).toHaveProperty('mobileOffset')
   })
 })
