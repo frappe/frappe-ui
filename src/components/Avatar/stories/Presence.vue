@@ -29,7 +29,7 @@ const members = [
     <div
       v-for="m in members"
       :key="m.name"
-      class="flex items-center gap-2 rounded px-2 py-1.5 hover:bg-surface-gray-2"
+      class="flex items-center gap-2 rounded-4 px-2 py-1.5 transition-colors hover:bg-surface-gray-1"
     >
       <Avatar :image="m.image" :label="m.name" size="lg">
         <template #indicator>

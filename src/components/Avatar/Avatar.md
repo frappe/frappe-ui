@@ -23,9 +23,25 @@ avatar from the one under it, and a count stands in for the rest.
 
 ### Online status
 
-The `#indicator` slot places a dot on the bottom-right corner.
+The `#indicator` slot places a dot on the bottom-right corner. A class on the
+dot sets its color.
+
+```vue
+<Avatar :image :label>
+  <template #indicator>
+    <span class="block size-full rounded-full bg-surface-green-5" />
+  </template>
+</Avatar>
+```
 
 <ComponentPreview name="Avatar-Presence" />
+
+### Verified badge
+
+The indicator can hold an icon. Use a size with room for it, and give it text
+for screen readers.
+
+<ComponentPreview name="Avatar-Verified" />
 
 ### Workspace switcher
 
@@ -53,12 +69,21 @@ initial and its background. It has no effect on a photo.
 
 A sizing class on the avatar (`size-*`, `w-*`, `h-*`) replaces the `size`
 prop's width and height. The `size` prop still sets the text size of the
-initial and the size of the indicator dot. A responsive class like
+initial and the size of the indicator. A responsive class like
 `sm:size-16` works alongside `size`: `size` sets the width on small screens,
 and the class takes over from its breakpoint up.
+
+### Indicator
+
+The avatar cuts a circle out of its bottom-right corner for the indicator. The
+gap around the indicator is see-through, so it matches the surface behind the
+avatar, such as a hovered row, a popover or a dialog.
 
 ## Accessibility
 
 The image uses `label` as its alt text.
+
+A status dot shows status with color only. Show the status as text next to the
+avatar, or put text with the `sr-only` class in the indicator.
 
 <!-- @include: ./Avatar.api.md -->
