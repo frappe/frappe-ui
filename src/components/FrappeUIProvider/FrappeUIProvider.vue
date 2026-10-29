@@ -23,12 +23,9 @@
 import Dialogs from '../Dialogs.vue'
 import ToastProvider from '../Toast/ToastProvider.vue'
 
-import type { ToasterProps } from 'vue-sonner'
+import type { FrappeUIProviderProps } from './types'
 
-defineProps<{
-  offset?: ToasterProps['offset']
-  mobileOffset?: ToasterProps['mobileOffset']
-}>()
+defineProps<FrappeUIProviderProps>()
 
 defineSlots<{
   /** The app. Rendered as-is; the provider adds no wrapper element of its own. */

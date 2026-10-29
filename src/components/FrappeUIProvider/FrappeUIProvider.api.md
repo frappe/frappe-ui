@@ -7,13 +7,13 @@
   const propsData = [
   {
     name: 'offset',
-    description: '',
+    description: 'Distance of the toast stack from the screen edge.',
     required: false,
     type: 'Offset'
   },
   {
     name: 'mobileOffset',
-    description: '',
+    description: 'Same as `offset`, but applied on mobile viewports.',
     required: false,
     type: 'Offset'
   }
