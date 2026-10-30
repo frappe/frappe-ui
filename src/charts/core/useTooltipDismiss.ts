@@ -16,6 +16,11 @@ export type TooltipDismissArgs = {
 export function useTooltipDismiss({ plot, data, close }: TooltipDismissArgs) {
   const dismiss = () => close()
   const onVisibility = () => document.hidden && close()
+  // A touch pointer fires `pointerleave` the moment contact ends, before the
+  // tap's own tooltip has had a chance to show.
+  const onPointerLeave = (event: PointerEvent) => {
+    if (event.pointerType !== 'touch') dismiss()
+  }
 
   // Capture phase, because a scroll event does not bubble: a listener on
   // `window` sees a nested container's scroll only on the way down.
@@ -38,8 +43,8 @@ export function useTooltipDismiss({ plot, data, close }: TooltipDismissArgs) {
   watch(
     plot,
     (el, previous) => {
-      previous?.removeEventListener('pointerleave', dismiss)
-      el?.addEventListener('pointerleave', dismiss)
+      previous?.removeEventListener('pointerleave', onPointerLeave)
+      el?.addEventListener('pointerleave', onPointerLeave)
     },
     { immediate: true },
   )
