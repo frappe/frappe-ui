@@ -31,8 +31,6 @@ export const IFRAME_ALLOWLIST: readonly string[] = [
   'codesandbox.io',
   'figma.com',
   'embed.figma.com',
-  'docs.google.com',
-  'drive.google.com',
   'notion.so',
 ]
 
