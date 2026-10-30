@@ -133,3 +133,33 @@ export function stepRange(
   if (!from || to) return [value, '']
   return orderRange([from, value])
 }
+
+/**
+ * Split what a user typed into a range input into its two date texts and
+ * parse each one with `coerce`. The ends are separated by "to" or " - ". A
+ * comma only separates them when the text is not itself one date, because a
+ * date format can contain a comma ("Oct 03, 2025").
+ */
+export function parseRangeInput(
+  raw: string,
+  coerce: (text?: string | null) => Dayjs | null,
+): [Dayjs | null, Dayjs | null] {
+  const text = raw.trim()
+  if (!text) return [null, null]
+  const parts = splitRangeText(text, coerce)
+  if (!parts.length) return [null, null]
+  return [coerce(parts[0]), coerce(parts[1])]
+}
+
+function splitRangeText(
+  text: string,
+  coerce: (text?: string | null) => Dayjs | null,
+): string[] {
+  const toParts = (list: string[]) => list.map((p) => p.trim()).filter(Boolean)
+  const byWord = toParts(text.split(/\s+to\s+/i))
+  if (byWord.length > 1) return byWord
+  const byDash = toParts(text.split(/\s+-\s+/))
+  if (byDash.length > 1) return byDash
+  if (coerce(text)) return [text]
+  return toParts(text.split(','))
+}
