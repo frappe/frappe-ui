@@ -33,12 +33,7 @@ const members = [
     >
       <Avatar decorative :image="m.image" :label="m.name" size="lg">
         <template #indicator>
-          <!-- A ring in the page color keeps the dot visible on a dark
-               photo. -->
-          <span
-            class="block size-full rounded-full ring-2 ring-[var(--surface-base)]"
-            :class="dot[m.status]"
-          />
+          <span class="block size-full rounded-full" :class="dot[m.status]" />
         </template>
       </Avatar>
       <div class="flex min-w-0 flex-col">

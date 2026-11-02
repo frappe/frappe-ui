@@ -9,7 +9,7 @@ export class DocTypeInterfaceGenerator {
     this.processedDoctypes = new Set()
     this.existingInterfaces = {}
     this.updatedInterfaces = 0
-    this.jsonFileCache = new Map()
+    this.doctypeFiles = new Map()
     this.summary = {
       processed: 0,
       updated: 0,
@@ -194,45 +194,15 @@ export class DocTypeInterfaceGenerator {
   }
 
   async findJsonFile(appName, doctypeName) {
-    const cacheKey = `${appName}/${doctypeName}`
-    if (this.jsonFileCache.has(cacheKey)) {
-      return this.jsonFileCache.get(cacheKey)
+    // Store the promise so parallel lookups share one walk of the app.
+    if (!this.doctypeFiles.has(appName)) {
+      this.doctypeFiles.set(
+        appName,
+        findDoctypeFiles(path.join(this.appsPath, appName)),
+      )
     }
-
-    const targetPattern = path.join(
-      'doctype',
-      doctypeName,
-      `${doctypeName}.json`,
-    )
-    let foundPath = null
-
-    const searchDirectory = async (directory) => {
-      const files = await fs.readdir(directory)
-      for (const file of files) {
-        const fullPath = path.join(directory, file)
-        try {
-          const stat = await fs.stat(fullPath)
-          if (stat.isDirectory()) {
-            await searchDirectory(fullPath)
-          } else if (fullPath.endsWith(targetPattern)) {
-            foundPath = fullPath
-            return
-          }
-        } catch (error) {
-          // Skip files/directories that can't be accessed (e.g., broken symlinks, permission denied)
-          if (error.code === 'ENOENT' || error.code === 'EACCES') {
-            continue
-          }
-          // Re-throw other unexpected errors
-          throw error
-        }
-      }
-    }
-
-    await searchDirectory(path.join(this.appsPath, appName))
-
-    this.jsonFileCache.set(cacheKey, foundPath)
-    return foundPath
+    const files = await this.doctypeFiles.get(appName)
+    return files.get(doctypeName) ?? null
   }
 
   generateBaseInterfaces() {
@@ -252,4 +222,47 @@ export class DocTypeInterfaceGenerator {
   }
   `
   }
+}
+
+// node_modules and dot folders hold no doctypes but can be most of an app's
+// tree, so the walk skips them.
+const SKIPPED_FOLDERS = /^(node_modules$|\.)/
+
+// Maps each doctype name to its `doctype/<name>/<name>.json` file in the app.
+async function findDoctypeFiles(appPath) {
+  const files = new Map()
+
+  const walk = async (directory) => {
+    let entries
+    try {
+      entries = await fs.readdir(directory, { withFileTypes: true })
+    } catch (error) {
+      if (error.code === 'ENOENT' || error.code === 'EACCES') {
+        return
+      }
+      throw error
+    }
+    for (const entry of entries) {
+      const fullPath = path.join(directory, entry.name)
+      if (entry.isDirectory() && !SKIPPED_FOLDERS.test(entry.name)) {
+        await walk(fullPath)
+      } else if (
+        isDoctypeFile(fullPath) &&
+        !files.has(path.basename(directory))
+      ) {
+        files.set(path.basename(directory), fullPath)
+      }
+    }
+  }
+
+  await walk(appPath)
+  return files
+}
+
+function isDoctypeFile(filePath) {
+  const doctypeFolder = path.dirname(filePath)
+  return (
+    path.basename(filePath) === `${path.basename(doctypeFolder)}.json` &&
+    path.basename(path.dirname(doctypeFolder)) === 'doctype'
+  )
 }
