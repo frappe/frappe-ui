@@ -202,8 +202,9 @@ let darkCheckboxStyles = {
 // the line box, so a tight line height cuts off descenders. Here it clips only
 // horizontally. `overflow-x: clip` does not let a flex or grid item shrink below
 // its content as `hidden` did, so the min sizes are set too. Tailwind's
-// `textOverflow` plugin owns all three classes, so it is disabled below and they
-// are defined here, in the component layer, where utilities on the element win.
+// `textOverflow` plugin owns all of these classes, so it is disabled below and
+// they are defined here, in the component layer, where utilities on the element
+// win.
 const textOverflowStyles = {
   '.truncate': {
     overflowX: 'clip',
@@ -213,6 +214,7 @@ const textOverflowStyles = {
     minHeight: '0',
   },
   '.text-ellipsis': { textOverflow: 'ellipsis' },
+  '.overflow-ellipsis': { textOverflow: 'ellipsis' },
   '.text-clip': { textOverflow: 'clip' },
 }
 

@@ -263,8 +263,12 @@ describe('truncate', () => {
     expect(css.indexOf('.min-w-12 {')).toBeGreaterThan(truncate)
   })
 
-  it('keeps text-ellipsis and text-clip', async () => {
-    const css = await compile(html('text-ellipsis text-clip'), layers)
+  it('keeps the other classes of the plugin it replaces', async () => {
+    const css = await compile(
+      html('text-ellipsis overflow-ellipsis text-clip'),
+      layers,
+    )
+    expect(css).toMatch(/\.overflow-ellipsis \{\s*text-overflow: ellipsis/)
     expect(css).toMatch(/\.text-ellipsis \{\s*text-overflow: ellipsis/)
     expect(css).toMatch(/\.text-clip \{\s*text-overflow: clip/)
   })

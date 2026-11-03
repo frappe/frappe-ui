@@ -132,8 +132,6 @@
           >
             <!-- Declined reads the same here as on a pill: struck through and
                muted, still plainly the event you said no to. -->
-            <!-- leading-5 and leading-4 below set each line's height, rather than
-               the sizes' own line height. -->
             <span
               class="calendar-row-title truncate leading-5"
               :class="[
