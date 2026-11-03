@@ -13,6 +13,18 @@ import preset from './preset.js'
 
 const theme = resolveConfig({ content: [], presets: [preset] }).theme
 
+async function compile(html, directives = '@tailwind utilities') {
+  const { default: postcss } = await import('postcss')
+  const { default: tailwindcss } = await import('tailwindcss')
+  const { css } = await postcss([
+    tailwindcss({
+      presets: [preset],
+      content: [{ raw: html, extension: 'html' }],
+    }),
+  ]).process(directives, { from: undefined })
+  return css
+}
+
 describe('spacing scale', () => {
   it('has every integer from 1 to 128', () => {
     for (const n of [1, 13, 17, 40, 52, 64, 65, 112, 128]) {
@@ -181,18 +193,6 @@ describe('dark-theme checkbox marks', () => {
  * come late enough in the sheet to win.
  */
 describe('hover', () => {
-  const compile = async (html) => {
-    const { default: postcss } = await import('postcss')
-    const { default: tailwindcss } = await import('tailwindcss')
-    const result = await postcss([
-      tailwindcss({
-        presets: [preset],
-        content: [{ raw: html, extension: 'html' }],
-      }),
-    ]).process('@tailwind utilities', { from: undefined })
-    return result.css
-  }
-
   it('applies only where hovering is possible', async () => {
     // Reaches every app on the preset, so a dropped flag should fail here.
     expect(preset.future.hoverOnlyWhenSupported).toBe(true)
@@ -240,33 +240,23 @@ describe('arbitrary values', () => {
 })
 
 describe('truncate', () => {
-  async function compile(classes) {
-    const { default: postcss } = await import('postcss')
-    const { default: tailwindcss } = await import('tailwindcss')
-    const { css } = await postcss([
-      tailwindcss({
-        presets: [preset],
-        content: [{ raw: `<div class="${classes}"></div>`, extension: 'html' }],
-      }),
-    ]).process('@tailwind components; @tailwind utilities;', {
-      from: undefined,
-    })
-    return css
-  }
+  const layers = '@tailwind components; @tailwind utilities;'
+  const html = (classes) => `<div class="${classes}"></div>`
 
   it('clips only the inline axis, so a tight line keeps its descenders', async () => {
-    const css = await compile('truncate')
+    const css = await compile(html('truncate'), layers)
     expect(css).toMatch(/\.truncate \{[^}]*overflow-x: clip/)
     expect(css).not.toMatch(/overflow: hidden/)
   })
 
-  it('still lets a flex or grid item shrink below its content', async () => {
-    const css = await compile('truncate')
+  it('sets the min sizes that overflow: hidden used to imply', async () => {
+    const css = await compile(html('truncate'), layers)
     expect(css).toMatch(/\.truncate \{[^}]*min-width: 0/)
+    expect(css).toMatch(/\.truncate \{[^}]*min-height: 0/)
   })
 
   it('yields to overflow and min-width utilities on the same element', async () => {
-    const css = await compile('truncate overflow-hidden min-w-12')
+    const css = await compile(html('truncate overflow-hidden min-w-12'), layers)
     const truncate = css.indexOf('.truncate {')
     expect(truncate).toBeGreaterThan(-1)
     expect(css.indexOf('.overflow-hidden {')).toBeGreaterThan(truncate)
@@ -274,7 +264,7 @@ describe('truncate', () => {
   })
 
   it('keeps text-ellipsis and text-clip', async () => {
-    const css = await compile('text-ellipsis text-clip')
+    const css = await compile(html('text-ellipsis text-clip'), layers)
     expect(css).toMatch(/\.text-ellipsis \{\s*text-overflow: ellipsis/)
     expect(css).toMatch(/\.text-clip \{\s*text-overflow: clip/)
   })

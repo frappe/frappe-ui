@@ -132,10 +132,8 @@
           >
             <!-- Declined reads the same here as on a pill: struck through and
                muted, still plainly the event you said no to. -->
-            <!-- leading-5 and leading-4 below, rather than the sizes' own 1.15: at
-               13px that leaves a 14.95px line box for glyphs that stand 16px, and
-               truncate's overflow-hidden then slices the descender off a g or a y.
-               The line box has to clear the ink before it can be clipped for width. -->
+            <!-- leading-5 and leading-4 below set each line's height, rather than
+               the sizes' own line height. -->
             <span
               class="calendar-row-title truncate leading-5"
               :class="[
