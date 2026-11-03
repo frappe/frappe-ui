@@ -138,6 +138,19 @@ describe('FileUploader', () => {
     cy.get('[data-slot=root]').should('have.attr', 'data-state', 'error')
   })
 
+  it('clears the input after a failed upload so the same file can be picked again', () => {
+    cy.intercept('POST', '/api/method/upload_file', {
+      statusCode: 417,
+      body: {},
+    }).as('upload')
+
+    cy.mount(FileUploader)
+    cy.get('input[type=file]').selectFile(testFile, { force: true })
+    cy.wait('@upload')
+    cy.get('[data-slot=root]').should('have.attr', 'data-state', 'error')
+    cy.get('input[type=file]').should('have.value', '')
+  })
+
   it('the default trigger is a real button, reachable by keyboard', () => {
     cy.mount(FileUploader)
     cy.get('button').should('not.have.attr', 'tabindex')

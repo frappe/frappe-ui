@@ -109,6 +109,8 @@ async function onFileAdd(event: Event) {
   const target = event.target as HTMLInputElement
   const selectedFile = target.files?.[0] || null
   file.value = selectedFile
+  // Without this, picking the same file again fires no change event.
+  target.value = ''
 
   if (!selectedFile) return
 
