@@ -238,3 +238,44 @@ describe('arbitrary values', () => {
     expect(css).not.toMatch(/var\(--\s/)
   }, 60_000)
 })
+
+describe('truncate', () => {
+  async function compile(classes) {
+    const { default: postcss } = await import('postcss')
+    const { default: tailwindcss } = await import('tailwindcss')
+    const { css } = await postcss([
+      tailwindcss({
+        presets: [preset],
+        content: [{ raw: `<div class="${classes}"></div>`, extension: 'html' }],
+      }),
+    ]).process('@tailwind components; @tailwind utilities;', {
+      from: undefined,
+    })
+    return css
+  }
+
+  it('clips only the inline axis, so a tight line keeps its descenders', async () => {
+    const css = await compile('truncate')
+    expect(css).toMatch(/\.truncate \{[^}]*overflow-x: clip/)
+    expect(css).not.toMatch(/overflow: hidden/)
+  })
+
+  it('still lets a flex or grid item shrink below its content', async () => {
+    const css = await compile('truncate')
+    expect(css).toMatch(/\.truncate \{[^}]*min-width: 0/)
+  })
+
+  it('yields to overflow and min-width utilities on the same element', async () => {
+    const css = await compile('truncate overflow-hidden min-w-12')
+    const truncate = css.indexOf('.truncate {')
+    expect(truncate).toBeGreaterThan(-1)
+    expect(css.indexOf('.overflow-hidden {')).toBeGreaterThan(truncate)
+    expect(css.indexOf('.min-w-12 {')).toBeGreaterThan(truncate)
+  })
+
+  it('keeps text-ellipsis and text-clip', async () => {
+    const css = await compile('text-ellipsis text-clip')
+    expect(css).toMatch(/\.text-ellipsis \{\s*text-overflow: ellipsis/)
+    expect(css).toMatch(/\.text-clip \{\s*text-overflow: clip/)
+  })
+})
