@@ -8,6 +8,11 @@ export interface FrappeUIConfig {
   // Max upload size in bytes (apps usually source this from their boot data)
   maxFileSize?: number | null
 
+  // Uploads larger than this many bytes are sent in chunks of this size.
+  // Defaults to 25 MB. Apps usually source it from Frappe's
+  // `get_file_chunk_size()`.
+  fileChunkSize?: number | null
+
   // Resource fetcher function
   resourceFetcher?: (options: any) => Promise<any>
 
