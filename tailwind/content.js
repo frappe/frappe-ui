@@ -24,12 +24,13 @@ function glob(pattern) {
 // `h('div', { class: '...' })` outside any component tree.
 //
 // `experimental/**` is not globbed whole. One rule decides what is listed:
-// every directory `experimental.ts` re-exports is covered, because importing
-// anything from `frappe-ui/experimental` pulls that directory's classes into
-// the app build, and an app that scans only this list would render it
-// unstyled. `content.test.js` derives the expected set from that barrel and
-// fails when the two drift. Directories under `experimental/` that the barrel
-// does not re-export stay out: nothing a consumer can import reaches them.
+// every directory `experimental.ts` re-exports is covered, and so is every
+// directory with its own `frappe-ui/experimental/*` subpath in `exports`.
+// Importing either pulls that directory's classes into the app build, and an
+// app that scans only this list would render it unstyled. `content.test.js`
+// derives the expected set from the barrel and `exports`, and fails when they
+// drift. Other directories under `experimental/` stay out: nothing a consumer
+// can import reaches them.
 //
 // `vitepress/**` (the shared docs theme) is listed for the same reason on its
 // own subpath: every class it renders, including its `lucide-*` icons, comes
@@ -57,6 +58,8 @@ export const content = [
   glob('experimental/TextEditor/**/*.{vue,js,ts,jsx,tsx}'),
   glob('experimental/ThemeSwitcher/**/*.{vue,js,ts,jsx,tsx}'),
   glob('experimental/SpriteIcons/**/*.{vue,js,ts,jsx,tsx}'),
+  // Subpath exports, each its own entry rather than part of the barrel.
+  glob('experimental/openui/**/*.{vue,js,ts,jsx,tsx}'),
   glob('vitepress/**/*.{vue,js,ts}'),
   '!' + glob('**/stories/**'),
 ]
