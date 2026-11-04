@@ -395,8 +395,12 @@ function ariaSelected(cell: CalendarPanelCell): 'true' | 'false' {
     : 'false'
 }
 
+// Read aloud, so a spoken date ("Tuesday, 3 February 2026"), not the ISO key
+// (read as digits and dashes). Day and month names follow the dayjs locale.
 function ariaLabel(cell: CalendarPanelCell): string {
-  return cell.date.format('YYYY-MM-DD') + (cell.isToday ? ' (Today)' : '')
+  return (
+    cell.date.format('dddd, D MMMM YYYY') + (cell.isToday ? ' (Today)' : '')
+  )
 }
 
 function cellClass(cell: CalendarPanelCell): Array<string | false> {

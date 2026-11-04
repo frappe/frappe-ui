@@ -81,6 +81,10 @@ Clicking a row, or pressing `Enter` or `Space` on it, opens or closes it.
 Every change assigns a new array, so shallow watchers, immutable stores and
 undo logs see it.
 
+Because the model is a plain array of keys, it's easy to keep. Save it, for
+example in local storage with one entry per tree, and people come back to the
+folders they left open instead of a collapsed tree.
+
 ### Drag and drop
 
 Set `draggable` to turn on dragging. The tree works out the drop position from
@@ -137,5 +141,10 @@ siblings and, for a parent, whether it is open.
 
 Drag and drop announces "Picked up", "Moved" and "Cancelled move" to screen
 readers.
+
+A tree built by hand from nested lists gets none of this: no arrow keys, no
+type to find, and nothing that tells a screen reader a row has children or is
+open. Use `Tree` for nested data, and shape each row with the slots in
+[Custom rows](#custom-rows).
 
 <!-- @include: ./Tree.api.md -->

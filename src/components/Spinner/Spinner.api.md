@@ -23,6 +23,13 @@
     required: false,
     type: 'boolean',
     default: 'false'
+  },
+  {
+    name: 'label',
+    description: 'What screen readers announce, like "Syncing". Defaults to "Loading". Pass\na translated string in a translated app, or `""` when visible text next\nto the spinner already says what\'s loading, which hides the spinner from\nscreen readers.',
+    required: false,
+    type: 'string',
+    default: '"Loading"'
   }
 ]
 </script>

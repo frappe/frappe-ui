@@ -1,7 +1,8 @@
 # Textarea
 
 A multi-line field for longer text, such as comments, notes and descriptions.
-For a single line, use [TextInput](./textinput).
+For a single line, use [TextInput](./textinput). For formatted text, use
+[Editor](../molecules/editor) from `frappe-ui/editor`.
 
 <ComponentPlayground name="Textarea" />
 
@@ -21,12 +22,23 @@ place.
 
 <ComponentPreview name="Textarea-Bio" />
 
+## Usage Guidelines
+
+<ComponentPreview name="Textarea-Guidelines" hide-code />
+
+<div class="guideline-text">
+
+- Show the character count before people hit a limit, not only once they pass it.
+- When long-form text needs formatting, like bold or lists, use the Editor instead.
+
+</div>
+
 ## Behavior
 
 ### Label, description and error
 
 `label` renders above the field and `description` below it. `error` renders
-below the field and hides `description`. It takes a string, an array of strings
+below the field and hides `description`, and turns the field's border red. It takes a string, an array of strings
 (one line each), or an `Error`, the same values as
 [ErrorMessage](./errormessage). An empty string or an empty array means no
 error. `required` adds a red asterisk to the label and sets `required` on the

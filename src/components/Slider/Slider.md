@@ -10,6 +10,8 @@ between a minimum and a maximum.
 ### Price range filter
 
 A `v-model` with two numbers draws two handles, one for each end of the range.
+The `#label` slot puts the selected range beside the label, and a row under the
+track shows the ends.
 
 <ComponentPreview name="Slider-Range" />
 
@@ -26,6 +28,18 @@ below and above zero look different.
 change of `v-model`.
 
 <ComponentPreview name="Slider-ValueCommit" />
+
+## Usage Guidelines
+
+<ComponentPreview name="Slider-Guidelines" hide-code />
+
+<div class="guideline-text">
+
+- Add a number field beside the slider. Some people know the exact value they want.
+- Show the current value next to the slider, so people don't have to guess it.
+- Use a slider for settings where an approximate value is fine, like volume or brightness.
+
+</div>
 
 ## Behavior
 

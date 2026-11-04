@@ -7,6 +7,7 @@ import PropsTable from '../components/Docs/PropsTable.vue'
 import SlotsTable from '../components/Docs/SlotsTable.vue'
 import EmitsTable from '../components/Docs/EmitsTable.vue'
 import PlaygroundFrame from '../components/Docs/PlaygroundFrame.vue'
+import Guideline from '../components/Docs/Guideline.vue'
 
 // PROSE theme: layout + generic doc components only. The individual
 // `<Name>.playground.vue` files are colocated with the components they
@@ -20,5 +21,6 @@ export const theme = {
     app.component('SlotsTable', SlotsTable)
     app.component('EmitsTable', EmitsTable)
     app.component('PlaygroundFrame', PlaygroundFrame)
+    app.component('Guideline', Guideline)
   },
 } satisfies Theme

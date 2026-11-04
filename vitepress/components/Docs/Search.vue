@@ -8,8 +8,8 @@ defineOptions({ inheritAttrs: false })
 
 withDefaults(
   defineProps<{
-    /** `subtle` is a borderless gray fill; `outline` adds a visible border for a field on a gray surface. */
-    variant?: 'subtle' | 'outline'
+    /** `subtle` is a borderless gray fill; `outline` adds a visible border for a field on a gray surface; `ghost` is transparent until hovered. */
+    variant?: 'subtle' | 'outline' | 'ghost'
     /** The trigger's label. */
     placeholder?: string
   }>(),
@@ -21,6 +21,7 @@ const variantClasses = {
     'border-[--surface-gray-2] bg-surface-gray-2 hover:border-outline-elevation-2 hover:bg-surface-gray-3',
   outline:
     'border-outline-gray-2 bg-surface-gray-2 hover:border-outline-gray-3 hover:bg-surface-gray-3',
+  ghost: 'border-transparent bg-transparent hover:bg-surface-gray-2',
 }
 
 // Cmd/Ctrl+K toggles the command palette.

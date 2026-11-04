@@ -2,19 +2,24 @@
   <div
     class="relative inline-block shrink-0"
     :class="[sizeClasses, shapeClasses]"
+    :aria-hidden="decorative || undefined"
   >
     <img
       v-if="image && !imgFetchError"
       :src="image"
-      :alt="label"
+      :alt="decorative ? '' : label"
       :class="[shapeClasses, 'h-full w-full object-cover']"
       :style="$slots.indicator && indicatorMask"
       @error="(err) => handleImageError(err)"
     />
+    <!-- The fallback shows one letter, so it carries the full name for
+         screen readers, the same name a photo's alt text gives. -->
     <div
       v-else
       class="flex h-full w-full items-center justify-center uppercase select-none"
       :class="[labelClasses, fallbackThemeClasses, shapeClasses]"
+      :role="!decorative && label ? 'img' : undefined"
+      :aria-label="!decorative && label ? label : undefined"
       :style="$slots.indicator && indicatorMask"
     >
       <div :class="iconClasses" v-if="$slots.default">
@@ -51,6 +56,7 @@ const props = withDefaults(defineProps<AvatarProps>(), {
   size: 'md',
   shape: 'circle',
   theme: 'gray',
+  decorative: false,
 })
 
 const fallbackThemeClasses = computed(() => {

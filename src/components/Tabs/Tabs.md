@@ -71,6 +71,17 @@ the item as `tab`. Put your own fields in the item's `data` and read them as
 
 <ComponentPreview name="Tabs-Shorthand" />
 
+## Usage Guidelines
+
+<ComponentPreview name="Tabs-Guidelines" hide-code />
+
+<div class="guideline-text">
+
+- Switch pages or panels with Tabs, not TabButtons. With a route on each tab, Tabs keeps the URL in sync.
+- Keep tabs to what fits in one row. A tab scrolled out of view is one people won't find.
+
+</div>
+
 ## Behavior
 
 ### Vertical tabs

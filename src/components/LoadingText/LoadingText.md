@@ -23,7 +23,7 @@ Swap `LoadingText` with a plain status line while a form saves. Click
 
 ## Accessibility
 
-The spinner has `role="status"` and the label "Loading". The text beside it is
-plain text.
+The component has `role="status"`, so screen readers announce its text. The
+spinner is hidden from them, so the text isn't read twice.
 
 <!-- @include: ./LoadingText.api.md -->

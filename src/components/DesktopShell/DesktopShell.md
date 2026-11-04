@@ -77,4 +77,10 @@ shared name would have to mean "the icon column", "the navigation panel" and
 "the tab bar" at once, and an app that renders both a rail and a sidebar could
 not say which is which.
 
+## Accessibility
+
+The page content sits in a `<main>` landmark, so screen-reader users can jump
+straight to it past the sidebar. A page inside the shell should not add its
+own `<main>`: a page has only one.
+
 <!-- @include: ./DesktopShell.api.md -->

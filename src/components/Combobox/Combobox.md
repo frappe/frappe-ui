@@ -58,6 +58,18 @@ goes back to the trigger, inside the dialog.
 
 <ComponentPreview name="Combobox-InDialog" layout="stacked" />
 
+## Usage Guidelines
+
+<ComponentPreview name="Combobox-Guidelines" hide-code />
+
+<div class="guideline-text">
+
+- Show a record's name, with its ID as a hint, not the ID alone.
+- When any value is valid, like a route or a font, let people use what they type.
+- Add a clear button when empty means something, like a style that falls back to unset.
+
+</div>
+
 ## Behavior
 
 ### Options
@@ -85,6 +97,11 @@ custom row that commits the query therefore turns `Combobox` into a text input
 with suggestions.
 
 ### Server search
+
+Search on the server for any list that grows with the site, such as
+employees, customers or items. Loading every record into `options` makes the
+field slow to open on a large site. A link field usually works this way: it asks
+the server for matches as people type, a moment after they pause.
 
 To load options from a server:
 
@@ -143,12 +160,29 @@ same as `setOpen(false)`. `#suffix` replaces the chevron.
 
 To add a clear button, put it in `#suffix` or `#trigger`. Use `@click.stop`
 so the click does not toggle the popover, and `@pointerdown.stop` so the
-trigger does not take the press.
+trigger does not take the press. The button holds only an icon, so give it an
+`aria-label`.
+
+```vue
+<Combobox v-model="timezone" :options="timezones">
+  <template #suffix="{ clear }">
+    <button
+      v-if="timezone"
+      type="button"
+      aria-label="Clear"
+      @click.stop="clear"
+      @pointerdown.stop
+    >
+      <span class="lucide-x size-4" aria-hidden="true" />
+    </button>
+  </template>
+</Combobox>
+```
 
 ### Label, description and error
 
 `label` renders above the field and `description` below it. `error` renders
-below the field and hides `description`. It takes a string, an array of strings
+below the field and hides `description`, and turns the field's border red. It takes a string, an array of strings
 (one line each), or an `Error`, the same values as
 [ErrorMessage](./errormessage). An empty string or an empty array means no
 error. `required` adds a red asterisk to the label.
