@@ -622,9 +622,7 @@ function goHome() {
               @click="onRowClick(item)"
             />
             <div class="min-w-0 flex-1">
-              <!-- Sized text in an inner span keeps its own line-height:
-                   `leading-snug` + `truncate` on one element would shear off
-                   descenders like the tail of "g". -->
+              <!-- Sized text in an inner span keeps its own line-height. -->
               <div class="truncate leading-snug text-ink-gray-8">
                 <span class="text-lg">{{ item.name }}</span>
               </div>

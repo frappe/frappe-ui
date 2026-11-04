@@ -198,6 +198,26 @@ let darkCheckboxStyles = {
   },
 }
 
+// Tailwind's `truncate` sets `overflow: hidden`, which also clips vertically at
+// the line box, so a tight line height cuts off descenders. Here it clips only
+// horizontally. `overflow-x: clip` does not let a flex or grid item shrink below
+// its content as `hidden` did, so the min sizes are set too. Tailwind's
+// `textOverflow` plugin owns all of these classes, so it is disabled below and
+// they are defined here, in the component layer, where utilities on the element
+// win.
+const textOverflowStyles = {
+  '.truncate': {
+    overflowX: 'clip',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    minWidth: '0',
+    minHeight: '0',
+  },
+  '.text-ellipsis': { textOverflow: 'ellipsis' },
+  '.overflow-ellipsis': { textOverflow: 'ellipsis' },
+  '.text-clip': { textOverflow: 'clip' },
+}
+
 export default plugin(
   function ({ addBase, addComponents, matchUtilities, theme }) {
     // tokens.js keys the variables by theme; the selector each theme lands on
@@ -215,6 +235,7 @@ export default plugin(
     addComponents(componentStyles)
     addComponents(buildTextStyleUtilities())
     addComponents(buildFocusRingUtilities())
+    addComponents(textOverflowStyles)
     // Authoring sugar for the list-family styling hooks (frappe-ui/list),
     // on the spacing scale with variants and arbitrary values:
     // `max-sm:list-gap-3` instead of `max-sm:[--list-gap:0.75rem]`.
@@ -227,6 +248,7 @@ export default plugin(
     )
   },
   {
+    corePlugins: { textOverflow: false },
     theme: {
       colors: colorPalette,
       borderRadius: buildRadiusConfig(),

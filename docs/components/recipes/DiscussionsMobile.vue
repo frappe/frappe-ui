@@ -136,9 +136,7 @@ const discussions = [
             <ListCell>
               <div class="min-w-0 flex-1">
                 <!-- The sized text lives in an inner span so it keeps its own
-                     line-height. Putting `leading-none` on the same element as
-                     `truncate` (overflow-hidden) would shear off descenders like
-                     the tail of "g". -->
+                     line-height. -->
                 <div class="truncate leading-none text-ink-gray-8">
                   <span class="text-lg">{{ discussion.title }}</span>
                 </div>
@@ -183,9 +181,7 @@ const discussions = [
           <ListCell>
             <div class="min-w-0 flex-1">
               <!-- The sized text lives in an inner span so it keeps its own
-                   line-height. Putting `leading-none` on the same element as
-                   `truncate` (overflow-hidden) would shear off descenders like
-                   the tail of "g". -->
+                   line-height. -->
               <div class="truncate leading-none text-ink-gray-8">
                 <span
                   :class="discussion.unread ? 'text-lg-semibold' : 'text-lg'"
