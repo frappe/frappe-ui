@@ -81,7 +81,7 @@
 <script setup lang="ts">
 import { ref, computed, nextTick, watch } from 'vue'
 import { dayjs } from '../../utils/dayjs'
-import { orderRange, rangeKey, stepRange } from './utils'
+import { orderRange, parseRangeInput, rangeKey, stepRange } from './utils'
 import DateRangeCalendar from './DateRangeCalendar.vue'
 import PickerShell from '../shared/picker/PickerShell.vue'
 import {
@@ -199,17 +199,6 @@ function normalizeIncoming(val?: string[] | null): [string, string] {
   return [from?.format(DATE_FORMAT) || '', to?.format(DATE_FORMAT) || '']
 }
 
-function parseRangeInput(raw: string): [Dayjs | null, Dayjs | null] {
-  if (!raw.trim()) return [null, null]
-  const normalized = raw.replace(/\s+to\s+/i, ',').replace(/\s+-\s+/g, ',')
-  const parts = normalized
-    .split(',')
-    .map((p) => p.trim())
-    .filter(Boolean)
-  if (!parts.length) return [null, null]
-  return [coerceToDayjs(parts[0]), coerceToDayjs(parts[1])]
-}
-
 function pickIncoming(): string[] {
   return props.modelValue && props.modelValue.length ? props.modelValue : []
 }
@@ -268,7 +257,7 @@ function commitInput(close = false): void {
     if (close && !shouldKeepOpen.value) isOpen.value = false
     return
   }
-  const [f, t] = parseRangeInput(raw)
+  const [f, t] = parseRangeInput(raw, coerceToDayjs)
   if (f && !checkUnavailable(f)) fromDate.value = f.format(DATE_FORMAT)
   if (t && !checkUnavailable(t)) toDate.value = t.format(DATE_FORMAT)
   else if (!t) toDate.value = ''
