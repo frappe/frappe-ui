@@ -53,6 +53,37 @@ export function generateWeeks(
   return chunked
 }
 
+/** Text that starts like an ISO date (`2026-11-03`), which a loose parse reads right. */
+export const ISO_DATE = /^\d{4}-\d{1,2}-\d{1,2}/
+
+const typedFormatCache = new Map<string, string[]>()
+
+/**
+ * The formats a person may type a date in under a display `format`, in its
+ * day-month-year order: a day, month or hour with no leading zero, a two-digit
+ * year, `-`, `/` or `.` between the date parts, no seconds, or no time.
+ * `DD-MM-YYYY HH:mm:ss` takes `3/11/26 9:15` and `03-11-2026`.
+ */
+export function typedFormats(format: string): string[] {
+  const cached = typedFormatCache.get(format)
+  if (cached) return cached
+  let formats = [format]
+  const vary = (change: (f: string) => string) => {
+    formats = [...new Set(formats.flatMap((f) => [f, change(f)]))]
+  }
+  vary((f) => f.replace(/(?<!D)DD(?!D)/, 'D'))
+  vary((f) => f.replace(/(?<!M)MM(?!M)/, 'M'))
+  vary((f) => f.replace(/(?<!Y)YYYY(?!Y)/, 'YY'))
+  vary((f) => f.replace(/(?<![Hh])(HH|hh)(?![Hh])/, (t) => t[0]))
+  vary((f) => f.replace(/:ss/, ''))
+  vary((f) => f.replace(/\s+[Hh].*$/, ''))
+  for (const separator of ['-', '/', '.']) {
+    vary((f) => f.replace(/(?<=[DMY])[-/.](?=[DMY])/g, separator))
+  }
+  typedFormatCache.set(format, formats)
+  return formats
+}
+
 export function getDateValue(date: Date | string) {
   if (!date || date.toString() === 'Invalid Date') return ''
 

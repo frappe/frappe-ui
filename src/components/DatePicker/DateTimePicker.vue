@@ -320,6 +320,12 @@ function commitInput(close = false): void {
     if (close && !shouldKeepOpen.value) isOpen.value = false
     return
   }
+  // An unedited blur keeps the value. Reading the shown text back would drop
+  // what the format leaves out, such as the seconds.
+  if (props.modelValue && raw === displayLabel.value) {
+    if (close && !shouldKeepOpen.value) isOpen.value = false
+    return
+  }
   const parsed = coerceToDayjs(raw)
   if (parsed && !checkUnavailable(parsed)) {
     selectDate(parsed)

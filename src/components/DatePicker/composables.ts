@@ -1,7 +1,13 @@
 import { ref, computed, watch } from 'vue'
 import type { Dayjs } from 'dayjs/esm'
 import { dayjs } from '../../utils/dayjs'
-import { generateWeeks, monthStart, getDateValue } from './utils'
+import {
+  generateWeeks,
+  monthStart,
+  getDateValue,
+  ISO_DATE,
+  typedFormats,
+} from './utils'
 import type { CalendarPanelExposed } from './calendarTypes'
 import type {
   CommonDatePickerProps,
@@ -94,6 +100,9 @@ export function useKeepOpen(props: CommonDatePickerProps) {
 }
 
 // Coerce arbitrary string input to a Dayjs, respecting an optional explicit format.
+// With a format, text of numbers alone reads in that format's day-month-year
+// order: `3-11-2026` under `DD-MM-YYYY` is 3 November, not 11 March. ISO text
+// (the value itself) and text with a month name keep the loose parse.
 export function useDateCoercion(getFormat: () => string | undefined) {
   return function coerceToDayjs(val?: string | null): Dayjs | null {
     if (!val) return null
@@ -103,6 +112,11 @@ export function useDateCoercion(getFormat: () => string | undefined) {
     if (format) {
       const dStrict = dayjs(raw, format, true)
       if (dStrict.isValid()) return dStrict
+      if (!ISO_DATE.test(raw)) {
+        const dTyped = dayjs(raw, typedFormats(format), true)
+        if (dTyped.isValid()) return dTyped
+        if (!/[a-z]/i.test(raw)) return null
+      }
     }
     const dLoose = dayjs(raw)
     if (dLoose.isValid()) return dLoose
