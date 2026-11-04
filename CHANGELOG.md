@@ -1,5 +1,22 @@
 # frappe-ui
 
+## 1.1.1
+
+### Patch Changes
+
+- Vite: `frappeTypes` finds doctype files in one pass over the app and skips
+  `node_modules` and dot folders. Type generation on dev start no longer takes
+  minutes in apps with a large `node_modules`.
+  [#1331](https://github.com/frappe/frappe-ui/pull/1331)
+- IconPicker: the icons in the grid and the field now use the theme's text
+  colours, so they show in dark mode.
+  [#1336](https://github.com/frappe/frappe-ui/pull/1336)
+- Tailwind preset: `truncate` now clips only horizontally, so a tight line
+  height no longer cuts off descenders. Add `overflow-hidden` to an element that
+  relied on `truncate` to hide extra lines vertically, or to keep the old
+  position of an inline-block `truncate`.
+  [#1338](https://github.com/frappe/frappe-ui/pull/1338)
+
 ## 1.1.0
 
 ### Minor Changes
