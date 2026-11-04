@@ -60,7 +60,7 @@ both the date and the time inputs.
 With a `format`, typed numbers read in that format's day-month-year order.
 Under `DD-MM-YYYY`, `3-11-2026`, `3/11/26` and `03.11.2026` all mean
 3 November 2026. A `DateTimePicker` also takes the date without its seconds or
-without a time. ISO text (`2026-11-03`) and text with a month name
+without a time, and a 12-hour time in either AM/PM case. ISO text (`2026-11-03`) and text with a month name
 (`Nov 3, 2026`) read as they do with no `format`. A focus and blur with no edit
 leaves the value as it is.
 

@@ -7,6 +7,7 @@ import {
   getDateValue,
   ISO_DATE,
   typedFormats,
+  withFormatSeparator,
 } from './utils'
 import type { CalendarPanelExposed } from './calendarTypes'
 import type {
@@ -113,9 +114,11 @@ export function useDateCoercion(getFormat: () => string | undefined) {
       const dStrict = dayjs(raw, format, true)
       if (dStrict.isValid()) return dStrict
       if (!ISO_DATE.test(raw)) {
-        const dTyped = dayjs(raw, typedFormats(format), true)
+        const typed = withFormatSeparator(raw, format)
+        const dTyped = dayjs(typed, typedFormats(format), true)
         if (dTyped.isValid()) return dTyped
-        if (!/[a-z]/i.test(raw)) return null
+        // AM/PM is not a month name: the loose parse would read it month-first.
+        if (!/[a-z]/i.test(raw.replace(/[ap]\.?m\.?/gi, ''))) return null
       }
     }
     const dLoose = dayjs(raw)

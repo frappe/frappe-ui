@@ -268,16 +268,17 @@ describe('DatePicker', () => {
     cy.get('input').should('have.value', '03-11-2026')
   })
 
-  it('keeps the value on a blur with no edit', () => {
+  it('keeps the value on a blur with no edit, though the format drops the year', () => {
     cy.mount(DatePicker, {
       props: {
-        modelValue: '2026-11-03',
-        format: 'DD-MM-YYYY',
+        modelValue: '2020-11-03',
+        format: 'DD MMM',
         'onUpdate:modelValue': cy.spy().as('onUpdate'),
       },
     })
+    cy.get('input').should('have.value', '03 Nov')
     cy.get('input').focus().blur()
-    cy.get('input').should('have.value', '03-11-2026')
+    cy.get('input').should('have.value', '03 Nov')
     cy.get('@onUpdate').should('not.have.been.called')
   })
 
