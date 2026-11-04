@@ -80,6 +80,18 @@ describe('Toast v1 — vue-sonner integration', () => {
     cy.contains('Plain message').should('exist')
   })
 
+  it('centers the action button label', () => {
+    cy.mount(FrappeUIProvider)
+    cy.then(() => {
+      toast.success('Post archived', {
+        action: { label: 'Undo', onClick: () => {} },
+      })
+    })
+    cy.contains('[data-sonner-toast] [data-button]', 'Undo')
+      .should('have.css', 'align-items', 'center')
+      .and('have.css', 'justify-content', 'center')
+  })
+
   // ---- toasts fired while the app subtree is still mounting ------------------
 
   // <Toaster> only receives toasts published after it subscribes, so a toast
