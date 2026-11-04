@@ -695,9 +695,7 @@ import{N as F,J as M,ae as p,r as _,o as s,D as a,aG as v,be as B,E as c,aU as O
 `),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"            <"),s("span",{class:"s_wac0bt"},"ListCell"),s("span",{class:"s_1zd9e2"},">")]),a(`
 `),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"              <"),s("span",{class:"s_1uuh8p"},"div"),s("span",{class:"s_1i4ay4"}," class"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"min-w-0 flex-1"),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_1zd9e2"},">")]),a(`
 `),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"                <!-- The sized text lives in an inner span so it keeps its own")]),a(`
-`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"                     line-height. Putting `leading-none` on the same element as")]),a(`
-`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"                     `truncate` (overflow-hidden) would shear off descenders like")]),a(`
-`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},'                     the tail of "g". -->')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"                     line-height. -->")]),a(`
 `),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"                <"),s("span",{class:"s_1uuh8p"},"div"),s("span",{class:"s_1i4ay4"}," class"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"truncate leading-none text-ink-gray-8"),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_1zd9e2"},">")]),a(`
 `),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"                  <"),s("span",{class:"s_1uuh8p"},"span")]),a(`
 `),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"                    :class"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"')]),a(`
@@ -1259,9 +1257,7 @@ import{N as F,J as M,ae as p,r as _,o as s,D as a,aG as v,be as B,E as c,aU as O
 `),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"            <"),s("span",{class:"s_wac0bt"},"ListCell"),s("span",{class:"s_1zd9e2"},">")]),a(`
 `),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"              <"),s("span",{class:"s_1uuh8p"},"div"),s("span",{class:"s_1i4ay4"}," class"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"min-w-0 flex-1"),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_1zd9e2"},">")]),a(`
 `),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"                <!-- The sized text lives in an inner span so it keeps its own")]),a(`
-`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"                     line-height. Putting `leading-none` on the same element as")]),a(`
-`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"                     `truncate` (overflow-hidden) would shear off descenders like")]),a(`
-`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},'                     the tail of "g". -->')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"                     line-height. -->")]),a(`
 `),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"                <"),s("span",{class:"s_1uuh8p"},"div"),s("span",{class:"s_1i4ay4"}," class"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"truncate leading-none text-ink-gray-8"),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_1zd9e2"},">")]),a(`
 `),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"                  <"),s("span",{class:"s_1uuh8p"},"span"),s("span",{class:"s_1i4ay4"}," class"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"text-lg"),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_1zd9e2"},">"),s("span",{class:"s_6am9cx"},"{{ discussion.title }}"),s("span",{class:"s_1zd9e2"},"</"),s("span",{class:"s_1uuh8p"},"span"),s("span",{class:"s_1zd9e2"},">")]),a(`
 `),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"                </"),s("span",{class:"s_1uuh8p"},"div"),s("span",{class:"s_1zd9e2"},">")]),a(`
@@ -1306,9 +1302,7 @@ import{N as F,J as M,ae as p,r as _,o as s,D as a,aG as v,be as B,E as c,aU as O
 `),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"          <"),s("span",{class:"s_wac0bt"},"ListCell"),s("span",{class:"s_1zd9e2"},">")]),a(`
 `),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"            <"),s("span",{class:"s_1uuh8p"},"div"),s("span",{class:"s_1i4ay4"}," class"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"min-w-0 flex-1"),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_1zd9e2"},">")]),a(`
 `),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"              <!-- The sized text lives in an inner span so it keeps its own")]),a(`
-`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"                   line-height. Putting `leading-none` on the same element as")]),a(`
-`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"                   `truncate` (overflow-hidden) would shear off descenders like")]),a(`
-`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},'                   the tail of "g". -->')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"                   line-height. -->")]),a(`
 `),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"              <"),s("span",{class:"s_1uuh8p"},"div"),s("span",{class:"s_1i4ay4"}," class"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"truncate leading-none text-ink-gray-8"),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_1zd9e2"},">")]),a(`
 `),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"                <"),s("span",{class:"s_1uuh8p"},"span")]),a(`
 `),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"                  :class"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"discussion.unread ? 'text-lg-semibold' : 'text-lg'"),s("span",{class:"s_w1p9wo"},'"')]),a(`
@@ -3425,9 +3419,7 @@ import{N as F,J as M,ae as p,r as _,o as s,D as a,aG as v,be as B,E as c,aU as O
 `),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"          <"),s("span",{class:"s_wac0bt"},"ListCell"),s("span",{class:"s_1i4ay4"}," class"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"self-start"),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_1zd9e2"},">")]),a(`
 `),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"            <"),s("span",{class:"s_1uuh8p"},"div"),s("span",{class:"s_1i4ay4"}," class"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"min-w-0 flex-1"),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_1zd9e2"},">")]),a(`
 `),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"              <!-- The sized text lives in an inner span so it keeps its own")]),a(`
-`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"                   line-height. Putting `leading-none` on the same element as")]),a(`
-`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"                   `truncate` (overflow-hidden) would shear off descenders like")]),a(`
-`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},'                   the tail of "g". -->')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"                   line-height. -->")]),a(`
 `),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"              <"),s("span",{class:"s_1uuh8p"},"div"),s("span",{class:"s_1i4ay4"}," class"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"truncate leading-none text-ink-gray-8"),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_1zd9e2"},">")]),a(`
 `),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"                <"),s("span",{class:"s_1uuh8p"},"span"),s("span",{class:"s_1i4ay4"}," class"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"text-lg"),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_1zd9e2"},">"),s("span",{class:"s_6am9cx"},"{{ ticket.subject }}"),s("span",{class:"s_1zd9e2"},"</"),s("span",{class:"s_1uuh8p"},"span"),s("span",{class:"s_1zd9e2"},">")]),a(`
 `),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"              </"),s("span",{class:"s_1uuh8p"},"div"),s("span",{class:"s_1zd9e2"},">")]),a(`
@@ -6350,9 +6342,7 @@ import{N as F,J as M,ae as p,r as _,o as s,D as a,aG as v,be as B,E as c,aU as O
 `),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"              @click"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"onRowClick(item)"),s("span",{class:"s_w1p9wo"},'"')]),a(`
 `),s("span",{class:"line"},[s("span",{class:"s_28rvie"},"            /"),s("span",{class:"s_1zd9e2"},">")]),a(`
 `),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"            <"),s("span",{class:"s_1uuh8p"},"div"),s("span",{class:"s_1i4ay4"}," class"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"min-w-0 flex-1"),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_1zd9e2"},">")]),a(`
-`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"              <!-- Sized text in an inner span keeps its own line-height:")]),a(`
-`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"                   `leading-snug` + `truncate` on one element would shear off")]),a(`
-`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},'                   descenders like the tail of "g". -->')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"              <!-- Sized text in an inner span keeps its own line-height. -->")]),a(`
 `),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"              <"),s("span",{class:"s_1uuh8p"},"div"),s("span",{class:"s_1i4ay4"}," class"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"truncate leading-snug text-ink-gray-8"),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_1zd9e2"},">")]),a(`
 `),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"                <"),s("span",{class:"s_1uuh8p"},"span"),s("span",{class:"s_1i4ay4"}," class"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"text-lg"),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_1zd9e2"},">"),s("span",{class:"s_6am9cx"},"{{ item.name }}"),s("span",{class:"s_1zd9e2"},"</"),s("span",{class:"s_1uuh8p"},"span"),s("span",{class:"s_1zd9e2"},">")]),a(`
 `),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"              </"),s("span",{class:"s_1uuh8p"},"div"),s("span",{class:"s_1zd9e2"},">")]),a(`
@@ -8177,9 +8167,7 @@ import{N as F,J as M,ae as p,r as _,o as s,D as a,aG as v,be as B,E as c,aU as O
 `),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"            <"),s("span",{class:"s_wac0bt"},"ListCell"),s("span",{class:"s_1zd9e2"},">")]),a(`
 `),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"              <"),s("span",{class:"s_1uuh8p"},"div"),s("span",{class:"s_1i4ay4"}," class"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"min-w-0 flex-1"),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_1zd9e2"},">")]),a(`
 `),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"                <!-- The sized text lives in an inner span so it keeps its own")]),a(`
-`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"                     line-height. Putting `leading-none` on the same element as")]),a(`
-`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"                     `truncate` (overflow-hidden) would shear off descenders")]),a(`
-`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},'                     like the tail of "g". -->')]),a(`
+`),s("span",{class:"line"},[s("span",{class:"s_1th9sy"},"                     line-height. -->")]),a(`
 `),s("span",{class:"line"},[s("span",{class:"s_1zd9e2"},"                <"),s("span",{class:"s_1uuh8p"},"div")]),a(`
 `),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"                  class"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"'),s("span",{class:"s_2575z4"},"truncate leading-snug"),s("span",{class:"s_w1p9wo"},'"')]),a(`
 `),s("span",{class:"line"},[s("span",{class:"s_1i4ay4"},"                  :class"),s("span",{class:"s_1jjt6x"},"="),s("span",{class:"s_w1p9wo"},'"')]),a(`
