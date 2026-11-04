@@ -298,6 +298,21 @@ describe('DateRangePicker', () => {
     })
   })
 
+  it('typed day-first range keeps its days and months under a DD/MM/YYYY format', () => {
+    cy.mount(DateRangePicker, {
+      props: {
+        format: 'DD/MM/YYYY',
+        'onUpdate:modelValue': cy.spy().as('onUpdate'),
+      },
+    })
+    cy.get('input').click()
+    cy.get('input').type('5/10/2025 to 9/10/2025{enter}')
+    cy.get('@onUpdate').should((spy: any) => {
+      const last = spy.lastCall.args[0]
+      expect(last).to.deep.equal(['2025-10-05', '2025-10-09'])
+    })
+  })
+
   // `open` and `setOpen` are the public slot contract, so a rename here is a
   // silent break in consumer templates. Popover carries the same test.
   it('exposes open and setOpen to the #trigger slot', () => {
