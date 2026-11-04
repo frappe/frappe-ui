@@ -93,11 +93,17 @@ export function typedFormats(format: string): string[] {
   return formats
 }
 
-/** `text` with `-`, `/` or `.` between its date numbers changed to the one `format` uses. */
+/**
+ * `text` with `-`, `/` or `.` between its date numbers changed to the one
+ * `format` uses. Only the date, before the first space, changes: a time such
+ * as `9.15` keeps its own separator.
+ */
 export function withFormatSeparator(text: string, format: string): string {
   const separator = /(?<=[DMY])[-/.](?=[DMY])/.exec(format)?.[0]
   if (!separator) return text
-  return text.replace(/(?<=\d)[-/.](?=\d)/g, separator)
+  return text.replace(/^\S+/, (date) =>
+    date.replace(/(?<=\d)[-/.](?=\d)/g, separator),
+  )
 }
 
 export function getDateValue(date: Date | string) {

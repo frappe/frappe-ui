@@ -16,6 +16,10 @@ describe('useDateCoercion', () => {
     expect(read(format, '24-10-2026 09:15:30')).toBe('2026-10-24 09:15:30')
     expect(read(format, '24-10-2026 9:15')).toBe('2026-10-24 09:15:00')
     expect(read(format, '3/11/2026')).toBe('2026-11-03 00:00:00')
+    // Only the date takes the format's separator; the time keeps its own.
+    expect(read('DD-MM-YYYY HH.mm', '3/11/2026 9.15')).toBe(
+      '2026-11-03 09:15:00',
+    )
   })
 
   it('reads a 12-hour time in either AM/PM case', () => {
