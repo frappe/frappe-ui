@@ -1,6 +1,6 @@
 strictness = 2
 comment_types = ["logic", "syntax"]
-auto_review = ["open"]
+auto_review = []
 review_drafts = false
 exclude_authors = ["dependabot[bot]", "renovate[bot]", "github-actions[bot]"]
 ignore_keywords = ["WIP", "[skip review]"]
@@ -21,7 +21,7 @@ ignore_patterns = [
 	"docs/content/docs/molecules/list.md",
 	"cypress/screenshots/**",
 ]
-status_check = true
+status_check = false
 update_description = false
 
 [sections.summary]
@@ -44,3 +44,6 @@ repos = [
 	"frappe/drive",
 	"frappe/insights",
 ]
+
+[auto_approve]
+enabled = false
