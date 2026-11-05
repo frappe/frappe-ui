@@ -258,10 +258,9 @@ onBeforeUnmount(() => ctx.unregisterItem(key.value))
   opacity: 0.4;
 }
 
-.frappe-tree [role='treeitem']:focus-visible {
+.frappe-tree [role='treeitem']:focus-visible > [data-slot='row'] {
   outline: 2px solid var(--outline-blue-3, #2490ef);
   outline-offset: -1px;
-  border-radius: 6px;
 }
 .frappe-tree [role='treeitem']:focus {
   outline: none;
