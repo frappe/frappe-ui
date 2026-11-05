@@ -105,7 +105,10 @@ export function useDateCoercion(getFormat: () => string | undefined) {
       if (dStrict.isValid()) return dStrict
     }
     const dLoose = dayjs(raw)
-    if (dLoose.isValid()) return dLoose
+    if (dLoose.isValid()) {
+      const dWithYear = dayjs(`${raw} ${dayjs().year()}`)
+      return dWithYear.isValid() ? dWithYear : dLoose
+    }
     const normalized = getDateValue(raw)
     if (normalized) {
       const dNorm = dayjs(normalized)
