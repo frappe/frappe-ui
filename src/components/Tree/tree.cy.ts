@@ -328,6 +328,111 @@ describe('Tree', () => {
     cy.focused().should('contain', 'Root')
   })
 
+  for (const theme of ['light', 'dark']) {
+    it(`outlines only the keyboard-focused row in ${theme} mode`, () => {
+      cy.mount({
+        render: () =>
+          h(
+            'div',
+            {
+              'data-theme': theme,
+              style: 'color: var(--outline-blue-3, #2490ef)',
+            },
+            [
+              h(Tree, {
+                nodes: makeNodes(),
+                nodeKey: 'id',
+                expanded: ['root', 'a'],
+              }),
+              h('button', 'After tree'),
+            ],
+          ),
+      })
+      cy.press(Cypress.Keyboard.Keys.TAB)
+      for (const [key, label] of [
+        [null, 'Root'],
+        ['ArrowDown', 'Node A'],
+        ['ArrowDown', 'Node A-1'],
+        ['ArrowUp', 'Node A'],
+      ]) {
+        if (key) cy.focused().trigger('keydown', { key })
+        cy.focused()
+          .should('have.attr', 'role', 'treeitem')
+          .and(($el) => expect($el[0].matches(':focus-visible')).to.be.true)
+          .and('have.css', 'outline-style', 'none')
+        cy.focused().children('[data-slot="row"]').should('have.text', label)
+        cy.get('[data-slot="row"]').should(($rows) => {
+          for (const row of $rows) {
+            const style = row.ownerDocument.defaultView!.getComputedStyle(row)
+            if (row.parentElement === row.ownerDocument.activeElement) {
+              expect(style.outlineStyle).to.eq('solid')
+              expect(style.outlineWidth).to.eq('2px')
+              expect(style.outlineOffset).to.eq('-1px')
+              expect(style.outlineColor).to.eq(style.color)
+            } else {
+              expect(style.outlineStyle).to.eq('none')
+            }
+          }
+        })
+      }
+      cy.press(Cypress.Keyboard.Keys.TAB)
+      cy.focused().should('have.text', 'After tree')
+      cy.get('[data-slot="row"]').each(($row) => {
+        cy.wrap($row).should('have.css', 'outline-style', 'none')
+      })
+    })
+  }
+
+  it('outlines the outer row with a custom item slot only for keyboard focus', () => {
+    cy.mount({
+      render: () =>
+        h('div', [
+          h(
+            Tree,
+            { nodes: makeNodes(), nodeKey: 'id' },
+            { item: ({ node }: any) => h('span', node.label) },
+          ),
+          h('button', 'After tree'),
+        ]),
+    })
+    cy.press(Cypress.Keyboard.Keys.TAB)
+    cy.focused().should(($el) =>
+      expect($el[0].matches(':focus-visible')).to.be.true,
+    )
+    cy.focused()
+      .children('[data-slot="row"]')
+      .should('have.text', 'Root')
+      .and('have.css', 'outline-style', 'solid')
+      .and('have.css', 'outline-width', '2px')
+    // A native pointer event resets the browser's keyboard focus modality.
+    cy.contains('button', 'After tree').then(async ($button) => {
+      const frame = window.top!.document.querySelector('iframe.aut-iframe')!
+      const frameRect = frame.getBoundingClientRect()
+      const scale = frameRect.width / frame.clientWidth
+      const rect = $button[0].getBoundingClientRect()
+      for (const type of ['mousePressed', 'mouseReleased']) {
+        await Cypress.automation('remote:debugger:protocol', {
+          command: 'Input.dispatchMouseEvent',
+          params: {
+            type,
+            x: frameRect.left + (rect.left + rect.width / 2) * scale,
+            y: frameRect.top + (rect.top + rect.height / 2) * scale,
+            button: 'left',
+            clickCount: 1,
+          },
+        })
+      }
+    })
+    cy.get('[data-slot="row"]').click()
+    cy.get('[role="treeitem"]')
+      .first()
+      .focus()
+      .should(($el) => expect($el[0].matches(':focus-visible')).to.be.false)
+    cy.get('[data-slot="row"]')
+      .first()
+      .should('have.css', 'outline-style', 'none')
+  })
+
   it('toggles expansion with Enter/Space', () => {
     cy.mount(Tree, {
       props: { nodes: makeNodes(), nodeKey: 'id', expanded: ['root'] },
@@ -482,7 +587,24 @@ describe('Tree', () => {
     it('emits drag-end with DropInfo on a valid reparent', () => {
       const onDragEnd = cy.stub().as('dragEnd')
       cy.mount(Tree, { props: dndProps(onDragEnd) })
-      dragOnto('Node B', 'Node A', 'inside')
+      const dataTransfer = new DataTransfer()
+      cy.contains('[data-slot="row"]', 'Node B').trigger('dragstart', {
+        dataTransfer,
+      })
+      cy.contains('[data-slot="row"]', 'Node A').then(($row) => {
+        const rect = $row[0].getBoundingClientRect()
+        cy.wrap($row)
+          .trigger('dragover', {
+            dataTransfer,
+            clientY: rect.top + rect.height / 2,
+          })
+          .should('have.css', 'outline-style', 'solid')
+          .and('have.css', 'outline-width', '2px')
+          .trigger('drop', { dataTransfer })
+      })
+      cy.contains('[data-slot="row"]', 'Node B').trigger('dragend', {
+        dataTransfer,
+      })
       cy.get('@dragEnd').should('have.been.calledOnce')
       cy.get('@dragEnd').then((stub: any) => {
         const info: DropInfo = stub.firstCall.args[0]
