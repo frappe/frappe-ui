@@ -26,11 +26,23 @@
          out of layout while keeping its child a direct box of the <a>. The old
          `:is="'template'"` looked like "no wrapper" but made Vue create a real
          <template> element, which the UA stylesheet hides — so every row
-         silently disappeared whenever `getRowRoute` was set. -->
-    <component
-      :is="list.options.getRowRoute ? 'div' : 'button'"
+         silently disappeared whenever `getRowRoute` was set.
+         Without a route the row is a <div> with button semantics. Using a real
+         <button> here made the row wrap any interactive cell slot content
+         (Select/Dropdown triggers are buttons too) in a nested <button> — invalid
+         HTML the browser re-parents on parse, which breaks the inner trigger's
+         popup events once a Dialog focus-scope wraps the list (#558). -->
+    <div
+      :role="list.options.getRowRoute ? undefined : 'button'"
+      :tabindex="list.options.getRowRoute || row.disabled ? undefined : 0"
       :class="
         list.options.getRowRoute ? 'contents' : '[all:unset] hover:[all:unset]'
+      "
+      @keydown.enter.self="
+        !list.options.getRowRoute && !row.disabled && onRowClick($event)
+      "
+      @keydown.space.prevent.self="
+        !list.options.getRowRoute && !row.disabled && onRowClick($event)
       "
     >
       <div
