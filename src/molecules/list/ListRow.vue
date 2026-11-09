@@ -12,7 +12,13 @@
       <slot />
     </ListRowBase>
   </RouterLink>
-  <ListRowBase v-else-if="href" tag="a" :href="href" :value="value" @click="onClick">
+  <ListRowBase
+    v-else-if="href"
+    tag="a"
+    :href="safeHref(href)"
+    :value="value"
+    @click="onClick"
+  >
     <slot />
   </ListRowBase>
   <ListRowBase
@@ -29,6 +35,7 @@
 import { RouterLink } from 'vue-router'
 import { useListContext } from './list-context'
 import ListRowBase from './ListRowBase.vue'
+import { safeHref } from '../../utils/url-safety'
 import type { ListRowProps } from './types'
 
 const props = defineProps<ListRowProps>()

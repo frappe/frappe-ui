@@ -39,7 +39,7 @@
         </router-link>
         <a
           v-else-if="item.href"
-          :href="item.href"
+          :href="safeHref(item.href)"
           @click="onLinkClick(item, $event)"
           class="flex items-center rounded-4 px-0.5 py-1 text-lg-medium leading-tighter"
           :class="[
@@ -93,6 +93,7 @@ import { useRouter } from 'vue-router'
 import { Dropdown } from '../Dropdown'
 import { Button } from '../Button'
 import type { BreadcrumbsProps } from './types'
+import { safeHref } from '../../utils/url-safety'
 import { ref, computed, nextTick, useTemplateRef } from 'vue'
 import { useResizeObserver } from '@vueuse/core'
 import type { BreadcrumbItem } from './types'

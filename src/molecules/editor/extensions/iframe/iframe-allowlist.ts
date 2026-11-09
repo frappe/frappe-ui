@@ -9,10 +9,8 @@
  * dot-boundary suffix — never substring).
  */
 import type { Editor } from '@tiptap/core'
-import {
-  isSafeUrl,
-  matchesHostname,
-} from '#molecules/editor/extensions/shared/url-safety'
+import { isSafeUrl, matchesHostname } from '#utils/url-safety'
+import { processEmbedUrl } from './iframe-embed-utils'
 
 /**
  * Hostnames (and their embed sub-hosts) we permit as iframe sources.
@@ -44,8 +42,8 @@ export const IFRAME_ALLOWLIST: readonly string[] = [
  * without it, YouTube's player throws SecurityError and renders a black box.
  * It does NOT grant the iframe our origin; cross-origin isolation from the
  * host still applies. The `allow-scripts + allow-same-origin` sandbox-escape
- * concern only exists for content served from OUR origin, which the
- * allowlist precludes (absolute http(s) URLs on external hosts only).
+ * concern only exists for content served from OUR origin, which
+ * {@link validateIframeUrl} refuses.
  */
 export const IFRAME_SANDBOX =
   'allow-scripts allow-same-origin allow-popups allow-forms allow-presentation' as const
@@ -86,23 +84,44 @@ export interface ValidateIframeUrlOptions {
  * True iff `url` is an absolute http(s) URL whose hostname is on the allowlist
  * (and not on an optional blocklist). Relative, bare, and unknown-scheme inputs
  * are rejected — there is no `startsWith('/')` escape hatch.
+ *
+ * This is the one check every iframe path shares: the HTML parse rule, the
+ * `src` attribute on render, the node view, paste, the dialog and commands.
  */
 export function validateIframeUrl(
-  url: string,
+  url: unknown,
   options?: ValidateIframeUrlOptions,
-): boolean {
+): url is string {
+  if (typeof url !== 'string') return false
   if (!isSafeUrl(url, { allowedSchemes: ['http', 'https'] })) return false
 
-  let host: string
-  try {
-    host = new URL(url).hostname
-  } catch {
+  const parsed = new URL(url)
+  // IFRAME_SANDBOX keeps `allow-same-origin`, which is only safe for pages
+  // from another origin. Refuse our own, even if an app allowlists its host.
+  if (isOwnOrigin(parsed)) return false
+
+  const blocklist = options?.blocklist
+  if (blocklist?.length && matchesHostname(parsed.hostname, blocklist)) {
     return false
   }
 
-  const blocklist = options?.blocklist
-  if (blocklist?.length && matchesHostname(host, blocklist)) return false
-
   const allowlist = options?.allowlist ?? IFRAME_ALLOWLIST
-  return matchesHostname(host, allowlist)
+  return matchesHostname(parsed.hostname, allowlist)
+}
+
+/**
+ * Rewrite incoming markup's `src` into its embed form, or `null` when the
+ * result is not an allowed embed.
+ */
+export function sanitizeIframeSrc(
+  raw: string | null,
+  allowlist?: readonly string[],
+): string | null {
+  if (!raw) return null
+  const src = processEmbedUrl(raw)
+  return validateIframeUrl(src, { allowlist }) ? src : null
+}
+
+function isOwnOrigin(url: URL): boolean {
+  return typeof window !== 'undefined' && url.origin === window.location.origin
 }
