@@ -4091,12 +4091,10 @@ import {
 
 ### Removed from `frappe-ui/experimental`
 
-The eleven v0 names were parked in `frappe-ui/experimental` for `1.0.0` and
-`1.1.0`. They are removed after `1.1.0`, so an import of `TextEditor`,
-`TextEditorBubbleMenu`, `TextEditorFixedMenu`, `TextEditorFloatingMenu`,
-`TextEditorContent`, `createEditorButton`, `ImageExtension`,
-`createSuggestionExtension` or their types from `frappe-ui/experimental` fails
-at build time. Move to `frappe-ui/editor` as this section describes.
+The names listed above were parked in `frappe-ui/experimental` for `1.0.0`
+and `1.1.0`. They are removed after `1.1.0`, so an import of them from
+`frappe-ui/experimental` fails at build time. Move to `frappe-ui/editor` as this
+section describes.
 
 ### Compose, don't configure
 

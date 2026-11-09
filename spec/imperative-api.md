@@ -76,7 +76,7 @@ The types don't help, because almost none of this is typed (§1.5).
 | --- | --- | --- |
 | `el` | `TextInput.vue:148`, `Textarea.vue:164` | a ref holding the element |
 | `inputRef` | `FileUploader.vue:180` | **a function** that returns the element |
-| `rootRef` | `Autocomplete.vue:409`, `TextEditor.vue:283` | a ref holding the element |
+| `rootRef` | `Autocomplete.vue:409` | a ref holding the element |
 | `viewportElement` | `ScrollArea.vue:44`, `SettingsBody.vue:21` | a computed holding the element |
 
 `inputRef` is the worst of these. It is named like a ref but it is a function
@@ -394,8 +394,8 @@ Every one of them fails as a type error at build time, not as a runtime crash.
 **`Editor.editor` stays.** Tiptap's whole command API lives on that object and
 there's no way to offer it short of re-exporting Tiptap. It's documented
 (`spec/editor.md:155-168`) and it's the intended seam between the component and
-the `useEditor` layer. `TextEditor.vue:282`'s copy disappears with that
-deprecated component.
+the `useEditor` layer. The v0 `TextEditor` had a copy, which was
+deleted with that component.
 
 **The seven echarts-backed charts stay too**, handing back the echarts instance
 as `chart`. `echartOptions` reaches every option key and no instance method, and
@@ -474,7 +474,7 @@ checked against the source.
 | `SettingsBody` | `{ viewportElement }` | same, sharing ScrollArea's type | No | Partly — typed at `SettingsBody.vue:26`, but `SettingsBodyExposed` is a second identical declaration, not the shared one |
 | `Editor` | `{ editor, isEmpty }` | same, plus a type | No | No — untyped, and `isEmpty` is writable, see §4 |
 | The seven echarts-backed charts | `{ chart }` | unchanged — [ADR-0016](./adr/0016-charts-expose-echarts-instance.md) | No | Yes — all seven `defineExpose<ChartExposedRefs>({ chart: computed(...) })` |
-| `Autocomplete`, `TextEditor` | various | deleted with the component | Policy | Partly — `Autocomplete` is deleted; `TextEditor` was parked in `frappe-ui/experimental` instead (#974) and still hands back `{ editor, rootRef }` |
+| `Autocomplete`, `TextEditor` | various | deleted with the component | Policy | Yes — both are deleted |
 | `CalendarPanel`, `PickerShell`, editor lists | various | internal, shared types | No | Partly — typed and out of every entry point, but none carries the `@internal` marker §2.6 requires |
 | everything else you can type in or tab to | nothing | `{ focus }` | No | All but `Tree` — see below |
 
