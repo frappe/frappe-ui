@@ -128,10 +128,7 @@ scope = [
 
 [[files]]
 path = "spec/editor.md"
-scope = [
-	"src/molecules/editor/**",
-	"experimental/TextEditor/**",
-]
+scope = ["src/molecules/editor/**"]
 
 [[files]]
 path = "spec/code-editor.md"

@@ -1240,11 +1240,6 @@
   resolved "https://registry.yarnpkg.com/@pkgjs/parseargs/-/parseargs-0.11.0.tgz#a77ea742fab25775145434eb1d2328cf5013ac33"
   integrity sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==
 
-"@popperjs/core@^2.9.0":
-  version "2.11.8"
-  resolved "https://registry.yarnpkg.com/@popperjs/core/-/core-2.11.8.tgz#6b79032e760a0899cd4204710beede972a3a185f"
-  integrity sha512-P1st0aksCrn9sGZhp8GMYwBnQsbvAWsZAX44oXNNvLHGqAOcoVxmjZiohstwQ7SqKnbR47akdNi+uleWD8+g6A==
-
 "@rolldown/pluginutils@1.0.0-beta.53":
   version "1.0.0-beta.53"
   resolved "https://registry.yarnpkg.com/@rolldown/pluginutils/-/pluginutils-1.0.0-beta.53.tgz#c57a5234ae122671aff6fe72e673a7ed90f03f87"
@@ -1502,7 +1497,7 @@
   dependencies:
     "@floating-ui/dom" "^1.0.0"
 
-"@tiptap/extension-bullet-list@3.26.0", "@tiptap/extension-bullet-list@^3.26.0":
+"@tiptap/extension-bullet-list@3.26.0":
   version "3.26.0"
   resolved "https://registry.yarnpkg.com/@tiptap/extension-bullet-list/-/extension-bullet-list-3.26.0.tgz#a242dc9add3cc8190334a48cad4e714fc9e07276"
   integrity sha512-Jv7BX+kBB2wUIvO/NhuUjv+T3kAed2Tjr664fgQ2zKT6X69jKIkYuCCedrIHuOyaOQ+SBDuH9h51wYv/E97QgQ==
@@ -1527,7 +1522,7 @@
   resolved "https://registry.yarnpkg.com/@tiptap/extension-document/-/extension-document-3.26.0.tgz#16d078e354b9edf6bbbf8a65ebfacfe01cc0ceb9"
   integrity sha512-Xhd6DCjaxCN4otQNvV6qra+XuoIjk6Vyjm87E5xn5Y/BMw7UGAG7LTkk3C2IEvxKrVZwJjalfxEqdHOgXQzVfw==
 
-"@tiptap/extension-dropcursor@3.26.0", "@tiptap/extension-dropcursor@^3.26.0":
+"@tiptap/extension-dropcursor@3.26.0":
   version "3.26.0"
   resolved "https://registry.yarnpkg.com/@tiptap/extension-dropcursor/-/extension-dropcursor-3.26.0.tgz#22f5626c7b25c539560f16878cfa189f79453edd"
   integrity sha512-rhAtp5J/YVDUCUIc5T7b0XY9dLeuI72JgOr53w0QQc0VA0uwbfTn7sx0LI9PDCE9uwmDH8H3snVRZRnAvlM8oA==
@@ -1537,7 +1532,7 @@
   resolved "https://registry.yarnpkg.com/@tiptap/extension-floating-menu/-/extension-floating-menu-3.26.0.tgz#0adccd23d8c7acdca44a496f07bbafd52558d3c3"
   integrity sha512-reQ77NRYAOP7iPudsNbzLBuBTdL2aGxZzjccUFmE2lNdmwP23n9A/JhkuUhshVBs/6IozvahI+smG3Bnea0TCQ==
 
-"@tiptap/extension-gapcursor@3.26.0", "@tiptap/extension-gapcursor@^3.26.0":
+"@tiptap/extension-gapcursor@3.26.0":
   version "3.26.0"
   resolved "https://registry.yarnpkg.com/@tiptap/extension-gapcursor/-/extension-gapcursor-3.26.0.tgz#2e93913894c7d47e1b422f4daf05ea435dc2c90c"
   integrity sha512-SIe68SDwx2fozt/XKG0FhCwzz/yRN6Bvo4D5TqvfDg6NK3PQb1DS4GN9PilmJqbY+kXryuiWEEJOWi7HpO8SuQ==
@@ -1569,12 +1564,12 @@
   dependencies:
     linkifyjs "^4.3.3"
 
-"@tiptap/extension-list-item@3.26.0", "@tiptap/extension-list-item@^3.26.0":
+"@tiptap/extension-list-item@3.26.0":
   version "3.26.0"
   resolved "https://registry.yarnpkg.com/@tiptap/extension-list-item/-/extension-list-item-3.26.0.tgz#8649338cfb8fe99f0327e4a73e8d8043e8779614"
   integrity sha512-MccGyj9HY4fkl04eIiFoTCkr8067Jku/VVdJNtRWW104Spx43C/7V2zpbxPvpcDhq3dW384fDxYXfpnb186xLg==
 
-"@tiptap/extension-list-keymap@3.26.0", "@tiptap/extension-list-keymap@^3.26.0":
+"@tiptap/extension-list-keymap@3.26.0":
   version "3.26.0"
   resolved "https://registry.yarnpkg.com/@tiptap/extension-list-keymap/-/extension-list-keymap-3.26.0.tgz#7dbf8ada102121d501d68093217e5568985fcfe9"
   integrity sha512-oBcj6qaNrRHQ+N0+pDuOVAQa4Nx9r8Cm5ANvyM2lTpoy60sOLOizuVvcvw1andVxbSrsZ1N/Sk+RZWyv1uoWyQ==
@@ -1584,7 +1579,7 @@
   resolved "https://registry.yarnpkg.com/@tiptap/extension-list/-/extension-list-3.26.0.tgz#ca3865985ae39091acfb1a8d3a1ee03e5c3c42f6"
   integrity sha512-EM8woyHDNKLEQ+lWUEoDtA4KrwP6fei/mYX1NxseMzKHHo7LFecx7wk6sovAXZrUvdML/yFBihgiMiO5VIsfkg==
 
-"@tiptap/extension-ordered-list@3.26.0", "@tiptap/extension-ordered-list@^3.26.0":
+"@tiptap/extension-ordered-list@3.26.0":
   version "3.26.0"
   resolved "https://registry.yarnpkg.com/@tiptap/extension-ordered-list/-/extension-ordered-list-3.26.0.tgz#de14e76a1fe50c3a8b6b7746da0251f8e78dda34"
   integrity sha512-ItLdFlcMsJz2vhbs1PcUfcN7nzVqGBOwPeCrrWxjrgscp+K3JoOGD+HhVVpBACOMwivUrlh8Ry5Ohvues2nOeA==
@@ -1674,36 +1669,6 @@
     prosemirror-tables "^1.8.0"
     prosemirror-transform "^1.12.0"
     prosemirror-view "^1.41.8"
-
-"@tiptap/starter-kit@^3.26.0":
-  version "3.26.0"
-  resolved "https://registry.yarnpkg.com/@tiptap/starter-kit/-/starter-kit-3.26.0.tgz#d82da4a48f42b75b3d47393337b28b079a98cffb"
-  integrity sha512-o34EtMfqtBaljdmeElZsRG/067oGx9Zcq+j2GWo71KlZe22ga/ALexeTf1c+ETsjCxSTKR6eyQ4RZvz/2JpYfg==
-  dependencies:
-    "@tiptap/core" "^3.26.0"
-    "@tiptap/extension-blockquote" "^3.26.0"
-    "@tiptap/extension-bold" "^3.26.0"
-    "@tiptap/extension-bullet-list" "^3.26.0"
-    "@tiptap/extension-code" "^3.26.0"
-    "@tiptap/extension-code-block" "^3.26.0"
-    "@tiptap/extension-document" "^3.26.0"
-    "@tiptap/extension-dropcursor" "^3.26.0"
-    "@tiptap/extension-gapcursor" "^3.26.0"
-    "@tiptap/extension-hard-break" "^3.26.0"
-    "@tiptap/extension-heading" "^3.26.0"
-    "@tiptap/extension-horizontal-rule" "^3.26.0"
-    "@tiptap/extension-italic" "^3.26.0"
-    "@tiptap/extension-link" "^3.26.0"
-    "@tiptap/extension-list" "^3.26.0"
-    "@tiptap/extension-list-item" "^3.26.0"
-    "@tiptap/extension-list-keymap" "^3.26.0"
-    "@tiptap/extension-ordered-list" "^3.26.0"
-    "@tiptap/extension-paragraph" "^3.26.0"
-    "@tiptap/extension-strike" "^3.26.0"
-    "@tiptap/extension-text" "^3.26.0"
-    "@tiptap/extension-underline" "^3.26.0"
-    "@tiptap/extensions" "^3.26.0"
-    "@tiptap/pm" "^3.26.0"
 
 "@tiptap/suggestion@^3.26.0":
   version "3.26.0"
@@ -6711,13 +6676,6 @@ tinyspy@^4.0.3:
   version "4.0.4"
   resolved "https://registry.yarnpkg.com/tinyspy/-/tinyspy-4.0.4.tgz#d77a002fb53a88aa1429b419c1c92492e0c81f78"
   integrity sha512-azl+t0z7pw/z958Gy9svOTuzqIk6xq+NSheJzn5MMWtWTFywIacg2wUlzKFGtt3cthx0r2SxMK0yzJOR0IES7Q==
-
-tippy.js@^6.3.7:
-  version "6.3.7"
-  resolved "https://registry.yarnpkg.com/tippy.js/-/tippy.js-6.3.7.tgz#8ccfb651d642010ed9a32ff29b0e9e19c5b8c61c"
-  integrity sha512-E1d3oP2emgJ9dRQZdf3Kkn0qJgI6ZLpyS5z6ZkY1DF3kaQaBsGZsndEpHwx+eC+tYM41HaSNvNtLx8tU57FzTQ==
-  dependencies:
-    "@popperjs/core" "^2.9.0"
 
 tldts-core@^6.1.86:
   version "6.1.86"

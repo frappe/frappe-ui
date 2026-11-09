@@ -405,7 +405,7 @@ Old names that no longer resolve from `frappe-ui`, and what to write instead.
 
 - `Autocomplete` → `Combobox` (one value) or `MultiSelect` (several). Removed in `1.0.0`, along with `FormControl type="autocomplete"`.
 - `ListView` → the `List` / `ListRow` / `ListCell` family from `frappe-ui/list`. The config-driven `ListView` still exists on `frappe-ui/experimental`, unstable, until `frappe-ui/list` reaches parity.
-- `TextEditor` and its menu components → `Editor` from `frappe-ui/editor`. The v0 family is parked on `frappe-ui/experimental`.
+- `TextEditor` and its menu components → `Editor` from `frappe-ui/editor`. The v0 family was removed after `1.1.0` and has no import path.
 - `Input` → `TextInput`, `Textarea`, `Select`, `Checkbox`, or `FormControl`.
 - `ListItem` → list primitives from `frappe-ui/list`, or app-written row markup.
 - `Card` → build the surface from tokens (see Page anatomy).
