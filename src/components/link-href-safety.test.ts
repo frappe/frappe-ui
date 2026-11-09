@@ -7,7 +7,7 @@
  */
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createApp, h, nextTick, type App, type VNode } from 'vue'
-import { createMemoryHistory, createRouter } from 'vue-router'
+import { RouterLink, createMemoryHistory, createRouter } from 'vue-router'
 import SidebarItem from './Sidebar/SidebarItem.vue'
 import SidebarRailItem from './SidebarRail/SidebarRailItem.vue'
 import MobileNavItem from './MobileNav/MobileNavItem.vue'
@@ -104,5 +104,24 @@ describe.each(Object.entries(COMPONENTS))('%s', (name, render) => {
   it.each(SAFE_HREFS)('keeps the href %j', async (href) => {
     const hrefs = await renderedHrefs(() => render(href), withRouter)
     expect(hrefs).toContain(href)
+  })
+})
+
+describe('CommandPaletteItem as a RouterLink', () => {
+  it('keeps the href the RouterLink generates', async () => {
+    const hrefs = await renderedHrefs(
+      () =>
+        h(CommandPalette, { open: true }, () => [
+          h(CommandPaletteList, () => [
+            h(
+              CommandPaletteItem,
+              { value: 'notes', as: RouterLink, to: '/notes' },
+              () => 'Notes',
+            ),
+          ]),
+        ]),
+      true,
+    )
+    expect(hrefs).toEqual(['/notes'])
   })
 })
