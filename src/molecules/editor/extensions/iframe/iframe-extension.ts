@@ -5,17 +5,21 @@
  * node view, and thin delegation to `iframe-commands` + `iframe-paste-handler`.
  *
  * Security posture (locked product decision):
- *  - `src` is validated against the allowlist on LOAD (`parseHTML` `getAttrs`)
- *    and on insert/paste — substring matching and the `startsWith('/')` escape
- *    hatch are gone (see `iframe-allowlist.ts`).
+ *  - `src` is checked by {@link validateIframeUrl} wherever it is read or
+ *    written: HTML parse, `renderHTML`, the node view, insert and paste.
+ *    JSON content and collaboration updates skip HTML parsing, so the render
+ *    side must never trust the stored attr.
  *  - rendering always forces the {@link IFRAME_SANDBOX} value, so incoming
  *    markup can never widen the sandbox beyond it.
  */
 import { Node, mergeAttributes } from '@tiptap/core'
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
 import IframeNodeView from './IframeNodeView.vue'
-import { IFRAME_SANDBOX, validateIframeUrl } from './iframe-allowlist'
-import { processEmbedUrl } from './iframe-embed-utils'
+import {
+  IFRAME_SANDBOX,
+  sanitizeIframeSrc,
+  validateIframeUrl,
+} from './iframe-allowlist'
 import { buildIframeCommands, type IframeAlign } from './iframe-commands'
 import { createIframePastePlugin } from './iframe-paste-handler'
 
@@ -59,8 +63,18 @@ export const IframeExtension = Node.create<IframeOptions>({
     return {
       src: {
         default: null,
-        parseHTML: (element) => element.getAttribute('src'),
-        renderHTML: (attributes) => ({ src: attributes.src }),
+        parseHTML: (element) =>
+          sanitizeIframeSrc(
+            element.getAttribute('src'),
+            this.options.allowlist,
+          ),
+        renderHTML: (attributes) => ({
+          src: validateIframeUrl(attributes.src, {
+            allowlist: this.options.allowlist,
+          })
+            ? attributes.src
+            : null,
+        }),
       },
       width: {
         default: null,
@@ -126,29 +140,15 @@ export const IframeExtension = Node.create<IframeOptions>({
     return [
       {
         tag: 'iframe[src]',
-        // Validate on LOAD: reject sources not on the allowlist so untrusted
-        // pasted/loaded HTML cannot smuggle in an arbitrary embed.
-        getAttrs: (element) => {
-          const raw = (element as HTMLElement).getAttribute('src')
-          if (!raw) return false
-          const src = processEmbedUrl(raw)
-          if (!validateIframeUrl(src, { allowlist: this.options.allowlist })) {
-            return false
-          }
-          return {
-            src,
-            width: parseDimension(
-              (element as HTMLElement).getAttribute('width'),
-            ),
-            height: parseDimension(
-              (element as HTMLElement).getAttribute('height'),
-            ),
-            title: (element as HTMLElement).getAttribute('title') || null,
-            align: normalizeAlign(
-              (element as HTMLElement).getAttribute('data-align'),
-            ),
-          }
-        },
+        // Drop the node when `src` is not an allowed embed. The `src`
+        // attribute's own parseHTML fills in the rewritten URL.
+        getAttrs: (element) =>
+          sanitizeIframeSrc(
+            (element as HTMLElement).getAttribute('src'),
+            this.options.allowlist,
+          )
+            ? null
+            : false,
       },
     ]
   },

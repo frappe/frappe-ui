@@ -11,7 +11,11 @@ import {
   type ResizeEdge,
 } from '#molecules/editor/composables/useNodeViewResize'
 import { safeGetPos } from '#molecules/editor/extensions/shared/node-view'
-import { IFRAME_SANDBOX } from './iframe-allowlist'
+import {
+  IFRAME_SANDBOX,
+  getIframeAllowlist,
+  validateIframeUrl,
+} from './iframe-allowlist'
 import { openIframeInsertDialog } from './iframeInsertDialogController'
 import type { IframeAlign } from './iframe-commands'
 
@@ -46,6 +50,15 @@ const frameStyle = computed(() => {
 })
 
 const sandbox = computed<string>(() => IFRAME_SANDBOX)
+
+// JSON content and collaboration updates never pass the HTML parse rule, so
+// the stored attr is untrusted here. Render only an allowed embed.
+const safeSrc = computed<string | null>(() => {
+  const src = props.node.attrs.src
+  return validateIframeUrl(src, { allowlist: getIframeAllowlist(editor) })
+    ? src
+    : null
+})
 
 const isInteractive = computed<boolean>(() => !!props.node.attrs.interactive)
 const overlayActive = computed(() => isEditable.value && !isInteractive.value)
@@ -180,11 +193,11 @@ function commitCaption(event: Event): void {
     >
       <div class="relative">
         <iframe
-          v-if="node.attrs.src"
+          v-if="safeSrc"
           ref="iframeRef"
           class="block h-auto max-w-full rounded-4 border-0"
           :class="{ 'pointer-events-none': overlayActive }"
-          :src="node.attrs.src"
+          :src="safeSrc"
           :style="frameStyle"
           :title="node.attrs.title || ''"
           :sandbox="sandbox"
@@ -204,7 +217,7 @@ function commitCaption(event: Event): void {
 
         <!-- Shared media toolbar (caption / change link / align) -->
         <MediaToolbar
-          v-if="node.attrs.src"
+          v-if="safeSrc"
           :node="node"
           media-type="embed"
           :is-editable="isEditable"
@@ -223,21 +236,25 @@ function commitCaption(event: Event): void {
         />
         <MediaResizeGuide :guide="() => guide" />
 
-        <!-- Placeholder while no src is set -->
+        <!-- Placeholder while no src is set, or when src is not allowed -->
         <div
-          v-if="!node.attrs.src"
-          class="flex h-[360px] w-[640px] items-center justify-center rounded-4 bg-surface-gray-1"
+          v-if="!safeSrc"
+          class="flex h-[360px] w-[640px] max-w-full items-center justify-center rounded-4 bg-surface-gray-1"
         >
           <div class="text-center text-ink-gray-5">
             <div class="mb-1 text-lg">🔗</div>
-            <div class="text-sm">Loading embed…</div>
+            <div class="text-sm">
+              {{
+                node.attrs.src ? 'This embed is not allowed' : 'Loading embed…'
+              }}
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Caption input (commits on blur / Enter) -->
       <input
-        v-if="(node.attrs.title || showCaption) && node.attrs.src"
+        v-if="(node.attrs.title || showCaption) && safeSrc"
         :value="node.attrs.title"
         class="mt-2 h-7 w-full border-0 bg-transparent text-center text-sm text-ink-gray-6 placeholder-ink-gray-4 focus:outline-none focus:ring-0 disabled:opacity-60"
         placeholder="Add caption"
