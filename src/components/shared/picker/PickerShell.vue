@@ -12,10 +12,10 @@
     <template #trigger>
       <div
         ref="triggerWrapperRef"
-        v-bind="$attrs"
+        v-bind="wrapperAttrs"
         @keydown.down.prevent="onArrowDown"
       >
-        <slot name="trigger" v-bind="triggerSlotProps">
+        <slot name="trigger" v-bind="{ ...triggerSlotProps, ariaAttrs}">
           <TextInput
             ref="textInputRef"
             v-model="inputValue"
@@ -38,6 +38,8 @@
             @click="onClick"
             @blur="onBlur"
             @keydown.enter.prevent="onEnter"
+            :aria-label="$attrs['aria-label']"
+            :aria-labelledby="$attrs['aria-labelledby']"
           >
             <template v-if="$slots.prefix" #prefix>
               <slot name="prefix" v-bind="triggerSlotProps" />
@@ -61,7 +63,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch, useAttrs } from 'vue'
 import Popover from '../../Popover/Popover.vue'
 import { TextInput } from '../../TextInput'
 import { useReactiveSlots } from '../../../composables/useReactiveSlots'
@@ -82,6 +84,17 @@ const props = withDefaults(defineProps<PickerShellProps>(), {
   displayLabel: '',
 })
 
+const attrs =useAttrs()
+
+const wrapperAttrs = computed(() => {
+  const { 'aria-label': _, 'aria-labelledby': __, ...rest } = attrs
+  return rest
+})
+
+const ariaAttrs = computed(() => ({
+  'aria-label': attrs['aria-label'],
+  'aria-labelledby': attrs['aria-labelledby'],
+}))
 const emit = defineEmits<{
   (e: 'focus'): void
   (e: 'click', event: MouseEvent): void
