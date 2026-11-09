@@ -108,10 +108,7 @@ const linkAttrs = computed(() =>
   props.route
     ? hasRouter.value
       ? { to: props.route }
-      : {
-          href:
-            typeof props.route === 'string' ? safeHref(props.route) : undefined,
-        }
+      : { href: safeHref(props.route) }
     : { href: safeHref(props.href) },
 )
 const resolvedRoute = computed(() =>

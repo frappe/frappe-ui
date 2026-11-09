@@ -17,12 +17,12 @@ const LINK_SCHEMES: readonly string[] = ['http', 'https', 'mailto', 'tel']
 const RELATIVE_BASE = 'https://relative.invalid/'
 
 /**
- * `href` when it is relative or uses a link scheme (http, https, mailto,
- * tel), otherwise `undefined`. Use it wherever an `href` comes from data, so
- * a `javascript:` or `data:` URL never reaches an anchor.
+ * `href` when it is a string that is relative or uses a link scheme (http,
+ * https, mailto, tel), otherwise `undefined`. Use it wherever an `href` comes
+ * from data, so a `javascript:` or `data:` URL never reaches an anchor.
  */
-export function safeHref(href: string | null | undefined): string | undefined {
-  if (!href) return undefined
+export function safeHref(href: unknown): string | undefined {
+  if (typeof href !== 'string' || !href) return undefined
   const safe = isSafeUrl(href, {
     allowedSchemes: LINK_SCHEMES,
     base: RELATIVE_BASE,
