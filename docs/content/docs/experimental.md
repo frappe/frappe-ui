@@ -30,7 +30,6 @@ Each export is here for one of two reasons:
 | [`Stepper`](#stepper) | Incubating | Its API being reviewed and refined |
 | [Sprite icons](#sprite-icons) | Parked | Apps moving to `lucide-*` classes |
 | [`ThemeSwitcher`](#themeswitcher) | Parked | Apps moving to `Select` plus `useColorScheme` |
-| [TextEditor (v0)](#texteditor-v0) | Parked | Apps moving to [`frappe-ui/editor`](/docs/molecules/editor) |
 | [Input labeling](#useinputlabeling) | Incubating | Its API settling |
 
 Components that were **removed** have no import path at all. The
@@ -305,18 +304,6 @@ the cards keeps its own markup.
 ```ts
 import { ThemeSwitcher } from 'frappe-ui/experimental'
 ```
-
-## TextEditor (v0)
-
-The v0 editor family, removed from the root in `1.0.0`. Parked, and will be
-removed. Use [`frappe-ui/editor`](/docs/molecules/editor) instead.
-
-```ts
-import { TextEditor, TextEditorFixedMenu } from 'frappe-ui/experimental'
-```
-
-See the [Editor migration section](/docs/migration#editor) for the before and
-after.
 
 ## useInputLabeling
 

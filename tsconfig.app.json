@@ -19,7 +19,6 @@
   ],
   "exclude": [
     "src/**/*.cy.ts",
-    "experimental/TextEditor/**/*",
     "experimental/**/*.cy.ts"
   ],
   "extends": "./tsconfig.base.json",

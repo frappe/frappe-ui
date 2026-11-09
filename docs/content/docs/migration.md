@@ -152,7 +152,8 @@ only moved.
   [Charts (v1)](#charts-v1-—-moved-to-frappe-ui-experimental) ·
   [Sprite icons](#sprite-icons-—-moved-to-frappe-ui-experimental) ·
   [ThemeSwitcher](#themeswitcher), which stays deprecated at its new path. The
-  v0 `TextEditor` family moved the same way; see [Editor](#editor).
+  v0 `TextEditor` family was parked the same way and has since been removed;
+  see [Editor](#editor).
 - [FAQ](#faq)
 
 ## Requirements
@@ -4088,29 +4089,14 @@ import {
 | `:uploadFunction` (optional, frappe default)    | `:upload-function` (required to enable uploads)                          |
 | `UploadedFile` from `frappe-ui/editor` (beta)   | `UploadedMedia`                                                          |
 
-### Not migrated yet: the temporary import path
+### Removed from `frappe-ui/experimental`
 
-All eleven v0 names are kept, unchanged, in `frappe-ui/experimental` as a
-temporary import path. It is unstable (no deprecation period) and will be
-removed once consumers migrate:
-
-```ts
-import {
-  TextEditor,
-  TextEditorBubbleMenu,
-  TextEditorFixedMenu,
-  TextEditorFloatingMenu,
-  TextEditorContent,
-  createEditorButton,
-  ImageExtension,
-  createSuggestionExtension,
-} from 'frappe-ui/experimental'
-import type {
-  SetImageOptions,
-  BaseSuggestionItem,
-  CreateSuggestionExtensionOptions,
-} from 'frappe-ui/experimental'
-```
+The eleven v0 names were parked in `frappe-ui/experimental` for `1.0.0` and
+`1.1.0`. They are removed after `1.1.0`, so an import of `TextEditor`,
+`TextEditorBubbleMenu`, `TextEditorFixedMenu`, `TextEditorFloatingMenu`,
+`TextEditorContent`, `createEditorButton`, `ImageExtension`,
+`createSuggestionExtension` or their types from `frappe-ui/experimental` fails
+at build time. Move to `frappe-ui/editor` as this section describes.
 
 ### Compose, don't configure
 
@@ -5598,6 +5584,7 @@ fails at build time.
 | `ListFilter`                          | build the filter UI in your app with `Select` and `Combobox`.                                                                                                                               |
 | `GridLayout`                          | depend on `grid-layout-plus` directly. `GridLayout` passed everything through to it.                                                                                                        |
 | `CommandPalette`, `CommandPaletteItem` at the root | the rebuilt family in `frappe-ui/experimental`. The names carry over but the API does not, so this is a rewrite, not an import-path change. See [CommandPalette](#commandpalette). |
+| `TextEditor`, `TextEditorBubbleMenu`, `TextEditorFixedMenu`, `TextEditorFloatingMenu`, `TextEditorContent`, `createEditorButton`, `ImageExtension`, `createSuggestionExtension` | [`frappe-ui/editor`](/docs/molecules/editor). Parked in `frappe-ui/experimental` until `1.1.0`, then removed. See [Editor](#editor). |
 
 ### Parked in `frappe-ui/experimental` {#parked-in-experimental}
 
@@ -5608,7 +5595,6 @@ fails at build time.
 | ---------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | `ListView` and its parts                                                                                   | [`frappe-ui/list`](/docs/molecules/list), which has no equivalent for config-driven columns yet. See [ListView](#listview-—-moved-to-frappe-ui-experimental). |
 | `Calendar`                                                                                                 | none yet. The API is unchanged until a redesigned calendar family replaces it. See [Calendar](#calendar-—-moved-to-frappe-ui-experimental). |
-| `TextEditor`, `TextEditorBubbleMenu`, `TextEditorFixedMenu`, `TextEditorFloatingMenu`, `TextEditorContent`, `createEditorButton` | [`frappe-ui/editor`](/docs/molecules/editor). See [Editor](#editor).                                                          |
 | `AxisChart`, `DonutChart`, `FunnelChart`, `NumberChart`, `ECharts`, `useAxisChartOptions`                  | [`frappe-ui/charts`](/docs/charts/overview). See [Charts (v1)](#charts-v1-—-moved-to-frappe-ui-experimental).               |
 | sprite `Icon`, `IconPicker`, `spritePlugin`                                                                | `lucide-*` classes and the root `Icon` component. The sprite trio will be removed. See [Sprite icons](#sprite-icons-—-moved-to-frappe-ui-experimental). |
 | `ThemeSwitcher`                                                                                            | `Select` plus `useColorScheme`. See [ThemeSwitcher](#themeswitcher).                                                          |

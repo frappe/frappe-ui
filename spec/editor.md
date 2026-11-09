@@ -526,9 +526,9 @@ const editor = useEditor({
 
 ## 12. Migration from the v0 monolith
 
-The v1 `<Editor>` ships at `frappe-ui/editor` **alongside** the v0 monolith, which stays available, unmodified, as a migration safety net — it is not extended, aliased, or auto-removed. The v0 family left the root exports (#974) and now ships from `frappe-ui/experimental` (#1007). During the window, `import { TextEditor } from 'frappe-ui/experimental'` (v0) and `import { Editor } from 'frappe-ui/editor'` (v1) coexist. Consumers migrate to `<Editor>` + a kit (or their own wrapper component); per-app guidance is in the published migration guide ([`docs/content/docs/migration.md`](../docs/content/docs/migration.md), `## Editor`), and the migration is **proven by porting gameplan** (the heaviest consumer) with functional parity and a measured bundle reduction before the API is considered done.
+The v1 `<Editor>` shipped at `frappe-ui/editor` **alongside** the v0 monolith, which stayed available, unmodified, as a migration safety net — it was not extended, aliased, or auto-removed. The v0 family left the root exports (#974) and moved to `frappe-ui/experimental` (#1007). During the window, `import { TextEditor } from 'frappe-ui/experimental'` (v0) and `import { Editor } from 'frappe-ui/editor'` (v1) coexisted until the removal below. Consumers migrate to `<Editor>` + a kit (or their own wrapper component); per-app guidance is in the published migration guide ([`docs/content/docs/migration.md`](../docs/content/docs/migration.md), `## Editor`), and the migration is **proven by porting gameplan** (the heaviest consumer) with functional parity and a measured bundle reduction before the API is considered done.
 
-Removing the v0 monolith is a deliberate, **human-gated** cleanup once all consumers are migrated and verified — implementation agents do not delete it. (Pre-v1 the library may still make this break; P13's freeze line is v1 release.)
+Removing the v0 monolith was a deliberate, **human-gated** cleanup — implementation agents do not delete it. Faris approved the removal on 2026-11-09, and the v0 family was deleted from `frappe-ui/experimental` after `1.1.0`. At that point every app on its main branch used `frappe-ui/editor` or its own wrapper, except Suite Mail, which pins frappe-ui to a commit and migrates when it bumps.
 
 ## Open questions / deferred
 

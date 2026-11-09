@@ -221,7 +221,6 @@
     "marked": "^15.0.12",
     "reka-ui": "^2.9.9",
     "socket.io-client": "^4.5.1",
-    "tippy.js": "^6.3.7",
     "typescript": "^5.0.2",
     "unplugin-auto-import": "^19.3.0",
     "unplugin-icons": "^22.1.0",
