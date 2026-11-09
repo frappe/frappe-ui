@@ -19,7 +19,7 @@ const createUploadId = vi.hoisted(() => vi.fn(() => 'uid-1'))
 vi.mock('#utils/file-to-base64', () => ({
   default: vi.fn(async () => 'data:image/png;base64,AAAA'),
 }))
-vi.mock('#molecules/editor/extensions/shared/url-safety', () => ({
+vi.mock('#utils/url-safety', () => ({
   isSafeUrl: () => true,
 }))
 vi.mock('#molecules/editor/extensions/shared/upload-id', () => ({

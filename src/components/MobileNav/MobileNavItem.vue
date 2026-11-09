@@ -63,6 +63,7 @@
 import { computed, getCurrentInstance } from 'vue'
 import { RouterLink } from 'vue-router'
 import Icon from '../Icon/Icon.vue'
+import { safeHref } from '../../utils/url-safety'
 import { scrollShellToTop } from '../../composables/useShellScrolled'
 import type { MobileNavItemProps } from './types'
 
@@ -86,8 +87,11 @@ const linkAttrs = computed(() =>
   props.route
     ? hasRouter.value
       ? { to: props.route }
-      : { href: typeof props.route === 'string' ? props.route : undefined }
-    : { href: props.href },
+      : {
+          href:
+            typeof props.route === 'string' ? safeHref(props.route) : undefined,
+        }
+    : { href: safeHref(props.href) },
 )
 
 const resolvedRoute = computed(() =>

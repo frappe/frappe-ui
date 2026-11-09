@@ -14,7 +14,7 @@
       :data-state="active ? 'active' : undefined"
       :data-disabled="disabled ? '' : undefined"
       class="mx-2.5 flex min-w-0 cursor-default items-center rounded-4 px-2 py-2 text-base-medium leading-tighter text-ink-gray-8 outline-none data-[state=active]:bg-surface-gray-2 data-[disabled]:cursor-not-allowed data-[disabled]:text-ink-gray-4"
-      v-bind="$attrs"
+      v-bind="itemAttrs"
     >
       <slot name="prefix" v-bind="slotProps" />
       <span
@@ -40,6 +40,7 @@ import {
   onUnmounted,
   onUpdated,
   ref,
+  useAttrs,
   useTemplateRef,
   watch,
 } from 'vue'
@@ -48,6 +49,7 @@ import {
   useCommandPaletteGroupContext,
   useCommandPaletteListContext,
 } from './context'
+import { safeHref } from '#utils/url-safety'
 import type {
   CommandPaletteItemEmits,
   CommandPaletteItemProps,
@@ -73,6 +75,15 @@ defineSlots<{
 }>()
 
 const palette = useCommandPaletteContext()
+
+// A row rendered `as="a"` takes its `href` through `$attrs`, often from search
+// results. Drop it when the scheme is not a link scheme.
+const attrs = useAttrs()
+const itemAttrs = computed(() =>
+  'href' in attrs
+    ? { ...attrs, href: safeHref(attrs.href as string | undefined) }
+    : attrs,
+)
 const group = useCommandPaletteGroupContext()
 const list = useCommandPaletteListContext()
 

@@ -1,27 +1,39 @@
 /**
- * Shared URL-safety primitives for editor extensions.
+ * Shared URL-safety primitives for components and the editor.
  *
- * Two concerns, kept deliberately small and pure:
- *  1. `isSafeUrl`   — does a string parse to an absolute URL with an allowed scheme?
- *  2. `matchesHostname` — exact-or-dot-boundary host allowlist matching.
+ *  1. `safeHref`        — keep a link `href` only when its scheme is safe.
+ *  2. `isSafeUrl`       — does a string parse to an absolute URL with an allowed scheme?
+ *  3. `matchesHostname` — exact-or-dot-boundary host allowlist matching.
  *
- * These replace two long-standing holes in the legacy iframe/link code:
- *  - the `domain.includes(allowed)` substring check (so `youtube.com.evil.com`
- *    matched `youtube.com`), and
- *  - the `url.startsWith('/')` blanket allow of any relative/bare string.
- *
- * NOTE: platform embed *transformation* (youtube /shorts + youtu.be query
- * params, vimeo unlisted hash, codepen, codesandbox, figma /file//proto//board,
- * google docs/drive, notion) is NOT done here — that lives in the iframe
- * cluster's embed utils. This module only decides whether a host is on an
- * allowlist and whether a URL is well-formed + scheme-safe, which is the
- * gate every one of those platforms must pass first.
+ * Every check uses the platform `URL` parser rather than a regex, so it sees
+ * a URL the way the browser will: `JaVaScRiPt:`, leading control characters
+ * and tabs inside the scheme all normalise to `javascript:` and fail.
  */
+
+/** Schemes a link may navigate to. Relative URLs are always allowed. */
+const LINK_SCHEMES: readonly string[] = ['http', 'https', 'mailto', 'tel']
+
+// Resolves relative links so only the scheme is checked. Never navigated to.
+const RELATIVE_BASE = 'https://relative.invalid/'
+
+/**
+ * `href` when it is relative or uses a link scheme (http, https, mailto,
+ * tel), otherwise `undefined`. Use it wherever an `href` comes from data, so
+ * a `javascript:` or `data:` URL never reaches an anchor.
+ */
+export function safeHref(href: string | null | undefined): string | undefined {
+  if (!href) return undefined
+  const safe = isSafeUrl(href, {
+    allowedSchemes: LINK_SCHEMES,
+    base: RELATIVE_BASE,
+  })
+  return safe ? href : undefined
+}
 
 /** Options for {@link isSafeUrl}. */
 export interface SafeUrlOptions {
   /** Schemes allowed (without the trailing colon). Defaults to `['http', 'https']`. */
-  allowedSchemes?: string[]
+  allowedSchemes?: readonly string[]
   /**
    * Optional base to resolve relative URLs against (e.g. `window.location.origin`).
    * A server-relative `file_url` like `/files/x.png` resolves to an http(s) URL

@@ -9,10 +9,7 @@
  * dot-boundary suffix — never substring).
  */
 import type { Editor } from '@tiptap/core'
-import {
-  isSafeUrl,
-  matchesHostname,
-} from '#molecules/editor/extensions/shared/url-safety'
+import { isSafeUrl, matchesHostname } from '#utils/url-safety'
 import { processEmbedUrl } from './iframe-embed-utils'
 
 /**

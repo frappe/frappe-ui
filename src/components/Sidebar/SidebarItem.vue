@@ -139,6 +139,7 @@ import {
 } from 'vue'
 import { RouterLink } from 'vue-router'
 import Icon from '../Icon/Icon.vue'
+import { safeHref } from '../../utils/url-safety'
 import Tooltip from '../Tooltip/Tooltip.vue'
 import { SidebarItemProps, sidebarCollapsedKey } from './types'
 
@@ -226,8 +227,11 @@ const linkAttrs = computed(() =>
   props.route
     ? hasRouter.value
       ? { to: props.route }
-      : { href: typeof props.route === 'string' ? props.route : undefined }
-    : { href: props.href },
+      : {
+          href:
+            typeof props.route === 'string' ? safeHref(props.route) : undefined,
+        }
+    : { href: safeHref(props.href) },
 )
 
 const resolvedRoute = computed(() =>

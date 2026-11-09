@@ -69,7 +69,7 @@ import { onBeforeUnmount, onMounted, ref, useTemplateRef, nextTick } from 'vue'
 import Button from '#components/Button/Button.vue'
 import TextInput from '#components/TextInput/TextInput.vue'
 import EditorPopover from '#molecules/editor/components/EditorPopover.vue'
-import { isSafeUrl } from '#molecules/editor/extensions/shared/url-safety'
+import { isSafeUrl } from '#utils/url-safety'
 
 const props = defineProps<{
   href: string
