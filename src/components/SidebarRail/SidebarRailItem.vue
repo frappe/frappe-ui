@@ -72,10 +72,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, getCurrentInstance } from 'vue'
-import { RouterLink } from 'vue-router'
+import { computed } from 'vue'
 import Icon from '../Icon/Icon.vue'
-import { safeHref } from '../../utils/url-safety'
+import { useNavLink } from '../shared/navLink'
 import Tooltip from '../Tooltip/Tooltip.vue'
 import SidebarRailItemBadge from './SidebarRailItemBadge.vue'
 import type { SidebarRailItemProps } from './types'
@@ -99,21 +98,8 @@ defineSlots<{
   default?: () => any
 }>()
 
-const globals = getCurrentInstance()?.appContext.config.globalProperties
-const hasRouter = computed(() => Boolean(globals?.$router))
-const linkComponent = computed(() =>
-  props.route && hasRouter.value ? RouterLink : 'a',
-)
-const linkAttrs = computed(() =>
-  props.route
-    ? hasRouter.value
-      ? { to: props.route }
-      : { href: safeHref(props.route) }
-    : { href: safeHref(props.href) },
-)
-const resolvedRoute = computed(() =>
-  props.route && globals?.$router ? globals.$router.resolve(props.route) : null,
-)
+const { globals, linkComponent, linkAttrs, resolvedRoute } = useNavLink(props)
+
 const resolvedActive = computed(() => {
   if (props.active !== undefined) return props.active
   const target = resolvedRoute.value

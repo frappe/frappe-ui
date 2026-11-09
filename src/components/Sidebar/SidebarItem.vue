@@ -128,18 +128,9 @@
 </template>
 
 <script setup lang="ts">
-import {
-  computed,
-  getCurrentInstance,
-  inject,
-  onMounted,
-  ref,
-  useAttrs,
-  useTemplateRef,
-} from 'vue'
-import { RouterLink } from 'vue-router'
+import { computed, inject, onMounted, ref, useAttrs, useTemplateRef } from 'vue'
 import Icon from '../Icon/Icon.vue'
-import { safeHref } from '../../utils/url-safety'
+import { useNavLink } from '../shared/navLink'
 import Tooltip from '../Tooltip/Tooltip.vue'
 import { SidebarItemProps, sidebarCollapsedKey } from './types'
 
@@ -211,29 +202,7 @@ const ariaLabel = computed(
   () => (attrs['aria-label'] as string) || tooltipText.value || undefined,
 )
 
-// Read the router/route off global properties instead of useRouter()/useRoute()
-// so this component works — without warnings or crashes — when mounted outside a
-// vue-router app (docs, tests, embedded use). vue-router installs $router/$route
-// here; the $route getter stays reactive when read inside a computed.
-const globals = getCurrentInstance()?.appContext.config.globalProperties
-const hasRouter = computed(() => Boolean(globals?.$router))
-
-// With a router, render RouterLink; without one, degrade to a plain <a> (with an
-// href only when `route` is a string — we can't resolve a route-location object).
-const linkComponent = computed(() =>
-  props.route && hasRouter.value ? RouterLink : 'a',
-)
-const linkAttrs = computed(() =>
-  props.route
-    ? hasRouter.value
-      ? { to: props.route }
-      : { href: safeHref(props.route) }
-    : { href: safeHref(props.href) },
-)
-
-const resolvedRoute = computed(() =>
-  props.route && globals?.$router ? globals.$router.resolve(props.route) : null,
-)
+const { globals, linkComponent, linkAttrs, resolvedRoute } = useNavLink(props)
 
 // Explicit `active` wins; otherwise infer from the current route so
 // router-driven items light up without extra wiring.
