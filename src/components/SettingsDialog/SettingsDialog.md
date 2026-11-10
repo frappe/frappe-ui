@@ -92,7 +92,8 @@ headers never scroll away. `SettingsHeader` takes `title`, `description` and an
 `SettingsRow` shows a setting's title and description on the left and its
 control on the right. When the control is a frappe-ui control such as `Switch`,
 the title becomes its `<label>`, with no `label-for` needed. Set `labelFor` to
-point the label at another element's id.
+point the label at another element's id. The `#description` slot replaces the
+`description` text, for a description that holds markup such as a link.
 
 ## Accessibility
 

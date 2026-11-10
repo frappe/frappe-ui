@@ -44,6 +44,17 @@ describe('SettingsRow', () => {
     cy.contains('Allow viewing.').should('exist')
   })
 
+  it('lets the description slot replace the description text', () => {
+    cy.mount(SettingsRow, {
+      props: { title: 'Public profile', description: 'Ignored' },
+      slots: {
+        description: () => h('a', { href: '/help' }, 'Read the guide'),
+      },
+    })
+    cy.contains('a', 'Read the guide').should('have.attr', 'href', '/help')
+    cy.contains('Ignored').should('not.exist')
+  })
+
   it('auto-associates the title label with a slotted Switch', () => {
     cy.mount(SettingsRow, {
       props: { title: 'Public profile' },
