@@ -255,6 +255,33 @@ describe('DatePicker', () => {
     cy.get('@onUpdate').should('have.been.calledWith', '2025-06-15')
   })
 
+  it('reads a typed date in the format’s day-month order', () => {
+    cy.mount(DatePicker, {
+      props: {
+        format: 'DD-MM-YYYY',
+        'onUpdate:modelValue': cy.spy().as('onUpdate'),
+      },
+    })
+    cy.get('input').click()
+    cy.get('input').type('3-11-26{enter}')
+    cy.get('@onUpdate').should('have.been.calledWith', '2026-11-03')
+    cy.get('input').should('have.value', '03-11-2026')
+  })
+
+  it('keeps the value on a blur with no edit, though the format drops the year', () => {
+    cy.mount(DatePicker, {
+      props: {
+        modelValue: '2020-11-03',
+        format: 'DD MMM',
+        'onUpdate:modelValue': cy.spy().as('onUpdate'),
+      },
+    })
+    cy.get('input').should('have.value', '03 Nov')
+    cy.get('input').focus().blur()
+    cy.get('input').should('have.value', '03 Nov')
+    cy.get('@onUpdate').should('not.have.been.called')
+  })
+
   it('typed unavailable date is rejected and reverts', () => {
     cy.mount(DatePicker, {
       props: {

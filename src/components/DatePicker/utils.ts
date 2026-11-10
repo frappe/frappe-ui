@@ -53,6 +53,59 @@ export function generateWeeks(
   return chunked
 }
 
+/** Text that starts like an ISO date (`2026-11-03`, `2026/11/03`), which a loose parse reads right. */
+export const ISO_DATE = /^\d{4}[-/]\d{1,2}[-/]\d{1,2}/
+
+// A format token, or a `[literal]` that must stay as written.
+const TOKEN_OR_LITERAL = /\[[^\]]*\]|[aA]/g
+
+// Each turns a format into one more a person may type under it.
+const TYPED_VARIANTS: ((format: string) => string)[] = [
+  (f) => f.replace(/(?<!D)DD(?!D)/, 'D'),
+  (f) => f.replace(/(?<!M)MM(?!M)/, 'M'),
+  (f) => f.replace(/(?<!Y)YYYY(?!Y)/, 'YY'),
+  (f) => f.replace(/(?<![Hh])(HH|hh)(?![Hh])/, (t) => t[0]),
+  (f) => f.replace(/:ss/, ''),
+  (f) => (/s/.test(f) ? f : f.replace(/mm/, 'mm:ss')),
+  (f) => f.replace(/\s+[Hh].*$/, ''),
+  // `PM` typed under `a`, or `pm` under `A`.
+  (f) =>
+    f.replace(TOKEN_OR_LITERAL, (t) => (t === 'a' ? 'A' : t === 'A' ? 'a' : t)),
+]
+
+const typedFormatCache = new Map<string, string[]>()
+
+/**
+ * The formats a person may type a date in under a display `format`, in its
+ * day-month-year order: a day, month or hour with no leading zero, a two-digit
+ * year, seconds added or left out, no time, or the other AM/PM case.
+ * `DD-MM-YYYY HH:mm:ss` takes `3-11-26 9:15` and `03-11-2026`. Pass the text
+ * through `withFormatSeparator` first, so `3/11/26` is read too.
+ */
+export function typedFormats(format: string): string[] {
+  const cached = typedFormatCache.get(format)
+  if (cached) return cached
+  let formats = [format]
+  for (const variant of TYPED_VARIANTS) {
+    formats = [...new Set(formats.flatMap((f) => [f, variant(f)]))]
+  }
+  typedFormatCache.set(format, formats)
+  return formats
+}
+
+/**
+ * `text` with `-`, `/` or `.` between its date numbers changed to the one
+ * `format` uses. Only the date, before the first space, changes: a time such
+ * as `9.15` keeps its own separator.
+ */
+export function withFormatSeparator(text: string, format: string): string {
+  const separator = /(?<=[DMY])[-/.](?=[DMY])/.exec(format)?.[0]
+  if (!separator) return text
+  return text.replace(/^\S+/, (date) =>
+    date.replace(/(?<=\d)[-/.](?=\d)/g, separator),
+  )
+}
+
 export function getDateValue(date: Date | string) {
   if (!date || date.toString() === 'Invalid Date') return ''
 
