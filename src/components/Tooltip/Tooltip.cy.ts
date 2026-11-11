@@ -1,7 +1,7 @@
 import Tooltip from './Tooltip.vue'
 import TooltipProvider from './TooltipProvider.vue'
 import Button from '../Button/Button.vue'
-import { h } from 'vue'
+import { h, ref } from 'vue'
 
 const Comp = () =>
   h(Tooltip, { text: 'some tooltip', hoverDelay: 0, side: 'top' }, [
@@ -126,5 +126,88 @@ describe('Tooltip', () => {
     cy.get('[role=tooltip]').should('not.exist')
     cy.tick(500)
     cy.get('button').should('have.attr', 'data-state', 'delayed-open')
+  })
+
+  describe('mounts the popup on the first hover or focus', () => {
+    // Hosted in a bare div, so its child nodes show everything Tooltip renders.
+    const host = (tooltip: ReturnType<typeof h>) => () =>
+      h('div', { 'data-cy': 'host' }, [tooltip])
+    const onlyTheTrigger = ($host: JQuery) =>
+      expect($host[0].childNodes).to.have.length(1)
+
+    it('renders only the trigger before, and opens on the first hover after the delay', () => {
+      cy.clock()
+      cy.mount(
+        host(
+          h(Tooltip, { text: 'Lazy', hoverDelay: 300 }, () => h('button', 'k')),
+        ),
+      )
+
+      // No reka root, no portal anchors, no wrapper element.
+      cy.get('[data-cy=host]').should(onlyTheTrigger)
+      cy.get('button')
+        .should('have.attr', 'data-state', 'closed')
+        .and('have.attr', 'data-slot', 'trigger')
+
+      // Touch never hovers, so it mounts nothing.
+      cy.get('button').trigger('pointermove', { pointerType: 'touch' })
+      cy.get('[data-cy=host]').should(onlyTheTrigger)
+
+      cy.get('button').trigger('pointermove', { pointerType: 'mouse' })
+      cy.tick(299)
+      cy.get('[role=tooltip]').should('not.exist')
+      cy.tick(1)
+      cy.get('[role=tooltip]').should('have.text', 'Lazy')
+      cy.get('[role=tooltip]').then(($tip) => {
+        cy.get('button').should(
+          'have.attr',
+          'aria-describedby',
+          $tip.attr('id'),
+        )
+      })
+    })
+
+    it('opens on the first keyboard focus and keeps focus on the trigger', () => {
+      cy.mount(
+        host(
+          h(Tooltip, { text: 'Lazy', hoverDelay: 500 }, () =>
+            h(Button, {}, () => 'k'),
+          ),
+        ),
+      )
+
+      cy.get('[data-cy=host]').should(onlyTheTrigger)
+      cy.get('button').focus()
+      cy.get('[role=tooltip]').should('have.text', 'Lazy')
+      // Mounting replaced the button element, and focus moved with it.
+      cy.focused().should('have.attr', 'data-slot', 'trigger')
+    })
+
+    it('keeps focus and typing in a field inside the trigger', () => {
+      const text = ref('hello')
+      cy.mount(
+        host(
+          h(Tooltip, { text: 'Lazy' }, () =>
+            h('div', [
+              h('input', {
+                value: text.value,
+                onInput: (e: Event) =>
+                  (text.value = (e.target as HTMLInputElement).value),
+              }),
+            ]),
+          ),
+        ),
+      )
+
+      // Focus on a descendant mounts the tooltip but, as in reka, does not open it.
+      cy.get('input').focus()
+      cy.get('[data-cy=host]').should(($host) =>
+        expect($host[0].childNodes.length).to.be.greaterThan(1),
+      )
+      cy.focused().should('match', 'input')
+      cy.focused().type(' world')
+      cy.get('input').should('have.value', 'hello world')
+      cy.get('[role=tooltip]').should('not.exist')
+    })
   })
 })
