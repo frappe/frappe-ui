@@ -1,5 +1,60 @@
 # frappe-ui
 
+## 1.2.0
+
+### Minor Changes
+
+- Experimental: the v0 `TextEditor` family is removed from
+  `frappe-ui/experimental`. This removes `TextEditor`, `TextEditorBubbleMenu`,
+  `TextEditorFixedMenu`, `TextEditorFloatingMenu`, `TextEditorContent`,
+  `createEditorButton`, `ImageExtension`, `createSuggestionExtension` and their
+  types. Use `frappe-ui/editor`; the migration guide's Editor section shows how.
+  [#1349](https://github.com/frappe/frappe-ui/pull/1349)
+- SettingsRow: the new `#description` slot replaces the `description` text, for
+  a description that holds markup such as a link.
+  [#1326](https://github.com/frappe/frappe-ui/pull/1326)
+
+### Patch Changes
+
+- DatePicker, DateTimePicker and DateRangePicker: with a `format`, a typed date
+  of numbers alone reads in that format's day-month-year order. Under
+  `DD-MM-YYYY`, `3-11-2026`, `3/11/26` and `03.11.2026` are 3 November, not 11
+  March. A date-time can be typed without its seconds or its time, and with
+  AM/PM in either case. DatePicker and DateTimePicker no longer write a value on
+  a focus and blur with no edit, so a format that hides the seconds keeps them.
+  [#1339](https://github.com/frappe/frappe-ui/pull/1339)
+- Vite: `frappeTypes` finds doctype files in one pass over the app and skips
+  `node_modules` and dot folders. Type generation on dev start no longer takes
+  minutes in apps with a large `node_modules`.
+  [#1331](https://github.com/frappe/frappe-ui/pull/1331)
+- Editor: an embed's `src` is now checked against the embed allowlist when the
+  content is loaded as JSON, set with `setContent`, or received from a
+  collaborator, not only when it is parsed from HTML. Embeds that point to the
+  app's own origin are refused.
+  [#1348](https://github.com/frappe/frappe-ui/pull/1348)
+- Editor: pasted HTML and pasted markdown are parsed in a separate document, so
+  event handlers in the pasted markup do not run.
+  [#1348](https://github.com/frappe/frappe-ui/pull/1348)
+- IconPicker: the icons in the grid and the field now use the theme's text
+  colours, so they show in dark mode.
+  [#1336](https://github.com/frappe/frappe-ui/pull/1336)
+- dialog: `prompt` loads its form inputs on first use, so they are no longer in
+  every app's first download.
+  [#1353](https://github.com/frappe/frappe-ui/pull/1353)
+- Tooltip, HoverCard: the popup mounts on the first hover or focus of the
+  trigger, so long lists of them render much faster.
+  [#1353](https://github.com/frappe/frappe-ui/pull/1353)
+- SidebarItem, SidebarRailItem, MobileNavItem, Breadcrumbs, ListRow and
+  CommandPaletteItem: an `href` is rendered only when it is relative or uses
+  `http`, `https`, `mailto` or `tel`. Other schemes leave the link without an
+  `href`. To open an app link such as `slack:` or `zoommtg:`, open it from a
+  click handler instead. [#1348](https://github.com/frappe/frappe-ui/pull/1348)
+- Tailwind preset: `truncate` now clips only horizontally, so a tight line
+  height no longer cuts off descenders. Add `overflow-hidden` to an element that
+  relied on `truncate` to hide extra lines vertically, or to keep the old
+  position of an inline-block `truncate`.
+  [#1338](https://github.com/frappe/frappe-ui/pull/1338)
+
 ## 1.1.0
 
 ### Minor Changes
