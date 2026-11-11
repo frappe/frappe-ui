@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import { TimePicker } from 'frappe-ui'
 
-// "When should we sync?" — typical meeting scheduler time slot
+// "When should we sync?": a typical meeting time slot
 const meetingTime = ref('14:30')
 </script>
 
@@ -20,7 +20,7 @@ const meetingTime = ref('14:30')
       </template>
     </TimePicker>
     <span class="text-xs text-ink-gray-5">
-      Selected: {{ meetingTime || '—' }}
+      Selected: {{ meetingTime || 'none' }}
     </span>
   </div>
 </template>

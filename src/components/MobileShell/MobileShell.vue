@@ -15,13 +15,15 @@
       wants the platform's own overscroll + inertia). Registered into the shared
       scroll-container registry so `shellScrollContainer` resolves it.
     -->
-    <div
+    <!-- The page's <main> landmark, so screen-reader users can jump straight
+         to the content. -->
+    <main
       ref="scroll"
       data-slot="mobile-shell-scroll"
       class="flex-1 overflow-y-auto overscroll-auto bg-surface-base [-webkit-overflow-scrolling:touch]"
     >
       <slot />
-    </div>
+    </main>
 
     <slot name="nav" />
   </div>

@@ -54,7 +54,7 @@ function buildCode(v: Record<string, any>) {
 </script>
 
 <template>
-  <PlaygroundFrame :knobs="knobs" :code="buildCode" preview-min-height="120px">
+  <PlaygroundFrame :knobs="knobs" :code="buildCode">
     <template #preview="{ values }">
       <Avatar
         :label="values.label"

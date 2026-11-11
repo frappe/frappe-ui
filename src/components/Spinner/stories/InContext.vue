@@ -8,6 +8,7 @@ import { Button } from 'frappe-ui'
       theme="gray"
       variant="solid"
       icon="lucide-save"
+      label="Save"
       :loading="true"
       size="xs"
     />

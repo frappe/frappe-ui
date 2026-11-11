@@ -35,6 +35,19 @@ bar.
 
 <ComponentPreview name="Progress-MultiStepForm" />
 
+## Usage Guidelines
+
+<ComponentPreview name="Progress-Guidelines" hide-code />
+
+<div class="guideline-text">
+
+- Progress bars are read-only. To let people set a value, use a Slider.
+- Use a segmented bar, with intervals, when progress moves in steps.
+- Give the bar a label, so people know what it measures.
+- Use the hint to show the percentage, or a count like steps or points.
+
+</div>
+
 ## Behavior
 
 ### Value

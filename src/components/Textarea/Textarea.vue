@@ -59,6 +59,7 @@ import LabelingWrapper from '../InputLabeling/LabelingWrapper.vue'
 import type { InputSize } from '../../composables/inputTypes'
 import type { TextareaEmits, TextareaProps } from './types'
 import type { TextInputExposed } from '../TextInput/types'
+import { withInvalidBorder } from '../../utils/invalidBorder'
 
 defineOptions({
   inheritAttrs: false,
@@ -171,7 +172,9 @@ const inputClasses = computed(() => {
   return [
     sizeClasses,
     paddingClasses,
-    variantClasses,
+    typeof variantClasses === 'string'
+      ? withInvalidBorder(variantClasses, hasError.value)
+      : variantClasses,
     props.disabled ? 'text-ink-gray-5' : 'text-ink-gray-8',
     'transition-colors w-full block',
   ]

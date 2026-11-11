@@ -15,17 +15,21 @@ function save([value]: number[]) {
 
 <template>
   <div class="flex w-full max-w-md flex-col gap-2">
-    <Slider
-      v-model="brightness"
-      label="Screen brightness"
-      @value-commit="save"
-    />
-    <p class="text-p-sm text-ink-gray-5">
-      Showing {{ brightness[0] }}.
-      <template v-if="saved !== null">
-        Saved {{ saved }} ({{ saves }} {{ saves === 1 ? 'save' : 'saves' }}).
+    <Slider v-model="brightness" @value-commit="save">
+      <template #label>
+        <span class="flex items-center justify-between">
+          Screen brightness
+          <span class="tabular-nums text-ink-gray-8" aria-hidden="true">
+            {{ brightness[0] }}%
+          </span>
+        </span>
       </template>
-      <template v-else>Not saved yet.</template>
+    </Slider>
+    <p class="text-p-sm text-ink-gray-5">
+      <template v-if="saved !== null">
+        Saved {{ saved }}% ({{ saves }} {{ saves === 1 ? 'save' : 'saves' }}).
+      </template>
+      <template v-else>Not saved yet. Drag the handle and let go.</template>
     </p>
   </div>
 </template>

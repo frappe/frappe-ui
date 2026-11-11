@@ -55,6 +55,7 @@ defineSlots<{
     :data-size="size"
     :data-state="isEmphasized ? 'active' : 'inactive'"
     :data-disabled="disabled ? '' : undefined"
+    :aria-disabled="disabled || undefined"
     :class="[
       'flex w-full items-center gap-2 rounded-4 transition-colors',
       sizeClasses,

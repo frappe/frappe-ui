@@ -22,7 +22,7 @@
         data-slot="content"
         :aria-describedby="undefined"
         class="fixed inset-x-0 bottom-0 z-50 mx-auto flex max-h-[90dvh] w-full max-w-2xl flex-col rounded-t-[36px] bg-surface-base shadow-lg [corner-shape:squircle] bottom-sheet-content focus:outline-none after:pointer-events-none after:absolute after:inset-x-0 after:top-full after:h-screen after:bg-surface-base"
-        :aria-label="title || 'Bottom sheet'"
+        :aria-label="accessibleName()"
         @escape-key-down="onDismissAttempt"
         @interact-outside="onDismissAttempt"
         @open-auto-focus="onOpenAutoFocus"
@@ -63,7 +63,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, useAttrs } from 'vue'
 import {
   DialogRoot,
   DialogPortal,
@@ -75,9 +75,21 @@ import { useSheetDrag } from '../../composables/useSheetDrag'
 import type { BottomSheetProps, BottomSheetEmits } from './types'
 import { usePortalTarget } from '../../composables/usePortalTarget'
 
+// The root is DialogRoot, which renders no element, so attributes would land
+// nowhere. Read `aria-label` ourselves to name a sheet that has no title.
+defineOptions({ inheritAttrs: false })
+const attrs = useAttrs()
+
 const props = withDefaults(defineProps<BottomSheetProps>(), {
   dismissible: true,
 })
+
+// The title names the sheet. Without one, use a caller's `aria-label`, so a
+// translated app isn't stuck with the English fallback.
+// A function, not a computed: `attrs` isn't reactive.
+function accessibleName() {
+  return props.title || (attrs['aria-label'] as string) || 'Bottom sheet'
+}
 const emit = defineEmits<BottomSheetEmits>()
 
 const portalTarget = usePortalTarget()

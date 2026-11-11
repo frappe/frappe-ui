@@ -15,7 +15,7 @@ import { Button, Tooltip, TooltipProvider } from 'frappe-ui'
       <Button icon="lucide-italic" tooltip="Italic" />
       <Button icon="lucide-underline" tooltip="Underline" />
       <Tooltip text="Strikethrough">
-        <Button icon="lucide-strikethrough" />
+        <Button icon="lucide-strikethrough" label="Strikethrough" />
       </Tooltip>
     </div>
   </TooltipProvider>

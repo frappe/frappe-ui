@@ -21,6 +21,16 @@ comments.
 
 <ComponentPreview name="Divider-OlderComments" />
 
+## Usage Guidelines
+
+<ComponentPreview name="Divider-Guidelines" hide-code />
+
+<div class="guideline-text">
+
+- Don't add a divider after the last item in a list.
+
+</div>
+
 ## Behavior
 
 ### Action
@@ -42,7 +52,7 @@ the divider stretches to the height of the row.
 ## Accessibility
 
 A plain divider renders an `<hr>`, which screen readers announce as a
-separator. A divider with an `action` renders the line as an element with
+separator. A vertical one also gets `aria-orientation="vertical"`. A divider with an `action` renders the line as an element with
 `role="separator"` and `aria-orientation`.
 
 <!-- @include: ./Divider.api.md -->
