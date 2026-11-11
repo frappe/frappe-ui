@@ -175,9 +175,14 @@ export const OrderedList = command(commandMeta.orderedList, (editor) =>
 export const Blockquote = command(commandMeta.blockquote, (editor) =>
   editor.chain().focus().toggleBlockquote().run(),
 )
-export const Paragraph = command(commandMeta.paragraph, (editor) =>
-  editor.chain().focus().setParagraph().run(),
-)
+const setParagraph: CommandMenuItem['action'] = (editor) =>
+  editor.chain().focus().setParagraph().run()
+export const Paragraph: CommandMenuItem = {
+  ...command(commandMeta.paragraph, setParagraph),
+  // `setParagraph` cannot run in a paragraph, where the button is pressed.
+  isDisabled: (editor) =>
+    !editor.isActive('paragraph') && !canRun(editor, setParagraph),
+}
 
 function heading(level: 1 | 2 | 3 | 4 | 5 | 6): CommandMenuItem {
   return command(headingMeta(level), (editor) =>
