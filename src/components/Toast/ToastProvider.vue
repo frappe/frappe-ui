@@ -1,6 +1,8 @@
 <template>
   <Toaster
     position="bottom-right"
+    :offset="offset"
+    :mobile-offset="mobileOffset"
     :close-button="true"
     :expand="false"
     :rich-colors="false"
@@ -28,6 +30,13 @@
 
 <script setup lang="ts">
 import { Toaster } from 'vue-sonner'
+
+import type { ToasterProps } from 'vue-sonner'
+
+defineProps<{
+  offset?: ToasterProps['offset']
+  mobileOffset?: ToasterProps['mobileOffset']
+}>()
 </script>
 
 <style>

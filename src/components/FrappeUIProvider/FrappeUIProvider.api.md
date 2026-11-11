@@ -4,6 +4,21 @@
   import SlotsTable from '@/components/Docs/SlotsTable.vue'
   import EmitsTable from '@/components/Docs/EmitsTable.vue'
 
+  const propsData = [
+  {
+    name: 'offset',
+    description: 'Distance of the toast stack from the screen edge.',
+    required: false,
+    type: 'Offset'
+  },
+  {
+    name: 'mobileOffset',
+    description: 'Same as `offset`, but applied on mobile viewports.',
+    required: false,
+    type: 'Offset'
+  }
+]
+
   const slotsData = [
   {
     name: 'default',
@@ -14,5 +29,7 @@
 </script>
 
 ## API Reference
+
+<PropsTable name="FrappeUIProvider" :data="propsData"/>
 
 <SlotsTable :data="slotsData"/>
