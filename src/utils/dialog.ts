@@ -10,7 +10,6 @@ import { moduleSingleton } from './moduleSingleton'
 import { useId } from './useId'
 import Dialog from '../components/Dialog/Dialog.vue'
 import { Button } from '../components/Button'
-import FormControl from '../components/FormControl/FormControl.vue'
 import ErrorMessage from '../components/ErrorMessage/ErrorMessage.vue'
 import type { DialogSize, DialogTheme } from '../components/Dialog/types'
 import type { ButtonProps } from '../components/Button'
@@ -446,6 +445,17 @@ export function confirm(args: ConfirmArgs): DialogHandle {
 
 // -- prompt --------------------------------------------------------------
 
+// FormControl imports every input type (date, time, combobox, select, …), and
+// this module is reachable from the package index, so a static import would
+// put all of them in every app's first download. Load it on the first prompt.
+let formControl: Promise<Component> | undefined
+function loadFormControl() {
+  formControl ??= import('../components/FormControl/FormControl.vue').then(
+    (module) => module.default,
+  )
+  return formControl
+}
+
 // Initial value for a prompt field. Checkbox defaults to false; everything
 // else (text/textarea/select/combobox) defaults to an empty string so the
 // `required` check has something concrete to compare against.
@@ -586,6 +596,9 @@ export function prompt(args: PromptArgs): DialogHandle {
       !field.type || field.type === 'text' || field.type === 'textarea',
   )
 
+  // Set before the dialog joins the stack, at the end of this function.
+  let FormControl: Component
+
   const renderField = (field: PromptField) => {
     const onUpdate = (val: any) => {
       values[field.name] = val
@@ -710,7 +723,12 @@ export function prompt(args: PromptArgs): DialogHandle {
     },
   })
 
-  assignedId = add(component)
+  // Join the stack only once FormControl has loaded, so the dialog's first
+  // frame already holds its fields. A dialog closed before then never shows.
+  loadFormControl().then((loaded) => {
+    FormControl = loaded
+    if (state.open) assignedId = add(component)
+  })
   return { close }
 }
 
