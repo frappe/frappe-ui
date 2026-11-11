@@ -5,11 +5,13 @@ import {
   HoverCardPortal,
   HoverCardRoot,
   HoverCardTrigger,
+  Slot,
   injectHoverCardRootContext,
 } from 'reka-ui'
 import { computed, defineComponent, ref, watch } from 'vue'
 import PopoverPanel from '../shared/popover/PopoverPanel.vue'
 import { usePortalTarget } from '../../composables/usePortalTarget'
+import { useDeferredTrigger } from '../shared/deferredTrigger'
 import type {
   HoverCardExposed,
   HoverCardProps,
@@ -40,6 +42,9 @@ const closeDelay = computed(() => props.leaveDelay)
 const triggerRef = ref<{ $el: Element } | null>(null)
 const controllerRef = ref<{ setOpen: (value: boolean) => void } | null>(null)
 
+// The trigger renders alone until it is first hovered or focused.
+const { mounted, mount, shellProps } = useDeferredTrigger('hoverCard')
+
 const HoverCardController = defineComponent({
   setup(_, { expose }) {
     const context = injectHoverCardRootContext()
@@ -69,11 +74,18 @@ function close() {
   setOpen(false)
 }
 
-// A controlled parent can close without calling the slot control. Clear any
-// imperative-open timer so Reka cannot reopen after the model turns false.
-watch(open, (isOpen) => {
-  if (!isOpen) controllerRef.value?.setOpen(false)
-})
+// Opening from the model, a template ref or a slot control mounts the card
+// without a hover first. A controlled parent can also close without calling
+// the slot control, so clear any imperative-open timer then, or Reka could
+// reopen after the model turns false.
+watch(
+  open,
+  (isOpen) => {
+    if (isOpen) mount()
+    else controllerRef.value?.setOpen(false)
+  },
+  { immediate: true },
+)
 
 const slotProps = computed<HoverCardSlotProps>(() => ({
   open: open.value,
@@ -102,7 +114,11 @@ function onPointerDownOutside(event: Event) {
 </script>
 
 <template>
+  <Slot v-if="!mounted" v-bind="shellProps">
+    <slot name="trigger" v-bind="slotProps" />
+  </Slot>
   <HoverCardRoot
+    v-else
     v-model:open="open"
     :open-delay="openDelay"
     :close-delay="closeDelay"
