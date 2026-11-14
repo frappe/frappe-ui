@@ -35,7 +35,7 @@
     >
       <Tooltip
         :text="tooltipText"
-        side="right"
+        :side="tooltipSide"
         :disabled="!isCollapsed || !tooltipText"
       >
         <!-- Deliberately unchanged by `isCollapsed`: the row keeps its `pl-2`
@@ -77,7 +77,7 @@
     >
       <Tooltip
         :text="tooltipText"
-        side="right"
+        :side="tooltipSide"
         :disabled="!isCollapsed || !tooltipText"
       >
         <!-- Deliberately unchanged by `isCollapsed`: the row keeps its `pl-2`
@@ -131,6 +131,7 @@
 import { computed, inject, onMounted, ref, useAttrs, useTemplateRef } from 'vue'
 import Icon from '../Icon/Icon.vue'
 import { useNavLink } from '../shared/navLink'
+import { navSideKey } from '../shared/navSide'
 import Tooltip from '../Tooltip/Tooltip.vue'
 import { SidebarItemProps, sidebarCollapsedKey } from './types'
 
@@ -191,6 +192,12 @@ const slotLabel = ref('')
 onMounted(() => {
   slotLabel.value = labelEl.value?.textContent?.trim() ?? ''
 })
+// The collapsed tooltip opens away from the navigation, toward the page.
+const navSide = inject(navSideKey, null)
+const tooltipSide = computed(() =>
+  navSide?.value === 'right' ? 'left' : 'right',
+)
+
 const tooltipText = computed(() => props.label || slotLabel.value)
 
 // A caller's `aria-label` wins over the derived one. It is the more specific

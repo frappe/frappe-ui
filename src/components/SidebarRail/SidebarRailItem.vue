@@ -4,7 +4,7 @@
     (instant hover between neighbours) and falls back to its own when a
     SidebarRailItem is used standalone.
   -->
-  <Tooltip side="right">
+  <Tooltip :side="tooltipSide">
     <!--
       Router and plain links share a dynamic component. The button stays a
       literal v-else because a raw 'button' string can resolve to the globally
@@ -32,7 +32,8 @@
         v-if="showIndicator"
         data-slot="sidebar-rail-item-indicator"
         aria-hidden="true"
-        class="absolute -left-[11px] top-1/2 h-7 w-1 -translate-y-1/2 rounded-r-4 bg-surface-gray-8"
+        :class="indicatorClasses"
+        class="absolute top-1/2 h-7 w-1 -translate-y-1/2 bg-surface-gray-8"
       />
       <slot><Icon :icon="icon" class="size-4" /></slot>
       <SidebarRailItemBadge :count="badge" :variant="badgeStyle" />
@@ -54,7 +55,8 @@
         v-if="showIndicator"
         data-slot="sidebar-rail-item-indicator"
         aria-hidden="true"
-        class="absolute -left-[11px] top-1/2 h-7 w-1 -translate-y-1/2 rounded-r-4 bg-surface-gray-8"
+        :class="indicatorClasses"
+        class="absolute top-1/2 h-7 w-1 -translate-y-1/2 bg-surface-gray-8"
       />
       <slot><Icon :icon="icon" class="size-4" /></slot>
       <SidebarRailItemBadge :count="badge" :variant="badgeStyle" />
@@ -72,9 +74,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, inject } from 'vue'
 import Icon from '../Icon/Icon.vue'
 import { useNavLink } from '../shared/navLink'
+import { navSideKey } from '../shared/navSide'
 import Tooltip from '../Tooltip/Tooltip.vue'
 import SidebarRailItemBadge from './SidebarRailItemBadge.vue'
 import type { SidebarRailItemProps } from './types'
@@ -98,6 +101,14 @@ defineSlots<{
   default?: () => any
 }>()
 
+// Outside a DesktopShell the navigation is on the left.
+const navSide = inject(navSideKey, null)
+const onRight = computed(() => navSide?.value === 'right')
+const tooltipSide = computed(() => (onRight.value ? 'left' : 'right'))
+const indicatorClasses = computed(() =>
+  onRight.value ? '-right-[11px] rounded-l-4' : '-left-[11px] rounded-r-4',
+)
+
 const { globals, linkComponent, linkAttrs, resolvedRoute } = useNavLink(props)
 
 const resolvedActive = computed(() => {
@@ -110,7 +121,8 @@ const resolvedActive = computed(() => {
     : current.path === target.path
 })
 
-// The left indicator bar is the `subtle` variant's active affordance; `ghost`
+// The indicator bar, on the rail's outer edge, is the `subtle` variant's
+// active affordance; `ghost`
 // items signal active state through their raised background instead.
 const showIndicator = computed(
   () => props.variant === 'subtle' && resolvedActive.value,
