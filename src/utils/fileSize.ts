@@ -5,7 +5,8 @@
  * user-facing size-limit message.
  *
  * Apps provide the limit explicitly via `setConfig('maxFileSize', bytes)`
- * (usually sourced from their boot data).
+ * and the chunk size via `setConfig('fileChunkSize', bytes)` (usually
+ * sourced from their boot data).
  */
 import { getConfig } from './config'
 
@@ -16,6 +17,17 @@ import { getConfig } from './config'
 export function getMaxFileSize(): number | null {
   const size = Number(getConfig('maxFileSize'))
   return Number.isFinite(size) && size > 0 ? size : null
+}
+
+const DEFAULT_FILE_CHUNK_SIZE = 25 * 1024 * 1024
+
+/**
+ * Bytes per upload request. Larger files are sent in chunks of this size.
+ * Reads the app-provided `fileChunkSize` config, or 25 MB when unset.
+ */
+export function getFileChunkSize(): number {
+  const size = Number(getConfig('fileChunkSize'))
+  return Number.isFinite(size) && size > 0 ? size : DEFAULT_FILE_CHUNK_SIZE
 }
 
 export function formatBytes(bytes: number): string {
