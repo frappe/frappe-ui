@@ -17,6 +17,7 @@
       :index="index"
       :set-size="roots.length"
     >
+      <!-- No v-if on these: it makes the slots dynamic and redraws every row. -->
       <template #item="p"><slot name="item" v-bind="p" /></template>
       <template #item-label="p"><slot name="item-label" v-bind="p" /></template>
       <template #item-prefix="p"
@@ -99,7 +100,7 @@ const declaredSlots = defineSlots<{
   /** Rendered instead of the tree when `nodes` is empty. */
   empty: () => unknown
 }>()
-// Forwarded slots stay unconditional so rows do not redraw with Tree; TreeItem reads `#item` here.
+// `#item` is always forwarded, so rows read here whether the app passed it.
 const slots = useReactiveSlots<typeof declaredSlots>()
 
 // Documented on `expanded` in `./types.ts`. A JSDoc block here would be

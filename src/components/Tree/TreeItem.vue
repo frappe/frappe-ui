@@ -88,6 +88,7 @@
         :index="childIndex"
         :set-size="children.length"
       >
+        <!-- No v-if on these: it makes the slots dynamic and redraws every row. -->
         <template #item="p"><slot name="item" v-bind="p" /></template>
         <template #item-label="p"
           ><slot name="item-label" v-bind="p"
