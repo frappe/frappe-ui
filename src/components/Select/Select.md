@@ -30,6 +30,17 @@ scrolls.
 
 <ComponentPreview name="Select-Footer" layout="stacked" />
 
+## Usage Guidelines
+
+<ComponentPreview name="Select-Guidelines" hide-code />
+
+<div class="guideline-text">
+
+- Use a select for a value saved in a form; use a dropdown to trigger a UI action.
+- Past about 10 options, use a Combobox so people can search.
+
+</div>
+
 ## Behavior
 
 ### Options
@@ -76,12 +87,13 @@ Use `v-model:open` when a parent component controls the menu. Inside
 
 By default the menu opens over the trigger, lined up with the selected option.
 Pass `side`, `align` or `offset` to place it next to the trigger instead.
-`portalTo` changes where the menu is teleported in both modes.
+`portalTo` changes where the menu is teleported in both modes. In both, a long
+list scrolls inside the space left on screen.
 
 ### Label, description and error
 
 `label` renders above the trigger and `description` below it. `error` renders
-below the trigger and hides `description`. It takes a string, an array of
+below the trigger and hides `description`, and turns the field's border red. It takes a string, an array of
 strings (one line each), or an `Error`, the same values as
 [ErrorMessage](./errormessage). An empty string or an empty array means no
 error. `required` adds a red asterisk to the label.

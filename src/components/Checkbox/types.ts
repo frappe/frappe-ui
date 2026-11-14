@@ -5,16 +5,17 @@ export interface CheckboxBaseProps extends InputLabelingProps {
   /** Controls the size of the checkbox */
   size?: ToggleSize
 
-  /** Wraps the control and label in a clickable surface with hover, active and focus states — useful for selection lists and menu items. The control always stays on the leading side. */
+  /** Wraps the control and label in a clickable surface with hover, active and focus states, for selection lists and menu items. The control always stays on the leading side. */
   padded?: boolean
 
   /** Disables the checkbox interaction */
   disabled?: boolean
 
   /**
-   * Renders the mixed "—" state (e.g. a select-all that's partially selected).
-   * Purely visual — the native `indeterminate` DOM property is not reflected as
-   * an attribute, so it must be set via this prop, not markup.
+   * Renders the mixed state, a dash in the box (e.g. a select-all that's
+   * partially selected). Purely visual: the native `indeterminate` DOM property
+   * is not reflected as an attribute, so it must be set via this prop, not
+   * markup.
    */
   indeterminate?: boolean
 }

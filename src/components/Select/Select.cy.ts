@@ -649,7 +649,11 @@ describe('Select', () => {
       // read `null`, and a caller watching for `null` would never fire.
       const onUpdate = cy.spy().as('onUpdate')
       cy.mount(Select, {
-        props: { options, modelValue: undefined, 'onUpdate:modelValue': onUpdate },
+        props: {
+          options,
+          modelValue: undefined,
+          'onUpdate:modelValue': onUpdate,
+        },
       })
 
       cy.get('[role=combobox]').should('have.text', 'Select option')
@@ -659,7 +663,11 @@ describe('Select', () => {
     it('emits null from clear even when the model started undefined', () => {
       const onUpdate = cy.spy().as('onUpdate')
       cy.mount(Select, {
-        props: { options, modelValue: undefined, 'onUpdate:modelValue': onUpdate },
+        props: {
+          options,
+          modelValue: undefined,
+          'onUpdate:modelValue': onUpdate,
+        },
       }).then((mounted: any) => {
         const vm = mounted.component ?? mounted.wrapper?.vm ?? mounted
         vm?.clear?.()
@@ -693,6 +701,21 @@ describe('Select', () => {
       cy.get('[role=combobox]').click()
       cy.get('[role=option]').contains('None').click()
       cy.get('@onUpdate').should('have.been.calledWith', '')
+    })
+  })
+})
+
+describe('Select in popper mode', () => {
+  // `side`/`align`/`offset` switch Select to popper positioning, which reka
+  // doesn't size to the viewport. A long list must still fit on screen.
+  it('keeps a long list inside the viewport', () => {
+    cy.viewport(800, 400)
+    const long = Array.from({ length: 60 }, (_, i) => `Option ${i + 1}`)
+    cy.mount(Select, { props: { options: long, side: 'bottom' } })
+    cy.get('button').first().click()
+    cy.get('[data-slot=content]').should(($content) => {
+      const r = $content[0].getBoundingClientRect()
+      expect(r.bottom).to.be.at.most(400)
     })
   })
 })

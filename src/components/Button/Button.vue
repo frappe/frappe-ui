@@ -3,6 +3,7 @@ import {
   computed,
   defineComponent,
   h,
+  onMounted,
   watchEffect,
   type Component,
   type SlotsType,
@@ -20,6 +21,15 @@ import TooltipBubble from '../Tooltip/TooltipBubble.vue'
 import { warnUnsupportedIconString } from '../../utils/iconString'
 import { useReactiveSlots } from '../../composables/useReactiveSlots'
 import { buttonProps, type ThemeVariant } from './types'
+
+// Icons already warned about, so a toolbar of unlabeled buttons warns once
+// per icon instead of once per render.
+const warnedUnlabeledIcons = new Set<string>()
+
+/** Test-only: clear the dedup set so each test sees a fresh warning. */
+export function _resetUnlabeledIconWarning() {
+  warnedUnlabeledIcons.clear()
+}
 
 export default defineComponent({
   name: 'Button',
@@ -74,6 +84,30 @@ export default defineComponent({
         Boolean(slots.icon) ||
         hasLucideIconInDefaultSlot.value,
     )
+
+    // An icon-only button shows no text, so its name comes from `label`, or
+    // failing that its tooltip. Without either, screen readers announce just
+    // "button".
+    // A function, not a computed: `attrs` isn't reactive, so it's read fresh
+    // on every render.
+    function accessibleName() {
+      if (props.label) return props.label
+      if (attrs['aria-label']) return attrs['aria-label'] as string
+      if (isIconButton.value && props.tooltip) return props.tooltip
+      return undefined
+    }
+
+    onMounted(() => {
+      if (import.meta.env.PROD) return
+      if (!isIconButton.value || accessibleName()) return
+      if (attrs['aria-labelledby']) return
+      const icon = typeof props.icon === 'string' ? props.icon : 'icon slot'
+      if (warnedUnlabeledIcons.has(icon)) return
+      warnedUnlabeledIcons.add(icon)
+      console.warn(
+        `[frappe-ui] Button with icon "${icon}" has no label, so screen readers announce it as just "button". Set \`label\` (it stays hidden and becomes the aria-label) or \`tooltip\`.`,
+      )
+    })
 
     const slotClasses = computed(
       () => ({ xs: 'h-3.5', sm: 'h-4', md: 'h-4.5', lg: 'h-5' })[props.size],
@@ -344,7 +378,7 @@ export default defineComponent({
         ...rootProps,
         ...restAttrs,
         class: [attrClass, buttonClasses.value],
-        'aria-label': props.label ?? restAttrs['aria-label'],
+        'aria-label': accessibleName(),
         'aria-busy': props.loading || undefined,
       }
       const button =

@@ -70,6 +70,7 @@ visibly change while the sheet is still sliding away.
 
 The sheet is a modal dialog. Focus stays inside it while it is open, and the
 page behind it does not scroll. `title` is the sheet's accessible name. Without
-a title, screen readers read "Bottom sheet".
+a title, pass `aria-label` to name it, or screen readers read the English
+fallback "Bottom sheet".
 
 <!-- @include: ./BottomSheet.api.md -->

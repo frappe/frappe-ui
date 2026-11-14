@@ -5,7 +5,7 @@ function sendInvite() {
   toast.promise(new Promise<void>((resolve) => setTimeout(resolve, 1500)), {
     loading: 'Sending invite to alex@example.com…',
     success: 'Invite sent to alex@example.com',
-    error: 'Could not send invite',
+    error: 'Couldn’t send the invite. Try again in a moment.',
   })
 }
 
@@ -29,8 +29,10 @@ function deleteFile() {
           onClick: () => toast.success(`Restored ${deleted.name}`),
         },
       }),
-      error: (err: Error) => ({
-        message: `Couldn't delete ${file.name} — ${err.message}`,
+      // Say what failed and what to do. The raw `err.message` is for logs,
+      // not for the toast.
+      error: () => ({
+        message: `Couldn’t delete ${file.name}. Check your connection and try again.`,
         action: {
           label: 'Retry',
           onClick: () => deleteFile(),

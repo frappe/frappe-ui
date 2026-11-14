@@ -2,16 +2,16 @@
 import { ref } from 'vue'
 import { TimePicker } from 'frappe-ui'
 
-// A yoga studio offers only its scheduled class times — not free-form intervals
+// A yoga studio offers only its scheduled class times, not free-form intervals
 const classTime = ref('07:00')
 
 const classOptions = [
-  { value: '06:00', label: '6:00 AM — Sunrise Flow' },
-  { value: '07:00', label: '7:00 AM — Vinyasa' },
-  { value: '09:30', label: '9:30 AM — Gentle Hatha' },
-  { value: '12:15', label: '12:15 PM — Lunch Power' },
-  { value: '17:30', label: '5:30 PM — Restorative' },
-  { value: '19:00', label: '7:00 PM — Candlelight Yin' },
+  { value: '06:00', label: '6:00 AM · Sunrise Flow' },
+  { value: '07:00', label: '7:00 AM · Vinyasa' },
+  { value: '09:30', label: '9:30 AM · Gentle Hatha' },
+  { value: '12:15', label: '12:15 PM · Lunch Power' },
+  { value: '17:30', label: '5:30 PM · Restorative' },
+  { value: '19:00', label: '7:00 PM · Candlelight Yin' },
 ]
 </script>
 

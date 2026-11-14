@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import { TimePicker } from 'frappe-ui'
 
-// Schedule a nightly cron — 24h format keeps the ops team unambiguous
+// Schedule a nightly cron. The 24-hour clock keeps it unambiguous for the ops team.
 const cronTime = ref('02:00')
 </script>
 

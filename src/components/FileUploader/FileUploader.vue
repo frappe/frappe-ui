@@ -22,7 +22,7 @@
     >
       <div>
         <Button @click="openFileSelector" :loading="uploading">
-          {{ uploading ? `Uploading ${progress}%` : 'Upload File' }}
+          {{ uploading ? `Uploading ${progress}%` : 'Upload file' }}
         </Button>
         <ErrorMessage :message="error ?? undefined" class="mt-1" />
       </div>
@@ -153,7 +153,7 @@ async function uploadFile(selectedFile: File) {
   })
   uploader.value.on('error', () => {
     uploading.value = false
-    error.value = 'Error Uploading File'
+    error.value = 'Error uploading file'
   })
   uploader.value.on('finish', () => {
     uploading.value = false
@@ -187,6 +187,6 @@ function getUploadErrorMessage(uploadError: unknown) {
   if (errorResponse?.exc) {
     return JSON.parse(errorResponse.exc)[0].split('\n').slice(-2, -1)[0]
   }
-  return 'Error Uploading File'
+  return 'Error uploading file'
 }
 </script>

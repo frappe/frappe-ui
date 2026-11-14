@@ -6,7 +6,9 @@
     <slot name="rail" />
     <slot name="sidebar" />
 
-    <div
+    <!-- The page's <main> landmark, so screen-reader users can jump straight
+         to the content past the rail and the sidebar. -->
+    <main
       data-slot="desktop-shell-content"
       class="flex min-w-0 flex-1 flex-col overflow-hidden"
     >
@@ -32,7 +34,7 @@
       <div v-else class="flex min-h-0 flex-1 flex-col overflow-hidden">
         <slot />
       </div>
-    </div>
+    </main>
   </div>
 </template>
 

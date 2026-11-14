@@ -39,6 +39,18 @@ An emoji in `#prefix` and a count as the label.
 
 <ComponentPreview name="Badge-Reactions" />
 
+## Usage Guidelines
+
+<ComponentPreview name="Badge-Guidelines" hide-code />
+
+<div class="guideline-text">
+
+- Use a solid red badge to show an unread count on an icon.
+- Badges are not interactive. Don't add an arrow that suggests a click; use a Button instead.
+- Keep badge text to a word or two, like a status or a count. Put longer detail next to the badge, not in it.
+
+</div>
+
 ## Behavior
 
 ### Label and slots

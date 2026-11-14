@@ -32,6 +32,18 @@ shows below the label, and one option is `disabled`.
 
 <ComponentPreview name="Radio-SettingsList" />
 
+## Usage Guidelines
+
+<ComponentPreview name="Radio-Guidelines" hide-code />
+
+<div class="guideline-text">
+
+- For enabling or disabling a single setting, use a switch instead.
+- When there are many options, use a Select instead of a long radio list.
+- Preselect a safe default, but never for consent or legal choices.
+
+</div>
+
 ## Behavior
 
 ### Inside a group

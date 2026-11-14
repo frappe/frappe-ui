@@ -11,4 +11,12 @@ export interface SpinnerProps {
 
   /** Show a faint track behind the arc */
   track?: boolean
+
+  /**
+   * What screen readers announce, like "Syncing". Defaults to "Loading". Pass
+   * a translated string in a translated app, or `""` when visible text next
+   * to the spinner already says what's loading, which hides the spinner from
+   * screen readers.
+   */
+  label?: string
 }

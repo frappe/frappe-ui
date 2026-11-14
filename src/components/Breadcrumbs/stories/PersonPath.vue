@@ -18,6 +18,7 @@ const items = [
     <template #prefix="{ item }">
       <Avatar
         v-if="item.user"
+        decorative
         :image="item.user.image"
         :label="item.label"
         size="sm"

@@ -1,0 +1,133 @@
+<script setup lang="ts">
+import { Switch, RadioGroup, Radio } from 'frappe-ui'
+
+const stock = ['Disable', 'Allow alternative', 'Maintain stock']
+const delivery = ['Home delivery', 'Store pickup', 'Locker pickup']
+
+// Annotation pill for the touch-target diagram.
+const annot =
+  'rounded-full bg-surface-gray-2 px-2.5 py-1 text-sm text-ink-gray-6 whitespace-nowrap'
+</script>
+
+<template>
+  <div class="flex flex-col gap-8">
+    <!-- 1. In a cell, only the switch is interactive (do-only) -->
+    <Guideline
+      :mark="false"
+      caption="In a settings cell, make only the switch the touch target, not the whole cell."
+    >
+      <template #do>
+        <div class="flex flex-col items-center py-4">
+          <!-- top annotation; the line dips onto the cell -->
+          <span :class="annot">Not a touch target</span>
+          <div class="relative z-10 -mb-2 h-9 border-l border-outline-gray-1" />
+
+          <!-- the settings cell -->
+          <div
+            class="flex w-[420px] items-center justify-between gap-4 rounded-6 bg-surface-gray-1 p-3"
+          >
+            <div>
+              <p class="text-base font-medium text-ink-gray-8">
+                2FA Authentication
+              </p>
+              <p class="text-sm text-ink-gray-5">
+                Manage two-factor authentication and security methods
+              </p>
+            </div>
+            <Switch :model-value="true" />
+          </div>
+
+          <!-- bottom annotations: label (not a target) and switch (target),
+               aligned to the cell so each line sits under what it points at -->
+          <div class="relative z-10 -mt-2 h-[68px] w-[420px]">
+            <div class="absolute left-9 flex flex-col items-center">
+              <div class="h-9 border-l border-outline-gray-1" />
+              <span :class="[annot, 'mt-1']">Not a touch target</span>
+            </div>
+            <div
+              class="absolute left-[395px] flex -translate-x-1/2 flex-col items-center"
+            >
+              <div class="h-9 border-l border-outline-gray-1" />
+              <span :class="[annot, 'mt-1']">Touch target</span>
+            </div>
+          </div>
+        </div>
+      </template>
+    </Guideline>
+
+    <!-- 2. Right-align switches in list rows -->
+    <Guideline
+      layout="stack"
+      caption="Align switches to the right in list items."
+    >
+      <template #do>
+        <div class="flex w-64 flex-col gap-3">
+          <div
+            v-for="s in stock"
+            :key="s"
+            class="flex items-center justify-between"
+          >
+            <span class="text-base text-ink-gray-8">{{ s }}</span>
+            <Switch :model-value="false" />
+          </div>
+        </div>
+      </template>
+      <template #dont>
+        <div class="flex w-64 flex-col gap-3">
+          <div v-for="s in stock" :key="s" class="flex items-center gap-2">
+            <span class="text-base text-ink-gray-8">{{ s }}</span>
+            <Switch :model-value="false" />
+          </div>
+        </div>
+      </template>
+    </Guideline>
+
+    <!-- 3. Immediate state changes (do-only) -->
+    <Guideline caption="Use switches for immediate state changes.">
+      <template #do>
+        <div class="flex w-64 flex-col gap-3">
+          <div class="flex items-center justify-between">
+            <span class="text-base text-ink-gray-8">Email notifications</span>
+            <Switch :model-value="false" />
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-base text-ink-gray-8">Dark mode</span>
+            <Switch :model-value="false" />
+          </div>
+        </div>
+      </template>
+    </Guideline>
+
+    <!-- 4. Not for mutually exclusive choices -->
+    <Guideline
+      layout="stack"
+      caption="Don't use a switch for mutually exclusive choices."
+    >
+      <template #do>
+        <div class="flex flex-col gap-2">
+          <p class="text-base font-medium text-ink-gray-8">
+            Delivery preferences
+          </p>
+          <RadioGroup :model-value="'Store pickup'">
+            <Radio v-for="d in delivery" :key="d" :value="d" :label="d" />
+          </RadioGroup>
+        </div>
+      </template>
+      <template #dont>
+        <div class="flex w-64 flex-col gap-2">
+          <p class="text-base font-medium text-ink-gray-8">
+            Delivery preferences
+          </p>
+          <div
+            v-for="d in delivery"
+            :key="d"
+            class="flex items-center justify-between"
+          >
+            <span class="text-base text-ink-gray-8">{{ d }}</span>
+            <Switch :model-value="false" />
+          </div>
+        </div>
+      </template>
+    </Guideline>
+  </div>
+</template>

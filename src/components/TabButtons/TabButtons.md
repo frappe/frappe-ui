@@ -46,6 +46,18 @@ a count after it. Both receive `{ button, active, disabled }`.
 
 <ComponentPreview name="TabButtons-InboxCounts" />
 
+## Usage Guidelines
+
+<ComponentPreview name="TabButtons-Guidelines" hide-code />
+
+<div class="guideline-text">
+
+- Give TabButtons a starting value, usually the first option. Without one, nothing is selected.
+- Keep TabButtons to about six options. For more, use a Select.
+- Give every option an icon, or none of them.
+
+</div>
+
 ## Behavior
 
 ### TabButtons or Tabs

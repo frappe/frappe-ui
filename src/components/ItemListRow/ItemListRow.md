@@ -23,7 +23,8 @@ either state: set them from your own state, as the status menu does on
 
 ### Disabled
 
-`disabled` mutes the row and shows a not-allowed cursor. It does not stop
+`disabled` mutes the row, shows a not-allowed cursor and sets
+`aria-disabled`, so screen readers announce it as unavailable. It does not stop
 clicks or set the `disabled` attribute on the element, so skip the action in
 your handler.
 

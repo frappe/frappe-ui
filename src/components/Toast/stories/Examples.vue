@@ -16,7 +16,7 @@ import { Button, toast } from 'frappe-ui'
       label="Comment posted"
       @click="
         toast.message('Comment posted', {
-          description: '“Looks good — shipping it!”',
+          description: '“Looks good, shipping it!”',
         })
       "
     />
