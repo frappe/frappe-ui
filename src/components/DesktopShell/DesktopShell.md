@@ -33,7 +33,7 @@ teleports to a `PageHeaderTarget` that the shell pins above the scroll area.
 shell. Only the drawing is reversed: the DOM order stays rail, sidebar, page,
 so Tab reaches the navigation first on both sides. A `SidebarRailItem` in the
 rail opens its tooltip toward the page and puts its active bar on the outer
-edge.
+edge. A collapsed `SidebarItem` opens its tooltip toward the page too.
 
 ```vue
 <DesktopShell nav-side="right">
@@ -44,8 +44,8 @@ edge.
 
 `navSide` is a physical side, `left` or `right`, and assumes a left-to-right
 page. If your app stores "start" and "end", map them to a physical side in
-one place. The shell mirrors nothing else: borders, resize handles, chevrons
-and the sidebar's own tooltips are yours to flip.
+one place. The shell mirrors nothing else: borders, resize handles and chevrons
+are yours to flip.
 
 ### Scroll container
 
