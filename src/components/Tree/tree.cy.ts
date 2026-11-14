@@ -121,6 +121,53 @@ describe('Tree', () => {
     cy.contains('Node A').should('exist')
   })
 
+  it('selects a row on click and on Enter through v-model', () => {
+    const onUpdate = cy.stub().as('select')
+    cy.mount(Tree, {
+      props: {
+        nodes: makeNodes(),
+        nodeKey: 'id',
+        expanded: ['root'],
+        'onUpdate:modelValue': onUpdate,
+      },
+    })
+    cy.contains('[data-slot="row"]', 'Node B').click()
+    cy.get('@select').should('have.been.calledWith', 'b')
+    cy.contains('[role="treeitem"]', 'Root').focus().type('{enter}')
+    cy.get('@select').should('have.been.calledWith', 'root')
+  })
+
+  it('marks only the selected row and passes `selected` to the slots', () => {
+    const selected = ref<string | null>('b')
+    cy.mount({
+      render: () =>
+        h(
+          Tree,
+          {
+            nodes: makeNodes(),
+            nodeKey: 'id',
+            expanded: ['root'],
+            modelValue: selected.value,
+          },
+          {
+            'item-suffix': ({ node, selected }: any) =>
+              h('span', { 'data-cy': `suffix-${node.id}` }, String(selected)),
+          },
+        ),
+    })
+    cy.contains('[role="treeitem"]', 'Node B')
+      .should('have.attr', 'aria-selected', 'true')
+      .and('have.attr', 'data-selected')
+    cy.contains('[role="treeitem"]', 'Node A').should(
+      'not.have.attr',
+      'aria-selected',
+    )
+    cy.get('[data-cy="suffix-b"]').should('have.text', 'true')
+    cy.get('[data-cy="suffix-a"]').should('have.text', 'false')
+    cy.then(() => (selected.value = null))
+    cy.get('[aria-selected]').should('not.exist')
+  })
+
   it('keeps every key when calls stack up under a bound v-model', () => {
     // A bound model round-trips through the parent, so the prop lags a render.
     // Consecutive calls must still accumulate rather than overwrite.
@@ -398,8 +445,9 @@ describe('Tree', () => {
       })
   })
 
-  it('freezes expand/collapse and drag when disabled', () => {
+  it('freezes expand/collapse, selection and drag when disabled', () => {
     const tree = ref<TreeExposed | null>(null)
+    const onSelect = cy.stub().as('select')
     cy.mount({
       render: () =>
         h(Tree, {
@@ -409,11 +457,14 @@ describe('Tree', () => {
           expanded: ['root'],
           disabled: true,
           draggable: true,
+          'onUpdate:modelValue': onSelect,
         }),
     })
     cy.contains('Node A').should('exist')
     cy.get('[data-slot="toggle"]').first().click()
     cy.contains('Node A').should('exist') // click had no effect
+    cy.contains('[data-slot="row"]', 'Node B').click()
+    cy.get('@select').should('not.have.been.called')
     // `disabled` freezes interaction, not the imperative API.
     cy.then(() => tree.value!.expand('a'))
     cy.contains('Node A-1').should('exist')

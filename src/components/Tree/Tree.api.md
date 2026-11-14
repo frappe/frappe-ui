@@ -52,6 +52,13 @@
     required: false,
     type: 'TreeKey[]',
     default: '[]'
+  },
+  {
+    name: 'modelValue',
+    description: 'Key of the selected node, or `null` for none. Two-way via `v-model`:\nclicking a row, or pressing Enter or Space on it, selects it.',
+    required: false,
+    type: 'TreeKey | null',
+    default: 'null'
   }
 ]
 
@@ -88,6 +95,11 @@
     name: 'update:expanded',
     description: 'Fired when the expanded changes.',
     type: '[value: TreeKey[]]'
+  },
+  {
+    name: 'update:modelValue',
+    description: 'Fired when the model value changes.',
+    type: '[value: TreeKey | null]'
   },
   {
     name: 'drag-start',

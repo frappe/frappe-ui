@@ -106,6 +106,7 @@ defineSlots<{
 // Documented on `expanded` in `./types.ts`. A JSDoc block here would be
 // appended to that description by `propsgen`, not replace it.
 const expandedKeys = defineModel<TreeKey[]>('expanded', { default: () => [] })
+const selectedKey = defineModel<TreeKey | null>({ default: null })
 
 const treeRef = ref<HTMLElement | null>(null)
 const focusedKey = ref<TreeKey | null>(null)
@@ -190,6 +191,10 @@ function setExpanded(node: TreeNode, value: boolean) {
 const toggleNode = (node: TreeNode) => setExpanded(node, !isExpanded(node))
 const expandNode = (node: TreeNode) => setExpanded(node, true)
 const collapseNode = (node: TreeNode) => setExpanded(node, false)
+
+function selectNode(node: TreeNode) {
+  if (!props.disabled) selectedKey.value = keyOf(node)
+}
 
 function eachCollapsible(nodes: TreeNode[], fn: (node: TreeNode) => void) {
   for (const node of nodes) {
@@ -298,6 +303,7 @@ const { onKeydown } = useTreeKeyboard({
   expand: expandNode,
   collapse: collapseNode,
   toggle: toggleNode,
+  select: selectNode,
 })
 
 // --- lifecycle ------------------------------------------------------------
@@ -314,12 +320,14 @@ provide(TreeContextKey, {
   draggable: toRef(props, 'draggable'),
   disabled: toRef(props, 'disabled'),
   focusedKey,
+  selectedKey,
   keyOf,
   labelOf,
   childrenOf,
   hasChildren,
   isExpanded,
   toggle: toggleNode,
+  select: selectNode,
   focus,
   registerItem,
   unregisterItem,

@@ -10,6 +10,8 @@
     :data-dragging="isDragging || undefined"
     :data-drop="dropEdge || undefined"
     :aria-expanded="hasChildren ? expanded : undefined"
+    :aria-selected="selected || undefined"
+    :data-selected="selected || undefined"
     :aria-level="level"
     :aria-setsize="setSize"
     :aria-posinset="index + 1"
@@ -22,7 +24,11 @@
       :class="[
         ctx.draggable.value && !ctx.disabled.value ? 'cursor-grab' : '',
         // When the row is fully overridden via #item, the consumer owns its hover/selected surface
-        $slots.item ? '' : 'hover:bg-surface-gray-2',
+        $slots.item
+          ? ''
+          : selected
+            ? 'bg-surface-gray-3'
+            : 'hover:bg-surface-gray-2',
       ]"
       :draggable="ctx.draggable.value && !ctx.disabled.value"
       @click="onRowClick"
@@ -135,6 +141,7 @@ const label = computed(() => ctx.labelOf(props.node))
 const children = computed(() => ctx.childrenOf(props.node))
 const hasChildren = computed(() => ctx.hasChildren(props.node))
 const expanded = computed(() => ctx.isExpanded(props.node))
+const selected = computed(() => ctx.selectedKey.value === key.value)
 const isDragging = computed(() => ctx.dragSourceKey.value === key.value)
 
 const dropEdge = computed(() =>
@@ -153,6 +160,7 @@ const itemSlotProps = computed(() => ({
   expanded: expanded.value,
   hasChildren: hasChildren.value,
   focused: ctx.focusedKey.value === key.value,
+  selected: selected.value,
   disabled: ctx.disabled.value,
 }))
 
@@ -163,6 +171,7 @@ const slotProps = computed(() => ({
 
 function onRowClick() {
   if (ctx.disabled.value) return
+  ctx.select(props.node)
   ctx.toggle(props.node)
 }
 
