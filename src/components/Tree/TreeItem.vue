@@ -22,7 +22,7 @@
       :class="[
         ctx.draggable.value && !ctx.disabled.value ? 'cursor-grab' : '',
         // When the row is fully overridden via #item, the consumer owns its hover/selected surface
-        $slots.item ? '' : 'hover:bg-surface-gray-2',
+        ctx.hasItemSlot.value ? '' : 'hover:bg-surface-gray-2',
       ]"
       :draggable="ctx.draggable.value && !ctx.disabled.value"
       @click="onRowClick"
@@ -33,7 +33,7 @@
       @drop.prevent="ctx.onDrop(node, parent)"
     >
       <!-- Fully-overridden item -->
-      <slot v-if="$slots.item" name="item" v-bind="slotProps" />
+      <slot v-if="ctx.hasItemSlot.value" name="item" v-bind="slotProps" />
 
       <!-- Default node rendering -->
       <template v-else>
@@ -88,16 +88,14 @@
         :index="childIndex"
         :set-size="children.length"
       >
-        <template v-if="$slots.item" #item="p"
-          ><slot name="item" v-bind="p"
-        /></template>
-        <template v-if="$slots['item-label']" #item-label="p"
+        <template #item="p"><slot name="item" v-bind="p" /></template>
+        <template #item-label="p"
           ><slot name="item-label" v-bind="p"
         /></template>
-        <template v-if="$slots['item-prefix']" #item-prefix="p"
+        <template #item-prefix="p"
           ><slot name="item-prefix" v-bind="p"
         /></template>
-        <template v-if="$slots['item-suffix']" #item-suffix="p"
+        <template #item-suffix="p"
           ><slot name="item-suffix" v-bind="p"
         /></template>
       </TreeItem>

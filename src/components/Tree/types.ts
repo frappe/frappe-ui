@@ -105,6 +105,7 @@ export interface TreeContext {
   guides: Ref<'connectors' | 'lines' | 'none'>
   draggable: Ref<boolean>
   disabled: Ref<boolean>
+  hasItemSlot: ComputedRef<boolean>
 
   focusedKey: Ref<TreeKey | null>
 

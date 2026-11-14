@@ -17,16 +17,12 @@
       :index="index"
       :set-size="roots.length"
     >
-      <template v-if="$slots.item" #item="p"
-        ><slot name="item" v-bind="p"
-      /></template>
-      <template v-if="$slots['item-label']" #item-label="p"
-        ><slot name="item-label" v-bind="p"
-      /></template>
-      <template v-if="$slots['item-prefix']" #item-prefix="p"
+      <template #item="p"><slot name="item" v-bind="p" /></template>
+      <template #item-label="p"><slot name="item-label" v-bind="p" /></template>
+      <template #item-prefix="p"
         ><slot name="item-prefix" v-bind="p"
       /></template>
-      <template v-if="$slots['item-suffix']" #item-suffix="p"
+      <template #item-suffix="p"
         ><slot name="item-suffix" v-bind="p"
       /></template>
     </TreeItem>
@@ -60,6 +56,7 @@ import TreeItem from './TreeItem.vue'
 import { useTreeDragDrop } from './useTreeDragDrop'
 import { useWarnLegacyExpanded } from './useWarnLegacyExpanded'
 import { usePortalTarget } from '../../composables/usePortalTarget'
+import { useReactiveSlots } from '../../composables/useReactiveSlots'
 import { warnRemoved } from '../../utils/warnDeprecated'
 import { useTreeKeyboard, type FlatNode } from './useTreeKeyboard'
 import {
@@ -90,7 +87,7 @@ const emit = defineEmits<{
   'drag-end': [info: DropInfo | null]
 }>()
 
-defineSlots<{
+const declaredSlots = defineSlots<{
   /** Fully replaces a row's default rendering — receives `toggle` plus node state. */
   item: (props: TreeNodeSlotProps) => unknown
   /** Leading content before the label, inside the default row layout. */
@@ -102,6 +99,8 @@ defineSlots<{
   /** Rendered instead of the tree when `nodes` is empty. */
   empty: () => unknown
 }>()
+// Forwarded slots stay unconditional so rows do not redraw with Tree; TreeItem reads `#item` here.
+const slots = useReactiveSlots<typeof declaredSlots>()
 
 // Documented on `expanded` in `./types.ts`. A JSDoc block here would be
 // appended to that description by `propsgen`, not replace it.
@@ -313,6 +312,7 @@ provide(TreeContextKey, {
   guides: toRef(props, 'guides'),
   draggable: toRef(props, 'draggable'),
   disabled: toRef(props, 'disabled'),
+  hasItemSlot: computed(() => Boolean(slots.item)),
   focusedKey,
   keyOf,
   labelOf,
