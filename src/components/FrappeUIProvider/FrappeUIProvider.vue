@@ -14,7 +14,7 @@
     <Dialogs /> needs no such treatment — it reads the `dialogs` ref at render
     time, so a dialog opened before it mounts still shows on the first render.
   -->
-  <ToastProvider />
+  <ToastProvider :offset="offset" :mobile-offset="mobileOffset" />
   <slot />
   <Dialogs />
 </template>
@@ -22,6 +22,10 @@
 <script setup lang="ts">
 import Dialogs from '../Dialogs.vue'
 import ToastProvider from '../Toast/ToastProvider.vue'
+
+import type { FrappeUIProviderProps } from './types'
+
+defineProps<FrappeUIProviderProps>()
 
 defineSlots<{
   /** The app. Rendered as-is; the provider adds no wrapper element of its own. */
