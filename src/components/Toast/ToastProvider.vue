@@ -16,7 +16,7 @@
         closeButton:
           'order-1 ml-auto group-has-[[data-action]]:ml-0 grid place-items-center rounded-1 text-ink-base hover:bg-surface-gray-8 size-5 !transition-colors [&_svg]:size-4',
         actionButton:
-          'flex shrink-0 text-ink-blue-link font-medium py-1.5 px-2 h-7 text-base mr-2 ml-auto bg-transparent hover:bg-surface-gray-8 rounded-4 !transition-colors',
+          'flex shrink-0 items-center justify-center text-ink-blue-link font-medium py-1.5 px-2 h-7 text-base mr-2 ml-auto bg-transparent hover:bg-surface-gray-8 rounded-4 !transition-colors',
         cancelButton:
           'flex text-ink-blue-link font-medium py-1.5 px-2 text-base hover:bg-surface-gray-8 transition-colors',
         error: '[&_[data-icon]]:text-ink-red-4',
