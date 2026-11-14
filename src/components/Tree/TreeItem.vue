@@ -48,7 +48,10 @@
           type="button"
           data-slot="toggle"
           :data-state="expanded ? 'expanded' : 'collapsed'"
-          class="flex size-5 shrink-0 items-center justify-center rounded-4 text-ink-gray-5 hover:bg-surface-gray-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-outline-gray-3"
+          class="flex size-5 shrink-0 items-center justify-center rounded-4 text-ink-gray-5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-outline-gray-3"
+          :class="
+            selected ? 'hover:bg-surface-gray-4' : 'hover:bg-surface-gray-3'
+          "
           :aria-label="expanded ? 'Collapse' : 'Expand'"
           tabindex="-1"
           @click.stop="ctx.toggle(node)"

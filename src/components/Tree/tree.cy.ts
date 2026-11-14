@@ -133,6 +133,8 @@ describe('Tree', () => {
     })
     cy.contains('[data-slot="row"]', 'Node B').click()
     cy.get('@select').should('have.been.calledWith', 'b')
+    cy.contains('[role="treeitem"]', 'Node A').focus().type(' ')
+    cy.get('@select').should('have.been.calledWith', 'a')
     cy.contains('[role="treeitem"]', 'Root').focus().type('{enter}')
     cy.get('@select').should('have.been.calledWith', 'root')
   })
@@ -464,6 +466,7 @@ describe('Tree', () => {
     cy.get('[data-slot="toggle"]').first().click()
     cy.contains('Node A').should('exist') // click had no effect
     cy.contains('[data-slot="row"]', 'Node B').click()
+    cy.contains('[role="treeitem"]', 'Node B').focus().type('{enter}')
     cy.get('@select').should('not.have.been.called')
     // `disabled` freezes interaction, not the imperative API.
     cy.then(() => tree.value!.expand('a'))
