@@ -11,6 +11,13 @@
     required: false,
     type: 'boolean',
     default: 'true'
+  },
+  {
+    name: 'navSide',
+    description: 'The physical edge the navigation (rail and sidebar) sits on. Defaults to\n`\'left\'`.\n\n`\'right\'` draws the shell right to left with `flex-row-reverse`. The DOM\norder stays rail, sidebar, content, so Tab reaches the navigation first on\nboth sides. `SidebarRailItem` reads the value: its tooltip opens away from\nthe navigation and its active bar sits on the outer edge.\n\nIt is a physical side and assumes a left-to-right page. Map "start" and\n"end" onto it in the app. Only `SidebarRailItem` reads it: the sidebar\'s\nown tooltips, borders and handles are not mirrored.',
+    required: false,
+    type: '"left" | "right"',
+    default: '"left"'
   }
 ]
 

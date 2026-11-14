@@ -101,6 +101,19 @@ describe('<SidebarRailItem />', () => {
     cy.get('[data-slot=sidebar-rail-item]').should('have.class', 'shadow-sm')
   })
 
+  it('keeps the indicator bar on the left and the tooltip on the right outside a shell', () => {
+    cy.mount(SidebarRailItem, { props: { label: 'Design', active: true } })
+    cy.get('[data-slot=sidebar-rail-item-indicator]')
+      .should('have.class', 'rounded-r-4')
+      .and('not.have.class', 'rounded-l-4')
+    cy.get('[data-slot=sidebar-rail-item]').focus()
+    cy.contains('[data-side]', 'Design').should(
+      'have.attr',
+      'data-side',
+      'right',
+    )
+  })
+
   it('paints no fill behind an image, and keeps the indicator bar', () => {
     const transparent = 'rgba(0, 0, 0, 0)'
     const background = ($cell: JQuery<HTMLElement>) =>

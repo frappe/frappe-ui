@@ -27,6 +27,26 @@ routed page in the default slot. Both side slots are optional. Render
 A page declares its own `PageHeader` anywhere in its template. The header
 teleports to a `PageHeaderTarget` that the shell pins above the scroll area.
 
+### Navigation side
+
+`navSide="right"` draws the rail and the sidebar on the right edge of the
+shell. Only the drawing is reversed: the DOM order stays rail, sidebar, page,
+so Tab reaches the navigation first on both sides. A `SidebarRailItem` in the
+rail opens its tooltip toward the page and puts its active bar on the outer
+edge.
+
+```vue
+<DesktopShell nav-side="right">
+  <template #rail><SidebarRail>...</SidebarRail></template>
+  <template #sidebar><Sidebar /></template>
+</DesktopShell>
+```
+
+`navSide` is a physical side, `left` or `right`, and assumes a left-to-right
+page. If your app stores "start" and "end", map them to a physical side in
+one place. The shell mirrors nothing else: borders, resize handles, chevrons
+and the sidebar's own tooltips are yours to flip.
+
 ### Scroll container
 
 The shell owns its scroll area. `useShellScrolled()` reads it with no setup,

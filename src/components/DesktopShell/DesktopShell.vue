@@ -1,5 +1,8 @@
 <template>
-  <div data-slot="desktop-shell" class="flex h-full">
+  <div
+    data-slot="desktop-shell"
+    :class="['flex h-full', navSide === 'right' && 'flex-row-reverse']"
+  >
     <slot name="rail" />
     <slot name="sidebar" />
 
@@ -38,6 +41,7 @@ import { computed, onBeforeUnmount, provide, ref, watch } from 'vue'
 import ScrollArea from '../ScrollArea/ScrollArea.vue'
 import PageHeaderTarget from '../PageHeader/PageHeaderTarget.vue'
 import { pageHeaderTargetKey } from '../PageHeader/target'
+import { navSideKey } from '../shared/navSide'
 import {
   registerShellScrollContainer,
   shellScrollElementKey,
@@ -45,7 +49,10 @@ import {
 } from '../../composables/useShellScrolled'
 import type { DesktopShellProps } from './types'
 
-withDefaults(defineProps<DesktopShellProps>(), { scroll: true })
+const props = withDefaults(defineProps<DesktopShellProps>(), {
+  scroll: true,
+  navSide: 'left',
+})
 
 defineSlots<{
   /** The icon column — usually a `SidebarRail`. Omit it on shells that don't use one. */
@@ -55,6 +62,11 @@ defineSlots<{
   /** The routed page content, placed in the scroll region (or the fixed-height pane when `scroll` is `false`). */
   default?: () => any
 }>()
+
+provide(
+  navSideKey,
+  computed(() => props.navSide),
+)
 
 const scrollArea = ref<InstanceType<typeof ScrollArea> | null>(null)
 const headerTarget = ref<{ el: HTMLElement | null } | null>(null)
