@@ -192,10 +192,6 @@ const toggleNode = (node: TreeNode) => setExpanded(node, !isExpanded(node))
 const expandNode = (node: TreeNode) => setExpanded(node, true)
 const collapseNode = (node: TreeNode) => setExpanded(node, false)
 
-function selectNode(node: TreeNode) {
-  if (!props.disabled) selectedKey.value = keyOf(node)
-}
-
 function eachCollapsible(nodes: TreeNode[], fn: (node: TreeNode) => void) {
   for (const node of nodes) {
     if (hasChildren(node)) {
@@ -203,6 +199,17 @@ function eachCollapsible(nodes: TreeNode[], fn: (node: TreeNode) => void) {
       eachCollapsible(childrenOf(node), fn)
     }
   }
+}
+
+// --- selection ------------------------------------------------------------
+function selectNode(node: TreeNode) {
+  if (!props.disabled) selectedKey.value = keyOf(node)
+}
+
+// A click or Enter/Space on a row selects it and opens or closes it.
+function activateNode(node: TreeNode) {
+  selectNode(node)
+  toggleNode(node)
 }
 
 // --- imperative API -------------------------------------------------------
@@ -302,8 +309,7 @@ const { onKeydown } = useTreeKeyboard({
   focus,
   expand: expandNode,
   collapse: collapseNode,
-  toggle: toggleNode,
-  select: selectNode,
+  activate: activateNode,
 })
 
 // --- lifecycle ------------------------------------------------------------
@@ -327,7 +333,7 @@ provide(TreeContextKey, {
   hasChildren,
   isExpanded,
   toggle: toggleNode,
-  select: selectNode,
+  activate: activateNode,
   focus,
   registerItem,
   unregisterItem,

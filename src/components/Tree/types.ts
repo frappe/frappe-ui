@@ -114,7 +114,7 @@ export interface TreeContext {
   disabled: Ref<boolean>
 
   focusedKey: Ref<TreeKey | null>
-  selectedKey: Ref<TreeKey | null>
+  selectedKey: Readonly<Ref<TreeKey | null>>
 
   keyOf: (node: TreeNode) => TreeKey
   labelOf: (node: TreeNode) => string
@@ -123,7 +123,7 @@ export interface TreeContext {
 
   isExpanded: (node: TreeNode) => boolean
   toggle: (node: TreeNode) => void
-  select: (node: TreeNode) => void
+  activate: (node: TreeNode) => void
   focus: (key: TreeKey) => void
 
   registerItem: (key: TreeKey, el: HTMLElement) => void

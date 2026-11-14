@@ -171,8 +171,7 @@ const slotProps = computed(() => ({
 
 function onRowClick() {
   if (ctx.disabled.value) return
-  ctx.select(props.node)
-  ctx.toggle(props.node)
+  ctx.activate(props.node)
 }
 
 watch(

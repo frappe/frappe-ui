@@ -86,8 +86,9 @@ undo logs see it.
 `v-model` holds the key of the selected node, or `null` for none. Clicking a
 row, or pressing `Enter` or `Space` on it, selects it. The selected row gets a
 background, `aria-selected="true"` and `data-selected`, and the row slots get
-`selected`. Set the key yourself to follow something outside the tree, such as
-the current page.
+`selected`. A row drawn with `#item` gets no background; style it from the
+slot's `selected`. Set the key yourself to follow something outside the tree,
+such as the current page.
 
 ```vue
 <Tree :nodes="nodes" node-key="name" v-model="selected" />
