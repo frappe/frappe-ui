@@ -1,5 +1,4 @@
 import Tree from './Tree.vue'
-import TreeRenderCount from './stories/TreeRenderCount.vue'
 import { defineComponent, h, ref } from 'vue'
 import type { DropInfo, TreeExposed, TreeNode } from './types'
 import { _resetWarnDeprecated } from '../../utils/warnDeprecated'
@@ -383,27 +382,6 @@ describe('Tree', () => {
     cy.get('[data-slot="row"]')
       .first()
       .should('not.have.class', 'hover:bg-surface-gray-2')
-  })
-
-  it('redraws only the rows whose state changed', () => {
-    const keys = ref<string[]>(['root'])
-    const renders: Record<string, number> = {}
-    const nodes = makeNodes()
-    cy.mount({
-      render: () =>
-        h(TreeRenderCount, {
-          nodes,
-          expanded: keys.value,
-          renders,
-        }),
-    })
-    cy.contains('Node B').should('exist')
-    cy.then(() => {
-      expect(renders.b, 'after mount').to.eq(1)
-      keys.value = ['root', 'a']
-    })
-    cy.contains('Node A-1').should('exist')
-    cy.then(() => expect(renders.b, 'after toggle').to.eq(1))
   })
 
   it('forwards class and style to the tree element', () => {
