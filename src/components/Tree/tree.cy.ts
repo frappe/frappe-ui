@@ -139,6 +139,32 @@ describe('Tree', () => {
     cy.get('@select').should('have.been.calledWith', 'root')
   })
 
+  it('makes the selected row the Tab stop while it is visible', () => {
+    const selected = ref('b')
+    cy.mount({
+      render: () =>
+        h(Tree, {
+          nodes: makeNodes(),
+          nodeKey: 'id',
+          expanded: ['root'],
+          modelValue: selected.value,
+        }),
+    })
+    cy.contains('[role="treeitem"]', 'Node B').should(
+      'have.attr',
+      'tabindex',
+      '0',
+    )
+    cy.get('[tabindex="0"]').should('have.length', 1)
+    cy.then(() => (selected.value = 'a-1'))
+    cy.contains('[role="treeitem"]', 'Root').should(
+      'have.attr',
+      'tabindex',
+      '0',
+    )
+    cy.get('[tabindex="0"]').should('have.length', 1)
+  })
+
   it('marks only the selected row and passes `selected` to the slots', () => {
     const selected = ref<string | null>('b')
     cy.mount({

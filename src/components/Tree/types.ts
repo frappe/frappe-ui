@@ -114,6 +114,7 @@ export interface TreeContext {
   disabled: Ref<boolean>
 
   focusedKey: Ref<TreeKey | null>
+  tabKey: Readonly<Ref<TreeKey | null>>
   selectedKey: Readonly<Ref<TreeKey | null>>
 
   keyOf: (node: TreeNode) => TreeKey

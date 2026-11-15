@@ -241,8 +241,7 @@ function focus(key: TreeKey) {
 }
 
 function onFocusin() {
-  if (focusedKey.value == null && roots.value.length)
-    focusedKey.value = keyOf(roots.value[0])
+  focusedKey.value ??= tabKey.value
 }
 
 const registerItem = (key: TreeKey, el: HTMLElement) => itemEls.set(key, el)
@@ -273,6 +272,15 @@ const flat = computed(() => {
   walk(roots.value, null, 1)
   return out
 })
+
+// Tab lands on the focused row, else the selected row if visible, else the first.
+const tabKey = computed(
+  () =>
+    focusedKey.value ??
+    flat.value.find((r) => r.key === selectedKey.value)?.key ??
+    flat.value[0]?.key ??
+    null,
+)
 
 // Guarded here as well as inside, so the call, the import and the composable
 // all leave the production bundle rather than shipping as dead code.
@@ -326,6 +334,7 @@ provide(TreeContextKey, {
   draggable: toRef(props, 'draggable'),
   disabled: toRef(props, 'disabled'),
   focusedKey,
+  tabKey,
   selectedKey,
   keyOf,
   labelOf,

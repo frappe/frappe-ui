@@ -151,11 +151,7 @@ const dropEdge = computed(() =>
   ctx.dropTargetKey.value === key.value ? ctx.dropPosition.value : null,
 )
 
-const tabbable = computed(
-  () =>
-    ctx.focusedKey.value === key.value ||
-    (ctx.focusedKey.value == null && props.level === 1 && props.index === 0),
-)
+const tabbable = computed(() => ctx.tabKey.value === key.value)
 
 const itemSlotProps = computed(() => ({
   node: props.node,
