@@ -100,8 +100,8 @@ export interface TreeProps {
 
   /**
    * Key of the selected node, or `null` for none. Two-way via `v-model`:
-   * clicking a row, or pressing Enter or Space on it, selects it. A tree
-   * without `v-model` marks no row.
+   * clicking a row, or pressing Enter or Space on it, selects it. Without
+   * `v-model` the tree keeps its own selection.
    * @default null
    */
   modelValue?: TreeKey | null

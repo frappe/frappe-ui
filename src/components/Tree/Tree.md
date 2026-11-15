@@ -83,9 +83,9 @@ undo logs see it.
 
 ### Selection
 
-`v-model` holds the key of the selected node, or `null` for none. A tree
-without `v-model` marks no row. Clicking a row, or pressing `Enter` or `Space`
-on it, selects it. The selected row gets a background, `aria-selected="true"`
+`v-model` holds the key of the selected node, or `null` for none. Clicking a
+row, or pressing `Enter` or `Space` on it, selects it. Without `v-model` the
+tree keeps its own selection, so a clicked row stays marked. The selected row gets a background, `aria-selected="true"`
 and `data-selected`, and the row slots get `selected`. A row drawn with `#item`
 gets no background; style it from the slot's `selected`. `Tab` into the tree
 lands on the selected row when it is visible. Set the key yourself to follow

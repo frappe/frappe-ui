@@ -139,12 +139,12 @@ describe('Tree', () => {
     cy.get('@select').should('have.been.calledWith', 'root')
   })
 
-  it('marks no row when v-model is not bound', () => {
+  it('keeps its own selection when v-model is not bound', () => {
     cy.mount(Tree, {
       props: { nodes: makeNodes(), nodeKey: 'id', expanded: ['root'] },
     })
     cy.contains('[data-slot="row"]', 'Node B').click()
-    cy.get('[aria-selected]').should('not.exist')
+    cy.get('[aria-selected]').should('have.length', 1).and('contain', 'Node B')
   })
 
   it('makes the selected row the Tab stop while it is visible', () => {
@@ -173,7 +173,7 @@ describe('Tree', () => {
     cy.get('[tabindex="0"]').should('have.length', 1)
   })
 
-  it('moves the Tab stop to the selected row when the focused row hides', () => {
+  it('moves focus to the selected row when the focused row hides', () => {
     const expanded = ref(['root', 'a'])
     const nodes = makeNodes()
     cy.mount({
@@ -188,11 +188,7 @@ describe('Tree', () => {
     cy.contains('[role="treeitem"]', 'Node A-1').focus()
     cy.then(() => (expanded.value = ['root']))
     cy.contains('Node A-1').should('not.exist')
-    cy.contains('[role="treeitem"]', 'Node B').should(
-      'have.attr',
-      'tabindex',
-      '0',
-    )
+    cy.focused().should('contain', 'Node B').and('have.attr', 'tabindex', '0')
   })
 
   it('moves the Tab stop to a row selected while focus was outside', () => {

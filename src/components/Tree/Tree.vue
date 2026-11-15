@@ -89,8 +89,6 @@ const emit = defineEmits<{
   'drag-start': [node: TreeNode]
   /** Fired when a drag ends: the committed move, or `null` if it was cancelled. */
   'drag-end': [info: DropInfo | null]
-  /** Fired when a row is selected, with its key. */
-  'update:modelValue': [key: TreeKey]
 }>()
 
 defineSlots<{
@@ -109,8 +107,7 @@ defineSlots<{
 // Documented on `expanded` in `./types.ts`. A JSDoc block here would be
 // appended to that description by `propsgen`, not replace it.
 const expandedKeys = defineModel<TreeKey[]>('expanded', { default: () => [] })
-// Controlled only, so a tree without `v-model` never marks a row.
-const selectedKey = computed(() => props.modelValue ?? null)
+const selectedKey = defineModel<TreeKey | null>({ default: null })
 
 const treeRef = ref<HTMLElement | null>(null)
 const focusedKey = ref<TreeKey | null>(null)
@@ -207,7 +204,7 @@ function eachCollapsible(nodes: TreeNode[], fn: (node: TreeNode) => void) {
 
 // --- selection ------------------------------------------------------------
 function selectNode(node: TreeNode) {
-  if (!props.disabled) emit('update:modelValue', keyOf(node))
+  if (!props.disabled) selectedKey.value = keyOf(node)
 }
 
 // A click or Enter/Space on a row selects it and opens or closes it.
@@ -331,10 +328,13 @@ const { onKeydown } = useTreeKeyboard({
 })
 
 // --- lifecycle ------------------------------------------------------------
-// Drop focus from a row that left the tree, so Tab falls back through `tabKey`.
+// When the focused row leaves the tree, move focus to the Tab stop.
 watch(flat, (rows) => {
-  if (focusedKey.value != null && !rows.some((r) => r.key === focusedKey.value))
-    focusedKey.value = null
+  if (focusedKey.value == null || rows.some((r) => r.key === focusedKey.value))
+    return
+  const hadFocus = treeRef.value?.contains(document.activeElement)
+  focusedKey.value = null
+  if (hadFocus && tabKey.value != null) focus(tabKey.value)
 })
 
 // --- provide context ------------------------------------------------------

@@ -55,9 +55,10 @@
   },
   {
     name: 'modelValue',
-    description: 'Key of the selected node, or `null` for none. Two-way via `v-model`:\nclicking a row, or pressing Enter or Space on it, selects it. A tree\nwithout `v-model` marks no row.',
+    description: 'Key of the selected node, or `null` for none. Two-way via `v-model`:\nclicking a row, or pressing Enter or Space on it, selects it. Without\n`v-model` the tree keeps its own selection.',
     required: false,
-    type: 'TreeKey | null'
+    type: 'TreeKey | null',
+    default: 'null'
   }
 ]
 
@@ -92,8 +93,8 @@
   const emitsData = [
   {
     name: 'update:modelValue',
-    description: 'Fired when a row is selected, with its key.',
-    type: '[key: TreeKey]'
+    description: 'Fired when the model value changes.',
+    type: '[value: TreeKey | null]'
   },
   {
     name: 'update:expanded',
