@@ -139,6 +139,14 @@ describe('Tree', () => {
     cy.get('@select').should('have.been.calledWith', 'root')
   })
 
+  it('marks no row when v-model is not bound', () => {
+    cy.mount(Tree, {
+      props: { nodes: makeNodes(), nodeKey: 'id', expanded: ['root'] },
+    })
+    cy.contains('[data-slot="row"]', 'Node B').click()
+    cy.get('[aria-selected]').should('not.exist')
+  })
+
   it('makes the selected row the Tab stop while it is visible', () => {
     const selected = ref('b')
     cy.mount({
@@ -185,6 +193,30 @@ describe('Tree', () => {
       'tabindex',
       '0',
     )
+  })
+
+  it('moves the Tab stop to a row selected while focus was outside', () => {
+    const selected = ref('b')
+    cy.mount({
+      render: () => [
+        h(Tree, {
+          nodes: makeNodes(),
+          nodeKey: 'id',
+          expanded: ['root', 'a'],
+          modelValue: selected.value,
+        }),
+        h('button', { 'data-cy': 'outside' }, 'Outside'),
+      ],
+    })
+    cy.contains('[role="treeitem"]', 'Node B').focus()
+    cy.get('[data-cy="outside"]').focus()
+    cy.then(() => (selected.value = 'a-1'))
+    cy.contains('[role="treeitem"]', 'Node A-1').should(
+      'have.attr',
+      'tabindex',
+      '0',
+    )
+    cy.get('[role="treeitem"][tabindex="0"]').should('have.length', 1)
   })
 
   it('marks only the selected row and passes `selected` to the slots', () => {

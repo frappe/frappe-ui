@@ -7,6 +7,7 @@
     :data-guides="guides"
     @keydown="onKeydown"
     @focusin="onFocusin"
+    @focusout="onFocusout"
   >
     <TreeItem
       v-for="(node, index) in roots"
@@ -88,6 +89,8 @@ const emit = defineEmits<{
   'drag-start': [node: TreeNode]
   /** Fired when a drag ends: the committed move, or `null` if it was cancelled. */
   'drag-end': [info: DropInfo | null]
+  /** Fired when a row is selected, with its key. */
+  'update:modelValue': [key: TreeKey]
 }>()
 
 defineSlots<{
@@ -106,7 +109,8 @@ defineSlots<{
 // Documented on `expanded` in `./types.ts`. A JSDoc block here would be
 // appended to that description by `propsgen`, not replace it.
 const expandedKeys = defineModel<TreeKey[]>('expanded', { default: () => [] })
-const selectedKey = defineModel<TreeKey | null>({ default: null })
+// Controlled only, so a tree without `v-model` never marks a row.
+const selectedKey = computed(() => props.modelValue ?? null)
 
 const treeRef = ref<HTMLElement | null>(null)
 const focusedKey = ref<TreeKey | null>(null)
@@ -203,7 +207,7 @@ function eachCollapsible(nodes: TreeNode[], fn: (node: TreeNode) => void) {
 
 // --- selection ------------------------------------------------------------
 function selectNode(node: TreeNode) {
-  if (!props.disabled) selectedKey.value = keyOf(node)
+  if (!props.disabled) emit('update:modelValue', keyOf(node))
 }
 
 // A click or Enter/Space on a row selects it and opens or closes it.
@@ -242,6 +246,12 @@ function focus(key: TreeKey) {
 
 function onFocusin() {
   focusedKey.value ??= tabKey.value
+}
+
+// Forget the focused row once focus leaves the tree, so Tab returns to the selection.
+function onFocusout(e: FocusEvent) {
+  const tree = e.currentTarget as HTMLElement
+  if (!tree.contains(e.relatedTarget as Node | null)) focusedKey.value = null
 }
 
 const registerItem = (key: TreeKey, el: HTMLElement) => itemEls.set(key, el)
