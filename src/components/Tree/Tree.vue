@@ -321,10 +321,10 @@ const { onKeydown } = useTreeKeyboard({
 })
 
 // --- lifecycle ------------------------------------------------------------
-// Keep focus valid if the focused node disappears from the tree.
+// Drop focus from a row that left the tree, so Tab falls back through `tabKey`.
 watch(flat, (rows) => {
   if (focusedKey.value != null && !rows.some((r) => r.key === focusedKey.value))
-    focusedKey.value = rows[0]?.key ?? null
+    focusedKey.value = null
 })
 
 // --- provide context ------------------------------------------------------

@@ -165,6 +165,28 @@ describe('Tree', () => {
     cy.get('[tabindex="0"]').should('have.length', 1)
   })
 
+  it('moves the Tab stop to the selected row when the focused row hides', () => {
+    const expanded = ref(['root', 'a'])
+    const nodes = makeNodes()
+    cy.mount({
+      render: () =>
+        h(Tree, {
+          nodes,
+          nodeKey: 'id',
+          expanded: expanded.value,
+          modelValue: 'b',
+        }),
+    })
+    cy.contains('[role="treeitem"]', 'Node A-1').focus()
+    cy.then(() => (expanded.value = ['root']))
+    cy.contains('Node A-1').should('not.exist')
+    cy.contains('[role="treeitem"]', 'Node B').should(
+      'have.attr',
+      'tabindex',
+      '0',
+    )
+  })
+
   it('marks only the selected row and passes `selected` to the slots', () => {
     const selected = ref<string | null>('b')
     cy.mount({
