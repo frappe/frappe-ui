@@ -1,5 +1,5 @@
 import Tree from './Tree.vue'
-import { defineComponent, h, ref } from 'vue'
+import { createBlock, defineComponent, h, openBlock, ref, withCtx } from 'vue'
 import type { DropInfo, TreeExposed, TreeNode } from './types'
 import { _resetWarnDeprecated } from '../../utils/warnDeprecated'
 
@@ -382,6 +382,38 @@ describe('Tree', () => {
     cy.get('[data-slot="row"]')
       .first()
       .should('not.have.class', 'hover:bg-surface-gray-2')
+  })
+
+  it('redraws only the rows whose state changed', () => {
+    const keys = ref<string[]>(['root'])
+    const renders: Record<string, number> = {}
+    const nodes = makeNodes()
+    // Written as a compiled template, since only compiled slots are stable.
+    cy.mount({
+      render: () => (
+        openBlock(),
+        createBlock(
+          Tree,
+          { nodes, nodeKey: 'id', expanded: keys.value },
+          {
+            'item-label': withCtx(({ node }: any) => {
+              renders[node.id] = (renders[node.id] ?? 0) + 1
+              return [h('span', node.label)]
+            }),
+            _: 1,
+          },
+          8,
+          ['expanded'],
+        )
+      ),
+    })
+    cy.contains('Node B').should('exist')
+    cy.then(() => {
+      expect(renders.b, 'after mount').to.eq(1)
+      keys.value = ['root', 'a']
+    })
+    cy.contains('Node A-1').should('exist')
+    cy.then(() => expect(renders.b, 'after toggle').to.eq(1))
   })
 
   it('forwards class and style to the tree element', () => {
