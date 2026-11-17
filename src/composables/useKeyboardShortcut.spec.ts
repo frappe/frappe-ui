@@ -508,6 +508,63 @@ describe('useKeyboardShortcut — allowInInput', () => {
     input.remove()
     unmount()
   })
+
+  it('does not fire inside an input or textarea in a shadow root by default (#1360)', async () => {
+    const handler = vi.fn()
+    const { unmount } = mountWithShortcut({
+      combo: 'C',
+      description: 'Create',
+      handler,
+    })
+    await nextTick()
+
+    const host = document.createElement('div')
+    const shadow = host.attachShadow({ mode: 'open' })
+    const textarea = document.createElement('textarea')
+    shadow.appendChild(textarea)
+    document.body.appendChild(host)
+
+    const event = new KeyboardEvent('keydown', {
+      key: 'c',
+      bubbles: true,
+      cancelable: true,
+      composed: true,
+    })
+    textarea.dispatchEvent(event)
+
+    expect(handler).not.toHaveBeenCalled()
+    host.remove()
+    unmount()
+  })
+
+  it('fires inside a shadow root input when allowInInput is true (#1360)', async () => {
+    const handler = vi.fn()
+    const { unmount } = mountWithShortcut({
+      combo: 'C',
+      description: 'Create',
+      allowInInput: true,
+      handler,
+    })
+    await nextTick()
+
+    const host = document.createElement('div')
+    const shadow = host.attachShadow({ mode: 'open' })
+    const input = document.createElement('input')
+    shadow.appendChild(input)
+    document.body.appendChild(host)
+
+    const event = new KeyboardEvent('keydown', {
+      key: 'c',
+      bubbles: true,
+      cancelable: true,
+      composed: true,
+    })
+    input.dispatchEvent(event)
+
+    expect(handler).toHaveBeenCalledOnce()
+    host.remove()
+    unmount()
+  })
 })
 
 describe('useKeyboardShortcut — allowInDialog', () => {
@@ -537,6 +594,37 @@ describe('useKeyboardShortcut — allowInDialog', () => {
 
     fireKey({ key: 'k' }, button)
     expect(handler).not.toHaveBeenCalled()
+    unmount()
+  })
+
+  it('does not fire when the target is inside a dialog in a shadow root (#1360)', async () => {
+    const handler = vi.fn()
+    const { unmount } = mountWithShortcut({
+      combo: 'K',
+      description: 'Action',
+      handler,
+    })
+    await nextTick()
+
+    const host = document.createElement('div')
+    const shadow = host.attachShadow({ mode: 'open' })
+    const shadowDialog = document.createElement('div')
+    shadowDialog.setAttribute('role', 'dialog')
+    const shadowBtn = document.createElement('button')
+    shadowDialog.appendChild(shadowBtn)
+    shadow.appendChild(shadowDialog)
+    document.body.appendChild(host)
+
+    const event = new KeyboardEvent('keydown', {
+      key: 'k',
+      bubbles: true,
+      cancelable: true,
+      composed: true,
+    })
+    shadowBtn.dispatchEvent(event)
+
+    expect(handler).not.toHaveBeenCalled()
+    host.remove()
     unmount()
   })
 
