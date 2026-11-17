@@ -1,4 +1,5 @@
 import { type App, type Component, createApp, h } from 'vue'
+import { PageDirection } from '#components/FrappeUIProvider/PageDirection'
 import {
   autoUpdate,
   computePosition,
@@ -62,7 +63,7 @@ export function useFloatingPopup<P extends Record<string, unknown>>(
 
   let app: App | null = createApp({
     render() {
-      return h(component, props)
+      return h(PageDirection, () => h(component, props))
     },
   })
   app.mount(floating)

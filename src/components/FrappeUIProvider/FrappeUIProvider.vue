@@ -14,15 +14,15 @@
     <Dialogs /> needs no such treatment — it reads the `dialogs` ref at render
     time, so a dialog opened before it mounts still shows on the first render.
 
-    Reka parts default to `dir="ltr"`, which forces Tabs, menus, selects and
-    scroll areas left to right on an RTL page. The ConfigProvider hands them the
-    document's direction, unless the app already wraps its own ConfigProvider.
+    PageDirection hands the page's direction to the Reka parts inside, unless
+    the app already wraps its own Reka ConfigProvider. Reka cannot tell whether
+    that one set `dir`, so it is left alone; such an app passes `dir` itself.
   -->
-  <ConfigProvider v-if="!appConfig" :dir="documentDir()">
+  <PageDirection v-if="!appConfig">
     <ToastProvider />
     <slot />
     <Dialogs />
-  </ConfigProvider>
+  </PageDirection>
   <template v-else>
     <ToastProvider />
     <slot />
@@ -31,10 +31,10 @@
 </template>
 
 <script setup lang="ts">
-import { ConfigProvider, injectConfigProviderContext } from 'reka-ui'
-import { documentDir } from '../../charts/utils'
+import { injectConfigProviderContext } from 'reka-ui'
 import Dialogs from '../Dialogs.vue'
 import ToastProvider from '../Toast/ToastProvider.vue'
+import { PageDirection } from './PageDirection'
 
 const appConfig = injectConfigProviderContext(null)
 
