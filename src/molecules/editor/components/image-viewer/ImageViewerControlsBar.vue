@@ -1,6 +1,6 @@
 <template>
   <div
-    class="absolute top-4 flex items-center space-x-3 p-2 text-white z-20 transition-opacity duration-300 ease-in-out"
+    class="absolute top-4 flex items-center gap-3 p-2 text-white z-20 transition-opacity duration-300 ease-in-out"
     :class="{ 'opacity-0 pointer-events-none': !visible }"
     @touchstart.stop
     @touchmove.stop
@@ -12,7 +12,7 @@
     <div class="bg-black/65 rounded-4 flex items-center">
       <Tooltip text="Previous image">
         <button
-          class="p-2 hover:bg-gray-900 rounded-l-4 focus:outline-none"
+          class="p-2 hover:bg-gray-900 rounded-s-4 focus:outline-none"
           @click.stop="emit('previous')"
         >
           <span class="lucide-chevron-left size-4" />
@@ -25,7 +25,7 @@
 
       <Tooltip text="Next image">
         <button
-          class="p-2 hover:bg-gray-900 rounded-r-4 focus:outline-none"
+          class="p-2 hover:bg-gray-900 rounded-e-4 focus:outline-none"
           @click.stop="emit('next')"
         >
           <span class="lucide-chevron-right size-4" />
@@ -37,7 +37,7 @@
     <div class="bg-black/65 rounded-4 flex items-center">
       <Tooltip text="Zoom out">
         <button
-          class="p-2 hover:bg-gray-900 rounded-l-4 focus:outline-none"
+          class="p-2 hover:bg-gray-900 rounded-s-4 focus:outline-none"
           @click.stop="emit('zoom-out')"
         >
           <span class="lucide-minus size-4" />
@@ -55,7 +55,7 @@
 
       <Tooltip text="Zoom in">
         <button
-          class="p-2 hover:bg-gray-900 rounded-r-4 focus:outline-none"
+          class="p-2 hover:bg-gray-900 rounded-e-4 focus:outline-none"
           @click.stop="emit('zoom-in')"
         >
           <span class="lucide-plus size-4" />
@@ -67,7 +67,7 @@
     <div class="bg-black/65 rounded-4 flex items-center">
       <Tooltip text="Download image">
         <button
-          class="p-2 hover:bg-gray-900 rounded-l-4 focus:outline-none"
+          class="p-2 hover:bg-gray-900 rounded-s-4 focus:outline-none"
           @click.stop="emit('download')"
         >
           <span class="lucide-download size-4" />
@@ -76,7 +76,7 @@
 
       <Tooltip :text="isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'">
         <button
-          class="p-2 hover:bg-gray-900 rounded-r-4 focus:outline-none hidden sm:block"
+          class="p-2 hover:bg-gray-900 rounded-e-4 focus:outline-none hidden sm:block"
           @click.stop="emit('toggle-fullscreen')"
         >
           <span v-if="!isFullscreen" class="lucide-maximize size-4" />

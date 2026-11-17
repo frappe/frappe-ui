@@ -38,10 +38,10 @@
 
     <template v-else>
       <span
-        class="lucide-globe ml-1.5 size-4 shrink-0 text-ink-gray-5"
+        class="lucide-globe ms-1.5 size-4 shrink-0 text-ink-gray-5"
         aria-hidden="true"
       />
-      <div class="pl-1.5 flex-1 min-w-0 flex">
+      <div class="ps-1.5 flex-1 min-w-0 flex">
         <a
           class="truncate text-sm text-ink-gray-9 border-b border-outline-gray-2 hover:border-outline-gray-3"
           :title="_href"

@@ -30,7 +30,7 @@
       :accesskey="accessKey"
       :aria-label="ariaLabel"
       :aria-current="resolvedActive ? 'page' : undefined"
-      class="flex h-full min-w-0 flex-1 items-center rounded-4 pl-2 focus-visible:ring-0 focus-visible:focus-ring"
+      class="flex h-full min-w-0 flex-1 items-center rounded-4 ps-2 focus-visible:ring-0 focus-visible:focus-ring"
       @click="handleClick"
     >
       <Tooltip
@@ -38,7 +38,7 @@
         :side="tooltipSide"
         :disabled="!isCollapsed || !tooltipText"
       >
-        <!-- Deliberately unchanged by `isCollapsed`: the row keeps its `pl-2`
+        <!-- Deliberately unchanged by `isCollapsed`: the row keeps its `ps-2`
              and the glyph its natural size, so the icon holds one position
              through the width animation instead of swinging to a centered
              square and back (the whole row is already the hit target). -->
@@ -52,8 +52,8 @@
         class="min-w-0 flex-1 transition-all ease-in-out"
         :class="
           isCollapsed
-            ? 'ml-0 w-0 overflow-hidden opacity-0'
-            : 'ml-2 w-auto opacity-100'
+            ? 'ms-0 w-0 overflow-hidden opacity-0'
+            : 'ms-2 w-auto opacity-100'
         "
       >
         <span ref="labelEl" class="flex min-w-0 items-center">
@@ -72,7 +72,7 @@
       v-bind="controlAttrs"
       :accesskey="accessKey"
       :aria-label="ariaLabel"
-      class="flex h-full text-left min-w-0 flex-1 items-center rounded-4 pl-2 focus-visible:ring-0 focus-visible:focus-ring"
+      class="flex h-full text-start min-w-0 flex-1 items-center rounded-4 ps-2 focus-visible:ring-0 focus-visible:focus-ring"
       @click="handleClick"
     >
       <Tooltip
@@ -80,7 +80,7 @@
         :side="tooltipSide"
         :disabled="!isCollapsed || !tooltipText"
       >
-        <!-- Deliberately unchanged by `isCollapsed`: the row keeps its `pl-2`
+        <!-- Deliberately unchanged by `isCollapsed`: the row keeps its `ps-2`
              and the glyph its natural size, so the icon holds one position
              through the width animation instead of swinging to a centered
              square and back (the whole row is already the hit target). -->
@@ -94,8 +94,8 @@
         class="min-w-0 flex-1 transition-all ease-in-out"
         :class="
           isCollapsed
-            ? 'ml-0 w-0 overflow-hidden opacity-0'
-            : 'ml-2 w-auto opacity-100'
+            ? 'ms-0 w-0 overflow-hidden opacity-0'
+            : 'ms-2 w-auto opacity-100'
         "
       >
         <span ref="labelEl" class="flex min-w-0 items-center">
@@ -119,7 +119,7 @@
       :class="isCollapsed ? 'w-0 overflow-hidden opacity-0' : 'opacity-100'"
     >
       <slot name="suffix">
-        <span v-if="suffix" class="mr-2 text-sm text-ink-gray-4">{{
+        <span v-if="suffix" class="me-2 text-sm text-ink-gray-4">{{
           suffix
         }}</span>
       </slot>

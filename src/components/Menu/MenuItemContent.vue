@@ -184,7 +184,7 @@ function handleSwitchChange(value: boolean) {
       />
       <Switch
         v-else-if="trailing === 'switch'"
-        class="ml-auto"
+        class="ms-auto"
         :disabled="item.disabled"
         :model-value="item.switchValue || false"
         @update:model-value="handleSwitchChange"

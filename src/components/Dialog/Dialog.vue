@@ -55,7 +55,7 @@
                       v-if="showHeader"
                       class="mb-6 flex items-center justify-between"
                     >
-                      <div class="flex items-center space-x-2 flex-1">
+                      <div class="flex items-center gap-2 flex-1">
                         <div
                           v-if="hasIcon"
                           data-slot="icon"
@@ -140,7 +140,7 @@
               as-child
             >
               <Button
-                class="absolute right-4 top-4 z-10"
+                class="absolute end-4 top-4 z-10"
                 variant="ghost"
                 label="Close"
               >

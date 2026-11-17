@@ -71,7 +71,7 @@
           }}</span>
         </slot>
 
-        <span class="ml-auto flex items-center">
+        <span class="ms-auto flex items-center">
           <slot name="item-suffix" v-bind="itemSlotProps" />
         </span>
       </template>
@@ -182,7 +182,7 @@ onBeforeUnmount(() => ctx.unregisterItem(key.value))
   height: var(--_tree-row-height);
 }
 .frappe-tree-group {
-  padding-left: var(--_tree-indent);
+  padding-inline-start: var(--_tree-indent);
 }
 
 /* ---- Connector guides (elbow lines) ---- */
@@ -194,17 +194,17 @@ onBeforeUnmount(() => ctx.unregisterItem(key.value))
 .frappe-tree[data-guides='connectors'] [role='group'] > li::before {
   content: '';
   position: absolute;
-  left: calc(var(--_tree-indent) / -2);
+  inset-inline-start: calc(var(--_tree-indent) / -2);
   top: 0;
   bottom: 0;
-  border-left: 1px solid var(--outline-gray-2, #e5e7eb);
+  border-inline-start: 1px solid var(--outline-gray-2, #e5e7eb);
 }
 
 /* horizontal elbow reaching each node */
 .frappe-tree[data-guides='connectors'] [role='group'] > li::after {
   content: '';
   position: absolute;
-  left: calc(var(--_tree-indent) / -2);
+  inset-inline-start: calc(var(--_tree-indent) / -2);
   top: calc(var(--_tree-row-height) / 2);
   width: calc(var(--_tree-indent) / 2);
   border-top: 1px solid var(--outline-gray-2, #e5e7eb);
@@ -215,14 +215,14 @@ onBeforeUnmount(() => ctx.unregisterItem(key.value))
   bottom: auto;
   height: calc(var(--_tree-row-height) / 2);
   border-bottom: 1px solid var(--outline-gray-2, #e5e7eb);
-  border-bottom-left-radius: 6px;
+  border-end-start-radius: 6px;
 }
 
 /* ---- Simple vertical lines ---- */
 .frappe-tree[data-guides='lines'] [role='group'] {
-  margin-left: calc(var(--_tree-indent) / 2);
-  border-left: 1px solid var(--outline-gray-2, #e5e7eb);
-  padding-left: calc(var(--_tree-indent) / 2) !important;
+  margin-inline-start: calc(var(--_tree-indent) / 2);
+  border-inline-start: 1px solid var(--outline-gray-2, #e5e7eb);
+  padding-inline-start: calc(var(--_tree-indent) / 2) !important;
 }
 
 /* ---- Drop indicators ---- */

@@ -8,14 +8,14 @@
     v-if="showCount"
     ref="referenceEl"
     aria-hidden="true"
-    class="pointer-events-none absolute -top-2 right-2 size-0"
+    class="pointer-events-none absolute -top-2 end-2 size-0"
   />
 
   <span
     v-else-if="showDot"
     data-slot="sidebar-rail-item-badge-dot"
     aria-hidden="true"
-    class="pointer-events-none absolute -right-0.5 -top-0.5 block size-2 rounded-full border border-[var(--surface-base)] bg-surface-red-6"
+    class="pointer-events-none absolute -end-0.5 -top-0.5 block size-2 rounded-full border border-[var(--surface-base)] bg-surface-red-6"
   />
 
   <Teleport :to="portalTarget ?? 'body'">

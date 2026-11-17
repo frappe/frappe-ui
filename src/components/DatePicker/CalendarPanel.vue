@@ -173,7 +173,7 @@
         </div>
         <div
           ref="monthListRef"
-          class="relative flex w-1/2 flex-col gap-0.5 overflow-y-auto pl-1.5"
+          class="relative flex w-1/2 flex-col gap-0.5 overflow-y-auto ps-1.5"
           role="listbox"
           aria-label="Select month"
         >

@@ -20,7 +20,7 @@ describe('Divider', () => {
 
     cy.get('hr')
       .should('exist')
-      .and('have.class', 'border-l-[1px]')
+      .and('have.class', 'border-s-[1px]')
       .and('not.have.class', 'w-full')
   })
 

@@ -8,7 +8,7 @@
           </template>
         </Button>
       </Dropdown>
-      <span class="ml-1 mr-0.5 text-base text-ink-gray-4" aria-hidden="true">
+      <span class="ms-1 me-0.5 text-base text-ink-gray-4" aria-hidden="true">
         /
       </span>
     </template>

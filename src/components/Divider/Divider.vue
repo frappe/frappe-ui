@@ -40,7 +40,7 @@ const actionOnClick = computed(() => {
 const dividerClasses = computed(() => {
   let spacerDimensionClasses = {
     horizontal: 'border-t-[1px] w-full',
-    vertical: 'border-l-[1px]',
+    vertical: 'border-s-[1px]',
   }[props.orientation]
 
   let flexClasses = props.flexItem ? 'self-stretch h-auto' : 'h-full'
@@ -56,8 +56,8 @@ const actionContainerClasses = computed(() => {
   if (props.orientation === 'horizontal') {
     let positionClasses = {
       center: 'justify-center',
-      start: 'justify-start pl-4',
-      end: 'justify-end pr-4',
+      start: 'justify-start ps-4',
+      end: 'justify-end pe-4',
     }[props.align]
 
     return [...baseClasses, 'flex w-full min-h-7 items-center', positionClasses]
@@ -76,7 +76,7 @@ const actionContainerClasses = computed(() => {
 const actionLineClasses = computed(() => {
   return {
     horizontal: 'inset-x-0 top-1/2 -translate-y-1/2 border-t-[1px]',
-    vertical: 'inset-y-0 left-1/2 -translate-x-1/2 border-l-[1px]',
+    vertical: 'inset-y-0 left-1/2 -translate-x-1/2 border-s-[1px]',
   }[props.orientation]
 })
 </script>
