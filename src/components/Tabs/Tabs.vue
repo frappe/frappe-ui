@@ -9,7 +9,8 @@ import {
   shallowRef,
   watch,
 } from 'vue'
-import { TabsRoot } from 'reka-ui'
+import { TabsRoot, injectConfigProviderContext } from 'reka-ui'
+import { documentDir } from '../../charts/utils'
 import { routerKey } from 'vue-router'
 import TabList from './TabList.vue'
 import TabTrigger from './TabTrigger.vue'
@@ -359,12 +360,11 @@ function onRekaUpdate(value: TabValue) {
   emit('update:modelValue', value)
 }
 
+// The prop wins, then a Reka ConfigProvider (FrappeUIProvider sets one), then
+// the page. `documentDir` re-reads when the page's `dir` changes after mount.
+const config = injectConfigProviderContext(null)
 const dir = computed<'ltr' | 'rtl'>(
-  () =>
-    props.dir ??
-    (typeof document !== 'undefined' && document.documentElement.dir === 'rtl'
-      ? 'rtl'
-      : 'ltr'),
+  () => props.dir ?? config?.dir?.value ?? documentDir(),
 )
 
 const visibleTabs = computed(() =>
