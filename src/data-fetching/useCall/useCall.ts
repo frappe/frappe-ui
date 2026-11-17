@@ -88,7 +88,7 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
     return base
   })
 
-  type FrappeResponse<T> = { data: T }
+  type FrappeResponse<T> = { data?: T; message?: T }
 
   // `submit` compares the newest request's number with the number it read
   // before it waited. The number itself is minted in `useFrappeFetch`, at the
@@ -109,6 +109,10 @@ export function useCall<TResponse, TParams extends BasicParams = undefined>(
     initialData: initialData !== undefined ? { data: initialData } : undefined,
     afterFetch(ctx: AfterFetchContext<FrappeResponse<TResponse>>) {
       if (ctx.data) {
+        if (ctx.data.data === undefined && ctx.data.message !== undefined) {
+          ctx.data.data = ctx.data.message
+        }
+
         // The cache holds the response as the server sent it: transformed
         // data may not survive JSON, and `transform` runs again when the
         // cache is read. Copied first, because `transform` may change the
