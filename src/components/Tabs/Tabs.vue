@@ -9,7 +9,8 @@ import {
   shallowRef,
   watch,
 } from 'vue'
-import { TabsRoot } from 'reka-ui'
+import { TabsRoot, injectConfigProviderContext } from 'reka-ui'
+import { documentDir } from '../../utils/document'
 import { routerKey } from 'vue-router'
 import TabList from './TabList.vue'
 import TabTrigger from './TabTrigger.vue'
@@ -359,12 +360,13 @@ function onRekaUpdate(value: TabValue) {
   emit('update:modelValue', value)
 }
 
+// The prop wins, then an RTL Reka ConfigProvider, then the page. A provider's
+// `ltr` is not trusted, because Reka defaults `dir` to `ltr` when the app
+// never set it (e.g. a provider added only for `nonce`). `documentDir`
+// re-reads when the page's `dir` changes after mount.
+const config = injectConfigProviderContext(null)
 const dir = computed<'ltr' | 'rtl'>(
-  () =>
-    props.dir ??
-    (typeof document !== 'undefined' && document.documentElement.dir === 'rtl'
-      ? 'rtl'
-      : 'ltr'),
+  () => props.dir ?? (config?.dir?.value === 'rtl' ? 'rtl' : documentDir()),
 )
 
 const visibleTabs = computed(() =>

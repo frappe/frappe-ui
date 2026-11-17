@@ -122,12 +122,8 @@ import {
   sliceTooltipItem,
 } from './slices'
 import { useChartTokens, useResolvedConfig } from './tokens'
-import {
-  chartAriaLabel,
-  documentDir,
-  elementCenter,
-  plotReading,
-} from './utils'
+import { chartAriaLabel, elementCenter, plotReading } from './utils'
+import { documentDir } from '../utils/document'
 import ChartContainer from './components/ChartContainer.vue'
 import ChartLegend from './components/ChartLegend.vue'
 import ChartTooltip from './components/ChartTooltip.vue'

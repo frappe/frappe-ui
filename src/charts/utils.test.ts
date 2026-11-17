@@ -2,23 +2,12 @@
  * @vitest-environment jsdom
  */
 import { afterEach, describe, expect, it } from 'vitest'
-import { documentDir, documentLocale } from './utils'
+import { documentLocale } from './utils'
 import { formatValue } from './format'
 
 afterEach(() => {
   document.documentElement.dir = ''
   document.documentElement.lang = ''
-})
-
-describe('documentDir', () => {
-  it('reads the direction the page declares', () => {
-    document.documentElement.dir = 'rtl'
-    expect(documentDir()).toBe('rtl')
-  })
-
-  it('falls back to ltr', () => {
-    expect(documentDir()).toBe('ltr')
-  })
 })
 
 describe('documentLocale', () => {

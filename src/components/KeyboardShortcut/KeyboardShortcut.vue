@@ -1,5 +1,8 @@
 <template>
+  <!-- A combo reads left to right in every locale, and its arrows name
+       physical keys, so neither mirrors. -->
   <span
+    dir="ltr"
     class="inline-flex items-center gap-0.5"
     :class="!bg ? 'text-ink-gray-5 text-sm' : ''"
     :aria-label="ariaLabel"

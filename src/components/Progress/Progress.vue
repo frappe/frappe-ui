@@ -27,7 +27,11 @@
       :max="MAX_VALUE"
       :get-value-label="() => valueLabel"
       class="transform-gpu overflow-hidden rounded-7"
-      :class="indicatorContainerClasses"
+      :class="[
+        indicatorContainerClasses,
+        // The fill slides in from the start edge, so mirror it in RTL.
+        !props.intervals && 'rtl:[scale:-1_1]',
+      ]"
     >
       <!-- Continuous Progress Bar -->
       <!-- The fill is full width and slid left so only `value`% of it shows.
@@ -76,7 +80,7 @@ const indicatorContainerClasses = computed(() => {
     xl: 'h-3',
   }[props.size]
 
-  const layoutClasses = props.intervals ? 'flex space-x-1' : 'bg-surface-gray-2'
+  const layoutClasses = props.intervals ? 'flex gap-1' : 'bg-surface-gray-2'
 
   return [heightClass, layoutClasses]
 })

@@ -13,15 +13,30 @@
 
     <Dialogs /> needs no such treatment — it reads the `dialogs` ref at render
     time, so a dialog opened before it mounts still shows on the first render.
+
+    PageDirection hands the page's direction to the Reka parts inside, unless
+    the app already wraps its own Reka ConfigProvider. Reka cannot tell whether
+    that one set `dir`, so it is left alone; such an app passes `dir` itself.
   -->
-  <ToastProvider />
-  <slot />
-  <Dialogs />
+  <PageDirection v-if="!appConfig">
+    <ToastProvider />
+    <slot />
+    <Dialogs />
+  </PageDirection>
+  <template v-else>
+    <ToastProvider />
+    <slot />
+    <Dialogs />
+  </template>
 </template>
 
 <script setup lang="ts">
+import { injectConfigProviderContext } from 'reka-ui'
 import Dialogs from '../Dialogs.vue'
 import ToastProvider from '../Toast/ToastProvider.vue'
+import { PageDirection } from './PageDirection'
+
+const appConfig = injectConfigProviderContext(null)
 
 defineSlots<{
   /** The app. Rendered as-is; the provider adds no wrapper element of its own. */

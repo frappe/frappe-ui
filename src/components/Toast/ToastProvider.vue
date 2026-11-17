@@ -1,6 +1,6 @@
 <template>
   <Toaster
-    position="bottom-right"
+    :position="documentDir() === 'rtl' ? 'bottom-left' : 'bottom-right'"
     :close-button="true"
     :expand="false"
     :rich-colors="false"
@@ -12,11 +12,11 @@
           'group py-2.5 flex items-center px-4 bg-surface-gray-9 rounded-5 shadow-xl w-[360px] after:bg-transparent',
         title: 'text-p-base font-medium text-ink-base',
         description: 'text-p-base text-ink-base',
-        icon: 'mr-2 text-ink-base [&_svg]:size-4',
+        icon: 'me-2 text-ink-base [&_svg]:size-4',
         closeButton:
-          'order-1 ml-auto group-has-[[data-action]]:ml-0 grid place-items-center rounded-1 text-ink-base hover:bg-surface-gray-8 size-5 !transition-colors [&_svg]:size-4',
+          'order-1 ms-auto group-has-[[data-action]]:ms-0 grid place-items-center rounded-1 text-ink-base hover:bg-surface-gray-8 size-5 !transition-colors [&_svg]:size-4',
         actionButton:
-          'flex shrink-0 text-ink-blue-link font-medium py-1.5 px-2 h-7 text-base mr-2 ml-auto bg-transparent hover:bg-surface-gray-8 rounded-4 !transition-colors',
+          'flex shrink-0 text-ink-blue-link font-medium py-1.5 px-2 h-7 text-base me-2 ms-auto bg-transparent hover:bg-surface-gray-8 rounded-4 !transition-colors',
         cancelButton:
           'flex text-ink-blue-link font-medium py-1.5 px-2 text-base hover:bg-surface-gray-8 transition-colors',
         error: '[&_[data-icon]]:text-ink-red-4',
@@ -28,6 +28,7 @@
 
 <script setup lang="ts">
 import { Toaster } from 'vue-sonner'
+import { documentDir } from '../../utils/document'
 </script>
 
 <style>

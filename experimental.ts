@@ -54,27 +54,6 @@ export type {
   PickerShellSlots,
   PickerShellExposed,
 } from './src/components/shared/picker/types'
-// v0 TextEditor family. Moved out of root (#974) — `frappe-ui/editor` is the
-// composition-based replacement. Parked here (#1007), unstable, as an interim
-// import path while apps migrate. Deletion stays human-gated (spec/editor.md
-// §12).
-export {
-  TextEditor,
-  TextEditorBubbleMenu,
-  TextEditorFixedMenu,
-  TextEditorFloatingMenu,
-  TextEditorContent,
-  createEditorButton,
-} from './experimental/TextEditor'
-export {
-  ImageExtension,
-  type SetImageOptions,
-} from './experimental/TextEditor/extensions/image'
-export {
-  createSuggestionExtension,
-  type BaseSuggestionItem,
-  type CreateSuggestionExtensionOptions,
-} from './experimental/TextEditor/extensions/suggestion'
 // ThemeSwitcher. Moved out of root (#1094) — `Select` bound to
 // `useColorScheme()` is the replacement, and it replaces the behavior rather
 // than the markup: this renders a reka-ui `RadioGroupRoot` of preview cards.

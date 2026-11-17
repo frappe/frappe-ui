@@ -173,7 +173,7 @@ import { formatPercent, formatValue } from './format'
 import { buildFunnelStages, funnelShapes } from './funnelGeometry'
 import { useTooltipDismiss } from './core/useTooltipDismiss'
 import { paletteColors, useChartTokens } from './tokens'
-import { documentDir } from './utils'
+import { documentDir } from '../utils/document'
 import ChartContainer from './components/ChartContainer.vue'
 import ChartTooltip from './components/ChartTooltip.vue'
 import type {

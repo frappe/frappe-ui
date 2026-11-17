@@ -1,5 +1,7 @@
 import { defineComponent, h, inject } from 'vue'
 import DesktopShell from './DesktopShell.vue'
+import SidebarRail from '../SidebarRail/SidebarRail.vue'
+import SidebarRailItem from '../SidebarRail/SidebarRailItem.vue'
 import PageHeader from '../PageHeader/PageHeader.vue'
 import { pageHeaderTargetKey } from '../PageHeader/target'
 import {
@@ -54,6 +56,98 @@ describe('<DesktopShell />', () => {
       .parent()
       .should('have.class', 'flex-1')
       .and('have.class', 'overflow-hidden')
+  })
+
+  // The navigation side moves the drawing only; the DOM order stays rail,
+  // sidebar, content.
+  describe('navSide', () => {
+    const slots = {
+      rail: () => h('div', { 'data-test': 'rail', class: 'w-10' }, 'rail'),
+      sidebar: () => h('div', { 'data-test': 'sidebar', class: 'w-20' }, 'sb'),
+      default: () => h('div', { 'data-test': 'page' }, 'page body'),
+    }
+    const left = (selector: string) =>
+      cy.get(selector).then(($el) => $el[0].getBoundingClientRect().left)
+
+    it('draws rail, sidebar, content left to right by default', () => {
+      cy.mount(DesktopShell, { slots })
+      cy.get('[data-slot=desktop-shell]').should(
+        'not.have.class',
+        'flex-row-reverse',
+      )
+      left('[data-test=rail]').then((rail) =>
+        left('[data-test=sidebar]').then((sidebar) =>
+          left('[data-test=page]').then((page) => {
+            expect(rail).to.be.lessThan(sidebar)
+            expect(sidebar).to.be.lessThan(page)
+          }),
+        ),
+      )
+    })
+
+    it('draws content, sidebar, rail left to right on the right, with the DOM order unchanged', () => {
+      cy.mount(DesktopShell, { props: { navSide: 'right' }, slots })
+      cy.get('[data-slot=desktop-shell]').should(
+        'have.class',
+        'flex-row-reverse',
+      )
+      left('[data-test=page]').then((page) =>
+        left('[data-test=sidebar]').then((sidebar) =>
+          left('[data-test=rail]').then((rail) => {
+            expect(page).to.be.lessThan(sidebar)
+            expect(sidebar).to.be.lessThan(rail)
+          }),
+        ),
+      )
+      cy.get('[data-slot=desktop-shell]').then(($shell) => {
+        const order = Array.from($shell[0].children).map(
+          (el) => el.getAttribute('data-test') ?? el.getAttribute('data-slot'),
+        )
+        expect(order).to.deep.equal([
+          'rail',
+          'sidebar',
+          'desktop-shell-content',
+        ])
+      })
+    })
+
+    // The tooltip content teleports out of the shell, so it is found by its
+    // text. Focus opens it with no hover delay.
+    for (const navSide of ['left', 'right'] as const) {
+      const right = navSide === 'right'
+
+      it(`puts a rail item's active bar and tooltip on the outer edge for navSide=${navSide}`, () => {
+        cy.mount(DesktopShell, {
+          props: { navSide },
+          slots: {
+            rail: () =>
+              h(SidebarRail, null, {
+                default: () =>
+                  h(SidebarRailItem, {
+                    label: 'Design',
+                    icon: 'lucide-palette',
+                    active: true,
+                  }),
+              }),
+          },
+        })
+        cy.get('[data-slot=sidebar-rail-item-indicator]')
+          .should(right ? 'have.class' : 'not.have.class', 'rounded-l-4')
+          .and(right ? 'not.have.class' : 'have.class', 'rounded-r-4')
+          .then(($bar) => {
+            const bar = $bar[0].getBoundingClientRect()
+            const cell = $bar[0].parentElement!.getBoundingClientRect()
+            if (right) expect(bar.left).to.be.greaterThan(cell.right)
+            else expect(bar.right).to.be.lessThan(cell.left)
+          })
+        cy.get('[data-slot=sidebar-rail-item]').focus()
+        cy.contains('[data-side]', 'Design').should(
+          'have.attr',
+          'data-side',
+          right ? 'left' : 'right',
+        )
+      })
+    }
   })
 
   // SHELL-Q3: the shell a page is inside wins over the newest registry entry.

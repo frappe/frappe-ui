@@ -1,4 +1,5 @@
 import { createApp, h, ref, type App } from 'vue'
+import { PageDirection } from '#components/FrappeUIProvider/PageDirection'
 import type { Editor } from '@tiptap/core'
 import IframeInsertDialog from './IframeInsertDialog.vue'
 
@@ -36,18 +37,20 @@ export function openIframeInsertDialog(args: {
 
   app = createApp({
     render() {
-      return h(IframeInsertDialog, {
-        modelValue: open.value,
-        'onUpdate:modelValue': (value: boolean) => {
-          open.value = value
-          if (!value) setTimeout(teardown, 0)
-        },
-        editor: args.editor,
-        getReplacePos: args.getReplacePos,
-        initialUrl: args.initialUrl,
-        platform: args.platform,
-        onClose: () => setTimeout(teardown, 0),
-      })
+      return h(PageDirection, () =>
+        h(IframeInsertDialog, {
+          modelValue: open.value,
+          'onUpdate:modelValue': (value: boolean) => {
+            open.value = value
+            if (!value) setTimeout(teardown, 0)
+          },
+          editor: args.editor,
+          getReplacePos: args.getReplacePos,
+          initialUrl: args.initialUrl,
+          platform: args.platform,
+          onClose: () => setTimeout(teardown, 0),
+        }),
+      )
     },
   })
 

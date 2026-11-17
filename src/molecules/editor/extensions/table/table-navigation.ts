@@ -33,6 +33,7 @@ import {
   nextCell,
   selectionCell,
 } from '@tiptap/pm/tables'
+import { documentDir } from '../../../../utils/document'
 import { trackPointerDrag } from './drag-scroll'
 
 type Axis = 'horiz' | 'vert'
@@ -66,9 +67,10 @@ function arrowLeavesCell(view: EditorView, event: KeyboardEvent): boolean {
   ).from
   switch (event.key) {
     case 'ArrowLeft':
-      return $head.pos <= firstPos
     case 'ArrowRight':
-      return $head.pos >= lastPos
+      return columnStep(event.key) === 1
+        ? $head.pos >= lastPos
+        : $head.pos <= firstPos
     case 'ArrowUp':
       // At the top line of the cell's first block.
       return (
@@ -84,6 +86,15 @@ function arrowLeavesCell(view: EditorView, event: KeyboardEvent): boolean {
     default:
       return false
   }
+}
+
+/**
+ * The step along the row that a left or right arrow takes. A table on an RTL
+ * page runs right to left, so there ArrowLeft moves to the next column.
+ */
+function columnStep(key: 'ArrowLeft' | 'ArrowRight'): 1 | -1 {
+  const forward = key === (documentDir() === 'rtl' ? 'ArrowLeft' : 'ArrowRight')
+  return forward ? 1 : -1
 }
 
 /** Select a whole cell (navigate mode), highlighting it. */
@@ -363,9 +374,8 @@ export const TableNavigation = Extension.create({
               if (!navigating) return false
               switch (event.key) {
                 case 'ArrowRight':
-                  return extendCell(editor, 'horiz', 1)
                 case 'ArrowLeft':
-                  return extendCell(editor, 'horiz', -1)
+                  return extendCell(editor, 'horiz', columnStep(event.key))
                 case 'ArrowDown':
                   return extendCell(editor, 'vert', 1)
                 case 'ArrowUp':
@@ -384,9 +394,10 @@ export const TableNavigation = Extension.create({
 
             switch (event.key) {
               case 'ArrowRight':
-                return navigating ? moveCell(editor, 'horiz', 1) : false
               case 'ArrowLeft':
-                return navigating ? moveCell(editor, 'horiz', -1) : false
+                return navigating
+                  ? moveCell(editor, 'horiz', columnStep(event.key))
+                  : false
               case 'ArrowDown':
                 return navigating ? moveCell(editor, 'vert', 1) : false
               case 'ArrowUp':

@@ -9,8 +9,11 @@
       >
         {{ title }}
       </component>
-      <div v-if="description" class="mt-1 text-base leading-5 text-ink-gray-6">
-        {{ description }}
+      <div
+        v-if="description || $slots.description"
+        class="mt-1 text-base leading-5 text-ink-gray-6"
+      >
+        <slot name="description">{{ description }}</slot>
       </div>
     </div>
     <div ref="control" class="flex shrink-0 items-start justify-end">
@@ -29,6 +32,13 @@ const props = defineProps<{
   description?: string
   /** Explicit id to associate the title label with. Overrides auto-detection. */
   labelFor?: string
+}>()
+
+defineSlots<{
+  /** The setting's control, on the right. */
+  default?: () => any
+  /** Replaces the `description` text, for content such as a link. */
+  description?: () => any
 }>()
 
 // frappe-ui form controls (Switch, Checkbox, …) render their interactive

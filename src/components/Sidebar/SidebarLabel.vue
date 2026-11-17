@@ -1,5 +1,5 @@
 <template>
-  <div data-slot="sidebar-label" class="relative flex h-7 items-center pl-2">
+  <div data-slot="sidebar-label" class="relative flex h-7 items-center ps-2">
     <h3
       class="text-base leading-tighter text-ink-gray-5 transition-all duration-300 ease-in-out"
       :class="

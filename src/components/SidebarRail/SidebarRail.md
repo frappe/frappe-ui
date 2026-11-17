@@ -45,14 +45,15 @@ middle list can overflow, wrap it in your own `overflow-y-auto` container.
 
 ### Tooltips
 
-Each item shows its `label` in a tooltip to the right. `description` adds a
+Each item shows its `label` in a tooltip that opens away from the navigation:
+to the right, or to the left in a `DesktopShell` with `navSide="right"`. `description` adds a
 second line, such as "12 members". The rail shares one tooltip context across
 its items, so moving between items shows each tooltip with no delay.
 
 ### Variants
 
-- `variant="subtle"` (default) is a filled cell with a bar on its left edge when
-  active. Use the default slot for an image, an avatar or initials. When the
+- `variant="subtle"` (default) is a filled cell with a bar on its outer edge (left,
+  or right when the shell's `navSide` is `right`) when active. Use the default slot for an image, an avatar or initials. When the
   slot holds an `<img>`, the cell paints no fill, so the image's rounded corners
   show no gray rim. The bar still marks the active item.
 - `variant="ghost"` is transparent until hovered, and raised when active. Pass

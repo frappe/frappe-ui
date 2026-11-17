@@ -13,7 +13,7 @@
 
 .ProseMirror:not(.ProseMirror-focused) p.is-editor-empty::before {
   content: attr(data-placeholder);
-  float: left;
+  float: inline-start;
   color: var(--ink-gray-4);
   pointer-events: none;
   height: 0;
@@ -78,7 +78,7 @@ img.ProseMirror-selectednode {
 
     > label {
       flex: 0 0 auto;
-      margin-right: 0.5rem;
+      margin-inline-end: 0.5rem;
       margin-top: 0.25rem;
       height: 1lh;
       display: flex;

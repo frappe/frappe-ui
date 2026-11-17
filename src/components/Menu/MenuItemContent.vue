@@ -184,7 +184,7 @@ function handleSwitchChange(value: boolean) {
       />
       <Switch
         v-else-if="trailing === 'switch'"
-        class="ml-auto"
+        class="ms-auto"
         :disabled="item.disabled"
         :model-value="item.switchValue || false"
         @update:model-value="handleSwitchChange"
@@ -192,7 +192,7 @@ function handleSwitchChange(value: boolean) {
       <span
         v-else-if="trailing === 'submenu'"
         :class="[
-          'lucide-chevron-right',
+          'lucide-chevron-right rtl:rotate-180',
           menuClasses.chevronIcon,
           getMenuIconColor(item),
         ]"

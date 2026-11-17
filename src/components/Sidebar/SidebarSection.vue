@@ -37,7 +37,7 @@
           {{ label }}
           <span
             class="lucide-chevron-right size-4 text-ink-gray-5 transition-all duration-300 ease-in-out"
-            :class="{ 'rotate-90': !isSectionCollapsed }"
+            :class="isSectionCollapsed ? 'rtl:rotate-180' : 'rotate-90'"
           />
         </button>
         <template v-else>{{ label }}</template>

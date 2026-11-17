@@ -82,8 +82,6 @@ const OPTIMIZE_DEPS_INCLUDE = [
   '@vueuse/core',
   'reka-ui',
   '@floating-ui/vue',
-  '@popperjs/core',
-  'tippy.js',
   'vue-sonner',
   'fuzzysort',
   'shiki',

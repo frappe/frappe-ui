@@ -1,5 +1,6 @@
 import { defineComponent, h, ref } from 'vue'
 import { createMemoryHistory, createRouter } from 'vue-router'
+import { ConfigProvider } from 'reka-ui'
 import Tabs from './Tabs.vue'
 import TabList from './TabList.vue'
 import TabTrigger from './TabTrigger.vue'
@@ -1551,6 +1552,40 @@ describe('Tabs', () => {
       expect(style.borderLeftColor, 'closed edge').to.not.equal(
         'rgba(0, 0, 0, 0)',
       )
+    })
+  })
+
+  describe('direction', () => {
+    const direction = () => cy.get('[role="tablist"]').closest('[dir]')
+
+    afterEach(() => {
+      document.documentElement.dir = ''
+    })
+
+    it('takes the direction of a surrounding Reka ConfigProvider', () => {
+      cy.mount(() =>
+        h(ConfigProvider, { dir: 'rtl' }, () => h(Tabs, { tabs: items })),
+      )
+      direction().should('have.attr', 'dir', 'rtl')
+    })
+
+    it('follows an RTL page under a ConfigProvider that never set dir', () => {
+      cy.document().then((doc) => {
+        doc.documentElement.dir = 'rtl'
+      })
+      cy.mount(() =>
+        h(ConfigProvider, { nonce: 'abc' }, () => h(Tabs, { tabs: items })),
+      )
+      direction().should('have.attr', 'dir', 'rtl')
+    })
+
+    it('follows the page when it switches to RTL after mount', () => {
+      cy.mount(Tabs, { props: { tabs: items } })
+      direction().should('have.attr', 'dir', 'ltr')
+      cy.document().then((doc) => {
+        doc.documentElement.dir = 'rtl'
+      })
+      direction().should('have.attr', 'dir', 'rtl')
     })
   })
 })

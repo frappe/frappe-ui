@@ -17,11 +17,7 @@
     "tailwind/tokens.d.ts",
     "tailwind/tokens.types.test.ts"
   ],
-  "exclude": [
-    "src/**/*.cy.ts",
-    "experimental/TextEditor/**/*",
-    "experimental/**/*.cy.ts"
-  ],
+  "exclude": ["src/**/*.cy.ts", "experimental/**/*.cy.ts"],
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "ignoreDeprecations": "5.0",

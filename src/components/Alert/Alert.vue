@@ -176,7 +176,7 @@ const bannerSecondaryClass = computed(() =>
     class="rounded-6 bg-surface-gray-1"
     :class="
       layout === 'row'
-        ? 'flex h-10 items-center py-1.5 pl-3.5 pr-1.5'
+        ? 'flex h-10 items-center py-1.5 ps-3.5 pe-1.5'
         : 'relative p-3'
     "
   >
@@ -184,7 +184,7 @@ const bannerSecondaryClass = computed(() =>
       <div
         v-if="showPrefix"
         data-slot="prefix"
-        class="mr-2 flex size-4 shrink-0 items-center justify-center"
+        class="me-2 flex size-4 shrink-0 items-center justify-center"
       >
         <slot name="prefix">
           <span
@@ -213,7 +213,7 @@ const bannerSecondaryClass = computed(() =>
       <div
         v-if="$slots.actions || props.primaryAction"
         data-slot="actions"
-        class="ml-1.5 flex shrink-0 items-center gap-1"
+        class="ms-1.5 flex shrink-0 items-center gap-1"
       >
         <slot name="actions" :dismiss="dismiss">
           <Button
@@ -230,7 +230,7 @@ const bannerSecondaryClass = computed(() =>
         v-if="props.dismissible"
         data-slot="dismiss"
         class="shrink-0"
-        :class="$slots.actions || props.primaryAction ? 'ml-1' : 'ml-1.5'"
+        :class="$slots.actions || props.primaryAction ? 'ms-1' : 'ms-1.5'"
         variant="ghost"
         theme="gray"
         size="sm"
@@ -243,7 +243,7 @@ const bannerSecondaryClass = computed(() =>
     <template v-else>
       <div
         class="flex items-center gap-1.5"
-        :class="props.dismissible ? 'pr-8' : ''"
+        :class="props.dismissible ? 'pe-8' : ''"
       >
         <div
           v-if="showPrefix"
@@ -314,7 +314,7 @@ const bannerSecondaryClass = computed(() =>
       <Button
         v-if="props.dismissible"
         data-slot="dismiss"
-        class="absolute right-1.5 top-1.5"
+        class="absolute end-1.5 top-1.5"
         variant="ghost"
         theme="gray"
         size="xs"

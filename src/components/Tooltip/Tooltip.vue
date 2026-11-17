@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import {
+  Slot,
   TooltipProvider,
   TooltipRoot,
   TooltipTrigger,
@@ -7,6 +8,7 @@ import {
 } from 'reka-ui'
 import TooltipBubble from './TooltipBubble.vue'
 import { computed, type Component } from 'vue'
+import { useDeferredTrigger } from '../shared/deferredTrigger'
 import type { TooltipProps } from './types'
 
 defineOptions({
@@ -36,6 +38,9 @@ const providerProps = computed(() =>
   parentProvider ? {} : { delayDuration: delayDuration.value },
 )
 
+// The trigger renders alone until it is first hovered or focused.
+const { mounted, shellProps } = useDeferredTrigger('tooltip')
+
 defineSlots<{
   /**
    * The trigger. Tooltip is the one overlay whose `#default` is the trigger
@@ -51,6 +56,9 @@ defineSlots<{
 
 <template>
   <slot v-if="disabled" />
+  <Slot v-else-if="!mounted" v-bind="shellProps">
+    <slot />
+  </Slot>
   <component :is="Provider" v-else v-bind="providerProps">
     <TooltipRoot>
       <TooltipTrigger as-child data-slot="trigger">

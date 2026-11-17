@@ -223,8 +223,13 @@
   const settingsRowSlots = [
   {
     name: 'default',
-    description: '',
-    type: '{}'
+    description: 'The setting\'s control, on the right.',
+    type: 'any'
+  },
+  {
+    name: 'description',
+    description: 'Replaces the `description` text, for content such as a link.',
+    type: 'any'
   }
 ]
 </script>
