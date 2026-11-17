@@ -121,7 +121,7 @@ const options = computed<DropdownOptions>(() => [
 
 <template>
   <div
-    class="absolute top-2.5 right-2.5 z-20 items-center"
+    class="absolute top-2.5 end-2.5 z-20 items-center"
     :class="isVisible ? 'flex' : 'hidden'"
   >
     <Dropdown v-model:open="menuOpen" :options="options" align="end">
