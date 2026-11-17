@@ -11,6 +11,14 @@ describe('weekStart', () => {
     expect(parseDate(weekStart(d('2026-08-27')))).toBe('2026-08-23')
     expect(parseDate(weekStart(d('2026-08-23')))).toBe('2026-08-23')
   })
+
+  it('goes back to the configured first day instead', () => {
+    // Thursday the 27th's week opens on Monday the 24th; a Sunday belongs to
+    // the week that began the Monday before it.
+    expect(parseDate(weekStart(d('2026-08-27'), 1))).toBe('2026-08-24')
+    expect(parseDate(weekStart(d('2026-08-24'), 1))).toBe('2026-08-24')
+    expect(parseDate(weekStart(d('2026-08-23'), 1))).toBe('2026-08-17')
+  })
 })
 
 describe('stripWeeks', () => {
@@ -42,6 +50,25 @@ describe('stripWeeks', () => {
     const range = stripRange(7, 2026)
     expect(parseDate(range.start)).toBe('2026-07-26')
     expect(parseDate(range.end)).toBe('2026-09-05')
+  })
+})
+
+describe('stripWeeks from Monday', () => {
+  const weeks = stripWeeks(7, 2026, 1)
+
+  it('starts on the Monday before the first and ends on the Sunday after the last', () => {
+    // Saturday Aug 1 sits in the week of Monday Jul 27; Monday Aug 31 opens a
+    // week of its own, closed by Sunday Sep 6.
+    expect(weeks).toHaveLength(6)
+    expect(parseDate(weeks[0]![0]!)).toBe('2026-07-27')
+    expect(parseDate(weeks[weeks.length - 1]![6]!)).toBe('2026-09-06')
+    expect(weeks.every((week) => week[0]!.getDay() === 1)).toBe(true)
+  })
+
+  it('reports the same span as its range', () => {
+    const { start, end } = stripRange(7, 2026, 1)
+    expect(parseDate(start)).toBe('2026-07-27')
+    expect(parseDate(end)).toBe('2026-09-06')
   })
 })
 

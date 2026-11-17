@@ -108,6 +108,15 @@ export interface CalendarRowBar {
   isEnd: boolean
 }
 
+export type CalendarWeekStart =
+  | 'sunday'
+  | 'monday'
+  | 'tuesday'
+  | 'wednesday'
+  | 'thursday'
+  | 'friday'
+  | 'saturday'
+
 export interface CalendarConfig {
   /** Hour (0-23) the Week and Day views scroll to on mount. */
   scrollToHour: number
@@ -147,6 +156,12 @@ export interface CalendarConfig {
    * (0 = Sunday).
    */
   weekends: string[]
+
+  /**
+   * The day each week starts on, in the Month grid, the Week view and the
+   * Agenda's weeks. Defaults to `'sunday'`.
+   */
+  weekStart?: CalendarWeekStart
 
   /** Removes the outer grid border. */
   noBorder?: boolean

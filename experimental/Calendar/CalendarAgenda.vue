@@ -339,12 +339,22 @@ import {
   type AgendaRow,
   type AgendaWeek,
 } from './agendaDays'
-import { daysList, daysListFull, monthList, parseDate } from './calendarUtils'
+import {
+  daysList,
+  daysListFull,
+  monthList,
+  parseDate,
+  weekStartDay,
+} from './calendarUtils'
 import { shortMonth } from './monthStrip'
 import { useNow } from './composables/useNow'
 import CalendarEventRow from './CalendarEventRow.vue'
 import { Spinner } from '#components/Spinner'
-import { CALENDAR_ACTIONS_KEY, type CalendarEvent } from './types'
+import {
+  CALENDAR_ACTIONS_KEY,
+  CALENDAR_CONFIG_KEY,
+  type CalendarEvent,
+} from './types'
 
 const props = defineProps<{
   events?: CalendarEvent[]
@@ -362,6 +372,7 @@ const props = defineProps<{
 }>()
 
 const calendarActions = inject(CALENDAR_ACTIONS_KEY)
+const firstDay = weekStartDay(inject(CALENDAR_CONFIG_KEY)?.weekStart)
 
 if (!calendarActions) {
   throw new Error('CalendarAgenda must be rendered inside Calendar.')
@@ -399,7 +410,7 @@ const isNarrow = computed(
 const now = useNow()
 
 const weeks = computed(() =>
-  agendaWeeks(props.events ?? [], props.anchor, now.value),
+  agendaWeeks(props.events ?? [], props.anchor, now.value, firstDay),
 )
 
 const isEmpty = computed(() => !weeks.value.length)

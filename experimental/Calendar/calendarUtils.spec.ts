@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { findOverlappingEventsCount, paintedEventHeight } from './calendarUtils'
+import {
+  findOverlappingEventsCount,
+  getCalendarDates,
+  paintedEventHeight,
+  parseDate,
+  weekDayNames,
+  weekStartDay,
+} from './calendarUtils'
 import type { CalendarEvent } from './types'
 
 /** The grid's default: 50px an hour. */
@@ -161,5 +168,47 @@ describe('findOverlappingEventsCount', () => {
         minuteHeight,
       ).map((event) => event.id),
     ).toEqual(['a', 'b'])
+  })
+})
+
+describe('week start', () => {
+  it('reads a weekday name as its index, Sunday when unset', () => {
+    expect(weekStartDay()).toBe(0)
+    expect(weekStartDay('sunday')).toBe(0)
+    expect(weekStartDay('monday')).toBe(1)
+    expect(weekStartDay('saturday')).toBe(6)
+  })
+
+  it('names the days in the order the week draws them', () => {
+    expect(weekDayNames()).toEqual([
+      'Sun',
+      'Mon',
+      'Tue',
+      'Wed',
+      'Thu',
+      'Fri',
+      'Sat',
+    ])
+    expect(weekDayNames(1)).toEqual([
+      'Mon',
+      'Tue',
+      'Wed',
+      'Thu',
+      'Fri',
+      'Sat',
+      'Sun',
+    ])
+  })
+
+  it('pads the month back to the first day of its first week', () => {
+    // August 2026 opens on a Saturday.
+    const sunday = getCalendarDates(7, 2026)
+    const monday = getCalendarDates(7, 2026, 1)
+    expect(parseDate(sunday[0]!)).toBe('2026-07-26')
+    expect(parseDate(monday[0]!)).toBe('2026-07-27')
+    // whole weeks, each opening on the configured day
+    expect(monday.length % 7).toBe(0)
+    for (let i = 0; i < monday.length; i += 7)
+      expect(monday[i]!.getDay()).toBe(1)
   })
 })
