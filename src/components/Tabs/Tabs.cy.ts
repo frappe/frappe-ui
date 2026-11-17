@@ -1569,6 +1569,16 @@ describe('Tabs', () => {
       direction().should('have.attr', 'dir', 'rtl')
     })
 
+    it('follows an RTL page under a ConfigProvider that never set dir', () => {
+      cy.document().then((doc) => {
+        doc.documentElement.dir = 'rtl'
+      })
+      cy.mount(() =>
+        h(ConfigProvider, { nonce: 'abc' }, () => h(Tabs, { tabs: items })),
+      )
+      direction().should('have.attr', 'dir', 'rtl')
+    })
+
     it('follows the page when it switches to RTL after mount', () => {
       cy.mount(Tabs, { props: { tabs: items } })
       direction().should('have.attr', 'dir', 'ltr')
