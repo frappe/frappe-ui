@@ -1,77 +1,17 @@
 import { reactive, computed } from 'vue'
-import { getMaxFileSize, formatBytes, fileSizeLimitMessage } from './fileSize'
+import FileUploadHandler, { UploadError } from './fileUploadHandler'
+import type { UploadOptions } from './fileUploadHandler'
 
-export interface UploadOptions {
-  private?: boolean
-  folder?: string
-  file_url?: string
-  doctype?: string
-  docname?: string
-  fieldname?: string
-  method?: string
-  type?: string
-  upload_endpoint?: string
-  optimize?: boolean
-  max_width?: number
-  max_height?: number
-  params?: object
-  signal?: AbortSignal
-  onProgress?: (progress: {
-    loaded: number
-    total: number
-    percent: number
-  }) => void
-}
+export {
+  isPrivateUpload,
+  UploadError,
+  type UploadErrorKind,
+  type UploadOptions,
+} from './fileUploadHandler'
 
-/**
- * Resolves whether an upload is private. Unset resolves to **private** — a
- * file with no stated intent is treated as access-controlled, not
- * world-readable. Pass `private: false` for intentionally public files.
- *
- * Internal: shared with `FileUploadHandler`, not exported from the package.
- */
-export function isPrivateUpload(options: UploadOptions = {}) {
-  return options.private ?? true
-}
-
-/** What made an upload fail. */
-export type UploadErrorKind = 'file-size' | 'network' | 'server' | 'abort'
-
-/**
- * The error every upload path rejects with: `upload()`, `useFileUpload()`,
- * and `FileUploadHandler.upload()`. Read `kind` to tell a cancelled upload
- * from a failed one; `messages` carries the server's messages when it sent
- * any.
- */
-export class UploadError extends Error {
-  /** What made the upload fail. */
-  readonly kind: UploadErrorKind
-
-  /** HTTP status, when the server answered. */
-  readonly status?: number
-
-  /** Server messages, in the order the server sent them. Empty otherwise. */
-  readonly messages: string[]
-
-  /** The parsed error payload, when the server sent one. */
-  readonly response?: unknown
-
-  constructor(
-    message: string,
-    options: {
-      kind: UploadErrorKind
-      status?: number
-      messages?: string[]
-      response?: unknown
-    },
-  ) {
-    super(message)
-    this.name = 'UploadError'
-    this.kind = options.kind
-    this.status = options.status
-    this.messages = options.messages ?? []
-    this.response = options.response
-  }
+interface UploadProgress {
+  uploaded: number
+  total: number
 }
 
 export interface UploadState {
@@ -97,37 +37,6 @@ export type UploadedFile = {
   folder?: string
   is_folder?: 0 | 1
   content_hash?: string
-}
-
-function parseServerMessages(error: any): string[] {
-  if (!error?._server_messages) return []
-  try {
-    return JSON.parse(error._server_messages)
-      .map((message: string) => {
-        try {
-          return JSON.parse(message).message
-        } catch {
-          return message
-        }
-      })
-      .filter(Boolean)
-  } catch {
-    return []
-  }
-}
-
-function extractUploadErrorMessage(error: any): string {
-  const messages = parseServerMessages(error)
-  if (messages.length) return messages.join('\n')
-  if (error?._error_message) return error._error_message
-  if (error?.message) return error.message
-  if (error?.exc_type === 'MaxFileSizeReachedError') {
-    const maxFileSize = getMaxFileSize()
-    return maxFileSize
-      ? `File size exceeded the maximum allowed size of ${formatBytes(maxFileSize)}.`
-      : 'File size exceeds the maximum allowed limit.'
-  }
-  return 'Upload failed'
 }
 
 function createUploadState(): UploadState {
@@ -187,170 +96,27 @@ async function uploadWithState(
   reset: () => void = () => Object.assign(state, createUploadState()),
 ): Promise<UploadedFile> {
   reset()
-  const limitMessage = fileSizeLimitMessage(file)
-  if (limitMessage) {
-    state.error = new UploadError(limitMessage, { kind: 'file-size' })
-    return Promise.reject(state.error)
-  }
   state.uploading = true
 
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest()
-
-    // Set up event listeners
-    xhr.upload.addEventListener('loadstart', () => {
-      state.uploading = true
-      state.error = null
-    })
-
-    const abort = () => {
-      xhr.abort()
-    }
-
-    options.signal?.addEventListener('abort', abort, { once: true })
-
-    xhr.upload.addEventListener('progress', (e) => {
-      if (e.lengthComputable) {
-        state.uploaded = e.loaded
-        state.total = e.total
-        state.progress = Math.round((e.loaded / e.total) * 100)
-        options.onProgress?.({
-          loaded: e.loaded,
-          total: e.total,
-          percent: state.progress,
-        })
-      }
-    })
-
-    xhr.upload.addEventListener('load', () => {
-      state.progress = 100
-    })
-
-    xhr.addEventListener('error', () => {
-      state.uploading = false
-      state.error = new UploadError('Upload failed', { kind: 'network' })
-      options.signal?.removeEventListener('abort', abort)
-      reject(state.error)
-    })
-
-    xhr.addEventListener('abort', () => {
-      state.uploading = false
-      state.error = new UploadError('Upload cancelled', { kind: 'abort' })
-      options.signal?.removeEventListener('abort', abort)
-      reject(state.error)
-    })
-
-    xhr.onreadystatechange = () => {
-      if (xhr.readyState == XMLHttpRequest.DONE) {
-        options.signal?.removeEventListener('abort', abort)
-        let error
-        if (xhr.status === 200) {
-          let r = null
-          try {
-            r = JSON.parse(xhr.responseText)
-          } catch (e) {
-            r = xhr.responseText
-          }
-
-          const result = (r.message || r) as UploadedFile
-          state.result = result
-          resolve(result)
-        } else if (xhr.status === 403) {
-          error = JSON.parse(xhr.responseText)
-        } else {
-          try {
-            error = JSON.parse(xhr.responseText)
-          } catch (e) {
-            error = 'Upload failed'
-          }
-        }
-
-        if (error) {
-          let exception
-          if (error.exc) {
-            exception = error.exc
-            try {
-              exception = JSON.parse(exception)[0]
-              console.log(exception)
-              // eslint-disable-next-line no-empty
-            } catch (e) {}
-          }
-          let e = new UploadError(extractUploadErrorMessage(error), {
-            kind: 'server',
-            status: xhr.status,
-            messages: parseServerMessages(error),
-            response: error,
-          })
-          state.error = e
-          reject(e)
-        }
-
-        state.uploading = false
-      }
-    }
-
-    const uploadEndpoint = options.upload_endpoint || '/api/method/upload_file'
-    xhr.open('POST', uploadEndpoint, true)
-    xhr.setRequestHeader('Accept', 'application/json')
-
-    if (window.csrf_token && window.csrf_token !== '{{ csrf_token }}') {
-      xhr.setRequestHeader('X-Frappe-CSRF-Token', window.csrf_token)
-    }
-
-    const formData = new FormData()
-    if (file) {
-      formData.append('file', file, file.name)
-    }
-
-    formData.append('is_private', isPrivateUpload(options) ? '1' : '0')
-    formData.append('folder', options.folder || 'Home')
-
-    if (options.file_url) {
-      formData.append('file_url', options.file_url)
-    }
-
-    if (options.doctype) {
-      formData.append('doctype', options.doctype)
-    }
-
-    if (options.docname) {
-      formData.append('docname', options.docname)
-    }
-
-    if (options.fieldname) {
-      formData.append('fieldname', options.fieldname)
-    }
-
-    if (options.method) {
-      formData.append('method', options.method)
-    }
-
-    if (options.type) {
-      formData.append('type', options.type)
-    }
-
-    if (options.optimize) {
-      formData.append('optimize', '1')
-      if (options.max_width) {
-        formData.append('max_width', options.max_width.toString())
-      }
-      if (options.max_height) {
-        formData.append('max_height', options.max_height.toString())
-      }
-    }
-    if (options.params) {
-      for (let [k, v] of Object.entries(options.params)) {
-        formData.append(k, v)
-      }
-    }
-
-    xhr.send(formData)
+  const handler = new FileUploadHandler()
+  handler.on('progress', ({ uploaded, total }: UploadProgress) => {
+    state.uploaded = uploaded
+    state.total = total
+    state.progress = Math.round((uploaded / total) * 100)
   })
-}
 
-// Add the Window interface for typescript
-declare global {
-  interface Window {
-    csrf_token?: string
+  try {
+    const result = (await handler.upload(file, options)) as UploadedFile
+    state.progress = 100
+    state.result = result
+    return result
+  } catch (error) {
+    state.error =
+      error instanceof UploadError
+        ? error
+        : new UploadError('Upload failed', { kind: 'network' })
+    throw state.error
+  } finally {
+    state.uploading = false
   }
 }
