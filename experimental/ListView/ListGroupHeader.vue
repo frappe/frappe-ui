@@ -6,7 +6,7 @@
     >
       <DownSolid
         class="h-4 w-4 text-ink-gray-6 transition-transform duration-200"
-        :class="[group.collapsed ? '-rotate-90' : '']"
+        :class="[group.collapsed ? '-rotate-90 rtl:rotate-90' : '']"
       />
     </button>
     <slot>

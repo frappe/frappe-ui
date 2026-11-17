@@ -4,7 +4,7 @@ import {
   type ResolvedColorScheme,
 } from '../composables/useColorScheme'
 import { oklchCssToSrgb } from './colorMath'
-import { documentAttributes } from './utils'
+import { documentAttributes } from '../utils/document'
 import type { ChartPalette, ChartPaletteName } from './types'
 
 /**

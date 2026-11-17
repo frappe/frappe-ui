@@ -27,7 +27,8 @@ import {
 } from '../seriesData'
 import { formatAxisValue, formatValue } from '../format'
 import { useChartTokens, useResolvedConfig } from '../tokens'
-import { documentDir, markName, plotReading } from '../utils'
+import { markName, plotReading } from '../utils'
+import { documentDir } from '../../utils/document'
 import type {
   AxisChartConfig,
   AxisChartSeriesConfig,

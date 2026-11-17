@@ -235,9 +235,10 @@ const bidirectionalRangeStyles = computed(() => {
   const thumbPositions = sliderValue.value.map((v) => (v - min) / range)
   const allPositions =
     thumbPositions.length === 1 ? [zeroPos, thumbPositions[0]] : thumbPositions
+  // Logical insets, so the fill mirrors with the thumbs on an RTL slider.
   return {
-    left: `${Math.min(...allPositions) * 100}%`,
-    right: `${(1 - Math.max(...allPositions)) * 100}%`,
+    insetInlineStart: `${Math.min(...allPositions) * 100}%`,
+    insetInlineEnd: `${(1 - Math.max(...allPositions)) * 100}%`,
   }
 })
 

@@ -1,4 +1,5 @@
 import { h } from 'vue'
+import { ConfigProvider } from 'reka-ui'
 import Slider from './Slider.vue'
 
 describe('Slider', () => {
@@ -522,43 +523,51 @@ describe('Slider', () => {
   })
 
   describe('bidirectional fill', () => {
-    // Targets the range element: the only absolutely-positioned element inside the control.
-    const range = () => cy.get('[data-slot="control"] .absolute')
+    /** The fill's left and right edges, as percentages of the track from its left. */
+    function fillEdges() {
+      // The range is the only absolutely-positioned element inside the control.
+      return cy.get('[data-slot="control"] .absolute').then(($fill) => {
+        const fill = $fill[0].getBoundingClientRect()
+        const track = $fill[0].parentElement!.getBoundingClientRect()
+        const percent = (x: number) =>
+          Math.round(((x - track.left) / track.width) * 100)
+        return [percent(fill.left), percent(fill.right)]
+      })
+    }
+
+    function mountSlider(modelValue: number, dir: 'ltr' | 'rtl' = 'ltr') {
+      const props = { modelValue: [modelValue], min: -100, max: 100 }
+      cy.mount(() => h(ConfigProvider, { dir }, () => h(Slider, props)))
+    }
 
     it('fills from zero-crossing to a positive value', () => {
-      cy.mount(Slider, { props: { modelValue: [50], min: -100, max: 100 } })
-      range()
-        .should('have.attr', 'style')
-        .and('include', 'left: 50%')
-        .and('include', 'right: 25%')
+      mountSlider(50)
+      fillEdges().should('deep.equal', [50, 75])
     })
 
     it('fills from a negative value to the zero-crossing', () => {
-      cy.mount(Slider, { props: { modelValue: [-50], min: -100, max: 100 } })
-      range()
-        .should('have.attr', 'style')
-        .and('include', 'left: 25%')
-        .and('include', 'right: 50%')
+      mountSlider(-50)
+      fillEdges().should('deep.equal', [25, 50])
     })
 
     it('renders zero-width fill when value is at zero', () => {
-      cy.mount(Slider, { props: { modelValue: [0], min: -100, max: 100 } })
-      range()
-        .should('have.attr', 'style')
-        .and('include', 'left: 50%')
-        .and('include', 'right: 50%')
+      mountSlider(0)
+      fillEdges().should('deep.equal', [50, 50])
+    })
+
+    it('mirrors the fill with the thumb on an RTL slider', () => {
+      mountSlider(100, 'rtl')
+      fillEdges().should('deep.equal', [0, 50])
     })
   })
 
   // INP-Q5.
   describe('template ref', () => {
     it('exposes focus() which focuses the thumb, not the root', () => {
-      cy.mount(Slider, { props: { modelValue: [40] } }).then(
-        (mounted: any) => {
-          const vm = mounted.component ?? mounted.wrapper?.vm ?? mounted
-          vm?.focus?.()
-        },
-      )
+      cy.mount(Slider, { props: { modelValue: [40] } }).then((mounted: any) => {
+        const vm = mounted.component ?? mounted.wrapper?.vm ?? mounted
+        vm?.focus?.()
+      })
 
       cy.get('[role="slider"]').should('be.focused')
     })

@@ -71,7 +71,7 @@ function select(value: CommandPaletteValue) {
             :keywords="page.keywords"
           >
             <template #prefix>
-              <span :class="[page.icon, 'mr-3 size-4 text-ink-gray-7']" />
+              <span :class="[page.icon, 'me-3 size-4 text-ink-gray-7']" />
             </template>
             {{ page.title }}
           </CommandPaletteItem>
@@ -84,7 +84,7 @@ function select(value: CommandPaletteValue) {
             :value="action"
           >
             <template #prefix>
-              <span :class="[action.icon, 'mr-3 size-4 text-ink-gray-7']" />
+              <span :class="[action.icon, 'me-3 size-4 text-ink-gray-7']" />
             </template>
             {{ action.title }}
             <template #suffix>

@@ -72,6 +72,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, toRef, watch } from 'vue'
 import { useTouchHandler } from '#composables/useTouchHandler'
+import { documentDir } from '../../../utils/document'
 import { usePortalTarget } from '#composables/usePortalTarget'
 import { useImageNavigation } from '#composables/useImageNavigation'
 import { useZoomPan } from '#composables/useZoomPan'
@@ -133,6 +134,12 @@ const { currentIndex, nextImage, previousImage } = useImageNavigation({
 
 const currentImage = computed(() => props.images[currentIndex.value])
 
+const isRtl = () => documentDir() === 'rtl'
+
+function swipeTo(navigate: () => void) {
+  if (zoomLevel.value <= 100) navigate()
+}
+
 const {
   isPanning: isTouchPanning,
   isPinching,
@@ -141,12 +148,9 @@ const {
   targetRef: imageContainer,
   zoomLevel: zoomLevel,
   panThreshold: 10,
-  onSwipeLeft: () => {
-    if (zoomLevel.value <= 100) nextImage()
-  },
-  onSwipeRight: () => {
-    if (zoomLevel.value <= 100) previousImage()
-  },
+  // A swipe pulls in the image from the reading end, the left on an RTL page.
+  onSwipeLeft: () => swipeTo(isRtl() ? previousImage : nextImage),
+  onSwipeRight: () => swipeTo(isRtl() ? nextImage : previousImage),
   onDoubleTap: (event) => {
     if (controlsBarEl.value?.contains(event.target as Node)) return
     if (zoomLevel.value > 100) {

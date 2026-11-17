@@ -99,7 +99,8 @@ import {
   sliceTooltipItem,
 } from './slices'
 import { useChartTokens } from './tokens'
-import { chartAriaLabel, documentDir } from './utils'
+import { chartAriaLabel } from './utils'
+import { documentDir } from '../utils/document'
 import ChartContainer from './components/ChartContainer.vue'
 import ChartLegend from './components/ChartLegend.vue'
 import ChartTooltip from './components/ChartTooltip.vue'

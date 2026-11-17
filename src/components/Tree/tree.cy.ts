@@ -328,6 +328,35 @@ describe('Tree', () => {
     cy.focused().should('contain', 'Root')
   })
 
+  describe('RTL keyboard navigation', () => {
+    afterEach(() => {
+      cy.document().then((doc) => {
+        doc.documentElement.dir = ''
+      })
+    })
+
+    it('expands with ArrowLeft and collapses with ArrowRight', () => {
+      cy.document().then((doc) => {
+        doc.documentElement.dir = 'rtl'
+      })
+      cy.mount(Tree, { props: { nodes: makeNodes(), nodeKey: 'id' } })
+      cy.get('[role="treeitem"]').first().focus()
+      cy.focused().should('have.attr', 'aria-expanded', 'false')
+
+      cy.focused().trigger('keydown', { key: 'ArrowRight' })
+      cy.focused().should('have.attr', 'aria-expanded', 'false')
+      cy.contains('Node A').should('not.exist')
+
+      cy.focused().trigger('keydown', { key: 'ArrowLeft' })
+      cy.focused().should('have.attr', 'aria-expanded', 'true')
+      cy.contains('Node A').should('exist')
+
+      cy.focused().trigger('keydown', { key: 'ArrowRight' })
+      cy.focused().should('have.attr', 'aria-expanded', 'false')
+      cy.contains('Node A').should('not.exist')
+    })
+  })
+
   it('toggles expansion with Enter/Space', () => {
     cy.mount(Tree, {
       props: { nodes: makeNodes(), nodeKey: 'id', expanded: ['root'] },

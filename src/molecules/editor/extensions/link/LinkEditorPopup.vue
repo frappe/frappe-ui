@@ -43,6 +43,7 @@
       />
       <div class="ps-1.5 flex-1 min-w-0 flex">
         <a
+          dir="ltr"
           class="truncate text-sm text-ink-gray-9 border-b border-outline-gray-2 hover:border-outline-gray-3"
           :title="_href"
           :href="_href"

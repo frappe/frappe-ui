@@ -378,6 +378,32 @@ describe('DatePicker', () => {
       cy.focused().should('have.attr', 'data-value', '2025-06-15')
     })
 
+    describe('RTL arrow keys', () => {
+      afterEach(() => {
+        cy.document().then((doc) => {
+          doc.documentElement.dir = ''
+        })
+      })
+
+      it('reverses horizontal day navigation and keeps vertical week navigation', () => {
+        cy.document().then((doc) => {
+          doc.documentElement.dir = 'rtl'
+        })
+        cy.mount(DatePicker, { props: { modelValue: '2025-06-15' } })
+        cy.get('input').focus().type('{downArrow}')
+        cy.focused().should('have.attr', 'data-value', '2025-06-15')
+
+        cy.focused().trigger('keydown', { key: 'ArrowLeft' })
+        cy.focused().should('have.attr', 'data-value', '2025-06-16')
+        cy.focused().trigger('keydown', { key: 'ArrowDown' })
+        cy.focused().should('have.attr', 'data-value', '2025-06-23')
+        cy.focused().trigger('keydown', { key: 'ArrowRight' })
+        cy.focused().should('have.attr', 'data-value', '2025-06-22')
+        cy.focused().trigger('keydown', { key: 'ArrowUp' })
+        cy.focused().should('have.attr', 'data-value', '2025-06-15')
+      })
+    })
+
     it('Home/End jump to week edges', () => {
       // 2025-06-15 is a Sunday → Home stays on 06-15, End jumps to 06-21 (Saturday)
       cy.mount(DatePicker, { props: { modelValue: '2025-06-18' } })

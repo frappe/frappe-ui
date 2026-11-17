@@ -80,7 +80,7 @@ const indicatorContainerClasses = computed(() => {
     xl: 'h-3',
   }[props.size]
 
-  const layoutClasses = props.intervals ? 'flex space-x-1' : 'bg-surface-gray-2'
+  const layoutClasses = props.intervals ? 'flex gap-1' : 'bg-surface-gray-2'
 
   return [heightClass, layoutClasses]
 })

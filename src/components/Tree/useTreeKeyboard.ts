@@ -1,5 +1,5 @@
 import type { Ref } from 'vue'
-import { documentDir } from '../../charts/utils'
+import { documentDir } from '../../utils/document'
 import type { TreeKey, TreeNode } from './types'
 
 /** One visible (un-collapsed) row, in render order. */

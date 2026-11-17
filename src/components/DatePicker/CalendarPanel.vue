@@ -201,7 +201,7 @@
 import { computed, nextTick, ref, watch } from 'vue'
 import type { Dayjs } from 'dayjs/esm'
 import { Button } from '../Button'
-import { documentDir } from '../../charts/utils'
+import { documentDir } from '../../utils/document'
 import { months } from './utils'
 import type {
   CalendarPanelCell,

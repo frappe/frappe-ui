@@ -1,4 +1,5 @@
 import { createApp, h, type App } from 'vue'
+import { PageDirection } from '#components/FrappeUIProvider/PageDirection'
 import ImageViewerModal from '../../components/ImageViewerModal.vue'
 import type { ViewableImage } from './collectImages'
 
@@ -50,22 +51,24 @@ export function openImageViewerModal(
 
   app = createApp({
     render() {
-      return h(ImageViewerModal, {
-        show: true,
-        images,
-        initialIndex,
-        'onUpdate:show': (value: boolean) => {
-          if (!value) {
-            // Defer so the close transition can finish before removal, but
-            // skip if a newer open has superseded this instance.
-            pendingTeardown = setTimeout(() => {
-              pendingTeardown = null
-              if (openGeneration !== generation) return
-              teardown()
-            }, 0)
-          }
-        },
-      })
+      return h(PageDirection, () =>
+        h(ImageViewerModal, {
+          show: true,
+          images,
+          initialIndex,
+          'onUpdate:show': (value: boolean) => {
+            if (!value) {
+              // Defer so the close transition can finish before removal, but
+              // skip if a newer open has superseded this instance.
+              pendingTeardown = setTimeout(() => {
+                pendingTeardown = null
+                if (openGeneration !== generation) return
+                teardown()
+              }, 0)
+            }
+          },
+        }),
+      )
     },
   })
 
