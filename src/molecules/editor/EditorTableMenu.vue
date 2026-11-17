@@ -9,6 +9,7 @@ import {
 } from 'vue'
 import { computePosition, flip, offset, shift } from '@floating-ui/dom'
 import { CellSelection, cellAround, isInTable, selectionCell } from '@tiptap/pm/tables'
+import { documentDir } from '../../charts/utils'
 import { verticalScrollParent } from './extensions/table/drag-scroll'
 import MenuItems from './MenuItems.vue'
 import TableContextMenu from './components/TableContextMenu.vue'
@@ -167,7 +168,12 @@ function openContextMenu(ed: Editor, clientX: number, clientY: number) {
     },
     closeOnAnchorPointerDown: true,
     animate: true,
-    floatingOptions: { placement: 'right-start', strategy: 'fixed', offset: 0 },
+    // Open toward the reading end: to the left of the cursor on an RTL page.
+    floatingOptions: {
+      placement: documentDir() === 'rtl' ? 'left-start' : 'right-start',
+      strategy: 'fixed',
+      offset: 0,
+    },
   })
 }
 
@@ -200,7 +206,10 @@ function onContextMenu(event: MouseEvent) {
     const cellDom = ed.view.nodeDOM($cell.pos)
     if (!(cellDom instanceof HTMLElement)) return
     const rect = cellDom.getBoundingClientRect()
-    point = { x: rect.left + Math.min(rect.width / 2, 24), y: rect.bottom - 4 }
+    // Near the cell's start edge, which is its right edge on an RTL page.
+    const inset = Math.min(rect.width / 2, 24)
+    const x = documentDir() === 'rtl' ? rect.right - inset : rect.left + inset
+    point = { x, y: rect.bottom - 4 }
   }
   event.preventDefault()
   // Keep an existing multi-cell selection when the click lands inside it — the

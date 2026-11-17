@@ -7,6 +7,7 @@ import {
   type EditorCommandContext,
   type EditorCommandMeta,
 } from './commands'
+import { documentDir } from '../../charts/utils'
 import { CellSelection } from '@tiptap/pm/tables'
 import type { EditorState } from '@tiptap/pm/state'
 import type { EditorView } from '@tiptap/pm/view'
@@ -330,13 +331,21 @@ function tableCommand(
 export const TableAddColumnBefore = tableCommand(
   'Insert column left',
   'lucide-arrow-left-to-line',
-  (editor) => editor.chain().focus().addColumnBefore().run(),
+  (editor) => addColumnOnSide(editor, 'left'),
 )
 export const TableAddColumnAfter = tableCommand(
   'Insert column right',
   'lucide-arrow-right-to-line',
-  (editor) => editor.chain().focus().addColumnAfter().run(),
+  (editor) => addColumnOnSide(editor, 'right'),
 )
+// "Left" and "right" name the side on screen. An RTL table runs right to left,
+// so there the column after the cell is the one on its left.
+function addColumnOnSide(editor: Editor, side: 'left' | 'right') {
+  const chain = editor.chain().focus()
+  const before = (side === 'left') === (documentDir() === 'ltr')
+  return (before ? chain.addColumnBefore() : chain.addColumnAfter()).run()
+}
+
 export const TableDeleteColumn = tableCommand(
   'Delete column',
   'lucide-square-x',
