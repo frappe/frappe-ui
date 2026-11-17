@@ -9,7 +9,7 @@ import { Button, PageHeaderMobile, PageHeaderMobileTitle } from 'frappe-ui'
         <Button
           variant="ghost"
           size="md"
-          icon="lucide-chevron-left"
+          icon="lucide-chevron-left rtl:rotate-180"
           label="Back"
         />
       </template>
