@@ -1,3 +1,5 @@
+import { documentDir } from '../../../../charts/utils'
+
 export interface ImageViewerKeymapActions {
   /** Whether the viewer is open; when false the handler is a no-op. */
   isOpen: () => boolean
@@ -29,12 +31,18 @@ export function createImageViewerKeydown(
 
     actions.onActivity()
 
+    // Images run right to left on an RTL page, so ArrowLeft shows the next one.
+    const [previousKey, nextKey] =
+      documentDir() === 'rtl'
+        ? ['ArrowRight', 'ArrowLeft']
+        : ['ArrowLeft', 'ArrowRight']
+
     switch (event.key) {
-      case 'ArrowLeft':
+      case previousKey:
         if (!actions.isPanning()) actions.previous()
         event.preventDefault()
         break
-      case 'ArrowRight':
+      case nextKey:
         if (!actions.isPanning()) actions.next()
         event.preventDefault()
         break
