@@ -24,7 +24,7 @@
       >
         <slot v-bind="slotProps" />
       </span>
-      <span v-if="$slots.suffix" class="ml-auto whitespace-nowrap pl-2">
+      <span v-if="$slots.suffix" class="ms-auto whitespace-nowrap ps-2">
         <slot name="suffix" v-bind="slotProps" />
       </span>
     </component>

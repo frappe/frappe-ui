@@ -39,7 +39,7 @@
     <template #default="{ close, open, disabled, setOpen }">
       <div
         class="flex w-fit"
-        :class="$slots.actions ? 'divide-x divide-outline-gray-2' : ''"
+        :class="$slots.actions ? 'divide-x divide-outline-gray-2 rtl:divide-x-reverse' : ''"
       >
         <aside
           v-if="$slots.actions"

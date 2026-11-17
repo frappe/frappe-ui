@@ -11,7 +11,7 @@ describe('Select', () => {
     cy.get('button').should('have.text', 'pla')
     cy.get('[role=combobox]')
       .should('have.attr', 'aria-expanded', 'false')
-      .and('have.class', 'text-left')
+      .and('have.class', 'text-start')
     cy.get('[role=presentation]').should('not.exist')
 
     cy.get('button').click()

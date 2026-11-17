@@ -24,7 +24,7 @@
           }"
         >
           <div
-            class="flex flex-1 justify-between border-r border-outline-gray-2 text-ink-gray-9"
+            class="flex flex-1 justify-between border-e border-outline-gray-2 text-ink-gray-9"
           >
             <div class="flex items-center gap-3">
               <Checkbox

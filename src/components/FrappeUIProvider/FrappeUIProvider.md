@@ -30,6 +30,14 @@ The provider mounts `<ToastProvider />` and `<Dialogs />` beside the app. The
 app needs it only if it uses the `dialog.*` or `toast.*` helpers, including
 `dialog.confirm`, `dialog.alert` and `dialog.prompt`.
 
+### Direction
+
+The provider passes the page's direction (`<html dir>`) to the Reka parts
+inside it, which otherwise default to `ltr`. On a `dir="rtl"` page that is what
+lets Tabs, SettingsDialog, TabButtons, menus, selects and scroll areas lay out
+right to left. An app that wraps its own Reka `ConfigProvider` keeps it: the
+provider then leaves the direction alone.
+
 ### Mounting the hosts yourself
 
 To get the hosts without the wrapper, mount `<Dialogs />` and

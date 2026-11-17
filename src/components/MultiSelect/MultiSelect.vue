@@ -480,7 +480,7 @@ defineSlots<MultiSelectSlots>()
             :icon="singleSelectedOption.icon"
           />
 
-          <span class="grid min-w-0 flex-1 text-left font-normal">
+          <span class="grid min-w-0 flex-1 text-start font-normal">
             <span
               :class="[
                 'col-start-1 row-start-1 max-w-full truncate',
@@ -618,7 +618,7 @@ defineSlots<MultiSelectSlots>()
                   v-if="!allSelected"
                   variant="ghost"
                   size="sm"
-                  class="ml-auto"
+                  class="ms-auto"
                   @click="selectAll"
                 >
                   Select All

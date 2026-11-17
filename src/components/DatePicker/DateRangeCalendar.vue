@@ -1,7 +1,11 @@
 <template>
   <div
     class="flex"
-    :class="isDualPaneActive ? 'divide-x divide-outline-gray-2' : ''"
+    :class="
+      isDualPaneActive
+        ? 'divide-x divide-outline-gray-2 rtl:divide-x-reverse'
+        : ''
+    "
   >
     <CalendarPanel
       ref="leftPanelRef"

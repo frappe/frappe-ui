@@ -402,7 +402,7 @@ defineExpose(exposed)
           />
           <slot v-else name="prefix" v-bind="controlSlotProps" />
 
-          <div class="grid min-w-0 text-left truncate">
+          <div class="grid min-w-0 text-start truncate">
             <SelectValue
               :placeholder="placeholder"
               class="col-start-1 row-start-1 max-w-full truncate leading-tighter"
@@ -426,7 +426,7 @@ defineExpose(exposed)
           <slot name="suffix" v-bind="controlSlotProps">
             <span
               data-slot="chevron"
-              class="lucide-chevron-down ml-auto size-4 shrink-0 text-ink-gray-4"
+              class="lucide-chevron-down ms-auto size-4 shrink-0 text-ink-gray-4"
             />
           </slot>
         </template>
@@ -564,7 +564,7 @@ defineExpose(exposed)
                         v-bind="getItemSlotProps(internalOption.option)"
                       />
                       <SelectItemIndicator
-                        class="ml-1 inline-flex items-center justify-center"
+                        class="ms-1 inline-flex items-center justify-center"
                       >
                         <span class="lucide-check size-4 text-ink-gray-6" />
                       </SelectItemIndicator>

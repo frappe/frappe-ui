@@ -6,14 +6,14 @@
     :padding-top="paddingTop"
   >
     <template #title>
-      <div class="flex items-center pr-2" data-slot="header">
+      <div class="flex items-center pe-2" data-slot="header">
         <h3
           class="shrink-0 text-3xl-semibold leading-6 text-ink-gray-9 flex-1"
           data-slot="title"
         >
           {{ title }}
         </h3>
-        <div v-if="shouldShowSearch" class="w-fit ml-2" data-slot="search">
+        <div v-if="shouldShowSearch" class="w-fit ms-2" data-slot="search">
           <!-- A placeholder disappears as soon as the field has text, so the
                field carries its own name as well (P5). -->
           <TextInput
@@ -45,7 +45,7 @@
         </div>
         <div
           v-else
-          class="grid max-h-[70vh] grid-cols-1 gap-8 gap-x-6 overflow-y-auto pr-1 md:grid-cols-2 xl:grid-cols-3"
+          class="grid max-h-[70vh] grid-cols-1 gap-8 gap-x-6 overflow-y-auto pe-1 md:grid-cols-2 xl:grid-cols-3"
           data-slot="groups"
         >
           <div

@@ -13,15 +13,30 @@
 
     <Dialogs /> needs no such treatment — it reads the `dialogs` ref at render
     time, so a dialog opened before it mounts still shows on the first render.
+
+    Reka parts default to `dir="ltr"`, which forces Tabs, menus, selects and
+    scroll areas left to right on an RTL page. The ConfigProvider hands them the
+    document's direction, unless the app already wraps its own ConfigProvider.
   -->
-  <ToastProvider />
-  <slot />
-  <Dialogs />
+  <ConfigProvider v-if="!appConfig" :dir="documentDir()">
+    <ToastProvider />
+    <slot />
+    <Dialogs />
+  </ConfigProvider>
+  <template v-else>
+    <ToastProvider />
+    <slot />
+    <Dialogs />
+  </template>
 </template>
 
 <script setup lang="ts">
+import { ConfigProvider, injectConfigProviderContext } from 'reka-ui'
+import { documentDir } from '../../charts/utils'
 import Dialogs from '../Dialogs.vue'
 import ToastProvider from '../Toast/ToastProvider.vue'
+
+const appConfig = injectConfigProviderContext(null)
 
 defineSlots<{
   /** The app. Rendered as-is; the provider adds no wrapper element of its own. */

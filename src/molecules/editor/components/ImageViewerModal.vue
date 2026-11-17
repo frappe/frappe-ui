@@ -9,7 +9,7 @@
     >
       <div
         v-if="props.show && currentImage"
-        class="fixed top-0 left-0 w-full h-full bg-black sm:bg-black/90 z-[50] flex flex-col justify-center items-center overflow-hidden touch-none"
+        class="fixed top-0 start-0 w-full h-full bg-black sm:bg-black/90 z-[50] flex flex-col justify-center items-center overflow-hidden touch-none"
         ref="imageContainer"
         @mousemove="handleActivity"
         @touchstart="handleActivity"

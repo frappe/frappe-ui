@@ -16,7 +16,7 @@
             label="Load More"
             @click="emit('loadMore')"
           />
-          <div v-if="showLoadMore" class="mx-3 h-[80%] border-l" />
+          <div v-if="showLoadMore" class="mx-3 h-[80%] border-s" />
           <div class="flex items-center gap-1 text-base text-ink-gray-5">
             <div>{{ options.rowCount || '0' }}</div>
             <div>of</div>

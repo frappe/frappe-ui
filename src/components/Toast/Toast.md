@@ -44,7 +44,8 @@ step by passing its `id` back to `toast.loading` and `toast.success`.
 The `toast.*` functions need `<ToastProvider />` mounted in the app.
 [`FrappeUIProvider`](./frappeuiprovider) already mounts it. `ToastProvider`
 takes no props: the position, the look and the default duration are the same
-in every app. Up to three toasts show at a time, and each one has a close
+in every app. Toasts sit at the bottom right, or at the bottom left on a
+`dir="rtl"` page. Up to three toasts show at a time, and each one has a close
 button.
 
 ### Functions

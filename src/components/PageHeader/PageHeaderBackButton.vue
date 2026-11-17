@@ -2,7 +2,7 @@
   <Button
     variant="ghost"
     size="md"
-    icon="lucide-chevron-left"
+    icon="lucide-chevron-left rtl:rotate-180"
     :label="label"
     @click="onClick"
   />

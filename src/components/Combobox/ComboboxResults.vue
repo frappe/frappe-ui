@@ -278,7 +278,7 @@ function handleSelect(item: NormalizedItem, event: Event) {
 
                   <ComboboxItemIndicator
                     v-if="isSelectableOption(item)"
-                    class="ml-1 inline-flex items-center justify-center"
+                    class="ms-1 inline-flex items-center justify-center"
                   >
                     <span class="lucide-check size-4 text-ink-gray-6" />
                   </ComboboxItemIndicator>

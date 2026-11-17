@@ -27,7 +27,11 @@
       :max="MAX_VALUE"
       :get-value-label="() => valueLabel"
       class="transform-gpu overflow-hidden rounded-7"
-      :class="indicatorContainerClasses"
+      :class="[
+        indicatorContainerClasses,
+        // The fill slides in from the start edge, so mirror it in RTL.
+        !props.intervals && 'rtl:[scale:-1_1]',
+      ]"
     >
       <!-- Continuous Progress Bar -->
       <!-- The fill is full width and slid left so only `value`% of it shows.

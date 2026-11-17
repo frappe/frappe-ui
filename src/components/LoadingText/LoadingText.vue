@@ -1,6 +1,6 @@
 <template>
   <div class="flex items-center text-base text-ink-gray-4">
-    <Spinner class="-ml-1 mr-2 h-3 w-3" /> {{ text }}
+    <Spinner class="-ms-1 me-2 h-3 w-3" /> {{ text }}
   </div>
 </template>
 

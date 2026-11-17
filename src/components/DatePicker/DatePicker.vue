@@ -40,7 +40,7 @@
       <div
         class="flex"
         :class="
-          $slots.actions ? 'w-fit divide-x divide-outline-gray-2' : 'w-56'
+          $slots.actions ? 'w-fit divide-x divide-outline-gray-2 rtl:divide-x-reverse' : 'w-56'
         "
       >
         <aside

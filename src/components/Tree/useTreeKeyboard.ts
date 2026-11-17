@@ -1,4 +1,5 @@
 import type { Ref } from 'vue'
+import { documentDir } from '../../charts/utils'
 import type { TreeKey, TreeNode } from './types'
 
 /** One visible (un-collapsed) row, in render order. */
@@ -69,6 +70,12 @@ export function useTreeKeyboard(options: KeyboardOptions) {
     const current = flat.value[index]
     if (!current && !['Home', 'End'].includes(e.key)) return
 
+    // Rows open toward the reading direction, which is leftward on an RTL page.
+    const [openKey, closeKey] =
+      documentDir() === 'rtl'
+        ? ['ArrowLeft', 'ArrowRight']
+        : ['ArrowRight', 'ArrowLeft']
+
     switch (e.key) {
       case 'ArrowDown':
         e.preventDefault()
@@ -78,12 +85,12 @@ export function useTreeKeyboard(options: KeyboardOptions) {
         e.preventDefault()
         focusAt(Math.max(index - 1, 0))
         break
-      case 'ArrowRight':
+      case openKey:
         e.preventDefault()
         if (current.hasChildren && !current.expanded) expand(current.node)
         else if (current.hasChildren && current.expanded) focusAt(index + 1)
         break
-      case 'ArrowLeft':
+      case closeKey:
         e.preventDefault()
         if (current.hasChildren && current.expanded) collapse(current.node)
         else moveToParent(current)

@@ -123,7 +123,7 @@ function onKeydown(event: KeyboardEvent) {
         type="button"
         :role="item.isActive ? 'menuitemcheckbox' : 'menuitem'"
         :aria-checked="item.isActive ? isChecked(item) : undefined"
-        class="flex w-full items-center gap-2 rounded-4 px-2 py-1.5 text-left text-ink-gray-8 hover:bg-surface-gray-3 focus-visible:bg-surface-gray-3 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+        class="flex w-full items-center gap-2 rounded-4 px-2 py-1.5 text-start text-ink-gray-8 hover:bg-surface-gray-3 focus-visible:bg-surface-gray-3 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
         :disabled="disabled(item)"
         @click="run(item, $event)"
       >
@@ -135,7 +135,7 @@ function onKeydown(event: KeyboardEvent) {
         <span>{{ labelOf(item) }}</span>
         <span
           v-if="isChecked(item)"
-          class="lucide-check ml-auto size-4 shrink-0"
+          class="lucide-check ms-auto size-4 shrink-0"
           aria-hidden="true"
         />
       </button>
