@@ -28,7 +28,7 @@
 
 <script setup lang="ts">
 import { Toaster } from 'vue-sonner'
-import { documentDir } from '../../charts/utils'
+import { documentDir } from '../../utils/document'
 </script>
 
 <style>

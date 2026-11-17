@@ -33,7 +33,7 @@ import {
   nextCell,
   selectionCell,
 } from '@tiptap/pm/tables'
-import { documentDir } from '../../../../charts/utils'
+import { documentDir } from '../../../../utils/document'
 import { trackPointerDrag } from './drag-scroll'
 
 type Axis = 'horiz' | 'vert'

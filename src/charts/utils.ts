@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { documentAttributes } from '../utils/document'
 
 /**
  * Identity of the bucket a cap collapses its tail into, shared by `maxSeries`
@@ -91,35 +91,6 @@ export function prefersReducedMotion(): boolean {
     typeof window !== 'undefined' &&
     window.matchMedia?.('(prefers-reduced-motion: reduce)').matches,
   )
-}
-
-// One observer for the whole page: `dir`, `lang` and the theme all flip on
-// `<html>`, so a per-chart observer would watch the same node N times over.
-const documentVersion = ref(0)
-let observer: MutationObserver | undefined
-
-/**
- * The version of `<html>`'s chart-facing attributes, bumped when one changes.
- * Reading it inside a computed is what makes the computed re-evaluate on a page
- * that switches direction, language or theme after mount. The first read starts
- * the observer, so nothing has to remember to.
- */
-export function documentAttributes(): number {
-  if (typeof document === 'undefined') return 0
-  if (!observer && typeof MutationObserver !== 'undefined') {
-    observer = new MutationObserver(() => documentVersion.value++)
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['dir', 'lang', 'data-theme', 'class'],
-    })
-  }
-  return documentVersion.value
-}
-
-export function documentDir(): 'ltr' | 'rtl' {
-  documentAttributes()
-  if (typeof document === 'undefined') return 'ltr'
-  return document.documentElement.dir === 'rtl' ? 'rtl' : 'ltr'
 }
 
 /**

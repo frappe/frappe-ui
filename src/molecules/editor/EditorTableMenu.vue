@@ -9,7 +9,7 @@ import {
 } from 'vue'
 import { computePosition, flip, offset, shift } from '@floating-ui/dom'
 import { CellSelection, cellAround, isInTable, selectionCell } from '@tiptap/pm/tables'
-import { documentDir } from '../../charts/utils'
+import { documentDir } from '../../utils/document'
 import { verticalScrollParent } from './extensions/table/drag-scroll'
 import MenuItems from './MenuItems.vue'
 import TableContextMenu from './components/TableContextMenu.vue'

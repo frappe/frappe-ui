@@ -1,4 +1,4 @@
-import { documentDir } from '../../../../charts/utils'
+import { documentDir } from '../../../../utils/document'
 
 export interface ImageViewerKeymapActions {
   /** Whether the viewer is open; when false the handler is a no-op. */

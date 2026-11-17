@@ -1,6 +1,6 @@
 import { defineComponent, h } from 'vue'
 import { ConfigProvider } from 'reka-ui'
-import { documentDir } from '../../charts/utils'
+import { documentDir } from '../../utils/document'
 
 /**
  * Hands the page's direction (`<html dir>`) to the Reka parts in its slot.

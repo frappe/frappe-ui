@@ -231,7 +231,8 @@ import {
   sparklinePoints,
 } from './sparkline'
 import { paletteColors, useChartTokens } from './tokens'
-import { documentDir, prefersReducedMotion } from './utils'
+import { prefersReducedMotion } from './utils'
+import { documentDir } from '../utils/document'
 import { useId } from '#utils/useId'
 import Skeleton from '#components/Skeleton/Skeleton.vue'
 import ChartCard from './components/ChartCard.vue'

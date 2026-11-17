@@ -7,7 +7,7 @@ import {
   type EditorCommandContext,
   type EditorCommandMeta,
 } from './commands'
-import { documentDir } from '../../charts/utils'
+import { documentDir } from '../../utils/document'
 import { CellSelection } from '@tiptap/pm/tables'
 import type { EditorState } from '@tiptap/pm/state'
 import type { EditorView } from '@tiptap/pm/view'

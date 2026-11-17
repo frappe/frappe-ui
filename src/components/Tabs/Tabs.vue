@@ -10,7 +10,7 @@ import {
   watch,
 } from 'vue'
 import { TabsRoot, injectConfigProviderContext } from 'reka-ui'
-import { documentDir } from '../../charts/utils'
+import { documentDir } from '../../utils/document'
 import { routerKey } from 'vue-router'
 import TabList from './TabList.vue'
 import TabTrigger from './TabTrigger.vue'

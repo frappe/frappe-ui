@@ -72,7 +72,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, toRef, watch } from 'vue'
 import { useTouchHandler } from '#composables/useTouchHandler'
-import { documentDir } from '../../../charts/utils'
+import { documentDir } from '../../../utils/document'
 import { usePortalTarget } from '#composables/usePortalTarget'
 import { useImageNavigation } from '#composables/useImageNavigation'
 import { useZoomPan } from '#composables/useZoomPan'
