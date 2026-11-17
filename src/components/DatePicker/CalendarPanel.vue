@@ -104,10 +104,8 @@
                 :tabindex="isFocusedCell(cell) ? 0 : -1"
                 @mouseenter="emit('hoverCell', cell.date)"
                 @click="!cell.isUnavailable && emit('selectDate', cell.date)"
-                @keydown.left.prevent="
-                  shiftFocus(cell.date.subtract(1, 'day'), -1)
-                "
-                @keydown.right.prevent="shiftFocus(cell.date.add(1, 'day'), 1)"
+                @keydown.left.prevent="shiftDay(cell.date, isRtl ? 1 : -1)"
+                @keydown.right.prevent="shiftDay(cell.date, isRtl ? -1 : 1)"
                 @keydown.up.prevent="
                   shiftFocus(cell.date.subtract(7, 'day'), -1)
                 "
@@ -203,6 +201,7 @@
 import { computed, nextTick, ref, watch } from 'vue'
 import type { Dayjs } from 'dayjs/esm'
 import { Button } from '../Button'
+import { documentDir } from '../../charts/utils'
 import { months } from './utils'
 import type {
   CalendarPanelCell,
@@ -330,6 +329,13 @@ watch(
 // min/max bounds check, an `isDateUnavailable` predicate that returns true
 // for an unbounded run of dates would otherwise spin forever.
 const MAX_SKIP_DISABLED_STEPS = 366
+
+// Weeks run right to left on an RTL page, so ArrowLeft moves to the next day.
+const isRtl = computed(() => documentDir() === 'rtl')
+
+function shiftDay(date: Dayjs, step: 1 | -1) {
+  shiftFocus(date.add(step, 'day'), step)
+}
 
 function shiftFocus(target: Dayjs, dir: 1 | -1, retried = false, steps = 0) {
   // Bounds check first — if the target is outside [min, max], the arrow

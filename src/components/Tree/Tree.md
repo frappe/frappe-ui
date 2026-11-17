@@ -135,6 +135,8 @@ siblings and, for a parent, whether it is open.
 | `Enter` / `Space` | Open or close the row                         |
 | Letters           | Move to the next row whose label starts with them |
 
+In a right-to-left layout `ArrowLeft` and `ArrowRight` swap.
+
 Drag and drop announces "Picked up", "Moved" and "Cancelled move" to screen
 readers.
 
