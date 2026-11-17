@@ -1,6 +1,6 @@
 <template>
   <Toaster
-    position="bottom-right"
+    :position="documentDir() === 'rtl' ? 'bottom-left' : 'bottom-right'"
     :close-button="true"
     :expand="false"
     :rich-colors="false"
@@ -28,6 +28,7 @@
 
 <script setup lang="ts">
 import { Toaster } from 'vue-sonner'
+import { documentDir } from '../../charts/utils'
 </script>
 
 <style>
