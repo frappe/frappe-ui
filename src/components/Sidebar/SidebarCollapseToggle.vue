@@ -2,7 +2,7 @@
   <SidebarItem :label="isCollapsed ? 'Expand' : 'Collapse'" @click="toggle">
     <template #prefix>
       <span
-        class="lucide-panel-right-open size-4 text-ink-gray-6 transition-transform duration-300 ease-in-out"
+        class="lucide-panel-right-open size-4 text-ink-gray-6 transition-transform duration-300 ease-in-out rtl:-scale-x-100"
         :class="{ 'rotate-180': isCollapsed }"
       />
     </template>

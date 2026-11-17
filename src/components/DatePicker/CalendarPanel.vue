@@ -8,7 +8,7 @@
         :class="{ invisible: hidePrev }"
         label="previous"
         variant="ghost"
-        icon="lucide-chevron-left"
+        icon="lucide-chevron-left rtl:rotate-180"
         @click="emit('prev')"
       />
       <span class="text-sm-medium text-ink-gray-7">
@@ -18,7 +18,7 @@
         :class="{ invisible: hideNext }"
         label="next"
         variant="ghost"
-        icon="lucide-chevron-right"
+        icon="lucide-chevron-right rtl:rotate-180"
         @click="emit('next')"
       />
     </div>
@@ -37,7 +37,7 @@
           v-if="!hidePrev"
           label="previous"
           variant="ghost"
-          icon="lucide-chevron-left"
+          icon="lucide-chevron-left rtl:rotate-180"
           @click="emit('prev')"
         />
         <Button
@@ -51,7 +51,7 @@
           v-if="!hideNext"
           label="next"
           variant="ghost"
-          icon="lucide-chevron-right"
+          icon="lucide-chevron-right rtl:rotate-180"
           @click="emit('next')"
         />
       </div>

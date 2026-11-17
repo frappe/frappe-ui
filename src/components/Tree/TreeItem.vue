@@ -49,7 +49,7 @@
         >
           <svg
             class="size-3.5 transition-transform duration-150 motion-reduce:transition-none"
-            :style="{ transform: expanded ? 'rotate(90deg)' : 'none' }"
+            :class="expanded ? 'rotate-90' : 'rtl:rotate-180'"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"

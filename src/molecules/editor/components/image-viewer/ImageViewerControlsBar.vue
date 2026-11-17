@@ -15,7 +15,7 @@
           class="p-2 hover:bg-gray-900 rounded-s-4 focus:outline-none"
           @click.stop="emit('previous')"
         >
-          <span class="lucide-chevron-left size-4" />
+          <span class="lucide-chevron-left size-4 rtl:rotate-180" />
         </button>
       </Tooltip>
 
@@ -28,7 +28,7 @@
           class="p-2 hover:bg-gray-900 rounded-e-4 focus:outline-none"
           @click.stop="emit('next')"
         >
-          <span class="lucide-chevron-right size-4" />
+          <span class="lucide-chevron-right size-4 rtl:rotate-180" />
         </button>
       </Tooltip>
     </div>
