@@ -8,6 +8,11 @@ export interface FrappeUIConfig {
   // Max upload size in bytes (apps usually source this from their boot data)
   maxFileSize?: number | null
 
+  // Upload files larger than this many bytes in pieces of this size, one
+  // request each. Unset sends every file in one request. Needs a server with
+  // chunked upload support (Frappe v17 and later). See UploadOptions.chunkSize.
+  uploadChunkSize?: number | null
+
   // Resource fetcher function
   resourceFetcher?: (options: any) => Promise<any>
 

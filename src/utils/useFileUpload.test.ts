@@ -249,3 +249,158 @@ describe('upload cancellation', () => {
     expect(error.message).toBe('Upload failed')
   })
 })
+
+describe('chunked upload', () => {
+  // Answers like Frappe's upload_file: an empty message for each piece but
+  // the last, and the File for the last one. Fails the piece in `failAt`.
+  class ChunkServerXhr {
+    static DONE = 4
+    static requests: FormData[] = []
+    static failAt: number | null = null
+    progressListeners: Array<(e: ProgressEvent) => void> = []
+    upload = {
+      addEventListener: (event: string, cb: (e: ProgressEvent) => void) => {
+        if (event === 'progress') this.progressListeners.push(cb)
+      },
+    }
+    status = 200
+    responseText = ''
+    readyState = 4
+    onreadystatechange: (() => void) | null = null
+    addEventListener() {}
+    open() {}
+    setRequestHeader() {}
+    send(body: FormData) {
+      ChunkServerXhr.requests.push(body)
+      const piece = body.get('file') as File
+      // The request body is larger than the piece: form fields and boundaries.
+      const sent = piece.size + 200
+      for (const loaded of [sent / 2, sent]) {
+        this.progressListeners.forEach((cb) =>
+          cb({ lengthComputable: true, loaded, total: sent } as ProgressEvent),
+        )
+      }
+      const index = Number(body.get('chunk_index') ?? 0)
+      const count = Number(body.get('total_chunk_count') ?? 1)
+      if (index === ChunkServerXhr.failAt) {
+        this.status = 413
+        this.responseText = '<html>413 Request Entity Too Large</html>'
+      } else {
+        this.responseText = JSON.stringify(
+          index === count - 1
+            ? { message: { file_url: '/private/files/demo.mp4' } }
+            : {},
+        )
+      }
+      this.onreadystatechange?.()
+    }
+  }
+
+  const video = (bytes: number) =>
+    new File([new Uint8Array(bytes)], 'demo.mp4', { type: 'video/mp4' })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+    setConfig('uploadChunkSize', null)
+    ChunkServerXhr.requests = []
+    ChunkServerXhr.failAt = null
+  })
+
+  it('sends a file larger than the chunk size in pieces and resolves with the File', async () => {
+    vi.stubGlobal(
+      'XMLHttpRequest',
+      ChunkServerXhr as unknown as typeof XMLHttpRequest,
+    )
+    setConfig('uploadChunkSize', 1000)
+    const uploader = useFileUpload()
+    const progress: number[] = []
+
+    const result = await uploader.upload(video(2500), {
+      private: true,
+      onProgress: ({ loaded }) => progress.push(loaded),
+    })
+
+    expect(result).toEqual({ file_url: '/private/files/demo.mp4' })
+    const pieces = ChunkServerXhr.requests.map((form) => ({
+      name: (form.get('file') as File).name,
+      size: (form.get('file') as File).size,
+      index: form.get('chunk_index'),
+      count: form.get('total_chunk_count'),
+      offset: form.get('chunk_byte_offset'),
+      total: form.get('total_file_size'),
+      isPrivate: form.get('is_private'),
+    }))
+    expect(pieces).toEqual([
+      {
+        name: 'demo.mp4',
+        size: 1000,
+        index: '0',
+        count: '3',
+        offset: '0',
+        total: '2500',
+        isPrivate: '1',
+      },
+      {
+        name: 'demo.mp4',
+        size: 1000,
+        index: '1',
+        count: '3',
+        offset: '1000',
+        total: '2500',
+        isPrivate: '1',
+      },
+      {
+        name: 'demo.mp4',
+        size: 500,
+        index: '2',
+        count: '3',
+        offset: '2000',
+        total: '2500',
+        isPrivate: '1',
+      },
+    ])
+    // Progress counts file bytes across all pieces, never going back.
+    expect(progress).toEqual([...progress].sort((a, b) => a - b))
+    expect(progress.at(-1)).toBe(2500)
+    expect(uploader.state.progress).toBe(100)
+    expect(uploader.state.result).toEqual(result)
+  })
+
+  it('sends a file in one request when it fits in one piece, or chunking is off', async () => {
+    vi.stubGlobal(
+      'XMLHttpRequest',
+      ChunkServerXhr as unknown as typeof XMLHttpRequest,
+    )
+
+    await upload(video(2500), {})
+    setConfig('uploadChunkSize', 1000)
+    await upload(video(1000), {})
+    await upload(video(2500), { chunkSize: false })
+
+    expect(ChunkServerXhr.requests).toHaveLength(3)
+    for (const form of ChunkServerXhr.requests) {
+      expect(form.has('chunk_index')).toBe(false)
+    }
+  })
+
+  it('stops at a failed piece and names it as too big', async () => {
+    vi.stubGlobal(
+      'XMLHttpRequest',
+      ChunkServerXhr as unknown as typeof XMLHttpRequest,
+    )
+    ChunkServerXhr.failAt = 1
+    const uploader = useFileUpload()
+
+    const error = await uploader
+      .upload(video(3 * 1024 * 1024), { chunkSize: 1024 * 1024 })
+      .catch((e) => e)
+
+    expect(ChunkServerXhr.requests).toHaveLength(2)
+    expect(error).toBeInstanceOf(UploadError)
+    expect(error.kind).toBe('file-size')
+    expect(error.message).toBe(
+      'This file is 3 MB, which is more than the server accepts.',
+    )
+    expect(uploader.state.uploading).toBe(false)
+  })
+})
