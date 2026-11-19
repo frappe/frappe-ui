@@ -42,7 +42,7 @@ export interface UploadOptions {
  * file with no stated intent is treated as access-controlled, not
  * world-readable. Pass `private: false` for intentionally public files.
  *
- * Internal: shared with `FileUploadHandler`, not exported from the package.
+ * Internal: not exported from the package.
  */
 export function isPrivateUpload(options: UploadOptions = {}) {
   return options.private ?? true

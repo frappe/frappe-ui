@@ -3,7 +3,7 @@ import { ref, watch } from 'vue'
 import type { JSONContent } from '@tiptap/core'
 import type { Extensions } from '@tiptap/core'
 import { useEditor, type Editor, type UploadFunction } from './useEditor'
-import { serializeContent } from './serialize-content'
+import { serializeContent, type ContentFormat } from './serialize-content'
 import { setPlaceholder } from './extensions'
 import { provideEditor } from './editor-context'
 
@@ -19,7 +19,7 @@ const props = withDefaults(
     extensions: Extensions
 
     // content / behavior knobs (universal, reactive where noted)
-    format?: 'html' | 'json' | 'markdown'
+    format?: ContentFormat
     placeholder?: string
     editable?: boolean
     autofocus?: boolean
