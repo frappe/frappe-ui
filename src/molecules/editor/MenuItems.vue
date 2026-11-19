@@ -26,7 +26,13 @@ watch(
       version.value++
     }
     editor.on('transaction', bump)
-    onCleanup(() => editor.off('transaction', bump))
+    // States read before EditorContent mounts the view are wrong (most items
+    // can't run yet), and mounting dispatches no transaction.
+    editor.on('mount', bump)
+    onCleanup(() => {
+      editor.off('transaction', bump)
+      editor.off('mount', bump)
+    })
   },
   { immediate: true },
 )

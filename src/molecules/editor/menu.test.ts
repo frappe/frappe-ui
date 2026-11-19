@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, vi } from 'vitest'
-import { createApp, defineComponent, h } from 'vue'
+import { createApp, defineComponent, h, nextTick } from 'vue'
 // At module scope rather than `await import('./index')` inside each test.
 // `vi.mock` below is hoisted above imports either way, so the stubs still
 // apply — but pulling the whole editor barrel is slow enough under coverage
@@ -131,6 +131,28 @@ describe('editor menu primitives and presets', () => {
     // them by aria-label rather than visible text.
     expect(root.textContent).toContain('Heading')
     expect(root.querySelector('[aria-label="Heading 2"]')).toBeTruthy()
+  })
+
+  it('re-reads disabled state when the editor view mounts', async () => {
+    const { EditorFixedMenu, Italic } = editorMenu
+    const { editor } = fakeEditor()
+    const handlers: Record<string, Array<() => void>> = {}
+    editor.on = (event: string, fn: () => void) =>
+      (handlers[event] ??= []).push(fn)
+    editor.off = vi.fn()
+    // Before the view mounts no command can run.
+    editor.canRun = false
+
+    const root = mount(EditorFixedMenu, { editor, items: [Italic] })
+    const italic = () =>
+      root.querySelector('[aria-label="Italic"]') as HTMLButtonElement
+    expect(italic().disabled).toBe(true)
+
+    // Mounting dispatches no transaction; only the `mount` event says so.
+    editor.canRun = true
+    handlers.mount?.forEach((fn) => fn())
+    await nextTick()
+    expect(italic().disabled).toBe(false)
   })
 
   it('command item actions call the editor chain', async () => {
