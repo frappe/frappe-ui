@@ -12,7 +12,7 @@
   >
     <!-- A row is a pill lying down: the same tinted block the grid views
          draw, with the calendar's colour as its fill and the pill's own bar
-         of that colour inside its left edge — 2px, rounded, a pixel short of
+         of that colour inside its start edge — 2px, rounded, a pixel short of
          the text at either end, so it reads as a mark set in the block and
          not as a border the block was given — so the Agenda and the Week
          read as one set of events at two ranges rather than two lists that
@@ -32,7 +32,7 @@
          390 — and a column is only worth its width when there is a title
          beside it to align. Under the title the time is still the first
          thing on its line, so a reader scanning for "when" finds it in the
-         same place on every row: the left, one line down.
+         same place on every row: the start, one line down.
 
          Radius and padding step with the layout: the wide row is one line
          and takes the pill's own 6px corner and a tight 6px of vertical
@@ -40,7 +40,7 @@
          lines tall and takes a size up of both, so a block does not read as
          a cramped card. -->
     <div
-      class="event calendar-row flex w-full gap-1.5 pl-1.5 pr-3 text-left"
+      class="event calendar-row flex w-full gap-1.5 ps-1.5 pe-3 text-start"
       :class="{
         narrow: props.narrow,
         'rounded-4 py-2.5': props.narrow,
@@ -77,7 +77,7 @@
         class="flex min-w-0 flex-1"
         :class="props.narrow ? 'items-center gap-3' : 'items-baseline gap-2.5'"
       >
-        <!-- The time, in a column of its own against the block's left edge:
+        <!-- The time, in a column of its own against the block's start edge:
            the titles line up under each other whatever each row's label says,
            which is what makes a day read as a day rather than as three
            sentences. In the calendar's own muted ink, as a pill's subtitle
@@ -102,7 +102,7 @@
           v-if="!props.narrow"
           class="calendar-row-time w-33 shrink-0 whitespace-nowrap text-xs tabular-nums text-ink-gray-7"
         >
-          {{ timeLabel }}
+          <bdi>{{ timeLabel }}</bdi>
         </span>
         <!-- Title, then what the row can add about it, on one line: a row is
            wide and a title is short, so a second line spends the height of
@@ -188,7 +188,7 @@
           <!-- The second line: the time, then what the row adds about the
              event, in the ink and size the description has on a wide row.
              The time leads it so a reader scanning for "when" finds it in
-             the same place on every row — the left, one line down. -->
+             the same place on every row — the start, one line down. -->
           <span
             v-if="props.narrow"
             class="event-subtitle flex min-w-0 items-baseline gap-1.5 text-sm leading-4"
@@ -197,7 +197,7 @@
             <span
               class="calendar-row-time shrink-0 whitespace-nowrap tabular-nums text-ink-gray-7"
             >
-              {{ timeLabel }}
+              <bdi>{{ timeLabel }}</bdi>
             </span>
             <span
               v-if="hasDescription"
@@ -210,7 +210,7 @@
           </span>
         </span>
         <!-- Who is coming, at the row's far end: a count, which is a column's
-           worth of fact rather than a sentence's, and the card's right edge
+           worth of fact rather than a sentence's, and the card's end edge
            is the one place other than the time column that a row is aligned
            on — so the counts of a day's rows line up under each other the
            way their times do. The slot is for a consumer that can put faces

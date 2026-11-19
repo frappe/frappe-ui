@@ -9,7 +9,7 @@
   -->
   <Popover
     :open="open"
-    :side="side"
+    :side="logicalSide"
     align="center"
     @update:open="(value) => !value && emit('update:open', false)"
     @open="emit('open')"
@@ -50,13 +50,14 @@
 </template>
 
 <script setup lang="ts">
-import { inject } from 'vue'
+import { computed, inject } from 'vue'
 import Popover from '#components/Popover/Popover.vue'
 import type { PopoverSide } from '#components/Popover/types'
+import { documentDir } from '#utils/document'
 import EventModalContent from './EventModalContent.vue'
 import { CALENDAR_CONFIG_KEY, type CalendarEvent } from './types'
 
-defineProps<{
+const props = defineProps<{
   open: boolean
   side: PopoverSide
   calendarEvent: CalendarEvent
@@ -72,4 +73,15 @@ const emit = defineEmits<{
 }>()
 
 const config = inject(CALENDAR_CONFIG_KEY)!
+
+// `side` names the LTR side; an RTL page opens it on the mirrored one.
+const mirroredSide: Partial<Record<PopoverSide, PopoverSide>> = {
+  left: 'right',
+  right: 'left',
+}
+const logicalSide = computed(() =>
+  documentDir() === 'rtl'
+    ? (mirroredSide[props.side] ?? props.side)
+    : props.side,
+)
 </script>

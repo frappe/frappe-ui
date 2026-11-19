@@ -2,13 +2,15 @@
   position: relative;
 }
 
-/* The hours hang 45px left of the day column — which is 45px in from the
-   gutter's right edge, the two being the same line. */
+/* The hours hang 45px before the day column — which is 45px in from the
+   gutter's end edge, the two being the same line. `plaintext` keeps "9 am"
+   in its own order on an RTL page. */
 .calendar-column ::before {
   content: attr(data-time-attr);
   position: absolute;
-  left: -45px;
+  inset-inline-start: -45px;
   top: -9px;
+  unicode-bidi: plaintext;
   font-size: 12px;
   font-weight: 400;
 }
