@@ -121,6 +121,61 @@ describe('Avatar', () => {
     })
   })
 
+  // The cut-out is a gradient, which has no logical side, so it is checked by
+  // where the hole is: the avatar's alpha at the dot's centre is 0.
+  function holeSide(dir: 'ltr' | 'rtl', pageDir: 'ltr' | 'rtl' = 'ltr') {
+    cy.then(() => {
+      document.documentElement.dir = pageDir
+    })
+    cy.mount(() =>
+      h('div', { dir }, [
+        h(
+          Avatar,
+          { 'data-cy': 'avatar', label: 'Abc', size: '3xl' },
+          { indicator: () => h('span', { 'data-cy': 'dot' }) },
+        ),
+      ]),
+    )
+    return cy.get('[data-cy="avatar"]').then(($avatar) => {
+      const avatar = $avatar[0].getBoundingClientRect()
+      const box = $avatar[0]
+        .querySelector('[data-cy="dot"]')!
+        .parentElement!.parentElement!.getBoundingClientRect()
+      const mask = getComputedStyle($avatar[0].firstElementChild!).maskImage
+      const dotSide = box.left < avatar.left ? 'left' : 'right'
+      // The hole's x is the first length after "at": near 0 on the left.
+      const holeX = mask.match(/at (calc\([^)]*\)|[\d.]+(?:px|%))/)![1]
+      const holeSide = holeX.includes('100%') ? 'right' : 'left'
+      return { dotSide, holeSide }
+    })
+  }
+
+  afterEach(() => {
+    document.documentElement.dir = ''
+  })
+
+  it('puts the indicator and its cut-out on the end corner', () => {
+    holeSide('ltr').should('deep.equal', {
+      dotSide: 'right',
+      holeSide: 'right',
+    })
+    holeSide('rtl', 'rtl').should('deep.equal', {
+      dotSide: 'left',
+      holeSide: 'left',
+    })
+  })
+
+  it('keeps the cut-out under the indicator in a nested dir', () => {
+    holeSide('rtl', 'ltr').should('deep.equal', {
+      dotSide: 'left',
+      holeSide: 'left',
+    })
+    holeSide('ltr', 'rtl').should('deep.equal', {
+      dotSide: 'right',
+      holeSide: 'right',
+    })
+  })
+
   it('leaves the avatar whole without an indicator', () => {
     cy.mount(Avatar, {
       props: { 'data-cy': 'avatar', label: 'Abc' },

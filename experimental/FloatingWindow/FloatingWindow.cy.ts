@@ -330,6 +330,34 @@ describe('FloatingWindow', () => {
     })
   })
 
+  describe('on an RTL page', () => {
+    beforeEach(() => {
+      document.documentElement.dir = 'rtl'
+    })
+    afterEach(() => {
+      document.documentElement.dir = ''
+    })
+
+    it('opens and minimizes to the bottom-left corner', () => {
+      cy.mount(controlledWindow())
+
+      // The default floating rect is 24px in from the left edge.
+      cy.get('[aria-label="Pop out"]').click()
+      cy.get('.floating-window').should(($el) => {
+        const r = $el[0].getBoundingClientRect()
+        expect(r.left).to.be.closeTo(24, 1)
+        expect(800 - r.bottom).to.be.closeTo(24, 1)
+      })
+
+      cy.get('[aria-label="Minimize"]').click()
+      cy.get('.floating-window').should(($el) => {
+        const r = $el[0].getBoundingClientRect()
+        expect(r.left).to.be.closeTo(24, 1)
+        expect(800 - r.bottom).to.be.closeTo(24, 1)
+      })
+    })
+  })
+
   describe('layering', () => {
     // A detached window sits above ordinary page chrome and below every dialog.
     // The host target is provided here on purpose: without it both nodes land

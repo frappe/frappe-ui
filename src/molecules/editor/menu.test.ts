@@ -236,6 +236,26 @@ describe('editor menu primitives and presets', () => {
     ).toBeTruthy()
   })
 
+  it('mirrors only the undo and redo buttons on an RTL page', () => {
+    const { EditorBubbleMenu, Undo, Redo, Bold } = editorMenu
+    const { editor } = fakeEditor()
+    editor.can = () => ({ undo: () => true, redo: () => true })
+    const root = mount(EditorBubbleMenu, {
+      editor,
+      items: [Undo, Redo, Bold],
+      options: {},
+    })
+    const mirrored = (label: string) =>
+      root
+        .querySelector(`[aria-label="${label}"]`)!
+        .classList.contains('rtl:-scale-x-100')
+
+    expect([Undo.icon, Redo.icon]).toEqual(['lucide-undo-2', 'lucide-redo-2'])
+    expect(mirrored('Undo')).toBe(true)
+    expect(mirrored('Redo')).toBe(true)
+    expect(mirrored('Bold')).toBe(false)
+  })
+
   it('passes shouldShow as a menu prop instead of nesting it in Floating UI options', async () => {
     const { EditorBubbleMenu, EditorFloatingMenu, Bold } = editorMenu
     const { editor } = fakeEditor()

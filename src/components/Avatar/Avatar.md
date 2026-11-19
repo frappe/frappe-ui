@@ -23,7 +23,8 @@ avatar from the one under it, and a count stands in for the rest.
 
 ### Online status
 
-The `#indicator` slot places a dot on the bottom-right corner. A class on the
+The `#indicator` slot places a dot on the bottom corner at the end of the line
+(bottom-right, or bottom-left on a `dir="rtl"` page). A class on the
 dot sets its color.
 
 ```vue
@@ -75,7 +76,7 @@ and the class takes over from its breakpoint up.
 
 ### Indicator
 
-The avatar cuts a circle out of its bottom-right corner for the indicator. The
+The avatar cuts a circle out of that corner for the indicator. The
 gap around the indicator is see-through, so it matches the surface behind the
 avatar, such as a hovered row, a popover or a dialog.
 
