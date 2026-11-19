@@ -96,6 +96,21 @@ function getCombo(config: KeyboardShortcutConfig): KeyboardShortcutCombo {
   return toValue(config.combo)
 }
 
+function isElementEditable(el: unknown): boolean {
+  if (!el || typeof el !== 'object') return false
+  let raw = el as Node
+  if (raw.nodeType === Node.TEXT_NODE) {
+    raw = raw.parentElement as Node
+  }
+  const target = raw as HTMLElement | null
+  if (!target) return false
+  return Boolean(
+    target.isContentEditable ||
+    target.tagName === 'INPUT' ||
+    target.tagName === 'TEXTAREA',
+  )
+}
+
 /**
  * True when the keypress belongs to whatever the user is typing in — an input,
  * a textarea, or a contenteditable. A shortcut that swallows those keys leaves
@@ -103,20 +118,33 @@ function getCombo(config: KeyboardShortcutConfig): KeyboardShortcutCombo {
  * this check.
  */
 export function isTargetEditable(e: KeyboardEvent): boolean {
-  const target = e.target as HTMLElement | null
-  if (!target) return false
-  return (
-    target.isContentEditable ||
-    target.tagName === 'INPUT' ||
-    target.tagName === 'TEXTAREA'
-  )
+  if (isElementEditable(e.target)) return true
+  if (typeof e.composedPath === 'function') {
+    const path = e.composedPath()
+    if (path.length && isElementEditable(path[0])) return true
+  }
+  return false
 }
 
 /** True when the keypress came from inside an open dialog (focus-trap owned). */
 function isInsideDialog(e: KeyboardEvent): boolean {
   const target = e.target
-  if (!(target instanceof Element)) return false
-  return !!target.closest('[role="dialog"]')
+  if (target instanceof Element && target.closest('[role="dialog"], dialog')) {
+    return true
+  }
+  if (typeof e.composedPath === 'function') {
+    for (const node of e.composedPath()) {
+      if (node instanceof Element) {
+        if (
+          node.getAttribute?.('role') === 'dialog' ||
+          node.tagName === 'DIALOG'
+        ) {
+          return true
+        }
+      }
+    }
+  }
+  return false
 }
 
 function globalKeydownHandler(e: KeyboardEvent) {
