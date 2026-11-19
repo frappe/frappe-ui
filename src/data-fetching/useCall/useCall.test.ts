@@ -834,4 +834,79 @@ describe('useCall', () => {
 
     logSpy.mockRestore()
   })
+
+  it('handles standard Frappe /api/method response envelope with message property', async () => {
+    server.use(
+      http.post(url('/api/method/my_app.api.get_attendance_status'), () =>
+        HttpResponse.json({
+          message: {
+            employee: 'HR-EMP-00004',
+            can_in: true,
+            can_out: false,
+          },
+        }),
+      ),
+    )
+
+    const onSuccess = vi.fn()
+    const call = useCall<{
+      employee: string
+      can_in: boolean
+      can_out: boolean
+      employee_upper?: string
+    }>({
+      url: url('/api/method/my_app.api.get_attendance_status'),
+      method: 'POST',
+      immediate: false,
+      onSuccess,
+      transform: (data) => ({
+        ...data,
+        employee_upper: data.employee.toUpperCase(),
+      }),
+    })
+
+    call.fetch()
+    await call.promise
+
+    expect(onSuccess).toHaveBeenCalledWith({
+      employee: 'HR-EMP-00004',
+      can_in: true,
+      can_out: false,
+      employee_upper: 'HR-EMP-00004',
+    })
+    expect(call.data).toEqual({
+      employee: 'HR-EMP-00004',
+      can_in: true,
+      can_out: false,
+      employee_upper: 'HR-EMP-00004',
+    })
+
+    const submitted = await call.submit()
+    expect(submitted).toEqual({
+      employee: 'HR-EMP-00004',
+      can_in: true,
+      can_out: false,
+      employee_upper: 'HR-EMP-00004',
+    })
+  })
+
+  it('handles primitive values in standard Frappe message envelope', async () => {
+    server.use(
+      http.get(url('/api/method/primitive_message'), () =>
+        HttpResponse.json({
+          message: 'pong',
+        }),
+      ),
+    )
+
+    const call = useCall<string>({
+      url: url('/api/method/primitive_message'),
+      immediate: false,
+    })
+
+    call.fetch()
+    await call.promise
+
+    expect(call.data).toBe('pong')
+  })
 })
