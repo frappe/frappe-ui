@@ -121,6 +121,131 @@ describe('Tree', () => {
     cy.contains('Node A').should('exist')
   })
 
+  it('selects a row on click and on Enter through v-model', () => {
+    const onUpdate = cy.stub().as('select')
+    cy.mount(Tree, {
+      props: {
+        nodes: makeNodes(),
+        nodeKey: 'id',
+        expanded: ['root'],
+        'onUpdate:modelValue': onUpdate,
+      },
+    })
+    cy.contains('[data-slot="row"]', 'Node B').click()
+    cy.get('@select').should('have.been.calledWith', 'b')
+    cy.contains('[role="treeitem"]', 'Node A').focus().type(' ')
+    cy.get('@select').should('have.been.calledWith', 'a')
+    cy.contains('[role="treeitem"]', 'Root').focus().type('{enter}')
+    cy.get('@select').should('have.been.calledWith', 'root')
+  })
+
+  it('keeps its own selection when v-model is not bound', () => {
+    cy.mount(Tree, {
+      props: { nodes: makeNodes(), nodeKey: 'id', expanded: ['root'] },
+    })
+    cy.contains('[data-slot="row"]', 'Node B').click()
+    cy.get('[aria-selected]').should('have.length', 1).and('contain', 'Node B')
+  })
+
+  it('makes the selected row the Tab stop while it is visible', () => {
+    const selected = ref('b')
+    cy.mount({
+      render: () =>
+        h(Tree, {
+          nodes: makeNodes(),
+          nodeKey: 'id',
+          expanded: ['root'],
+          modelValue: selected.value,
+        }),
+    })
+    cy.contains('[role="treeitem"]', 'Node B').should(
+      'have.attr',
+      'tabindex',
+      '0',
+    )
+    cy.get('[tabindex="0"]').should('have.length', 1)
+    cy.then(() => (selected.value = 'a-1'))
+    cy.contains('[role="treeitem"]', 'Root').should(
+      'have.attr',
+      'tabindex',
+      '0',
+    )
+    cy.get('[tabindex="0"]').should('have.length', 1)
+  })
+
+  it('moves focus to the selected row when the focused row hides', () => {
+    const expanded = ref(['root', 'a'])
+    const nodes = makeNodes()
+    cy.mount({
+      render: () =>
+        h(Tree, {
+          nodes,
+          nodeKey: 'id',
+          expanded: expanded.value,
+          modelValue: 'b',
+        }),
+    })
+    cy.contains('[role="treeitem"]', 'Node A-1').focus()
+    cy.then(() => (expanded.value = ['root']))
+    cy.contains('Node A-1').should('not.exist')
+    cy.focused().should('contain', 'Node B').and('have.attr', 'tabindex', '0')
+  })
+
+  it('moves the Tab stop to a row selected while focus was outside', () => {
+    const selected = ref('b')
+    cy.mount({
+      render: () => [
+        h(Tree, {
+          nodes: makeNodes(),
+          nodeKey: 'id',
+          expanded: ['root', 'a'],
+          modelValue: selected.value,
+        }),
+        h('button', { 'data-cy': 'outside' }, 'Outside'),
+      ],
+    })
+    cy.contains('[role="treeitem"]', 'Node B').focus()
+    cy.get('[data-cy="outside"]').focus()
+    cy.then(() => (selected.value = 'a-1'))
+    cy.contains('[role="treeitem"]', 'Node A-1').should(
+      'have.attr',
+      'tabindex',
+      '0',
+    )
+    cy.get('[role="treeitem"][tabindex="0"]').should('have.length', 1)
+  })
+
+  it('marks only the selected row and passes `selected` to the slots', () => {
+    const selected = ref<string | null>('b')
+    cy.mount({
+      render: () =>
+        h(
+          Tree,
+          {
+            nodes: makeNodes(),
+            nodeKey: 'id',
+            expanded: ['root'],
+            modelValue: selected.value,
+          },
+          {
+            'item-suffix': ({ node, selected }: any) =>
+              h('span', { 'data-cy': `suffix-${node.id}` }, String(selected)),
+          },
+        ),
+    })
+    cy.contains('[role="treeitem"]', 'Node B')
+      .should('have.attr', 'aria-selected', 'true')
+      .and('have.attr', 'data-selected')
+    cy.contains('[role="treeitem"]', 'Node A').should(
+      'not.have.attr',
+      'aria-selected',
+    )
+    cy.get('[data-cy="suffix-b"]').should('have.text', 'true')
+    cy.get('[data-cy="suffix-a"]').should('have.text', 'false')
+    cy.then(() => (selected.value = null))
+    cy.get('[aria-selected]').should('not.exist')
+  })
+
   it('keeps every key when calls stack up under a bound v-model', () => {
     // A bound model round-trips through the parent, so the prop lags a render.
     // Consecutive calls must still accumulate rather than overwrite.
@@ -427,8 +552,9 @@ describe('Tree', () => {
       })
   })
 
-  it('freezes expand/collapse and drag when disabled', () => {
+  it('freezes expand/collapse, selection and drag when disabled', () => {
     const tree = ref<TreeExposed | null>(null)
+    const onSelect = cy.stub().as('select')
     cy.mount({
       render: () =>
         h(Tree, {
@@ -438,11 +564,15 @@ describe('Tree', () => {
           expanded: ['root'],
           disabled: true,
           draggable: true,
+          'onUpdate:modelValue': onSelect,
         }),
     })
     cy.contains('Node A').should('exist')
     cy.get('[data-slot="toggle"]').first().click()
     cy.contains('Node A').should('exist') // click had no effect
+    cy.contains('[data-slot="row"]', 'Node B').click()
+    cy.contains('[role="treeitem"]', 'Node B').focus().type('{enter}')
+    cy.get('@select').should('not.have.been.called')
     // `disabled` freezes interaction, not the imperative API.
     cy.then(() => tree.value!.expand('a'))
     cy.contains('Node A-1').should('exist')

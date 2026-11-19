@@ -10,6 +10,8 @@
     :data-dragging="isDragging || undefined"
     :data-drop="dropEdge || undefined"
     :aria-expanded="hasChildren ? expanded : undefined"
+    :aria-selected="selected || undefined"
+    :data-selected="selected || undefined"
     :aria-level="level"
     :aria-setsize="setSize"
     :aria-posinset="index + 1"
@@ -22,7 +24,11 @@
       :class="[
         ctx.draggable.value && !ctx.disabled.value ? 'cursor-grab' : '',
         // When the row is fully overridden via #item, the consumer owns its hover/selected surface
-        $slots.item ? '' : 'hover:bg-surface-gray-2',
+        $slots.item
+          ? ''
+          : selected
+            ? 'bg-surface-gray-3'
+            : 'hover:bg-surface-gray-2',
       ]"
       :draggable="ctx.draggable.value && !ctx.disabled.value"
       @click="onRowClick"
@@ -42,7 +48,10 @@
           type="button"
           data-slot="toggle"
           :data-state="expanded ? 'expanded' : 'collapsed'"
-          class="flex size-5 shrink-0 items-center justify-center rounded-4 text-ink-gray-5 hover:bg-surface-gray-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-outline-gray-3"
+          class="flex size-5 shrink-0 items-center justify-center rounded-4 text-ink-gray-5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-outline-gray-3"
+          :class="
+            selected ? 'hover:bg-surface-gray-4' : 'hover:bg-surface-gray-3'
+          "
           :aria-label="expanded ? 'Collapse' : 'Expand'"
           tabindex="-1"
           @click.stop="ctx.toggle(node)"
@@ -135,17 +144,14 @@ const label = computed(() => ctx.labelOf(props.node))
 const children = computed(() => ctx.childrenOf(props.node))
 const hasChildren = computed(() => ctx.hasChildren(props.node))
 const expanded = computed(() => ctx.isExpanded(props.node))
+const selected = computed(() => ctx.selectedKey.value === key.value)
 const isDragging = computed(() => ctx.dragSourceKey.value === key.value)
 
 const dropEdge = computed(() =>
   ctx.dropTargetKey.value === key.value ? ctx.dropPosition.value : null,
 )
 
-const tabbable = computed(
-  () =>
-    ctx.focusedKey.value === key.value ||
-    (ctx.focusedKey.value == null && props.level === 1 && props.index === 0),
-)
+const tabbable = computed(() => ctx.tabKey.value === key.value)
 
 const itemSlotProps = computed(() => ({
   node: props.node,
@@ -153,6 +159,7 @@ const itemSlotProps = computed(() => ({
   expanded: expanded.value,
   hasChildren: hasChildren.value,
   focused: ctx.focusedKey.value === key.value,
+  selected: selected.value,
   disabled: ctx.disabled.value,
 }))
 
@@ -163,7 +170,7 @@ const slotProps = computed(() => ({
 
 function onRowClick() {
   if (ctx.disabled.value) return
-  ctx.toggle(props.node)
+  ctx.activate(props.node)
 }
 
 watch(

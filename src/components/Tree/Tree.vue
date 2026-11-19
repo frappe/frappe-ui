@@ -7,6 +7,7 @@
     :data-guides="guides"
     @keydown="onKeydown"
     @focusin="onFocusin"
+    @focusout="onFocusout"
   >
     <TreeItem
       v-for="(node, index) in roots"
@@ -106,6 +107,7 @@ defineSlots<{
 // Documented on `expanded` in `./types.ts`. A JSDoc block here would be
 // appended to that description by `propsgen`, not replace it.
 const expandedKeys = defineModel<TreeKey[]>('expanded', { default: () => [] })
+const selectedKey = defineModel<TreeKey | null>({ default: null })
 
 const treeRef = ref<HTMLElement | null>(null)
 const focusedKey = ref<TreeKey | null>(null)
@@ -200,6 +202,17 @@ function eachCollapsible(nodes: TreeNode[], fn: (node: TreeNode) => void) {
   }
 }
 
+// --- selection ------------------------------------------------------------
+function selectNode(node: TreeNode) {
+  if (!props.disabled) selectedKey.value = keyOf(node)
+}
+
+// A click or Enter/Space on a row selects it and opens or closes it.
+function activateNode(node: TreeNode) {
+  selectNode(node)
+  toggleNode(node)
+}
+
 // --- imperative API -------------------------------------------------------
 // Key-based and programmatic, so `disabled` (which freezes user interaction)
 // does not block them. `expand` accepts a key whose children have not loaded
@@ -229,8 +242,13 @@ function focus(key: TreeKey) {
 }
 
 function onFocusin() {
-  if (focusedKey.value == null && roots.value.length)
-    focusedKey.value = keyOf(roots.value[0])
+  focusedKey.value ??= tabKey.value
+}
+
+// Forget the focused row once focus leaves the tree, so Tab returns to the selection.
+function onFocusout(e: FocusEvent) {
+  const tree = e.currentTarget as HTMLElement
+  if (!tree.contains(e.relatedTarget as Node | null)) focusedKey.value = null
 }
 
 const registerItem = (key: TreeKey, el: HTMLElement) => itemEls.set(key, el)
@@ -261,6 +279,15 @@ const flat = computed(() => {
   walk(roots.value, null, 1)
   return out
 })
+
+// Tab lands on the focused row, else the selected row if visible, else the first.
+const tabKey = computed(
+  () =>
+    focusedKey.value ??
+    flat.value.find((r) => r.key === selectedKey.value)?.key ??
+    flat.value[0]?.key ??
+    null,
+)
 
 // Guarded here as well as inside, so the call, the import and the composable
 // all leave the production bundle rather than shipping as dead code.
@@ -297,14 +324,17 @@ const { onKeydown } = useTreeKeyboard({
   focus,
   expand: expandNode,
   collapse: collapseNode,
-  toggle: toggleNode,
+  activate: activateNode,
 })
 
 // --- lifecycle ------------------------------------------------------------
-// Keep focus valid if the focused node disappears from the tree.
+// When the focused row leaves the tree, move focus to the Tab stop.
 watch(flat, (rows) => {
-  if (focusedKey.value != null && !rows.some((r) => r.key === focusedKey.value))
-    focusedKey.value = rows[0]?.key ?? null
+  if (focusedKey.value == null || rows.some((r) => r.key === focusedKey.value))
+    return
+  const hadFocus = treeRef.value?.contains(document.activeElement)
+  focusedKey.value = null
+  if (hadFocus && tabKey.value != null) focus(tabKey.value)
 })
 
 // --- provide context ------------------------------------------------------
@@ -314,12 +344,15 @@ provide(TreeContextKey, {
   draggable: toRef(props, 'draggable'),
   disabled: toRef(props, 'disabled'),
   focusedKey,
+  tabKey,
+  selectedKey,
   keyOf,
   labelOf,
   childrenOf,
   hasChildren,
   isExpanded,
   toggle: toggleNode,
+  activate: activateNode,
   focus,
   registerItem,
   unregisterItem,

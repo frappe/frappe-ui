@@ -97,6 +97,14 @@ export interface TreeProps {
    * @default []
    */
   expanded?: TreeKey[]
+
+  /**
+   * Key of the selected node, or `null` for none. Two-way via `v-model`:
+   * clicking a row, or pressing Enter or Space on it, selects it. Without
+   * `v-model` the tree keeps its own selection.
+   * @default null
+   */
+  modelValue?: TreeKey | null
 }
 
 /** State + callbacks shared from `Tree` down to every recursive `TreeItem`. */
@@ -107,6 +115,8 @@ export interface TreeContext {
   disabled: Ref<boolean>
 
   focusedKey: Ref<TreeKey | null>
+  tabKey: Readonly<Ref<TreeKey | null>>
+  selectedKey: Readonly<Ref<TreeKey | null>>
 
   keyOf: (node: TreeNode) => TreeKey
   labelOf: (node: TreeNode) => string
@@ -115,6 +125,7 @@ export interface TreeContext {
 
   isExpanded: (node: TreeNode) => boolean
   toggle: (node: TreeNode) => void
+  activate: (node: TreeNode) => void
   focus: (key: TreeKey) => void
 
   registerItem: (key: TreeKey, el: HTMLElement) => void
@@ -161,6 +172,7 @@ export interface TreeNodeSlotProps {
   expanded: boolean
   hasChildren: boolean
   focused: boolean
+  selected: boolean
   disabled: boolean
   toggle: () => void
 }

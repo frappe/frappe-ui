@@ -81,6 +81,20 @@ Clicking a row, or pressing `Enter` or `Space` on it, opens or closes it.
 Every change assigns a new array, so shallow watchers, immutable stores and
 undo logs see it.
 
+### Selection
+
+`v-model` holds the key of the selected node, or `null` for none. Clicking a
+row, or pressing `Enter` or `Space` on it, selects it. Without `v-model` the
+tree keeps its own selection, so a clicked row stays marked. The selected row gets a background, `aria-selected="true"`
+and `data-selected`, and the row slots get `selected`. A row drawn with `#item`
+gets no background; style it from the slot's `selected`. `Tab` into the tree
+lands on the selected row when it is visible. Set the key yourself to follow
+something outside the tree, such as the current page.
+
+```vue
+<Tree :nodes="nodes" node-key="name" v-model="selected" />
+```
+
 ### Drag and drop
 
 Set `draggable` to turn on dragging. The tree works out the drop position from
@@ -112,7 +126,7 @@ removed from the old one.
 
 ### Disabled
 
-`disabled` stops people from opening, closing and dragging rows.
+`disabled` stops people from opening, closing, selecting and dragging rows.
 
 ### Custom rows
 
@@ -124,7 +138,8 @@ row's state.
 
 The tree follows the WAI-ARIA tree view pattern, with `role="tree"`,
 `treeitem` and `group`. Each row reports its level, its position among its
-siblings and, for a parent, whether it is open.
+siblings and, for a parent, whether it is open. The selected row has
+`aria-selected="true"`.
 
 | Keys              | Action                                        |
 | ----------------- | --------------------------------------------- |
@@ -132,7 +147,7 @@ siblings and, for a parent, whether it is open.
 | `ArrowRight`               | Open the row, or move to its first child      |
 | `ArrowLeft`               | Close the row, or move to its parent          |
 | `Home` / `End`    | Move to the first or last row                 |
-| `Enter` / `Space` | Open or close the row                         |
+| `Enter` / `Space` | Select the row, and open or close it          |
 | Letters           | Move to the next row whose label starts with them |
 
 In a right-to-left layout `ArrowLeft` and `ArrowRight` swap.
