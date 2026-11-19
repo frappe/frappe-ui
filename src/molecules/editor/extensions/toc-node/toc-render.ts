@@ -18,8 +18,8 @@ import {
 } from '#molecules/editor/extensions/shared/heading-tree-utils'
 
 const OL_STYLE =
-  'list-style-type: decimal; margin: 0.5em 0; padding-left: 1.5em'
-const NESTED_OL_STYLE = 'list-style-type: decimal; padding-left: 1.5em'
+  'list-style-type: decimal; margin: 0.5em 0; padding-inline-start: 1.5em'
+const NESTED_OL_STYLE = 'list-style-type: decimal; padding-inline-start: 1.5em'
 
 /** Element-spec tuple: `[tag, attrs, ...children]`. Assignable to DOMOutputSpec. */
 type ElementSpec = readonly [string, Record<string, string>, ...any[]]

@@ -48,7 +48,7 @@
   },
   {
     name: 'indicator',
-    description: 'Small indicator shown at the bottom-right of the avatar',
+    description: 'Small indicator shown at the avatar\'s bottom end corner (bottom-left in RTL)',
     type: 'any'
   }
 ]

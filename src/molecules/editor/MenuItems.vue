@@ -57,6 +57,15 @@ function isComponentItem(
   return !('type' in item) && !!(item as CommandMenuItem).component
 }
 
+// Undo and redo point along the line, so they mirror on an RTL page.
+const RTL_MIRRORED_ICONS = new Set(['lucide-undo-2', 'lucide-redo-2'])
+
+function rtlMirrorClass(item: CommandMenuItem) {
+  return typeof item.icon === 'string' && RTL_MIRRORED_ICONS.has(item.icon)
+    ? 'rtl:-scale-x-100'
+    : undefined
+}
+
 function isGroup(item: MenuItem): item is MenuGroupItem {
   return 'type' in item && item.type === 'group'
 }
@@ -155,7 +164,10 @@ const menuButtonSize = computed(() => props.size ?? 'xs')
             variant="ghost"
             :icon="groupItem.icon"
             :label="groupItem.label"
-            class="aria-pressed:bg-surface-gray-3"
+            :class="[
+              'aria-pressed:bg-surface-gray-3',
+              rtlMirrorClass(groupItem),
+            ]"
             :aria-pressed="isPressed(groupItem)"
             :disabled="isItemDisabled(groupItem)"
             @click="run(groupItem, $event)"
@@ -168,7 +180,7 @@ const menuButtonSize = computed(() => props.size ?? 'xs')
           variant="ghost"
           :icon="item.icon"
           :label="labelOf(item)"
-          class="aria-pressed:bg-surface-gray-3"
+          :class="['aria-pressed:bg-surface-gray-3', rtlMirrorClass(item)]"
           :aria-pressed="isPressed(item)"
           :disabled="isItemDisabled(item)"
           @click="run(item, $event)"
