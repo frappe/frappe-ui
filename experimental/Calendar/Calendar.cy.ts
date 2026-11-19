@@ -437,6 +437,166 @@ describe('Calendar', () => {
     )
   })
 
+  describe('on an RTL page', () => {
+    beforeEach(() => {
+      document.documentElement.dir = 'rtl'
+    })
+    afterEach(() => {
+      document.documentElement.dir = ''
+    })
+
+    // Columns run Sunday to Saturday from the right edge.
+    function columnFromRight($row: JQuery<HTMLElement>, x: number) {
+      const row = $row[0].getBoundingClientRect()
+      return Math.floor(((row.right - x) / row.width) * 7)
+    }
+
+    it('lays a multi-day bar over its own days', () => {
+      cy.mount(Calendar, {
+        props: {
+          events: [
+            {
+              id: 'EV-STAY',
+              title: 'Offsite',
+              fromDate: thisWeek(1),
+              toDate: thisWeek(3),
+              isFullDay: true,
+              color: 'cyan',
+            },
+          ],
+        },
+      })
+
+      cy.get('.event')
+        .filter(':contains("Offsite")')
+        .then(($bar) => {
+          const bar = $bar[0].getBoundingClientRect()
+          const $row = $bar.closest('[data-week-row]') as JQuery<HTMLElement>
+          expect(columnFromRight($row, bar.right - 2)).to.eq(1)
+          expect(columnFromRight($row, bar.left + 2)).to.eq(3)
+        })
+    })
+
+    it('moves an event one day on when dropped one cell to the left', () => {
+      const onUpdate = cy.spy().as('update')
+      cy.mount(Calendar, {
+        props: {
+          events: [
+            {
+              id: 'EV-DRAG',
+              title: 'Drag me',
+              fromDate: thisWeek(2),
+              toDate: thisWeek(2),
+              isFullDay: true,
+              color: 'green',
+            },
+          ],
+          config: { isEditMode: true },
+          onUpdate,
+        },
+      })
+
+      const dataTransfer = new DataTransfer()
+      cy.get('.event')
+        .filter(':contains("Drag me")')
+        .then(($event) => {
+          const box = $event[0].getBoundingClientRect()
+          const $row = $event.closest('[data-week-row]')
+          const cell = $row[0].getBoundingClientRect().width / 7
+          const x = box.left + box.width / 2
+          cy.wrap($event).trigger('dragstart', { dataTransfer, clientX: x })
+          cy.wrap($row).trigger('drop', { dataTransfer, clientX: x - cell })
+        })
+      cy.get('@update').should('have.been.calledOnce')
+      cy.get('@update')
+        .its('firstCall.args.0')
+        .should('include', { fromDate: thisWeek(3), toDate: thisWeek(3) })
+    })
+
+    it('moves an event one day on when dragged one column to the left in the week view', () => {
+      const onUpdate = cy.spy().as('update')
+      cy.mount(Calendar, {
+        props: {
+          events: [
+            {
+              id: 'EV-WEEK',
+              title: 'Standup',
+              fromDate: thisWeek(2),
+              toDate: thisWeek(2),
+              fromTime: '10:00',
+              toTime: '11:00',
+              color: 'blue',
+            },
+          ],
+          config: { isEditMode: true, defaultMode: 'Week' },
+          onUpdate,
+        },
+      })
+
+      cy.get('.event')
+        .filter(':contains("Standup")')
+        .then(($event) => {
+          const box = $event[0].getBoundingClientRect()
+          const column = document.querySelector('[data-day-columns]')!
+          const width = column.clientWidth / 7
+          const x = box.left + box.width / 2
+          const y = box.top + box.height / 2
+          cy.wrap($event).trigger('mousedown', { clientX: x, clientY: y })
+          cy.window().trigger('mousemove', { clientX: x - width, clientY: y })
+          cy.window().trigger('mouseup', { clientX: x - width, clientY: y })
+        })
+      cy.get('@update')
+        .its('firstCall.args.0')
+        .should('include', { fromDate: thisWeek(3), fromTime: '10:00:00' })
+    })
+
+    it('opens the event popover toward the reading start in the week view', () => {
+      cy.mount(Calendar, {
+        props: {
+          events: [
+            {
+              id: 'EV-POP',
+              title: 'Review',
+              fromDate: thisWeek(3),
+              toDate: thisWeek(3),
+              fromTime: '10:00',
+              toTime: '11:00',
+              color: 'blue',
+            },
+          ],
+          config: { defaultMode: 'Week' },
+        },
+      })
+
+      cy.get('.event').filter(':contains("Review")').click()
+      cy.get('.event')
+        .filter(':contains("Review")')
+        .then(($event) => {
+          const event = $event[0].getBoundingClientRect()
+          cy.get('[data-reka-popper-content-wrapper]').should(($popover) => {
+            expect($popover[0].getBoundingClientRect().left).to.be.at.least(
+              event.right - 1,
+            )
+          })
+        })
+    })
+
+    it('goes forward with ArrowLeft and back with ArrowRight', () => {
+      cy.mount(Calendar, { props: { events: [] } })
+
+      const month = (offset: number) => {
+        const date = new Date()
+        date.setDate(1)
+        date.setMonth(date.getMonth() + offset)
+        return date.toLocaleString('en', { month: 'long' })
+      }
+      cy.get('body').type('{leftarrow}')
+      cy.contains(month(1)).should('exist')
+      cy.get('body').type('{rightarrow}{rightarrow}')
+      cy.contains(month(-1)).should('exist')
+    })
+  })
+
   describe('Agenda view', () => {
     // Two events either side of a three-day hole, both inside the window.
     const spread: CalendarEvent[] = [

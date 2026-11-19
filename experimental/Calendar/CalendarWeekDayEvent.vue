@@ -58,8 +58,8 @@
           'h-7': isAllDay && !bar,
           'min-h-6': !isAllDay,
           active: activeEvent == (props.event?.id || props.event?.name),
-          'rounded-l-none': bar && !bar.isStart,
-          'rounded-r-none': bar && !bar.isEnd,
+          'rounded-s-none': bar && !bar.isStart,
+          'rounded-e-none': bar && !bar.isEnd,
           'rounded-b-none': !isAllDay && props.event.segIsEnd === false,
           'rounded-t-none': !isAllDay && props.event.segIsStart === false,
           'event-draft': !!props.event.isDraft,
@@ -78,7 +78,7 @@
         "
       >
         <div class="flex gap-1.5 h-full" :class="padClass">
-          <!-- The calendar's own colour, down the pill's left edge — and the
+          <!-- The calendar's own colour, down the pill's start edge — and the
                first thing a tight pill gives up: the bar and the air beside it
                are 8px of a pill some 40px wide, a fifth of it spent saying
                what the fill it is drawn on says already. Where the column has
@@ -219,7 +219,7 @@
                   isCompact ? `${TIME_FLOOR_CLASS} truncate` : timeClampClass
                 "
               >
-                {{ timeLabel }}
+                <bdi>{{ timeLabel }}</bdi>
               </p>
             </div>
           </div>
@@ -249,6 +249,7 @@ import { useElementSize } from '@vueuse/core'
 import CalendarEventPopover from './CalendarEventPopover.vue'
 import NewEventModal from './NewEventModal.vue'
 import type { PopoverSide } from '#components/Popover/types'
+import { documentDir } from '#utils/document'
 import { useEventBase } from './useEventBase'
 import {
   calculateMinutes,
@@ -353,6 +354,7 @@ const eventTimeRef = ref<HTMLElement | null>(null)
 const isResizing = ref(false)
 const isRepositioning = ref(false)
 const isEventUpdated = ref(false)
+const isRtl = computed(() => documentDir() === 'rtl')
 // Pixel offset of the card while dragged, and the move it stands for: whole
 // days sideways, minutes up or down. Both ends of the event follow together.
 const state = reactive({ xAxis: 0, yAxis: 0, dayShift: 0, minuteShift: 0 })
@@ -374,12 +376,12 @@ const placedToTime = () =>
  * wrapper gives up so that it does — on both sides.
  *
  * The pill is the wrapper's width with `mx-px` besides, and `shrink-0`, so it
- * hangs a pixel past the wrapper's right edge. The wrapper therefore starts a
+ * hangs a pixel past the wrapper's end edge. The wrapper therefore starts a
  * pixel inside the inset and gives the whole of it up twice over: the pill's
- * own edges then land on the inset, left and right.
+ * own edges then land on the inset, at start and end.
  *
  * The view's number, or the standard gap. A bar laid against the column boundary
- * asks for the rule's own pixel back on its right, so that the white either side
+ * asks for the rule's own pixel back on its end, so that the white either side
  * of a divider is the same width — see `COLUMN_RULE`.
  */
 const pillInset = computed(() => props.inset ?? PILL_INSET)
@@ -428,8 +430,8 @@ const PILL_RADIUS = 8
  * on the same line steps down from the second as the second did from the
  * first.
  *
- * A right edge rather than a width, so that the pills resolve the same `7%`
- * against the same column: as `left + width`, 20% + 73% and 3px + 93% came out
+ * An end edge rather than a width, so that the pills resolve the same `7%`
+ * against the same column: as `start + width`, 20% + 73% and 3px + 93% came out
  * a sixty-fourth of a pixel apart, a device pixel on a good screen.
  */
 const timedBox = (
@@ -477,9 +479,9 @@ const timedBox = (
     bottom,
     height: bottom - top,
     hallNumber,
-    left: (extra = 0) =>
+    start: (extra = 0) =>
       `calc(${hallNumber * 20}% + ${pillInset.value + extra}px)`,
-    right: (extra = 0) => `calc(7% + ${hallNumber * 2 * CUT - extra}px)`,
+    end: (extra = 0) => `calc(7% + ${hallNumber * 2 * CUT - extra}px)`,
   }
 }
 
@@ -508,8 +510,8 @@ const cuts = computed(() => {
   // wherever it shows.
   const ring: CSSProperties = {
     top: `${own.top - CUT}px`,
-    left: own.left(-CUT),
-    right: own.right(CUT),
+    insetInlineStart: own.start(-CUT),
+    insetInlineEnd: own.end(CUT),
     height: `${own.height + 2 * CUT}px`,
     borderRadius: `${PILL_RADIUS + CUT}px`,
   }
@@ -521,9 +523,13 @@ const cuts = computed(() => {
       other.over || [],
     )
     // `inset()` clips this element — the whole column — to the other pill's
-    // box: its top and bottom in pixels from the column's edges, its left and
-    // right the pill's own, and its corners the pill's own.
-    const clip = `inset(${box.top}px ${box.right()} calc(100% - ${box.top + box.height}px) ${box.left()} round ${PILL_RADIUS}px)`
+    // box: its top and bottom in pixels from the column's edges, its start and
+    // end the pill's own, and its corners the pill's own. `inset()` is
+    // physical, so RTL puts the start on the right.
+    const [right, left] = isRtl.value
+      ? [box.start(), box.end()]
+      : [box.end(), box.start()]
+    const clip = `inset(${box.top}px ${right} calc(100% - ${box.top + box.height}px) ${left} round ${PILL_RADIUS}px)`
     return { id: `${other.id}-${other.hallNumber}-${other.idx}`, clip, ring }
   })
 })
@@ -533,7 +539,7 @@ const containerStyle = computed<CSSProperties>(() => {
     const span = props.bar.endCol - props.bar.startCol + 1
     return {
       position: 'absolute',
-      left: `calc(${(props.bar.startCol / DAY_COLUMNS) * 100}% + ${wrapperInset.value}px)`,
+      insetInlineStart: `calc(${(props.bar.startCol / DAY_COLUMNS) * 100}% + ${wrapperInset.value}px)`,
       width: `calc(${(span / DAY_COLUMNS) * 100}% - ${pillInset.value * 2 + COLUMN_RULE}px)`,
       top: `${weekLaneGap(props.narrow) + props.bar.lane * weekLanePitch(props.narrow)}px`,
       height: `${weekLaneHeight(props.narrow)}px`,
@@ -552,10 +558,10 @@ const containerStyle = computed<CSSProperties>(() => {
 
   const { top, height, hallNumber } = ownBox()
 
-  // Inset by the same measure an all-day bar is, so the two read off one left
+  // Inset by the same measure an all-day bar is, so the two read off one start
   // edge: the all-day pill above and the events under it are the same day's,
   // and a reader sees where the day starts once. The inset comes off the width
-  // so only the left edge moves; the right is where the column's own air
+  // so only the start edge moves; the end is where the column's own air
   // begins, at 93%, which is where the cascade of overlapping pills is read
   // from — each pill laid over another starts a fifth of the column further
   // in. It holds through a drag as well — a pill that shifts on being picked
@@ -564,16 +570,16 @@ const containerStyle = computed<CSSProperties>(() => {
   // `timedBox`. Dragged, it runs the column's width.
   const dragging = isResizing.value || isRepositioning.value
   const box = timedBox(0, 0, hallNumber)
-  const left = dragging
+  const start = dragging
     ? `${wrapperInset.value}px`
     : `calc(${hallNumber * 20}% + ${wrapperInset.value}px)`
-  const right = dragging ? `${PILL_MARGIN}px` : box.right(-PILL_MARGIN)
+  const end = dragging ? `${PILL_MARGIN}px` : box.end(-PILL_MARGIN)
 
   return {
     position: 'absolute',
     top: `${top}px`,
-    left,
-    right,
+    insetInlineStart: start,
+    insetInlineEnd: end,
     height: `${height}px`,
     zIndex: isResizing.value || isRepositioning.value ? 100 : 0,
     transform: `translate(${state.xAxis}px, ${state.yAxis}px)`,
@@ -903,18 +909,20 @@ function columnWidth(): number {
 }
 
 // Sideways movement is in whole days and stays inside the week: the card's
-// own column bounds how far left or right it can go. A bar's column is the
+// own column bounds how far back or forward it can go. A bar's column is the
 // first day it shows in this row, so a stay that began last week can still
-// move right but not left past the row's edge.
+// move forward but not back past the row's edge. Columns run right to left on
+// an RTL page, so the distance is read from the card's right edge there.
 function handleHorizontalMovement(clientX: number, rect: DOMRect) {
   if (!eventRef.value) return
   const width = columnWidth()
-  let diff = Math.floor((clientX - rect.left) / width)
+  const fromStart = isRtl.value ? rect.right - clientX : clientX - rect.left
+  let diff = Math.floor(fromStart / width)
 
   const column = props.bar ? props.bar.startCol : new Date(props.date).getDay()
   diff = Math.max(-column, Math.min(diff, DAY_COLUMNS - 1 - column))
 
-  state.xAxis = Math.ceil(diff * width)
+  state.xAxis = Math.ceil(diff * width) * (isRtl.value ? -1 : 1)
   state.dayShift = diff
 }
 

@@ -94,7 +94,7 @@
              rather than mb-1.5, so the heading stands off the first day by a
              hair more than the day stands off its blocks.
 
-             ml-[7px] does the same for the horizontal, for the fill and the
+             ms-[7px] does the same for the horizontal, for the fill and the
              text both. The gutter's fill starts 7px into the card — the card's
              own 1px border, then the gutter's 6px of margin — and the label
              takes the gutter's 8px of padding, so its fill starts where the
@@ -119,7 +119,7 @@
             past: week.isPast,
             'mb-2 flex-col items-start gap-0.5 px-3.5 text-lg-semibold':
               isNarrow,
-            'mb-1.5 ml-[7px] items-baseline gap-2 px-2 text-base-semibold':
+            'mb-1.5 ms-[7px] items-baseline gap-2 px-2 text-base-semibold':
               !isNarrow,
           }"
           @click="openWeek(week.start)"
@@ -148,7 +148,7 @@
           "
         >
           <!-- One day, as a row of its week: the day in a column down the
-               left, its events in the wider one beside it.
+               start, its events in the wider one beside it.
 
                Headed, a day cost a full row of height to say a date, and a day
                with one event on it spent half its height saying which day the
@@ -177,7 +177,7 @@
                its own, and none carries a rule down its edge either: the rows
                beside it are tinted blocks with edges of their own, and a rule
                between a column of text and a column of blocks was a third
-               edge saying what the blocks' left edges already say. The
+               edge saying what the blocks' start edges already say. The
                hairline between one day and the next stays — it divides days,
                which nothing else does — and the gray step is free for what a
                gutter does when you point at it.
@@ -241,7 +241,7 @@
                  it dates. -->
             <button
               type="button"
-              class="calendar-day-header flex shrink-0 cursor-pointer items-baseline gap-2 text-left"
+              class="calendar-day-header flex shrink-0 cursor-pointer items-baseline gap-2 text-start"
               :class="{
                 'px-3.5 py-1': isNarrow,
                 'm-1.5 w-42 rounded-3 px-2 py-1.5 hover:bg-surface-gray-2':
@@ -290,14 +290,14 @@
             </button>
 
             <!-- The blocks, 4px apart. Wide, inset from the card's edge above,
-                 below and on the right by the 6px a block's own padding is,
+                 below and at the end by the 6px a block's own padding is,
                  so the first block's text lands on the gutter's baseline and
                  the tint stops short of the card's border; the gutter's own
-                 padding keeps them off the left. Narrow there is no card to
+                 padding keeps them off the start. Narrow there is no card to
                  stand off. -->
             <div
               class="flex min-w-0 flex-1 flex-col gap-1"
-              :class="{ 'py-1.5 pr-1.5': !isNarrow }"
+              :class="{ 'py-1.5 pe-1.5': !isNarrow }"
             >
               <CalendarEventRow
                 v-for="event in row.events"

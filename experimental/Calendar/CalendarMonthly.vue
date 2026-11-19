@@ -50,7 +50,7 @@
             v-for="(date, col) in row.week"
             :key="parseDate(date)"
             class="flex min-w-0 flex-col border-outline-gray-1"
-            :class="col > 0 && 'border-l'"
+            :class="col > 0 && 'border-s'"
             @click="calendarActions.handleCellClick($event, date)"
           >
             <!-- Every number sits in the same 24px disc, filled only on today
@@ -68,7 +68,7 @@
                  Centred where the cell is narrow, so a date sits under the
                  weekday letter that names its column; a seventh of a phone's
                  width has no margin to hang a number off. Wider, the number
-                 keeps to the right, where a month grid has always put it. -->
+                 keeps to the end, where a month grid has always put it. -->
             <div
               class="flex shrink-0 items-center px-[3px] text-xs"
               :class="isNarrow ? 'justify-center' : 'justify-end'"
@@ -197,6 +197,7 @@ import { useNow } from './composables/useNow'
 import { useStripScroll } from './composables/useStripScroll'
 import CalendarMonthEvent from './CalendarMonthEvent.vue'
 import { Button } from '#components/Button'
+import { documentDir } from '#utils/document'
 import {
   CALENDAR_ACTIONS_KEY,
   type CalendarConfig,
@@ -240,7 +241,7 @@ const lanePitch = computed(() => weekLanePitch(isNarrow.value))
 
 /**
  * How far inside its cell an event is drawn, in pixels — the stacked pills and
- * the bars laid across the row alike, so the two read off one left edge.
+ * the bars laid across the row alike, so the two read off one start edge.
  *
  * Four where the cell has the room the desktop gives it, and the 2px the grid's
  * other views inset by where it has not: a phone's cell is 50px wide, and 4
@@ -422,10 +423,10 @@ const rows = computed<StripRow[]>(() => {
 function barStyle(bar: CalendarRowBar) {
   const span = bar.endCol - bar.startCol + 1
   return {
-    // The rule's own pixel comes off the right as well: a bar is laid against
+    // The rule's own pixel comes off the end as well: a bar is laid against
     // the boundary the cell's border sits on, where the stacked pills above it
     // are inside the content box and clear of it — see `COLUMN_RULE`.
-    left: `calc(${(bar.startCol / 7) * 100}% + ${cellInset.value}px)`,
+    insetInlineStart: `calc(${(bar.startCol / 7) * 100}% + ${cellInset.value}px)`,
     width: `calc(${(span / 7) * 100}% - ${cellInset.value * 2 + COLUMN_RULE}px)`,
     top: `${HEADER_HEIGHT + bar.lane * lanePitch.value}px`,
     height: `${laneHeight.value}px`,
@@ -467,14 +468,16 @@ useStripScroll(scroller, {
 /** The day under a pointer, from its position across a week row. */
 function dateAtPointer(row: HTMLElement, clientX: number, week: Date[]) {
   const rect = row.getBoundingClientRect()
-  const col = Math.floor(((clientX - rect.left) / rect.width) * 7)
+  const fromStart =
+    documentDir() === 'rtl' ? rect.right - clientX : clientX - rect.left
+  const col = Math.floor((fromStart / rect.width) * 7)
   return parseDate(week[Math.max(0, Math.min(6, col))]!)
 }
 
 // A drag carries the event and the day it was picked up on, so that a drop
 // moves the event by the distance dragged rather than snapping its start to
 // wherever it landed — grabbing the third day of a stay and moving it one
-// cell right should move the stay one day, not three.
+// cell on should move the stay one day, not three.
 /**
  * The event being dragged. A stay across several weeks is a bar per row, so
  * the fade is keyed on the event rather than on the piece that was grabbed.

@@ -3,7 +3,8 @@
      light/dark previews use one full-width frame; the system preview sets a
      light and a dark frame side by side-->
 <template>
-  <div :class="{ flex: frames.length > 1 }">
+  <!-- A drawing of a left-to-right desktop window, so it does not mirror. -->
+  <div dir="ltr" :class="{ flex: frames.length > 1 }">
     <div
       v-for="(frame, index) in frames"
       :key="index"

@@ -205,7 +205,7 @@ function handleEventTime() {
 
 <style>
 .form-control.prefix select {
-  padding-left: 2.2rem !important;
+  padding-inline-start: 2.2rem !important;
   text-transform: capitalize !important;
 }
 </style>

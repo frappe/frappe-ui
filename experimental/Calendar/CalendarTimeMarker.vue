@@ -44,7 +44,7 @@ const setCurrentTime = computed(() => {
 <style scoped>
 /* A dot at the line's head, centred on it, rather than a tick across it: the
    line says when, and the dot says where it starts — a point, which is what
-   "now" is. Pulled half its width left so it sits on the day's rule, the way the
+   "now" is. Pulled half its width back so it sits on the day's rule, the way the
    line runs from it. */
 .current-time::before {
   content: '';
@@ -54,7 +54,7 @@ const setCurrentTime = computed(() => {
   border-radius: 9999px;
   background-color: var(--surface-red-6);
   position: absolute;
-  left: -4px;
+  inset-inline-start: -4px;
   top: -3px;
 }
 </style>
