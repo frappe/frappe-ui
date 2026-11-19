@@ -1,5 +1,11 @@
 import { reactive, computed } from 'vue'
-import { getMaxFileSize, formatBytes, fileSizeLimitMessage } from './fileSize'
+import {
+  getMaxFileSize,
+  formatBytes,
+  fileSizeLimitMessage,
+  serverSizeLimitMessage,
+} from './fileSize'
+import { getConfig } from './config'
 
 export interface UploadOptions {
   private?: boolean
@@ -14,6 +20,14 @@ export interface UploadOptions {
   optimize?: boolean
   max_width?: number
   max_height?: number
+  /**
+   * Send files larger than this many bytes in pieces of this size, one request
+   * each, so no request goes over a proxy's body limit. Defaults to the
+   * `uploadChunkSize` config. `false`, or neither set, sends every file in one
+   * request. The server must support chunked uploads (Frappe v17 and later).
+   * An older one saves each piece as a separate, broken file.
+   */
+  chunkSize?: number | false
   params?: object
   signal?: AbortSignal
   onProgress?: (progress: {
@@ -28,7 +42,7 @@ export interface UploadOptions {
  * file with no stated intent is treated as access-controlled, not
  * world-readable. Pass `private: false` for intentionally public files.
  *
- * Internal: shared with `FileUploadHandler`, not exported from the package.
+ * Internal: not exported from the package.
  */
 export function isPrivateUpload(options: UploadOptions = {}) {
   return options.private ?? true
@@ -194,14 +208,142 @@ async function uploadWithState(
   }
   state.uploading = true
 
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest()
+  const reportProgress = (loaded: number, total: number) => {
+    state.uploaded = loaded
+    state.total = total
+    state.progress = Math.round((loaded / total) * 100)
+    options.onProgress?.({ loaded, total, percent: state.progress })
+  }
 
-    // Set up event listeners
-    xhr.upload.addEventListener('loadstart', () => {
-      state.uploading = true
-      state.error = null
-    })
+  try {
+    const chunkSize = resolveChunkSize(file, options)
+    const result =
+      file && chunkSize
+        ? await sendInChunks(file, chunkSize, options, reportProgress)
+        : await postForm(
+            uploadForm(file, options),
+            file,
+            options,
+            reportProgress,
+          )
+    state.progress = 100
+    state.result = result as UploadedFile
+    return state.result
+  } catch (error) {
+    state.error = error as UploadError
+    throw error
+  } finally {
+    state.uploading = false
+  }
+}
+
+/**
+ * The piece size for `file`, or null to send it in one request. Only files
+ * larger than one piece are split.
+ */
+function resolveChunkSize(file: File | null, options: UploadOptions) {
+  const chunkSize = options.chunkSize ?? getConfig('uploadChunkSize')
+  if (!file || !chunkSize || chunkSize <= 0) return null
+  return file.size > chunkSize ? chunkSize : null
+}
+
+/**
+ * Sends `file` as consecutive pieces of `chunkSize` bytes. Frappe appends
+ * each piece to a temporary file and creates the File record when the last
+ * one arrives, so only the last response carries the uploaded file.
+ */
+async function sendInChunks(
+  file: File,
+  chunkSize: number,
+  options: UploadOptions,
+  reportProgress: (loaded: number, total: number) => void,
+) {
+  const count = Math.ceil(file.size / chunkSize)
+  let result: unknown
+  for (let index = 0; index < count; index++) {
+    const offset = index * chunkSize
+    const piece = file.slice(offset, offset + chunkSize)
+    const form = uploadForm(null, options)
+    form.append('file', piece, file.name)
+    form.append('chunk_index', String(index))
+    form.append('total_chunk_count', String(count))
+    form.append('chunk_byte_offset', String(offset))
+    form.append('total_file_size', String(file.size))
+    result = await postForm(form, file, options, (loaded, total) =>
+      reportProgress(offset + piece.size * (loaded / total), file.size),
+    )
+  }
+  return result
+}
+
+/** The upload request's form fields, with `file` attached when given. */
+function uploadForm(file: File | null, options: UploadOptions) {
+  const formData = new FormData()
+  if (file) {
+    formData.append('file', file, file.name)
+  }
+
+  formData.append('is_private', isPrivateUpload(options) ? '1' : '0')
+  formData.append('folder', options.folder || 'Home')
+
+  if (options.file_url) {
+    formData.append('file_url', options.file_url)
+  }
+
+  if (options.doctype) {
+    formData.append('doctype', options.doctype)
+  }
+
+  if (options.docname) {
+    formData.append('docname', options.docname)
+  }
+
+  if (options.fieldname) {
+    formData.append('fieldname', options.fieldname)
+  }
+
+  if (options.method) {
+    formData.append('method', options.method)
+  }
+
+  if (options.type) {
+    formData.append('type', options.type)
+  }
+
+  if (options.optimize) {
+    formData.append('optimize', '1')
+    if (options.max_width) {
+      formData.append('max_width', options.max_width.toString())
+    }
+    if (options.max_height) {
+      formData.append('max_height', options.max_height.toString())
+    }
+  }
+  if (options.params) {
+    for (let [k, v] of Object.entries(options.params)) {
+      formData.append(k, v)
+    }
+  }
+  return formData
+}
+
+/**
+ * One POST to the upload endpoint. Resolves with the response's `message`
+ * and rejects with an `UploadError`. `file` is the whole file, used to name
+ * its size when the server refuses the request as too large.
+ */
+function postForm(
+  formData: FormData,
+  file: File | null,
+  options: UploadOptions,
+  onProgress: (loaded: number, total: number) => void,
+): Promise<unknown> {
+  return new Promise((resolve, reject) => {
+    if (options.signal?.aborted) {
+      reject(new UploadError('Upload cancelled', { kind: 'abort' }))
+      return
+    }
+    const xhr = new XMLHttpRequest()
 
     const abort = () => {
       xhr.abort()
@@ -210,83 +352,67 @@ async function uploadWithState(
     options.signal?.addEventListener('abort', abort, { once: true })
 
     xhr.upload.addEventListener('progress', (e) => {
-      if (e.lengthComputable) {
-        state.uploaded = e.loaded
-        state.total = e.total
-        state.progress = Math.round((e.loaded / e.total) * 100)
-        options.onProgress?.({
-          loaded: e.loaded,
-          total: e.total,
-          percent: state.progress,
-        })
-      }
-    })
-
-    xhr.upload.addEventListener('load', () => {
-      state.progress = 100
+      if (e.lengthComputable) onProgress(e.loaded, e.total)
     })
 
     xhr.addEventListener('error', () => {
-      state.uploading = false
-      state.error = new UploadError('Upload failed', { kind: 'network' })
       options.signal?.removeEventListener('abort', abort)
-      reject(state.error)
+      reject(new UploadError('Upload failed', { kind: 'network' }))
     })
 
     xhr.addEventListener('abort', () => {
-      state.uploading = false
-      state.error = new UploadError('Upload cancelled', { kind: 'abort' })
       options.signal?.removeEventListener('abort', abort)
-      reject(state.error)
+      reject(new UploadError('Upload cancelled', { kind: 'abort' }))
     })
 
     xhr.onreadystatechange = () => {
-      if (xhr.readyState == XMLHttpRequest.DONE) {
-        options.signal?.removeEventListener('abort', abort)
-        let error
-        if (xhr.status === 200) {
-          let r = null
-          try {
-            r = JSON.parse(xhr.responseText)
-          } catch (e) {
-            r = xhr.responseText
-          }
+      if (xhr.readyState != XMLHttpRequest.DONE) return
+      options.signal?.removeEventListener('abort', abort)
+      if (xhr.status === 0) return // the 'error' or 'abort' listener rejects
 
-          const result = (r.message || r) as UploadedFile
-          state.result = result
-          resolve(result)
-        } else if (xhr.status === 403) {
-          error = JSON.parse(xhr.responseText)
-        } else {
-          try {
-            error = JSON.parse(xhr.responseText)
-          } catch (e) {
-            error = 'Upload failed'
-          }
+      if (xhr.status === 200) {
+        let r = null
+        try {
+          r = JSON.parse(xhr.responseText)
+        } catch (e) {
+          r = xhr.responseText
         }
-
-        if (error) {
-          let exception
-          if (error.exc) {
-            exception = error.exc
-            try {
-              exception = JSON.parse(exception)[0]
-              console.log(exception)
-              // eslint-disable-next-line no-empty
-            } catch (e) {}
-          }
-          let e = new UploadError(extractUploadErrorMessage(error), {
-            kind: 'server',
-            status: xhr.status,
-            messages: parseServerMessages(error),
-            response: error,
-          })
-          state.error = e
-          reject(e)
-        }
-
-        state.uploading = false
+        resolve(r?.message || r)
+        return
       }
+
+      if (xhr.status === 413) {
+        // A proxy in front of Frappe (nginx, Cloudflare) can refuse a body
+        // that the site's own limit allows. It answers with an HTML page.
+        reject(
+          new UploadError(serverSizeLimitMessage(file), {
+            kind: 'file-size',
+            status: xhr.status,
+          }),
+        )
+        return
+      }
+
+      let error
+      try {
+        error = JSON.parse(xhr.responseText)
+      } catch (e) {
+        error = 'Upload failed'
+      }
+      if (error?.exc) {
+        try {
+          console.log(JSON.parse(error.exc)[0])
+          // eslint-disable-next-line no-empty
+        } catch (e) {}
+      }
+      reject(
+        new UploadError(extractUploadErrorMessage(error), {
+          kind: 'server',
+          status: xhr.status,
+          messages: parseServerMessages(error),
+          response: error,
+        }),
+      )
     }
 
     const uploadEndpoint = options.upload_endpoint || '/api/method/upload_file'
@@ -295,53 +421,6 @@ async function uploadWithState(
 
     if (window.csrf_token && window.csrf_token !== '{{ csrf_token }}') {
       xhr.setRequestHeader('X-Frappe-CSRF-Token', window.csrf_token)
-    }
-
-    const formData = new FormData()
-    if (file) {
-      formData.append('file', file, file.name)
-    }
-
-    formData.append('is_private', isPrivateUpload(options) ? '1' : '0')
-    formData.append('folder', options.folder || 'Home')
-
-    if (options.file_url) {
-      formData.append('file_url', options.file_url)
-    }
-
-    if (options.doctype) {
-      formData.append('doctype', options.doctype)
-    }
-
-    if (options.docname) {
-      formData.append('docname', options.docname)
-    }
-
-    if (options.fieldname) {
-      formData.append('fieldname', options.fieldname)
-    }
-
-    if (options.method) {
-      formData.append('method', options.method)
-    }
-
-    if (options.type) {
-      formData.append('type', options.type)
-    }
-
-    if (options.optimize) {
-      formData.append('optimize', '1')
-      if (options.max_width) {
-        formData.append('max_width', options.max_width.toString())
-      }
-      if (options.max_height) {
-        formData.append('max_height', options.max_height.toString())
-      }
-    }
-    if (options.params) {
-      for (let [k, v] of Object.entries(options.params)) {
-        formData.append(k, v)
-      }
     }
 
     xhr.send(formData)

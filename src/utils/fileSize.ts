@@ -34,3 +34,13 @@ export function fileSizeLimitMessage(file: File | null): string | null {
   if (!maxFileSize || file.size <= maxFileSize) return null
   return `This file is ${formatBytes(file.size)}; the limit is ${formatBytes(maxFileSize)}.`
 }
+
+/**
+ * Message for a file the server refused as too large (HTTP 413). The limit
+ * belongs to a proxy and is not known here, so the message gives the file's
+ * size only.
+ */
+export function serverSizeLimitMessage(file: File | null): string {
+  if (!file) return 'This file is more than the server accepts.'
+  return `This file is ${formatBytes(file.size)}, which is more than the server accepts.`
+}

@@ -154,7 +154,8 @@ export const VideoExtension = NodeExtension.create<VideoExtensionOptions>({
   parseHTML() {
     return [
       {
-        tag: 'video',
+        // A `<video>` without a source is an upload that never finished.
+        tag: 'video[src]',
         getAttrs: (node) => {
           if (typeof node === 'string') return {}
           const element = node as HTMLElement
