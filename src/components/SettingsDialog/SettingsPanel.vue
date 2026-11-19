@@ -17,10 +17,14 @@
 </template>
 
 <script setup lang="ts">
+import { provide, ref } from 'vue'
 import { TabsContent } from 'reka-ui'
+import { settingsPanelScrolledKey } from './context'
 
 defineProps<{
   /** Unique tab id — must match the SettingsNavItem `value` that controls it. */
   value: string | number
 }>()
+
+provide(settingsPanelScrolledKey, ref(false))
 </script>
