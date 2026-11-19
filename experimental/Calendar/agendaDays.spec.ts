@@ -59,6 +59,14 @@ describe('agendaRange', () => {
     expect(parseDate(end)).toBe('2026-10-31')
   })
 
+  it('pads to weeks that start on the configured day', () => {
+    // From Monday: Aug 1 sits in the week of Jul 27, and Oct 31, a Saturday,
+    // in the week Sunday Nov 1 closes.
+    const { start, end } = agendaRange(d('2026-08-20'), 1)
+    expect(parseDate(start)).toBe('2026-07-27')
+    expect(parseDate(end)).toBe('2026-11-01')
+  })
+
   // The months are what the reader asked for; the padding is how the list
   // draws them, and the header says the former.
   it('names three whole months whatever the padding reaches', () => {
@@ -174,6 +182,16 @@ describe('agendaWeeks', () => {
       ['2026-08-16', ['2026-08-20', '2026-08-21', '2026-08-22']],
       ['2026-08-23', ['2026-08-23', '2026-08-24', '2026-08-25', '2026-08-26']],
     ])
+  })
+
+  it('gathers the days under weeks that start on the configured day', () => {
+    // From Monday, Sunday the 23rd closes the week of the 17th.
+    const weeks = agendaWeeks(events, d('2026-08-20'), d('2026-08-20'), 1)
+    expect(weeks.map((w) => [w.key, w.days.map((day) => day.key)])).toEqual([
+      ['2026-08-17', ['2026-08-20', '2026-08-21', '2026-08-22', '2026-08-23']],
+      ['2026-08-24', ['2026-08-24', '2026-08-25', '2026-08-26']],
+    ])
+    expect(weeks[0]!.isCurrent).toBe(true)
   })
 
   it('names the week under way and the one either side of it', () => {

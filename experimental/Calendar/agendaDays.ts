@@ -71,9 +71,15 @@ export function agendaMonths(anchor: Date): { start: Date; end: Date } {
  * comes from `agendaMonths` instead — the reader chose three months, and the
  * days either side are how the view draws them, not what it is showing.
  */
-export function agendaRange(anchor: Date): { start: Date; end: Date } {
+export function agendaRange(
+  anchor: Date,
+  firstDay = 0,
+): { start: Date; end: Date } {
   const { start, end } = agendaMonths(anchor)
-  return { start: weekStart(start), end: addDays(weekStart(end), 6) }
+  return {
+    start: weekStart(start, firstDay),
+    end: addDays(weekStart(end, firstDay), 6),
+  }
 }
 
 /**
@@ -85,8 +91,9 @@ export function agendaRows(
   events: CalendarEvent[],
   anchor: Date,
   today: Date = new Date(),
+  firstDay = 0,
 ): AgendaRow[] {
-  const { start, end } = agendaRange(anchor)
+  const { start, end } = agendaRange(anchor, firstDay)
   const todayKey = parseDate(today)
   const rows: AgendaRow[] = []
 
@@ -119,9 +126,9 @@ export function agendaRows(
  * walks the weeks and, inside each, its days.
  */
 export interface AgendaWeek {
-  /** The Sunday the week starts on, as `YYYY-MM-DD`. */
+  /** The day the week starts on, as `YYYY-MM-DD`. */
   key: string
-  /** Sunday to Saturday, the same week the Month view draws as a row. */
+  /** The same seven days the Month view draws as a row. */
   start: Date
   end: Date
   /** The week today falls in — the one that reads "This week". */
@@ -158,15 +165,16 @@ export function agendaWeeks(
   events: CalendarEvent[],
   anchor: Date,
   today: Date = new Date(),
+  firstDay = 0,
 ): AgendaWeek[] {
-  const rows = agendaRows(events, anchor, today)
-  const currentWeek = parseDate(weekStart(today))
-  const nextWeek = parseDate(addDays(weekStart(today), 7))
-  const lastWeek = parseDate(addDays(weekStart(today), -7))
+  const rows = agendaRows(events, anchor, today, firstDay)
+  const currentWeek = parseDate(weekStart(today, firstDay))
+  const nextWeek = parseDate(addDays(weekStart(today, firstDay), 7))
+  const lastWeek = parseDate(addDays(weekStart(today, firstDay), -7))
   const weeks: AgendaWeek[] = []
 
   for (const row of rows) {
-    const start = weekStart(row.date)
+    const start = weekStart(row.date, firstDay)
     const key = parseDate(start)
     let week = weeks[weeks.length - 1]
 

@@ -1,9 +1,18 @@
-import type { CalendarColor, CalendarEvent, CalendarTimeFormat } from './types'
+import type {
+  CalendarColor,
+  CalendarEvent,
+  CalendarTimeFormat,
+  CalendarWeekStart,
+} from './types'
 
-export function getCalendarDates(month: number, year: number): Date[] {
+export function getCalendarDates(
+  month: number,
+  year: number,
+  weekStartDay = 0,
+): Date[] {
   let daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
   let firstDay = new Date(year, month, 1)
-  let leftPadding = firstDay.getDay()
+  let leftPadding = (firstDay.getDay() - weekStartDay + 7) % 7
 
   let datesInPreviousMonth = getBeforeDates(firstDay, leftPadding)
   let datesInCurrentMonth = getCurrentMonthDates(firstDay)
@@ -266,6 +275,26 @@ export const monthList = [
 ]
 
 export const daysList = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+
+const WEEK_START_DAY: Record<CalendarWeekStart, number> = {
+  sunday: 0,
+  monday: 1,
+  tuesday: 2,
+  wednesday: 3,
+  thursday: 4,
+  friday: 5,
+  saturday: 6,
+}
+
+/** The weekday index a week starts on, `0` for Sunday. */
+export function weekStartDay(weekStart?: CalendarWeekStart): number {
+  return (weekStart && WEEK_START_DAY[weekStart]) || 0
+}
+
+/** `daysList` in the order a week starting on `weekStartDay` draws it. */
+export function weekDayNames(weekStartDay = 0): string[] {
+  return [...daysList.slice(weekStartDay), ...daysList.slice(0, weekStartDay)]
+}
 export const daysListFull = [
   'Sunday',
   'Monday',

@@ -150,6 +150,7 @@ import { Button } from '#components/Button'
 import { TabButtons } from '#components/TabButtons'
 import {
   getCalendarDates,
+  weekStartDay,
   monthList,
   handleSeconds,
   formatMonthYear,
@@ -208,9 +209,11 @@ const defaultConfig: CalendarConfig = {
   showIcon: true,
   timeFormat: '12h',
   weekends: ['sunday'],
+  weekStart: 'sunday',
 }
 
 const overrideConfig: CalendarConfig = { ...defaultConfig, ...props.config }
+const firstDay = weekStartDay(overrideConfig.weekStart)
 let activeView = ref<CalendarMode>(overrideConfig.defaultMode)
 
 function updateActiveView(
@@ -451,7 +454,7 @@ let currentMonth = ref(new Date().getMonth())
 let currentDate = ref(new Date())
 
 let currentMonthDates = computed(() => {
-  let dates = getCalendarDates(currentMonth.value, currentYear.value)
+  let dates = getCalendarDates(currentMonth.value, currentYear.value, firstDay)
   return dates
 })
 
@@ -794,7 +797,7 @@ function getVisibleRange() {
   // anchored, less the days already spent — so a consumer's fetch window and
   // its "new event" anchor agree with what is on screen.
   if (activeView.value === 'Agenda') {
-    const { start, end } = agendaRange(agendaAnchor.value)
+    const { start, end } = agendaRange(agendaAnchor.value, firstDay)
     return {
       startDate: dayjs(start).format('YYYY-MM-DD'),
       endDate: dayjs(end).format('YYYY-MM-DD'),
@@ -802,7 +805,7 @@ function getVisibleRange() {
   }
 
   // The Month strip's first and last weeks reach into the neighbouring months.
-  const range = stripRange(currentMonth.value, currentYear.value)
+  const range = stripRange(currentMonth.value, currentYear.value, firstDay)
   return {
     startDate: dayjs(range.start).format('YYYY-MM-DD'),
     endDate: dayjs(range.end).format('YYYY-MM-DD'),
