@@ -1,5 +1,10 @@
 import { reactive, computed } from 'vue'
-import { getMaxFileSize, formatBytes, fileSizeLimitMessage } from './fileSize'
+import {
+  getMaxFileSize,
+  formatBytes,
+  fileSizeLimitMessage,
+  serverSizeLimitMessage,
+} from './fileSize'
 
 export interface UploadOptions {
   private?: boolean
@@ -255,6 +260,16 @@ async function uploadWithState(
           const result = (r.message || r) as UploadedFile
           state.result = result
           resolve(result)
+        } else if (xhr.status === 413) {
+          // A proxy in front of Frappe (nginx, Cloudflare) can refuse a body
+          // that the site's own limit allows. It answers with an HTML page.
+          state.error = new UploadError(serverSizeLimitMessage(file), {
+            kind: 'file-size',
+            status: xhr.status,
+          })
+          state.uploading = false
+          reject(state.error)
+          return
         } else if (xhr.status === 403) {
           error = JSON.parse(xhr.responseText)
         } else {

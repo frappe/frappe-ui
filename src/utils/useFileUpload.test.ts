@@ -100,6 +100,34 @@ describe('upload (standalone export)', () => {
     expect(error.messages).toEqual(['Not allowed'])
   })
 
+  it('names a 413 from a proxy as a file that is too big', async () => {
+    class ProxyLimitXhr extends FakeXhr {
+      send(body: FormData) {
+        this.body = body
+        this.status = 413
+        this.responseText =
+          '<html><head><title>413 Request Entity Too Large</title></head></html>'
+        this.onreadystatechange?.()
+      }
+    }
+    vi.stubGlobal(
+      'XMLHttpRequest',
+      ProxyLimitXhr as unknown as typeof XMLHttpRequest,
+    )
+    const file = new File([new Uint8Array(3 * 1024 * 1024)], 'demo.mp4', {
+      type: 'video/mp4',
+    })
+
+    const error = await upload(file, {}).catch((e) => e)
+
+    expect(error).toBeInstanceOf(UploadError)
+    expect(error.kind).toBe('file-size')
+    expect(error.status).toBe(413)
+    expect(error.message).toBe(
+      'This file is 3 MB, which is more than the server accepts.',
+    )
+  })
+
   it('rejects an UploadError when the file is over the size limit', async () => {
     setConfig('maxFileSize', 1)
     const file = new File(['hello'], 'hello.txt', { type: 'text/plain' })
