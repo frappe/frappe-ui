@@ -6,14 +6,14 @@ import { createApp, h, ref } from 'vue'
 import type { JSONContent } from '@tiptap/core'
 import Editor from './Editor.vue'
 import EditorContent from './EditorContent.vue'
-import { Image, ImageGroup, StarterKit, Video } from './extensions'
+import { Image, ImageGroup, Markdown, StarterKit, Video } from './extensions'
 import { cleanupMounted, flush, registerCleanup } from './test-helpers'
 import type { Editor as TiptapEditor } from './useEditor'
 
 afterEach(cleanupMounted)
 
 /** A v-model editor, as an app binds it to a draft. */
-function mountControlled(initial = '') {
+function mountControlled(initial = '', format: 'html' | 'markdown' = 'html') {
   const content = ref<string | JSONContent | null | undefined>(initial)
   let editor: TiptapEditor | null = null
   const root = document.createElement('div')
@@ -23,7 +23,8 @@ function mountControlled(initial = '') {
       h(
         Editor,
         {
-          extensions: [StarterKit, Image, ImageGroup, Video],
+          extensions: [StarterKit, Image, ImageGroup, Video, Markdown],
+          format,
           modelValue: content.value,
           'onUpdate:modelValue': (value: typeof content.value) =>
             (content.value = value),
@@ -80,6 +81,26 @@ describe('unfinished media uploads', () => {
     expect(String(content.value)).not.toMatch(/<video|<img/)
     // The v-model round trip must not reset the editor and lose the upload.
     expect(mediaNodes(getEditor())).toEqual(['video', 'image'])
+  })
+
+  it('stay out of markdown content too', async () => {
+    const { content, getEditor } = mountControlled('Intro', 'markdown')
+    await flush()
+
+    getEditor()
+      .chain()
+      .focus('end')
+      .insertContent({
+        type: 'paragraph',
+        content: [
+          { type: 'image', attrs: { uploadId: 'i1', error: 'Upload failed' } },
+        ],
+      })
+      .run()
+    await flush()
+
+    expect(String(content.value).trim()).toBe('Intro')
+    expect(mediaNodes(getEditor())).toEqual(['image'])
   })
 
   it('take a gallery of only unfinished uploads out whole', async () => {
