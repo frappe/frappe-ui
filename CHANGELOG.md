@@ -1,5 +1,45 @@
 # frappe-ui
 
+## 1.3.0
+
+### Minor Changes
+
+- Uploads can now send large files in pieces. Set
+  `setConfig('uploadChunkSize', bytes)`, or pass `chunkSize` to one upload, and
+  files larger than that go to the server one piece per request. A proxy's
+  request size limit no longer blocks them. Without the setting, every file is
+  still sent in one request. Chunked uploads need Frappe v17 or later.
+  `FileUploader` and `FileUploadHandler` use the same upload code, so they
+  support it too. [#1369](https://github.com/frappe/frappe-ui/pull/1369)
+- DesktopShell: new `navSide` prop (`'left' | 'right'`, default `'left'`). On
+  `'right'` the shell draws the navigation on the right and `SidebarRailItem`
+  opens its tooltip toward the content and moves its active bar to the outer
+  edge, and a collapsed `SidebarItem` opens its tooltip toward the content.
+  [#1355](https://github.com/frappe/frappe-ui/pull/1355)
+
+### Patch Changes
+
+- RTL: editor code blocks and link URLs stay left to right; arrow keys and
+  swipes in the image viewer and table cells, "Insert column left/right", the
+  table context menu, editor popups and dialogs, Tabs, the bidirectional Slider
+  fill and the ListView group chevron follow the page direction. The exported
+  editor commands `TableAddColumnBefore` ("Insert column left") and
+  `TableAddColumnAfter` ("Insert column right") now insert by screen side: on an
+  RTL page `TableAddColumnBefore` adds the column after the current one in
+  document order, and `TableAddColumnAfter` adds it before. Apps that use these
+  commands in their own menus will see them switch sides on RTL pages.
+  [#1364](https://github.com/frappe/frappe-ui/pull/1364)
+- RTL: components lay out, point and position correctly on a `dir="rtl"` page.
+  [#1363](https://github.com/frappe/frappe-ui/pull/1363)
+- Editor: an image or video that is still uploading, or failed to upload, is no
+  longer written to the editor's `v-model` value or `change` event. Saved
+  content used to keep it as an empty `<video>` that loaded back as "This video
+  hasn't yet been uploaded." with nothing to retry. A `<video>` without a `src`
+  in existing content is now ignored when it loads. `upload()`, `useFileUpload`
+  and `FileUploadHandler` now report a 413 from a proxy as a file that is too
+  big, with the file's size, instead of "Upload failed".
+  [#1369](https://github.com/frappe/frappe-ui/pull/1369)
+
 ## 1.2.0
 
 ### Minor Changes
