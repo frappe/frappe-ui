@@ -1,5 +1,5 @@
 import type { ComputedRef, InjectionKey } from 'vue'
-import type { ToggleSize } from '../../composables/inputTypes'
+import type { RadioSize } from '../../composables/inputTypes'
 import type { InputLabelingProps } from '../../composables/useInputLabeling'
 
 /** The value a radio represents within its group. */
@@ -10,7 +10,7 @@ export interface RadioGroupProps extends InputLabelingProps {
   modelValue?: RadioValue
 
   /** Size of every radio in the group. */
-  size?: ToggleSize
+  size?: RadioSize
 
   /** Wraps each option in a clickable surface with hover, active and focus states — useful for selection lists and menu items. */
   padded?: boolean
@@ -55,7 +55,7 @@ export interface RadioProps extends Omit<
 
 /** Group-level state that each `Radio` reads instead of taking as its own prop. */
 export interface RadioGroupContext {
-  size: ComputedRef<ToggleSize>
+  size: ComputedRef<RadioSize>
   padded: ComputedRef<boolean>
   disabled: ComputedRef<boolean>
 }
