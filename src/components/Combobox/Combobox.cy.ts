@@ -641,6 +641,40 @@ describe('Combobox', () => {
   })
 
   describe('highlighting', () => {
+    it('preserves the scroll position when a server page is appended after typing', () => {
+      const page = (start: number) =>
+        Array.from({ length: 20 }, (_, index) => ({
+          value: start + index,
+          label: `Member ${start + index}`,
+        }))
+      const PagedSearch = defineComponent({
+        setup() {
+          return { options: ref(page(0)) }
+        },
+        render() {
+          return h(Combobox, { options: this.options, filterable: false })
+        },
+      })
+      cy.mount(PagedSearch).then((mounted: any) => {
+        cy.wrap(mounted.component ?? mounted.wrapper?.vm ?? mounted).as('vm')
+      })
+      cy.get('[role="combobox"]').type('Member')
+      cy.get('[role="option"]').should('have.length', 20)
+      cy.get('[data-reka-combobox-viewport]')
+        .scrollTo('bottom')
+        .invoke('scrollTop')
+        .then((top) => {
+          expect(top).to.be.greaterThan(100)
+          cy.get('@vm').then((vm: any) => {
+            vm.options.push(...page(20))
+          })
+          cy.get('[role="option"]').should('have.length', 40)
+          cy.get('[data-reka-combobox-viewport]')
+            .invoke('scrollTop')
+            .should('equal', top)
+        })
+    })
+
     it('re-highlights the first item when options are replaced after typing', () => {
       // A server-driven picker: a row is already visible while typing (e.g. a
       // "create" custom row or stale results), then the debounced search

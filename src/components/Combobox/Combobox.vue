@@ -258,8 +258,22 @@ const hasVisibleItems = computed(() => filteredGroups.value.length > 0)
 // that arrive asynchronously (a debounced server search resolving) land after
 // that pass and would leave nothing highlighted. Gated to the typing path so
 // merely opening the list still lets reka highlight the committed selection.
-watch(filteredGroups, () => {
+watch(filteredGroups, (groups, previous) => {
   if (!open.value || !hasTypedSinceOpen.value) return
+  const items = groups.flatMap((group) => group.options)
+  const previousItems = previous.flatMap((group) => group.options)
+  // Appending a server page preserves the current highlight and scroll position.
+  if (
+    previousItems.length &&
+    items.length > previousItems.length &&
+    previousItems.every((item, index) => {
+      const next = items[index]
+      return isSelectableOption(item)
+        ? isSelectableOption(next) && item.value === next.value
+        : !isSelectableOption(next) && item.key === next.key
+    })
+  )
+    return
   nextTick(() => rootRef.value?.highlightFirstItem?.())
 })
 
