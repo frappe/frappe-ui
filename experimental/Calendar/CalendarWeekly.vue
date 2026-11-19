@@ -91,9 +91,9 @@
       -->
       <div class="flex shrink-0 h-fit border-b-[1px]">
         <!-- The same rule the hour gutter draws below, carried up through the
-           all-day row so the week's left edge is one line. -->
+           all-day row so the week's start edge is one line. -->
         <div
-          class="flex w-14 shrink-0 justify-center border-r-[1px] border-outline-gray-1 pl-px pt-1"
+          class="flex w-14 shrink-0 justify-center border-e-[1px] border-outline-gray-1 ps-px pt-1"
         >
           <!-- A label, and only that. The chevron that used to sit beside it
                toggled a row it was not in, from a column whose job is to say
@@ -101,7 +101,7 @@
                hidden on.
 
                The day view's label, to the letter: centred across the gutter
-               with `pl-px` against the rule on the right, which is inside the
+               with `ps-px` against the rule on the end, which is inside the
                box and so is not part of what centring divides, and the hours'
                own type from `.calendar-all-day-label`, so the label and the
                column it heads cannot drift apart.
@@ -128,7 +128,7 @@
             v-for="(date, col) in weeklyDates"
             :key="parseDate(date)"
             class="cell -my-2 flex w-full flex-col border-outline-gray-1"
-            :class="col === weeklyDates.length - 1 ? '' : 'border-r-[1px]'"
+            :class="col === weeklyDates.length - 1 ? '' : 'border-e-[1px]'"
             :data-date-attr="date"
             @click.prevent="
               (e) => {
@@ -143,10 +143,10 @@
                  for what is not drawn, which is what a broken line says. Its corners are the
                  bars' own 8px, and so is its height — a lane, taken from the
                  constant the bars themselves are laid out by, so the two cannot
-                 end up a few pixels apart. Its left edge is theirs too, margin
+                 end up a few pixels apart. Its start edge is theirs too, margin
                  and all — `barInset` is where a bar's own edge lands, which is
                  not the same in a narrow column as in a wide one, and a button
-                 that read the inset alone started a pixel to their left. It says
+                 that read the inset alone started a pixel before them. It says
                  how many are hidden and then it is gone — the lanes it opened
                  are the answer.
 
@@ -154,7 +154,7 @@
                  are: "+3" is 30-odd pixels of a 40px lane, so a button sized to
                  its own label left a sliver of column beside it that read as a
                  bar cut short rather than as air. Its label sits in the middle
-                 there rather than at the left edge the bars' titles start on: a
+                 there rather than at the start edge the bars' titles start on: a
                  count is not a title, and two characters held against one end of
                  a box that wide read as text that had been pushed. -->
             <Button
@@ -167,8 +167,8 @@
               :class="isNarrow ? 'self-stretch !px-1' : 'w-fit !justify-start'"
               :style="{
                 marginTop: `${visibleLanes * lanePitch + laneGap}px`,
-                marginLeft: `${barInset}px`,
-                marginRight: isNarrow ? `${barInset}px` : undefined,
+                marginInlineStart: `${barInset}px`,
+                marginInlineEnd: isNarrow ? `${barInset}px` : undefined,
                 height: `${laneHeight}px`,
               }"
               @click.stop="isCollapsed = false"
@@ -199,10 +199,10 @@
           <!-- The hour gutter, a spacer as tall as the 24 hours beside it: the
              labels hang off the first day column's rows (see `.calendar-column`
              in style.css). `shrink-0`, or the flex row squeezes it out of line
-             with the all-day label above; and the rule is this column's right
-             edge, not the first day's left, so the two land on the same pixel. -->
+             with the all-day label above; and the rule is this column's end
+             edge, not the first day's start, so the two land on the same pixel. -->
           <div
-            class="w-14 shrink-0 border-r-[1px] border-outline-gray-1"
+            class="w-14 shrink-0 border-e-[1px] border-outline-gray-1"
             :style="{ height: `${24 * hourHeight}px` }"
           />
 
@@ -218,9 +218,9 @@
                 class="relative w-full border-outline-gray-1"
                 :class="[
                   idx === 0 && 'calendar-column',
-                  // The last column's right edge is the box's own, and the box
+                  // The last column's end edge is the box's own, and the box
                   // draws that itself.
-                  idx === weeklyDates.length - 1 ? '' : 'border-r-[1px]',
+                  idx === weeklyDates.length - 1 ? '' : 'border-e-[1px]',
                 ]"
                 :data-date-attr="date"
                 data-time-grid
@@ -349,7 +349,7 @@ const laneGap = computed(() => weekLaneGap(isNarrow.value))
 const lanePitch = computed(() => weekLanePitch(isNarrow.value))
 
 /**
- * Where a bar's own left edge lands, inside its day: the column's inset, and the
+ * Where a bar's own start edge lands, inside its day: the column's inset, and the
  * the standard gap, or the 2px a narrow week comes down to. Anything laid out
  * beside the bars rather than being one reads it, or it starts on a different
  * line to them.
