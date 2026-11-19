@@ -10,6 +10,9 @@ export type ContentFormat = 'html' | 'json' | 'markdown'
 
 const MEDIA_NODES = new Set(['image', 'video'])
 
+/** Nodes that must hold at least one media node, such as an image gallery. */
+const MEDIA_GROUPS = new Set(['imageGroup'])
+
 /**
  * The document without images and videos that have no `src` yet: uploads that
  * are still running, or that failed.
@@ -20,17 +23,34 @@ const MEDIA_NODES = new Set(['image', 'video'])
  * with nothing to show and nothing to retry. Returns `doc` itself when there is
  * nothing to drop.
  */
-export function withoutUnfinishedMedia(doc: PMNode): PMNode {
+function withoutUnfinishedMedia(doc: PMNode): PMNode {
   const ranges: Array<[number, number]> = []
   doc.descendants((node, pos) => {
-    if (MEDIA_NODES.has(node.type.name) && !node.attrs.src) {
-      ranges.push([pos, pos + node.nodeSize])
-    }
+    // Emptied, a gallery would be refilled by ProseMirror with a new image
+    // that has no `src`, so a gallery of unfinished uploads goes whole.
+    const drop =
+      isUnfinishedMedia(node) ||
+      (MEDIA_GROUPS.has(node.type.name) && everyChildUnfinished(node))
+    if (!drop) return true
+    ranges.push([pos, pos + node.nodeSize])
+    return false
   })
   if (!ranges.length) return doc
   const transform = new Transform(doc)
   for (const [from, to] of ranges.reverse()) transform.delete(from, to)
   return transform.doc
+}
+
+function isUnfinishedMedia(node: PMNode) {
+  return MEDIA_NODES.has(node.type.name) && !node.attrs.src
+}
+
+function everyChildUnfinished(node: PMNode) {
+  let every = true
+  node.forEach((child) => {
+    if (!isUnfinishedMedia(child)) every = false
+  })
+  return every
 }
 
 /**

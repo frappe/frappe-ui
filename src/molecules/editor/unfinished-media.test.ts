@@ -6,7 +6,7 @@ import { createApp, h, ref } from 'vue'
 import type { JSONContent } from '@tiptap/core'
 import Editor from './Editor.vue'
 import EditorContent from './EditorContent.vue'
-import { Image, StarterKit, Video } from './extensions'
+import { Image, ImageGroup, StarterKit, Video } from './extensions'
 import { cleanupMounted, flush, registerCleanup } from './test-helpers'
 import type { Editor as TiptapEditor } from './useEditor'
 
@@ -23,7 +23,7 @@ function mountControlled(initial = '') {
       h(
         Editor,
         {
-          extensions: [StarterKit, Image, Video],
+          extensions: [StarterKit, Image, ImageGroup, Video],
           modelValue: content.value,
           'onUpdate:modelValue': (value: typeof content.value) =>
             (content.value = value),
@@ -80,6 +80,28 @@ describe('unfinished media uploads', () => {
     expect(String(content.value)).not.toMatch(/<video|<img/)
     // The v-model round trip must not reset the editor and lose the upload.
     expect(mediaNodes(getEditor())).toEqual(['video', 'image'])
+  })
+
+  it('take a gallery of only unfinished uploads out whole', async () => {
+    const { content, getEditor } = mountControlled('<p>Intro</p>')
+    await flush()
+
+    getEditor()
+      .chain()
+      .focus('end')
+      .insertContent({
+        type: 'imageGroup',
+        content: [
+          { type: 'image', attrs: { uploadId: 'a', error: 'Upload failed' } },
+          { type: 'image', attrs: { uploadId: 'b', loading: true } },
+        ],
+      })
+      .run()
+    await flush()
+
+    // An emptied gallery would be refilled with a new image that has no src.
+    expect(String(content.value)).not.toMatch(/<img|image-group/)
+    expect(mediaNodes(getEditor())).toEqual(['image', 'image'])
   })
 
   it('do not load back from HTML saved before this fix', async () => {
