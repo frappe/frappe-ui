@@ -1,4 +1,9 @@
-import { getCurrentInstance, ref } from 'vue'
+import {
+  getCurrentInstance,
+  onBeforeUnmount,
+  ref,
+  type ComponentInternalInstance,
+} from 'vue'
 
 /**
  * Defers an overlay's popup machinery (reka root, trigger, portal) until its
@@ -46,6 +51,13 @@ export function useDeferredTrigger(kind: 'tooltip' | 'hoverCard') {
     const gotFocus = receivesEvent(trigger, 'focus', () =>
       focus?.restore(trigger),
     )
+    if (
+      event.type === 'pointermove' &&
+      event instanceof PointerEvent &&
+      event.isTrusted
+    ) {
+      trackPointerHandoff(trigger, event.pointerId, instance)
+    }
     replay(event, trigger, gotFocus)
   }
 
@@ -83,22 +95,66 @@ export function useDeferredTrigger(kind: 'tooltip' | 'hoverCard') {
   return { mounted, mount, shellProps }
 }
 
+// Replaying a move starts Reka's timer without making the browser enter the
+// new trigger. If the next native move lands elsewhere, the browser may never
+// send the trigger the leave event that clears the timer and resets hover.
+function trackPointerHandoff(
+  trigger: Element,
+  pointerId: number,
+  instance: ComponentInternalInstance,
+) {
+  const controller = new AbortController()
+  const stop = () => controller.abort()
+  const options = { capture: true, signal: controller.signal }
+  const doc = trigger.ownerDocument
+
+  function isSamePointer(event: PointerEvent) {
+    return event.isTrusted && event.pointerId === pointerId
+  }
+
+  function onBoundary(event: Event) {
+    if (event instanceof PointerEvent && isSamePointer(event)) stop()
+  }
+
+  function onMove(event: PointerEvent) {
+    if (!isSamePointer(event)) return
+    stop()
+    if (!trigger.isConnected || event.composedPath().includes(trigger)) return
+
+    // The document's event path hides triggers in closed shadow roots.
+    const root = trigger.getRootNode()
+    if (
+      event.type === 'pointermove' &&
+      root instanceof ShadowRoot &&
+      trigger.contains(root.elementFromPoint(event.clientX, event.clientY))
+    ) {
+      return
+    }
+
+    const relatedTarget = event.type === 'pointermove' ? event.target : null
+    dispatchPointerEvent(trigger, 'pointerleave', event, relatedTarget)
+  }
+
+  doc.addEventListener('pointermove', onMove, options)
+  doc.addEventListener(
+    'pointerleave',
+    (event) => {
+      if (event.target === doc) onMove(event)
+    },
+    options,
+  )
+  trigger.addEventListener('pointerenter', onBoundary, options)
+  trigger.addEventListener('pointerleave', onBoundary, options)
+  onBeforeUnmount(stop, instance)
+}
+
 // Sends the event that mounted the overlay to the new trigger, so reka runs
 // its own open logic: hover delay, skip delay, touch filtering.
 function replay(event: Event, trigger: Element, gotFocus: boolean) {
   if (event.type.startsWith('pointer')) {
     // A script can dispatch a plain `Event` named "pointermove", and reka
     // still treats it as a pointer, so read its fields as optional.
-    const pointer: Partial<PointerEvent> = event
-    trigger.dispatchEvent(
-      new PointerEvent(event.type, {
-        pointerId: pointer.pointerId,
-        pointerType: pointer.pointerType ?? 'mouse',
-        isPrimary: pointer.isPrimary,
-        clientX: pointer.clientX,
-        clientY: pointer.clientY,
-      }),
-    )
+    dispatchPointerEvent(trigger, event.type, event)
     return
   }
   // Reka opens on a `focus` event that reaches the trigger. A descendant's
@@ -108,6 +164,24 @@ function replay(event: Event, trigger: Element, gotFocus: boolean) {
   if (event.type === 'focus' && !gotFocus) {
     trigger.dispatchEvent(new FocusEvent('focus'))
   }
+}
+
+function dispatchPointerEvent(
+  trigger: Element,
+  type: string,
+  pointer: Partial<PointerEvent>,
+  relatedTarget?: EventTarget | null,
+) {
+  trigger.dispatchEvent(
+    new PointerEvent(type, {
+      pointerId: pointer.pointerId,
+      pointerType: pointer.pointerType ?? 'mouse',
+      isPrimary: pointer.isPrimary,
+      clientX: pointer.clientX,
+      clientY: pointer.clientY,
+      relatedTarget,
+    }),
+  )
 }
 
 // The first element a rendered tree starts with. Reka's root renders a

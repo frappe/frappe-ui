@@ -167,6 +167,58 @@ describe('Tooltip', () => {
       })
     })
 
+    it('cancels the first hover when the pointer moves directly off the replacement trigger', () => {
+      const shells = new Set<EventTarget>()
+      function ignoreReplacementBoundaries(event: PointerEvent) {
+        // Reproduce the missing boundary events even when Chromium happens
+        // to recognize the replacement before the next native move.
+        const target = event.target as HTMLElement | null
+        if (
+          event.isTrusted &&
+          target?.dataset?.cy?.startsWith('trigger-') &&
+          !shells.has(target)
+        ) {
+          event.stopPropagation()
+        }
+      }
+
+      cy.clock()
+      cy.mount(() =>
+        h(
+          'div',
+          {
+            style: { display: 'flex', gap: '12px' },
+            onPointerenterCapture: ignoreReplacementBoundaries,
+            onPointerleaveCapture: ignoreReplacementBoundaries,
+          },
+          [
+            ...Array.from({ length: 6 }, (_, i) =>
+              h(Tooltip, { text: `Tooltip ${i}`, hoverDelay: 800 }, () =>
+                h('button', { 'data-cy': `trigger-${i}` }, `Button ${i}`),
+              ),
+            ),
+            h('span', { 'data-cy': 'outside' }, 'Outside the triggers'),
+          ],
+        ),
+      )
+      cy.get('[data-cy^=trigger-]')
+        .should('have.length', 6)
+        .then(($triggers) => {
+          for (const trigger of $triggers.toArray()) shells.add(trigger)
+        })
+
+      movePointerTo('[data-cy=outside]')
+      for (let i = 0; i < 6; i++) movePointerTo(`[data-cy=trigger-${i}]`)
+      movePointerTo('[data-cy=outside]')
+
+      cy.tick(800)
+      cy.get('[role=tooltip]').should('not.exist')
+
+      movePointerTo('[data-cy=trigger-0]')
+      cy.tick(800)
+      cy.get('[role=tooltip]').should('have.text', 'Tooltip 0')
+    })
+
     it('opens on the first keyboard focus and keeps focus on the trigger', () => {
       cy.mount(
         host(
@@ -211,3 +263,21 @@ describe('Tooltip', () => {
     })
   })
 })
+
+function movePointerTo(selector: string) {
+  cy.get(selector).then(($el) => {
+    // CDP uses runner coordinates, which include the scaled app iframe.
+    const frame = window.top!.document.querySelector('iframe.aut-iframe')!
+    const frameRect = frame.getBoundingClientRect()
+    const scale = frameRect.width / frame.clientWidth
+    const rect = $el[0].getBoundingClientRect()
+    return Cypress.automation('remote:debugger:protocol', {
+      command: 'Input.dispatchMouseEvent',
+      params: {
+        type: 'mouseMoved',
+        x: frameRect.left + (rect.left + rect.width / 2) * scale,
+        y: frameRect.top + (rect.top + rect.height / 2) * scale,
+      },
+    })
+  })
+}
