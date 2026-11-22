@@ -18,7 +18,7 @@
     </div>
     <slot v-if="list.options.resizeColumn" name="resizer" v-bind="{ item }">
       <div
-        class="flex h-4 absolute -right-2 w-2 cursor-col-resize justify-center"
+        class="flex h-4 absolute -end-2 w-2 cursor-col-resize justify-center"
         @mousedown="startResizing"
       >
         <div
@@ -68,11 +68,13 @@ const list = inject('list')
 const startResizing = (e) => {
   const initialX = e.clientX
   const initialWidth = widthInPx.value
+  // The handle sits on the end edge, so in RTL dragging left widens the column.
+  const growth = getComputedStyle(columnRef.value).direction === 'rtl' ? -1 : 1
   const onMouseMove = (e) => {
     document.body.classList.add('select-none')
     document.body.classList.add('cursor-col-resize')
     resizer.value.style.backgroundColor = 'rgb(199 199 199)'
-    let newWidth = initialWidth + (e.clientX - initialX)
+    let newWidth = initialWidth + growth * (e.clientX - initialX)
 
     const w = `${newWidth < 50 ? 50 : newWidth}px`
     emit('columnWidthUpdated', { key: props.item.key, width: w, save: false })

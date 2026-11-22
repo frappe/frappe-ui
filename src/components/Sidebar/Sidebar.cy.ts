@@ -1,6 +1,7 @@
 import { h, ref } from 'vue'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import Sidebar from './Sidebar.vue'
+import DesktopShell from '../DesktopShell/DesktopShell.vue'
 import SidebarItem from './SidebarItem.vue'
 import SidebarLabel from './SidebarLabel.vue'
 import SidebarSection from './SidebarSection.vue'
@@ -588,4 +589,39 @@ describe('<SidebarCollapseToggle />', () => {
     cy.contains('Collapse').click()
     cy.contains('Expand').should('exist')
   })
+})
+
+describe('<SidebarItem /> collapsed tooltip side', () => {
+  const sides = [
+    { navSide: undefined, expected: 'right' },
+    { navSide: 'left', expected: 'right' },
+    { navSide: 'right', expected: 'left' },
+  ] as const
+
+  // The tooltip content teleports out of the sidebar, so it is found by its
+  // text.
+  for (const { navSide, expected } of sides) {
+    for (const kind of ['button', 'link'] as const) {
+      it(`opens on the ${expected} for a ${kind} with navSide=${navSide ?? 'unset'}`, () => {
+        cy.viewport(1280, 720)
+        const item = () =>
+          h(SidebarItem, {
+            label: 'Reports',
+            icon: 'lucide-chart-bar',
+            ...(kind === 'link' ? { href: '#reports' } : {}),
+          })
+        const sidebar = () => h(Sidebar, { collapsed: true }, { default: item })
+        cy.mount(() =>
+          navSide ? h(DesktopShell, { navSide }, { sidebar }) : sidebar(),
+        )
+        cy.get('[data-slot=trigger]').trigger('pointermove')
+        cy.get('[data-slot=trigger]').trigger('focus')
+        cy.contains('[data-side]', 'Reports').should(
+          'have.attr',
+          'data-side',
+          expected,
+        )
+      })
+    }
+  }
 })

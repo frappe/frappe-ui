@@ -21,7 +21,7 @@
 import type { Editor } from '@tiptap/core'
 import fileToBase64 from '#utils/file-to-base64'
 import { fileSizeLimitMessage } from '#utils/fileSize'
-import { isSafeUrl } from '#molecules/editor/extensions/shared/url-safety'
+import { isSafeUrl } from '#utils/url-safety'
 import { findNodeByUploadId } from '#molecules/editor/extensions/shared/node-view'
 import {
   deleteLocalFile,

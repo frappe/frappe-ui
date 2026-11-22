@@ -226,4 +226,36 @@ describe('HoverCard', () => {
       'instant',
     )
   })
+
+  it('renders only the trigger until the first hover, then opens after the delay', () => {
+    cy.clock()
+    cy.mount(() =>
+      h('div', { 'data-cy': 'host' }, [
+        h(HoverCard, { hoverDelay: 300 }, Slots),
+      ]),
+    )
+    // Hosted in a bare div, so its child nodes show everything HoverCard
+    // renders: no reka root, no portal anchors, no wrapper element.
+    const onlyTheTrigger = ($host: JQuery) =>
+      expect($host[0].childNodes).to.have.length(1)
+
+    cy.get('[data-cy=host]').should(onlyTheTrigger)
+    cy.get('[data-cy=trigger]')
+      .should('have.attr', 'data-state', 'closed')
+      .and('have.attr', 'data-slot', 'trigger')
+
+    // Touch never hovers, so it mounts nothing.
+    cy.get('[data-cy=trigger]').trigger('pointerenter', {
+      pointerType: 'touch',
+    })
+    cy.get('[data-cy=host]').should(onlyTheTrigger)
+
+    cy.get('[data-cy=trigger]').trigger('pointerenter', {
+      pointerType: 'mouse',
+    })
+    cy.tick(299)
+    cy.get('[data-slot=content]').should('not.exist')
+    cy.tick(1)
+    cy.get('[data-cy=content]').should('have.text', 'Card content')
+  })
 })

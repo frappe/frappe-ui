@@ -3,6 +3,7 @@ import { ref, watch } from 'vue'
 import type { JSONContent } from '@tiptap/core'
 import type { Extensions } from '@tiptap/core'
 import { useEditor, type Editor, type UploadFunction } from './useEditor'
+import { serializeContent, type ContentFormat } from './serialize-content'
 import { setPlaceholder } from './extensions'
 import { provideEditor } from './editor-context'
 
@@ -18,7 +19,7 @@ const props = withDefaults(
     extensions: Extensions
 
     // content / behavior knobs (universal, reactive where noted)
-    format?: 'html' | 'json' | 'markdown'
+    format?: ContentFormat
     placeholder?: string
     editable?: boolean
     autofocus?: boolean
@@ -65,14 +66,7 @@ const editor = useEditor({
     syncIsEmpty(editor)
     // Emit the freshly-written value directly from the editor (P1: a side-event,
     // independent of v-model timing).
-    emit(
-      'change',
-      props.format === 'json'
-        ? editor.getJSON()
-        : props.format === 'markdown'
-          ? editor.getMarkdown()
-          : editor.getHTML(),
-    )
+    emit('change', serializeContent(editor, props.format))
   },
   onFocus(_editor, event) {
     emit('focus', event)

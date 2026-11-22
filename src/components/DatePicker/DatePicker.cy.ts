@@ -255,6 +255,33 @@ describe('DatePicker', () => {
     cy.get('@onUpdate').should('have.been.calledWith', '2025-06-15')
   })
 
+  it('reads a typed date in the format’s day-month order', () => {
+    cy.mount(DatePicker, {
+      props: {
+        format: 'DD-MM-YYYY',
+        'onUpdate:modelValue': cy.spy().as('onUpdate'),
+      },
+    })
+    cy.get('input').click()
+    cy.get('input').type('3-11-26{enter}')
+    cy.get('@onUpdate').should('have.been.calledWith', '2026-11-03')
+    cy.get('input').should('have.value', '03-11-2026')
+  })
+
+  it('keeps the value on a blur with no edit, though the format drops the year', () => {
+    cy.mount(DatePicker, {
+      props: {
+        modelValue: '2020-11-03',
+        format: 'DD MMM',
+        'onUpdate:modelValue': cy.spy().as('onUpdate'),
+      },
+    })
+    cy.get('input').should('have.value', '03 Nov')
+    cy.get('input').focus().blur()
+    cy.get('input').should('have.value', '03 Nov')
+    cy.get('@onUpdate').should('not.have.been.called')
+  })
+
   it('typed unavailable date is rejected and reverts', () => {
     cy.mount(DatePicker, {
       props: {
@@ -349,6 +376,32 @@ describe('DatePicker', () => {
       cy.focused().should('have.attr', 'data-value', '2025-06-22')
       cy.focused().trigger('keydown', { key: 'ArrowUp' })
       cy.focused().should('have.attr', 'data-value', '2025-06-15')
+    })
+
+    describe('RTL arrow keys', () => {
+      afterEach(() => {
+        cy.document().then((doc) => {
+          doc.documentElement.dir = ''
+        })
+      })
+
+      it('reverses horizontal day navigation and keeps vertical week navigation', () => {
+        cy.document().then((doc) => {
+          doc.documentElement.dir = 'rtl'
+        })
+        cy.mount(DatePicker, { props: { modelValue: '2025-06-15' } })
+        cy.get('input').focus().type('{downArrow}')
+        cy.focused().should('have.attr', 'data-value', '2025-06-15')
+
+        cy.focused().trigger('keydown', { key: 'ArrowLeft' })
+        cy.focused().should('have.attr', 'data-value', '2025-06-16')
+        cy.focused().trigger('keydown', { key: 'ArrowDown' })
+        cy.focused().should('have.attr', 'data-value', '2025-06-23')
+        cy.focused().trigger('keydown', { key: 'ArrowRight' })
+        cy.focused().should('have.attr', 'data-value', '2025-06-22')
+        cy.focused().trigger('keydown', { key: 'ArrowUp' })
+        cy.focused().should('have.attr', 'data-value', '2025-06-15')
+      })
     })
 
     it('Home/End jump to week edges', () => {

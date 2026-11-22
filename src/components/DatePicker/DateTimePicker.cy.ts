@@ -133,6 +133,35 @@ describe('DateTimePicker', () => {
     cy.get('@onUpdate').should('have.been.called')
   })
 
+  describe('typed text with a format', () => {
+    it('keeps the value on a blur with no edit, though the format drops the seconds', () => {
+      cy.mount(DateTimePicker, {
+        props: {
+          modelValue: '2026-10-24 09:15:30',
+          format: 'DD-MM-YYYY HH:mm',
+          'onUpdate:modelValue': cy.spy().as('onUpdate'),
+        },
+      })
+      cy.get('input').first().should('have.value', '24-10-2026 09:15')
+      cy.get('input').first().focus().blur()
+      cy.get('input').first().should('have.value', '24-10-2026 09:15')
+      cy.get('@onUpdate').should('not.have.been.called')
+    })
+
+    it('reads a typed date-time in the format’s day-month order', () => {
+      cy.mount(DateTimePicker, {
+        props: {
+          modelValue: '2026-10-24 09:15:30',
+          format: 'DD-MM-YYYY HH:mm:ss',
+          'onUpdate:modelValue': cy.spy().as('onUpdate'),
+        },
+      })
+      cy.get('input').first().clear().type('3/11/2026 9:15{enter}')
+      cy.get('@onUpdate').should('have.been.calledWith', '2026-11-03 09:15:00')
+      cy.get('input').first().should('have.value', '03-11-2026 09:15:00')
+    })
+  })
+
   describe('open-on-select (v1 behavior change)', () => {
     it('selecting a date does NOT close the popover', () => {
       // Regression guard for the v1 behavior change: clicking a date used

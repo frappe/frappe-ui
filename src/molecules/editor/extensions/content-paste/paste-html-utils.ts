@@ -4,6 +4,10 @@
  * No DOM mutation of the live document and no ProseMirror dispatch — these are
  * unit-testable string/DOM-fragment transforms used by
  * `paste-image-controller.ts` and `content-paste-extension.ts`.
+ *
+ * Pasted HTML comes from any page the user copied from. It is parsed into an
+ * inert document (see {@link parseInert}), never into an element of the live
+ * page, where `<img onerror>` and similar handlers would run.
  */
 import { DOMParser, Slice } from '@tiptap/pm/model'
 import type { Node, Schema } from '@tiptap/pm/model'
@@ -21,9 +25,7 @@ export function normalizeFontSizePtToPx(html: string): string {
 
 /** True iff the HTML string contains at least one `<img>` element. */
 export function htmlContainsImage(html: string): boolean {
-  const div = document.createElement('div')
-  div.innerHTML = html
-  return div.querySelector('img') !== null
+  return parseInert(html).querySelector('img') !== null
 }
 
 /**
@@ -32,9 +34,8 @@ export function htmlContainsImage(html: string): boolean {
  * so pasted code/pre content survives.
  */
 export function parseHtmlToSlice(html: string, schema: Schema): Slice {
-  const div = document.createElement('div')
-  div.innerHTML = normalizeFontSizePtToPx(html)
-  return DOMParser.fromSchema(schema).parseSlice(div, {
+  const body = parseInert(normalizeFontSizePtToPx(html))
+  return DOMParser.fromSchema(schema).parseSlice(body, {
     preserveWhitespace: true,
   })
 }
@@ -68,4 +69,13 @@ export function collectImageNodes(
     images.push({ node, pos, src })
   })
   return images
+}
+
+/**
+ * The `<body>` of `html` parsed by the browser's `DOMParser`. That document
+ * has no browsing context: it runs no scripts or event handlers and loads no
+ * images, so untrusted markup is safe to query and walk.
+ */
+function parseInert(html: string): HTMLElement {
+  return new globalThis.DOMParser().parseFromString(html, 'text/html').body
 }

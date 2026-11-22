@@ -54,7 +54,6 @@ export const content = [
   glob('experimental/Charts/**/*.{vue,js,ts,jsx,tsx}'),
   glob('experimental/CommandPalette/**/*.{vue,js,ts,jsx,tsx}'),
   glob('experimental/ListView/**/*.{vue,js,ts,jsx,tsx}'),
-  glob('experimental/TextEditor/**/*.{vue,js,ts,jsx,tsx}'),
   glob('experimental/ThemeSwitcher/**/*.{vue,js,ts,jsx,tsx}'),
   glob('experimental/SpriteIcons/**/*.{vue,js,ts,jsx,tsx}'),
   glob('vitepress/**/*.{vue,js,ts}'),

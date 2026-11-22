@@ -104,10 +104,9 @@ A button declared via a component's action prop(s), rendered in its footer/toolb
 Typed by an internal generic `Action<Ctx>` (`ButtonProps` plus `onClick(context)`);
 the public names are `DialogAction` (context `{ close }`) and `AlertAction`
 (context `{ dismiss }`, shared with SidebarCard), plus `DividerAction` (no
-callback context). Dialog, Alert, SidebarCard and TextEditor get reactive
-`loading` state while an async `onClick` runs; Divider forwards the click and
-the caller owns its loading state. Shared by Dialog, Alert, SidebarCard, Divider
-and TextEditor (P6-aligned).
+callback context). Dialog, Alert and SidebarCard get reactive `loading` state
+while an async `onClick` runs. Divider forwards the click and the caller owns its
+loading state. Shared by Dialog, Alert, SidebarCard and Divider (P6-aligned).
 Charts take no action prop — a chart header renders caller-supplied
 buttons through the `#actions` slot (spec/charts.md).
 
@@ -186,8 +185,8 @@ The single subpath where the entire editor family lives — the `useEditor` engi
 whole family is there and nowhere else: root exports nothing from it. It is one of
 several runtime subpaths (`editor`, `list`, `charts`, `icons`, `experimental`),
 beside the build-time entries; what earns one is
-[ADR-0010](./spec/adr/0010-subpath-export-rule.md). The v0 `TextEditor` family sits
-on `frappe-ui/experimental`, not here.
+[ADR-0010](./spec/adr/0010-subpath-export-rule.md). The v0 `TextEditor` family was
+removed (see [spec/editor.md §12](./spec/editor.md)).
 _Avoid_: importing the editor surface from `frappe-ui` (top-level); shipping ready-made
 assembled editors (`CommentEditor`/`RichTextEditor`) from the library.
 

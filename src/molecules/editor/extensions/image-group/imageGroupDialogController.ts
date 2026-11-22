@@ -1,4 +1,5 @@
 import { createApp, h, ref, type App } from 'vue'
+import { PageDirection } from '#components/FrappeUIProvider/PageDirection'
 import type { Editor } from '@tiptap/core'
 import ImageGroupUploadDialog from './ImageGroupUploadDialog.vue'
 
@@ -26,20 +27,22 @@ export function openImageGroupUploadDialog(args: {
 
   app = createApp({
     render() {
-      return h(ImageGroupUploadDialog, {
-        modelValue: open.value,
-        'onUpdate:modelValue': (value: boolean) => {
-          open.value = value
-          if (!value) setTimeout(teardown, 0)
-        },
-        files: files.value,
-        'onUpdate:files': (value: File[]) => {
-          files.value = value
-        },
-        editor: args.editor,
-        mode: 'new',
-        onClose: () => setTimeout(teardown, 0),
-      })
+      return h(PageDirection, () =>
+        h(ImageGroupUploadDialog, {
+          modelValue: open.value,
+          'onUpdate:modelValue': (value: boolean) => {
+            open.value = value
+            if (!value) setTimeout(teardown, 0)
+          },
+          files: files.value,
+          'onUpdate:files': (value: File[]) => {
+            files.value = value
+          },
+          editor: args.editor,
+          mode: 'new',
+          onClose: () => setTimeout(teardown, 0),
+        }),
+      )
     },
   })
 

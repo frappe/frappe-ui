@@ -16,12 +16,13 @@ import {
 } from '@tiptap/core'
 import type { EditorOptions } from '@tiptap/core'
 import type { UploadFunction } from './extensions/shared/media-upload-types'
+import { serializeContent, type ContentFormat } from './serialize-content'
 
 type Editor = TiptapEditor
 
 export type UseEditorOptions = {
   content?: Ref<string | JSONContent | null | undefined>
-  format?: 'html' | 'json' | 'markdown'
+  format?: ContentFormat
   editable?: MaybeRefOrGetter<boolean>
   autofocus?: boolean
   /**
@@ -88,13 +89,6 @@ export function useEditor(
     )
   }
 
-  const serialize = (tiptapEditor: Editor) =>
-    format === 'json'
-      ? tiptapEditor.getJSON()
-      : format === 'markdown'
-        ? tiptapEditor.getMarkdown()
-        : tiptapEditor.getHTML()
-
   const editorOptions: Partial<EditorOptions> = {
     element: null,
     extensions,
@@ -110,7 +104,7 @@ export function useEditor(
     },
     onUpdate: ({ editor: tiptapEditor }) => {
       if (!isCollaborationMode && options.content && !applyingExternalUpdate) {
-        const value = serialize(tiptapEditor)
+        const value = serializeContent(tiptapEditor, format)
         if (format === 'json') lastEmitted = value
         options.content.value = value
       }
@@ -180,8 +174,13 @@ export function useEditor(
         toRaw(content) === lastEmitted
       )
         return
-      if (format === 'html' && editor.value.getHTML() === content) return
-      if (format === 'markdown' && editor.value.getMarkdown() === content)
+      // Compare what v-model would carry, not `getHTML()`: an upload in
+      // progress is left out of the value, and must not count as a difference
+      // that resets the editor and loses the upload.
+      if (
+        format !== 'json' &&
+        serializeContent(editor.value, format) === content
+      )
         return
 
       applyingExternalUpdate = true

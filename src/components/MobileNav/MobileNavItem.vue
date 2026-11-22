@@ -60,9 +60,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, getCurrentInstance } from 'vue'
-import { RouterLink } from 'vue-router'
+import { computed } from 'vue'
 import Icon from '../Icon/Icon.vue'
+import { useNavLink } from '../shared/navLink'
 import { scrollShellToTop } from '../../composables/useShellScrolled'
 import type { MobileNavItemProps } from './types'
 
@@ -73,26 +73,7 @@ defineSlots<{
   default?: (props: { active: boolean }) => any
 }>()
 
-// Read router/route off global properties (not useRouter/useRoute) so the item
-// works without warnings when mounted outside a vue-router app — docs, tests,
-// embedded use. Same approach as SidebarItem.
-const globals = getCurrentInstance()?.appContext.config.globalProperties
-const hasRouter = computed(() => Boolean(globals?.$router))
-
-const linkComponent = computed(() =>
-  props.route && hasRouter.value ? RouterLink : 'a',
-)
-const linkAttrs = computed(() =>
-  props.route
-    ? hasRouter.value
-      ? { to: props.route }
-      : { href: typeof props.route === 'string' ? props.route : undefined }
-    : { href: props.href },
-)
-
-const resolvedRoute = computed(() =>
-  props.route && globals?.$router ? globals.$router.resolve(props.route) : null,
-)
+const { globals, linkComponent, linkAttrs, resolvedRoute } = useNavLink(props)
 
 // Is this item's target the exact current route? Drives scroll-vs-navigate and
 // aria-current — distinct from `active`, which may span a whole section.

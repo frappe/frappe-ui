@@ -61,6 +61,7 @@ for the full removal table.
 | Motion | Shared `PopoverPanel` motion. One rhythm across the library — an `80ms` fade on open, nothing on close |
 | Styling | No class-injection props. Stable `data-slot` / `data-state` / `data-motion` hooks only |
 | Trigger slot | `#trigger` via reka `HoverCardTrigger as-child` — hover/focus wiring is automatic; there is no aria association |
+| Mounting | Deferred: only the trigger renders until its first hover or focus (or an `open` request), then the card mounts and opens with its usual delay. Long lists pay for one element per card. `Tooltip` does the same |
 
 ## Exact public API for v1
 

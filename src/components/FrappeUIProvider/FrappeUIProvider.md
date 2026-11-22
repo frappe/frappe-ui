@@ -27,8 +27,42 @@ import { FrappeUIProvider } from 'frappe-ui'
 ### When it is required
 
 The provider mounts `<ToastProvider />` and `<Dialogs />` beside the app. The
-app needs it only if it uses the `dialog.*` or `toast.*` helpers, including
+app needs it if it uses the `dialog.*` or `toast.*` helpers, including
 `dialog.confirm`, `dialog.alert` and `dialog.prompt`.
+
+An app that can show a right-to-left page also needs it, or its own Reka
+`ConfigProvider` (see [Direction](#direction)). Without one, Tabs, menus,
+selects and sliders lay out left to right on a `dir="rtl"` page.
+
+### Direction
+
+The provider passes the page's direction (`<html dir>`) to the Reka parts
+inside it, which otherwise default to `ltr`. On a `dir="rtl"` page that is what
+lets Tabs, SettingsDialog, TabButtons, menus, selects and scroll areas lay out
+right to left. The provider follows the page if `<html dir>` changes after
+mount.
+
+An app that wraps its own Reka `ConfigProvider`, even only for `nonce` or
+`useId`, keeps it, and the provider then leaves the direction alone. Reka gives
+`dir` a default of `ltr`, so the provider cannot tell whether that
+`ConfigProvider` set it. Pass the page's direction to it yourself:
+
+```vue
+<script setup>
+import { ConfigProvider } from 'reka-ui'
+import { FrappeUIProvider } from 'frappe-ui'
+
+const pageDir = document.documentElement.dir === 'rtl' ? 'rtl' : 'ltr'
+</script>
+
+<template>
+  <ConfigProvider :dir="pageDir">
+    <FrappeUIProvider>
+      <App />
+    </FrappeUIProvider>
+  </ConfigProvider>
+</template>
+```
 
 ### Mounting the hosts yourself
 

@@ -8,8 +8,8 @@
     :show-no-results="true"
   >
     <template #default="{ item }">
-      <span v-if="item.icon" :class="[item.icon, 'mr-2 h-4 w-4']" />
-      <div v-else class="mr-2 h-4 w-4"></div>
+      <span v-if="item.icon" :class="[item.icon, 'me-2 h-4 w-4']" />
+      <div v-else class="me-2 h-4 w-4"></div>
       <span>{{ item.title }}</span>
     </template>
   </SuggestionList>

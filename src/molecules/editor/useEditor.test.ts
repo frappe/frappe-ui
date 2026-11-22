@@ -67,6 +67,10 @@ vi.mock('@tiptap/core', () => {
       editors.push(this)
     }
 
+    // A document with no unfinished uploads, so `serializeContent` reads the
+    // getters below.
+    state = { doc: { descendants() {} } }
+
     getHTML() {
       return typeof this.content === 'string' ? this.content : '<p>json</p>'
     }

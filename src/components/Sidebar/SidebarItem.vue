@@ -30,15 +30,15 @@
       :accesskey="accessKey"
       :aria-label="ariaLabel"
       :aria-current="resolvedActive ? 'page' : undefined"
-      class="flex h-full min-w-0 flex-1 items-center rounded-4 pl-2 focus-visible:ring-0 focus-visible:focus-ring"
+      class="flex h-full min-w-0 flex-1 items-center rounded-4 ps-2 focus-visible:ring-0 focus-visible:focus-ring"
       @click="handleClick"
     >
       <Tooltip
         :text="tooltipText"
-        side="right"
+        :side="tooltipSide"
         :disabled="!isCollapsed || !tooltipText"
       >
-        <!-- Deliberately unchanged by `isCollapsed`: the row keeps its `pl-2`
+        <!-- Deliberately unchanged by `isCollapsed`: the row keeps its `ps-2`
              and the glyph its natural size, so the icon holds one position
              through the width animation instead of swinging to a centered
              square and back (the whole row is already the hit target). -->
@@ -52,8 +52,8 @@
         class="min-w-0 flex-1 transition-all ease-in-out"
         :class="
           isCollapsed
-            ? 'ml-0 w-0 overflow-hidden opacity-0'
-            : 'ml-2 w-auto opacity-100'
+            ? 'ms-0 w-0 overflow-hidden opacity-0'
+            : 'ms-2 w-auto opacity-100'
         "
       >
         <span ref="labelEl" class="flex min-w-0 items-center">
@@ -72,15 +72,15 @@
       v-bind="controlAttrs"
       :accesskey="accessKey"
       :aria-label="ariaLabel"
-      class="flex h-full text-left min-w-0 flex-1 items-center rounded-4 pl-2 focus-visible:ring-0 focus-visible:focus-ring"
+      class="flex h-full text-start min-w-0 flex-1 items-center rounded-4 ps-2 focus-visible:ring-0 focus-visible:focus-ring"
       @click="handleClick"
     >
       <Tooltip
         :text="tooltipText"
-        side="right"
+        :side="tooltipSide"
         :disabled="!isCollapsed || !tooltipText"
       >
-        <!-- Deliberately unchanged by `isCollapsed`: the row keeps its `pl-2`
+        <!-- Deliberately unchanged by `isCollapsed`: the row keeps its `ps-2`
              and the glyph its natural size, so the icon holds one position
              through the width animation instead of swinging to a centered
              square and back (the whole row is already the hit target). -->
@@ -94,8 +94,8 @@
         class="min-w-0 flex-1 transition-all ease-in-out"
         :class="
           isCollapsed
-            ? 'ml-0 w-0 overflow-hidden opacity-0'
-            : 'ml-2 w-auto opacity-100'
+            ? 'ms-0 w-0 overflow-hidden opacity-0'
+            : 'ms-2 w-auto opacity-100'
         "
       >
         <span ref="labelEl" class="flex min-w-0 items-center">
@@ -119,7 +119,7 @@
       :class="isCollapsed ? 'w-0 overflow-hidden opacity-0' : 'opacity-100'"
     >
       <slot name="suffix">
-        <span v-if="suffix" class="mr-2 text-sm text-ink-gray-4">{{
+        <span v-if="suffix" class="me-2 text-sm text-ink-gray-4">{{
           suffix
         }}</span>
       </slot>
@@ -128,17 +128,10 @@
 </template>
 
 <script setup lang="ts">
-import {
-  computed,
-  getCurrentInstance,
-  inject,
-  onMounted,
-  ref,
-  useAttrs,
-  useTemplateRef,
-} from 'vue'
-import { RouterLink } from 'vue-router'
+import { computed, inject, onMounted, ref, useAttrs, useTemplateRef } from 'vue'
 import Icon from '../Icon/Icon.vue'
+import { useNavLink } from '../shared/navLink'
+import { navSideKey } from '../shared/navSide'
 import Tooltip from '../Tooltip/Tooltip.vue'
 import { SidebarItemProps, sidebarCollapsedKey } from './types'
 
@@ -199,6 +192,12 @@ const slotLabel = ref('')
 onMounted(() => {
   slotLabel.value = labelEl.value?.textContent?.trim() ?? ''
 })
+// The collapsed tooltip opens away from the navigation, toward the page.
+const navSide = inject(navSideKey, null)
+const tooltipSide = computed(() =>
+  navSide?.value === 'right' ? 'left' : 'right',
+)
+
 const tooltipText = computed(() => props.label || slotLabel.value)
 
 // A caller's `aria-label` wins over the derived one. It is the more specific
@@ -210,29 +209,7 @@ const ariaLabel = computed(
   () => (attrs['aria-label'] as string) || tooltipText.value || undefined,
 )
 
-// Read the router/route off global properties instead of useRouter()/useRoute()
-// so this component works — without warnings or crashes — when mounted outside a
-// vue-router app (docs, tests, embedded use). vue-router installs $router/$route
-// here; the $route getter stays reactive when read inside a computed.
-const globals = getCurrentInstance()?.appContext.config.globalProperties
-const hasRouter = computed(() => Boolean(globals?.$router))
-
-// With a router, render RouterLink; without one, degrade to a plain <a> (with an
-// href only when `route` is a string — we can't resolve a route-location object).
-const linkComponent = computed(() =>
-  props.route && hasRouter.value ? RouterLink : 'a',
-)
-const linkAttrs = computed(() =>
-  props.route
-    ? hasRouter.value
-      ? { to: props.route }
-      : { href: typeof props.route === 'string' ? props.route : undefined }
-    : { href: props.href },
-)
-
-const resolvedRoute = computed(() =>
-  props.route && globals?.$router ? globals.$router.resolve(props.route) : null,
-)
+const { globals, linkComponent, linkAttrs, resolvedRoute } = useNavLink(props)
 
 // Explicit `active` wins; otherwise infer from the current route so
 // router-driven items light up without extra wiring.

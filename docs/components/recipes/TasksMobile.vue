@@ -344,9 +344,7 @@ function addComment() {
             <ListCell>
               <div class="min-w-0 flex-1">
                 <!-- The sized text lives in an inner span so it keeps its own
-                     line-height. Putting `leading-none` on the same element as
-                     `truncate` (overflow-hidden) would shear off descenders
-                     like the tail of "g". -->
+                     line-height. -->
                 <div
                   class="truncate leading-snug"
                   :class="

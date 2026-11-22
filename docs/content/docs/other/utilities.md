@@ -284,6 +284,30 @@ async function onFile(file) {
 | `params`                            | `object`                                | Extra form fields, sent unchanged.                             |
 | `signal`                            | `AbortSignal`                           | Cancels the upload.                                            |
 | `onProgress`                        | `(p: { loaded, total, percent }) => void` | Called on every progress update.                             |
+| `chunkSize`                         | `number \| false`                       | Send larger files in pieces of this many bytes. See [Large files](#large-files). |
+
+### Large files
+
+A proxy in front of the site, such as nginx, can refuse a request body larger
+than its own limit. The upload then fails with an `UploadError` of kind
+`file-size`, even when the file is under the site's Max File Size.
+
+To upload files larger than that limit, send them in pieces. Set a piece size
+once for the app, under the proxy's limit:
+
+```ts
+import { setConfig } from 'frappe-ui'
+
+setConfig('uploadChunkSize', 10 * 1024 * 1024) // 10 MB
+```
+
+Files larger than one piece are then sent as one request per piece. Smaller
+files still go in one request. Progress, cancelling and errors work the same
+way in both modes. Pass `chunkSize` to one upload to override the app's
+setting, or `chunkSize: false` to send that file in one request.
+
+Chunked uploads need Frappe v17 or later. An older server saves each piece
+as a separate, broken file, so leave `uploadChunkSize` unset for those sites.
 
 ### FileUploadHandler
 

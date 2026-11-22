@@ -40,7 +40,7 @@
       <div
         class="flex"
         :class="
-          $slots.actions ? 'w-fit divide-x divide-outline-gray-2' : 'w-56'
+          $slots.actions ? 'w-fit divide-x divide-outline-gray-2 rtl:divide-x-reverse' : 'w-56'
         "
       >
         <aside
@@ -317,6 +317,12 @@ function commitInput(close = false): void {
     } else {
       clearSelection()
     }
+    if (close && !shouldKeepOpen.value) isOpen.value = false
+    return
+  }
+  // An unedited blur keeps the value. Reading the shown text back would drop
+  // what the format leaves out, such as the seconds.
+  if (props.modelValue && raw === displayLabel.value) {
     if (close && !shouldKeepOpen.value) isOpen.value = false
     return
   }

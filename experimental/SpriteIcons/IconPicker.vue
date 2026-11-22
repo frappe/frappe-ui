@@ -167,6 +167,7 @@ defineExpose({
           <Icon
             :name="internalModelValue || 'circle-dashed'"
             class="w-4 h-4 flex-shrink-0"
+            :class="internalModelValue ? 'text-ink-gray-8' : 'text-ink-gray-4'"
           />
           <ComboboxInput
             :value="searchTerm"
@@ -207,7 +208,7 @@ defineExpose({
                 :key="iconName"
                 @click="handleIconClick(iconName)"
                 type="button"
-                class="w-8 h-8 flex items-center justify-center rounded-4 hover:bg-surface-gray-3 transition-colors"
+                class="w-8 h-8 flex items-center justify-center rounded-4 text-ink-gray-7 hover:bg-surface-gray-3 transition-colors"
                 :class="{
                   'bg-surface-gray-3': internalModelValue === iconName,
                 }"

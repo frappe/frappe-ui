@@ -135,7 +135,7 @@ const actionClass = computed(() =>
   >
     <div
       class="flex items-center gap-1.5"
-      :class="props.dismissible ? 'pr-8' : ''"
+      :class="props.dismissible ? 'pe-8' : ''"
     >
       <div
         v-if="showPrefix"
@@ -194,7 +194,7 @@ const actionClass = computed(() =>
     <Button
       v-if="props.dismissible"
       data-slot="dismiss"
-      class="absolute right-1.5 top-1.5"
+      class="absolute end-1.5 top-1.5"
       variant="ghost"
       theme="gray"
       size="xs"

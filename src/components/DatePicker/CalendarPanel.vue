@@ -8,7 +8,7 @@
         :class="{ invisible: hidePrev }"
         label="previous"
         variant="ghost"
-        icon="lucide-chevron-left"
+        icon="lucide-chevron-left rtl:rotate-180"
         @click="emit('prev')"
       />
       <span class="text-sm-medium text-ink-gray-7">
@@ -18,7 +18,7 @@
         :class="{ invisible: hideNext }"
         label="next"
         variant="ghost"
-        icon="lucide-chevron-right"
+        icon="lucide-chevron-right rtl:rotate-180"
         @click="emit('next')"
       />
     </div>
@@ -37,7 +37,7 @@
           v-if="!hidePrev"
           label="previous"
           variant="ghost"
-          icon="lucide-chevron-left"
+          icon="lucide-chevron-left rtl:rotate-180"
           @click="emit('prev')"
         />
         <Button
@@ -51,7 +51,7 @@
           v-if="!hideNext"
           label="next"
           variant="ghost"
-          icon="lucide-chevron-right"
+          icon="lucide-chevron-right rtl:rotate-180"
           @click="emit('next')"
         />
       </div>
@@ -104,10 +104,8 @@
                 :tabindex="isFocusedCell(cell) ? 0 : -1"
                 @mouseenter="emit('hoverCell', cell.date)"
                 @click="!cell.isUnavailable && emit('selectDate', cell.date)"
-                @keydown.left.prevent="
-                  shiftFocus(cell.date.subtract(1, 'day'), -1)
-                "
-                @keydown.right.prevent="shiftFocus(cell.date.add(1, 'day'), 1)"
+                @keydown.left.prevent="shiftDay(cell.date, isRtl ? 1 : -1)"
+                @keydown.right.prevent="shiftDay(cell.date, isRtl ? -1 : 1)"
                 @keydown.up.prevent="
                   shiftFocus(cell.date.subtract(7, 'day'), -1)
                 "
@@ -173,7 +171,7 @@
         </div>
         <div
           ref="monthListRef"
-          class="relative flex w-1/2 flex-col gap-0.5 overflow-y-auto pl-1.5"
+          class="relative flex w-1/2 flex-col gap-0.5 overflow-y-auto ps-1.5"
           role="listbox"
           aria-label="Select month"
         >
@@ -203,6 +201,7 @@
 import { computed, nextTick, ref, watch } from 'vue'
 import type { Dayjs } from 'dayjs/esm'
 import { Button } from '../Button'
+import { documentDir } from '../../utils/document'
 import { months } from './utils'
 import type {
   CalendarPanelCell,
@@ -330,6 +329,13 @@ watch(
 // min/max bounds check, an `isDateUnavailable` predicate that returns true
 // for an unbounded run of dates would otherwise spin forever.
 const MAX_SKIP_DISABLED_STEPS = 366
+
+// Weeks run right to left on an RTL page, so ArrowLeft moves to the next day.
+const isRtl = computed(() => documentDir() === 'rtl')
+
+function shiftDay(date: Dayjs, step: 1 | -1) {
+  shiftFocus(date.add(step, 'day'), step)
+}
 
 function shiftFocus(target: Dayjs, dir: 1 | -1, retried = false, steps = 0) {
   // Bounds check first — if the target is outside [min, max], the arrow

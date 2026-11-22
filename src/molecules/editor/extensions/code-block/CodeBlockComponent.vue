@@ -1,11 +1,13 @@
 <template>
   <node-view-wrapper>
-    <div class="code-block-container group relative">
+    <!-- Code reads left to right on any page; RTL would reorder `f() {`.
+         The whole block is LTR so the controls stay clear of the code start. -->
+    <div dir="ltr" class="code-block-container group relative">
       <pre
-        class="flex items-start gap-5 !pl-3"
+        class="flex items-start gap-5 !ps-3"
       ><span class="flex flex-none select-none flex-col items-end border-outline-gray-2 text-ink-gray-4" aria-hidden="true" contenteditable="false"><span v-for="n in lineCount" :key="n" class="block">{{ n }}</span></span><code class="min-w-0 flex-1 overflow-x-auto"><node-view-content /></code></pre>
       <div
-        class="absolute right-0 top-0 pr-2 pt-1.5 flex items-center gap-0.5 opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100 [@media(hover:none)]:opacity-100"
+        class="absolute end-0 top-0 pe-2 pt-1.5 flex items-center gap-0.5 opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100 [@media(hover:none)]:opacity-100"
         :class="{ 'opacity-100': languageMenuOpen || props.selected }"
         contenteditable="false"
       >

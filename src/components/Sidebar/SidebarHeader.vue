@@ -29,13 +29,13 @@
         </slot>
       </div>
       <div
-        class="flex flex-1 flex-col text-left duration-300 ease-in-out truncate"
+        class="flex flex-1 flex-col text-start duration-300 ease-in-out truncate"
         :class="
           isCollapsed
-            ? 'ml-0 w-0 overflow-hidden opacity-0'
+            ? 'ms-0 w-0 overflow-hidden opacity-0'
             : showLogo
-              ? 'ml-2 w-auto opacity-100'
-              : 'ml-0 w-auto opacity-100'
+              ? 'ms-2 w-auto opacity-100'
+              : 'ms-0 w-auto opacity-100'
         "
       >
         <!-- The size sits on the line itself, not on a span inside a
@@ -69,8 +69,8 @@
             class="duration-300 ease-in-out"
             :class="
               isCollapsed
-                ? 'ml-0 w-0 overflow-hidden opacity-0'
-                : 'ml-2 w-auto opacity-100'
+                ? 'ms-0 w-0 overflow-hidden opacity-0'
+                : 'ms-2 w-auto opacity-100'
             "
           >
             <span class="lucide-chevron-down size-4 text-ink-gray-7" />
