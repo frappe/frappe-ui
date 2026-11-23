@@ -61,7 +61,7 @@ export function useDeferredTrigger(kind: 'tooltip' | 'hoverCard') {
   }
 
   function onPointer(event: Event) {
-    if ((event as Partial<PointerEvent>).pointerType !== 'touch') mount(event)
+    if (readPointerType(event) !== 'touch') mount(event)
   }
 
   function onFocus(event: Event) {
@@ -110,20 +110,16 @@ function trackPointerHandoff(
   const controller = new AbortController()
   const stop = () => controller.abort()
   const options = { capture: true, signal: controller.signal }
-  function isSamePointer(event: Event): event is PointerEvent {
-    return (
-      event instanceof PointerEvent &&
-      event.isTrusted &&
-      event.pointerId === pointerId
-    )
+  function matchesPointer(event: PointerEvent) {
+    return event.isTrusted && event.pointerId === pointerId
   }
 
   function onBoundary(event: Event) {
-    if (isSamePointer(event)) stop()
+    if (event instanceof PointerEvent && matchesPointer(event)) stop()
   }
 
   function checkExit(event: Event) {
-    if (!isSamePointer(event)) return
+    if (!(event instanceof PointerEvent) || !matchesPointer(event)) return
     stop()
     if (!trigger.isConnected || event.composedPath().includes(trigger)) return
 
@@ -156,9 +152,7 @@ function trackPointerHandoff(
 // Sends the event that mounted the overlay to the new trigger, so reka runs
 // its own open logic: hover delay, skip delay, touch filtering.
 function replay(event: Event, trigger: Element, gotFocus: boolean) {
-  if (event.type.startsWith('pointer')) {
-    // A script can dispatch a plain `Event` named "pointermove", and reka
-    // still treats it as a pointer, so read its fields as optional.
+  if (event.type === 'pointermove' || event.type === 'pointerenter') {
     dispatchPointerEvent(trigger, event.type, event)
     return
   }
@@ -171,19 +165,47 @@ function replay(event: Event, trigger: Element, gotFocus: boolean) {
   }
 }
 
+function readPointerType(event: Event) {
+  if ('pointerType' in event && typeof event.pointerType === 'string') {
+    return event.pointerType
+  }
+}
+
 function dispatchPointerEvent(
   trigger: Element,
-  type: string,
-  pointer: Partial<PointerEvent>,
+  type: 'pointermove' | 'pointerenter' | 'pointerleave',
+  source: Event,
   relatedTarget?: EventTarget | null,
 ) {
+  // Plain synthetic events can carry some or none of these fields.
+  const { pointerId, isPrimary, clientX, clientY } =
+    source instanceof PointerEvent
+      ? source
+      : {
+          pointerId:
+            'pointerId' in source && typeof source.pointerId === 'number'
+              ? source.pointerId
+              : undefined,
+          isPrimary:
+            'isPrimary' in source && typeof source.isPrimary === 'boolean'
+              ? source.isPrimary
+              : undefined,
+          clientX:
+            'clientX' in source && typeof source.clientX === 'number'
+              ? source.clientX
+              : undefined,
+          clientY:
+            'clientY' in source && typeof source.clientY === 'number'
+              ? source.clientY
+              : undefined,
+        }
   trigger.dispatchEvent(
     new PointerEvent(type, {
-      pointerId: pointer.pointerId,
-      pointerType: pointer.pointerType ?? 'mouse',
-      isPrimary: pointer.isPrimary,
-      clientX: pointer.clientX,
-      clientY: pointer.clientY,
+      pointerId,
+      pointerType: readPointerType(source) ?? 'mouse',
+      isPrimary,
+      clientX,
+      clientY,
       relatedTarget,
     }),
   )
