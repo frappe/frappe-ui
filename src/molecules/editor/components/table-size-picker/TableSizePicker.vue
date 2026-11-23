@@ -31,11 +31,16 @@ function pick(r: number, c: number) {
 }
 
 function onKeydown(event: KeyboardEvent) {
+  // Columns grow toward the end side, which is the left on an RTL page.
+  const grow =
+    getComputedStyle(event.currentTarget as Element).direction === 'rtl'
+      ? -1
+      : 1
   const step: Record<string, [number, number]> = {
     ArrowDown: [1, 0],
     ArrowUp: [-1, 0],
-    ArrowRight: [0, 1],
-    ArrowLeft: [0, -1],
+    ArrowRight: [0, grow],
+    ArrowLeft: [0, -grow],
   }
   const delta = step[event.key]
   if (delta) {
