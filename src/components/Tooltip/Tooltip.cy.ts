@@ -167,56 +167,95 @@ describe('Tooltip', () => {
       })
     })
 
-    it('cancels the first hover when the pointer moves directly off the replacement trigger', () => {
-      const shells = new Set<EventTarget>()
-      function ignoreReplacementBoundaries(event: PointerEvent) {
-        // Reproduce the missing boundary events even when Chromium happens
-        // to recognize the replacement before the next native move.
-        const target = event.target as HTMLElement | null
-        if (
-          event.isTrusted &&
-          target?.dataset?.cy?.startsWith('trigger-') &&
-          !shells.has(target)
-        ) {
-          event.stopPropagation()
+    for (const exit of ['within the document', 'outside the viewport']) {
+      it(`cancels the first hover when the pointer moves ${exit}`, () => {
+        const shells = new Set<EventTarget>()
+        const listeners = missedBoundaryListeners(shells)
+        const skipDocumentLeave = (event: PointerEvent) => {
+          if (event.target === event.currentTarget) {
+            event.stopImmediatePropagation()
+          }
         }
-      }
 
-      cy.clock()
-      cy.mount(() =>
-        h(
-          'div',
-          {
-            style: { display: 'flex', gap: '12px' },
-            onPointerenterCapture: ignoreReplacementBoundaries,
-            onPointerleaveCapture: ignoreReplacementBoundaries,
-          },
-          [
+        cy.clock()
+        cy.mount(() =>
+          h('div', { ...listeners, style: { display: 'flex', gap: '12px' } }, [
             ...Array.from({ length: 6 }, (_, i) =>
               h(Tooltip, { text: `Tooltip ${i}`, hoverDelay: 800 }, () =>
                 h('button', { 'data-cy': `trigger-${i}` }, `Button ${i}`),
               ),
             ),
             h('span', { 'data-cy': 'outside' }, 'Outside the triggers'),
-          ],
-        ),
+          ]),
+        )
+        cy.get('[data-cy^=trigger-]')
+          .should('have.length', 6)
+          .then(($triggers) => {
+            for (const trigger of $triggers.toArray()) shells.add(trigger)
+          })
+
+        if (exit === 'outside the viewport') {
+          cy.document().then((doc) => {
+            doc.addEventListener('pointerleave', skipDocumentLeave, true)
+          })
+        }
+        movePointerTo('[data-cy=outside]')
+        for (let i = 0; i < 6; i++) movePointerTo(`[data-cy=trigger-${i}]`)
+        if (exit === 'outside the viewport') {
+          movePointerOut()
+          cy.document().then((doc) => {
+            doc.removeEventListener('pointerleave', skipDocumentLeave, true)
+          })
+        } else {
+          movePointerTo('[data-cy=outside]')
+        }
+
+        cy.tick(800)
+        cy.get('[role=tooltip]').should('not.exist')
+
+        movePointerTo('[data-cy=trigger-0]')
+        cy.tick(800)
+        cy.get('[role=tooltip]').should('have.text', 'Tooltip 0')
+        movePointerOut()
+      })
+    }
+
+    it('releases the handoff listener when the mounted trigger is disabled', () => {
+      const shells = new Set<EventTarget>()
+      const disabled = ref(false)
+      let spy: ReturnType<typeof cy.spy>
+      let handoffSignal: AbortSignal
+
+      cy.clock()
+      cy.mount(() =>
+        h('div', missedBoundaryListeners(shells), [
+          h(Tooltip, { text: 'Lazy', disabled: disabled.value }, () =>
+            h('button', { 'data-cy': 'trigger-0' }, 'Trigger'),
+          ),
+          h('span', { 'data-cy': 'outside' }, 'Outside the trigger'),
+        ]),
       )
-      cy.get('[data-cy^=trigger-]')
-        .should('have.length', 6)
-        .then(($triggers) => {
-          for (const trigger of $triggers.toArray()) shells.add(trigger)
-        })
-
+      cy.get('[data-cy=trigger-0]').then(($trigger) => {
+        shells.add($trigger[0])
+        spy = cy.spy($trigger[0].ownerDocument, 'addEventListener')
+      })
       movePointerTo('[data-cy=outside]')
-      for (let i = 0; i < 6; i++) movePointerTo(`[data-cy=trigger-${i}]`)
-      movePointerTo('[data-cy=outside]')
-
-      cy.tick(800)
-      cy.get('[role=tooltip]').should('not.exist')
-
       movePointerTo('[data-cy=trigger-0]')
-      cy.tick(800)
-      cy.get('[role=tooltip]').should('have.text', 'Tooltip 0')
+      cy.then(() => {
+        const handoff = spy
+          .getCalls()
+          .find(
+            ({ args: [type, , options] }) =>
+              type === 'pointermove' && options?.capture && options?.signal,
+          )
+        expect(handoff, 'pointer handoff armed').to.exist
+        handoffSignal = handoff!.args[2].signal
+        expect(handoffSignal.aborted).to.equal(false)
+        disabled.value = true
+      })
+      cy.get('[data-cy=trigger-0]').should('not.have.attr', 'data-state')
+      cy.then(() => expect(handoffSignal.aborted).to.equal(true))
+      movePointerOut()
     })
 
     it('opens on the first keyboard focus and keeps focus on the trigger', () => {
@@ -264,6 +303,26 @@ describe('Tooltip', () => {
   })
 })
 
+function missedBoundaryListeners(shells: Set<EventTarget>) {
+  function ignoreReplacementBoundary(event: PointerEvent) {
+    // Simulate the missing native boundary even when Chromium recognizes
+    // the replacement before the next move.
+    const target = event.target as HTMLElement | null
+    if (
+      event.isTrusted &&
+      target?.dataset?.cy?.startsWith('trigger-') &&
+      !shells.has(target)
+    ) {
+      event.stopPropagation()
+    }
+  }
+
+  return {
+    onPointerenterCapture: ignoreReplacementBoundary,
+    onPointerleaveCapture: ignoreReplacementBoundary,
+  }
+}
+
 function movePointerTo(selector: string) {
   cy.get(selector).then(($el) => {
     // CDP uses runner coordinates, which include the scaled app iframe.
@@ -271,13 +330,20 @@ function movePointerTo(selector: string) {
     const frameRect = frame.getBoundingClientRect()
     const scale = frameRect.width / frame.clientWidth
     const rect = $el[0].getBoundingClientRect()
-    return Cypress.automation('remote:debugger:protocol', {
-      command: 'Input.dispatchMouseEvent',
-      params: {
-        type: 'mouseMoved',
-        x: frameRect.left + (rect.left + rect.width / 2) * scale,
-        y: frameRect.top + (rect.top + rect.height / 2) * scale,
-      },
-    })
+    return moveNativePointer(
+      frameRect.left + (rect.left + rect.width / 2) * scale,
+      frameRect.top + (rect.top + rect.height / 2) * scale,
+    )
   })
+}
+
+function moveNativePointer(x: number, y: number) {
+  return Cypress.automation('remote:debugger:protocol', {
+    command: 'Input.dispatchMouseEvent',
+    params: { type: 'mouseMoved', x, y },
+  })
+}
+
+function movePointerOut() {
+  cy.then(() => moveNativePointer(-10, -10))
 }

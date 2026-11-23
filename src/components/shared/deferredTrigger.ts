@@ -1,9 +1,4 @@
-import {
-  getCurrentInstance,
-  onBeforeUnmount,
-  ref,
-  type ComponentInternalInstance,
-} from 'vue'
+import { getCurrentInstance, ref } from 'vue'
 
 /**
  * Defers an overlay's popup machinery (reka root, trigger, portal) until its
@@ -33,6 +28,7 @@ export function useDeferredTrigger(kind: 'tooltip' | 'hoverCard') {
   // so a pressed tooltip trigger does not mount either. Its hover card opens
   // on any focus.
   let pressed = false
+  let stopPointerHandoff: (() => void) | undefined
 
   function mount(event?: Event) {
     if (mounted.value) return
@@ -41,6 +37,9 @@ export function useDeferredTrigger(kind: 'tooltip' | 'hoverCard') {
     const shell = event?.currentTarget
     if (!event || !(shell instanceof Element)) return
     const focus = captureFocus(shell)
+    const parent =
+      shell.parentElement ??
+      (shell.parentNode instanceof ShadowRoot ? shell.parentNode.host : null)
 
     // Render now rather than on the next tick, so reka starts its hover-delay
     // timer in the same task as the real event, as it did when it was mounted
@@ -56,7 +55,7 @@ export function useDeferredTrigger(kind: 'tooltip' | 'hoverCard') {
       event instanceof PointerEvent &&
       event.isTrusted
     ) {
-      trackPointerHandoff(trigger, event.pointerId, instance)
+      stopPointerHandoff = trackPointerHandoff(trigger, parent, event.pointerId)
     }
     replay(event, trigger, gotFocus)
   }
@@ -92,7 +91,12 @@ export function useDeferredTrigger(kind: 'tooltip' | 'hoverCard') {
     onPointerdown,
   }
 
-  return { mounted, mount, shellProps }
+  function stopHandoff() {
+    stopPointerHandoff?.()
+    stopPointerHandoff = undefined
+  }
+
+  return { mounted, mount, shellProps, stopHandoff }
 }
 
 // Replaying a move starts Reka's timer without making the browser enter the
@@ -100,23 +104,25 @@ export function useDeferredTrigger(kind: 'tooltip' | 'hoverCard') {
 // send the trigger the leave event that clears the timer and resets hover.
 function trackPointerHandoff(
   trigger: Element,
+  parent: Element | null,
   pointerId: number,
-  instance: ComponentInternalInstance,
 ) {
   const controller = new AbortController()
   const stop = () => controller.abort()
   const options = { capture: true, signal: controller.signal }
-  const doc = trigger.ownerDocument
-
-  function isSamePointer(event: PointerEvent) {
-    return event.isTrusted && event.pointerId === pointerId
+  function isSamePointer(event: Event): event is PointerEvent {
+    return (
+      event instanceof PointerEvent &&
+      event.isTrusted &&
+      event.pointerId === pointerId
+    )
   }
 
   function onBoundary(event: Event) {
-    if (event instanceof PointerEvent && isSamePointer(event)) stop()
+    if (isSamePointer(event)) stop()
   }
 
-  function onMove(event: PointerEvent) {
+  function checkExit(event: Event) {
     if (!isSamePointer(event)) return
     stop()
     if (!trigger.isConnected || event.composedPath().includes(trigger)) return
@@ -131,21 +137,20 @@ function trackPointerHandoff(
       return
     }
 
-    const relatedTarget = event.type === 'pointermove' ? event.target : null
+    const relatedTarget =
+      event.type === 'pointermove' ? event.target : event.relatedTarget
     dispatchPointerEvent(trigger, 'pointerleave', event, relatedTarget)
   }
 
-  doc.addEventListener('pointermove', onMove, options)
-  doc.addEventListener(
-    'pointerleave',
-    (event) => {
-      if (event.target === doc) onMove(event)
-    },
-    options,
-  )
+  trigger.ownerDocument.addEventListener('pointermove', checkExit, options)
+  // The original trigger's parent survives the swap and receives its own
+  // leave on viewport exit, even if no more moves arrive in this document.
+  parent?.addEventListener('pointerleave', checkExit, {
+    signal: controller.signal,
+  })
   trigger.addEventListener('pointerenter', onBoundary, options)
   trigger.addEventListener('pointerleave', onBoundary, options)
-  onBeforeUnmount(stop, instance)
+  return stop
 }
 
 // Sends the event that mounted the overlay to the new trigger, so reka runs

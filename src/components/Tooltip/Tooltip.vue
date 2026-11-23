@@ -39,7 +39,7 @@ const providerProps = computed(() =>
 )
 
 // The trigger renders alone until it is first hovered or focused.
-const { mounted, shellProps } = useDeferredTrigger('tooltip')
+const { mounted, shellProps, stopHandoff } = useDeferredTrigger('tooltip')
 
 defineSlots<{
   /**
@@ -61,7 +61,11 @@ defineSlots<{
   </Slot>
   <component :is="Provider" v-else v-bind="providerProps">
     <TooltipRoot>
-      <TooltipTrigger as-child data-slot="trigger">
+      <TooltipTrigger
+        as-child
+        data-slot="trigger"
+        @vue:before-unmount="stopHandoff"
+      >
         <slot />
       </TooltipTrigger>
       <TooltipBubble
