@@ -15,8 +15,6 @@ rules:
       space-x → gap-x. Add an `rtl:` variant if neither fits.
     severity: ERROR
     languages: [generic]
-    options:
-      generic_comment_style: cpp
     paths: &shipped
       include: ['*.vue', '*.ts', '*.js', '*.css']
       exclude:
@@ -109,8 +107,6 @@ rules:
       `documentDir()` so the popup opens toward the reading direction.
     severity: ERROR
     languages: [generic]
-    options:
-      generic_comment_style: cpp
     paths: *shipped
     patterns:
       - pattern-regex: 'placement:\s*[''"](?:left|right)(?:-start|-end)?[''"]'
