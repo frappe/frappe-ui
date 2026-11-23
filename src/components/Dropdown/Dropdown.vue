@@ -29,7 +29,7 @@
         data-slot="content"
         data-motion="instant"
         :class="menuClasses.content"
-        :side="side"
+        :side="physicalSide(side)"
         :align="align"
         :side-offset="offset"
         :style="{
@@ -51,6 +51,7 @@
 </template>
 
 <script setup lang="ts">
+import { physicalSide } from '../../utils/document'
 import { computed, onScopeDispose, useAttrs } from 'vue'
 import {
   DropdownMenuContent,

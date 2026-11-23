@@ -14,9 +14,9 @@
   },
   {
     name: 'side',
-    description: 'Side of the trigger to render the content on.',
+    description: 'Side of the trigger to render the content on. `inline-start` and\n`inline-end` follow the reading direction.',
     required: false,
-    type: 'PopoverSide',
+    type: 'PopoverSide | InlineSide',
     default: '"bottom"'
   },
   {

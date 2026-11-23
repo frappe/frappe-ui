@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { physicalSide } from '../../utils/document'
 import { computed, nextTick, ref, useAttrs, useTemplateRef, watch } from 'vue'
 import {
   ComboboxAnchor,
@@ -713,7 +714,7 @@ defineSlots<ComboboxSlots>()
               !isButtonMode && 'min-w-[--reka-combobox-trigger-width]',
             ]"
             position="popper"
-            :side="side"
+            :side="physicalSide(side)"
             :align="align"
             :side-offset="offset"
           >

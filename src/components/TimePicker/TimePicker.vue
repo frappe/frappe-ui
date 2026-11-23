@@ -61,7 +61,7 @@
         data-slot="content"
         data-selection
         class="z-[100]"
-        :side="resolvedSide"
+        :side="physicalSide(resolvedSide)"
         :align="resolvedAlign"
         :side-offset="resolvedOffset"
         @open-auto-focus.prevent
@@ -97,6 +97,7 @@
 </template>
 
 <script setup lang="ts">
+import { physicalSide, type InlineSide } from '../../utils/document'
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import {
   PopoverAnchor,
@@ -165,7 +166,9 @@ defineOptions({ inheritAttrs: false })
 
 // ── Prop reconciliation ──────────────────────────────────────────────────────
 
-const resolvedSide = computed<PopoverSide>(() => props.side ?? 'bottom')
+const resolvedSide = computed<PopoverSide | InlineSide>(
+  () => props.side ?? 'bottom',
+)
 const resolvedAlign = computed<PopoverAlign>(() => props.align ?? 'start')
 const resolvedOffset = computed(() => props.offset ?? 4)
 

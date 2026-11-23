@@ -5,7 +5,7 @@ import { Popover } from 'frappe-ui'
 <template>
   <div class="flex items-center gap-1.5 text-base text-ink-gray-8">
     Billing email
-    <Popover side="right" arrow>
+    <Popover side="inline-end" arrow>
       <template #trigger>
         <button
           type="button"

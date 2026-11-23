@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { physicalSide } from '#utils/document'
 import { computed, nextTick, reactive, ref, useAttrs, watch } from 'vue'
 import {
   ComboboxAnchor,
@@ -417,7 +418,7 @@ defineSlots<MultiEmailInputSlots>()
           data-slot="content"
           :data-size="size"
           position="popper"
-          :side="side"
+          :side="physicalSide(side)"
           :align="align"
           :side-offset="offset"
           class="z-[100] min-w-[--reka-combobox-trigger-width] overflow-hidden rounded-6 bg-surface-elevation-2 shadow-2xl"

@@ -1,3 +1,4 @@
+import type { InlineSide } from '../../utils/document'
 import type { Component } from 'vue'
 import type { InputSize, InputVariant } from '../../composables/inputTypes'
 import type { InputLabelingProps } from '../../composables/useInputLabeling'
@@ -59,7 +60,7 @@ export interface SelectProps extends InputLabelingProps {
    * item-aligned placement (anchored over the trigger, macOS-style) to
    * standard popper placement below/beside the trigger.
    */
-  side?: PopoverSide
+  side?: PopoverSide | InlineSide
 
   /** Preferred popover alignment. Defaults to `'start'`. See `side`. */
   align?: PopoverAlign

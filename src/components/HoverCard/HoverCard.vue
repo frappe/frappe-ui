@@ -10,6 +10,7 @@ import {
 } from 'reka-ui'
 import { computed, defineComponent, ref, watch } from 'vue'
 import PopoverPanel from '../shared/popover/PopoverPanel.vue'
+import { physicalSide } from '../../utils/document'
 import { usePortalTarget } from '../../composables/usePortalTarget'
 import { useDeferredTrigger } from '../shared/deferredTrigger'
 import type {
@@ -131,7 +132,7 @@ function onPointerDownOutside(event: Event) {
       <HoverCardContent
         data-slot="content"
         class="z-[100]"
-        :side="side"
+        :side="physicalSide(side)"
         :align="align"
         :side-offset="offset"
         :collision-padding="collisionPadding"

@@ -64,7 +64,7 @@
     name: 'side',
     description: 'Preferred popover side. Defaults to `\'bottom\'`.\n\nSetting `side`, `align`, or `offset` switches the menu from its default\nitem-aligned placement (anchored over the trigger, macOS-style) to\nstandard popper placement below/beside the trigger.',
     required: false,
-    type: 'PopoverSide'
+    type: 'PopoverSide | InlineSide'
   },
   {
     name: 'align',

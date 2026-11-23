@@ -31,7 +31,7 @@
     name: 'side',
     description: 'Preferred popover side.',
     required: false,
-    type: 'PopoverSide'
+    type: 'PopoverSide | InlineSide'
   },
   {
     name: 'align',

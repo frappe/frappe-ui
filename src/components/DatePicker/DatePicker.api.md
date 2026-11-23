@@ -10,7 +10,7 @@
     name: 'side',
     description: 'Preferred popover side relative to the trigger.',
     required: false,
-    type: 'PopoverSide'
+    type: 'PopoverSide | InlineSide'
   },
   {
     name: 'align',
@@ -218,7 +218,7 @@
     name: 'side',
     description: 'Preferred popover side relative to the trigger.',
     required: false,
-    type: 'PopoverSide'
+    type: 'PopoverSide | InlineSide'
   },
   {
     name: 'align',
@@ -433,7 +433,7 @@
     name: 'side',
     description: 'Preferred popover side relative to the trigger.',
     required: false,
-    type: 'PopoverSide'
+    type: 'PopoverSide | InlineSide'
   },
   {
     name: 'align',

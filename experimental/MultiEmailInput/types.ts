@@ -1,3 +1,4 @@
+import type { InlineSide } from '../../src/utils/document'
 import type { InputLabelingProps } from '../../src/composables/useInputLabeling'
 import type {
   PopoverSide,
@@ -83,7 +84,7 @@ export interface MultiEmailInputProps extends InputLabelingProps {
   createLabel?: (value: string) => string
 
   /** Preferred popover side. */
-  side?: PopoverSide
+  side?: PopoverSide | InlineSide
 
   /** Preferred popover alignment. */
   align?: PopoverAlign

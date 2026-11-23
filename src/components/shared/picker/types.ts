@@ -1,3 +1,4 @@
+import type { InlineSide } from '../../../utils/document'
 import type {
   InputExposed,
   InputSize,
@@ -7,7 +8,7 @@ import type { InputLabelingProps } from '../../../composables/useInputLabeling'
 
 export interface PickerShellProps {
   /** Side of the trigger to render the panel on. Already resolved by the caller. */
-  side: 'top' | 'right' | 'bottom' | 'left'
+  side: 'top' | 'right' | 'bottom' | 'left' | InlineSide
 
   /** Alignment of the panel along the chosen side. */
   align: 'start' | 'center' | 'end'

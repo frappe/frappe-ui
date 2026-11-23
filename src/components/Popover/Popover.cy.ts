@@ -13,6 +13,40 @@ describe('Popover', () => {
   // ---------------------------------------------------------------------------
   // New contract
   // ---------------------------------------------------------------------------
+  describe('inline sides', () => {
+    afterEach(() => {
+      document.documentElement.dir = ''
+    })
+
+    // Room on both sides, so the popover does not flip away from the edge.
+    function openOn(side: 'inline-start' | 'inline-end') {
+      cy.mount(
+        defineComponent(
+          () => () =>
+            h('div', { style: 'display: flex; justify-content: center' }, [
+              h(Popover, { side }, NewSlots),
+            ]),
+        ),
+      )
+      cy.get('[data-cy="trigger"]').click()
+      return cy.get('[data-slot="content"]')
+    }
+
+    it('opens inline-start on the left in LTR', () => {
+      openOn('inline-start').should('have.attr', 'data-side', 'left')
+    })
+
+    it('opens inline-start on the right on an RTL page', () => {
+      document.documentElement.dir = 'rtl'
+      openOn('inline-start').should('have.attr', 'data-side', 'right')
+    })
+
+    it('opens inline-end on the left on an RTL page', () => {
+      document.documentElement.dir = 'rtl'
+      openOn('inline-end').should('have.attr', 'data-side', 'left')
+    })
+  })
+
   describe('contract', () => {
     it('auto-wires #trigger to open on click (no manual onClick)', () => {
       cy.mount(Popover, { slots: NewSlots })

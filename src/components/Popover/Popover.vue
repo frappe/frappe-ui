@@ -22,7 +22,7 @@
         ref="contentRef"
         data-slot="content"
         class="z-[100]"
-        :side="side"
+        :side="physicalSide(side)"
         :align="align"
         :side-offset="offset"
         :collision-padding="collisionPadding"
@@ -61,6 +61,7 @@ import {
   Primitive,
 } from 'reka-ui'
 import PopoverPanel from '../shared/popover/PopoverPanel.vue'
+import { physicalSide } from '../../utils/document'
 import { usePortalTarget } from '../../composables/usePortalTarget'
 import type { PopoverEmits, PopoverProps, PopoverSlotProps } from './types'
 

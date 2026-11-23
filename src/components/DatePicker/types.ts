@@ -1,3 +1,4 @@
+import type { InlineSide } from '../../utils/document'
 import type { Dayjs } from 'dayjs/esm'
 import type { InputSize, InputVariant } from '../../composables/inputTypes'
 import type { InputLabelingProps } from '../../composables/useInputLabeling'
@@ -12,7 +13,7 @@ export type { PopoverAlign, PopoverSide }
 export interface CommonDatePickerProps extends InputLabelingProps {
   // Positioning — aligned with Combobox/Dropdown vocabulary
   /** Preferred popover side relative to the trigger. */
-  side?: PopoverSide
+  side?: PopoverSide | InlineSide
 
   /** Alignment of the popover along the trigger edge. */
   align?: PopoverAlign

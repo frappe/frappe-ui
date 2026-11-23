@@ -1,3 +1,4 @@
+import type { InlineSide } from '../../utils/document'
 import type { Component, VNodeChild } from 'vue'
 import type { InputSize, InputVariant } from '../../composables/inputTypes'
 import type { InputLabelingProps } from '../../composables/useInputLabeling'
@@ -132,7 +133,7 @@ export interface ComboboxProps extends InputLabelingProps {
   openOnClick?: boolean
 
   /** Preferred popover side. */
-  side?: PopoverSide
+  side?: PopoverSide | InlineSide
 
   /** Preferred popover alignment. */
   align?: PopoverAlign

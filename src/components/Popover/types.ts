@@ -1,4 +1,5 @@
 import type { PortalTarget } from '../../composables/usePortalTarget'
+import type { InlineSide } from '../../utils/document'
 export type PopoverSide = 'top' | 'right' | 'bottom' | 'left'
 export type PopoverAlign = 'start' | 'center' | 'end'
 
@@ -6,8 +7,11 @@ export interface PopoverProps {
   /** Controls visibility (v-model:open). */
   open?: boolean
 
-  /** Side of the trigger to render the content on. */
-  side?: PopoverSide
+  /**
+   * Side of the trigger to render the content on. `inline-start` and
+   * `inline-end` follow the reading direction.
+   */
+  side?: PopoverSide | InlineSide
 
   /** Alignment of the content along the chosen side. */
   align?: PopoverAlign

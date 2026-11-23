@@ -1,3 +1,4 @@
+import type { InlineSide } from '../../utils/document'
 import { ref, computed, watch } from 'vue'
 import type { Dayjs } from 'dayjs/esm'
 import { dayjs } from '../../utils/dayjs'
@@ -81,7 +82,9 @@ export function useCalendarView() {
 
 // Positioning resolution: `side`/`align`/`offset`.
 export function usePopoverPositioning(props: CommonDatePickerProps) {
-  const resolvedSide = computed<PopoverSide>(() => props.side ?? 'bottom')
+  const resolvedSide = computed<PopoverSide | InlineSide>(
+    () => props.side ?? 'bottom',
+  )
   const resolvedAlign = computed<PopoverAlign>(() => props.align ?? 'start')
   const resolvedOffset = computed(() => props.offset ?? 4)
   return { resolvedSide, resolvedAlign, resolvedOffset }

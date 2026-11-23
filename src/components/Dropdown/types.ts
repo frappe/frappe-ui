@@ -1,3 +1,4 @@
+import type { InlineSide } from '../../utils/document'
 import type { ButtonProps } from '../Button'
 import type {
   MenuDynamicSlots,
@@ -41,7 +42,7 @@ export interface DropdownProps {
   align?: DropdownAlign
 
   /** Side of the trigger the dropdown appears on. */
-  side?: DropdownSide
+  side?: DropdownSide | InlineSide
 
   /** Offset in pixels between trigger and dropdown. */
   offset?: number

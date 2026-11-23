@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { physicalSide } from '../../utils/document'
 import { computed, ref, useAttrs, useTemplateRef, watch } from 'vue'
 import {
   ComboboxAnchor,
@@ -526,7 +527,7 @@ defineSlots<MultiSelectSlots>()
           :data-loading="loading ? '' : undefined"
           class="z-[100] min-w-[--reka-combobox-trigger-width]"
           position="popper"
-          :side="side"
+          :side="physicalSide(side)"
           :align="align"
           :side-offset="offset"
         >

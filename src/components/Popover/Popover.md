@@ -30,8 +30,8 @@ content draws its own surface.
 
 ### Field help
 
-`side="right"` opens the panel beside the icon, and `arrow` points it back at
-the icon.
+`side="inline-end"` opens the panel beside the icon, after it in reading order,
+and `arrow` points it back at the icon.
 
 <ComponentPreview name="Popover-FieldHelp" />
 
@@ -59,7 +59,9 @@ close it. The popover emits `open` when it opens and `close` when it closes.
 
 `side` (`top`, `right`, `bottom`, `left`) picks the edge of the trigger the
 panel opens on, and `align` (`start`, `center`, `end`) its position along that
-edge. `offset` sets the gap in pixels. The panel flips and shifts to stay
+edge. `inline-start` and `inline-end` follow the reading direction:
+`inline-end` is the right in LTR and the left on an RTL page. `offset` sets the
+gap in pixels. The panel flips and shifts to stay
 inside the screen. `collisionPadding` sets the space it keeps from the screen
 edge.
 

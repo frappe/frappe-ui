@@ -4,6 +4,7 @@
  * always 24-hour `HH:mm` (or `HH:mm:ss` if seconds were typed).
  */
 
+import type { InlineSide } from '../../utils/document'
 import type { InputLabelingProps } from '../../composables/useInputLabeling'
 import type { InputSize, InputVariant } from '../../composables/inputTypes'
 
@@ -27,7 +28,7 @@ export interface TimePickerProps extends InputLabelingProps {
   options?: Array<{ value: string; label?: string }>
 
   /** Preferred popover side. */
-  side?: PopoverSide
+  side?: PopoverSide | InlineSide
 
   /** Alignment of the popover along the trigger edge. */
   align?: PopoverAlign

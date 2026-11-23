@@ -22,3 +22,15 @@ export function documentDir(): 'ltr' | 'rtl' {
   if (typeof document === 'undefined') return 'ltr'
   return document.documentElement.dir === 'rtl' ? 'rtl' : 'ltr'
 }
+
+/** Popup sides that follow the reading direction. */
+export type InlineSide = 'inline-start' | 'inline-end'
+
+/** The physical side to hand Reka: `inline-start` is the left in LTR and the right in RTL. */
+export function physicalSide<Side extends string>(
+  side: Side | InlineSide,
+): Side | 'left' | 'right' {
+  if (side === 'inline-start') return documentDir() === 'rtl' ? 'right' : 'left'
+  if (side === 'inline-end') return documentDir() === 'rtl' ? 'left' : 'right'
+  return side
+}

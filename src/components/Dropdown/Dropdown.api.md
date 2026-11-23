@@ -36,7 +36,7 @@
     name: 'side',
     description: 'Side of the trigger the dropdown appears on.',
     required: false,
-    type: 'DropdownSide',
+    type: 'DropdownSide | InlineSide',
     default: '"bottom"'
   },
   {

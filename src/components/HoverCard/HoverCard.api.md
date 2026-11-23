@@ -8,9 +8,9 @@
   const propsData = [
   {
     name: 'side',
-    description: 'Side of the trigger the card is placed on.',
+    description: 'Side of the trigger the card is placed on. `inline-start` and\n`inline-end` follow the reading direction.',
     required: false,
-    type: 'PopoverSide',
+    type: 'PopoverSide | InlineSide',
     default: '"bottom"'
   },
   {
