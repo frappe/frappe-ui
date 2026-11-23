@@ -12,7 +12,10 @@ export type { PopoverAlign, PopoverSide }
 // Shared props for both single date and range pickers
 export interface CommonDatePickerProps extends InputLabelingProps {
   // Positioning — aligned with Combobox/Dropdown vocabulary
-  /** Preferred popover side relative to the trigger. */
+  /**
+   * Preferred popover side relative to the trigger. `inline-start` and
+   * `inline-end` follow the page direction.
+   */
   side?: PopoverSide | InlineSide
 
   /** Alignment of the popover along the trigger edge. */

@@ -110,7 +110,10 @@ export interface MultiSelectProps extends InputLabelingProps {
   /** Fallback empty-state copy. */
   emptyText?: string
 
-  /** Preferred popover side. */
+  /**
+   * Preferred popover side. `inline-start` and `inline-end` follow the page
+   * direction.
+   */
   side?: PopoverSide | InlineSide
 
   /** Preferred popover alignment. */

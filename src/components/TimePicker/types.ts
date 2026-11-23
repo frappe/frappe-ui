@@ -27,7 +27,10 @@ export interface TimePickerProps extends InputLabelingProps {
   /** Caller-provided option values; bypasses the generated grid. */
   options?: Array<{ value: string; label?: string }>
 
-  /** Preferred popover side. */
+  /**
+   * Preferred popover side. `inline-start` and `inline-end` follow the page
+   * direction.
+   */
   side?: PopoverSide | InlineSide
 
   /** Alignment of the popover along the trigger edge. */

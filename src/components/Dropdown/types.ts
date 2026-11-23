@@ -41,7 +41,10 @@ export interface DropdownProps {
   /** Alignment of the dropdown content along the trigger edge. */
   align?: DropdownAlign
 
-  /** Side of the trigger the dropdown appears on. */
+  /**
+   * Side of the trigger the dropdown appears on. `inline-start` and
+   * `inline-end` follow the page direction.
+   */
   side?: DropdownSide | InlineSide
 
   /** Offset in pixels between trigger and dropdown. */

@@ -44,8 +44,8 @@ mount.
 
 To open a popup beside its trigger in reading order, pass `side="inline-start"`
 or `side="inline-end"` to Popover, Tooltip, HoverCard, Dropdown, Select,
-Combobox, MultiSelect, DatePicker or TimePicker. `left` and `right` stay
-physical on both kinds of page.
+Combobox, MultiSelect, DatePicker, TimePicker or MultiEmailInput. `left` and
+`right` stay physical on both kinds of page.
 
 An app that wraps its own Reka `ConfigProvider`, even only for `nonce` or
 `useId`, keeps it, and the provider then leaves the direction alone. Reka gives

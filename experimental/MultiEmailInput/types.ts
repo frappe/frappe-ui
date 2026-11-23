@@ -83,7 +83,10 @@ export interface MultiEmailInputProps extends InputLabelingProps {
   /** Builds the "create" row label for a typed address. */
   createLabel?: (value: string) => string
 
-  /** Preferred popover side. */
+  /**
+   * Preferred popover side. `inline-start` and `inline-end` follow the page
+   * direction.
+   */
   side?: PopoverSide | InlineSide
 
   /** Preferred popover alignment. */

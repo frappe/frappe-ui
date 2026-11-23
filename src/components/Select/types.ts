@@ -54,7 +54,8 @@ export interface SelectProps extends InputLabelingProps {
   emptyText?: string
 
   /**
-   * Preferred popover side. Defaults to `'bottom'`.
+   * Preferred popover side. Defaults to `'bottom'`. `inline-start` and
+   * `inline-end` follow the page direction.
    *
    * Setting `side`, `align`, or `offset` switches the menu from its default
    * item-aligned placement (anchored over the trigger, macOS-style) to
