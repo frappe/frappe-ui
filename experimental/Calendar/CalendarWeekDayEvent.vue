@@ -249,7 +249,7 @@ import { useElementSize } from '@vueuse/core'
 import CalendarEventPopover from './CalendarEventPopover.vue'
 import NewEventModal from './NewEventModal.vue'
 import type { PopoverSide } from '#components/Popover/types'
-import { documentDir } from '#utils/document'
+import { documentDir, type InlineSide } from '#utils/document'
 import { useEventBase } from './useEventBase'
 import {
   calculateMinutes,
@@ -335,8 +335,8 @@ const height15Min = minuteHeight * 15
 // Week view puts the card beside the event; the other views centre it below.
 // `align` is always 'center' — the old `placement="center"` was never a valid
 // side and reached reka as one.
-const popoverSide = computed<PopoverSide>(() =>
-  activeView.value === 'Week' ? 'left' : 'bottom',
+const popoverSide = computed<PopoverSide | InlineSide>(() =>
+  activeView.value === 'Week' ? 'inline-start' : 'bottom',
 )
 const eventIcon = computed(() =>
   props.event.type ? eventIcons[props.event.type] : null,

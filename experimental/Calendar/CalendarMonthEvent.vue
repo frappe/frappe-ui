@@ -1,7 +1,7 @@
 <template>
   <CalendarEventPopover
     v-model:open="isPopoverOpen"
-    side="left"
+    side="inline-start"
     :calendar-event="calendarEvent"
     :date="date"
     @open="registerDeleteShortcut"
