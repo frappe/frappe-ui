@@ -142,8 +142,9 @@ const labelClasses = computed(() => {
 })
 
 // The box the indicator sits in, and how far it hangs past the avatar's
-// bottom corner at the end of the line (bottom-left on an RTL page). The avatar masks out a circle the size of this box, so
-// the gap around the indicator shows whatever is behind the avatar.
+// bottom corner at the end of the line (bottom-left on an RTL page). The
+// avatar masks out a circle the size of this box, so the gap around the
+// indicator shows whatever is behind the avatar.
 const indicatorBox = computed(() => {
   return {
     xs: { size: '0.5rem', offset: '0.1rem' },
