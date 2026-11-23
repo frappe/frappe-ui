@@ -271,9 +271,25 @@ function formatValue(v: number) {
 
 function hitTestValue(event: MouseEvent, index: number) {
   if (props.step !== 0.5) return index
-  const rect = (event.currentTarget as HTMLElement).getBoundingClientRect()
-  const isLeftHalf = event.clientX - rect.left < rect.width / 2
-  return isLeftHalf ? index - 0.5 : index
+  const star = event.currentTarget as HTMLElement
+  const rect = star.getBoundingClientRect()
+  const fromStart = isRtl(star)
+    ? rect.right - event.clientX
+    : event.clientX - rect.left
+  return fromStart < rect.width / 2 ? index - 0.5 : index
+}
+
+// Stars run right to left on an RTL page, so the first half and ArrowLeft
+// point to higher values there.
+function isRtl(el: Element) {
+  return getComputedStyle(el).direction === 'rtl'
+}
+
+function ltrArrow(e: KeyboardEvent) {
+  if (!isRtl(e.currentTarget as Element)) return e.key
+  if (e.key === 'ArrowLeft') return 'ArrowRight'
+  if (e.key === 'ArrowRight') return 'ArrowLeft'
+  return e.key
 }
 
 function onStarMove(event: MouseEvent, index: number) {
@@ -317,9 +333,11 @@ function onKeydown(e: KeyboardEvent) {
   const max = starCount.value
   const step = props.step ?? 1
 
+  const key = ltrArrow(e)
+
   if (isSliderMode.value) {
     let next: number | null = null
-    switch (e.key) {
+    switch (key) {
       case 'ArrowRight':
       case 'ArrowUp':
         next = Math.min(max, savedValue.value + step)
@@ -358,7 +376,7 @@ function onKeydown(e: KeyboardEvent) {
     focusedIndex.value ||
     Math.max(1, Math.min(max, Math.ceil(savedValue.value) || 1))
   let next: number | null = null
-  switch (e.key) {
+  switch (key) {
     case 'ArrowRight':
     case 'ArrowDown':
       next = Math.min(max, current + 1)
@@ -455,6 +473,15 @@ const hasLabeling = computed(() => {
 
 .rating-half-right {
   clip-path: inset(0 0 0 50%);
+}
+
+/* The lower half of a star sits on its start side, which is the right in RTL. */
+.rating-half-left:dir(rtl) {
+  clip-path: inset(0 0 0 50%);
+}
+
+.rating-half-right:dir(rtl) {
+  clip-path: inset(0 50% 0 0);
 }
 
 .rating-icon {

@@ -252,6 +252,68 @@ describe('Rating', () => {
     })
   })
 
+  describe('on an RTL page', () => {
+    beforeEach(() => {
+      document.documentElement.dir = 'rtl'
+    })
+    afterEach(() => {
+      document.documentElement.dir = ''
+    })
+
+    function clickAt(fraction: number) {
+      cy.get('[data-slot="star"]')
+        .eq(2)
+        .then(($btn) => {
+          const rect = $btn[0].getBoundingClientRect()
+          cy.wrap($btn).click(rect.width * fraction, rect.height / 2)
+        })
+    }
+
+    it('right-half click emits half value', () => {
+      const onUpdate = cy.spy().as('onUpdate')
+      cy.mount(Rating, {
+        props: { modelValue: 0, step: 0.5, 'onUpdate:modelValue': onUpdate },
+      })
+      clickAt(0.75)
+      cy.get('@onUpdate').should('have.been.calledWith', 2.5)
+    })
+
+    it('left-half click emits full value', () => {
+      const onUpdate = cy.spy().as('onUpdate')
+      cy.mount(Rating, {
+        props: { modelValue: 0, step: 0.5, 'onUpdate:modelValue': onUpdate },
+      })
+      clickAt(0.25)
+      cy.get('@onUpdate').should('have.been.calledWith', 3)
+    })
+
+    it('fills a half star from its right side', () => {
+      cy.mount(Rating, { props: { modelValue: 2.5, step: 0.5 } })
+      cy.get('[data-slot="star"]')
+        .eq(2)
+        .find('[data-state="filled"]')
+        .should('have.css', 'clip-path', 'inset(0px 0px 0px 50%)')
+    })
+
+    it('radiogroup: arrow left moves selection forward', () => {
+      const onUpdate = cy.spy().as('onUpdate')
+      cy.mount(Rating, {
+        props: { modelValue: 2, 'onUpdate:modelValue': onUpdate },
+      })
+      cy.get('[role="radio"][aria-checked="true"]').focus().type('{leftArrow}')
+      cy.get('@onUpdate').should('have.been.calledWith', 3)
+    })
+
+    it('slider: arrow right decrements by step', () => {
+      const onUpdate = cy.spy().as('onUpdate')
+      cy.mount(Rating, {
+        props: { modelValue: 2, step: 0.5, 'onUpdate:modelValue': onUpdate },
+      })
+      cy.get('[role="slider"]').focus().type('{rightArrow}')
+      cy.get('@onUpdate').should('have.been.calledWith', 1.5)
+    })
+  })
+
   describe('shared labeling contract', () => {
     it('wires aria-labelledby and aria-describedby to the radiogroup', () => {
       cy.mount(Rating, {
