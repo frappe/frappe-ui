@@ -59,6 +59,7 @@ import { CALENDAR_CONFIG_KEY, type CalendarEvent } from './types'
 
 const props = defineProps<{
   open: boolean
+  /** The side in LTR; an RTL page opens the popover on the mirrored one. */
   side: PopoverSide
   calendarEvent: CalendarEvent
   date: Date
@@ -74,14 +75,13 @@ const emit = defineEmits<{
 
 const config = inject(CALENDAR_CONFIG_KEY)!
 
-// `side` names the LTR side; an RTL page opens it on the mirrored one.
-const mirroredSide: Partial<Record<PopoverSide, PopoverSide>> = {
+const mirroredSide: Record<PopoverSide, PopoverSide> = {
+  top: 'top',
+  bottom: 'bottom',
   left: 'right',
   right: 'left',
 }
 const logicalSide = computed(() =>
-  documentDir() === 'rtl'
-    ? (mirroredSide[props.side] ?? props.side)
-    : props.side,
+  documentDir() === 'rtl' ? mirroredSide[props.side] : props.side,
 )
 </script>
