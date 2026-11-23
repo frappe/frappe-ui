@@ -62,23 +62,46 @@ rules:
       - pattern-not-regex:
           "'-right-\\[11px\\] rounded-l-4' : '-left-\\[11px\\] rounded-r-4'"
       # TabButtons and Tabs: the indicator moves by an offset measured from the left edge.
-      - pattern-not-regex: "'pointer-events-none absolute left-0 top-0 "
       - pattern-not-regex:
-          "'(?:inset-y-0 )?left-0 (?:bottom-0 h-px
-          )?w-\\[--reka-tabs-indicator-size\\]
-          translate-x-\\[--reka-tabs-indicator-position\\]"
+          "'pointer-events-none absolute left-0 top-0
+          motion-reduce:transition-none'"
+      - pattern-not-regex:
+          '''left-0 bottom-0 h-px w-\[--reka-tabs-indicator-size\]
+          translate-x-\[--reka-tabs-indicator-position\] translate-y-px
+          transition-\[width,transform\]'''
+      - pattern-not-regex:
+          '''left-0 w-\[--reka-tabs-indicator-size\]
+          translate-x-\[--reka-tabs-indicator-position\]
+          transition-\[width,transform\]'''
+      - pattern-not-regex:
+          '''inset-y-0 left-0 w-\[--reka-tabs-indicator-size\]
+          translate-x-\[--reka-tabs-indicator-position\]
+          transition-\[width,transform\]'''
       # EditorTableMenu: floating-ui writes a physical style.left.
-      - pattern-not-regex: 'class="fixed left-0 top-0 '
+      - pattern-not-regex:
+          'class="fixed left-0 top-0 z-\[100\] flex items-center gap-1 rounded-6
+          border border-outline-gray-2 bg-surface-elevation-2 p-1 shadow-sm"'
       # Editor media: the resize grips sit on the physical edges of floated media.
       - pattern-not-regex: "edge === 'left' \\? 'left-0' : 'right-0'"
-      - pattern-not-regex: "'absolute right-2.5 bottom-2.5 "
-      # FloatingWindow: each resize handle sits on the physical edge its drag moves.
       - pattern-not-regex:
-          'class: ''-(?:top|bottom)-1 -(?:left|right)-1 size-4 |class:
-          ''-(?:left|right)-1 inset-y-0 w-2 |class="absolute -bottom-1 -right-1
-          z-10 size-4 '
+          '''absolute right-2\.5 bottom-2\.5 z-30 cursor-nwse-resize
+          touch-none'''
+      # FloatingWindow: each resize handle sits on the physical edge its drag moves.
+      - pattern-not-regex: "class: '-left-1 inset-y-0 w-2 cursor-ew-resize'"
+      - pattern-not-regex: "class: '-right-1 inset-y-0 w-2 cursor-ew-resize'"
+      - pattern-not-regex:
+          "class: '-top-1 -left-1 size-4 z-10 cursor-nwse-resize'"
+      - pattern-not-regex:
+          "class: '-top-1 -right-1 size-4 z-10 cursor-nesw-resize'"
+      - pattern-not-regex:
+          "class: '-bottom-1 -left-1 size-4 z-10 cursor-nesw-resize'"
+      - pattern-not-regex:
+          'class="absolute -bottom-1 -right-1 z-10 size-4 cursor-nwse-resize
+          rounded-1 focus-visible:outline-none focus-visible:ring-2
+          focus-visible:ring-outline-gray-3"'
       # Iframe: alignment is a document attribute, not reading direction.
-      - pattern-not-regex: "align === '(?:right|left)' \\? 'm[lr]-auto m[lr]-0'"
+      - pattern-not-regex: "align === 'right' \\? 'ml-auto mr-0'"
+      - pattern-not-regex: "align === 'left' \\? 'mr-auto ml-0'"
 
   - id: rtl-physical-placement
     message: |
@@ -119,7 +142,10 @@ rules:
       - pattern-not-regex: '(?m)^[ \t]*(?://|/?\*|<!--)[^\n]*$'
       # Physical on purpose.
       # Code editor: overrides CodeMirror's own physical cursor and gutter borders.
-      - pattern-not-regex: '\.frappe-code \.cm-cursor,[^{]*\{[^}]*border-left-color:'
-      - pattern-not-regex: '\.frappe-code \.cm-gutters \{[^}]*border-right: none;'
+      - pattern-not-regex:
+          '\.frappe-code \.cm-cursor,[^{]*\{[^}]*border-left-color:'
+      - pattern-not-regex:
+          '\.frappe-code \.cm-gutters \{[^}]*border-right: none;'
       # Editor commands: TipTap's textAlign attribute values, not CSS.
-      - pattern-not-regex: "editor\\.isActive\\(\\{ textAlign: '(?:left|right)' \\}\\)"
+      - pattern-not-regex:
+          "editor\\.isActive\\(\\{ textAlign: '(?:left|right)' \\}\\)"

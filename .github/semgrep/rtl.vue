@@ -24,6 +24,12 @@
 const layoutClasses = props.intervals ? 'flex space-x-1' : 'bg-surface-gray-2'
 // ok: rtl-physical-class
 const side = 'left-start'
+const indicator =
+  // ok: rtl-physical-class
+  'pointer-events-none absolute left-0 top-0 motion-reduce:transition-none'
+const changedIndicator =
+  // ruleid: rtl-physical-class
+  'pointer-events-none absolute left-0 top-0 motion-reduce:transition-none z-10'
 /** The grip's `right-2.5` inset, named in a comment. */
 const popup = useFloatingPopup({
   // ruleid: rtl-physical-placement
