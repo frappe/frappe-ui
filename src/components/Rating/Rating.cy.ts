@@ -1,4 +1,4 @@
-import { defineComponent, h } from 'vue'
+import { defineComponent, h, ref } from 'vue'
 import Rating from './Rating.vue'
 
 describe('Rating', () => {
@@ -361,6 +361,44 @@ describe('Rating', () => {
       })
       cy.get('[role="slider"]').focus().type('{rightArrow}')
       cy.get('@onUpdate').should('have.been.calledWith', 1.5)
+    })
+  })
+
+  describe('direction set on a mounted control', () => {
+    function mountSwitchable(modelValue: number) {
+      const onUpdate = cy.spy().as('onUpdate')
+      const direction = ref('ltr')
+      cy.mount(
+        defineComponent(() => () =>
+          h(Rating, {
+            modelValue,
+            step: 0.5,
+            style: { direction: direction.value },
+            'onUpdate:modelValue': onUpdate,
+          }),
+        ),
+      )
+      cy.get('[role="slider"]').then(() => {
+        direction.value = 'rtl'
+      })
+      cy.get('[role="slider"]').should('have.css', 'direction', 'rtl')
+    }
+
+    it('picks the half value from the right half once it turns RTL', () => {
+      mountSwitchable(0)
+      cy.get('[data-slot="star"]')
+        .eq(2)
+        .then(($btn) => {
+          const rect = $btn[0].getBoundingClientRect()
+          cy.wrap($btn).click(rect.width * 0.75, rect.height / 2)
+        })
+      cy.get('@onUpdate').should('have.been.calledWith', 2.5)
+    })
+
+    it('raises the rating with ArrowLeft once it turns RTL', () => {
+      mountSwitchable(2)
+      cy.get('[role="slider"]').focus().type('{leftArrow}')
+      cy.get('@onUpdate').should('have.been.calledWith', 2.5)
     })
   })
 

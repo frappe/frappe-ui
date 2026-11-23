@@ -37,6 +37,8 @@
       data-slot="control"
       v-bind="{ ...dataAttrs, ...controlAttrs }"
       @mouseleave="onLeave"
+      @pointerenter="readDirection"
+      @focusin="readDirection"
       @keydown="onKeydown"
     >
       <button
@@ -193,9 +195,12 @@ const rootRef = ref<HTMLElement>()
 
 // Stars run right to left in an RTL control, so the lower half sits on the
 // right and ArrowLeft points to higher values. Clipping, hit testing and keys
-// all read this one value.
+// all read this one value. CSS direction changes fire no event, so every
+// pointer, focus and key event reads it again before using it.
+const directionReads = ref(0)
 const isRtl = computed(() => {
   documentAttributes()
+  void directionReads.value
   return rootRef.value
     ? getComputedStyle(rootRef.value).direction === 'rtl'
     : false
@@ -298,7 +303,12 @@ function ltrArrow(e: KeyboardEvent) {
   return e.key
 }
 
+function readDirection() {
+  directionReads.value++
+}
+
 function onStarMove(event: MouseEvent, index: number) {
+  readDirection()
   if (isDisabled.value) return
   hoveredValue.value = hitTestValue(event, index)
 }
@@ -314,6 +324,7 @@ function commit(next: number) {
 }
 
 function onStarClick(event: MouseEvent, index: number) {
+  readDirection()
   if (isDisabled.value) return
   commit(hitTestValue(event, index))
 }
@@ -335,6 +346,7 @@ const rootTabindex = computed(() => {
 })
 
 function onKeydown(e: KeyboardEvent) {
+  readDirection()
   if (isDisabled.value) return
   const max = starCount.value
   const step = props.step ?? 1
