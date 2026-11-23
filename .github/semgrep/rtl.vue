@@ -41,6 +41,23 @@ const indent = { marginLeft: '4px' }
 const width = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight)
 // ok: rtl-physical-css
 const logical = { marginInlineStart: '4px' }
+// ruleid: rtl-physical-css
+const cellAlign = { textAlign: 'right' }
+// prettier-ignore
+// ruleid: rtl-physical-css
+const headerAlign = { textAlign: "left" }
+// ok: rtl-physical-css
+const startAlign = { textAlign: 'start' }
+// ruleid: rtl-physical-css
+const corner = 'border-top-left-radius: 4px'
+// ruleid: rtl-physical-css
+const cornerStyle = { borderBottomRightRadius: '4px' }
+// ok: rtl-physical-css
+const logicalCorner = 'border-start-start-radius: 4px'
+// ok: rtl-physical-css
+const isLeft = editor.isActive({ textAlign: 'left' })
+// ruleid: rtl-physical-css
+const isLeftStyled = editor.isActive({ textAlign: 'left', color: 'red' })
 const flipped = useFloatingPopup({
   floatingOptions: {
     // ok: rtl-physical-placement

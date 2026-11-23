@@ -98,7 +98,9 @@ rules:
       Physical CSS properties stay on the same side in RTL. Use the logical one:
       margin-left → margin-inline-start, padding-right → padding-inline-end,
       border-left → border-inline-start, text-align: left → start,
-      marginLeft → marginInlineStart.
+      border-top-left-radius → border-start-start-radius,
+      marginLeft → marginInlineStart, textAlign: 'left' → 'start',
+      borderTopLeftRadius → borderStartStartRadius.
     severity: ERROR
     languages: [generic]
     paths: *shipped
@@ -110,9 +112,14 @@ rules:
               (?:margin|padding|border)-(?:left|right)(?:-[a-z]+)?\s*:
             | (?:text-align|float|clear)\s*:\s*(?:left|right)\b
             | (?:margin|padding|border)(?:Left|Right)(?:[A-Z][a-z]+)?\s*:
+            | border-(?:top|bottom)-(?:left|right)-radius\s*:
+            | border(?:Top|Bottom)(?:Left|Right)Radius\s*:
+            | textAlign\s*:\s*['"](?:left|right)['"]
           )
       - pattern-not-regex: '(?m)^[ \t]*(?://|/?\*|<!--)[^\n]*$'
       # Physical on purpose.
       # Code editor: overrides CodeMirror's own physical cursor and gutter borders.
       - pattern-not-regex: '\.frappe-code \.cm-cursor,[^{]*\{[^}]*border-left-color:'
       - pattern-not-regex: '\.frappe-code \.cm-gutters \{[^}]*border-right: none;'
+      # Editor commands: TipTap's textAlign attribute values, not CSS.
+      - pattern-not-regex: "editor\\.isActive\\(\\{ textAlign: '(?:left|right)' \\}\\)"
