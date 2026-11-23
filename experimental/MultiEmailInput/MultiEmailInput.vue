@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { physicalSide } from '#utils/document'
 import { computed, nextTick, reactive, ref, useAttrs, watch } from 'vue'
 import {
   ComboboxAnchor,
@@ -14,6 +13,7 @@ import {
   TagsInputItemDelete,
   TagsInputRoot,
 } from 'reka-ui'
+import { physicalSide } from '#utils/document'
 import Avatar from '../../src/components/Avatar/Avatar.vue'
 import ItemListRow from '../../src/components/ItemListRow/ItemListRow.vue'
 import { Spinner } from '../../src/components/Spinner'

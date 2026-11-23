@@ -1,9 +1,9 @@
-import type { InlineSide } from '../../src/utils/document'
 import type { InputLabelingProps } from '../../src/composables/useInputLabeling'
 import type {
   PopoverSide,
   PopoverAlign,
 } from '../../src/components/Popover/types'
+import type { InlineSide } from '../../src/utils/document'
 import type { SelectionSize } from '../../src/components/shared/selection/utils'
 
 /** Sizes for the control and option rows (shared with the selection inputs). */

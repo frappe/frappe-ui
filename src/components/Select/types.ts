@@ -1,5 +1,5 @@
-import type { InlineSide } from '../../utils/document'
 import type { Component } from 'vue'
+import type { InlineSide } from '../../utils/document'
 import type { InputSize, InputVariant } from '../../composables/inputTypes'
 import type { InputLabelingProps } from '../../composables/useInputLabeling'
 import type { PopoverAlign, PopoverSide } from '../shared/selection/types'

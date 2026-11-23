@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { physicalSide } from '../../utils/document'
 import { computed, ref, useAttrs, useTemplateRef, watch } from 'vue'
 import {
   ComboboxAnchor,
@@ -9,6 +8,7 @@ import {
   ComboboxRoot,
   FocusScope,
 } from 'reka-ui'
+import { physicalSide } from '../../utils/document'
 import Button from '../Button/Button.vue'
 import { Spinner } from '../Spinner'
 import MultiSelectResults from './MultiSelectResults.vue'

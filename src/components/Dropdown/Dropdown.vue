@@ -51,7 +51,6 @@
 </template>
 
 <script setup lang="ts">
-import { physicalSide } from '../../utils/document'
 import { computed, onScopeDispose, useAttrs } from 'vue'
 import {
   DropdownMenuContent,
@@ -64,6 +63,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from 'reka-ui'
+import { physicalSide } from '../../utils/document'
 import { Button } from '../Button'
 import Menu from '../Menu/Menu.vue'
 import type { DropdownProps, DropdownSlots } from './types'

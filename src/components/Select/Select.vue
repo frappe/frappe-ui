@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { physicalSide } from '../../utils/document'
 import { computed, useAttrs, useTemplateRef } from 'vue'
+import { physicalSide } from '../../utils/document'
 import { useInputLabeling } from '../../composables/useInputLabeling'
 import { useReactiveSlots } from '../../composables/useReactiveSlots'
 import { usePortalTarget } from '../../composables/usePortalTarget'

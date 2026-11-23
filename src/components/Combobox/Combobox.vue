@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { physicalSide } from '../../utils/document'
 import { computed, nextTick, ref, useAttrs, useTemplateRef, watch } from 'vue'
 import {
   ComboboxAnchor,
@@ -10,6 +9,7 @@ import {
   ComboboxTrigger,
   FocusScope,
 } from 'reka-ui'
+import { physicalSide } from '../../utils/document'
 import OptionIcon from '../shared/selection/OptionIcon.vue'
 import PopoverPanel from '../shared/popover/PopoverPanel.vue'
 import ComboboxResults from './ComboboxResults.vue'

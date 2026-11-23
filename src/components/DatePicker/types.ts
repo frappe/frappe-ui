@@ -1,5 +1,5 @@
-import type { InlineSide } from '../../utils/document'
 import type { Dayjs } from 'dayjs/esm'
+import type { InlineSide } from '../../utils/document'
 import type { InputSize, InputVariant } from '../../composables/inputTypes'
 import type { InputLabelingProps } from '../../composables/useInputLabeling'
 

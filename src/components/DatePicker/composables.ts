@@ -1,6 +1,6 @@
-import type { InlineSide } from '../../utils/document'
 import { ref, computed, watch } from 'vue'
 import type { Dayjs } from 'dayjs/esm'
+import type { InlineSide } from '../../utils/document'
 import { dayjs } from '../../utils/dayjs'
 import {
   generateWeeks,

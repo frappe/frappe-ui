@@ -97,7 +97,6 @@
 </template>
 
 <script setup lang="ts">
-import { physicalSide, type InlineSide } from '../../utils/document'
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import {
   PopoverAnchor,
@@ -105,6 +104,7 @@ import {
   PopoverPortal,
   PopoverRoot,
 } from 'reka-ui'
+import { physicalSide, type InlineSide } from '../../utils/document'
 import { TextInput } from '../TextInput'
 import { usePortalTarget } from '../../composables/usePortalTarget'
 import '../shared/selection/popoverMotion.css'
