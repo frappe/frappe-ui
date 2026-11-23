@@ -309,6 +309,42 @@ describe('Rating', () => {
       cy.get('@onUpdate').should('have.been.calledWith', 3)
     })
 
+    it('icon slot props name physical halves', () => {
+      cy.mount(Rating, {
+        props: { modelValue: 3.5, step: 0.5 },
+        slots: {
+          icon: ({
+            index,
+            side,
+            state,
+            leftState,
+            rightState,
+          }: {
+            index: number
+            side: 'left' | 'right'
+            state: string
+            leftState: string
+            rightState: string
+          }) =>
+            h('i', {
+              'data-test': `s${index}-${side}`,
+              'data-state': state,
+              'data-left': leftState,
+              'data-right': rightState,
+            }),
+        },
+      })
+      // star 4: the filled lower half is drawn on the physical right
+      cy.get('.rating-half-left [data-test="s4-right"]')
+        .should('have.attr', 'data-state', 'filled')
+        .and('have.attr', 'data-left', 'empty')
+        .and('have.attr', 'data-right', 'filled')
+      cy.get('.rating-half-right [data-test="s4-left"]')
+        .should('have.attr', 'data-state', 'empty')
+        .and('have.attr', 'data-left', 'empty')
+        .and('have.attr', 'data-right', 'filled')
+    })
+
     it('radiogroup: arrow left moves selection forward', () => {
       const onUpdate = cy.spy().as('onUpdate')
       cy.mount(Rating, {
