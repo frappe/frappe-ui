@@ -295,6 +295,20 @@ describe('Rating', () => {
         .should('have.css', 'clip-path', 'inset(0px 0px 0px 50%)')
     })
 
+    it('fills and picks like LTR inside a direction: ltr control', () => {
+      const onUpdate = cy.spy().as('onUpdate')
+      cy.mount(Rating, {
+        props: { modelValue: 2.5, step: 0.5, 'onUpdate:modelValue': onUpdate },
+        attrs: { style: 'direction: ltr' },
+      })
+      cy.get('[data-slot="star"]')
+        .eq(2)
+        .find('[data-state="filled"]')
+        .should('have.css', 'clip-path', 'inset(0px 50% 0px 0px)')
+      clickAt(0.75)
+      cy.get('@onUpdate').should('have.been.calledWith', 3)
+    })
+
     it('radiogroup: arrow left moves selection forward', () => {
       const onUpdate = cy.spy().as('onUpdate')
       cy.mount(Rating, {

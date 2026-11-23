@@ -33,6 +33,7 @@
       :aria-valuemax="isSliderMode ? starCount : undefined"
       :aria-valuenow="isSliderMode ? savedValue : undefined"
       :aria-valuetext="isSliderMode ? formatValue(savedValue) : undefined"
+      :data-dir="isRtl ? 'rtl' : undefined"
       data-slot="control"
       v-bind="{ ...dataAttrs, ...controlAttrs }"
       @mouseleave="onLeave"
@@ -131,6 +132,7 @@
 <script setup lang="ts">
 import { computed, ref, useAttrs, nextTick } from 'vue'
 import type { StyleValue } from 'vue'
+import { documentAttributes } from '../../utils/document'
 import { resolvePropValue } from '../../utils/resolvePropValue'
 import { useInputLabeling } from '../../composables/useInputLabeling'
 import { useReactiveSlots } from '../../composables/useReactiveSlots'
@@ -188,6 +190,16 @@ const isSliderMode = computed(() => props.step === 0.5)
 const hoveredValue = ref<number | null>(null)
 const focusedIndex = ref<number>(0)
 const rootRef = ref<HTMLElement>()
+
+// Stars run right to left in an RTL control, so the lower half sits on the
+// right and ArrowLeft points to higher values. Clipping, hit testing and keys
+// all read this one value.
+const isRtl = computed(() => {
+  documentAttributes()
+  return rootRef.value
+    ? getComputedStyle(rootRef.value).direction === 'rtl'
+    : false
+})
 
 const {
   inputId,
@@ -273,20 +285,14 @@ function hitTestValue(event: MouseEvent, index: number) {
   if (props.step !== 0.5) return index
   const star = event.currentTarget as HTMLElement
   const rect = star.getBoundingClientRect()
-  const fromStart = isRtl(star)
+  const fromStart = isRtl.value
     ? rect.right - event.clientX
     : event.clientX - rect.left
   return fromStart < rect.width / 2 ? index - 0.5 : index
 }
 
-// Stars run right to left on an RTL page, so the first half and ArrowLeft
-// point to higher values there.
-function isRtl(el: Element) {
-  return getComputedStyle(el).direction === 'rtl'
-}
-
 function ltrArrow(e: KeyboardEvent) {
-  if (!isRtl(e.currentTarget as Element)) return e.key
+  if (!isRtl.value) return e.key
   if (e.key === 'ArrowLeft') return 'ArrowRight'
   if (e.key === 'ArrowRight') return 'ArrowLeft'
   return e.key
@@ -475,12 +481,11 @@ const hasLabeling = computed(() => {
   clip-path: inset(0 0 0 50%);
 }
 
-/* The lower half of a star sits on its start side, which is the right in RTL. */
-.rating-half-left:dir(rtl) {
+[data-dir='rtl'] .rating-half-left {
   clip-path: inset(0 0 0 50%);
 }
 
-.rating-half-right:dir(rtl) {
+[data-dir='rtl'] .rating-half-right {
   clip-path: inset(0 50% 0 0);
 }
 
