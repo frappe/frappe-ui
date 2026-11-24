@@ -344,7 +344,9 @@ export default defineComponent({
         ...rootProps,
         ...restAttrs,
         class: [attrClass, buttonClasses.value],
-        'aria-label': props.label ?? restAttrs['aria-label'],
+        // An explicit aria-label wins: it can describe the action better than
+        // the visible label, e.g. "Open record SO-0001" for a button labelled "SO-0001".
+        'aria-label': restAttrs['aria-label'] ?? props.label,
         'aria-busy': props.loading || undefined,
       }
       const button =

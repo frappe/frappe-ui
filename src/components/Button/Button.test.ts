@@ -22,6 +22,33 @@ describe('Button', () => {
     app.unmount()
   })
 
+  it('lets a caller-provided accessible name win over the label', () => {
+    const host = document.createElement('div')
+    const app = createApp(Button, {
+      label: 'SO-0001',
+      'aria-label': 'Open sales order SO-0001',
+    })
+    app.mount(host)
+
+    expect(host.querySelector('button')?.getAttribute('aria-label')).toBe(
+      'Open sales order SO-0001',
+    )
+
+    app.unmount()
+  })
+
+  it('names the button after its label by default', () => {
+    const host = document.createElement('div')
+    const app = createApp(Button, { label: 'Save' })
+    app.mount(host)
+
+    expect(host.querySelector('button')?.getAttribute('aria-label')).toBe(
+      'Save',
+    )
+
+    app.unmount()
+  })
+
   it('swaps the resting background for the pressed one when data-state is active', () => {
     const render = (props: Record<string, unknown>) => {
       const host = document.createElement('div')
