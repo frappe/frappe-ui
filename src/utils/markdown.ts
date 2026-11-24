@@ -1,7 +1,19 @@
+import DOMPurify from 'dompurify'
 import { marked } from 'marked'
 
+/**
+ * Markdown as HTML that is safe to render with `v-html`: GitHub-flavoured,
+ * with line breaks kept, and sanitized with DOMPurify.
+ */
 export function markdownToHTML(text: string): string {
-  // Use synchronous marked.parse
+  return DOMPurify.sanitize(markdownToRawHTML(text))
+}
+
+/**
+ * Markdown as unsanitized HTML, for the editor's paste path, where the editor
+ * schema keeps only the nodes it knows.
+ */
+export function markdownToRawHTML(text: string): string {
   return marked.parse(text, {
     gfm: true,
     breaks: true,

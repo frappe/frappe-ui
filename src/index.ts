@@ -201,6 +201,7 @@ export { vOnOutsideClick } from './directives/onOutsideClick'
 // Utilities
 export { dayjs, dayjsLocal, type Dayjs } from './utils/dayjs'
 export { default as debounce } from './utils/debounce'
+export { markdownToHTML } from './utils/markdown'
 // FileUploadHandler is the class FileUploader is built on; useFileUpload is
 // the recommended composable entry point for headless/custom-UI uploads.
 // fileToBase64 and the fileSize helpers (formatBytes, getMaxFileSize,
