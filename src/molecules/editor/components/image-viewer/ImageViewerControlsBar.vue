@@ -1,6 +1,6 @@
 <template>
   <div
-    class="absolute top-4 flex items-center gap-3 p-2 text-white z-20 transition-opacity duration-300 ease-in-out"
+    class="absolute top-[max(1rem,env(safe-area-inset-top))] flex items-center gap-3 p-2 text-white z-20 transition-opacity duration-300 ease-in-out"
     :class="{ 'opacity-0 pointer-events-none': !visible }"
     @touchstart.stop
     @touchmove.stop
