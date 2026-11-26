@@ -28,6 +28,7 @@ export function useDeferredTrigger(kind: 'tooltip' | 'hoverCard') {
   // so a pressed tooltip trigger does not mount either. Its hover card opens
   // on any focus.
   let pressed = false
+  let stopPointerHandoff: (() => void) | undefined
 
   function mount(event?: Event) {
     if (mounted.value) return
@@ -36,6 +37,9 @@ export function useDeferredTrigger(kind: 'tooltip' | 'hoverCard') {
     const shell = event?.currentTarget
     if (!event || !(shell instanceof Element)) return
     const focus = captureFocus(shell)
+    const parent =
+      shell.parentElement ??
+      (shell.parentNode instanceof ShadowRoot ? shell.parentNode.host : null)
 
     // Render now rather than on the next tick, so reka starts its hover-delay
     // timer in the same task as the real event, as it did when it was mounted
@@ -46,11 +50,18 @@ export function useDeferredTrigger(kind: 'tooltip' | 'hoverCard') {
     const gotFocus = receivesEvent(trigger, 'focus', () =>
       focus?.restore(trigger),
     )
+    if (
+      event.type === 'pointermove' &&
+      event instanceof PointerEvent &&
+      event.isTrusted
+    ) {
+      stopPointerHandoff = trackPointerHandoff(trigger, parent, event.pointerId)
+    }
     replay(event, trigger, gotFocus)
   }
 
   function onPointer(event: Event) {
-    if ((event as Partial<PointerEvent>).pointerType !== 'touch') mount(event)
+    if (readPointerType(event) !== 'touch') mount(event)
   }
 
   function onFocus(event: Event) {
@@ -80,25 +91,69 @@ export function useDeferredTrigger(kind: 'tooltip' | 'hoverCard') {
     onPointerdown,
   }
 
-  return { mounted, mount, shellProps }
+  function stopHandoff() {
+    stopPointerHandoff?.()
+    stopPointerHandoff = undefined
+  }
+
+  return { mounted, mount, shellProps, stopHandoff }
+}
+
+// Replaying a move starts Reka's timer without making the browser enter the
+// new trigger. If the next native move lands elsewhere, the browser may never
+// send the trigger the leave event that clears the timer and resets hover.
+function trackPointerHandoff(
+  trigger: Element,
+  parent: Element | null,
+  pointerId: number,
+) {
+  const controller = new AbortController()
+  const stop = () => controller.abort()
+  const options = { capture: true, signal: controller.signal }
+  function matchesPointer(event: PointerEvent) {
+    return event.isTrusted && event.pointerId === pointerId
+  }
+
+  function onBoundary(event: Event) {
+    if (event instanceof PointerEvent && matchesPointer(event)) stop()
+  }
+
+  function checkExit(event: Event) {
+    if (!(event instanceof PointerEvent) || !matchesPointer(event)) return
+    stop()
+    if (!trigger.isConnected || event.composedPath().includes(trigger)) return
+
+    // The document's event path hides triggers in closed shadow roots.
+    const root = trigger.getRootNode()
+    if (
+      event.type === 'pointermove' &&
+      root instanceof ShadowRoot &&
+      trigger.contains(root.elementFromPoint(event.clientX, event.clientY))
+    ) {
+      return
+    }
+
+    const relatedTarget =
+      event.type === 'pointermove' ? event.target : event.relatedTarget
+    dispatchPointerEvent(trigger, 'pointerleave', event, relatedTarget)
+  }
+
+  trigger.ownerDocument.addEventListener('pointermove', checkExit, options)
+  // The original trigger's parent survives the swap and receives its own
+  // leave on viewport exit, even if no more moves arrive in this document.
+  parent?.addEventListener('pointerleave', checkExit, {
+    signal: controller.signal,
+  })
+  trigger.addEventListener('pointerenter', onBoundary, options)
+  trigger.addEventListener('pointerleave', onBoundary, options)
+  return stop
 }
 
 // Sends the event that mounted the overlay to the new trigger, so reka runs
 // its own open logic: hover delay, skip delay, touch filtering.
 function replay(event: Event, trigger: Element, gotFocus: boolean) {
-  if (event.type.startsWith('pointer')) {
-    // A script can dispatch a plain `Event` named "pointermove", and reka
-    // still treats it as a pointer, so read its fields as optional.
-    const pointer: Partial<PointerEvent> = event
-    trigger.dispatchEvent(
-      new PointerEvent(event.type, {
-        pointerId: pointer.pointerId,
-        pointerType: pointer.pointerType ?? 'mouse',
-        isPrimary: pointer.isPrimary,
-        clientX: pointer.clientX,
-        clientY: pointer.clientY,
-      }),
-    )
+  if (event.type === 'pointermove' || event.type === 'pointerenter') {
+    dispatchPointerEvent(trigger, event.type, event)
     return
   }
   // Reka opens on a `focus` event that reaches the trigger. A descendant's
@@ -108,6 +163,52 @@ function replay(event: Event, trigger: Element, gotFocus: boolean) {
   if (event.type === 'focus' && !gotFocus) {
     trigger.dispatchEvent(new FocusEvent('focus'))
   }
+}
+
+function readPointerType(event: Event) {
+  if ('pointerType' in event && typeof event.pointerType === 'string') {
+    return event.pointerType
+  }
+}
+
+function dispatchPointerEvent(
+  trigger: Element,
+  type: 'pointermove' | 'pointerenter' | 'pointerleave',
+  source: Event,
+  relatedTarget?: EventTarget | null,
+) {
+  // Plain synthetic events can carry some or none of these fields.
+  const { pointerId, isPrimary, clientX, clientY } =
+    source instanceof PointerEvent
+      ? source
+      : {
+          pointerId:
+            'pointerId' in source && typeof source.pointerId === 'number'
+              ? source.pointerId
+              : undefined,
+          isPrimary:
+            'isPrimary' in source && typeof source.isPrimary === 'boolean'
+              ? source.isPrimary
+              : undefined,
+          clientX:
+            'clientX' in source && typeof source.clientX === 'number'
+              ? source.clientX
+              : undefined,
+          clientY:
+            'clientY' in source && typeof source.clientY === 'number'
+              ? source.clientY
+              : undefined,
+        }
+  trigger.dispatchEvent(
+    new PointerEvent(type, {
+      pointerId,
+      pointerType: readPointerType(source) ?? 'mouse',
+      isPrimary,
+      clientX,
+      clientY,
+      relatedTarget,
+    }),
+  )
 }
 
 // The first element a rendered tree starts with. Reka's root renders a
