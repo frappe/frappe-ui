@@ -503,7 +503,7 @@ function computeCurrentDay(): number | null {
 let currentDay = ref(computeCurrentDay())
 let _lastInternalDay = currentDay.value
 
-watch([activeView, week, date], () => {
+watch([activeView, week, selectedDay], () => {
   const val = computeCurrentDay()
   _lastInternalDay = val
   currentDay.value = val
