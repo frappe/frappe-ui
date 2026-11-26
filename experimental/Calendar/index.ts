@@ -15,5 +15,6 @@ export type {
   CalendarRowSlotProps,
   CalendarRowTag,
   CalendarTimeFormat,
+  CalendarWeekStart,
   GroupedCalendarEvents,
 } from './types'

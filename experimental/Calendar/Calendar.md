@@ -140,6 +140,7 @@ defaults:
   hourHeight: 50,         // pixel height of one hour row
   timeFormat: '12h',      // '12h' | '24h'
   weekends: ['sunday'],   // days shaded as weekend
+  weekStart: 'sunday',    // the day each week starts on, 'sunday' to 'saturday'
   eventIcons: {},         // icons keyed by an event's `type`
   showIcon: true,         // show the eventIcons icon on cards
   noBorder: false,        // remove the outer grid border
@@ -147,6 +148,10 @@ defaults:
 ```
 
 `eventIcons` values are Vue components.
+
+`weekStart` orders the Month grid and its weekday header, the Week view and the
+Agenda's week cards. A Frappe app passes the site's `first_day_of_the_week`
+lowercased, as `CalendarHeatmapChart` takes it.
 
 ## Keyboard shortcuts
 

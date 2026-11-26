@@ -257,6 +257,7 @@ import {
   formattedDuration,
   paintedEventHeight,
   EVENT_HEIGHT_THRESHOLD,
+  weekStartDay,
 } from './calendarUtils'
 import {
   COLUMN_RULE,
@@ -911,7 +912,9 @@ function handleHorizontalMovement(clientX: number, rect: DOMRect) {
   const width = columnWidth()
   let diff = Math.floor((clientX - rect.left) / width)
 
-  const column = props.bar ? props.bar.startCol : new Date(props.date).getDay()
+  const column = props.bar
+    ? props.bar.startCol
+    : (new Date(props.date).getDay() - weekStartDay(config.weekStart) + 7) % 7
   diff = Math.max(-column, Math.min(diff, DAY_COLUMNS - 1 - column))
 
   state.xAxis = Math.ceil(diff * width)

@@ -10,7 +10,7 @@
       <!-- A size down where the columns are: seven names across a phone is the
            widest thing in the grid, and the dates under them are 12px. -->
       <span
-        v-for="day in daysList"
+        v-for="day in weekDays"
         class="inline-flex items-center justify-center text-ink-gray-6 h-8"
         :class="isNarrow ? 'text-sm' : 'text-base'"
       >
@@ -179,7 +179,7 @@
 <script setup lang="ts">
 import { computed, inject, onMounted, onUnmounted, ref } from 'vue'
 import { breakpointsTailwind, useBreakpoints } from '@vueuse/core'
-import { daysList, parseDate } from './calendarUtils'
+import { parseDate, weekDayNames, weekStartDay } from './calendarUtils'
 import {
   COLUMN_INSET,
   COLUMN_RULE,
@@ -400,9 +400,13 @@ interface StripRow {
   lanes: number[]
 }
 
+const firstDay = weekStartDay(props.config.weekStart)
+const weekDays = weekDayNames(firstDay)
+
 const rows = computed<StripRow[]>(() => {
   const spans = props.events.filter(isSpan)
-  return stripWeeks(props.currentMonth, props.currentYear).map((week) => {
+  const weeks = stripWeeks(props.currentMonth, props.currentYear, firstDay)
+  return weeks.map((week) => {
     const { bars } = layoutRow(spans, week)
     return {
       key: parseDate(week[0]!),
