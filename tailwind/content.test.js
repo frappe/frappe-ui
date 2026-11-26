@@ -2,8 +2,9 @@
  * The exported `content` globs are the only way a consuming app knows which
  * frappe-ui files emit Tailwind classes. One rule decides what is listed for
  * `experimental/`: every directory the `frappe-ui/experimental` barrel
- * re-exports. This test derives that set from the barrel, so adding a
- * re-export without a glob fails here instead of rendering unstyled in an app.
+ * re-exports, and every directory with its own `frappe-ui/experimental/*`
+ * subpath. This test derives that set from the barrel and `exports`, so adding
+ * either without a glob fails here instead of rendering unstyled in an app.
  */
 import { describe, expect, it } from 'vitest'
 import fs from 'node:fs'
@@ -17,8 +18,11 @@ const packageRoot = path.resolve(
   '..',
 )
 
-/** Directories under `experimental/` that `experimental.ts` re-exports. */
-function reExportedDirectories() {
+/**
+ * Directories under `experimental/` that an app can import: the ones
+ * `experimental.ts` re-exports, and the ones with their own subpath export.
+ */
+function importableDirectories() {
   const barrel = fs.readFileSync(
     path.join(packageRoot, 'experimental.ts'),
     'utf8',
@@ -26,6 +30,13 @@ function reExportedDirectories() {
   const directories = new Set()
   for (const match of barrel.matchAll(/from '\.\/experimental\/([^/']+)/g)) {
     directories.add(match[1])
+  }
+  const { exports } = JSON.parse(
+    fs.readFileSync(path.join(packageRoot, 'package.json'), 'utf8'),
+  )
+  for (const subpath of Object.keys(exports)) {
+    const match = subpath.match(/^\.\/experimental\/([^/]+)$/)
+    if (match) directories.add(match[1])
   }
   return [...directories].sort()
 }
@@ -42,8 +53,8 @@ function globbedDirectories(prefix) {
 const withoutNegation = (glob) => (glob.startsWith('!') ? glob.slice(1) : glob)
 
 describe('content globs', () => {
-  it('covers every directory the experimental barrel re-exports', () => {
-    expect(globbedDirectories('experimental')).toEqual(reExportedDirectories())
+  it('covers every experimental directory an app can import', () => {
+    expect(globbedDirectories('experimental')).toEqual(importableDirectories())
   })
 
   it('finds something to scan behind every glob', () => {
