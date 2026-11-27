@@ -117,6 +117,7 @@ function buildRangeWeeks(year: number, month: number): CalendarPanelCell[][] {
   return generateRangeWeeks({
     year,
     monthIndex: month,
+    weekStart: props.weekStart,
     from: fromDate.value,
     to: toDate.value,
     preview: hoverDate.value ?? focusedDate.value,

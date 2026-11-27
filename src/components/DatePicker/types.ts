@@ -1,6 +1,7 @@
 import type { Dayjs } from 'dayjs/esm'
 import type { InputSize, InputVariant } from '../../composables/inputTypes'
 import type { InputLabelingProps } from '../../composables/useInputLabeling'
+import type { Weekday } from './weekdays'
 
 // Re-exported, not redeclared: `index.ts` does `export * from './types'`, so a
 // local copy publishes a second structurally identical `PopoverSide` at the
@@ -76,7 +77,12 @@ export interface CommonDatePickerProps extends InputLabelingProps {
   isDateUnavailable?: (date: Dayjs) => boolean
 }
 
-export interface DatePickerProps extends CommonDatePickerProps {
+export interface WeekStartProps {
+  /** First day of the calendar week. Defaults to `'sunday'`. */
+  weekStart?: Weekday
+}
+
+export interface DatePickerProps extends CommonDatePickerProps, WeekStartProps {
   /** Controlled value for the picker. */
   modelValue?: string
 }
@@ -84,7 +90,8 @@ export interface DatePickerProps extends CommonDatePickerProps {
 /** A range value: a `[from, to]` tuple in `YYYY-MM-DD` format, or `[]` when cleared. */
 export type DateRangeValue = [string, string] | []
 
-export interface DateRangePickerProps extends CommonDatePickerProps {
+export interface DateRangePickerProps
+  extends CommonDatePickerProps, WeekStartProps {
   /**
    * Controlled range value as `[from, to]` in `YYYY-MM-DD` format, or `[]` for
    * no selection. `DateRangeValue` types both sides of `v-model` (INP-Q12): the

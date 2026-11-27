@@ -422,6 +422,38 @@ describe('DateRangePicker', () => {
       )
       cy.get('[aria-label="2025-06-28"]').should('exist')
     })
+
+    it('uses the configured week start in both panes', () => {
+      cy.mount(DateRangePicker, {
+        props: {
+          dualPane: true,
+          modelValue: ['2025-06-30', '2025-07-06'],
+          weekStart: 'monday',
+        },
+      })
+      cy.get('input').focus().type('{downArrow}')
+
+      cy.get('[role=grid]').each(($grid) => {
+        cy.wrap($grid)
+          .find('[role=columnheader]')
+          .first()
+          .should('have.attr', 'aria-label', 'monday')
+      })
+      cy.get('[data-value="2025-06-01"]').should(
+        'have.attr',
+        'aria-colindex',
+        '7',
+      )
+      cy.get('[data-value="2025-07-01"]').should(
+        'have.attr',
+        'aria-colindex',
+        '2',
+      )
+      cy.focused().trigger('keydown', { key: 'End' })
+      cy.focused().should('have.attr', 'data-value', '2025-07-06')
+      cy.focused().trigger('keydown', { key: 'Home' })
+      cy.focused().should('have.attr', 'data-value', '2025-06-30')
+    })
   })
 
   // INP-Q5 (ADR-0012).

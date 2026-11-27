@@ -65,6 +65,7 @@
         <DateCalendar
           ref="calendarRef"
           :model-value="selected"
+          :week-start="props.weekStart"
           today-label="Today"
           :min="props.min"
           :max="props.max"

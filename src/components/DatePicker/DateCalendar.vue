@@ -70,9 +70,13 @@ const checkUnavailable = makeUnavailableCheck(
 )
 
 const weeks = computed<CalendarPanelCell[][]>(() =>
-  generateWeeks(currentYear.value, currentMonth.value, model.value).map(
-    (week) =>
-      week.map((d) => ({ ...d, isUnavailable: checkUnavailable(d.date) })),
+  generateWeeks(
+    currentYear.value,
+    currentMonth.value,
+    model.value,
+    props.weekStart,
+  ).map((week) =>
+    week.map((d) => ({ ...d, isUnavailable: checkUnavailable(d.date) })),
   ),
 )
 

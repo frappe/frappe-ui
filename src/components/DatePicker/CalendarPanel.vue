@@ -66,13 +66,16 @@
       >
         <div
           class="flex items-center text-xs-medium uppercase text-ink-gray-4 mb-1 gap-0.5"
+          role="row"
         >
           <div
-            v-for="(d, di) in WEEKDAYS"
-            :key="di"
+            v-for="weekday in weekdays"
+            :key="weekday"
             class="flex size-7 items-center justify-center"
+            role="columnheader"
+            :aria-label="weekday"
           >
-            {{ d }}
+            {{ weekday[0].toUpperCase() }}
           </div>
         </div>
         <div class="flex flex-col gap-0.5">
@@ -82,7 +85,7 @@
             class="flex gap-0.5"
             role="row"
           >
-            <template v-for="cell in week" :key="cell.key">
+            <template v-for="(cell, column) in week" :key="cell.key">
               <div
                 v-if="hideOutOfMonth && !cell.inMonth"
                 class="size-7"
@@ -94,6 +97,7 @@
                 class="flex size-7 items-center justify-center text-sm transition-colors duration-100"
                 :class="cellClass(cell)"
                 role="gridcell"
+                :aria-colindex="column + 1"
                 :aria-selected="ariaSelected(cell)"
                 :aria-disabled="cell.isUnavailable ? 'true' : undefined"
                 :aria-label="ariaLabel(cell)"
@@ -110,11 +114,9 @@
                   shiftFocus(cell.date.subtract(7, 'day'), -1)
                 "
                 @keydown.down.prevent="shiftFocus(cell.date.add(7, 'day'), 1)"
-                @keydown.home.prevent="
-                  shiftFocus(cell.date.subtract(cell.date.day(), 'day'), -1)
-                "
+                @keydown.home.prevent="shiftFocus(week[0].date, -1)"
                 @keydown.end.prevent="
-                  shiftFocus(cell.date.add(6 - cell.date.day(), 'day'), 1)
+                  shiftFocus(week[week.length - 1].date, 1)
                 "
                 @keydown.page-up.prevent="
                   shiftFocus(
@@ -203,6 +205,7 @@ import type { Dayjs } from 'dayjs/esm'
 import { Button } from '../Button'
 import { documentDir } from '../../utils/document'
 import { months } from './utils'
+import { WEEKDAYS } from './weekdays'
 import type {
   CalendarPanelCell,
   CalendarPanelExposed,
@@ -393,7 +396,9 @@ function focusInitialCell() {
 
 defineExpose<CalendarPanelExposed>({ focusInitialCell })
 
-const WEEKDAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
+const weekdays = computed(
+  () => props.weeks[0]?.map(({ date }) => WEEKDAYS[date.day()]) ?? [],
+)
 
 function ariaSelected(cell: CalendarPanelCell): 'true' | 'false' {
   return cell.isSelected || cell.isRangeStart || cell.isRangeEnd

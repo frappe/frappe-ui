@@ -65,6 +65,7 @@
         <DateRangeCalendar
           ref="calendarRef"
           :model-value="[fromDate, toDate]"
+          :week-start="props.weekStart"
           :dual-pane="props.dualPane"
           today-label="Today"
           :min="props.min"

@@ -414,6 +414,28 @@ describe('DatePicker', () => {
       cy.focused().should('have.attr', 'data-value', '2025-06-15')
     })
 
+    it('aligns weekday headers, dates and week navigation with a Monday start', () => {
+      cy.mount(DatePicker, {
+        props: { modelValue: '2025-06-18', weekStart: 'monday' },
+      })
+      cy.get('input').focus().type('{downArrow}')
+
+      cy.get('[role=columnheader]').should(($headers) => {
+        expect(
+          $headers.toArray().map((header) => header.textContent?.trim()),
+        ).to.deep.equal(['M', 'T', 'W', 'T', 'F', 'S', 'S'])
+      })
+      cy.get('[role=row]')
+        .eq(1)
+        .find('[role=gridcell]')
+        .first()
+        .should('have.attr', 'data-value', '2025-05-26')
+      cy.focused().trigger('keydown', { key: 'End' })
+      cy.focused().should('have.attr', 'data-value', '2025-06-22')
+      cy.focused().trigger('keydown', { key: 'Home' })
+      cy.focused().should('have.attr', 'data-value', '2025-06-16')
+    })
+
     it('PageUp/PageDown shift by one month, Shift+PageDown shifts by one year', () => {
       cy.mount(DatePicker, { props: { modelValue: '2025-06-15' } })
       cy.get('input').focus().type('{downArrow}')

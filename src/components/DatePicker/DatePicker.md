@@ -44,6 +44,18 @@ the range into "Depart" and "Return" fields over one calendar.
 `format` changes only the text shown in the input, not the value. Type a range
 with `DateRangeValue`, exported from `frappe-ui`.
 
+### First day of the week
+
+`DatePicker` and `DateRangePicker` start the week on Sunday by default. Set
+`week-start` to a lowercase weekday name from `sunday` through `saturday`.
+The calendar starts each row on that day, and Home and End move to the first
+and last dates of the week.
+
+```vue
+<DatePicker v-model="date" week-start="monday" />
+<DateRangePicker v-model="range" week-start="monday" />
+```
+
 ### Limits
 
 `min` and `max` take `'YYYY-MM-DD'`. `DateTimePicker` also takes

@@ -116,6 +116,12 @@
     type: '((date: Dayjs) => boolean)'
   },
   {
+    name: 'weekStart',
+    description: 'First day of the calendar week. Defaults to `\'sunday\'`.',
+    required: false,
+    type: '"sunday" | "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday"'
+  },
+  {
     name: 'modelValue',
     description: 'Controlled value for the picker.',
     required: false,
@@ -322,6 +328,12 @@
     description: 'Return true to prevent a date from being selected. Combined with `min`/`max`.',
     required: false,
     type: '((date: Dayjs) => boolean)'
+  },
+  {
+    name: 'weekStart',
+    description: 'First day of the calendar week. Defaults to `\'sunday\'`.',
+    required: false,
+    type: '"sunday" | "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday"'
   },
   {
     name: 'modelValue',
