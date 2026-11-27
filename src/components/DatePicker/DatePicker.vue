@@ -100,6 +100,7 @@ import type {
 
 const props = withDefaults(defineProps<DatePickerProps>(), {
   modelValue: '',
+  weekStart: 'sunday',
   variant: 'subtle',
   placeholder: 'Select date',
   typeable: true,

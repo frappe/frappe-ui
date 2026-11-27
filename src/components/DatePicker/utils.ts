@@ -2,7 +2,7 @@ import { dayjs, dayjsLocal } from '../../utils/dayjs'
 import type { Dayjs } from 'dayjs/esm'
 import type { DatePickerDateObj as DateObj, DateRangeValue } from './types'
 import type { CalendarPanelCell } from './calendarTypes'
-import { WEEKDAYS, type Weekday } from './weekdays'
+import { WEEKDAYS, type Weekday } from '../../utils/weekdays'
 
 // Constant list of month labels
 export const months: string[] = [
@@ -25,20 +25,25 @@ export function monthStart(year: number, monthIndex: number): Dayjs {
   return dayjs(`${year}-${monthIndex + 1}-01`)
 }
 
+function startOfCalendarWeek(date: Dayjs, weekStart?: Weekday): Dayjs {
+  if (weekStart === undefined) return date.startOf('week')
+
+  const firstWeekday = Math.max(0, WEEKDAYS.indexOf(weekStart))
+  const leadingDays = (date.day() - firstWeekday + 7) % 7
+  return date.subtract(leadingDays, 'day')
+}
+
 // Build weeks grid for the calendar
 export function generateWeeks(
   year: number,
   monthIndex: number,
   selected: string,
-  weekStart: Weekday = 'sunday',
+  weekStart?: Weekday,
 ): DateObj[][] {
   // Always emit 6 rows × 7 days so the calendar height stays constant — both
   // across months in a single pane (no jiggle when navigating) and between
   // panes in dual-pane mode (where one month may span 5 weeks and the other 6).
-  const firstOfMonth = monthStart(year, monthIndex)
-  const firstWeekday = Math.max(0, WEEKDAYS.indexOf(weekStart))
-  const leadingDays = (firstOfMonth.day() - firstWeekday + 7) % 7
-  const start = firstOfMonth.subtract(leadingDays, 'day')
+  const start = startOfCalendarWeek(monthStart(year, monthIndex), weekStart)
   const days: DateObj[] = []
   let d: Dayjs = start
   const sel = dayjs(selected)

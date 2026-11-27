@@ -1,3 +1,4 @@
+/** Indexed by the weekday number used by Date and Day.js. */
 export const WEEKDAYS = [
   'sunday',
   'monday',

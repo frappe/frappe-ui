@@ -15,8 +15,8 @@ describe('generateWeeks with a Monday-first Day.js locale', () => {
     dayjs.locale(previousLocale)
   })
 
-  it('starts on Sunday by default', () => {
-    expect(generateWeeks(2025, 5, '')[0][0].key).toBe('2025-06-01')
+  it('uses the locale when no week start is passed', () => {
+    expect(generateWeeks(2025, 5, '')[0][0].key).toBe('2025-05-26')
   })
 
   it('starts on the configured weekday', () => {

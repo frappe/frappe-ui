@@ -204,8 +204,8 @@ import { computed, nextTick, ref, watch } from 'vue'
 import type { Dayjs } from 'dayjs/esm'
 import { Button } from '../Button'
 import { documentDir } from '../../utils/document'
+import { WEEKDAYS } from '../../utils/weekdays'
 import { months } from './utils'
-import { WEEKDAYS } from './weekdays'
 import type {
   CalendarPanelCell,
   CalendarPanelExposed,
@@ -287,6 +287,24 @@ watch(
 // matching panel's watch handler calls `.focus()` on its own cell.
 
 const gridRef = ref<HTMLElement | null>(null)
+
+// A new week start can move the focused date into another keyed row, which
+// replaces its button without changing focusedDate.
+watch(
+  () => props.weeks[0]?.[0]?.date.day(),
+  async () => {
+    const grid = gridRef.value
+    const active = grid?.ownerDocument.activeElement
+    if (!grid || !active || !grid.contains(active)) return
+    const date = active.getAttribute('data-value')
+    if (!date) return
+
+    await nextTick()
+    if (grid.ownerDocument.activeElement === grid.ownerDocument.body) {
+      grid.querySelector<HTMLButtonElement>(`[data-value='${date}']`)?.focus()
+    }
+  },
+)
 
 function isFocusedCell(cell: CalendarPanelCell): boolean {
   return !!props.focusedDate && cell.date.isSame(props.focusedDate, 'day')

@@ -1,4 +1,5 @@
 import { defineComponent, h, ref } from 'vue'
+import { dayjs } from '../../utils/dayjs'
 import DatePicker from './DatePicker.vue'
 import type {
   DatePickerActionsSlotProps,
@@ -48,6 +49,29 @@ const getTodaysDate = () => {
 }
 
 describe('DatePicker', () => {
+  describe('with a Monday-first Day.js locale', () => {
+    let previousLocale: string
+
+    beforeEach(() => {
+      previousLocale = dayjs.locale()
+      dayjs.locale({ ...dayjs.Ls.en, name: 'monday-first-test', weekStart: 1 })
+    })
+
+    afterEach(() => {
+      dayjs.locale(previousLocale)
+    })
+
+    it('starts on Sunday unless week-start is set', () => {
+      cy.mount(DatePicker, { props: { modelValue: '2025-06-16', open: true } })
+      cy.get('[role=columnheader]')
+        .first()
+        .should('have.attr', 'aria-label', 'sunday')
+      cy.get('[role=gridcell]')
+        .first()
+        .should('have.attr', 'data-value', '2025-06-01')
+    })
+  })
+
   it('renders', () => {
     cy.mount(DatePicker)
 
@@ -434,6 +458,23 @@ describe('DatePicker', () => {
       cy.focused().should('have.attr', 'data-value', '2025-06-22')
       cy.focused().trigger('keydown', { key: 'Home' })
       cy.focused().should('have.attr', 'data-value', '2025-06-16')
+    })
+
+    it('keeps focus on the same date when changing the week start moves it to another row', () => {
+      cy.mount(DatePicker, { props: { modelValue: '2025-06-16' } }).then(
+        ({ wrapper }) => {
+          cy.get('input').focus().type('{downArrow}')
+          cy.focused().should('have.attr', 'data-value', '2025-06-16')
+          cy.then(() => wrapper.setProps({ weekStart: 'monday' }))
+          cy.focused().should('have.attr', 'data-value', '2025-06-16')
+          cy.focused().trigger('keydown', { key: 'End' })
+          cy.focused().should('have.attr', 'data-value', '2025-06-22')
+
+          cy.get('input').focus()
+          cy.then(() => wrapper.setProps({ weekStart: 'sunday' }))
+          cy.get('input').should('be.focused')
+        },
+      )
     })
 
     it('PageUp/PageDown shift by one month, Shift+PageDown shifts by one year', () => {

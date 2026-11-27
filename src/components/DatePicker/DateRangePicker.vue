@@ -106,6 +106,7 @@ import type {
 } from '../shared/picker/types'
 
 const props = withDefaults(defineProps<DateRangePickerProps>(), {
+  weekStart: 'sunday',
   modelValue: () => [],
   variant: 'subtle',
   placeholder: 'Select range',

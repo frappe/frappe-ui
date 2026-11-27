@@ -1,7 +1,7 @@
 import type { Dayjs } from 'dayjs/esm'
 import type { InputSize, InputVariant } from '../../composables/inputTypes'
 import type { InputLabelingProps } from '../../composables/useInputLabeling'
-import type { Weekday } from './weekdays'
+import type { Weekday } from '../../utils/weekdays'
 
 // Re-exported, not redeclared: `index.ts` does `export * from './types'`, so a
 // local copy publishes a second structurally identical `PopoverSide` at the

@@ -22,6 +22,34 @@ const clearSlot = {
 }
 
 describe('DateTimePicker', () => {
+  describe('with a Monday-first Day.js locale', () => {
+    let previousLocale: string
+
+    beforeEach(() => {
+      previousLocale = dayjs.locale()
+      dayjs.locale({ ...dayjs.Ls.en, name: 'monday-first-test', weekStart: 1 })
+    })
+
+    afterEach(() => {
+      dayjs.locale(previousLocale)
+    })
+
+    it('starts the headers, dates and keyboard week on Monday', () => {
+      cy.mount(DateTimePicker, {
+        props: { modelValue: '2025-06-18 12:00:00' },
+      })
+      cy.get('input').first().focus().type('{downArrow}')
+      cy.get('[role=columnheader]')
+        .first()
+        .should('have.attr', 'aria-label', 'monday')
+      cy.get('[role=gridcell]')
+        .first()
+        .should('have.attr', 'data-value', '2025-05-26')
+      cy.focused().trigger('keydown', { key: 'Home' })
+      cy.focused().should('have.attr', 'data-value', '2025-06-16')
+    })
+  })
+
   it('renders', () => {
     cy.mount(DateTimePicker)
 

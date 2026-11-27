@@ -70,7 +70,7 @@
     name: 'weekStart',
     description: 'The weekday at the top of each column. Defaults to the week start of the\ndayjs locale, and to `\'sunday\'` when the locale names none.',
     required: false,
-    type: 'CalendarHeatmapWeekStart'
+    type: '"sunday" | "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday"'
   },
   {
     name: 'min',

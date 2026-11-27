@@ -119,7 +119,8 @@
     name: 'weekStart',
     description: 'First day of the calendar week. Defaults to `\'sunday\'`.',
     required: false,
-    type: '"sunday" | "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday"'
+    type: '"sunday" | "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday"',
+    default: '"sunday"'
   },
   {
     name: 'modelValue',
@@ -333,7 +334,8 @@
     name: 'weekStart',
     description: 'First day of the calendar week. Defaults to `\'sunday\'`.',
     required: false,
-    type: '"sunday" | "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday"'
+    type: '"sunday" | "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday"',
+    default: '"sunday"'
   },
   {
     name: 'modelValue',
