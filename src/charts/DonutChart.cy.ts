@@ -79,7 +79,19 @@ describe('DonutChart', () => {
     cy.get('[data-slot="chart-plot"] [role="img"]').trigger('pointerdown', {
       pointerType: 'touch',
     })
-    cy.get('body').trigger('pointerdown', { pointerType: 'touch' })
+    // The finger lifts, as it does at the end of a tap.
+    cy.document().then((doc) =>
+      doc.dispatchEvent(new Event('touchend', { bubbles: true })),
+    )
+    // On the body itself: `trigger` would fire at the body's centre, which
+    // the chart covers.
+    cy.document().then((doc) =>
+      doc.body.dispatchEvent(
+        Object.assign(new Event('pointerdown', { bubbles: true }), {
+          pointerType: 'touch',
+        }),
+      ),
+    )
     cy.get('[data-slot="chart-tooltip"]').should('not.exist')
     onFirstSlice().trigger('mousemove', 350, 135)
     cy.get('[data-slot="chart-tooltip"]').should('contain.text', 'Search')

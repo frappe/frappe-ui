@@ -26,12 +26,32 @@ export function useTooltipDismiss({
   clearHover,
 }: TooltipDismissArgs) {
   // Whether the hover on the plot is a finger's, which only `clearHover` takes
-  // off. It stays a finger's until a mouse moves over the plot: a finger that
-  // scrolls the page from the plot hovers the marks again as it goes.
+  // off. A finger that scrolls the page from the plot hovers the marks again
+  // as it goes, so the hover stays a finger's until it has been cleared with
+  // the finger up, or a mouse moves over the plot.
   let touched = false
+  // The fingers that went down on the plot and are still down, by pointer:
+  // only they can hover its marks again. A tap ends in a pointerup. A swipe
+  // that scrolls the page cancels its pointer at once, and its finger stays
+  // down until the touch ends.
+  const fingers = new Set<number>()
   const dismiss = () => {
-    if (touched) clearHover?.()
+    if (touched) {
+      clearHover?.()
+      if (!fingers.size) touched = false
+    }
     close()
+  }
+  const onTouchEnd = (event: TouchEvent) => {
+    if (!event.touches?.length) fingers.clear()
+  }
+  const onPointerUp = (event: PointerEvent) => {
+    if (event.pointerType === 'touch') fingers.delete(event.pointerId)
+  }
+  // Where no touch event will end the swipe, its cancel is all there is.
+  const onPointerCancel = (event: PointerEvent) => {
+    if (event.pointerType === 'touch' && !('ontouchstart' in window))
+      fingers.delete(event.pointerId)
   }
   const onVisibility = () => document.hidden && dismiss()
 
@@ -48,8 +68,10 @@ export function useTooltipDismiss({
   }
   const onTouchDown = (event: PointerEvent) => {
     if (event.pointerType !== 'touch') return
-    if (plot.value?.contains(event.target as Node)) touched = true
-    else dismiss()
+    if (plot.value?.contains(event.target as Node)) {
+      touched = true
+      fingers.add(event.pointerId)
+    } else dismiss()
   }
 
   // Capture phase, because a scroll event does not bubble: a listener on
@@ -63,6 +85,19 @@ export function useTooltipDismiss({
       capture: true,
       passive: true,
     })
+    for (const name of ['touchend', 'touchcancel'] as const)
+      document.addEventListener(name, onTouchEnd, {
+        capture: true,
+        passive: true,
+      })
+    document.addEventListener('pointerup', onPointerUp, {
+      capture: true,
+      passive: true,
+    })
+    document.addEventListener('pointercancel', onPointerCancel, {
+      capture: true,
+      passive: true,
+    })
   })
 
   onBeforeUnmount(() => {
@@ -71,6 +106,12 @@ export function useTooltipDismiss({
     window.removeEventListener('blur', dismiss)
     document.removeEventListener('visibilitychange', onVisibility)
     document.removeEventListener('pointerdown', onTouchDown, { capture: true })
+    for (const name of ['touchend', 'touchcancel'] as const)
+      document.removeEventListener(name, onTouchEnd, { capture: true })
+    document.removeEventListener('pointerup', onPointerUp, { capture: true })
+    document.removeEventListener('pointercancel', onPointerCancel, {
+      capture: true,
+    })
   })
 
   // The plot arrives after the chart has mounted, and again whenever the
@@ -82,6 +123,9 @@ export function useTooltipDismiss({
       previous?.removeEventListener('pointermove', onMouse)
       el?.addEventListener('pointerleave', onLeave)
       el?.addEventListener('pointermove', onMouse)
+      // A finger on a plot that has gone ends its touch there, out of reach,
+      // and cannot hover the new one.
+      fingers.clear()
     },
     { immediate: true },
   )
