@@ -6,6 +6,7 @@ import {
   toNumber,
 } from './axisChartCommon'
 import { dayjs } from '#utils/dayjs'
+import { WEEKDAYS } from '#utils/weekdays'
 import { estimateTextWidth } from './format'
 import { interpolateRamp } from './colorMath'
 import {
@@ -28,7 +29,6 @@ import type {
   CalendarHeatmapChartConfig,
   CalendarHeatmapDay,
   CalendarHeatmapGrid,
-  CalendarHeatmapWeekStart,
 } from './types'
 
 export type CalendarHeatmapOptionContext = {
@@ -76,16 +76,6 @@ const PLOT_RIGHT_PAD = 4
 const SCALE_ROW = 24
 const SCALE_GAP = 8
 
-const FIRST_DAY: Record<CalendarHeatmapWeekStart, number> = {
-  sunday: 0,
-  monday: 1,
-  tuesday: 2,
-  wednesday: 3,
-  thursday: 4,
-  friday: 5,
-  saturday: 6,
-}
-
 /** Rows that carry a weekday label: seven at cell height crowd into each other. */
 const LABELLED_ROWS = [1, 3, 5]
 
@@ -110,8 +100,8 @@ function dayNames(firstDay: number) {
 }
 
 function weekStartDay(config: Pick<CalendarHeatmapChartConfig, 'weekStart'>) {
-  if (config.weekStart) return FIRST_DAY[config.weekStart]
-  return dayjs.Ls[dayjs.locale()]?.weekStart ?? FIRST_DAY.sunday
+  if (config.weekStart) return Math.max(0, WEEKDAYS.indexOf(config.weekStart))
+  return dayjs.Ls[dayjs.locale()]?.weekStart ?? 0
 }
 
 const ISO_DAY = /^(\d{4})-(\d{2})-(\d{2})/

@@ -3,6 +3,7 @@ import type {
   DatePickerDateObj,
   DatePickerViewMode,
   DateRangeValue,
+  WeekStartProps,
 } from './types'
 
 // Types for the calendars. Not in `types.ts`, which `index.ts` re-exports: the
@@ -10,7 +11,7 @@ import type {
 
 // ── DateCalendar ─────────────────────────────────────────────────────────────
 
-export interface DateCalendarProps {
+export interface DateCalendarProps extends WeekStartProps {
   /**
    * Earliest selectable date in `YYYY-MM-DD` format. Also bounds keyboard
    * navigation and the year list.
@@ -45,7 +46,7 @@ export interface DateCalendarExposed {
 
 // ── DateRangeCalendar ────────────────────────────────────────────────────────
 
-export interface DateRangeCalendarProps {
+export interface DateRangeCalendarProps extends WeekStartProps {
   /**
    * Earliest selectable date in `YYYY-MM-DD` format. Also bounds keyboard
    * navigation and the year list.

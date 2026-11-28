@@ -1,6 +1,7 @@
 import type { ComputedRef } from 'vue'
 import type { ECharts } from 'echarts/core'
 import type { TimeGrain } from './format'
+import type { Weekday } from '#utils/weekdays'
 
 export type ChartDir = 'ltr' | 'rtl'
 
@@ -429,14 +430,7 @@ export type HeatmapCellEvent = {
 }
 
 /** The weekday each column of a calendar heatmap starts on. */
-export type CalendarHeatmapWeekStart =
-  | 'sunday'
-  | 'monday'
-  | 'tuesday'
-  | 'wednesday'
-  | 'thursday'
-  | 'friday'
-  | 'saturday'
+export type CalendarHeatmapWeekStart = Weekday
 
 export type CalendarHeatmapChartConfig = {
   /** One row per day. Of two on the same day, the later one is drawn. */

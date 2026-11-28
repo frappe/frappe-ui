@@ -60,6 +60,10 @@ Per-component additions:
 - `DatePicker`, `DateTimePicker`: `modelValue?: string`.
 - `DateRangePicker`: `modelValue?: DateRangeValue`, and `dualPane` (default
   `false`) to render the current and next month side by side.
+- `DatePicker`, `DateRangePicker`: `weekStart` accepts a lowercase weekday
+  name from `'sunday'` through `'saturday'` and defaults to `'sunday'`.
+  It sets the first column of every calendar pane and the week boundaries
+  for Home/End keyboard navigation, regardless of the Day.js locale.
 
 A class on the component element reaches the trigger wrapper: `PickerShell`
 sets `inheritAttrs: false` and binds `$attrs` to the element around the input.

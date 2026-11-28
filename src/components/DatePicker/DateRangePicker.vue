@@ -65,6 +65,7 @@
         <DateRangeCalendar
           ref="calendarRef"
           :model-value="[fromDate, toDate]"
+          :week-start="props.weekStart"
           :dual-pane="props.dualPane"
           today-label="Today"
           :min="props.min"
@@ -105,6 +106,7 @@ import type {
 } from '../shared/picker/types'
 
 const props = withDefaults(defineProps<DateRangePickerProps>(), {
+  weekStart: 'sunday',
   modelValue: () => [],
   variant: 'subtle',
   placeholder: 'Select range',

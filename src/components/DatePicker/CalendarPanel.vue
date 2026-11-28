@@ -66,13 +66,16 @@
       >
         <div
           class="flex items-center text-xs-medium uppercase text-ink-gray-4 mb-1 gap-0.5"
+          role="row"
         >
           <div
-            v-for="(d, di) in WEEKDAYS"
-            :key="di"
+            v-for="weekday in weekdays"
+            :key="weekday"
             class="flex size-7 items-center justify-center"
+            role="columnheader"
+            :aria-label="weekday"
           >
-            {{ d }}
+            {{ weekday[0].toUpperCase() }}
           </div>
         </div>
         <div class="flex flex-col gap-0.5">
@@ -82,7 +85,7 @@
             class="flex gap-0.5"
             role="row"
           >
-            <template v-for="cell in week" :key="cell.key">
+            <template v-for="(cell, column) in week" :key="cell.key">
               <div
                 v-if="hideOutOfMonth && !cell.inMonth"
                 class="size-7"
@@ -94,6 +97,7 @@
                 class="flex size-7 items-center justify-center text-sm transition-colors duration-100"
                 :class="cellClass(cell)"
                 role="gridcell"
+                :aria-colindex="column + 1"
                 :aria-selected="ariaSelected(cell)"
                 :aria-disabled="cell.isUnavailable ? 'true' : undefined"
                 :aria-label="ariaLabel(cell)"
@@ -110,11 +114,9 @@
                   shiftFocus(cell.date.subtract(7, 'day'), -1)
                 "
                 @keydown.down.prevent="shiftFocus(cell.date.add(7, 'day'), 1)"
-                @keydown.home.prevent="
-                  shiftFocus(cell.date.subtract(cell.date.day(), 'day'), -1)
-                "
+                @keydown.home.prevent="shiftFocus(week[0].date, -1)"
                 @keydown.end.prevent="
-                  shiftFocus(cell.date.add(6 - cell.date.day(), 'day'), 1)
+                  shiftFocus(week[week.length - 1].date, 1)
                 "
                 @keydown.page-up.prevent="
                   shiftFocus(
@@ -202,6 +204,7 @@ import { computed, nextTick, ref, watch } from 'vue'
 import type { Dayjs } from 'dayjs/esm'
 import { Button } from '../Button'
 import { documentDir } from '../../utils/document'
+import { WEEKDAYS } from '../../utils/weekdays'
 import { months } from './utils'
 import type {
   CalendarPanelCell,
@@ -284,6 +287,24 @@ watch(
 // matching panel's watch handler calls `.focus()` on its own cell.
 
 const gridRef = ref<HTMLElement | null>(null)
+
+// A new week start can move the focused date into another keyed row, which
+// replaces its button without changing focusedDate.
+watch(
+  () => props.weeks[0]?.[0]?.date.day(),
+  async () => {
+    const grid = gridRef.value
+    const active = grid?.ownerDocument.activeElement
+    if (!grid || !active || !grid.contains(active)) return
+    const date = active.getAttribute('data-value')
+    if (!date) return
+
+    await nextTick()
+    if (grid.ownerDocument.activeElement === grid.ownerDocument.body) {
+      grid.querySelector<HTMLButtonElement>(`[data-value='${date}']`)?.focus()
+    }
+  },
+)
 
 function isFocusedCell(cell: CalendarPanelCell): boolean {
   return !!props.focusedDate && cell.date.isSame(props.focusedDate, 'day')
@@ -393,7 +414,9 @@ function focusInitialCell() {
 
 defineExpose<CalendarPanelExposed>({ focusInitialCell })
 
-const WEEKDAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
+const weekdays = computed(
+  () => props.weeks[0]?.map(({ date }) => WEEKDAYS[date.day()]) ?? [],
+)
 
 function ariaSelected(cell: CalendarPanelCell): 'true' | 'false' {
   return cell.isSelected || cell.isRangeStart || cell.isRangeEnd
