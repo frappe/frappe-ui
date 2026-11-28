@@ -66,6 +66,13 @@ export type PlotKeyboardReturn = {
 }
 
 /**
+ * How long after a finger lifts its tap may still focus the plot. Browsers send
+ * the tap's mousedown right after the lift, or up to 300ms later on a page that
+ * can zoom, so this leaves room without taking a later key's focus.
+ */
+const TAP_FOCUS_DELAY = 1000
+
+/**
  * A keyboard path to the marks of an echarts plot.
  *
  * echarts draws into one element, so there are no per-mark DOM nodes to tab
@@ -83,6 +90,10 @@ export function usePlotKeyboard<T>(
   // there would pull the tooltip off the mark under the pointer, so a focus
   // that a pointer caused is left alone.
   let fromPointer = false
+  // A tap focuses the plot later than a mouse press does: after the finger
+  // lifts, on the mousedown the browser sends for the tap. When the finger
+  // lifted, so that focus still counts as the tap's.
+  let touchLiftedAt = -Infinity
 
   const marks = computed(() => args.marks())
   const count = computed(() => marks.value.length)
@@ -160,6 +171,7 @@ export function usePlotKeyboard<T>(
     index.value = null
     held = undefined
     fromPointer = false
+    touchLiftedAt = -Infinity
     args.clear(previous)
   }
 
@@ -222,14 +234,23 @@ export function usePlotKeyboard<T>(
     onPointerdown: () => {
       fromPointer = true
     },
-    onPointerup: () => {
+    onPointerup: (event?: PointerEvent) => {
+      fromPointer = false
+      if (event?.pointerType === 'touch') touchLiftedAt = event.timeStamp
+    },
+    // A touch that turns into a scroll ends here instead of in a release.
+    onPointercancel: () => {
       fromPointer = false
     },
     // Landing on the plot puts the cursor on the first mark, so the first
     // arrow press moves rather than announcing what focus already did.
-    onFocus: () => {
-      const pointer = fromPointer
+    onFocus: (event?: FocusEvent) => {
+      const pointer =
+        fromPointer ||
+        (event !== undefined &&
+          event.timeStamp - touchLiftedAt < TAP_FOCUS_DELAY)
       fromPointer = false
+      touchLiftedAt = -Infinity
       if (!pointer && index.value === null) step(1)
     },
     onBlur: leave,

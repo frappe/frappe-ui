@@ -175,6 +175,7 @@ useTooltipDismiss({
   close: () => {
     tooltip.open = false
   },
+  clearHover,
 })
 
 function hover(slice: DonutSlice, event: MouseEvent) {

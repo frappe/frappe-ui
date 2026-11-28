@@ -7,6 +7,8 @@ import {
 } from './dataLabelFit'
 import { useChart } from './useChart'
 import { usePlotKeyboard } from './usePlotKeyboard'
+import { clearHover } from './clearHover'
+import { clientPoint } from './clientPoint'
 import { useTooltipDismiss } from './useTooltipDismiss'
 import type { AxisChartOptionContext } from '../axisChartCommon'
 import {
@@ -258,6 +260,7 @@ export function useAxisChart<C extends AxisChartConfig>(
     close: () => {
       tooltip.open = false
     },
+    clearHover: () => clearHover(chart.value),
   })
 
   /**
@@ -318,14 +321,15 @@ export function useAxisChart<C extends AxisChartConfig>(
   function updateTooltip(
     offsetX: number,
     offsetY: number,
-    nativeEvent?: MouseEvent,
+    nativeEvent?: Event,
   ) {
     const index = hoveredIndex(offsetX, offsetY)
     if (index === null) {
       tooltip.open = false
       return
     }
-    showIndex(index, nativeEvent?.clientX, nativeEvent?.clientY)
+    const at = clientPoint(nativeEvent)
+    showIndex(index, at?.x, at?.y)
   }
 
   function showIndex(index: number, clientX?: number, clientY?: number) {

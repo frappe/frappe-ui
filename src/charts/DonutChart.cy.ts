@@ -67,6 +67,36 @@ describe('DonutChart', () => {
       .and('contain.text', '50%')
   })
 
+  // A finger never leaves the plot, so echarts keeps the tapped slice hovered
+  // and fires no second mouseover for it. A touch outside takes the hover off.
+  // echarts binds no touch events in this desktop Chrome, so the mouse opens
+  // the slice and only the touches are touches.
+  it('opens the same slice again after a touch outside closed it', () => {
+    mountChart()
+    slices().should('have.length', data.length)
+    onFirstSlice().trigger('mousemove', 350, 135)
+    cy.get('[data-slot="chart-tooltip"]').should('contain.text', 'Search')
+    cy.get('[data-slot="chart-plot"] [role="img"]').trigger('pointerdown', {
+      pointerType: 'touch',
+    })
+    // The finger lifts, as it does at the end of a tap.
+    cy.document().then((doc) =>
+      doc.dispatchEvent(new Event('touchend', { bubbles: true })),
+    )
+    // On the body itself: `trigger` would fire at the body's centre, which
+    // the chart covers.
+    cy.document().then((doc) =>
+      doc.body.dispatchEvent(
+        Object.assign(new Event('pointerdown', { bubbles: true }), {
+          pointerType: 'touch',
+        }),
+      ),
+    )
+    cy.get('[data-slot="chart-tooltip"]').should('not.exist')
+    onFirstSlice().trigger('mousemove', 350, 135)
+    cy.get('[data-slot="chart-tooltip"]').should('contain.text', 'Search')
+  })
+
   it('emits select with the row behind the slice', () => {
     mountChart({ onSelect: cy.spy().as('onSelect') })
     slices().should('have.length', data.length)

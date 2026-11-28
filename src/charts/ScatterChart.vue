@@ -68,6 +68,8 @@ import { GridComponent, MarkLineComponent } from 'echarts/components'
 import { LabelLayout } from 'echarts/features'
 import { registerChartModules, useChart } from './core/useChart'
 import { usePlotKeyboard } from './core/usePlotKeyboard'
+import { clearHover } from './core/clearHover'
+import { clientPoint } from './core/clientPoint'
 import { useTooltipDismiss } from './core/useTooltipDismiss'
 import { buildScatterOption, buildScatterSeries } from './scatterOptions'
 import { formatLabel, formatValue } from './format'
@@ -220,8 +222,9 @@ const { chart, dispatch } = useChart({
   },
   onZrEvents: {
     mousemove: (e: any) => {
-      pointer.x = e.event?.clientX ?? pointer.x
-      pointer.y = e.event?.clientY ?? pointer.y
+      const at = clientPoint(e.event)
+      pointer.x = at?.x ?? pointer.x
+      pointer.y = at?.y ?? pointer.y
       if (tooltip.open) {
         tooltip.x = pointer.x
         tooltip.y = pointer.y
@@ -401,6 +404,7 @@ useTooltipDismiss({
   close: () => {
     tooltip.open = false
   },
+  clearHover: () => clearHover(chart.value),
 })
 
 const keyboard = usePlotKeyboard({
