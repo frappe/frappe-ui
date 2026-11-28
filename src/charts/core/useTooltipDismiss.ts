@@ -17,6 +17,17 @@ export function useTooltipDismiss({ plot, data, close }: TooltipDismissArgs) {
   const dismiss = () => close()
   const onVisibility = () => document.hidden && close()
 
+  // A finger leaves the plot when it lifts, so a touch's leave is the end of
+  // the tap that opened the reading, not a move off it. The reading stays
+  // until the next touch lands somewhere else.
+  const onLeave = (event: PointerEvent) =>
+    event.pointerType !== 'touch' && close()
+  const onTouchDown = (event: PointerEvent) => {
+    if (event.pointerType !== 'touch') return
+    if (plot.value?.contains(event.target as Node)) return
+    close()
+  }
+
   // Capture phase, because a scroll event does not bubble: a listener on
   // `window` sees a nested container's scroll only on the way down.
   onMounted(() => {
@@ -24,6 +35,10 @@ export function useTooltipDismiss({ plot, data, close }: TooltipDismissArgs) {
     window.addEventListener('resize', dismiss)
     window.addEventListener('blur', dismiss)
     document.addEventListener('visibilitychange', onVisibility)
+    document.addEventListener('pointerdown', onTouchDown, {
+      capture: true,
+      passive: true,
+    })
   })
 
   onBeforeUnmount(() => {
@@ -31,6 +46,7 @@ export function useTooltipDismiss({ plot, data, close }: TooltipDismissArgs) {
     window.removeEventListener('resize', dismiss)
     window.removeEventListener('blur', dismiss)
     document.removeEventListener('visibilitychange', onVisibility)
+    document.removeEventListener('pointerdown', onTouchDown, { capture: true })
   })
 
   // The plot arrives after the chart has mounted, and again whenever the
@@ -38,8 +54,8 @@ export function useTooltipDismiss({ plot, data, close }: TooltipDismissArgs) {
   watch(
     plot,
     (el, previous) => {
-      previous?.removeEventListener('pointerleave', dismiss)
-      el?.addEventListener('pointerleave', dismiss)
+      previous?.removeEventListener('pointerleave', onLeave)
+      el?.addEventListener('pointerleave', onLeave)
     },
     { immediate: true },
   )

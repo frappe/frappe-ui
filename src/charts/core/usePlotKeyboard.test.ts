@@ -35,10 +35,13 @@ function setup(count = 4) {
     cleared,
     activated,
     keyboard,
-    focus: () => handlers().onFocus(),
+    focus: (timeStamp?: number) =>
+      handlers().onFocus(timeStamp === undefined ? undefined : { timeStamp }),
     blur: () => handlers().onBlur(),
     pointerdown: () => handlers().onPointerdown(),
-    pointerup: () => handlers().onPointerup(),
+    pointerup: (event?: { pointerType: string; timeStamp: number }) =>
+      handlers().onPointerup(event),
+    pointercancel: () => handlers().onPointercancel(),
     press: (key: string) =>
       handlers().onKeydown({ key, preventDefault: () => {} }),
     pressEvent: (key: string) => {
@@ -132,6 +135,57 @@ describe('usePlotKeyboard', () => {
     plot.pointerup()
     plot.blur()
     plot.focus()
+    expect(plot.moves).toEqual([{ index: 0, previous: null }])
+  })
+
+  // A tap sends its mousedown, and so its focus, after the finger lifts and the
+  // pointer is up. That focus is still the tap's.
+  it('leaves the cursor alone when a tap caused the focus', () => {
+    const plot = setup()
+    plot.pointerdown()
+    plot.pointerup({ pointerType: 'touch', timeStamp: 100 })
+    plot.focus(150)
+    expect(plot.moves).toEqual([])
+    expect(plot.keyboard.index.value).toBe(null)
+  })
+
+  it('takes a focus from a key long after a tap', () => {
+    const plot = setup()
+    plot.pointerdown()
+    plot.pointerup({ pointerType: 'touch', timeStamp: 100 })
+    plot.focus(5000)
+    expect(plot.moves).toEqual([{ index: 0, previous: null }])
+  })
+
+  it('takes a focus from a key right after a mouse release', () => {
+    const plot = setup()
+    plot.pointerdown()
+    plot.pointerup({ pointerType: 'mouse', timeStamp: 100 })
+    plot.focus(150)
+    expect(plot.moves).toEqual([{ index: 0, previous: null }])
+  })
+
+  // A tap on a plot that already has focus sends no focus; the next focus is
+  // a key's once the plot has been left.
+  it('takes a key focus after a tap on the focused plot and a blur', () => {
+    const plot = setup()
+    plot.focus()
+    plot.pointerdown()
+    plot.pointerup({ pointerType: 'touch', timeStamp: 100 })
+    plot.blur()
+    plot.focus(300)
+    expect(plot.moves).toEqual([
+      { index: 0, previous: null },
+      { index: 0, previous: null },
+    ])
+  })
+
+  // A swipe that scrolls the page cancels the touch instead of releasing it.
+  it('takes a key focus after a touch that became a scroll', () => {
+    const plot = setup()
+    plot.pointerdown()
+    plot.pointercancel()
+    plot.focus(5000)
     expect(plot.moves).toEqual([{ index: 0, previous: null }])
   })
 
