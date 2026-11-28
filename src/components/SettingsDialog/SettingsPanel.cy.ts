@@ -1,5 +1,8 @@
-import { h } from 'vue'
+import { defineComponent, h, ref } from 'vue'
+import { TabsRoot } from 'reka-ui'
+import SettingsBody from './SettingsBody.vue'
 import SettingsHeader from './SettingsHeader.vue'
+import SettingsPanel from './SettingsPanel.vue'
 import SettingsRow from './SettingsRow.vue'
 import Switch from '../Switch/Switch.vue'
 
@@ -32,6 +35,96 @@ describe('SettingsHeader', () => {
     })
     cy.get('.custom').should('exist')
     cy.contains('Ignored').should('not.exist')
+  })
+})
+
+describe('SettingsHeader scroll divider', () => {
+  const mountPanel = () =>
+    cy.mount(() =>
+      h(TabsRoot, { defaultValue: 'a', class: 'flex h-80 w-[40rem]' }, () =>
+        h(SettingsPanel, { value: 'a' }, () => [
+          h(SettingsHeader, { title: 'General', description: 'Prefs.' }),
+          h(SettingsBody, null, () =>
+            h('div', { class: 'h-[60rem]' }, 'Long content'),
+          ),
+        ]),
+      ),
+    )
+  const headerBorder = () => cy.contains('h2', 'General').closest('.border-b')
+
+  it('shows a divider only once the body has scrolled', () => {
+    mountPanel()
+    headerBorder().should('not.have.attr', 'data-scrolled')
+    headerBorder().should('have.css', 'border-bottom-color', 'rgba(0, 0, 0, 0)')
+
+    cy.get('[data-slot="scroll-area-viewport"]').scrollTo(0, 80)
+    headerBorder().should('have.attr', 'data-scrolled')
+    headerBorder().should(
+      'not.have.css',
+      'border-bottom-color',
+      'rgba(0, 0, 0, 0)',
+    )
+
+    cy.get('[data-slot="scroll-area-viewport"]').scrollTo(0, 0)
+    headerBorder().should('not.have.attr', 'data-scrolled')
+  })
+
+  it('keeps the header the same height when the divider appears', () => {
+    mountPanel()
+    headerBorder().then(($el) => {
+      const before = $el.outerHeight()
+      cy.get('[data-slot="scroll-area-viewport"]').scrollTo(0, 80)
+      headerBorder().should(($h) => expect($h.outerHeight()).to.equal(before))
+    })
+  })
+
+  it('clears the divider when the panel is shown again at the top', () => {
+    cy.mount(
+      defineComponent({
+        setup() {
+          const shown = ref(true)
+          return () =>
+            h(
+              TabsRoot,
+              { defaultValue: 'a', class: 'flex h-80 w-[40rem]' },
+              () => [
+                h(
+                  'button',
+                  {
+                    id: 'toggle',
+                    onClick: () => (shown.value = !shown.value),
+                  },
+                  'Toggle',
+                ),
+                h(SettingsPanel, { value: 'a' }, () =>
+                  shown.value
+                    ? [
+                        h(SettingsHeader, { title: 'General' }),
+                        h(SettingsBody, null, () =>
+                          h('div', { class: 'h-[60rem]' }, 'Long content'),
+                        ),
+                      ]
+                    : null,
+                ),
+              ],
+            )
+        },
+      }),
+    )
+    cy.get('[data-slot="scroll-area-viewport"]').scrollTo(0, 80)
+    headerBorder().should('have.attr', 'data-scrolled')
+    cy.get('#toggle').click()
+    cy.get('#toggle').click()
+    headerBorder().should('not.have.attr', 'data-scrolled')
+  })
+
+  it('renders a header and a body without a panel around them', () => {
+    cy.mount(() => [
+      h(SettingsHeader, { title: 'General' }),
+      h(SettingsBody, null, () => h('div', { class: 'h-40' }, 'Content')),
+    ])
+    cy.contains('h2', 'General').should('exist')
+    cy.get('[data-scrolled]').should('not.exist')
   })
 })
 

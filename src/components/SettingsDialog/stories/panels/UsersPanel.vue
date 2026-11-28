@@ -58,7 +58,7 @@ const filtered = computed(() =>
         </template>
       </TextInput>
       <div
-        class="grid h-8 grid-cols-[1fr_8rem] items-center border-b text-sm text-ink-gray-5"
+        class="grid h-8 grid-cols-[1fr_8rem] items-center text-sm text-ink-gray-5"
       >
         <div>User</div>
         <div>Role</div>

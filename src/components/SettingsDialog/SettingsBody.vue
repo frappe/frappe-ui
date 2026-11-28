@@ -10,13 +10,29 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { inject, onBeforeUnmount, onMounted, ref } from 'vue'
+import { useEventListener } from '@vueuse/core'
 import { ScrollArea } from '../ScrollArea'
+import { settingsPanelScrolledKey } from './context'
 import type { SettingsBodyExposed } from './types'
 
 defineOptions({ name: 'SettingsBody' })
 
 const scrollArea = ref<InstanceType<typeof ScrollArea>>()
+const scrolled = inject(settingsPanelScrolledKey, null)
+
+onMounted(() => {
+  const viewport = scrollArea.value?.viewportElement
+  if (!scrolled || !viewport) return
+  const sync = () => (scrolled.value = viewport.scrollTop > 0)
+  sync()
+  useEventListener(viewport, 'scroll', sync, { passive: true })
+})
+
+// The panel outlives this body when its tab is not selected.
+onBeforeUnmount(() => {
+  if (scrolled) scrolled.value = false
+})
 
 // Forward the scroll viewport element so a panel body can be virtualized while
 // keeping this component's styled scrollbar (see ScrollArea.viewportElement).

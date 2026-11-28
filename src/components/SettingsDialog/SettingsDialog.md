@@ -87,6 +87,14 @@ stays in place and the body scrolls, so titles, search inputs and column
 headers never scroll away. `SettingsHeader` takes `title`, `description` and an
 `#actions` slot, or any content in its default slot.
 
+The header leaves a gap above the body. Once the body scrolls, a gray border
+shows under the header, so content does not run into the title. The border takes
+its space from the start, so the header does not change height. A header with
+its own default-slot content, such as a search input, gets the same gap and
+border.
+
+<ComponentPreview name="SettingsDialog-PanelScroll" />
+
 ### Setting rows
 
 `SettingsRow` shows a setting's title and description on the left and its
