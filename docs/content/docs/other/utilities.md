@@ -25,6 +25,26 @@ Pass `true` as the third argument to run on the first call instead of the last.
 Call `debouncedInput.cancel()` to drop a pending call, for example when the
 component unmounts before a debounced request fires.
 
+## markdownToHTML
+
+Renders markdown as HTML that is safe to show with `v-html`: GitHub-flavoured
+markdown (tables, task lists, strikethrough), with single line breaks kept as
+`<br>`. The output is sanitized with DOMPurify, so scripts, event handlers and
+`javascript:` links are removed. Use it for markdown from users, the server or
+an AI reply.
+
+```vue
+<script setup>
+import { markdownToHTML } from 'frappe-ui'
+
+const html = markdownToHTML('**2 deals** need a reply\n\n- Acme\n- Globex')
+</script>
+
+<template>
+  <div v-html="html" />
+</template>
+```
+
 ## dayjs / dayjsLocal
 
 `dayjs` is [Day.js](https://day.js.org/) with the plugins the library and most

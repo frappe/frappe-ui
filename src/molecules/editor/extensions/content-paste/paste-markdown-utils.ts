@@ -6,7 +6,7 @@
  * ProseMirror {@link Slice}. Returns `null` when the text is not markdown.
  */
 import type { Schema, Slice } from '@tiptap/pm/model'
-import { detectMarkdown, markdownToHTML } from '#utils/markdown'
+import { detectMarkdown, markdownToRawHTML } from '#utils/markdown'
 import { parseHtmlToSlice } from './paste-html-utils'
 
 /**
@@ -15,6 +15,6 @@ import { parseHtmlToSlice } from './paste-html-utils'
  */
 export function tryMarkdownSlice(text: string, schema: Schema): Slice | null {
   if (!text || !detectMarkdown(text)) return null
-  const html = markdownToHTML(text)
+  const html = markdownToRawHTML(text)
   return parseHtmlToSlice(html, schema)
 }
