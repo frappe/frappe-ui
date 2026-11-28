@@ -1,4 +1,4 @@
-import { defineComponent, h, ref } from 'vue'
+import { defineComponent, h, nextTick, ref } from 'vue'
 import BarChart from './BarChart.vue'
 import Dialog from '../components/Dialog/Dialog.vue'
 import './style.css'
@@ -772,6 +772,26 @@ describe('BarChart', () => {
       it('closes when the pointer leaves the plot', () => {
         openTooltip()
         plot().trigger('pointerleave')
+        cy.get('[data-slot="chart-tooltip"]').should('not.exist')
+      })
+
+      // A finger leaves the plot when it lifts, at the end of the tap that
+      // opened the tooltip. echarts binds no touch events in this desktop
+      // Chrome, so the tooltip opens from the mouse and only the leave is a
+      // touch. Vue renders a close on the next tick, so wait for it.
+      it('stays open when a finger lifts off the plot', () => {
+        openTooltip()
+        plot().trigger('pointerleave', { pointerType: 'touch' })
+        cy.then(() => nextTick())
+        cy.get('[data-slot="chart-tooltip"]').should('contain.text', 'Jan')
+      })
+
+      it('closes when a touch lands outside the plot', () => {
+        openTooltip()
+        plot().trigger('pointerdown', { pointerType: 'touch' })
+        cy.then(() => nextTick())
+        cy.get('[data-slot="chart-tooltip"]').should('exist')
+        cy.get('body').trigger('pointerdown', { pointerType: 'touch' })
         cy.get('[data-slot="chart-tooltip"]').should('not.exist')
       })
 

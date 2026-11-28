@@ -7,6 +7,7 @@ import {
 } from './dataLabelFit'
 import { useChart } from './useChart'
 import { usePlotKeyboard } from './usePlotKeyboard'
+import { clearHover } from './clearHover'
 import { clientPoint } from './clientPoint'
 import { useTooltipDismiss } from './useTooltipDismiss'
 import type { AxisChartOptionContext } from '../axisChartCommon'
@@ -259,6 +260,7 @@ export function useAxisChart<C extends AxisChartConfig>(
     close: () => {
       tooltip.open = false
     },
+    clearHover: () => clearHover(chart.value),
   })
 
   /**

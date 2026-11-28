@@ -265,6 +265,7 @@ useTooltipDismiss({
   close: () => {
     tooltip.open = false
   },
+  clearHover,
 })
 
 function hover(stage: FunnelStage, event: MouseEvent) {

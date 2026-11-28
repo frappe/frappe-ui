@@ -79,6 +79,7 @@ import {
 } from 'echarts/components'
 import { registerChartModules, useChart } from './core/useChart'
 import { usePlotKeyboard } from './core/usePlotKeyboard'
+import { clearHover } from './core/clearHover'
 import { clientPoint } from './core/clientPoint'
 import { useTooltipDismiss } from './core/useTooltipDismiss'
 import {
@@ -192,6 +193,7 @@ useTooltipDismiss({
   close: () => {
     tooltip.open = false
   },
+  clearHover: () => clearHover(chart.value),
 })
 
 const dayIndexes = computed(

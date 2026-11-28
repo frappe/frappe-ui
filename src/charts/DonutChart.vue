@@ -110,6 +110,7 @@ import { computed, reactive, ref, watch } from 'vue'
 import { PieChart as PieSeries } from 'echarts/charts'
 import { registerChartModules, useChart } from './core/useChart'
 import { pruneHiddenSeries, toggleHiddenSeries } from './hiddenSeries'
+import { clearHover } from './core/clearHover'
 import { clientPoint } from './core/clientPoint'
 import { useTooltipDismiss } from './core/useTooltipDismiss'
 import { usePlotKeyboard } from './core/usePlotKeyboard'
@@ -248,6 +249,7 @@ useTooltipDismiss({
   close: () => {
     tooltip.open = false
   },
+  clearHover: () => clearHover(chart.value),
 })
 
 /** Slice under the pointer, or under the hovered legend entry. */

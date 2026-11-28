@@ -57,6 +57,7 @@ import { computed, reactive, ref } from 'vue'
 import { SankeyChart as SankeySeries } from 'echarts/charts'
 import { registerChartModules, useChart } from './core/useChart'
 import { usePlotKeyboard } from './core/usePlotKeyboard'
+import { clearHover } from './core/clearHover'
 import { clientPoint } from './core/clientPoint'
 import { useTooltipDismiss } from './core/useTooltipDismiss'
 import { buildSankeyGraph, buildSankeyOption } from './sankeyOptions'
@@ -156,6 +157,7 @@ useTooltipDismiss({
   close: () => {
     tooltip.open = false
   },
+  clearHover: () => clearHover(chart.value),
 })
 
 const { chart, dispatch } = useChart({

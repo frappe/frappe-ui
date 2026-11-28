@@ -68,6 +68,7 @@ import { GridComponent, MarkLineComponent } from 'echarts/components'
 import { LabelLayout } from 'echarts/features'
 import { registerChartModules, useChart } from './core/useChart'
 import { usePlotKeyboard } from './core/usePlotKeyboard'
+import { clearHover } from './core/clearHover'
 import { clientPoint } from './core/clientPoint'
 import { useTooltipDismiss } from './core/useTooltipDismiss'
 import { buildScatterOption, buildScatterSeries } from './scatterOptions'
@@ -403,6 +404,7 @@ useTooltipDismiss({
   close: () => {
     tooltip.open = false
   },
+  clearHover: () => clearHover(chart.value),
 })
 
 const keyboard = usePlotKeyboard({

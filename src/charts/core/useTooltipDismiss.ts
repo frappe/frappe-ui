@@ -5,6 +5,12 @@ export type TooltipDismissArgs = {
   /** The marks the reading was taken from. A new list voids the reading. */
   data: () => unknown
   close: () => void
+  /**
+   * Takes the hover off the plot: the emphasised mark, the axis pointer. A
+   * mouse leaving does that, and a finger never leaves, so this runs when the
+   * reading closes after a tap, before `close`.
+   */
+  clearHover?: () => void
 }
 
 /**
@@ -13,19 +19,37 @@ export type TooltipDismissArgs = {
  * so echarts reports nothing and the reading hangs over what took its place.
  * One rule covers them all: an invalid reading goes.
  */
-export function useTooltipDismiss({ plot, data, close }: TooltipDismissArgs) {
-  const dismiss = () => close()
-  const onVisibility = () => document.hidden && close()
+export function useTooltipDismiss({
+  plot,
+  data,
+  close,
+  clearHover,
+}: TooltipDismissArgs) {
+  // Whether the hover on the plot is a finger's, which only `clearHover` takes
+  // off. It stays a finger's until a mouse moves over the plot: a finger that
+  // scrolls the page from the plot hovers the marks again as it goes.
+  let touched = false
+  const dismiss = () => {
+    if (touched) clearHover?.()
+    close()
+  }
+  const onVisibility = () => document.hidden && dismiss()
 
   // A finger leaves the plot when it lifts, so a touch's leave is the end of
   // the tap that opened the reading, not a move off it. The reading stays
   // until the next touch lands somewhere else.
-  const onLeave = (event: PointerEvent) =>
-    event.pointerType !== 'touch' && close()
+  const onLeave = (event: PointerEvent) => {
+    if (event.pointerType === 'touch') return
+    touched = false
+    close()
+  }
+  const onMouse = (event: PointerEvent) => {
+    if (event.pointerType !== 'touch') touched = false
+  }
   const onTouchDown = (event: PointerEvent) => {
     if (event.pointerType !== 'touch') return
-    if (plot.value?.contains(event.target as Node)) return
-    close()
+    if (plot.value?.contains(event.target as Node)) touched = true
+    else dismiss()
   }
 
   // Capture phase, because a scroll event does not bubble: a listener on
@@ -55,7 +79,9 @@ export function useTooltipDismiss({ plot, data, close }: TooltipDismissArgs) {
     plot,
     (el, previous) => {
       previous?.removeEventListener('pointerleave', onLeave)
+      previous?.removeEventListener('pointermove', onMouse)
       el?.addEventListener('pointerleave', onLeave)
+      el?.addEventListener('pointermove', onMouse)
     },
     { immediate: true },
   )
