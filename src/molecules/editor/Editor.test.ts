@@ -192,6 +192,28 @@ describe('Editor', () => {
     expect(ctx.root.querySelector('[aria-label="Link"]')).toBeTruthy()
   })
 
+  it('draws Paragraph pressed but not disabled in a paragraph', async () => {
+    const { Paragraph } = await import('./index')
+    const ctx = mount(
+      { extensions: [RichTextKit], modelValue: '<p>Hello</p>' },
+      {
+        slots: {
+          default: ({ editor }: any) =>
+            h('div', [
+              h(EditorContent, { editor }),
+              h(EditorFixedMenu, { editor, items: [Paragraph] }),
+            ]),
+        },
+      },
+    )
+    await nextTick()
+    const paragraph = ctx.root.querySelector(
+      '[aria-label="Paragraph"]',
+    ) as HTMLButtonElement
+    expect(paragraph.getAttribute('aria-pressed')).toBe('true')
+    expect(paragraph.disabled).toBe(false)
+  })
+
   it('self-prunes a preset across kits — Table hides under CommentKit, shows under RichTextKit', async () => {
     const slot = ({ editor }: any) =>
       h(EditorFixedMenu, { editor, items: articleToolbar })
