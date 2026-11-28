@@ -84,9 +84,9 @@
   },
   {
     name: 'side',
-    description: 'Preferred popover side.',
+    description: 'Preferred popover side. `inline-start` and `inline-end` follow the page\ndirection.',
     required: false,
-    type: 'PopoverSide',
+    type: 'PopoverSide | InlineSide',
     default: '"bottom"'
   },
   {

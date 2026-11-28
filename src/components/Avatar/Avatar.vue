@@ -7,14 +7,23 @@
       v-if="image && !imgFetchError"
       :src="image"
       :alt="label"
-      :class="[shapeClasses, 'h-full w-full object-cover']"
+      :class="[
+        shapeClasses,
+        'h-full w-full object-cover',
+        $slots.indicator && INDICATOR_MASK_CLASSES,
+      ]"
       :style="$slots.indicator && indicatorMask"
       @error="(err) => handleImageError(err)"
     />
     <div
       v-else
       class="flex h-full w-full items-center justify-center uppercase select-none"
-      :class="[labelClasses, fallbackThemeClasses, shapeClasses]"
+      :class="[
+        labelClasses,
+        fallbackThemeClasses,
+        shapeClasses,
+        $slots.indicator && INDICATOR_MASK_CLASSES,
+      ]"
       :style="$slots.indicator && indicatorMask"
     >
       <div :class="iconClasses" v-if="$slots.default">
@@ -30,7 +39,7 @@
       :style="{
         width: indicatorBox.size,
         height: indicatorBox.size,
-        right: `-${indicatorBox.offset}`,
+        insetInlineEnd: `-${indicatorBox.offset}`,
         bottom: `-${indicatorBox.offset}`,
       }"
     >
@@ -133,8 +142,9 @@ const labelClasses = computed(() => {
 })
 
 // The box the indicator sits in, and how far it hangs past the avatar's
-// bottom-right corner. The avatar masks out a circle the size of this box, so
-// the gap around the indicator shows whatever is behind the avatar.
+// bottom corner at the end of the line (bottom-left on an RTL page). The
+// avatar masks out a circle the size of this box, so the gap around the
+// indicator shows whatever is behind the avatar.
 const indicatorBox = computed(() => {
   return {
     xs: { size: '0.5rem', offset: '0.1rem' },
@@ -147,12 +157,21 @@ const indicatorBox = computed(() => {
   }[props.size]
 })
 
+// A gradient has no logical side, so both cut-outs are built and `:dir(rtl)`
+// picks the one under the indicator. It follows the element's own direction,
+// the same as the indicator's `insetInlineEnd`.
+const INDICATOR_MASK_CLASSES =
+  '[mask-image:var(--indicator-mask)] [&:dir(rtl)]:[mask-image:var(--indicator-mask-rtl)]'
+
 const indicatorMask = computed(() => {
   const { size, offset } = indicatorBox.value
   const radius = `calc(${size} / 2)`
-  const center = `calc(100% - ${radius} + ${offset})`
+  const fromEnd = `calc(100% - ${radius} + ${offset})`
+  const cutAt = (x: string) =>
+    `radial-gradient(circle at ${x} ${fromEnd}, transparent ${radius}, #000 calc(${radius} + 0.5px))`
   return {
-    maskImage: `radial-gradient(circle at ${center} ${center}, transparent ${radius}, #000 calc(${radius} + 0.5px))`,
+    '--indicator-mask': cutAt(fromEnd),
+    '--indicator-mask-rtl': cutAt(`calc(${radius} - ${offset})`),
   }
 })
 
@@ -190,7 +209,7 @@ defineSlots<{
   /** Custom content shown inside the avatar (icon / initials replacement) */
   default?: () => any
 
-  /** Small indicator shown at the bottom-right of the avatar */
+  /** Small indicator shown at the avatar's bottom end corner (bottom-left in RTL) */
   indicator?: () => any
 }>()
 </script>

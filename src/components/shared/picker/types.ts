@@ -4,10 +4,15 @@ import type {
   InputVariant,
 } from '../../../composables/inputTypes'
 import type { InputLabelingProps } from '../../../composables/useInputLabeling'
+import type { InlineSide } from '../../../utils/document'
+import type { PopoverSide } from '../../Popover/types'
 
 export interface PickerShellProps {
-  /** Side of the trigger to render the panel on. Already resolved by the caller. */
-  side: 'top' | 'right' | 'bottom' | 'left'
+  /**
+   * Side of the trigger to render the panel on; defaulted by the caller and
+   * resolved to a physical side by Popover.
+   */
+  side: PopoverSide | InlineSide
 
   /** Alignment of the panel along the chosen side. */
   align: 'start' | 'center' | 'end'

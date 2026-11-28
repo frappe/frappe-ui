@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, useAttrs, useTemplateRef } from 'vue'
+import { physicalSide } from '../../utils/document'
 import { useInputLabeling } from '../../composables/useInputLabeling'
 import { useReactiveSlots } from '../../composables/useReactiveSlots'
 import { usePortalTarget } from '../../composables/usePortalTarget'
@@ -440,7 +441,7 @@ defineExpose(exposed)
             usesPopperPosition ? 'min-w-[--reka-select-trigger-width]' : null
           "
           :position="usesPopperPosition ? 'popper' : 'item-aligned'"
-          :side="side"
+          :side="physicalSide(side)"
           :align="align"
           :side-offset="offset"
         >

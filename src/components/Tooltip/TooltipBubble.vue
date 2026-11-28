@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { TooltipArrow, TooltipContent, TooltipPortal } from 'reka-ui'
 import { usePortalTarget } from '../../composables/usePortalTarget'
+import { physicalSide, type InlineSide } from '../../utils/document'
 import type { TooltipSide } from './types'
 
 /**
@@ -20,7 +21,7 @@ import type { TooltipSide } from './types'
 withDefaults(
   defineProps<{
     /** Preferred popover side relative to the trigger. */
-    side?: TooltipSide
+    side?: TooltipSide | InlineSide
     /** Distance in px between the trigger and the bubble. */
     offset?: number
     /** Text content when `#content` is not provided. */
@@ -43,7 +44,7 @@ defineSlots<{
   <TooltipPortal :to="portalTarget">
     <TooltipContent
       data-slot="content"
-      :side="side"
+      :side="physicalSide(side)"
       :side-offset="offset"
       class="z-[100]"
     >

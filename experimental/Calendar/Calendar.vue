@@ -26,7 +26,6 @@
     />
     <template v-else>
       <div class="mb-2 flex justify-between">
-        <!-- left side  -->
         <!-- Year, Month -->
         <div class="flex items-center">
           <DatePicker
@@ -45,7 +44,6 @@
             </template>
           </DatePicker>
         </div>
-        <!-- right side -->
         <!-- actions buttons for calendar -->
         <div class="flex gap-x-1">
           <!-- Increment and Decrement Button-->
@@ -53,19 +51,19 @@
           <Button
             @click="decrement"
             variant="ghost"
-            icon="lucide-chevron-left"
+            icon="lucide-chevron-left rtl:rotate-180"
           />
           <Button label="Today" @click="setCalendarDate()" variant="ghost" />
           <Button
             @click="increment"
             variant="ghost"
-            icon="lucide-chevron-right"
+            icon="lucide-chevron-right rtl:rotate-180"
           />
 
           <!--  View change button, default is months or can be set via props!  -->
           <TabButtons
             :options="enabledModes"
-            class="ml-2"
+            class="ms-2"
             v-model="activeView"
           />
         </div>
@@ -156,6 +154,7 @@ import {
   getWeekMonthParts,
 } from './calendarUtils'
 import { dayjs } from '#utils/dayjs'
+import { documentDir } from '#utils/document'
 import { isTargetEditable } from '#composables/useKeyboardShortcut'
 import DatePicker from '#components/DatePicker/DatePicker.vue'
 import CalendarMonthly from './CalendarMonthly.vue'
@@ -293,8 +292,13 @@ function handleShortcuts(e: KeyboardEvent) {
   const view = viewShortcuts[e.key.toLowerCase()]
   if (view) activeView.value = view
   if (e.key.toLowerCase() === 't') setCalendarDate()
-  if (e.key === 'ArrowLeft') decrement()
-  if (e.key === 'ArrowRight') increment()
+  // Back is toward the reading start: ArrowRight on an RTL page.
+  const [back, forward] =
+    documentDir() === 'rtl'
+      ? ['ArrowRight', 'ArrowLeft']
+      : ['ArrowLeft', 'ArrowRight']
+  if (e.key === back) decrement()
+  if (e.key === forward) increment()
 }
 const viewShortcuts: Record<string, CalendarMode> = {
   m: 'Month',

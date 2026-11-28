@@ -33,9 +33,12 @@
       :aria-valuemax="isSliderMode ? starCount : undefined"
       :aria-valuenow="isSliderMode ? savedValue : undefined"
       :aria-valuetext="isSliderMode ? formatValue(savedValue) : undefined"
+      :data-dir="isRtl ? 'rtl' : undefined"
       data-slot="control"
       v-bind="{ ...dataAttrs, ...controlAttrs }"
       @mouseleave="onLeave"
+      @pointerenter="readDirection"
+      @focusin="readDirection"
       @keydown="onKeydown"
     >
       <button
@@ -66,10 +69,10 @@
           <slot
             name="icon"
             :index="index"
-            side="left"
+            :side="isRtl ? 'right' : 'left'"
             :state="halfState(index - 0.5)"
-            :left-state="halfState(index - 0.5)"
-            :right-state="halfState(index)"
+            :left-state="halfState(isRtl ? index : index - 0.5)"
+            :right-state="halfState(isRtl ? index - 0.5 : index)"
             :value="savedValue"
             :preview-value="hoveredValue"
             :max="starCount"
@@ -95,10 +98,10 @@
           <slot
             name="icon"
             :index="index"
-            side="right"
+            :side="isRtl ? 'left' : 'right'"
             :state="halfState(index)"
-            :left-state="halfState(index - 0.5)"
-            :right-state="halfState(index)"
+            :left-state="halfState(isRtl ? index : index - 0.5)"
+            :right-state="halfState(isRtl ? index - 0.5 : index)"
             :value="savedValue"
             :preview-value="hoveredValue"
             :max="starCount"
@@ -131,6 +134,7 @@
 <script setup lang="ts">
 import { computed, ref, useAttrs, nextTick } from 'vue'
 import type { StyleValue } from 'vue'
+import { documentAttributes } from '../../utils/document'
 import { resolvePropValue } from '../../utils/resolvePropValue'
 import { useInputLabeling } from '../../composables/useInputLabeling'
 import { useReactiveSlots } from '../../composables/useReactiveSlots'
@@ -188,6 +192,19 @@ const isSliderMode = computed(() => props.step === 0.5)
 const hoveredValue = ref<number | null>(null)
 const focusedIndex = ref<number>(0)
 const rootRef = ref<HTMLElement>()
+
+// Stars run right to left in an RTL control, so the lower half sits on the
+// right and ArrowLeft points to higher values. Clipping, hit testing and keys
+// all read this one value. CSS direction changes fire no event, so every
+// pointer, focus and key event reads it again before using it.
+const directionReads = ref(0)
+const isRtl = computed(() => {
+  documentAttributes()
+  void directionReads.value
+  return rootRef.value
+    ? getComputedStyle(rootRef.value).direction === 'rtl'
+    : false
+})
 
 const {
   inputId,
@@ -271,12 +288,27 @@ function formatValue(v: number) {
 
 function hitTestValue(event: MouseEvent, index: number) {
   if (props.step !== 0.5) return index
-  const rect = (event.currentTarget as HTMLElement).getBoundingClientRect()
-  const isLeftHalf = event.clientX - rect.left < rect.width / 2
-  return isLeftHalf ? index - 0.5 : index
+  const star = event.currentTarget as HTMLElement
+  const rect = star.getBoundingClientRect()
+  const fromStart = isRtl.value
+    ? rect.right - event.clientX
+    : event.clientX - rect.left
+  return fromStart < rect.width / 2 ? index - 0.5 : index
+}
+
+function ltrArrow(e: KeyboardEvent) {
+  if (!isRtl.value) return e.key
+  if (e.key === 'ArrowLeft') return 'ArrowRight'
+  if (e.key === 'ArrowRight') return 'ArrowLeft'
+  return e.key
+}
+
+function readDirection() {
+  directionReads.value++
 }
 
 function onStarMove(event: MouseEvent, index: number) {
+  readDirection()
   if (isDisabled.value) return
   hoveredValue.value = hitTestValue(event, index)
 }
@@ -292,6 +324,7 @@ function commit(next: number) {
 }
 
 function onStarClick(event: MouseEvent, index: number) {
+  readDirection()
   if (isDisabled.value) return
   commit(hitTestValue(event, index))
 }
@@ -313,13 +346,16 @@ const rootTabindex = computed(() => {
 })
 
 function onKeydown(e: KeyboardEvent) {
+  readDirection()
   if (isDisabled.value) return
   const max = starCount.value
   const step = props.step ?? 1
 
+  const key = ltrArrow(e)
+
   if (isSliderMode.value) {
     let next: number | null = null
-    switch (e.key) {
+    switch (key) {
       case 'ArrowRight':
       case 'ArrowUp':
         next = Math.min(max, savedValue.value + step)
@@ -358,7 +394,7 @@ function onKeydown(e: KeyboardEvent) {
     focusedIndex.value ||
     Math.max(1, Math.min(max, Math.ceil(savedValue.value) || 1))
   let next: number | null = null
-  switch (e.key) {
+  switch (key) {
     case 'ArrowRight':
     case 'ArrowDown':
       next = Math.min(max, current + 1)
@@ -455,6 +491,14 @@ const hasLabeling = computed(() => {
 
 .rating-half-right {
   clip-path: inset(0 0 0 50%);
+}
+
+[data-dir='rtl'] .rating-half-left {
+  clip-path: inset(0 0 0 50%);
+}
+
+[data-dir='rtl'] .rating-half-right {
+  clip-path: inset(0 50% 0 0);
 }
 
 .rating-icon {

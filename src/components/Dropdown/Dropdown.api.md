@@ -34,9 +34,9 @@
   },
   {
     name: 'side',
-    description: 'Side of the trigger the dropdown appears on.',
+    description: 'Side of the trigger the dropdown appears on. `inline-start` and\n`inline-end` follow the page direction.',
     required: false,
-    type: 'DropdownSide',
+    type: 'DropdownSide | InlineSide',
     default: '"bottom"'
   },
   {

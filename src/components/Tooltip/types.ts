@@ -1,3 +1,5 @@
+import type { InlineSide } from '../../utils/document'
+
 export type TooltipSide = 'top' | 'right' | 'bottom' | 'left'
 
 export interface TooltipProps {
@@ -13,9 +15,10 @@ export interface TooltipProps {
   hoverDelay?: number
 
   /**
-   * Side of the trigger the tooltip is placed on.
+   * Side of the trigger the tooltip is placed on. `inline-start` and
+   * `inline-end` follow the reading direction.
    */
-  side?: TooltipSide
+  side?: TooltipSide | InlineSide
 
   /**
    * Distance in px between the trigger and the tooltip.

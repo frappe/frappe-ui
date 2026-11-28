@@ -1,4 +1,5 @@
 import type { Component } from 'vue'
+import type { InlineSide } from '../../utils/document'
 import type { InputSize, InputVariant } from '../../composables/inputTypes'
 import type { InputLabelingProps } from '../../composables/useInputLabeling'
 import type { PopoverAlign, PopoverSide } from '../shared/selection/types'
@@ -53,13 +54,14 @@ export interface SelectProps extends InputLabelingProps {
   emptyText?: string
 
   /**
-   * Preferred popover side. Defaults to `'bottom'`.
+   * Preferred popover side. Defaults to `'bottom'`. `inline-start` and
+   * `inline-end` follow the page direction.
    *
    * Setting `side`, `align`, or `offset` switches the menu from its default
    * item-aligned placement (anchored over the trigger, macOS-style) to
    * standard popper placement below/beside the trigger.
    */
-  side?: PopoverSide
+  side?: PopoverSide | InlineSide
 
   /** Preferred popover alignment. Defaults to `'start'`. See `side`. */
   align?: PopoverAlign

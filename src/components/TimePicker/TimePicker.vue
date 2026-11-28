@@ -61,7 +61,7 @@
         data-slot="content"
         data-selection
         class="z-[100]"
-        :side="resolvedSide"
+        :side="physicalSide(resolvedSide)"
         :align="resolvedAlign"
         :side-offset="resolvedOffset"
         @open-auto-focus.prevent
@@ -104,6 +104,7 @@ import {
   PopoverPortal,
   PopoverRoot,
 } from 'reka-ui'
+import { physicalSide, type InlineSide } from '../../utils/document'
 import { TextInput } from '../TextInput'
 import { usePortalTarget } from '../../composables/usePortalTarget'
 import '../shared/selection/popoverMotion.css'
@@ -165,7 +166,9 @@ defineOptions({ inheritAttrs: false })
 
 // ── Prop reconciliation ──────────────────────────────────────────────────────
 
-const resolvedSide = computed<PopoverSide>(() => props.side ?? 'bottom')
+const resolvedSide = computed<PopoverSide | InlineSide>(
+  () => props.side ?? 'bottom',
+)
 const resolvedAlign = computed<PopoverAlign>(() => props.align ?? 'start')
 const resolvedOffset = computed(() => props.offset ?? 4)
 

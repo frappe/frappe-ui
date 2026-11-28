@@ -9,6 +9,7 @@ import {
   ComboboxTrigger,
   FocusScope,
 } from 'reka-ui'
+import { physicalSide } from '../../utils/document'
 import OptionIcon from '../shared/selection/OptionIcon.vue'
 import PopoverPanel from '../shared/popover/PopoverPanel.vue'
 import ComboboxResults from './ComboboxResults.vue'
@@ -713,7 +714,7 @@ defineSlots<ComboboxSlots>()
               !isButtonMode && 'min-w-[--reka-combobox-trigger-width]',
             ]"
             position="popper"
-            :side="side"
+            :side="physicalSide(side)"
             :align="align"
             :side-offset="offset"
           >

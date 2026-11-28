@@ -25,21 +25,21 @@
       :class="[config.noBorder ? '' : 'border-b-[1px]']"
     >
       <!-- The same rule the hour gutter draws below, carried up through the
-           all-day row so the day's left edge is one line. Same width as that
+           all-day row so the day's start edge is one line. Same width as that
            gutter, at either size, or the two rules are two lines. -->
       <div
-        class="flex w-14 shrink-0 justify-center border-r-[1px] border-outline-gray-1 pl-px pt-1"
+        class="flex w-14 shrink-0 justify-center border-e-[1px] border-outline-gray-1 ps-px pt-1"
       >
         <!-- A label, and only that. The chevron that used to sit beside it
              toggled a row it was not in, from a column whose job is to say what
              the row is — and on a narrow gutter the two together had no room to
              be either. What is hidden says so itself, at the end of the row,
              where the hidden things are. -->
-        <!-- Centred across the gutter, with even air either side — `pl-px`
-             against the rule on the right, which is inside the box and so is
+        <!-- Centred across the gutter, with even air either side — `ps-px`
+             against the rule on the end, which is inside the box and so is
              not part of what centring divides. Without it the label sat a pixel
              nearer the edge the eye has something to measure against. The hours
-             under it are hung from the day column instead, so their left edge
+             under it are hung from the day column instead, so their start edge
              lands a pixel or so off this one — near enough that the column
              still reads as a column, and even air is what the eye checks on a
              word standing alone in a box. It takes the hours' type from
@@ -130,16 +130,16 @@
         :class="[config.noBorder ? 'border-t-[1px]' : '']"
         ref="gridRef"
       >
-        <!-- Left column. `shrink-0`, or the flex row squeezes the gutter and
+        <!-- Start column. `shrink-0`, or the flex row squeezes the gutter and
              its rule drifts out of line with the all-day label above it; and
-             the rule is this column's right edge, not the day column's left,
+             the rule is this column's end edge, not the day column's start,
              so it lands on the same pixel as the label's above. -->
         <!-- `self-start`, so the gutter is as tall as its 24 hours rather than
-             stretched to the scroll viewport: its rule is the day's left edge,
+             stretched to the scroll viewport: its rule is the day's start edge,
              and a stretched box paints one that stops at the fold. -->
         <!-- 56px, at every size: the hours are the same "10 am" on a phone as
              on a desktop, so the column is sized to the label rather than to
-             the screen. The labels hang 45px left of the day column (see
+             the screen. The labels hang 45px before the day column (see
              style.css), which puts them 11px inside a 56px gutter against the
              9px "12 pm" leaves on the other side — a column with an even inset
              either way. At the 80px this was on a desktop the same label sat
@@ -149,11 +149,11 @@
              `.calendar-column` in style.css), so the gutter has nothing of its
              own to draw but its rule, and is as tall as the 24 hours beside it. -->
         <div
-          class="w-14 shrink-0 self-start border-r-[1px] border-outline-gray-1"
+          class="w-14 shrink-0 self-start border-e-[1px] border-outline-gray-1"
           :style="{ height: `${24 * hourHeight}px` }"
         />
 
-        <!-- Calendar Grid / Right Column -->
+        <!-- Calendar Grid / End Column -->
         <div class="grid h-full w-full grid-cols-1 pb-2">
           <div class="calendar-column relative" data-time-grid>
             <!-- Day Grid -->

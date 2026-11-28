@@ -1,0 +1,35 @@
+name: RTL lint
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group:
+    rtl-lint-${{ github.event_name == 'pull_request' &&
+    github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  logical-classes:
+    runs-on: ubuntu-latest
+    name: No physical left/right sides
+    steps:
+      - uses: actions/checkout@v4
+
+      # Pinned, so a new Semgrep release cannot turn the check red on its own.
+      - name: Install Semgrep
+        run: pipx install semgrep==1.161.0
+
+      - name: Test the rules
+        run: semgrep --test --metrics off .github/semgrep
+
+      # Without --error, semgrep exits 0 however many findings it reports.
+      - name: Scan shipped components
+        run:
+          semgrep scan --error --metrics off --config .github/semgrep/rtl.yml
+          src experimental

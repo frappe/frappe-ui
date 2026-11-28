@@ -7,3 +7,4 @@ export type {
   PopoverSide,
   PopoverAlign,
 } from './types'
+export type { InlineSide } from '../../utils/document'

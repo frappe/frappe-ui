@@ -8,9 +8,9 @@
   const datePickerProps = [
   {
     name: 'side',
-    description: 'Preferred popover side relative to the trigger.',
+    description: 'Preferred popover side relative to the trigger. `inline-start` and\n`inline-end` follow the page direction.',
     required: false,
-    type: 'PopoverSide'
+    type: 'PopoverSide | InlineSide'
   },
   {
     name: 'align',
@@ -216,9 +216,9 @@
   const dateRangePickerProps = [
   {
     name: 'side',
-    description: 'Preferred popover side relative to the trigger.',
+    description: 'Preferred popover side relative to the trigger. `inline-start` and\n`inline-end` follow the page direction.',
     required: false,
-    type: 'PopoverSide'
+    type: 'PopoverSide | InlineSide'
   },
   {
     name: 'align',
@@ -431,9 +431,9 @@
   const dateTimePickerProps = [
   {
     name: 'side',
-    description: 'Preferred popover side relative to the trigger.',
+    description: 'Preferred popover side relative to the trigger. `inline-start` and\n`inline-end` follow the page direction.',
     required: false,
-    type: 'PopoverSide'
+    type: 'PopoverSide | InlineSide'
   },
   {
     name: 'align',

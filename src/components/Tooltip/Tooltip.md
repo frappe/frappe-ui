@@ -49,8 +49,9 @@ such as an image. The arrow shows in both cases.
 
 ### Position
 
-`side` (`top`, `right`, `bottom`, `left`) picks the edge of the trigger the
-tooltip opens on, and `offset` sets the gap in pixels. Both work the same as on
+`side` (`top`, `right`, `bottom`, `left`, or `inline-start` and `inline-end`,
+which follow the reading direction) picks the edge of the trigger the tooltip
+opens on, and `offset` sets the gap in pixels. Both work the same as on
 `Popover` and `HoverCard`. The tooltip flips to stay inside the screen.
 
 ### Hover delay

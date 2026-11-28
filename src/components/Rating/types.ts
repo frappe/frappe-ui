@@ -42,6 +42,7 @@ export interface RatingIconSlotProps {
    * Which half of the star this invocation renders into. The slot is stamped
    * once per half so clipping works; use `side` to pick the matching state
    * when driving icon color from a slot template under `step === 0.5`.
+   * `side`, `leftState` and `rightState` stay physical on RTL pages.
    */
   side: 'left' | 'right'
   /** State of the half being rendered — equals `leftState` or `rightState` per `side`. */

@@ -7,6 +7,7 @@ import {
   type Ref,
 } from 'vue'
 import { useEventListener, useStorage, useWindowSize } from '@vueuse/core'
+import { documentDir } from '#utils/document'
 import type {
   FloatingWindowOptions,
   Rect,
@@ -69,8 +70,12 @@ export function useFloatingWindow(
 
   const { width: viewportWidth, height: viewportHeight } = useWindowSize()
 
+  // Opens in the bottom corner at the end of the line: bottom-left on an RTL page.
   const fallback: Rect = {
-    x: Math.max(0, viewportWidth.value - DEFAULT_WIDTH - EDGE_MARGIN),
+    x:
+      documentDir() === 'rtl'
+        ? EDGE_MARGIN
+        : Math.max(0, viewportWidth.value - DEFAULT_WIDTH - EDGE_MARGIN),
     y: Math.max(0, viewportHeight.value - DEFAULT_HEIGHT - EDGE_MARGIN),
     width: DEFAULT_WIDTH,
     height: DEFAULT_HEIGHT,
@@ -95,7 +100,7 @@ export function useFloatingWindow(
       return {
         position: 'fixed',
         zIndex: Z_INDEX,
-        right: `${EDGE_MARGIN}px`,
+        insetInlineEnd: `${EDGE_MARGIN}px`,
         bottom: `${EDGE_MARGIN}px`,
         width: `${TRAY_WIDTH}px`,
       }

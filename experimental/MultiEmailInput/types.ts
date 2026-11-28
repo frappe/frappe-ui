@@ -3,6 +3,7 @@ import type {
   PopoverSide,
   PopoverAlign,
 } from '../../src/components/Popover/types'
+import type { InlineSide } from '../../src/utils/document'
 import type { SelectionSize } from '../../src/components/shared/selection/utils'
 
 /** Sizes for the control and option rows (shared with the selection inputs). */
@@ -82,8 +83,11 @@ export interface MultiEmailInputProps extends InputLabelingProps {
   /** Builds the "create" row label for a typed address. */
   createLabel?: (value: string) => string
 
-  /** Preferred popover side. */
-  side?: PopoverSide
+  /**
+   * Preferred popover side. `inline-start` and `inline-end` follow the page
+   * direction.
+   */
+  side?: PopoverSide | InlineSide
 
   /** Preferred popover alignment. */
   align?: PopoverAlign

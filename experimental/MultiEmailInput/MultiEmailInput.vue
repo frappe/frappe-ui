@@ -13,6 +13,7 @@ import {
   TagsInputItemDelete,
   TagsInputRoot,
 } from 'reka-ui'
+import { physicalSide } from '#utils/document'
 import Avatar from '../../src/components/Avatar/Avatar.vue'
 import ItemListRow from '../../src/components/ItemListRow/ItemListRow.vue'
 import { Spinner } from '../../src/components/Spinner'
@@ -417,7 +418,7 @@ defineSlots<MultiEmailInputSlots>()
           data-slot="content"
           :data-size="size"
           position="popper"
-          :side="side"
+          :side="physicalSide(side)"
           :align="align"
           :side-offset="offset"
           class="z-[100] min-w-[--reka-combobox-trigger-width] overflow-hidden rounded-6 bg-surface-elevation-2 shadow-2xl"

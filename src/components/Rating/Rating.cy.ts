@@ -1,4 +1,4 @@
-import { defineComponent, h } from 'vue'
+import { defineComponent, h, ref } from 'vue'
 import Rating from './Rating.vue'
 
 describe('Rating', () => {
@@ -249,6 +249,156 @@ describe('Rating', () => {
       })
       cy.get('[role="slider"]').focus().type('4')
       cy.get('@onUpdate').should('have.been.calledWith', 4)
+    })
+  })
+
+  describe('on an RTL page', () => {
+    beforeEach(() => {
+      document.documentElement.dir = 'rtl'
+    })
+    afterEach(() => {
+      document.documentElement.dir = ''
+    })
+
+    function clickAt(fraction: number) {
+      cy.get('[data-slot="star"]')
+        .eq(2)
+        .then(($btn) => {
+          const rect = $btn[0].getBoundingClientRect()
+          cy.wrap($btn).click(rect.width * fraction, rect.height / 2)
+        })
+    }
+
+    it('right-half click emits half value', () => {
+      const onUpdate = cy.spy().as('onUpdate')
+      cy.mount(Rating, {
+        props: { modelValue: 0, step: 0.5, 'onUpdate:modelValue': onUpdate },
+      })
+      clickAt(0.75)
+      cy.get('@onUpdate').should('have.been.calledWith', 2.5)
+    })
+
+    it('left-half click emits full value', () => {
+      const onUpdate = cy.spy().as('onUpdate')
+      cy.mount(Rating, {
+        props: { modelValue: 0, step: 0.5, 'onUpdate:modelValue': onUpdate },
+      })
+      clickAt(0.25)
+      cy.get('@onUpdate').should('have.been.calledWith', 3)
+    })
+
+    it('fills a half star from its right side', () => {
+      cy.mount(Rating, { props: { modelValue: 2.5, step: 0.5 } })
+      cy.get('[data-slot="star"]')
+        .eq(2)
+        .find('[data-state="filled"]')
+        .should('have.css', 'clip-path', 'inset(0px 0px 0px 50%)')
+    })
+
+    it('fills and picks like LTR inside a direction: ltr control', () => {
+      const onUpdate = cy.spy().as('onUpdate')
+      cy.mount(Rating, {
+        props: { modelValue: 2.5, step: 0.5, 'onUpdate:modelValue': onUpdate },
+        attrs: { style: 'direction: ltr' },
+      })
+      cy.get('[data-slot="star"]')
+        .eq(2)
+        .find('[data-state="filled"]')
+        .should('have.css', 'clip-path', 'inset(0px 50% 0px 0px)')
+      clickAt(0.75)
+      cy.get('@onUpdate').should('have.been.calledWith', 3)
+    })
+
+    it('icon slot props name physical halves', () => {
+      cy.mount(Rating, {
+        props: { modelValue: 3.5, step: 0.5 },
+        slots: {
+          icon: ({
+            index,
+            side,
+            state,
+            leftState,
+            rightState,
+          }: {
+            index: number
+            side: 'left' | 'right'
+            state: string
+            leftState: string
+            rightState: string
+          }) =>
+            h('i', {
+              'data-test': `s${index}-${side}`,
+              'data-state': state,
+              'data-left': leftState,
+              'data-right': rightState,
+            }),
+        },
+      })
+      // star 4: the filled lower half is drawn on the physical right
+      cy.get('.rating-half-left [data-test="s4-right"]')
+        .should('have.attr', 'data-state', 'filled')
+        .and('have.attr', 'data-left', 'empty')
+        .and('have.attr', 'data-right', 'filled')
+      cy.get('.rating-half-right [data-test="s4-left"]')
+        .should('have.attr', 'data-state', 'empty')
+        .and('have.attr', 'data-left', 'empty')
+        .and('have.attr', 'data-right', 'filled')
+    })
+
+    it('radiogroup: arrow left moves selection forward', () => {
+      const onUpdate = cy.spy().as('onUpdate')
+      cy.mount(Rating, {
+        props: { modelValue: 2, 'onUpdate:modelValue': onUpdate },
+      })
+      cy.get('[role="radio"][aria-checked="true"]').focus().type('{leftArrow}')
+      cy.get('@onUpdate').should('have.been.calledWith', 3)
+    })
+
+    it('slider: arrow right decrements by step', () => {
+      const onUpdate = cy.spy().as('onUpdate')
+      cy.mount(Rating, {
+        props: { modelValue: 2, step: 0.5, 'onUpdate:modelValue': onUpdate },
+      })
+      cy.get('[role="slider"]').focus().type('{rightArrow}')
+      cy.get('@onUpdate').should('have.been.calledWith', 1.5)
+    })
+  })
+
+  describe('direction set on a mounted control', () => {
+    function mountSwitchable(modelValue: number) {
+      const onUpdate = cy.spy().as('onUpdate')
+      const direction = ref('ltr')
+      cy.mount(
+        defineComponent(() => () =>
+          h(Rating, {
+            modelValue,
+            step: 0.5,
+            style: { direction: direction.value },
+            'onUpdate:modelValue': onUpdate,
+          }),
+        ),
+      )
+      cy.get('[role="slider"]').then(() => {
+        direction.value = 'rtl'
+      })
+      cy.get('[role="slider"]').should('have.css', 'direction', 'rtl')
+    }
+
+    it('picks the half value from the right half once it turns RTL', () => {
+      mountSwitchable(0)
+      cy.get('[data-slot="star"]')
+        .eq(2)
+        .then(($btn) => {
+          const rect = $btn[0].getBoundingClientRect()
+          cy.wrap($btn).click(rect.width * 0.75, rect.height / 2)
+        })
+      cy.get('@onUpdate').should('have.been.calledWith', 2.5)
+    })
+
+    it('raises the rating with ArrowLeft once it turns RTL', () => {
+      mountSwitchable(2)
+      cy.get('[role="slider"]').focus().type('{leftArrow}')
+      cy.get('@onUpdate').should('have.been.calledWith', 2.5)
     })
   })
 

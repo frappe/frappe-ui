@@ -29,7 +29,7 @@
         data-slot="content"
         data-motion="instant"
         :class="menuClasses.content"
-        :side="side"
+        :side="physicalSide(side)"
         :align="align"
         :side-offset="offset"
         :style="{
@@ -63,6 +63,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from 'reka-ui'
+import { physicalSide } from '../../utils/document'
 import { Button } from '../Button'
 import Menu from '../Menu/Menu.vue'
 import type { DropdownProps, DropdownSlots } from './types'

@@ -53,12 +53,13 @@
 import { inject } from 'vue'
 import Popover from '#components/Popover/Popover.vue'
 import type { PopoverSide } from '#components/Popover/types'
+import type { InlineSide } from '#utils/document'
 import EventModalContent from './EventModalContent.vue'
 import { CALENDAR_CONFIG_KEY, type CalendarEvent } from './types'
 
 defineProps<{
   open: boolean
-  side: PopoverSide
+  side: PopoverSide | InlineSide
   calendarEvent: CalendarEvent
   date: Date
 }>()

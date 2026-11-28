@@ -1,0 +1,147 @@
+# Shipped components must lay out right to left on a `dir="rtl"` page.
+#
+#   semgrep scan --error --metrics off --config .github/semgrep/rtl.yml src experimental
+#   semgrep --test .github/semgrep
+#
+# Where a physical side is correct, add the exact snippet to the
+# "Physical on purpose" list below with the reason. If that code changes,
+# the snippet stops matching and the scan flags the line again.
+rules:
+  - id: rtl-physical-class
+    message: |
+      Physical Tailwind classes stay on the same side in RTL. Use the logical one:
+      ml/mr → ms/me, pl/pr → ps/pe, left/right → start/end, text-left → text-start,
+      border-l/r → border-s/e, rounded-l/r → rounded-s/e, rounded-tl → rounded-ss,
+      space-x → gap-x. Add an `rtl:` variant if neither fits.
+    severity: ERROR
+    languages: [generic]
+    paths: &shipped
+      include: ['*.vue', '*.ts', '*.js', '*.css']
+      exclude:
+        - '*.cy.ts'
+        - '*.test.ts'
+        - '*.spec.ts'
+        - '*.d.ts'
+        - '*.playground.vue'
+        - '**/stories/**'
+        - '**/mocks/**'
+        # A drawing of a left-to-right window, rendered with dir="ltr".
+        - 'experimental/ThemeSwitcher/previews/**'
+        - 'experimental/ThemeSwitcher/ThemePreview.vue'
+        # Floated and aligned media follow the document's attributes, not the reading direction.
+        - 'src/molecules/editor/components/media-node-view-utils.ts'
+    patterns:
+      - pattern-regex: |
+          (?x)
+          (?<![\w-])
+          (?:[^\s"'`:]+:)*
+          -?
+          (?:
+              (?:scroll-)?[mp][lr]-(?:auto|px|full|\d[\w./]*|\[[^\]\s]+\])
+            | (?:left|right)-(?:auto|px|full|\d[\w./]*|\[[^\]\s]+\])
+            | (?:text|float|clear)-(?:left|right)
+            | border-[lr](?:-[\w./\[\]#%]+)?
+            | rounded-(?:[lr]|[tb][lr])(?:-[\w./\[\]]+)?
+            | origin-(?:top-|bottom-)?(?:left|right)
+            | space-x-(?:px|\d[\w./]*|\[[^\]\s]+\])
+          )
+          (?![\w-])
+      # `rtl:` and `ltr:` variants are direction-aware already.
+      - pattern-not-regex: '(?:^|[\s"''`:])(?:rtl|ltr):[^\s"''`]+'
+      # Centring with `left-1/2` and `-translate-x-1/2` works in both directions.
+      - pattern-not-regex: '(?:[\w-]+:)?left-1/2(?=[^\n]*-translate-x-1/2)'
+      # Comment lines that name a class.
+      - pattern-not-regex: '(?m)^[ \t]*(?://|/?\*|<!--)[^\n]*$'
+
+      # Physical on purpose.
+      # DonutChart: centred by the translate in its inline style.
+      - pattern-not-regex: "'absolute left-1/2'"
+      # SidebarRail: the indicator sits on the side the navSide prop names.
+      - pattern-not-regex:
+          "'-right-\\[11px\\] rounded-l-4' : '-left-\\[11px\\] rounded-r-4'"
+      # TabButtons and Tabs: the indicator moves by an offset measured from the left edge.
+      - pattern-not-regex:
+          "'pointer-events-none absolute left-0 top-0
+          motion-reduce:transition-none'"
+      - pattern-not-regex:
+          '''left-0 bottom-0 h-px w-\[--reka-tabs-indicator-size\]
+          translate-x-\[--reka-tabs-indicator-position\] translate-y-px
+          transition-\[width,transform\]'''
+      - pattern-not-regex:
+          '''left-0 w-\[--reka-tabs-indicator-size\]
+          translate-x-\[--reka-tabs-indicator-position\]
+          transition-\[width,transform\]'''
+      - pattern-not-regex:
+          '''inset-y-0 left-0 w-\[--reka-tabs-indicator-size\]
+          translate-x-\[--reka-tabs-indicator-position\]
+          transition-\[width,transform\]'''
+      # EditorTableMenu: floating-ui writes a physical style.left.
+      - pattern-not-regex:
+          'class="fixed left-0 top-0 z-\[100\] flex items-center gap-1 rounded-6
+          border border-outline-gray-2 bg-surface-elevation-2 p-1 shadow-sm"'
+      # Editor media: the resize grips sit on the physical edges of floated media.
+      - pattern-not-regex: "edge === 'left' \\? 'left-0' : 'right-0'"
+      - pattern-not-regex:
+          '''absolute right-2\.5 bottom-2\.5 z-30 cursor-nwse-resize
+          touch-none'''
+      # FloatingWindow: each resize handle sits on the physical edge its drag moves.
+      - pattern-not-regex: "class: '-left-1 inset-y-0 w-2 cursor-ew-resize'"
+      - pattern-not-regex: "class: '-right-1 inset-y-0 w-2 cursor-ew-resize'"
+      - pattern-not-regex:
+          "class: '-top-1 -left-1 size-4 z-10 cursor-nwse-resize'"
+      - pattern-not-regex:
+          "class: '-top-1 -right-1 size-4 z-10 cursor-nesw-resize'"
+      - pattern-not-regex:
+          "class: '-bottom-1 -left-1 size-4 z-10 cursor-nesw-resize'"
+      - pattern-not-regex:
+          'class="absolute -bottom-1 -right-1 z-10 size-4 cursor-nwse-resize
+          rounded-1 focus-visible:outline-none focus-visible:ring-2
+          focus-visible:ring-outline-gray-3"'
+      # Iframe: alignment is a document attribute, not reading direction.
+      - pattern-not-regex: "align === 'right' \\? 'ml-auto mr-0'"
+      - pattern-not-regex: "align === 'left' \\? 'mr-auto ml-0'"
+
+  - id: rtl-physical-placement
+    message: |
+      A floating-ui `left`/`right` placement does not flip in RTL. Pick it from
+      `documentDir()` so the popup opens toward the reading direction.
+    severity: ERROR
+    languages: [generic]
+    paths: *shipped
+    patterns:
+      - pattern-regex: 'placement:\s*[''"](?:left|right)(?:-start|-end)?[''"]'
+      - pattern-not-regex: 'documentDir\(\)[^\n]*placement|placement:[^\n]*documentDir\(\)'
+
+  - id: rtl-physical-css
+    message: |
+      Physical CSS properties stay on the same side in RTL. Use the logical one:
+      margin-left → margin-inline-start, padding-right → padding-inline-end,
+      border-left → border-inline-start, text-align: left → start,
+      border-top-left-radius → border-start-start-radius,
+      marginLeft → marginInlineStart, textAlign: 'left' → 'start',
+      borderTopLeftRadius → borderStartStartRadius.
+    severity: ERROR
+    languages: [generic]
+    paths: *shipped
+    patterns:
+      - pattern-regex: |
+          (?x)
+          (?<![\w.-])
+          (?:
+              (?:margin|padding|border)-(?:left|right)(?:-[a-z]+)?\s*:
+            | (?:text-align|float|clear)\s*:\s*(?:left|right)\b
+            | (?:margin|padding|border)(?:Left|Right)(?:[A-Z][a-z]+)?\s*:
+            | border-(?:top|bottom)-(?:left|right)-radius\s*:
+            | border(?:Top|Bottom)(?:Left|Right)Radius\s*:
+            | textAlign\s*:\s*['"](?:left|right)['"]
+          )
+      - pattern-not-regex: '(?m)^[ \t]*(?://|/?\*|<!--)[^\n]*$'
+      # Physical on purpose.
+      # Code editor: overrides CodeMirror's own physical cursor and gutter borders.
+      - pattern-not-regex:
+          '\.frappe-code \.cm-cursor,[^{]*\{[^}]*border-left-color:'
+      - pattern-not-regex:
+          '\.frappe-code \.cm-gutters \{[^}]*border-right: none;'
+      # Editor commands: TipTap's textAlign attribute values, not CSS.
+      - pattern-not-regex:
+          "editor\\.isActive\\(\\{ textAlign: '(?:left|right)' \\}\\)"

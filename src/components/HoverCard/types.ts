@@ -1,11 +1,13 @@
 import type { PopoverAlign, PopoverSide } from '../Popover/types'
 import type { PortalTarget } from '../../composables/usePortalTarget'
+import type { InlineSide } from '../../utils/document'
 
 export interface HoverCardProps {
   /**
-   * Side of the trigger the card is placed on.
+   * Side of the trigger the card is placed on. `inline-start` and
+   * `inline-end` follow the reading direction.
    */
-  side?: PopoverSide
+  side?: PopoverSide | InlineSide
 
   /**
    * Alignment of the card relative to the trigger.

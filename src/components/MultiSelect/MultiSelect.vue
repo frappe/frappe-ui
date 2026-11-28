@@ -8,6 +8,7 @@ import {
   ComboboxRoot,
   FocusScope,
 } from 'reka-ui'
+import { physicalSide } from '../../utils/document'
 import Button from '../Button/Button.vue'
 import { Spinner } from '../Spinner'
 import MultiSelectResults from './MultiSelectResults.vue'
@@ -526,7 +527,7 @@ defineSlots<MultiSelectSlots>()
           :data-loading="loading ? '' : undefined"
           class="z-[100] min-w-[--reka-combobox-trigger-width]"
           position="popper"
-          :side="side"
+          :side="physicalSide(side)"
           :align="align"
           :side-offset="offset"
         >

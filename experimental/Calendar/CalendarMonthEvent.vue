@@ -1,7 +1,7 @@
 <template>
   <CalendarEventPopover
     v-model:open="isPopoverOpen"
-    side="left"
+    side="inline-start"
     :calendar-event="calendarEvent"
     :date="date"
     @open="registerDeleteShortcut"
@@ -16,8 +16,8 @@
         'h-5 gap-1 px-1 py-0.5': dense,
         'h-7 gap-1.5 px-1 py-1': !dense,
         active: activeEvent == (props.event?.id || props.event?.name),
-        'rounded-l-none': bar && !bar.isStart,
-        'rounded-r-none': bar && !bar.isEnd,
+        'rounded-s-none': bar && !bar.isStart,
+        'rounded-e-none': bar && !bar.isEnd,
         'event-draft': !!props.event.isDraft,
       }"
       :style="eventBgStyle"

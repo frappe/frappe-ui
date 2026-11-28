@@ -21,9 +21,9 @@
   },
   {
     name: 'side',
-    description: 'Side of the trigger the tooltip is placed on.',
+    description: 'Side of the trigger the tooltip is placed on. `inline-start` and\n`inline-end` follow the reading direction.',
     required: false,
-    type: 'TooltipSide',
+    type: 'TooltipSide | InlineSide',
     default: '"top"'
   },
   {
